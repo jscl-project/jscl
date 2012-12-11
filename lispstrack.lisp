@@ -5,7 +5,10 @@
     ((stringp sexp) (format nil " \"~a\" " sexp))
     ; list
     ((case (first sexp)
-       (if nil)
+       (if (format nil "((~a)? (~a) : (~a))"
+		   (ls-compile (second sexp))
+		   (ls-compile (third sexp))
+		   (ls-compile (fourth sexp))))
        (lambda nil)
        (t nil)))))
 
