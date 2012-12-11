@@ -1,7 +1,8 @@
 (defun ls-compile (sexp)
   (cond
     ((symbolp sexp) nil)
-    ((integerp sexp) (format nil "~a" sexp))
+    ((integerp sexp) (format nil " ~a " sexp))
+    ((stringp sexp) (format nil " \"~a\" " sexp))
     ; list
     ((case (first sexp)
        (if nil)
