@@ -6,9 +6,23 @@
           strs
           :initial-value ""))
 
+
+(let ((counter 0))
+  (defun make-binding (symbol)
+    (cons symbol (format nil "V_~d" (incf counter)))))
+
 ;;; Compiler
 
 (defvar *compilations* nil)
+
+(defun extend-env (args env)
+  (append (mapcar #'make-binding args) env))
+
+(defun ls-lookup (symbol env)
+  (let ((binding (assoc symbol env)))
+    (if binding
+	(format nil "~a" (cdr binding))
+	(error "Undefined variable `~a'"  symbol))))
 
 (defmacro define-compilation (name args &body body)
   "creates a new primitive `name' with parameters args and @body. The
@@ -23,28 +37,28 @@ body can access to the local environment through the variable env"
           (ls-compile false env)))
 
 (define-compilation lambda (args &rest body)
-  (concat "(function ("
-          (format nil "~{V_~a~^, ~}" args)
-          "){ "
-          (ls-compile-block body (extend-env args env))
-          "})
-"))
+  (let ((new-env (extend-env args env)))
+    (concat "(function ("
+	    (format nil "~{~a~^, ~}" (mapcar
+				      (lambda (x) (ls-lookup x new-env))
+				      args))
+	    "){ "
+	    (ls-compile-block body new-env)
+	    "})
+")))
 
-(defun extend-env (args env)
-  (append (mapcar #'list args) env))
+(define-compilation setq (var val)
+  (format nil "~a = ~a" (ls-lookup var env) (ls-compile val env)))
 
 (defparameter *env* '())
 (defparameter *env-fun* '())
 
-
 (defun ls-compile (sexp &optional env)
   (cond
-    ((symbolp sexp) (if (assoc sexp env)
-			(format nil "V_~a" sexp)
-			(error "Undefined variable `~a'" sexp)))
-    ((integerp sexp) (format nil " ~a " sexp))
+    ((symbolp sexp) (ls-lookup sexp env))
+    ((integerp sexp) (format nil "~a" sexp))
     ((stringp sexp) (format nil " \"~a\" " sexp))
-    ; list
+					; list
     ((listp sexp)
      (let ((compiler-func (second (assoc (car sexp) *compilations*))))
        (if compiler-func
