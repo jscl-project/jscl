@@ -11,6 +11,8 @@
 (defvar *compilations* nil)
 
 (defmacro define-compilation (name args &body body)
+  "creates a new primitive `name' with parameters args and @body. The
+body can access to the local environment through the variable env"
   `(push (list ',name (lambda (env ,@args) ,@body))
          *compilations*))
 
@@ -24,16 +26,22 @@
   (concat "(function ("
           (format nil "~{V_~a~^, ~}" args)
           "){ "
-          (ls-compile-block body env)
+          (ls-compile-block body (extend-env args env))
           "})
 "))
+
+(defun extend-env (args env)
+  (append (mapcar #'list args) env))
 
 (defparameter *env* '())
 (defparameter *env-fun* '())
 
+
 (defun ls-compile (sexp &optional env)
   (cond
-    ((symbolp sexp) (format nil "V_~a" sexp))
+    ((symbolp sexp) (if (assoc sexp env)
+			(format nil "V_~a" sexp)
+			(error "Undefined variable `~a'" sexp)))
     ((integerp sexp) (format nil " ~a " sexp))
     ((stringp sexp) (format nil " \"~a\" " sexp))
     ; list
