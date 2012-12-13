@@ -50,6 +50,12 @@ body can access to the local environment through the variable env"
 (define-compilation setq (var val)
   (format nil "~a = ~a" (ls-lookup var env) (ls-compile val env)))
 
+(define-compilation quote (sexp)
+  (cond
+    ((integerp sexp) (format nil "~a" sexp))
+    ((stringp sexp) (format nil "\"~a\"" sexp))
+    ((listp sexp)   (format nil "[~{~a~^, ~}]" sexp))))
+
 (defparameter *env* '())
 (defparameter *env-fun* '())
 
