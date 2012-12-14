@@ -1,5 +1,10 @@
 ;;; Utils
 
+(defmacro while (condition &body body)
+  `(do ()
+       ((not ,condition))
+     ,@body))
+
 ;;; simplify me, please
 (defun concat (&rest strs)
   (reduce (lambda (s1 s2) (concatenate 'string s1 s2))
