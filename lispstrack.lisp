@@ -28,10 +28,22 @@
              separator
              (join (cdr list) separator)))))
 
-
 ;;; Compiler
 
 (defvar *compilations* nil)
+
+(defun ls-compile-sexps (sexps env)
+  (concat (join (mapcar (lambda (x)
+                          (ls-compile x env))
+                        sexps)
+                ";
+")))
+
+(defun ls-compile-block (sexps env)
+  (concat (ls-compile-sexps (butlast sexps env) env)
+          ";
+return " (ls-compile (car (last sexps)) env) ";"))
+
 
 (defun extend-env (args env)
   (append (mapcar #'make-binding args) env))
@@ -81,6 +93,11 @@ body can access to the local environment through the variable env"
 (define-compilation debug (form)
   (format nil "console.log(~a)" (ls-compile form env)))
 
+(define-compilation while (pred &rest body)
+  (format nil "(function(){while(~a){~a}})() "
+	  (ls-compile pred env)
+	  (ls-compile-sexps body env)))
+
 (defparameter *env* '())
 (defparameter *env-fun* '())
 
@@ -95,19 +112,3 @@ body can access to the local environment through the variable env"
            (apply compiler-func env (cdr sexp))
            ;; funcall
            )))))
-
-(defun ls-compile-block (sexps env)
-  (concat (join (mapcar (lambda (x)
-                          (concat (ls-compile x env) ";"))
-                        (butlast sexps))
-                "")
-          "
-return " (ls-compile (car (last sexps)) env) ";"))
-
-
-(defun compile-test ()
-  (with-open-file (in "test.lisp")
-    (with-open-file (out "test.js" :direction :output :if-exists :supersede)
-      (loop
-         for x = (read in nil) while x
-         do (format out "~a;~%" (ls-compile x))))))
