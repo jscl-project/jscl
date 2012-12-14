@@ -96,9 +96,16 @@ body can access to the local environment through the variable env"
 
 (defun ls-compile-block (sexps env)
   (concat (join (mapcar (lambda (x)
-                          (ls-compile x env))
+                          (concat (ls-compile x env) ";"))
                         (butlast sexps))
-                ";
-")
-          ";
+                "")
+          "
 return " (ls-compile (car (last sexps)) env) ";"))
+
+
+(defun compile-test ()
+  (with-open-file (in "test.lisp")
+    (with-open-file (out "test.js" :direction :output :if-exists :supersede)
+      (loop
+         for x = (read in nil) while x
+         do (write-string (ls-compile x) out)))))

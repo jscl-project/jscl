@@ -1,0 +1,3 @@
+
+(lambda (x y)
+  x)
