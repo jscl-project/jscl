@@ -28,7 +28,6 @@
              separator
              (join (cdr list) separator)))))
 
-
 ;;; Compiler
 
 (defvar *compilations* nil)
@@ -78,6 +77,11 @@ body can access to the local environment through the variable env"
 (define-compilation quote (sexp)
   (lisp->js sexp))
 
+(define-compilation while (pred &rest body)
+  (format nil "(function(){while(~a){~{~a~}}})()"
+	  (ls-compile pred env)
+	  (mapcar (lambda (x) (ls-compile x env)) body)))
+
 (defparameter *env* '())
 (defparameter *env-fun* '())
 
@@ -94,11 +98,14 @@ body can access to the local environment through the variable env"
            ;; funcall
            )))))
 
-(defun ls-compile-block (sexps env)
+(defun ls-compile-sexps (sexps env)
   (concat (join (mapcar (lambda (x)
                           (ls-compile x env))
-                        (butlast sexps))
+                        sexps)
                 ";
-")
+")))
+
+(defun ls-compile-block (sexps env)
+  (concat (ls-compile-sexps (butlast sexps env) env)
           ";
 return " (ls-compile (car (last sexps)) env) ";"))
