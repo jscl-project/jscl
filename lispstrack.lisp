@@ -32,6 +32,19 @@
 
 (defvar *compilations* nil)
 
+(defun ls-compile-sexps (sexps env)
+  (concat (join (mapcar (lambda (x)
+                          (ls-compile x env))
+                        sexps)
+                ";
+")))
+
+(defun ls-compile-block (sexps env)
+  (concat (ls-compile-sexps (butlast sexps env) env)
+          ";
+return " (ls-compile (car (last sexps)) env) ";"))
+
+
 (defun extend-env (args env)
   (append (mapcar #'make-binding args) env))
 
@@ -78,9 +91,9 @@ body can access to the local environment through the variable env"
   (lisp->js sexp))
 
 (define-compilation while (pred &rest body)
-  (format nil "(function(){while(~a){~{~a~}}})()"
+  (format nil "(function(){while(~a){~a}})() "
 	  (ls-compile pred env)
-	  (mapcar (lambda (x) (ls-compile x env)) body)))
+	  (ls-compile-sexps body env)))
 
 (defparameter *env* '())
 (defparameter *env-fun* '())
@@ -97,15 +110,3 @@ body can access to the local environment through the variable env"
            (apply compiler-func env (cdr sexp))
            ;; funcall
            )))))
-
-(defun ls-compile-sexps (sexps env)
-  (concat (join (mapcar (lambda (x)
-                          (ls-compile x env))
-                        sexps)
-                ";
-")))
-
-(defun ls-compile-block (sexps env)
-  (concat (ls-compile-sexps (butlast sexps env) env)
-          ";
-return " (ls-compile (car (last sexps)) env) ";"))
