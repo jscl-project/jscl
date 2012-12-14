@@ -53,8 +53,8 @@
        nil)
       ((char= ch #\.)
        (%read-char stream)
+       (skip-whitespaces-and-comments stream)
        (prog1 (ls-read-1 stream)
-         (skip-whitespaces-and-comments stream)
          (unless (char= (%read-char stream) #\))
            (error "')' was expected."))))
       (t
