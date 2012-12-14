@@ -16,6 +16,19 @@
   (defun make-binding (symbol)
     (cons symbol (format nil "V_~d" (incf counter)))))
 
+;;; Concatenate a list of strings, with a separator
+(defun join (list separator)
+  (cond
+    ((null list)
+     "")
+    ((null (cdr list))
+     (car list))
+    (t
+     (concat (car list)
+             separator
+             (join (cdr list) separator)))))
+
+
 ;;; Compiler
 
 (defvar *compilations* nil)
@@ -44,22 +57,26 @@ body can access to the local environment through the variable env"
 (define-compilation lambda (args &rest body)
   (let ((new-env (extend-env args env)))
     (concat "(function ("
-	    (format nil "~{~a~^, ~}" (mapcar
-				      (lambda (x) (ls-lookup x new-env))
-				      args))
-	    "){ "
+	    (join (mapcar (lambda (x) (ls-lookup x new-env))
+                          args)
+                  ",")
+	    "){
+"
 	    (ls-compile-block body new-env)
-	    "})
-")))
+	    "
+})")))
 
 (define-compilation setq (var val)
   (format nil "~a = ~a" (ls-lookup var env) (ls-compile val env)))
 
-(define-compilation quote (sexp)
+(defun lisp->js (sexp)
   (cond
     ((integerp sexp) (format nil "~a" sexp))
     ((stringp sexp) (format nil "\"~a\"" sexp))
-    ((listp sexp)   (format nil "[~{~a~^, ~}]" sexp))))
+    ((listp sexp)   (concat "[" (join (mapcar 'lisp->js sexp) ",") "]"))))
+
+(define-compilation quote (sexp)
+  (lisp->js sexp))
 
 (defparameter *env* '())
 (defparameter *env-fun* '())
@@ -78,8 +95,10 @@ body can access to the local environment through the variable env"
            )))))
 
 (defun ls-compile-block (sexps env)
-  (format nil
-    "~{~#[~; return ~a;~:;~a;~%~]~}"
-    (mapcar #'(lambda (x)
-		      (ls-compile x env))
-		  sexps)))
+  (concat (join (mapcar (lambda (x)
+                          (ls-compile x env))
+                        (butlast sexps))
+                ";
+")
+          ";
+return " (ls-compile (car (last sexps)) env) ";"))
