@@ -78,6 +78,9 @@ body can access to the local environment through the variable env"
 (define-compilation quote (sexp)
   (lisp->js sexp))
 
+(define-compilation debug (form)
+  (format nil "console.log(~a)" (ls-compile form env)))
+
 (defparameter *env* '())
 (defparameter *env-fun* '())
 
@@ -86,7 +89,6 @@ body can access to the local environment through the variable env"
     ((symbolp sexp) (ls-lookup sexp env))
     ((integerp sexp) (format nil "~a" sexp))
     ((stringp sexp) (format nil " \"~a\" " sexp))
-					; list
     ((listp sexp)
      (let ((compiler-func (second (assoc (car sexp) *compilations*))))
        (if compiler-func
@@ -108,4 +110,4 @@ return " (ls-compile (car (last sexps)) env) ";"))
     (with-open-file (out "test.js" :direction :output :if-exists :supersede)
       (loop
          for x = (read in nil) while x
-         do (write-string (ls-compile x) out)))))
+         do (format out "~a;~%" (ls-compile x))))))
