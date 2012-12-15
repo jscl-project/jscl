@@ -93,10 +93,30 @@ body can access to the local environment through the variable env"
 (define-compilation debug (form)
   (format nil "console.log(~a)" (ls-compile form env)))
 
+(defun compile-test ()
+  (with-open-file (in "test.lisp")
+    (with-open-file (out "test.js" :direction :output :if-exists :supersede)
+      (loop
+         for x = (read in nil) while x
+         do (write-string (ls-compile x) out)))))
+
 (define-compilation while (pred &rest body)
   (format nil "(function(){while(~a){~a}})() "
 	  (ls-compile pred env)
 	  (ls-compile-sexps body env)))
+
+(define-compilation + (x y)
+  (concat "((" (ls-compile x env) ") + (" (ls-compile y env) "))"))
+
+(define-compilation - (x y)
+  (concat "((" (ls-compile x env) ") - (" (ls-compile y env) "))"))
+
+(define-compilation * (x y)
+  (concat "((" (ls-compile x env) ") * (" (ls-compile y env) "))"))
+
+(define-compilation / (x y)
+  (concat "((" (ls-compile x env) ") / (" (ls-compile y env) "))"))
+
 
 (defparameter *env* '())
 (defparameter *env-fun* '())
@@ -110,5 +130,6 @@ body can access to the local environment through the variable env"
      (let ((compiler-func (second (assoc (car sexp) *compilations*))))
        (if compiler-func
            (apply compiler-func env (cdr sexp))
+	   (funcall (ls-compile (car sexp) env)  )
            ;; funcall
            )))))
