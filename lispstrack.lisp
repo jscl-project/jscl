@@ -34,9 +34,9 @@
 
 (defun ls-compile-sexps (sexps env)
   (concat (join (mapcar (lambda (x)
-                          (ls-compile x env))
+                          (concat (ls-compile x env) ";"))
                         sexps)
-                ";
+                "
 ")))
 
 (defun ls-compile-block (sexps env)
