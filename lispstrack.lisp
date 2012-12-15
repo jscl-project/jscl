@@ -104,6 +104,7 @@ body can access to the local environment through the variable env"
 	  (ls-compile pred env)
 	  (ls-compile-sexps body env)))
 
+;;; aritmetic primitives
 (define-compilation + (x y)
   (concat "((" (ls-compile x env) ") + (" (ls-compile y env) "))"))
 
@@ -115,6 +116,9 @@ body can access to the local environment through the variable env"
 
 (define-compilation / (x y)
   (concat "((" (ls-compile x env) ") / (" (ls-compile y env) "))"))
+
+(define-compilation = (x y)
+  (concat "((" (ls-compile x env) ") == (" (ls-compile y env) "))"))
 
 
 (defparameter *env* '())
