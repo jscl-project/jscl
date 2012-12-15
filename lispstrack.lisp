@@ -13,8 +13,13 @@
 
 
 (let ((counter 0))
-  (defun make-binding (symbol)
-    (cons symbol (format nil "V_~d" (incf counter)))))
+  (defun make-var-binding (symbol)
+    (cons symbol (format nil "v~d" (incf counter)))))
+
+(let ((counter 0))
+  (defun make-func-binding (symbol)
+    (cons symbol (format nil "f~d" (incf counter)))))
+
 
 ;;; Concatenate a list of strings, with a separator
 (defun join (list separator)
@@ -32,20 +37,20 @@
 
 (defvar *compilations* nil)
 
-(defun ls-compile-sexps (sexps env)
+(defun ls-compile-sexps (sexps env fenv)
   (concat (join (mapcar (lambda (x)
-                          (concat (ls-compile x env) ";"))
+                          (concat (ls-compile x env fenv) ";"))
                         sexps)
                 ";
 ")))
 
-(defun ls-compile-block (sexps env)
-  (concat (ls-compile-sexps (butlast sexps) env)
-          "return " (ls-compile (car (last sexps)) env) ";"))
+(defun ls-compile-block (sexps env fenv)
+  (concat (ls-compile-sexps (butlast sexps) env fenv)
+          "return " (ls-compile (car (last sexps)) env fenv) ";"))
 
 
 (defun extend-env (args env)
-  (append (mapcar #'make-binding args) env))
+  (append (mapcar #'make-var-binding args) env))
 
 (defparameter *env* '())
 (defparameter *fenv* '())
@@ -68,14 +73,14 @@
   ;; Creates a new primitive `name' with parameters args and
   ;; @body. The body can access to the local environment through the
   ;; variable ENV.
-  `(push (list ',name (lambda (env ,@args) ,@body))
+  `(push (list ',name (lambda (env fenv ,@args) ,@body))
          *compilations*))
 
 (define-compilation if (condition true false)
   (format nil "((~a)? (~a) : (~a))"
-          (ls-compile condition env)
-          (ls-compile true env)
-          (ls-compile false env)))
+          (ls-compile condition env fenv)
+          (ls-compile true env fenv)
+          (ls-compile false env fenv)))
 
 (define-compilation lambda (args &rest body)
   (let ((new-env (extend-env args env)))
@@ -85,12 +90,15 @@
                   ",")
 	    "){
 "
-	    (ls-compile-block body new-env)
+	    (ls-compile-block body new-env fenv)
 	    "
 })")))
 
+(define-compilation fsetq (var val)
+  (format nil "~a = ~a" (lookup-function var fenv) (ls-compile val env fenv)))
+
 (define-compilation setq (var val)
-  (format nil "~a = ~a" (lookup-variable var env) (ls-compile val env)))
+  (format nil "~a = ~a" (lookup-variable var env) (ls-compile val env fenv)))
 
 (defun lisp->js (sexp)
   (cond
@@ -102,12 +110,12 @@
   (lisp->js sexp))
 
 (define-compilation debug (form)
-  (format nil "console.log(~a)" (ls-compile form env)))
+  (format nil "console.log(~a)" (ls-compile form env fenv)))
 
 (define-compilation while (pred &rest body)
   (format nil "(function(){while(~a){~a}})() "
-	  (ls-compile pred env)
-	  (ls-compile-sexps body env)))
+	  (ls-compile pred env fenv)
+	  (ls-compile-sexps body env fenv)))
 
 (defmacro eval-when-compile (&body body)
   `(eval-when (:compile-toplevel :execute)
@@ -118,26 +126,35 @@
 
 ;;; aritmetic primitives
 (define-compilation + (x y)
-  (concat "((" (ls-compile x env) ") + (" (ls-compile y env) "))"))
+  (concat "((" (ls-compile x env fenv) ") + (" (ls-compile y env fenv) "))"))
 
 (define-compilation - (x y)
-  (concat "((" (ls-compile x env) ") - (" (ls-compile y env) "))"))
+  (concat "((" (ls-compile x env fenv) ") - (" (ls-compile y env fenv) "))"))
 
 (define-compilation * (x y)
-  (concat "((" (ls-compile x env) ") * (" (ls-compile y env) "))"))
+  (concat "((" (ls-compile x env fenv) ") * (" (ls-compile y env fenv) "))"))
 
 (define-compilation / (x y)
-  (concat "((" (ls-compile x env) ") / (" (ls-compile y env) "))"))
+  (concat "((" (ls-compile x env fenv) ") / (" (ls-compile y env fenv) "))"))
 
 (define-compilation = (x y)
-  (concat "((" (ls-compile x env) ") == (" (ls-compile y env) "))"))
+  (concat "((" (ls-compile x env fenv) ") == (" (ls-compile y env fenv) "))"))
 
 
 (defun %compile-defvar (name)
-  (push (make-binding name) *env*)
+  (push (make-var-binding name) *env*)
   (format nil "var ~a" (lookup-variable name *env*)))
 
-(defun ls-compile (sexp &optional env)
+(defun %compile-defun (name)
+  (push (make-func-binding name) *fenv*)
+  (format nil "var ~a" (lookup-variable name *fenv*)))
+
+(defun compile-funcall (name args env fenv)
+  (format nil "~a(~{~a~^, ~})"
+          (lookup-function name fenv)
+          (mapcar (lambda (x) (ls-compile x env fenv)) args)))
+
+(defun ls-compile (sexp &optional env fenv)
   (cond
     ((symbolp sexp) (lookup-variable sexp env))
     ((integerp sexp) (format nil "~a" sexp))
@@ -145,10 +162,8 @@
     ((listp sexp)
      (let ((compiler-func (second (assoc (car sexp) *compilations*))))
        (if compiler-func
-           (apply compiler-func env (cdr sexp))
-	   (funcall (ls-compile (car sexp) env)  )
-           ;; funcall
-           )))))
+           (apply compiler-func env fenv (cdr sexp))
+           (compile-funcall (car sexp) (cdr sexp) env fenv))))))
 
 
 ;;; Testing
