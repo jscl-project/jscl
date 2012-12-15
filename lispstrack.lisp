@@ -54,8 +54,9 @@
 	(error "Undefined variable `~a'"  symbol))))
 
 (defmacro define-compilation (name args &body body)
-  "creates a new primitive `name' with parameters args and @body. The
-body can access to the local environment through the variable env"
+  ;; Creates a new primitive `name' with parameters args and
+  ;; @body. The body can access to the local environment through the
+  ;; variable ENV.
   `(push (list ',name (lambda (env ,@args) ,@body))
          *compilations*))
 
