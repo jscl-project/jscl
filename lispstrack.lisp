@@ -36,13 +36,12 @@
   (concat (join (mapcar (lambda (x)
                           (concat (ls-compile x env) ";"))
                         sexps)
-                "
+                ";
 ")))
 
 (defun ls-compile-block (sexps env)
-  (concat (ls-compile-sexps (butlast sexps env) env)
-          ";
-return " (ls-compile (car (last sexps)) env) ";"))
+  (concat (ls-compile-sexps (butlast sexps) env)
+          "return " (ls-compile (car (last sexps)) env) ";"))
 
 
 (defun extend-env (args env)
