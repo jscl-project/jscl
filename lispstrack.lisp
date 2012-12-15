@@ -97,7 +97,7 @@ body can access to the local environment through the variable env"
     (with-open-file (out "test.js" :direction :output :if-exists :supersede)
       (loop
          for x = (read in nil) while x
-         do (write-string (ls-compile x) out)))))
+         do (write-string (concat (ls-compile x) "; ") out)))))
 
 (define-compilation while (pred &rest body)
   (format nil "(function(){while(~a){~a}})() "
