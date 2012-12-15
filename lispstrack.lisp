@@ -92,17 +92,17 @@ body can access to the local environment through the variable env"
 (define-compilation debug (form)
   (format nil "console.log(~a)" (ls-compile form env)))
 
-(defun compile-test ()
-  (with-open-file (in "test.lisp")
-    (with-open-file (out "test.js" :direction :output :if-exists :supersede)
-      (loop
-         for x = (read in nil) while x
-         do (write-string (concat (ls-compile x) "; ") out)))))
-
 (define-compilation while (pred &rest body)
   (format nil "(function(){while(~a){~a}})() "
 	  (ls-compile pred env)
 	  (ls-compile-sexps body env)))
+
+(defmacro eval-when-compile (&body body)
+  `(eval-when (:compile-toplevel :execute)
+     ,@body))
+
+(define-compilation eval-when-compile (when &rest body)
+  (eval body))
 
 ;;; aritmetic primitives
 (define-compilation + (x y)
@@ -136,3 +136,13 @@ body can access to the local environment through the variable env"
 	   (funcall (ls-compile (car sexp) env)  )
            ;; funcall
            )))))
+
+
+;;; Testing
+
+(defun compile-test ()
+  (with-open-file (in "test.lisp")
+    (with-open-file (out "test.js" :direction :output :if-exists :supersede)
+      (loop
+         for x = (read in nil) while x
+         do (write-string (concat (ls-compile x) "; ") out)))))
