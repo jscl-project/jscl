@@ -1,6 +1,10 @@
-
 (lambda (x y)
   x)
+
+(eval-when-compile
+  (%compile-defvar 'name))
+(setq name 10)
+(debug name)
 
 (debug "hola")
 (debug '(1 2 3 4))

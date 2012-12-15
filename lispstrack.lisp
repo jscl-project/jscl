@@ -47,11 +47,22 @@
 (defun extend-env (args env)
   (append (mapcar #'make-binding args) env))
 
+(defparameter *env* '())
+(defparameter *fenv* '())
+
 (defun ls-lookup (symbol env)
   (let ((binding (assoc symbol env)))
-    (if binding
-	(format nil "~a" (cdr binding))
-	(error "Undefined variable `~a'"  symbol))))
+    (and binding (format nil "~a" (cdr binding)))))
+
+(defun lookup-variable (symbol env)
+  (or (ls-lookup symbol env)
+      (ls-lookup symbol *env*)
+      (error "Undefined variable `~a'"  symbol)))
+
+(defun lookup-function (symbol env)
+  (or (ls-lookup symbol env)
+      (ls-lookup symbol *fenv*)
+      (error "Undefined function `~a'"  symbol)))
 
 (defmacro define-compilation (name args &body body)
   ;; Creates a new primitive `name' with parameters args and
@@ -69,7 +80,7 @@
 (define-compilation lambda (args &rest body)
   (let ((new-env (extend-env args env)))
     (concat "(function ("
-	    (join (mapcar (lambda (x) (ls-lookup x new-env))
+	    (join (mapcar (lambda (x) (lookup-variable x new-env))
                           args)
                   ",")
 	    "){
@@ -79,7 +90,7 @@
 })")))
 
 (define-compilation setq (var val)
-  (format nil "~a = ~a" (ls-lookup var env) (ls-compile val env)))
+  (format nil "~a = ~a" (lookup-variable var env) (ls-compile val env)))
 
 (defun lisp->js (sexp)
   (cond
@@ -102,8 +113,8 @@
   `(eval-when (:compile-toplevel :execute)
      ,@body))
 
-(define-compilation eval-when-compile (when &rest body)
-  (eval body))
+(define-compilation eval-when-compile (&rest body)
+  (eval (cons 'progn body)))
 
 ;;; aritmetic primitives
 (define-compilation + (x y)
@@ -122,14 +133,15 @@
   (concat "((" (ls-compile x env) ") == (" (ls-compile y env) "))"))
 
 
-(defparameter *env* '())
-(defparameter *env-fun* '())
+(defun %compile-defvar (name)
+  (push (make-binding name) *env*)
+  (format nil "var ~a" (lookup-variable name *env*)))
 
 (defun ls-compile (sexp &optional env)
   (cond
-    ((symbolp sexp) (ls-lookup sexp env))
+    ((symbolp sexp) (lookup-variable sexp env))
     ((integerp sexp) (format nil "~a" sexp))
-    ((stringp sexp) (format nil " \"~a\" " sexp))
+    ((stringp sexp) (format nil "\"~a\"" sexp))
     ((listp sexp)
      (let ((compiler-func (second (assoc (car sexp) *compilations*))))
        (if compiler-func
@@ -146,4 +158,4 @@
     (with-open-file (out "test.js" :direction :output :if-exists :supersede)
       (loop
          for x = (read in nil) while x
-         do (write-string (concat (ls-compile x) "; ") out)))))
+         do (write-line (concat (ls-compile x) "; ") out)))))
