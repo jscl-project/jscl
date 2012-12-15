@@ -19,3 +19,10 @@
   (%compile-defun 'f))
 (fsetq f (lambda (x) (+ x 10)))
 (debug (f 20))
+
+;;; Macros
+(debug "---MACROS---")
+(eval-when-compile
+  (%compile-defmacro 'f (lambda (x) (list '+ x 10))))
+
+(debug (f 10))

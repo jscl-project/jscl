@@ -37,17 +37,12 @@
 
 (defvar *compilations* nil)
 
-(defun ls-compile-sexps (sexps env fenv)
+(defun ls-compile-block (sexps env fenv)
   (concat (join (mapcar (lambda (x)
                           (concat (ls-compile x env fenv) ";"))
                         sexps)
                 ";
 ")))
-
-(defun ls-compile-block (sexps env fenv)
-  (concat (ls-compile-sexps (butlast sexps) env fenv)
-          "return " (ls-compile (car (last sexps)) env fenv) ";"))
-
 
 (defun extend-env (args env)
   (append (mapcar #'make-var-binding args) env))
@@ -90,7 +85,8 @@
                   ",")
 	    "){
 "
-	    (ls-compile-block body new-env fenv)
+            (concat (ls-compile-block (butlast body) env fenv)
+                    "return " (ls-compile (car (last body)) env fenv) ";")
 	    "
 })")))
 
@@ -115,14 +111,19 @@
 (define-compilation while (pred &rest body)
   (format nil "(function(){while(~a){~a}})() "
 	  (ls-compile pred env fenv)
-	  (ls-compile-sexps body env fenv)))
+	  (ls-compile-block body env fenv)))
 
 (defmacro eval-when-compile (&body body)
   `(eval-when (:compile-toplevel :execute)
      ,@body))
 
+(defvar *eval-when-compilations*)
 (define-compilation eval-when-compile (&rest body)
-  (eval (cons 'progn body)))
+  (setq *eval-when-compilations* "")
+  (eval (cons 'progn body))
+  (if (string= *eval-when-compilations* "")
+      nil
+      *eval-when-compilations*))
 
 ;;; aritmetic primitives
 (define-compilation + (x y)
@@ -141,18 +142,33 @@
   (concat "((" (ls-compile x env fenv) ") == (" (ls-compile y env fenv) "))"))
 
 
+(defmacro with-eval-when-compilation (&body body)
+  `(setq *eval-when-compilations*
+         (concat *eval-when-compilations* (progn ,@body))))
+
 (defun %compile-defvar (name)
   (push (make-var-binding name) *env*)
-  (format nil "var ~a" (lookup-variable name *env*)))
+  (with-eval-when-compilation
+    (format nil "var ~a" (lookup-variable name *env*))))
 
 (defun %compile-defun (name)
   (push (make-func-binding name) *fenv*)
-  (format nil "var ~a" (lookup-variable name *fenv*)))
+  (with-eval-when-compilation
+    (format nil "var ~a" (lookup-variable name *fenv*))))
+
+(defun %compile-defmacro (name lambda)
+  (push (cons name (cons 'macro lambda)) *fenv*))
 
 (defun compile-funcall (name args env fenv)
   (format nil "~a(~{~a~^, ~})"
           (lookup-function name fenv)
           (mapcar (lambda (x) (ls-compile x env fenv)) args)))
+
+(defun ls-macroexpand-1 (form &optional env fenv)
+  (let ((function (cdr (assoc (car form) *fenv*))))
+    (if (and (listp function) (eq (car function) 'macro))
+        (apply (eval (cdr function)) (cdr form))
+        form)))
 
 (defun ls-compile (sexp &optional env fenv)
   (cond
@@ -160,17 +176,23 @@
     ((integerp sexp) (format nil "~a" sexp))
     ((stringp sexp) (format nil "\"~a\"" sexp))
     ((listp sexp)
-     (let ((compiler-func (second (assoc (car sexp) *compilations*))))
-       (if compiler-func
-           (apply compiler-func env fenv (cdr sexp))
-           (compile-funcall (car sexp) (cdr sexp) env fenv))))))
+     (let ((sexp (ls-macroexpand-1 sexp env fenv)))
+       (let ((compiler-func (second (assoc (car sexp) *compilations*))))
+         (if compiler-func
+             (apply compiler-func env fenv (cdr sexp))
+             (compile-funcall (car sexp) (cdr sexp) env fenv)))))))
+
+
+(defun ls-compile-file (filename output)
+  (with-open-file (in filename)
+    (with-open-file (out output :direction :output :if-exists :supersede)
+      (loop
+         for x = (read in nil) while x
+         for compilation = (ls-compile x)
+         when compilation do (write-line (concat compilation "; ") out)))))
 
 
 ;;; Testing
 
 (defun compile-test ()
-  (with-open-file (in "test.lisp")
-    (with-open-file (out "test.js" :direction :output :if-exists :supersede)
-      (loop
-         for x = (read in nil) while x
-         do (write-line (concat (ls-compile x) "; ") out)))))
+  (ls-compile-file "test.lisp" "test.js"))
