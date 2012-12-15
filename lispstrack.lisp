@@ -85,8 +85,8 @@
                   ",")
 	    "){
 "
-            (concat (ls-compile-block (butlast body) env fenv)
-                    "return " (ls-compile (car (last body)) env fenv) ";")
+            (concat (ls-compile-block (butlast body) new-env fenv)
+                    "return " (ls-compile (car (last body)) new-env fenv) ";")
 	    "
 })")))
 
