@@ -22,7 +22,15 @@
 
 ;;; Macros
 (debug "---MACROS---")
-(eval-when-compile
-  (%compile-defmacro 'f (lambda (x) (list '+ x 10))))
 
-(debug (f 10))
+(eval-when-compile
+  (%compile-defmacro 'incf
+                     (lambda (y)
+                       (list 'setq y (list '+ 1 y)))))
+
+(eval-when-compile
+  (%compile-defvar 'x))
+
+(setq x 0)
+(incf x)
+(debug x)
