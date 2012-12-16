@@ -12,6 +12,114 @@
           :initial-value ""))
 
 
+;;;; READER
+
+;;; It is a basic Lisp reader. It does not use advanced stuff
+;;; intentionally, because we want to use it to bootstrap a simple
+;;; Lisp. The main entry point is the function `ls-read', which
+;;; accepts a strings as argument and return the Lisp expression.
+(defun make-string-stream (string)
+  (cons string 0))
+
+(defun %peek-char (stream)
+  (if (streamp stream)
+      (peek-char nil stream nil)
+      (and (< (cdr stream) (length (car stream)))
+           (char (car stream) (cdr stream)))))
+
+(defun %read-char (stream)
+  (if (streamp stream)
+      (read-char stream nil)
+      (and (< (cdr stream) (length (car stream)))
+           (prog1 (char (car stream) (cdr stream))
+             (incf (cdr stream))))))
+
+(defun whitespacep (ch)
+  (or (char= ch #\space) (char= ch #\newline) (char= ch #\tab)))
+
+(defun skip-whitespaces (stream)
+  (loop for ch = (%peek-char stream)
+     while (and ch (whitespacep ch))
+     do (%read-char stream)))
+
+(defun terminalp (ch)
+  (or (null ch) (whitespacep ch) (char= #\) ch)))
+
+(defun read-until (stream func)
+  (let ((string ""))
+    (loop for ch = (%peek-char stream)
+       until (funcall func ch)
+       do (setq string (concat string (string ch)))
+       do (%read-char stream))
+    string))
+
+(defun skip-whitespaces-and-comments (stream)
+  (let (ch)
+    (skip-whitespaces stream)
+    (setq ch (%peek-char stream))
+    (while (and ch (eql ch #\;))
+      (read-until stream (lambda (x) (eql x #\newline)))
+      (skip-whitespaces stream)
+      (setq ch (%peek-char stream)))))
+
+(defun %read-list (stream)
+  (skip-whitespaces-and-comments stream)
+  (let ((ch (%peek-char stream)))
+    (cond
+      ((char= ch #\))
+       (%read-char stream)
+       nil)
+      ((char= ch #\.)
+       (%read-char stream)
+       (skip-whitespaces-and-comments stream)
+       (prog1 (ls-read stream)
+         (unless (char= (%read-char stream) #\))
+           (error "')' was expected."))))
+      (t
+       (cons (ls-read stream) (%read-list stream))))))
+
+(defvar *eof* (make-symbol "EOF"))
+(defun ls-read (stream)
+  (skip-whitespaces-and-comments stream)
+  (let ((ch (%peek-char stream)))
+    (cond
+      ((null ch)
+       *eof*)
+      ((char= ch #\()
+       (%read-char stream)
+       (%read-list stream))
+      ((char= ch #\')
+       (%read-char stream)
+       (list 'quote (ls-read stream)))
+      ((char= ch #\`)
+       (%read-char stream)
+       (list 'backquote (ls-read stream)))
+      ((char= ch #\")
+       (%read-char stream)
+       (prog1 (read-until stream (lambda (ch) (char= ch #\")))
+         (%read-char stream)))
+      ((char= ch #\,)
+       (%read-char stream)
+       (if (eql (%peek-char stream) #\@)
+           (progn (%read-char stream) (list 'unquote-splicing (ls-read stream)))
+           (list 'unquote (ls-read stream))))
+      ((char= ch #\#)
+       (%read-char stream)
+       (ecase (%read-char stream)
+         (#\'
+          (list 'function (ls-read stream)))))
+      (t
+       (let ((string (read-until stream #'terminalp)))
+         (if (every #'digit-char-p string)
+             (parse-integer string)
+             (intern (string-upcase string))))))))
+
+(defun ls-read-from-string (string)
+  (ls-read (make-string-stream string)))
+
+
+;;;; Compiler
+
 (let ((counter 0))
   (defun make-var-binding (symbol)
     (cons symbol (format nil "v~d" (incf counter)))))
@@ -271,17 +379,16 @@
                 code)
       (setq *literals* nil))))
 
-
 (defun ls-compile-file (filename output)
   (with-open-file (in filename)
     (with-open-file (out output :direction :output :if-exists :supersede)
       (loop
-         for x = (read in nil) while x
+         for x = (ls-read in)
+         until (eq x *eof*)
          for compilation = (ls-compile-toplevel x)
          when compilation do (write-line (concat compilation "; ") out)))))
 
 
 ;;; Testing
-
 (defun compile-test ()
   (ls-compile-file "test.lisp" "test.js"))
