@@ -41,5 +41,12 @@
 ;;; &rest lambda-list
 
 (debug (lambda (&rest x) x))
+(debug (lambda (x y &rest z) z))
 (debug (lambda (x y &rest z) x))
-(debug (lambda (x y &rest z) y))
+
+;; (eval-when-compile
+;;   (%compile-defmacro 'defun
+;; 		     (lambda (name args &rest body)
+;; 		       (list 'eval-when-compile
+;; 			     (list 'compile-defun)
+;; 			     (list 'fsetq (list 'lambda args (list 'progn body)))))))

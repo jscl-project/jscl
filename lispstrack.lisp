@@ -54,6 +54,21 @@
   (let ((binding (assoc symbol env)))
     (and binding (format nil "~a" (cdr binding)))))
 
+(defvar *literal-ns* '())
+
+(let ((counter 0))
+  (defun make-literal (literal)
+    (cons (format nil "l~d" (incf counter))
+	  (literal-lisp->js literal))))
+
+(defvar *modified-literals* "")
+(defun ls-compile-toplevel (sexp &optional env fenv)
+  (setq *modified-literals* nil)
+  (let ((code (ls-compile sexp env fenv)))
+    (format nil "~a" *modified-literals*)
+    (format nil "~a" code))
+  (setq *modified-literals* ""))
+
 (defun lookup-variable (symbol env)
   (or (ls-lookup symbol env)
       (ls-lookup symbol *env*)
@@ -114,14 +129,18 @@
 (define-compilation setq (var val)
   (format nil "~a = ~a" (lookup-variable var env) (ls-compile val env fenv)))
 
-(defun lisp->js (sexp)
+(defun literal-lisp->js (sexp)
   (cond
+    ((null sexp) "undefined")
     ((integerp sexp) (format nil "~a" sexp))
     ((stringp sexp) (format nil "\"~a\"" sexp))
-    ((listp sexp)   (concat "[" (join (mapcar 'lisp->js sexp) ",") "]"))))
+    ((listp sexp) (concat "{car: " (literal-lisp->js (car sexp)) ", cdr: "
+			  (literal-lisp->js (cdr sexp)) "}"))))
 
 (define-compilation quote (sexp)
-  (lisp->js sexp))
+  (let ((literal (make-literal sexp)))
+    (setq *modified-literals* (cdr sexp))
+    (format nil "~a" (car literal))))
 
 (define-compilation debug (form)
   (format nil "console.log(~a)" (ls-compile form env fenv)))
@@ -159,6 +178,14 @@
 (define-compilation = (x y)
   (concat "((" (ls-compile x env fenv) ") == (" (ls-compile y env fenv) "))"))
 
+(define-compilation cons (x y)
+  (concat "(new Cons("y", " x "))"))
+
+(define-compilation car (x)
+  (concat "(x.car)"))
+
+(define-compilation cdr (x)
+  (concat "(x.cdr)"))
 
 (defmacro with-eval-when-compilation (&body body)
   `(setq *eval-when-compilations*
