@@ -1,3 +1,20 @@
+;;; Library
+
+(eval-when-compile
+  (%compile-defmacro 'defmacro
+     (lambda (name args &rest body)
+       `(eval-when-compile
+          (%compile-defmacro ',name (lambda ,args ,@body))))))
+
+(defmacro defun (name args &rest body)
+  `(progn
+     (eval-when-compile
+       (%compile-defun ',name))
+     (fsetq ,name (lambda ,args ,@body))))
+
+
+;;; Tests
+
 (lambda (x y) x)
 
 (debug "hola")
@@ -26,12 +43,7 @@
 ;;; Macros
 (debug "---MACROS---")
 
-(eval-when-compile
-  (%compile-defmacro 'defmacro
-                     (lambda (name args &rest body)
-                       (list 'eval-when-compile
-                             (list '%compile-defmacro (list 'quote name)
-                                   (list* 'lambda args body))))))
+
 
 (defmacro incf (x)
   (list 'setq x (list '+ 1 x)))
@@ -69,14 +81,8 @@
 (debug (lambda (x y &rest z) x))
 
 
-(progn
-  (eval-when-compile
-    (%compile-defun 'f))
-  (fsetq f (lambda (x) (* x x))))
-
+(defun f (x) (* x x))
 (debug (f 33))
-
-;; (debug (foo))
 
 ;; (eval-when-compile
 ;;   (%compile-defmacro 'defun

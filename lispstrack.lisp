@@ -301,6 +301,7 @@
     ((symbolp x)
      (lookup-function x fenv))))
 
+#+common-lisp
 (defmacro eval-when-compile (&body body)
   `(eval-when (:compile-toplevel :execute)
      ,@body))
@@ -349,6 +350,9 @@
   (if (and (listp form) (eq (car form) 'backquote))
       (backquote-expand-1 (cadr form))
       form))
+
+(defmacro backquote (form)
+  (backquote-expand-1 form))
 
 (define-transformation backquote (form)
   (backquote-expand-1 form))
