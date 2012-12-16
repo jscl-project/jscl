@@ -310,28 +310,6 @@
       (backquote-expand-1 (cadr form))
       form))
 
-;;; Some Tests comparing backquote agains the backquote of the host
-;;; Lisp. It is not very exhaustive, but we just want a working
-;;; backquotation to be able bootstrap this program.
-(macrolet ((test (form1 form2)
-             `(assert (equal ,form1 ,form2))))
-  (test (backquote (1 2 3 4))
-        `(1 2 3 4))
-  (test (backquote (1 2 (+ 3 4)))
-        `(1 2 (+ 3 4)))
-  (test (backquote (1 2 (unquote (+ 3 4))))
-        `(1 2 ,(+ 3 4)))
-  (test (backquote (1 2 (unquote-splicing '(3 4))))
-        `(1 2 ,@'(3 4)))
-  (test (backquote (backquote x))
-        ``x)
-  (let ((x 10))
-    (test `',x
-          (backquote (quote (unquote x)))))
-  (let ((x 10))
-    (test (eval ``(,,x))
-          (eval (backquote (backquote ((unquote (unquote x)))))))))
-
 (define-transformation backquote (form)
   (backquote-expand-1 form))
 
