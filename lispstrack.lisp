@@ -6,6 +6,9 @@
        ((not ,condition))
      ,@body))
 
+(defvar *newline* "
+")
+
 ;;; simplify me, please
 (defun concat (&rest strs)
   (reduce (lambda (s1 s2) (concatenate 'string s1 s2))
@@ -23,6 +26,11 @@
      (concat (car list)
              separator
              (join (cdr list) separator)))))
+
+(defun join-trailing (list separator)
+  (if (null list)
+      ""
+      (concat (car list) separator (join-trailing (cdr list) separator))))
 
 (defun integer-to-string (x)
   (if (zerop x)
@@ -168,11 +176,11 @@
 (defvar *compilations* nil)
 
 (defun ls-compile-block (sexps env fenv)
-  (concat (join (mapcar (lambda (x)
-                          (concat (ls-compile x env fenv) ";"))
-                        sexps)
-                ";
-")))
+  (join-trailing (mapcar (lambda (x)
+                           (ls-compile x env fenv))
+                         sexps)
+                 ";
+"))
 
 (defun extend-env (args env)
   (append (mapcar #'make-var-binding args) env))
@@ -229,19 +237,19 @@
               (join (mapcar (lambda (x) (lookup-variable x new-env))
                             required-arguments)
                     ",")
-              "){
-"
+              "){"
+              *newline*
               (if rest-argument
                   (concat "var " (lookup-variable rest-argument new-env)
                           " = arguments.slice("
-                          (prin1-to-string (length required-arguments)) ");
-")
+                          (prin1-to-string (length required-arguments))
+                          ");"
+                          *newline*)
                   "")
-
               (concat (ls-compile-block (butlast body) new-env fenv)
                       "return " (ls-compile (car (last body)) new-env fenv) ";")
-              "
-})"))))
+              *newline*
+              "})"))))
 
 (define-compilation fsetq (var val)
   (concat (lookup-function var fenv)
@@ -429,8 +437,7 @@
   (setq *toplevel-compilations* nil)
   (let ((code (ls-compile sexp)))
     (prog1
-        (concat (join (mapcar (lambda (x)(concat x ";
-"))
+        (concat (join (mapcar (lambda (x) (concat x ";" *newline*))
                               *toplevel-compilations*)
                       "")
                 code)
