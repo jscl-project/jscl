@@ -12,6 +12,21 @@
        (%compile-defun ',name))
      (fsetq ,name (lambda ,args ,@body))))
 
+(defun append (list1 list2)
+  (if (null list1)
+      list2
+      (cons (car list1)
+            (append (cdr list1) list2))))
+
+(defun reverse-aux (list acc)
+  (if (null list)
+      acc
+      (reverse-aux (cdr list) (cons (car list) acc))))
+
+(defun reverse (list)
+  (reverse-aux list '()))
+
+(debug (reverse '(1 2 3 4)))
 
 ;;; Tests
 
@@ -80,9 +95,6 @@
 (debug (lambda (x y &rest z) z))
 (debug (lambda (x y &rest z) x))
 
-
-(defun f (x) (* x x))
-(debug (f 33))
 
 ;; (eval-when-compile
 ;;   (%compile-defmacro 'defun
