@@ -57,6 +57,9 @@
 
 (debug (progn 1 2 3 123))
 
+(debug (let ((x 99999))
+         (incf x)))
+
 ;;; &rest lambda-list
 
 (debug (lambda (&rest x) x))

@@ -167,6 +167,10 @@
 (define-transformation progn (&rest body)
   `((lambda () ,@body)))
 
+(define-transformation let (bindings &rest body)
+  `((lambda ,(mapcar 'car bindings) ,@body)
+    ,@(mapcar 'cadr bindings)))
+
 ;;; aritmetic primitives
 (define-compilation + (x y)
   (concat "((" (ls-compile x env fenv) ") + (" (ls-compile y env fenv) "))"))
