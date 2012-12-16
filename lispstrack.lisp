@@ -124,6 +124,7 @@
     ((null sexp) "undefined")
     ((integerp sexp) (format nil "~a" sexp))
     ((stringp sexp) (format nil "\"~a\"" sexp))
+    ((symbolp sexp) (format nil "{name: \"~a\"}" (symbol-name sexp)))
     ((consp sexp) (concat "{car: "
                           (literal->js (car sexp))
                           ", cdr: "
@@ -182,6 +183,11 @@
 
 (define-compilation cdr (x)
   (concat "(" (ls-compile x env fenv) ").cdr"))
+
+(define-compilation symbol-name (x)
+  (concat "(" (ls-compile x env fenv) ").name"))
+
+
 
 (defmacro with-eval-when-compilation (&body body)
   `(setq *eval-when-compilations*

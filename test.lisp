@@ -40,6 +40,14 @@
 (incf x)
 (debug x)
 
+;;; Conses
+(debug (cons 1 2))
+(debug (car (cons 1 2)))
+(debug (cdr (cons 1 2)))
+
+;;; Symbols
+(debug (symbol-name 'foo))
+(debug (symbol-name 'foo-bar))
 
 ;;; &rest lambda-list
 
@@ -47,11 +55,7 @@
 (debug (lambda (x y &rest z) z))
 (debug (lambda (x y &rest z) x))
 
-;;; Conses
-(debug (cons 1 2))
-(debug (car (cons 1 2)))
-(debug (cdr (cons 1 2)))
-
+;; (debug (foo))
 
 ;; (eval-when-compile
 ;;   (%compile-defmacro 'defun
