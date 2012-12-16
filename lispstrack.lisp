@@ -201,6 +201,8 @@
   `(push (list ',name (lambda (env fenv ,@args) ,@body))
          *compilations*))
 
+(defvar *toplevel-compilations*)
+
 (define-compilation if (condition true false)
   (concat "("
           (ls-compile condition env fenv)
@@ -254,8 +256,6 @@
 
 ;;; Literals
 
-(defvar *literals* '())
-
 (defun literal->js (sexp)
   (cond
     ((null sexp) "undefined")
@@ -270,7 +270,7 @@
 (let ((counter 0))
   (defun literal (form)
     (let ((var (concat "l" (integer-to-string (incf counter)))))
-      (push (cons var (literal->js form)) *literals*)
+      (push (concat "var " var " = " (literal->js form)) *toplevel-compilations*)
       var)))
 
 (define-compilation quote (sexp)
@@ -299,11 +299,8 @@
 
 (defvar *eval-when-compilations*)
 (define-compilation eval-when-compile (&rest body)
-  (setq *eval-when-compilations* "")
   (eval (cons 'progn body))
-  (if (string= *eval-when-compilations* "")
-      nil
-      *eval-when-compilations*))
+  nil)
 
 (defmacro define-transformation (name args form)
   `(define-compilation ,name ,args
@@ -383,20 +380,13 @@
 (define-compilation code-char (x)
   (concat "String.fromCharCode( " (ls-compile x env fenv) ")"))
 
-
-(defmacro with-eval-when-compilation (&body body)
-  `(setq *eval-when-compilations*
-         (concat *eval-when-compilations* (progn ,@body))))
-
 (defun %compile-defvar (name)
   (push (make-var-binding name) *env*)
-  (with-eval-when-compilation
-    (concat "var " (lookup-variable name *env*))))
+  (push (concat "var " (lookup-variable name *env*)) *toplevel-compilations*))
 
 (defun %compile-defun (name)
   (push (make-func-binding name) *fenv*)
-  (with-eval-when-compilation
-    (concat "var " (lookup-variable name *fenv*))))
+  (push (concat "var " (lookup-variable name *fenv*)) *toplevel-compilations*))
 
 (defun %compile-defmacro (name lambda)
   (push (cons name (cons 'macro lambda)) *fenv*))
@@ -436,16 +426,15 @@
              (compile-funcall (car sexp) (cdr sexp) env fenv)))))))
 
 (defun ls-compile-toplevel (sexp)
-  (setq *literals* nil)
+  (setq *toplevel-compilations* nil)
   (let ((code (ls-compile sexp)))
     (prog1
-        (concat (join (mapcar (lambda (lit)
-                                (concat "var " (car lit) " = " (cdr lit) ";
+        (concat (join (mapcar (lambda (x)(concat x ";
 "))
-                              *literals*)
+                              *toplevel-compilations*)
                       "")
                 code)
-      (setq *literals* nil))))
+      (setq *toplevel-compilations* nil))))
 
 #+common-lisp
 (defun ls-compile-file (filename output)

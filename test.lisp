@@ -68,6 +68,14 @@
 (debug (lambda (x y &rest z) z))
 (debug (lambda (x y &rest z) x))
 
+
+(progn
+  (eval-when-compile
+    (%compile-defun 'f))
+  (fsetq f (lambda (x) (* x x))))
+
+(debug (f 33))
+
 ;; (debug (foo))
 
 ;; (eval-when-compile
