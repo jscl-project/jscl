@@ -175,13 +175,13 @@
   (concat "((" (ls-compile x env fenv) ") == (" (ls-compile y env fenv) "))"))
 
 (define-compilation cons (x y)
-  (concat "(new Cons("y", " x "))"))
+  (concat "{car: " (ls-compile x env fenv) ", cdr: " (ls-compile y env fenv) "}"))
 
 (define-compilation car (x)
-  (concat "(x.car)"))
+  (concat "(" (ls-compile x env fenv) ").car"))
 
 (define-compilation cdr (x)
-  (concat "(x.cdr)"))
+  (concat "(" (ls-compile x env fenv) ").cdr"))
 
 (defmacro with-eval-when-compilation (&body body)
   `(setq *eval-when-compilations*
@@ -241,7 +241,7 @@
     (with-open-file (out output :direction :output :if-exists :supersede)
       (loop
          for x = (read in nil) while x
-         for compilation = (ls-compile x)
+         for compilation = (ls-compile-toplevel x)
          when compilation do (write-line (concat compilation "; ") out)))))
 
 

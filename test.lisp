@@ -33,6 +33,9 @@
 (defmacro incf (x)
   (list 'setq x (list '+ 1 x)))
 
+(eval-when-compile
+  (%compile-defvar 'x))
+
 (setq x 10)
 (incf x)
 (debug x)
@@ -43,6 +46,12 @@
 (debug (lambda (&rest x) x))
 (debug (lambda (x y &rest z) z))
 (debug (lambda (x y &rest z) x))
+
+;;; Conses
+(debug (cons 1 2))
+(debug (car (cons 1 2)))
+(debug (cdr (cons 1 2)))
+
 
 ;; (eval-when-compile
 ;;   (%compile-defmacro 'defun
