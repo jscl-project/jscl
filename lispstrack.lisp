@@ -159,6 +159,14 @@
       nil
       *eval-when-compilations*))
 
+
+(defmacro define-transformation (name args form)
+  `(define-compilation ,name ,args
+     (ls-compile ,form env fenv)))
+
+(define-transformation progn (&rest body)
+  `((lambda () ,@body)))
+
 ;;; aritmetic primitives
 (define-compilation + (x y)
   (concat "((" (ls-compile x env fenv) ") + (" (ls-compile y env fenv) "))"))
@@ -209,16 +217,24 @@
 (defun %compile-defmacro (name lambda)
   (push (cons name (cons 'macro lambda)) *fenv*))
 
-(defun compile-funcall (name args env fenv)
-  (format nil "~a(~{~a~^, ~})"
-          (lookup-function name fenv)
-          (mapcar (lambda (x) (ls-compile x env fenv)) args)))
-
 (defun ls-macroexpand-1 (form &optional env fenv)
   (let ((function (cdr (assoc (car form) *fenv*))))
     (if (and (listp function) (eq (car function) 'macro))
         (apply (eval (cdr function)) (cdr form))
         form)))
+
+(defun compile-funcall (function args env fenv)
+  (cond
+    ((symbolp function)
+     (format nil "~a(~{~a~^, ~})"
+             (lookup-function function fenv)
+             (mapcar (lambda (x) (ls-compile x env fenv)) args)))
+    ((and (listp function) (eq (car function) 'lambda))
+     (format nil "(~a)(~{~a~^, ~})"
+             (ls-compile function env fenv)
+             (mapcar (lambda (x) (ls-compile x env fenv)) args)))
+    (t
+     (error "Invalid function designator ~a." function))))
 
 (defun ls-compile (sexp &optional env fenv)
   (cond

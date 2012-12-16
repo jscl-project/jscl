@@ -19,6 +19,8 @@
 (fsetq f (lambda (x) (+ x 10)))
 (debug (f 20))
 
+(debug ((lambda (x) x) 9999))
+
 ;;; Macros
 (debug "---MACROS---")
 
@@ -53,6 +55,7 @@
 (debug (symbol-name 'foo))
 (debug (symbol-name 'foo-bar))
 
+(debug (progn 1 2 3 123))
 
 ;;; &rest lambda-list
 
