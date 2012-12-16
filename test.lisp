@@ -48,3 +48,9 @@
 (setq x 10)
 (%incf x)
 (debug x)
+
+
+;;; &rest lambda-list
+
+(debug (lambda (&rest x) x))
+(debug (lambda (x y &rest z) x))

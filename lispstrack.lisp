@@ -77,18 +77,36 @@
           (ls-compile true env fenv)
           (ls-compile false env fenv)))
 
-(define-compilation lambda (args &rest body)
-  (let ((new-env (extend-env args env)))
-    (concat "(function ("
-	    (join (mapcar (lambda (x) (lookup-variable x new-env))
-                          args)
-                  ",")
-	    "){
+;;; Return the required args of a lambda list
+(defun lambda-list-required-argument (lambda-list)
+  (if (or (null lambda-list) (eq (car lambda-list) '&rest))
+      nil
+      (cons (car lambda-list) (lambda-list-required-argument (cdr lambda-list)))))
+
+(defun lambda-list-rest-argument (lambda-list)
+  (second (member '&rest lambda-list)))
+
+(define-compilation lambda (lambda-list &rest body)
+  (let ((required-arguments (lambda-list-required-argument lambda-list))
+        (rest-argument (lambda-list-rest-argument lambda-list)))
+    (let ((new-env (extend-env (cons rest-argument required-arguments) env)))
+      (concat "(function ("
+              (join (mapcar (lambda (x) (lookup-variable x new-env))
+                            required-arguments)
+                    ",")
+              "){
 "
-            (concat (ls-compile-block (butlast body) new-env fenv)
-                    "return " (ls-compile (car (last body)) new-env fenv) ";")
-	    "
-})")))
+              (if rest-argument
+                  (concat "var " (lookup-variable rest-argument new-env)
+                          " = arguments.slice("
+                          (prin1-to-string (length required-arguments)) ");
+")
+                  "")
+
+              (concat (ls-compile-block (butlast body) new-env fenv)
+                      "return " (ls-compile (car (last body)) new-env fenv) ";")
+              "
+})"))))
 
 (define-compilation fsetq (var val)
   (format nil "~a = ~a" (lookup-function var fenv) (ls-compile val env fenv)))
