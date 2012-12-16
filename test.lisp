@@ -1,5 +1,4 @@
-(lambda (x y)
-  x)
+(lambda (x y) x)
 
 (debug "hola")
 (debug '(1 2 3 4))
@@ -45,9 +44,15 @@
 (debug (car (cons 1 2)))
 (debug (cdr (cons 1 2)))
 
+(setq x '(1 . 2))
+(debug x)
+(debug (eq x x))
+(debug (eq '(1 . 2) '(1 . 2)))
+
 ;;; Symbols
 (debug (symbol-name 'foo))
 (debug (symbol-name 'foo-bar))
+
 
 ;;; &rest lambda-list
 

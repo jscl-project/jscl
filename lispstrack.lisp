@@ -187,6 +187,9 @@
 (define-compilation symbol-name (x)
   (concat "(" (ls-compile x env fenv) ").name"))
 
+(define-compilation eq (x y)
+  (concat "(" (ls-compile x env fenv) " === " (ls-compile y env fenv) ")"))
+
 
 
 (defmacro with-eval-when-compilation (&body body)
