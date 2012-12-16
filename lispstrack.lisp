@@ -1,5 +1,6 @@
 ;;; Utils
 
+#+common-lisp
 (defmacro while (condition &body body)
   `(do ()
        ((not ,condition))
@@ -446,6 +447,7 @@
                 code)
       (setq *literals* nil))))
 
+#+common-lisp
 (defun ls-compile-file (filename output)
   (with-open-file (in filename)
     (with-open-file (out output :direction :output :if-exists :supersede)
@@ -454,7 +456,6 @@
          until (eq x *eof*)
          for compilation = (ls-compile-toplevel x)
          when compilation do (write-line (concat compilation "; ") out)))))
-
 
 ;;; Testing
 (defun compile-test ()
