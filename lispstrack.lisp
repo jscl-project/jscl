@@ -374,6 +374,9 @@
 (define-compilation = (x y)
   (concat "((" (ls-compile x env fenv) ") == (" (ls-compile y env fenv) "))"))
 
+(define-compilation null (x)
+  (concat "(" (ls-compile x env fenv) "== undefined)"))
+
 (define-compilation cons (x y)
   (concat "{car: " (ls-compile x env fenv) ", cdr: " (ls-compile y env fenv) "}"))
 
@@ -382,6 +385,8 @@
 
 (define-compilation cdr (x)
   (concat "(" (ls-compile x env fenv) ").cdr"))
+
+
 
 (define-compilation symbol-name (x)
   (concat "(" (ls-compile x env fenv) ").name"))
