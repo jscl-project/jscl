@@ -147,6 +147,13 @@
 	  (ls-compile pred env fenv)
 	  (ls-compile-block body env fenv)))
 
+(define-compilation function (x)
+  (cond
+    ((and (listp x) (eq (car x) 'lambda))
+     (ls-compile x env fenv))
+    ((symbolp x)
+     (lookup-function x fenv))))
+
 (defmacro eval-when-compile (&body body)
   `(eval-when (:compile-toplevel :execute)
      ,@body))

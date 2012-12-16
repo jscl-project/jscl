@@ -21,6 +21,8 @@
 
 (debug ((lambda (x) x) 9999))
 
+(debug #'f)
+
 ;;; Macros
 (debug "---MACROS---")
 
