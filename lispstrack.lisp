@@ -11,8 +11,19 @@
           strs
           :initial-value ""))
 
+;;; Concatenate a list of strings, with a separator
+(defun join (list separator)
+  (cond
+    ((null list)
+     "")
+    ((null (cdr list))
+     (car list))
+    (t
+     (concat (car list)
+             separator
+             (join (cdr list) separator)))))
 
-;;;; READER
+;;;; Reader
 
 ;;; It is a basic Lisp reader. It does not use advanced stuff
 ;;; intentionally, because we want to use it to bootstrap a simple
@@ -127,21 +138,6 @@
 (let ((counter 0))
   (defun make-func-binding (symbol)
     (cons symbol (format nil "f~d" (incf counter)))))
-
-
-;;; Concatenate a list of strings, with a separator
-(defun join (list separator)
-  (cond
-    ((null list)
-     "")
-    ((null (cdr list))
-     (car list))
-    (t
-     (concat (car list)
-             separator
-             (join (cdr list) separator)))))
-
-;;; Compiler
 
 (defvar *compilations* nil)
 
@@ -274,7 +270,6 @@
       nil
       *eval-when-compilations*))
 
-
 (defmacro define-transformation (name args form)
   `(define-compilation ,name ,args
      (ls-compile ,form env fenv)))
@@ -286,7 +281,62 @@
   `((lambda ,(mapcar 'car bindings) ,@body)
     ,@(mapcar 'cadr bindings)))
 
-;;; aritmetic primitives
+;;; A little backquote implementation without optimizations of any
+;;; kind for lispstrack.
+(defun backquote-expand-1 (form)
+  (cond
+    ((symbolp form)
+     (list 'quote form))
+    ((atom form)
+     form)
+    ((eq (car form) 'unquote)
+     (car form))
+    ((eq (car form) 'backquote)
+     (backquote-expand-1 (backquote-expand-1 (cadr form))))
+    (t
+     (cons 'append
+           (mapcar (lambda (s)
+                     (cond
+                       ((and (listp s) (eq (car s) 'unquote))
+                        (list 'list (cadr s)))
+                       ((and (listp s) (eq (car s) 'unquote-splicing))
+                        (cadr s))
+                       (t
+                        (list 'list (backquote-expand-1 s)))))
+                   form)))))
+
+(defun backquote-expand (form)
+  (if (and (listp form) (eq (car form) 'backquote))
+      (backquote-expand-1 (cadr form))
+      form))
+
+;;; Some Tests comparing backquote agains the backquote of the host
+;;; Lisp. It is not very exhaustive, but we just want a working
+;;; backquotation to be able bootstrap this program.
+(macrolet ((test (form1 form2)
+             `(assert (equal ,form1 ,form2))))
+  (test (backquote (1 2 3 4))
+        `(1 2 3 4))
+  (test (backquote (1 2 (+ 3 4)))
+        `(1 2 (+ 3 4)))
+  (test (backquote (1 2 (unquote (+ 3 4))))
+        `(1 2 ,(+ 3 4)))
+  (test (backquote (1 2 (unquote-splicing '(3 4))))
+        `(1 2 ,@'(3 4)))
+  (test (backquote (backquote x))
+        ``x)
+  (let ((x 10))
+    (test `',x
+          (backquote (quote (unquote x)))))
+  (let ((x 10))
+    (test (eval ``(,,x))
+          (eval (backquote (backquote ((unquote (unquote x)))))))))
+
+(define-transformation backquote (form)
+  (backquote-expand-1 form))
+
+;;; Primitives
+
 (define-compilation + (x y)
   (concat "((" (ls-compile x env fenv) ") + (" (ls-compile y env fenv) "))"))
 
