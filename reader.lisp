@@ -82,7 +82,14 @@
        (ls-read-1 stream))
       ((char= ch #\,)
        (%read-char stream)
-       (list 'comma (ls-read-1 stream)))
+       (if (eql (%peek-char stream) #\@)
+           (progn (%read-char stream) (list 'splicing (ls-read-1 stream)))
+           (list 'comma (ls-read-1 stream))))
+      ((char= ch #\#)
+       (%read-char stream)
+       (ecase (%read-char stream)
+         (#\'
+          (list 'function (ls-read-1 stream)))))
       (t
        (let ((string (read-until stream #'terminalp)))
          (if (every #'digit-char-p string)
