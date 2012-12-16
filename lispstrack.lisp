@@ -345,6 +345,8 @@
 (define-compilation eq (x y)
   (concat "(" (ls-compile x env fenv) " === " (ls-compile y env fenv) ")"))
 
+(define-compilation code-char (x)
+  (concat "String.fromCharCode( " (ls-compile x env fenv) ")"))
 
 
 (defmacro with-eval-when-compilation (&body body)
