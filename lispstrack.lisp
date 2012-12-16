@@ -24,13 +24,15 @@
              (join (cdr list) separator)))))
 
 (defun integer-to-string (x)
-  (let ((digits nil))
-    (while (not (= x 0))
-      (push (mod x 10) digits)
-      (setq x (truncate x 10)))
-    (join (mapcar (lambda (d) (string (char "0123456789" d)))
-             digits)
-          "")))
+  (if (zerop x)
+      "0"
+      (let ((digits nil))
+        (while (not (= x 0))
+          (push (mod x 10) digits)
+          (setq x (truncate x 10)))
+        (join (mapcar (lambda (d) (string (char "0123456789" d)))
+                      digits)
+              ""))))
 
 ;;;; Reader
 
@@ -142,11 +144,11 @@
 
 (let ((counter 0))
   (defun make-var-binding (symbol)
-    (cons symbol (format nil "v~d" (incf counter)))))
+    (cons symbol (concat "v" (integer-to-string (incf counter))))))
 
 (let ((counter 0))
   (defun make-func-binding (symbol)
-    (cons symbol (format nil "f~d" (incf counter)))))
+    (cons symbol (concat "f" (integer-to-string (incf counter))))))
 
 (defvar *compilations* nil)
 
@@ -165,7 +167,7 @@
 
 (defun ls-lookup (symbol env)
   (let ((binding (assoc symbol env)))
-    (and binding (format nil "~a" (cdr binding)))))
+    (and binding (cdr binding))))
 
 (defun lookup-variable (symbol env)
   (or (ls-lookup symbol env)
@@ -185,10 +187,13 @@
          *compilations*))
 
 (define-compilation if (condition true false)
-  (format nil "((~a)? (~a) : (~a))"
+  (concat "("
           (ls-compile condition env fenv)
+          " ? "
           (ls-compile true env fenv)
-          (ls-compile false env fenv)))
+          " : "
+          (ls-compile false env fenv)
+          ")"))
 
 ;;; Return the required args of a lambda list
 (defun lambda-list-required-argument (lambda-list)
@@ -222,10 +227,14 @@
 })"))))
 
 (define-compilation fsetq (var val)
-  (format nil "~a = ~a" (lookup-function var fenv) (ls-compile val env fenv)))
+  (concat (lookup-function var fenv)
+          " = "
+          (ls-compile val env fenv)))
 
 (define-compilation setq (var val)
-  (format nil "~a = ~a" (lookup-variable var env) (ls-compile val env fenv)))
+  (concat (lookup-variable var env)
+          " = "
+           (ls-compile val env fenv)))
 
 
 ;;; Literals
@@ -235,9 +244,9 @@
 (defun literal->js (sexp)
   (cond
     ((null sexp) "undefined")
-    ((integerp sexp) (format nil "~a" sexp))
-    ((stringp sexp) (format nil "\"~a\"" sexp))
-    ((symbolp sexp) (format nil "{name: \"~a\"}" (symbol-name sexp)))
+    ((integerp sexp) (integer-to-string sexp))
+    ((stringp sexp) (concat "\"" sexp "\""))
+    ((symbolp sexp) (concat "{name: \"" (symbol-name sexp) "\"}"))
     ((consp sexp) (concat "{car: "
                           (literal->js (car sexp))
                           ", cdr: "
@@ -245,7 +254,7 @@
 
 (let ((counter 0))
   (defun literal (form)
-    (let ((var (format nil "l~d" (incf counter))))
+    (let ((var (concat "l" (integer-to-string (incf counter)))))
       (push (cons var (literal->js form)) *literals*)
       var)))
 
@@ -253,12 +262,14 @@
   (literal sexp))
 
 (define-compilation debug (form)
-  (format nil "console.log(~a)" (ls-compile form env fenv)))
+  (concat "console.log(" (ls-compile form env fenv) ")"))
 
 (define-compilation while (pred &rest body)
-  (format nil "(function(){while(~a){~a}})() "
-	  (ls-compile pred env fenv)
-	  (ls-compile-block body env fenv)))
+  (concat "(function(){ while("
+          (ls-compile pred env fenv)
+          "){"
+          (ls-compile-block body env fenv)
+          "}})()"))
 
 (define-compilation function (x)
   (cond
@@ -365,12 +376,12 @@
 (defun %compile-defvar (name)
   (push (make-var-binding name) *env*)
   (with-eval-when-compilation
-    (format nil "var ~a" (lookup-variable name *env*))))
+    (concat "var " (lookup-variable name *env*))))
 
 (defun %compile-defun (name)
   (push (make-func-binding name) *fenv*)
   (with-eval-when-compilation
-    (format nil "var ~a" (lookup-variable name *fenv*))))
+    (concat "var " (lookup-variable name *fenv*))))
 
 (defun %compile-defmacro (name lambda)
   (push (cons name (cons 'macro lambda)) *fenv*))
@@ -384,21 +395,24 @@
 (defun compile-funcall (function args env fenv)
   (cond
     ((symbolp function)
-     (format nil "~a(~{~a~^, ~})"
-             (lookup-function function fenv)
-             (mapcar (lambda (x) (ls-compile x env fenv)) args)))
+     (concat (lookup-function function fenv)
+             "("
+             (join (mapcar (lambda (x) (ls-compile x env fenv)) args)
+                   ", ")
+             ")"))
     ((and (listp function) (eq (car function) 'lambda))
-     (format nil "(~a)(~{~a~^, ~})"
-             (ls-compile function env fenv)
-             (mapcar (lambda (x) (ls-compile x env fenv)) args)))
+     (concat "(" (ls-compile function env fenv) ")("
+             (join (mapcar (lambda (x) (ls-compile x env fenv)) args)
+                   ", ")
+             ")"))
     (t
      (error "Invalid function designator ~a." function))))
 
 (defun ls-compile (sexp &optional env fenv)
   (cond
     ((symbolp sexp) (lookup-variable sexp env))
-    ((integerp sexp) (format nil "~a" sexp))
-    ((stringp sexp) (format nil "\"~a\"" sexp))
+    ((integerp sexp) (integer-to-string sexp))
+    ((stringp sexp) (concat "\"" sexp "\""))
     ((listp sexp)
      (let ((sexp (ls-macroexpand-1 sexp env fenv)))
        (let ((compiler-func (second (assoc (car sexp) *compilations*))))
