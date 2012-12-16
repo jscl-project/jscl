@@ -67,7 +67,7 @@
       (setq ch (%peek-char stream)))))
 
 (defun terminalp (ch)
-  (or (null ch) (whitespacep ch) (char= #\) ch)))
+  (or (null ch) (whitespacep ch) (char= #\) ch) (char= #\( ch)))
 
 (defun read-until (stream func)
   (let ((string "")
@@ -133,7 +133,17 @@
        (%read-char stream)
        (ecase (%read-char stream)
          (#\'
-          (list 'function (ls-read stream)))))
+          (list 'function (ls-read stream)))
+         (#\+
+          (let ((feature (read-until stream #'terminalp)))
+            (cond
+              ((string= feature "common-lisp")
+               (ls-read stream);ignore
+               (ls-read stream))
+              ((string= feature "lispstrack")
+               (ls-read stream))
+              (t
+               (error "Unknown reader form.")))))))
       (t
        (let ((string (read-until stream #'terminalp)))
          (if (every #'digit-char-p string)
