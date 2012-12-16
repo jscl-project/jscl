@@ -24,29 +24,17 @@
 (debug "---MACROS---")
 
 (eval-when-compile
-  (%compile-defmacro 'incf
-                     (lambda (y)
-                       (list 'setq y (list '+ 1 y)))))
-
-(eval-when-compile
-  (%compile-defvar 'x))
-
-(setq x 0)
-(incf x)
-(debug x)
-
-(eval-when-compile
   (%compile-defmacro 'defmacro
                      (lambda (name args &rest body)
                        (list 'eval-when-compile
                              (list '%compile-defmacro (list 'quote name)
                                    (list* 'lambda args body))))))
 
-(defmacro %incf (x)
+(defmacro incf (x)
   (list 'setq x (list '+ 1 x)))
 
 (setq x 10)
-(%incf x)
+(incf x)
 (debug x)
 
 
@@ -54,3 +42,4 @@
 
 (debug (lambda (&rest x) x))
 (debug (lambda (x y &rest z) x))
+(debug (lambda (x y &rest z) y))
