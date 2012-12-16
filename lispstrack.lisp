@@ -54,21 +54,6 @@
   (let ((binding (assoc symbol env)))
     (and binding (format nil "~a" (cdr binding)))))
 
-(defvar *literal-ns* '())
-
-(let ((counter 0))
-  (defun make-literal (literal)
-    (cons (format nil "l~d" (incf counter))
-	  (literal-lisp->js literal))))
-
-(defvar *modified-literals* "")
-(defun ls-compile-toplevel (sexp &optional env fenv)
-  (setq *modified-literals* nil)
-  (let ((code (ls-compile sexp env fenv)))
-    (format nil "~a" *modified-literals*)
-    (format nil "~a" code))
-  (setq *modified-literals* ""))
-
 (defun lookup-variable (symbol env)
   (or (ls-lookup symbol env)
       (ls-lookup symbol *env*)
@@ -129,18 +114,29 @@
 (define-compilation setq (var val)
   (format nil "~a = ~a" (lookup-variable var env) (ls-compile val env fenv)))
 
-(defun literal-lisp->js (sexp)
+
+;;; Literals
+
+(defvar *literals* '())
+
+(defun literal->js (sexp)
   (cond
     ((null sexp) "undefined")
     ((integerp sexp) (format nil "~a" sexp))
     ((stringp sexp) (format nil "\"~a\"" sexp))
-    ((listp sexp) (concat "{car: " (literal-lisp->js (car sexp)) ", cdr: "
-			  (literal-lisp->js (cdr sexp)) "}"))))
+    ((consp sexp) (concat "{car: "
+                          (literal->js (car sexp))
+                          ", cdr: "
+			  (literal->js (cdr sexp)) "}"))))
+
+(let ((counter 0))
+  (defun literal (form)
+    (let ((var (format nil "l~d" (incf counter))))
+      (push (cons var (literal->js form)) *literals*)
+      var)))
 
 (define-compilation quote (sexp)
-  (let ((literal (make-literal sexp)))
-    (setq *modified-literals* (cdr sexp))
-    (format nil "~a" (car literal))))
+  (literal sexp))
 
 (define-compilation debug (form)
   (format nil "console.log(~a)" (ls-compile form env fenv)))
@@ -226,6 +222,18 @@
          (if compiler-func
              (apply compiler-func env fenv (cdr sexp))
              (compile-funcall (car sexp) (cdr sexp) env fenv)))))))
+
+(defun ls-compile-toplevel (sexp)
+  (setq *literals* nil)
+  (let ((code (ls-compile sexp)))
+    (prog1
+        (concat (join (mapcar (lambda (lit)
+                                (concat "var " (car lit) " = " (cdr lit) ";
+"))
+                              *literals*)
+                      "")
+                code)
+      (setq *literals* nil))))
 
 
 (defun ls-compile-file (filename output)
