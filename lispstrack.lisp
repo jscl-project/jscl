@@ -406,7 +406,7 @@
 (define-compilation eq (x y)
   (concat "(" (ls-compile x env fenv) " === " (ls-compile y env fenv) ")"))
 
-(define-compilation code-char (x)
+(define-compilation string (x)
   (concat "String.fromCharCode( " (ls-compile x env fenv) ")"))
 
 (define-compilation char (string index)
