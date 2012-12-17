@@ -36,12 +36,6 @@
       (cons (funcall func (car list))
             (mapcar func (cdr list)))))
 
-(defun !reduce (func list initial)
-  (if (null list)
-      initial
-      (!reduce func
-               (cdr list)
-               (funcall func (car list) initial))))
 
 ;;; Tests
 

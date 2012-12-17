@@ -1,3 +1,11 @@
+
+(defun !reduce (func list initial)
+  (if (null list)
+      initial
+      (!reduce func
+               (cdr list)
+               (funcall func initial (car list)))))
+
 ;;; Utils
 
 #+common-lisp
@@ -11,9 +19,9 @@
 
 ;;; simplify me, please
 (defun concat (&rest strs)
-  (reduce (lambda (s1 s2) (concatenate 'string s1 s2))
-          strs
-          :initial-value ""))
+  (!reduce (lambda (s1 s2) (concatenate 'string s1 s2))
+           strs
+           ""))
 
 ;;; Concatenate a list of strings, with a separator
 (defun join (list separator)
