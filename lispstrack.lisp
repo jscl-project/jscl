@@ -386,8 +386,6 @@
 (define-compilation cdr (x)
   (concat "(" (ls-compile x env fenv) ").cdr"))
 
-
-
 (define-compilation symbol-name (x)
   (concat "(" (ls-compile x env fenv) ").name"))
 
@@ -396,6 +394,16 @@
 
 (define-compilation code-char (x)
   (concat "String.fromCharCode( " (ls-compile x env fenv) ")"))
+
+(define-compilation funcall (func &rest args)
+  (concat "("
+          (ls-compile func env fenv)
+          ")("
+          (join (mapcar (lambda (x)
+                          (ls-compile x env fenv))
+                        args)
+                ", ")
+          ")"))
 
 (defun %compile-defvar (name)
   (push (make-var-binding name) *env*)
