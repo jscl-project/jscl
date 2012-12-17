@@ -314,10 +314,9 @@
 
 #+common-lisp
 (defmacro eval-when-compile (&body body)
-  `(eval-when (:compile-toplevel :execute)
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
      ,@body))
 
-(defvar *eval-when-compilations*)
 (define-compilation eval-when-compile (&rest body)
   (eval (cons 'progn body))
   nil)
