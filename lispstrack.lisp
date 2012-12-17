@@ -50,7 +50,16 @@
               (mapcar func (cdr list)))))
 
   (defmacro push (x place)
-    `(setq ,place (cons ,x ,place))))
+    `(setq ,place (cons ,x ,place)))
+
+
+  (defvar *package* (new))
+
+  (defun intern (name)
+    (set *package* name (make-symbol name)))
+
+  (defun find-symbol (name)
+    (get *package* name)))
 
 
 (defun !reduce (func list initial)
@@ -454,6 +463,9 @@
 (define-compilation cdr (x)
   (concat "(" (ls-compile x env fenv) ").cdr"))
 
+(define-compilation make-symbol (name)
+  (concat "{name: " (ls-compile name env fenv) "}"))
+
 (define-compilation symbol-name (x)
   (concat "(" (ls-compile x env fenv) ").name"))
 
@@ -489,6 +501,18 @@
                         args)
                 ", ")
           ")"))
+
+(define-compilation new ()
+  "{}")
+
+(define-compilation get (object key)
+  (concat "(" (ls-compile object env fenv) ")[" (ls-compile key env fenv) "]"))
+
+(define-compilation set (object key value)
+  (concat "(" (ls-compile object env fenv) ")[" (ls-compile key env fenv) "]")
+  " = " (ls-compile value env fenv))
+
+
 
 (defun %compile-defvar (name)
   (push (make-var-binding name) *env*)
