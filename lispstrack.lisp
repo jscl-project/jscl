@@ -14,7 +14,6 @@
          ((not ,condition))
        ,@body))
 
-  #+common-lisp
   (defun concat-two (s1 s2)
     (concatenate 'string s1 s2)))
 
