@@ -12,6 +12,7 @@
        (%compile-defun ',name))
      (fsetq ,name (lambda ,args ,@body))))
 
+(defun + (x y)  (+ x y))
 (defun 1+ (x) (+ x 1))
 (defun 1- (x) (- x 1))
 
@@ -34,6 +35,13 @@
       '()
       (cons (funcall func (car list))
             (mapcar func (cdr list)))))
+
+(defun !reduce (func list initial)
+  (if (null list)
+      initial
+      (!reduce func
+               (cdr list)
+               (funcall func (car list) initial))))
 
 ;;; Tests
 
