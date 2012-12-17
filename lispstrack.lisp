@@ -442,9 +442,11 @@
   (concat "(" (ls-compile object env fenv) ")[" (ls-compile key env fenv) "]"))
 
 (define-compilation set (object key value)
-  (concat "(" (ls-compile object env fenv) ")[" (ls-compile key env fenv) "]")
-  " = " (ls-compile value env fenv))
-
+  (concat "(("
+          (ls-compile object env fenv)
+          ")["
+          (ls-compile key env fenv) "]"
+          " = " (ls-compile value env fenv) ")"))
 
 
 (defun %compile-defvar (name)
