@@ -12,8 +12,8 @@
        (%compile-defvar ',name))
      (setq ,name ,value)))
 
-(defvar nil 'nil)
 (defvar t 't)
+(defvar nil 'nil)
 
 (defmacro defun (name args &rest body)
   `(progn
@@ -129,5 +129,3 @@
         (join (mapcar (lambda (d) (string (char "0123456789" d)))
                       digits)
               ""))))
-
-(debug (integer-to-string 323))

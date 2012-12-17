@@ -197,18 +197,18 @@
 (defparameter *env* '())
 (defparameter *fenv* '())
 
-(defun ls-lookup (symbol env)
+(defun lookup (symbol env)
   (let ((binding (assoc symbol env)))
     (and binding (cdr binding))))
 
 (defun lookup-variable (symbol env)
-  (or (ls-lookup symbol env)
-      (ls-lookup symbol *env*)
+  (or (lookup symbol env)
+      (lookup symbol *env*)
       (error "Undefined variable `~a'"  symbol)))
 
 (defun lookup-function (symbol env)
-  (or (ls-lookup symbol env)
-      (ls-lookup symbol *fenv*)
+  (or (lookup symbol env)
+      (lookup symbol *fenv*)
       (error "Undefined function `~a'"  symbol)))
 
 (defmacro define-compilation (name args &body body)
@@ -222,7 +222,7 @@
 
 (define-compilation if (condition true false)
   (concat "("
-          (ls-compile condition env fenv)
+          (ls-compile condition env fenv) " == undefined"
           " ? "
           (ls-compile true env fenv)
           " : "
@@ -241,7 +241,9 @@
 (define-compilation lambda (lambda-list &rest body)
   (let ((required-arguments (lambda-list-required-argument lambda-list))
         (rest-argument (lambda-list-rest-argument lambda-list)))
-    (let ((new-env (extend-env (cons rest-argument required-arguments) env)))
+    (let ((new-env (extend-env (append (if rest-argument (list rest-argument))
+                                       required-arguments)
+                               env)))
       (concat "(function ("
               (join (mapcar (lambda (x) (lookup-variable x new-env))
                             required-arguments)
@@ -277,7 +279,7 @@
 
 (defun literal->js (sexp)
   (cond
-    ((null sexp) "undefined")
+    ((null sexp) "unspecified")
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" sexp "\""))
     ((symbolp sexp) (concat "{name: \"" (symbol-name sexp) "\"}"))
@@ -288,9 +290,11 @@
 
 (let ((counter 0))
   (defun literal (form)
-    (let ((var (concat "l" (integer-to-string (incf counter)))))
-      (push (concat "var " var " = " (literal->js form)) *toplevel-compilations*)
-      var)))
+    (if (null form)
+        (literal->js form)
+        (let ((var (concat "l" (integer-to-string (incf counter)))))
+          (push (concat "var " var " = " (literal->js form)) *toplevel-compilations*)
+          var))))
 
 (define-compilation quote (sexp)
   (literal sexp))
@@ -453,12 +457,12 @@
 
 
 (defun %compile-defvar (name)
-  (unless (lookup-variable name *env*)
+  (unless (lookup name *env*)
     (push (make-var-binding name) *env*)
     (push (concat "var " (lookup-variable name *env*)) *toplevel-compilations*)))
 
 (defun %compile-defun (name)
-  (unless (lookup-variable name *fenv*)
+  (unless (lookup name *fenv*)
     (push (make-func-binding name) *fenv*)
     (push (concat "var " (lookup-variable name *fenv*)) *toplevel-compilations*)))
 
