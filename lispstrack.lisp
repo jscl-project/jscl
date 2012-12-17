@@ -25,7 +25,7 @@
   (defun / (x y) (/ x y))
   (defun 1+ (x) (+ x 1))
   (defun 1- (x) (- x 1))
-  (defun cons (x y ) (cons x y))
+  (defun cons (x y) (cons x y))
   (defun car (x) (car x))
   (defun cdr (x) (cdr x))
 
@@ -47,7 +47,10 @@
     (if (null list)
         '()
         (cons (funcall func (car list))
-              (mapcar func (cdr list))))))
+              (mapcar func (cdr list)))))
+
+  (defmacro push (x place)
+    `(setq ,place (cons ,x ,place))))
 
 
 (defun !reduce (func list initial)
@@ -61,7 +64,6 @@
 
 #+common-lisp
 (progn
-
   (defmacro while (condition &body body)
     `(do ()
          ((not ,condition))
