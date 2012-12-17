@@ -523,15 +523,14 @@
       (setq *toplevel-compilations* nil))))
 
 #+common-lisp
-(defun ls-compile-file (filename output)
-  (with-open-file (in filename)
-    (with-open-file (out output :direction :output :if-exists :supersede)
-      (loop
-         for x = (ls-read in)
-         until (eq x *eof*)
-         for compilation = (ls-compile-toplevel x)
-         when compilation do (write-line (concat compilation "; ") out)))))
-
-;;; Testing
-(defun compile-test ()
-  (ls-compile-file "test.lisp" "test.js"))
+(progn
+  (defun ls-compile-file (filename output)
+    (with-open-file (in filename)
+      (with-open-file (out output :direction :output :if-exists :supersede)
+        (loop
+           for x = (ls-read in)
+           until (eq x *eof*)
+           for compilation = (ls-compile-toplevel x)
+           when compilation do (write-line (concat compilation "; ") out)))))
+  (defun bootstrap ()
+    (ls-compile-file "lispstrack.lisp" "lispstrack.js")))
