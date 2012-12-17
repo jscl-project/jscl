@@ -385,6 +385,12 @@
 (define-compilation = (x y)
   (concat "((" (ls-compile x env fenv) ") == (" (ls-compile y env fenv) "))"))
 
+(define-compilation mod (x y)
+  (concat "((" (ls-compile x env fenv) ") % (" (ls-compile y env fenv) "))"))
+
+(define-compilation floor (x)
+  (concat "(Math.floor(" (ls-compile x env fenv) "))"))
+
 (define-compilation null (x)
   (concat "(" (ls-compile x env fenv) "== undefined)"))
 
