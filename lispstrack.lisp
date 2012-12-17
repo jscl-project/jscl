@@ -453,12 +453,14 @@
 
 
 (defun %compile-defvar (name)
-  (push (make-var-binding name) *env*)
-  (push (concat "var " (lookup-variable name *env*)) *toplevel-compilations*))
+  (unless (lookup-variable name *env*)
+    (push (make-var-binding name) *env*)
+    (push (concat "var " (lookup-variable name *env*)) *toplevel-compilations*)))
 
 (defun %compile-defun (name)
-  (push (make-func-binding name) *fenv*)
-  (push (concat "var " (lookup-variable name *fenv*)) *toplevel-compilations*))
+  (unless (lookup-variable name *fenv*)
+    (push (make-func-binding name) *fenv*)
+    (push (concat "var " (lookup-variable name *fenv*)) *toplevel-compilations*)))
 
 (defun %compile-defmacro (name lambda)
   (push (cons name (cons 'macro lambda)) *fenv*))
