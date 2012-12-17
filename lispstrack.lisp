@@ -17,8 +17,7 @@
   (defun concat-two (s1 s2)
     (concatenate 'string s1 s2)))
 
-(defvar *newline* "
-")
+(defvar *newline* (string (code-char 10)))
 
 (defun concat (&rest strs)
   (!reduce (lambda (s1 s2) (concat-two s1 s2))
