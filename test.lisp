@@ -6,6 +6,12 @@
        `(eval-when-compile
           (%compile-defmacro ',name (lambda ,args ,@body))))))
 
+(defmacro defvar (name value)
+  `(progn
+     (eval-when-compile
+       (%compile-defvar ',name))
+     (setq ,name ,value)))
+
 (defmacro defun (name args &rest body)
   `(progn
      (eval-when-compile
