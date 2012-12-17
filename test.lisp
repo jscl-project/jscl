@@ -55,7 +55,10 @@
 (defvar *package* (new))
 
 (defun intern (name)
-  (set *package* name (make-symbol name)))
+  (let ((s (get *package* name)))
+    (if s
+        s
+        (set *package* name (make-symbol name)))))
 
 (defun find-symbol (name)
   (get *package* name))
