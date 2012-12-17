@@ -12,6 +12,9 @@
        (%compile-defun ',name))
      (fsetq ,name (lambda ,args ,@body))))
 
+(defun 1+ (x) (+ x 1))
+(defun 1- (x) (- x 1))
+
 (defun append (list1 list2)
   (if (null list1)
       list2
@@ -26,7 +29,11 @@
 (defun reverse (list)
   (reverse-aux list '()))
 
-(debug (reverse '(1 2 3 4)))
+(defun mapcar (func list)
+  (if (null list)
+      '()
+      (cons (funcall func (car list))
+            (mapcar func (cdr list)))))
 
 ;;; Tests
 
