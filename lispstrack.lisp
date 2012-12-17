@@ -306,10 +306,12 @@
               "){"
               *newline*
               (if rest-argument
-                  (concat "var " (lookup-variable rest-argument new-env)
-                          " = arguments.slice("
-                          (prin1-to-string (length required-arguments))
-                          ");"
+                  (concat "var " (lookup-variable rest-argument new-env) ";" *newline*
+                          "for (var i = arguments.length-1; i>="
+                          (integer-to-string (length required-arguments))
+                          "; i--)" *newline*
+                          (lookup-variable rest-argument new-env) " = "
+                          "{car: arguments[i], cdr: " (lookup-variable rest-argument new-env) "};"
                           *newline*)
                   "")
               (concat (ls-compile-block (butlast body) new-env fenv)
