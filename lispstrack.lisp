@@ -60,17 +60,22 @@
 ;;; Utils
 
 #+common-lisp
-(defmacro while (condition &body body)
-  `(do ()
-       ((not ,condition))
-     ,@body))
+(progn
+
+  (defmacro while (condition &body body)
+    `(do ()
+         ((not ,condition))
+       ,@body))
+
+  #+common-lisp
+  (defun concat-two (s1 s2)
+    (concatenate 'string s1 s2)))
 
 (defvar *newline* "
 ")
 
-;;; simplify me, please
 (defun concat (&rest strs)
-  (!reduce (lambda (s1 s2) (concatenate 'string s1 s2))
+  (!reduce (lambda (s1 s2) (concat-two s1 s2))
            strs
            ""))
 
@@ -456,6 +461,20 @@
 
 (define-compilation code-char (x)
   (concat "String.fromCharCode( " (ls-compile x env fenv) ")"))
+
+(define-compilation char (string index)
+  (concat "("
+          (ls-compile string env fenv)
+          ").charCodeAt("
+          (ls-compile index env fenv)
+          ")"))
+
+(define-compilation concat-two (string1 string2)
+  (concat "("
+          (ls-compile string1 env fenv)
+          ").concat("
+          (ls-compile string2 env fenv)
+          ")"))
 
 (define-compilation funcall (func &rest args)
   (concat "("
