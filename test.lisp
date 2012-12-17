@@ -12,9 +12,16 @@
        (%compile-defun ',name))
      (fsetq ,name (lambda ,args ,@body))))
 
-(defun + (x y)  (+ x y))
+(defun = (x y) (= x y))
+(defun + (x y) (+ x y))
+(defun - (x y) (- x y))
+(defun * (x y) (* x y))
+(defun / (x y) (/ x y))
 (defun 1+ (x) (+ x 1))
 (defun 1- (x) (- x 1))
+(defun cons (x y ) (cons x y))
+(defun car (x) (car x))
+(defun cdr (x) (cdr x))
 
 (defun append (list1 list2)
   (if (null list1)
