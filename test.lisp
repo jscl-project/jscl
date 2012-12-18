@@ -123,7 +123,7 @@
   (if (zerop x)
       "0"
       (let ((digits nil))
-        (while (not (= x 0))
+        (while (not (zerop x 0))
           (push (mod x 10) digits)
           (setq x (truncate x 10)))
         (join (mapcar (lambda (d) (string (char "0123456789" d)))
