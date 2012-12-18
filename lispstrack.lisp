@@ -1,3 +1,9 @@
+(defun ensure-list (x)
+  (if (listp x)
+      x
+      (list x)))
+
+
 (defun !reduce (func list initial)
   (if (null list)
       initial
@@ -15,7 +21,12 @@
        ,@body))
 
   (defun concat-two (s1 s2)
-    (concatenate 'string s1 s2)))
+    (concatenate 'string s1 s2))
+
+  (defun setcar (cons new)
+    (setf (car cons) new))
+  (defun setcdr (cons new)
+    (setf (cdr cons) new)))
 
 (defvar *newline* (string (code-char 10)))
 
@@ -72,7 +83,7 @@
 (defun %read-char (stream)
   (and (< (cdr stream) (length (car stream)))
        (prog1 (char (car stream) (cdr stream))
-         (incf (cdr stream)))))
+         (setcdr stream (1+ (cdr stream))))))
 
 (defun whitespacep (ch)
   (or (char= ch #\space) (char= ch #\newline) (char= ch #\tab)))
@@ -172,7 +183,7 @@
        (let ((string (read-until stream #'terminalp)))
          (if (every #'digit-char-p string)
              (parse-integer string)
-             (intern (string-upcase string)))))))))
+             (intern (string-upcase string))))))))
 
 (defun ls-read-from-string (string)
   (ls-read (make-string-stream string)))
@@ -340,8 +351,9 @@
   `((lambda () ,@body)))
 
 (define-transformation let (bindings &rest body)
-  `((lambda ,(mapcar 'car bindings) ,@body)
-    ,@(mapcar 'cadr bindings)))
+  (let ((bindings (mapcar #'ensure-list bindings)))
+    `((lambda ,(mapcar 'car bindings) ,@body)
+      ,@(mapcar 'cadr bindings))))
 
 ;;; A little backquote implementation without optimizations of any
 ;;; kind for lispstrack.
@@ -415,6 +427,13 @@
 
 (define-compilation cdr (x)
   (concat "(" (ls-compile x env fenv) ").cdr"))
+
+(define-compilation setcar (x new)
+  (concat "((" (ls-compile x env fenv) ").car = " (ls-compile new env fenv) ")"))
+
+(define-compilation setcdr (x new)
+  (concat "((" (ls-compile x env fenv) ").cdr = " (ls-compile new env fenv) ")"))
+
 
 (define-compilation make-symbol (name)
   (concat "{name: " (ls-compile name env fenv) "}"))

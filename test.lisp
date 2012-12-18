@@ -167,6 +167,13 @@
           (or ,@(cdr forms))))))
 
 
+(defmacro prog1 (form &rest body)
+  (let ((value (make-symbol "VALUE")))
+    `(let ((,value ,form))
+       ,@body
+       ,value)))
+
+
 (defun char= (x y) (= x y))
 
 
@@ -183,5 +190,17 @@
   (and (< (cdr stream) (length (car stream)))
        (char (car stream) (cdr stream))))
 
+;; (defun %read-char (stream)
+;;   (and (< (cdr stream) (length (car stream)))
+;;        (prog1 (char (car stream) (cdr stream))
+;;          (setcdr stream (1+ (cdr stream))))))
+
 (defun whitespacep (ch)
   (or (char= ch #\space) (char= ch #\newline) (char= ch #\tab)))
+
+;; (defun skip-whitespaces (stream)
+;;   (let (ch)
+;;     (setq ch (%peek-char stream))
+;;     (while (and ch (whitespacep ch))
+;;       (%read-char stream)
+;;       (setq ch (%peek-char stream)))))
