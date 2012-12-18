@@ -526,21 +526,6 @@
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" sexp "\""))
     ((listp sexp)
-     (let ((sexp (ls-macroexpand-1 sexp env fenv)))
-       (if (listp sexp)
-           (let ((compiler-func (second (assoc (car sexp) *compilations*))))
-             (if compiler-func
-                 (apply compiler-func env fenv (cdr sexp))
-                 (compile-funcall (car sexp) (cdr sexp) env fenv)))
-           (ls-compile sexp env fenv))))))
-
-
-(defun ls-compile (sexp &optional env fenv)
-  (cond
-    ((symbolp sexp) (lookup-variable sexp env))
-    ((integerp sexp) (integer-to-string sexp))
-    ((stringp sexp) (concat "\"" sexp "\""))
-    ((listp sexp)
      (if (assoc (car sexp) *compilations*)
          (let ((comp (second (assoc (car sexp) *compilations*))))
            (apply comp env fenv (cdr sexp)))
