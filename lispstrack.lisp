@@ -66,17 +66,13 @@
   (cons string 0))
 
 (defun %peek-char (stream)
-  (if (streamp stream)
-      (peek-char nil stream nil)
-      (and (< (cdr stream) (length (car stream)))
-           (char (car stream) (cdr stream)))))
+  (and (< (cdr stream) (length (car stream)))
+       (char (car stream) (cdr stream))))
 
 (defun %read-char (stream)
-  (if (streamp stream)
-      (read-char stream nil)
-      (and (< (cdr stream) (length (car stream)))
-           (prog1 (char (car stream) (cdr stream))
-             (incf (cdr stream))))))
+  (and (< (cdr stream) (length (car stream)))
+       (prog1 (char (car stream) (cdr stream))
+         (incf (cdr stream)))))
 
 (defun whitespacep (ch)
   (or (char= ch #\space) (char= ch #\newline) (char= ch #\tab)))
@@ -520,15 +516,24 @@
 
 #+common-lisp
 (progn
+
+  (defun read-whole-file (filename)
+    (with-open-file (in filename)
+      (let ((seq (make-array (file-length in) :element-type 'character)))
+        (read-sequence seq in)
+        seq)))
+
   (defun ls-compile-file (filename output)
     (setq *env* nil *fenv* nil)
-    (with-open-file (in filename)
-      (with-open-file (out output :direction :output :if-exists :supersede)
+    (with-open-file (out output :direction :output :if-exists :supersede)
+      (let* ((source (read-whole-file filename))
+             (in (make-string-stream source)))
         (loop
            for x = (ls-read in)
            until (eq x *eof*)
            for compilation = (ls-compile-toplevel x)
            when (plusp (length compilation))
            do (write-line (concat compilation "; ") out)))))
+
   (defun bootstrap ()
     (ls-compile-file "lispstrack.lisp" "lispstrack.js")))
