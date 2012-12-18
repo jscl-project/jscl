@@ -209,3 +209,21 @@
   (or (null ch) (whitespacep ch) (char= #\) ch) (char= #\( ch)))
 
 
+(defun read-until (stream func)
+  (let ((string "")
+        (ch))
+    (setq ch (%peek-char stream))
+    (while (not (funcall func ch))
+      (setq string (concat string (string ch)))
+      (%read-char stream)
+      (setq ch (%peek-char stream)))
+    string))
+
+(defun skip-whitespaces-and-comments (stream)
+  (let (ch)
+    (skip-whitespaces stream)
+    (setq ch (%peek-char stream))
+    (while (and ch (char= ch #\;))
+      (read-until stream (lambda (x) (char= x #\newline)))
+      (skip-whitespaces stream)
+      (setq ch (%peek-char stream)))))

@@ -112,8 +112,8 @@
   (let (ch)
     (skip-whitespaces stream)
     (setq ch (%peek-char stream))
-    (while (and ch (eql ch #\;))
-      (read-until stream (lambda (x) (eql x #\newline)))
+    (while (and ch (char= ch #\;))
+      (read-until stream (lambda (x) (char= x #\newline)))
       (skip-whitespaces stream)
       (setq ch (%peek-char stream)))))
 
