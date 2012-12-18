@@ -284,7 +284,7 @@
 
 (defun literal->js (sexp)
   (cond
-    ((null sexp) "unspecified")
+    ((null sexp) "undefined")
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" sexp "\""))
     ((symbolp sexp) (concat "{name: \"" (symbol-name sexp) "\"}"))
