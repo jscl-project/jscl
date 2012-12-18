@@ -164,7 +164,9 @@
          (#\'
           (list 'function (ls-read stream)))
          (#\\
-          (let ((cname (read-until stream #'terminalp)))
+          (let ((cname
+		 (concat (string (%read-char stream))
+			 (read-until stream #'terminalp))))
             (cond
               ((string= cname "space") (char-code #\space))
               ((string= cname "newline") (char-code #\newline))
