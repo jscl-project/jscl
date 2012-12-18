@@ -534,6 +534,22 @@
                  (compile-funcall (car sexp) (cdr sexp) env fenv)))
            (ls-compile sexp env fenv))))))
 
+
+(defun ls-compile (sexp &optional env fenv)
+  (cond
+    ((symbolp sexp) (lookup-variable sexp env))
+    ((integerp sexp) (integer-to-string sexp))
+    ((stringp sexp) (concat "\"" sexp "\""))
+    ((listp sexp)
+     (if (assoc (car sexp) *compilations*)
+         (let ((comp (second (assoc (car sexp) *compilations*))))
+           (apply comp env fenv (cdr sexp)))
+         (let ((fn (cdr (assoc (car sexp) *fenv*))))
+           (if (and (listp fn) (eq (car fn) 'macro))
+               (ls-compile (ls-macroexpand-1 sexp env fenv) env fenv)
+               (compile-funcall (car sexp) (cdr sexp) env fenv)))))))
+
+
 (defun ls-compile-toplevel (sexp)
   (setq *toplevel-compilations* nil)
   (let ((code (ls-compile sexp)))
