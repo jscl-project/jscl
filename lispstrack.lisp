@@ -153,23 +153,26 @@
          (#\'
           (list 'function (ls-read stream)))
          (#\\
-          (%read-char stream))
+          (let ((cname (read-until stream #'terminalp)))
+            (cond
+              ((string= cname "space") (char-code #\space))
+              ((string= cname "newline") (char-code #\newline))
+              (t (char-code (char cname 0))))))
          (#\+
           (let ((feature (read-until stream #'terminalp)))
             (cond
               ((string= feature "common-lisp")
-               (ls-read stream);ignore
+               (ls-read stream)         ;ignore
                (ls-read stream))
               ((string= feature "lispstrack")
                (ls-read stream))
               (t
-               (error "Unknown reader form.")))))
-         ))
+               (error "Unknown reader form.")))))))
       (t
        (let ((string (read-until stream #'terminalp)))
          (if (every #'digit-char-p string)
              (parse-integer string)
-             (intern (string-upcase string))))))))
+             (intern (string-upcase string)))))))))
 
 (defun ls-read-from-string (string)
   (ls-read (make-string-stream string)))
