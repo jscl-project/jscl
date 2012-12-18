@@ -185,9 +185,10 @@
 (defvar *compilations* nil)
 
 (defun ls-compile-block (sexps env fenv)
-  (join-trailing (mapcar (lambda (x)
-                           (ls-compile x env fenv))
-                         sexps)
+  (join-trailing
+   (remove nil (mapcar (lambda (x)
+                         (ls-compile x env fenv))
+                       sexps))
                  ";
 "))
 
@@ -222,7 +223,7 @@
 
 (define-compilation if (condition true false)
   (concat "("
-          (ls-compile condition env fenv) " == undefined"
+          (ls-compile condition env fenv)
           " ? "
           (ls-compile true env fenv)
           " : "
@@ -416,7 +417,7 @@
   (concat "(" (ls-compile x env fenv) " === " (ls-compile y env fenv) ")"))
 
 (define-compilation string (x)
-  (concat "String.fromCharCode( " (ls-compile x env fenv) ")"))
+  (concat "String.fromCharCode(" (ls-compile x env fenv) ")"))
 
 (define-compilation char (string index)
   (concat "("
@@ -516,12 +517,14 @@
 #+common-lisp
 (progn
   (defun ls-compile-file (filename output)
+    (setq *env* nil *fenv* nil)
     (with-open-file (in filename)
       (with-open-file (out output :direction :output :if-exists :supersede)
         (loop
            for x = (ls-read in)
            until (eq x *eof*)
            for compilation = (ls-compile-toplevel x)
-           when compilation do (write-line (concat compilation "; ") out)))))
+           when (plusp (length compilation))
+           do (write-line (concat compilation "; ") out)))))
   (defun bootstrap ()
     (ls-compile-file "lispstrack.lisp" "lispstrack.js")))
