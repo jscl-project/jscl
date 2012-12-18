@@ -204,3 +204,8 @@
     (while (and ch (whitespacep ch))
       (%read-char stream)
       (setq ch (%peek-char stream)))))
+
+(defun terminalp (ch)
+  (or (null ch) (whitespacep ch) (char= #\) ch) (char= #\( ch)))
+
+

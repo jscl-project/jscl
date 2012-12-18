@@ -299,7 +299,7 @@
 
 (defun literal->js (sexp)
   (cond
-    ((null sexp) "undefined")
+    ((null sexp) "false")
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" sexp "\""))
     ((symbolp sexp) (concat "{name: \"" (symbol-name sexp) "\"}"))
@@ -419,7 +419,7 @@
   (concat "(Math.floor(" (ls-compile x env fenv) "))"))
 
 (define-compilation null (x)
-  (concat "(" (ls-compile x env fenv) "== undefined)"))
+  (concat "(" (ls-compile x env fenv) "== false)"))
 
 (define-compilation cons (x y)
   (concat "{car: " (ls-compile x env fenv) ", cdr: " (ls-compile y env fenv) "}"))
