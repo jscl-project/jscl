@@ -527,10 +527,12 @@
     ((stringp sexp) (concat "\"" sexp "\""))
     ((listp sexp)
      (let ((sexp (ls-macroexpand-1 sexp env fenv)))
-       (let ((compiler-func (second (assoc (car sexp) *compilations*))))
-         (if compiler-func
-             (apply compiler-func env fenv (cdr sexp))
-             (compile-funcall (car sexp) (cdr sexp) env fenv)))))))
+       (if (listp sexp)
+           (let ((compiler-func (second (assoc (car sexp) *compilations*))))
+             (if compiler-func
+                 (apply compiler-func env fenv (cdr sexp))
+                 (compile-funcall (car sexp) (cdr sexp) env fenv)))
+           (ls-compile sexp env fenv))))))
 
 (defun ls-compile-toplevel (sexp)
   (setq *toplevel-compilations* nil)
