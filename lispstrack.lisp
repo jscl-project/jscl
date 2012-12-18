@@ -37,9 +37,13 @@
              (join (cdr list) separator)))))
 
 (defun join-trailing (list separator)
-  (if (null list)
-      ""
-      (concat (car list) separator (join-trailing (cdr list) separator))))
+  (cond
+    ((null list)
+     "")
+    ((null (car list))
+     (join-trailing (cdr list) separator))
+    (t
+     (concat (car list) separator (join-trailing (cdr list) separator)))))
 
 (defun integer-to-string (x)
   (if (zerop x)
