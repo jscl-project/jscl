@@ -154,6 +154,22 @@
           (and ,@(cdr forms))
           nil))))
 
+
+(defmacro or (&rest forms)
+  (cond
+    ((null forms)
+     nil)
+    ((null (cdr forms))
+     (car forms))
+    (t
+     `(if ,(car forms)
+          t
+          (or ,@(cdr forms))))))
+
+
+(defun char= (x y) (= x y))
+
+
 ;;;; Reader
 
 ;;; It is a basic Lisp reader. It does not use advanced stuff
@@ -166,3 +182,6 @@
 (defun %peek-char (stream)
   (and (< (cdr stream) (length (car stream)))
        (char (car stream) (cdr stream))))
+
+(defun whitespacep (ch)
+  (or (char= ch #\space) (char= ch #\newline) (char= ch #\tab)))
