@@ -21,6 +21,12 @@
        (%compile-defun ',name))
      (fsetq ,name (lambda ,args ,@body))))
 
+(defmacro when (condition &rest body)
+  `(if ,condition (progn ,@body)))
+
+(defmacro unless (condition &rest body)
+  `(if ,condition nil (progn ,@body)))
+
 (defun = (x y) (= x y))
 (defun + (x y) (+ x y))
 (defun - (x y) (- x y))
@@ -227,3 +233,19 @@
       (read-until stream (lambda (x) (char= x #\newline)))
       (skip-whitespaces stream)
       (setq ch (%peek-char stream)))))
+
+(defun %read-list (stream)
+  (skip-whitespaces-and-comments stream)
+  (let ((ch (%peek-char stream)))
+    (cond
+      ((char= ch #\))
+       (%read-char stream)
+       nil)
+      ((char= ch #\.)
+       (%read-char stream)
+       (skip-whitespaces-and-comments stream)
+       (prog1 (ls-read stream)
+         (unless (char= (%read-char stream) #\))
+           (error "')' was expected."))))
+      (t
+       (cons (ls-read stream) (%read-list stream))))))
