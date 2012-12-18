@@ -152,6 +152,8 @@
        (ecase (%read-char stream)
          (#\'
           (list 'function (ls-read stream)))
+         (#\\
+          (%read-char stream))
          (#\+
           (let ((feature (read-until stream #'terminalp)))
             (cond
@@ -161,7 +163,8 @@
               ((string= feature "lispstrack")
                (ls-read stream))
               (t
-               (error "Unknown reader form.")))))))
+               (error "Unknown reader form.")))))
+         ))
       (t
        (let ((string (read-until stream #'terminalp)))
          (if (every #'digit-char-p string)
@@ -385,6 +388,9 @@
 
 (define-compilation / (x y)
   (concat "((" (ls-compile x env fenv) ") / (" (ls-compile y env fenv) "))"))
+
+(define-compilation < (x y)
+  (concat "((" (ls-compile x env fenv) ") < (" (ls-compile y env fenv) "))"))
 
 (define-compilation = (x y)
   (concat "((" (ls-compile x env fenv) ") == (" (ls-compile y env fenv) "))"))
