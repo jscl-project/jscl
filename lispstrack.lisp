@@ -473,6 +473,10 @@
                 ", ")
           ")"))
 
+(define-compilation error (string)
+  (concat "console.error(" (ls-compile string env fenv) ")"))
+
+
 (define-compilation new ()
   "{}")
 
