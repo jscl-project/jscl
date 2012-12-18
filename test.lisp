@@ -55,6 +55,19 @@
 (defun reverse (list)
   (reverse-aux list '()))
 
+(defmacro incf (x)
+  `(setq ,x (1+ ,x)))
+
+(defmacro decf (x)
+  `(setq ,x (1- ,x)))
+
+(defun length (list)
+  (let ((l 0))
+    (while (not (null list))
+      (incf l)
+      (setq list (cdr list)))
+    l))
+
 (defun mapcar (func list)
   (if (null list)
       '()
@@ -129,3 +142,27 @@
         (join (mapcar (lambda (d) (string (char "0123456789" d)))
                       digits)
               ""))))
+
+(defmacro and (&rest forms)
+  (cond
+    ((null forms)
+     t)
+    ((null (cdr forms))
+     (car forms))
+    (t
+     `(if ,(car forms)
+          (and ,@(cdr forms))
+          nil))))
+
+;;;; Reader
+
+;;; It is a basic Lisp reader. It does not use advanced stuff
+;;; intentionally, because we want to use it to bootstrap a simple
+;;; Lisp. The main entry point is the function `ls-read', which
+;;; accepts a strings as argument and return the Lisp expression.
+(defun make-string-stream (string)
+  (cons string 0))
+
+(defun %peek-char (stream)
+  (and (< (cdr stream) (length (car stream)))
+       (char (car stream) (cdr stream))))
