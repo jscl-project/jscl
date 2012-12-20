@@ -355,12 +355,24 @@
 
 ;;; Literals
 
+(defun escape-string (string)
+  (let ((output "")
+        (index 0)
+        (size (length string)))
+    (while (< index size)
+      (let ((ch (char string index)))
+        (when (or (char= ch #\") (char= ch #\\))
+          (setq output (concat output "\\")))
+        (setq output (concat output (string ch))))
+      (incf index))
+    output))
+
 (defun literal->js (sexp)
   (cond
     ((null sexp) "false")
     ((integerp sexp) (integer-to-string sexp))
-    ((stringp sexp) (concat "\"" sexp "\""))
-    ((symbolp sexp) (concat "{name: \"" (symbol-name sexp) "\"}"))
+    ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
+    ((symbolp sexp) (concat "{name: \"" (escape-string (symbol-name sexp)) "\"}"))
     ((consp sexp) (concat "{car: "
                           (literal->js (car sexp))
                           ", cdr: "
@@ -553,7 +565,7 @@
                 ", ")
           ")"))
 
-(define-transformation apply (func &rest args)
+(define-compilation apply (func &rest args)
   (if (null args)
       (concat "(" (ls-compile func env fenv) ")()")
       (let ((args (butlast args))
@@ -565,10 +577,10 @@
                                              args)
                                      ", ")
                 "];" *newline*
-                "var tail = (" (ls-compile last env fenv) ");"
+                "var tail = (" (ls-compile last env fenv) ");" *newline*
                 "while (tail != false){" *newline*
                 "    args.push(tail[0]);" *newline*
-                "    args = args.slice(1);"
+                "    args = args.slice(1);" *newline*
                 "}" *newline*
                 "return f.apply(this, args);" *newline*
                 "}" *newline*))))
