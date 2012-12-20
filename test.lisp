@@ -516,8 +516,8 @@
    (remove nil (mapcar (lambda (x)
                          (ls-compile x env fenv))
                        sexps))
-                 ";
-"))
+   (concat ";" *newline*)))
+
 (defmacro define-compilation (name args &rest body)
   ;; Creates a new primitive `name' with parameters args and
   ;; @body. The body can access to the local environment through the
