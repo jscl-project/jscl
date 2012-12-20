@@ -104,6 +104,25 @@
                (progn ,@(cdar clausules))
                (cond ,@(cdr clausules))))))
 
+
+(defmacro case (form &rest clausules)
+  (let ((!form (make-symbol "FORM")))
+    `(let ((,!form ,form))
+       (cond
+         ,@(mapcar (lambda (clausule)
+                     (if (eq (car clausule) t)
+                         clausule
+                         `((eql ,!form ,(car clausule))
+                           ,@(cdr clausule))))
+                   clausules)))))
+
+(defmacro ecase (form &rest clausules)
+  `(case ,form
+     ,@(append
+        clausules
+        `((t
+           (error "ECASE expression failed."))))))
+
 (defun !reduce (func list initial)
   (if (null list)
       initial
@@ -249,3 +268,57 @@
            (error "')' was expected."))))
       (t
        (cons (ls-read stream) (%read-list stream))))))
+
+(defvar *eof* (make-symbol "EOF"))
+(defun ls-read (stream)
+  (skip-whitespaces-and-comments stream)
+  (let ((ch (%peek-char stream)))
+    (cond
+      ((null ch)
+       *eof*)
+      ((char= ch #\()
+       (%read-char stream)
+       (%read-list stream))
+      ((char= ch #\')
+       (%read-char stream)
+       (list 'quote (ls-read stream)))
+      ((char= ch #\`)
+       (%read-char stream)
+       (list 'backquote (ls-read stream)))
+      ((char= ch #\")
+       (%read-char stream)
+       (prog1 (read-until stream (lambda (ch) (char= ch #\")))
+         (%read-char stream)))
+      ((char= ch #\,)
+       (%read-char stream)
+       (if (eql (%peek-char stream) #\@)
+           (progn (%read-char stream) (list 'unquote-splicing (ls-read stream)))
+           (list 'unquote (ls-read stream))))
+      ((char= ch #\#)
+       (%read-char stream)
+       (ecase (%read-char stream)
+         (#\'
+          (list 'function (ls-read stream)))
+         (#\\
+          (let ((cname
+		 (concat (string (%read-char stream))
+			 (read-until stream #'terminalp))))
+            (cond
+              ((string= cname "space") (char-code #\space))
+              ((string= cname "newline") (char-code #\newline))
+              (t (char-code (char cname 0))))))
+         (#\+
+          (let ((feature (read-until stream #'terminalp)))
+            (cond
+              ((string= feature "common-lisp")
+               (ls-read stream)         ;ignore
+               (ls-read stream))
+              ((string= feature "lispstrack")
+               (ls-read stream))
+              (t
+               (error "Unknown reader form.")))))))
+      (t
+       (let ((string (read-until stream #'terminalp)))
+         (if (every #'digit-char-p string)
+             (parse-integer string)
+             (intern (string-upcase string))))))))
