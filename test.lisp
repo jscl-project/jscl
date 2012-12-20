@@ -43,9 +43,16 @@
 (defun car (x) (car x))
 (defun caar (x) (car (car x)))
 (defun cadr (x) (car (cdr x)))
+(defun caddr (x) (car (cdr x)))
+(defun cadddr (x) (car (cdr x)))
 (defun cdr (x) (cdr x))
 (defun cdar (x) (cdr (car x)))
 (defun cddr (x) (cdr (cdr x)))
+
+(defun first (x) (car x))
+(defun second (x) (cadr x))
+(defun third (x) (caddr x))
+(defun fourth (x) (cadddr x))
 
 (defun list (&rest args)
   args)
@@ -353,3 +360,25 @@
          (if (every #'digit-char-p string)
              (parse-integer string)
              (intern (string-upcase string))))))))
+
+
+(defun ls-read-from-string (string)
+  (ls-read (make-string-stream string)))
+
+
+
+;;;; Compiler
+
+(defvar *compilation-unit-checks* '())
+
+(defvar *env* '())
+(defvar *fenv* '())
+
+(defun make-binding (name type js declared)
+  (list name type js declared))
+
+(defun binding-name (b) (first b))
+(defun binding-type (b) (second b))
+(defun binding-translation (b) (third b))
+(defun binding-declared (b)
+  (and b (fourth b)))

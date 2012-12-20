@@ -194,8 +194,8 @@
 
 (defvar *compilation-unit-checks* '())
 
-(defparameter *env* '())
-(defparameter *fenv* '())
+(defvar *env* '())
+(defvar *fenv* '())
 
 (defun make-binding (name type js declared)
   (list name type js declared))
