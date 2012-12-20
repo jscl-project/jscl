@@ -493,11 +493,17 @@
 (define-compilation eq (x y)
   (concat "(" (ls-compile x env fenv) " === " (ls-compile y env fenv) ")"))
 
+(define-compilation equal (x y)
+  (concat "(" (ls-compile x env fenv) " == " (ls-compile y env fenv) ")"))
+
 (define-compilation string (x)
   (concat "String.fromCharCode(" (ls-compile x env fenv) ")"))
 
 (define-compilation string-upcase (x)
   (concat "(" (ls-compile x env fenv) ").toUpperCase()"))
+
+(define-compilation string-length (x)
+  (concat "(" (ls-compile x env fenv) ").length"))
 
 (define-compilation char (string index)
   (concat "("
@@ -598,6 +604,7 @@
 
   (defun ls-compile-file (filename output)
     (setq *env* nil *fenv* nil)
+    (setq *compilation-unit-checks* nil)
     (with-open-file (out output :direction :output :if-exists :supersede)
       (let* ((source (read-whole-file filename))
              (in (make-string-stream source)))
@@ -608,7 +615,8 @@
            when (plusp (length compilation))
            do (write-line (concat compilation "; ") out))
         (dolist (check *compilation-unit-checks*)
-          (funcall check)))))
+          (funcall check))
+        (setq *compilation-unit-checks* nil))))
 
   (defun bootstrap ()
     (ls-compile-file "lispstrack.lisp" "lispstrack.js")))

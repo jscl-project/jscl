@@ -47,6 +47,9 @@
 (defun cdar (x) (cdr (car x)))
 (defun cddr (x) (cdr (cdr x)))
 
+(defun list (&rest args)
+  args)
+
 (defun append (list1 list2)
   (if (null list1)
       list2
@@ -201,6 +204,34 @@
 
 (defun char= (x y) (= x y))
 
+
+(defun digit-char-p (x)
+  (if (and (< #\0 x) (< x #\9))
+      (- x #\0)
+      nil))
+
+(defun parse-integer (string)
+  (let ((value 0)
+        (index 0)
+        (size (string-length string)))
+    (while (< index size)
+      (setq value (+ (* value 10) (digit-char-p (char string index))))
+      (incf index))))
+
+(defun every (function seq)
+  ;; string
+  (let ((ret t)
+        (index 0)
+        (size (string-length seq)))
+    (while (and ret (< index size))
+      (unless (funcall function (char seq index))
+        (setq ret nil)))))
+
+(defun eql (x y)
+  (eq x y))
+
+(defun string= (s1 s2)
+  (equal s1 s2))
 
 ;;;; Reader
 
