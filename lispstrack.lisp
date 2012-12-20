@@ -3,7 +3,6 @@
       x
       (list x)))
 
-
 (defun !reduce (func list initial)
   (if (null list)
       initial
@@ -193,13 +192,83 @@
 
 ;;;; Compiler
 
-(let ((counter 0))
-  (defun make-var-binding (symbol)
-    (cons symbol (concat "v" (integer-to-string (incf counter))))))
+(defvar *compilation-unit-checks* '())
+
+(defparameter *env* '())
+(defparameter *fenv* '())
+
+(defun make-binding (name type js declared)
+  (list name type js declared))
+
+(defun binding-name (b) (first b))
+(defun binding-type (b) (second b))
+(defun binding-translation (b) (third b))
+(defun binding-declared (b)
+  (and b (fourth b)))
+(defun mark-binding-as-declared (b)
+  (setcar (cdddr b) t))
 
 (let ((counter 0))
-  (defun make-func-binding (symbol)
-    (cons symbol (concat "f" (integer-to-string (incf counter))))))
+  (defun gvarname (symbol)
+    (concat "v" (integer-to-string (incf counter))))
+
+  (defun lookup-variable (symbol env)
+    (or (assoc symbol env)
+        (assoc symbol *env*)
+        (let ((name (symbol-name symbol))
+              (binding (make-binding symbol 'variable (gvarname symbol) nil)))
+          (push binding *env*)
+          (push (lambda ()
+                  (unless (binding-declared (assoc symbol *env*))
+                    (error (concat "Undefined variable `" name "'"))))
+                *compilation-unit-checks*)
+          binding)))
+
+  (defun lookup-variable-translation (symbol env)
+    (binding-translation (lookup-variable symbol env)))
+
+  (defun extend-local-env (args env)
+    (append (mapcar (lambda (symbol)
+                      (make-binding symbol 'variable (gvarname symbol) t))
+                    args)
+            env)))
+
+(let ((counter 0))
+  (defun lookup-function (symbol env)
+    (or (assoc symbol env)
+        (assoc symbol *fenv*)
+        (let ((name (symbol-name symbol))
+              (binding
+               (make-binding symbol
+                             'function
+                             (concat "f" (integer-to-string (incf counter)))
+                             nil)))
+          (push binding *fenv*)
+          (push (lambda ()
+                  (unless (binding-declared (assoc symbol *fenv*))
+                    (error (concat "Undefined function `" name "'"))))
+                *compilation-unit-checks*)
+          binding)))
+
+  (defun lookup-function-translation (symbol env)
+    (binding-translation (lookup-function symbol env))))
+
+
+(defvar *toplevel-compilations*)
+
+(defun %compile-defvar (name)
+  (let ((b (lookup-variable name *env*)))
+    (mark-binding-as-declared b)
+    (push (concat "var " (binding-translation b)) *toplevel-compilations*)))
+
+(defun %compile-defun (name)
+  (let ((b (lookup-function name *env*)))
+    (mark-binding-as-declared b)
+    (push (concat "var " (binding-translation b)) *toplevel-compilations*)))
+
+(defun %compile-defmacro (name lambda)
+  (push (make-binding name 'macro lambda t) *fenv*))
+
 
 (defvar *compilations* nil)
 
@@ -210,35 +279,12 @@
                        sexps))
                  ";
 "))
-
-(defun extend-env (args env)
-  (append (mapcar #'make-var-binding args) env))
-
-(defparameter *env* '())
-(defparameter *fenv* '())
-
-(defun lookup (symbol env)
-  (let ((binding (assoc symbol env)))
-    (and binding (cdr binding))))
-
-(defun lookup-variable (symbol env)
-  (or (lookup symbol env)
-      (lookup symbol *env*)
-      (error "Undefined variable `~a'"  symbol)))
-
-(defun lookup-function (symbol env)
-  (or (lookup symbol env)
-      (lookup symbol *fenv*)
-      (error "Undefined function `~a'"  symbol)))
-
 (defmacro define-compilation (name args &body body)
   ;; Creates a new primitive `name' with parameters args and
   ;; @body. The body can access to the local environment through the
   ;; variable ENV.
   `(push (list ',name (lambda (env fenv ,@args) ,@body))
          *compilations*))
-
-(defvar *toplevel-compilations*)
 
 (define-compilation if (condition true false)
   (concat "("
@@ -261,23 +307,26 @@
 (define-compilation lambda (lambda-list &rest body)
   (let ((required-arguments (lambda-list-required-argument lambda-list))
         (rest-argument (lambda-list-rest-argument lambda-list)))
-    (let ((new-env (extend-env (append (if rest-argument (list rest-argument))
-                                       required-arguments)
-                               env)))
+    (let ((new-env (extend-local-env
+                    (append (if rest-argument (list rest-argument))
+                            required-arguments)
+                    env)))
       (concat "(function ("
-              (join (mapcar (lambda (x) (lookup-variable x new-env))
+              (join (mapcar (lambda (x)
+                              (lookup-variable-translation x new-env))
                             required-arguments)
                     ",")
               "){"
               *newline*
               (if rest-argument
-                  (concat "var " (lookup-variable rest-argument new-env) ";" *newline*
-                          "for (var i = arguments.length-1; i>="
-                          (integer-to-string (length required-arguments))
-                          "; i--)" *newline*
-                          (lookup-variable rest-argument new-env) " = "
-                          "{car: arguments[i], cdr: " (lookup-variable rest-argument new-env) "};"
-                          *newline*)
+                  (let ((js!rest (lookup-variable-translation rest-argument new-env)))
+                    (concat "var " js!rest ";" *newline*
+                            "for (var i = arguments.length-1; i>="
+                            (integer-to-string (length required-arguments))
+                            "; i--)" *newline*
+                            js!rest " = "
+                            "{car: arguments[i], cdr: " js!rest "};"
+                            *newline*))
                   "")
               (concat (ls-compile-block (butlast body) new-env fenv)
                       "return " (ls-compile (car (last body)) new-env fenv) ";")
@@ -285,15 +334,14 @@
               "})"))))
 
 (define-compilation fsetq (var val)
-  (concat (lookup-function var fenv)
+  (concat (lookup-function-translation var fenv)
           " = "
           (ls-compile val env fenv)))
 
 (define-compilation setq (var val)
-  (concat (lookup-variable var env)
+  (concat (lookup-variable-translation var env)
           " = "
            (ls-compile val env fenv)))
-
 
 ;;; Literals
 
@@ -334,7 +382,7 @@
     ((and (listp x) (eq (car x) 'lambda))
      (ls-compile x env fenv))
     ((symbolp x)
-     (lookup-function x fenv))))
+     (lookup-function-translation x fenv))))
 
 #+common-lisp
 (defmacro eval-when-compile (&body body)
@@ -436,7 +484,6 @@
 (define-compilation setcdr (x new)
   (concat "((" (ls-compile x env fenv) ").cdr = " (ls-compile new env fenv) ")"))
 
-
 (define-compilation make-symbol (name)
   (concat "{name: " (ls-compile name env fenv) "}"))
 
@@ -476,7 +523,6 @@
 (define-compilation error (string)
   (concat "console.error(" (ls-compile string env fenv) ")"))
 
-
 (define-compilation new ()
   "{}")
 
@@ -490,30 +536,20 @@
           (ls-compile key env fenv) "]"
           " = " (ls-compile value env fenv) ")"))
 
-
-(defun %compile-defvar (name)
-  (unless (lookup name *env*)
-    (push (make-var-binding name) *env*)
-    (push (concat "var " (lookup-variable name *env*)) *toplevel-compilations*)))
-
-(defun %compile-defun (name)
-  (unless (lookup name *fenv*)
-    (push (make-func-binding name) *fenv*)
-    (push (concat "var " (lookup-variable name *fenv*)) *toplevel-compilations*)))
-
-(defun %compile-defmacro (name lambda)
-  (push (cons name (cons 'macro lambda)) *fenv*))
+(defun macrop (x)
+  (and (symbolp x) (eq (binding-type (lookup-function x *fenv*)) 'macro)))
 
 (defun ls-macroexpand-1 (form &optional env fenv)
-  (let ((function (cdr (assoc (car form) *fenv*))))
-    (if (and (listp function) (eq (car function) 'macro))
-        (apply (eval (cdr function)) (cdr form))
-        form)))
+  (when (macrop (car form))
+    (let ((binding (lookup-function (car form) *env*)))
+      (if (eq (binding-type binding) 'macro)
+          (apply (eval (binding-translation binding)) (cdr form))
+          form))))
 
 (defun compile-funcall (function args env fenv)
   (cond
     ((symbolp function)
-     (concat (lookup-function function fenv)
+     (concat (lookup-function-translation function fenv)
              "("
              (join (mapcar (lambda (x) (ls-compile x env fenv)) args)
                    ", ")
@@ -528,18 +564,16 @@
 
 (defun ls-compile (sexp &optional env fenv)
   (cond
-    ((symbolp sexp) (lookup-variable sexp env))
+    ((symbolp sexp) (lookup-variable-translation sexp env))
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" sexp "\""))
     ((listp sexp)
      (if (assoc (car sexp) *compilations*)
          (let ((comp (second (assoc (car sexp) *compilations*))))
            (apply comp env fenv (cdr sexp)))
-         (let ((fn (cdr (assoc (car sexp) *fenv*))))
-           (if (and (listp fn) (eq (car fn) 'macro))
-               (ls-compile (ls-macroexpand-1 sexp env fenv) env fenv)
-               (compile-funcall (car sexp) (cdr sexp) env fenv)))))))
-
+         (if (macrop (car sexp))
+             (ls-compile (ls-macroexpand-1 sexp env fenv) env fenv)
+             (compile-funcall (car sexp) (cdr sexp) env fenv))))))
 
 (defun ls-compile-toplevel (sexp)
   (setq *toplevel-compilations* nil)
@@ -553,7 +587,6 @@
 
 #+common-lisp
 (progn
-
   (defun read-whole-file (filename)
     (with-open-file (in filename)
       (let ((seq (make-array (file-length in) :element-type 'character)))
@@ -570,7 +603,9 @@
            until (eq x *eof*)
            for compilation = (ls-compile-toplevel x)
            when (plusp (length compilation))
-           do (write-line (concat compilation "; ") out)))))
+           do (write-line (concat compilation "; ") out))
+        (dolist (check *compilation-unit-checks*)
+          (funcall check)))))
 
   (defun bootstrap ()
     (ls-compile-file "lispstrack.lisp" "lispstrack.js")))
