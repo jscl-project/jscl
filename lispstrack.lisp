@@ -132,6 +132,17 @@
       (t
        (cons (ls-read stream) (%read-list stream))))))
 
+(defun read-string (stream)
+  (let ((string "")
+        (ch nil))
+    (setq ch (%read-char stream))
+    (while (not (char= ch #\"))
+      (when (char= ch #\\)
+        (setq ch (%read-char stream)))
+      (setq string (concat string (string ch)))
+      (setq ch (%read-char stream)))
+    string))
+
 (defvar *eof* (make-symbol "EOF"))
 (defun ls-read (stream)
   (skip-whitespaces-and-comments stream)
@@ -150,8 +161,7 @@
        (list 'backquote (ls-read stream)))
       ((char= ch #\")
        (%read-char stream)
-       (prog1 (read-until stream (lambda (ch) (char= ch #\")))
-         (%read-char stream)))
+       (read-string stream))
       ((char= ch #\,)
        (%read-char stream)
        (if (eql (%peek-char stream) #\@)
@@ -254,7 +264,7 @@
     (binding-translation (lookup-function symbol env))))
 
 
-(defvar *toplevel-compilations*)
+(defvar *toplevel-compilations* nil)
 
 (defun %compile-defvar (name)
   (let ((b (lookup-variable name *env*)))
@@ -279,7 +289,7 @@
                        sexps))
                  ";
 "))
-(defmacro define-compilation (name args &body body)
+(defmacro define-compilation (name args &rest body)
   ;; Creates a new primitive `name' with parameters args and
   ;; @body. The body can access to the local environment through the
   ;; variable ENV.
@@ -308,7 +318,7 @@
   (let ((required-arguments (lambda-list-required-argument lambda-list))
         (rest-argument (lambda-list-rest-argument lambda-list)))
     (let ((new-env (extend-local-env
-                    (append (if rest-argument (list rest-argument))
+                    (append (and rest-argument (list rest-argument))
                             required-arguments)
                     env)))
       (concat "(function ("
@@ -460,6 +470,10 @@
 (define-compilation = (x y)
   (concat "((" (ls-compile x env fenv) ") == (" (ls-compile y env fenv) "))"))
 
+(define-compilation numberp (x)
+  (concat "(typeof (" (ls-compile x env fenv) ") == \"number\")"))
+
+
 (define-compilation mod (x y)
   (concat "((" (ls-compile x env fenv) ") % (" (ls-compile y env fenv) "))"))
 
@@ -472,6 +486,10 @@
 (define-compilation cons (x y)
   (concat "{car: " (ls-compile x env fenv) ", cdr: " (ls-compile y env fenv) "}"))
 
+(define-compilation consp (x)
+  (concat "('car' in " (ls-compile x env fenv) ")"))
+
+
 (define-compilation car (x)
   (concat "(" (ls-compile x env fenv) ").car"))
 
@@ -483,6 +501,9 @@
 
 (define-compilation setcdr (x new)
   (concat "((" (ls-compile x env fenv) ").cdr = " (ls-compile new env fenv) ")"))
+
+(define-compilation symbolp (x)
+  (concat "('name' in " (ls-compile x env fenv) ")"))
 
 (define-compilation make-symbol (name)
   (concat "{name: " (ls-compile name env fenv) "}"))
@@ -498,6 +519,9 @@
 
 (define-compilation string (x)
   (concat "String.fromCharCode(" (ls-compile x env fenv) ")"))
+
+(define-compilation stringp (x)
+  (concat "(typeof(" (ls-compile x env fenv) ") == \"string\")"))
 
 (define-compilation string-upcase (x)
   (concat "(" (ls-compile x env fenv) ").toUpperCase()"))
@@ -528,6 +552,30 @@
                         args)
                 ", ")
           ")"))
+
+(define-transformation apply (func &rest args)
+  (if (null args)
+      (concat "(" (ls-compile func env fenv) ")()")
+      (let ((args (butlast args))
+            (last (car (last args))))
+        (concat "function(){" *newline*
+                "var f = " (ls-compile func env fenv) ";" *newline*
+                "var args = [" (join (mapcar (lambda (x)
+                                               (ls-compile x env fenv))
+                                             args)
+                                     ", ")
+                "];" *newline*
+                "var tail = (" (ls-compile last env fenv) ");"
+                "while (tail != false){" *newline*
+                "    args.push(tail[0]);" *newline*
+                "    args = args.slice(1);"
+                "}" *newline*
+                "return f.apply(this, args);" *newline*
+                "}" *newline*))))
+
+(define-compilation js-eval (string)
+  (concat "eval(" (ls-compile string env fenv)  ")"))
+
 
 (define-compilation error (string)
   (concat "(function (){ throw " (ls-compile string env fenv) ";" "return 0;})()"))
@@ -569,7 +617,7 @@
                    ", ")
              ")"))
     (t
-     (error "Invalid function designator ~a." function))))
+     (error (concat "Invalid function designator " (symbol-name function))))))
 
 (defun ls-compile (sexp &optional env fenv)
   (cond
