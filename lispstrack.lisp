@@ -635,7 +635,7 @@
   (cond
     ((symbolp sexp) (lookup-variable-translation sexp env))
     ((integerp sexp) (integer-to-string sexp))
-    ((stringp sexp) (concat "\"" sexp "\""))
+    ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
     ((listp sexp)
      (if (assoc (car sexp) *compilations*)
          (let ((comp (second (assoc (car sexp) *compilations*))))
