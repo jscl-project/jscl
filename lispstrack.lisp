@@ -530,7 +530,7 @@
           ")"))
 
 (define-compilation error (string)
-  (concat "console.error(" (ls-compile string env fenv) ")"))
+  (concat "(function (){ throw " (ls-compile string env fenv) ";" "return 0;})()"))
 
 (define-compilation new ()
   "{}")
