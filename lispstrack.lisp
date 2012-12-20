@@ -496,6 +496,9 @@
 (define-compilation string (x)
   (concat "String.fromCharCode(" (ls-compile x env fenv) ")"))
 
+(define-compilation string-upcase (x)
+  (concat "(" (ls-compile x env fenv) ").toUpperCase()"))
+
 (define-compilation char (string index)
   (concat "("
           (ls-compile string env fenv)
