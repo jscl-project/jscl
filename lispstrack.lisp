@@ -330,7 +330,7 @@
               *newline*
               (if rest-argument
                   (let ((js!rest (lookup-variable-translation rest-argument new-env)))
-                    (concat "var " js!rest ";" *newline*
+                    (concat "var " js!rest "= false;" *newline*
                             "for (var i = arguments.length-1; i>="
                             (integer-to-string (length required-arguments))
                             "; i--)" *newline*
@@ -651,9 +651,10 @@
   (setq *toplevel-compilations* nil)
   (let ((code (ls-compile sexp)))
     (prog1
-        (concat (join (mapcar (lambda (x) (concat x ";" *newline*))
+        (concat "/* " (princ-to-string sexp) " */"
+                (join (mapcar (lambda (x) (concat x ";" *newline*))
                               *toplevel-compilations*)
-                      "")
+               "")
                 code)
       (setq *toplevel-compilations* nil))))
 

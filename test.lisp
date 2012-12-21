@@ -61,9 +61,6 @@
 (defun atom (x)
   (not (consp x)))
 
-(defun listp (x)
-  (or (consp x) (null x)))
-
 (defun ensure-list (x)
   (if (listp x)
       x
@@ -89,12 +86,17 @@
 (defmacro decf (x)
   `(setq ,x (1- ,x)))
 
-(defun length (list)
+(defun list-length (list)
   (let ((l 0))
     (while (not (null list))
       (incf l)
       (setq list (cdr list)))
     l))
+
+(defun length (seq)
+  (if (stringp seq)
+      (string-length seq)
+      (list-length seq)))
 
 (defun mapcar (func list)
   (if (null list)
@@ -222,9 +224,14 @@
 
 (defun char= (x y) (= x y))
 
+(defun <= (x y) (or (< x y) (= x y)))
+(defun >= (x y) (not (< x y)))
+
+(defun listp (x)
+  (or (consp x) (null x)))
+
 (defun integerp (x)
   (and (numberp x) (= (floor x) x)))
-
 
 (defun last (x)
   (if (null (cdr x))
@@ -252,29 +259,32 @@
     ((eql x (car list))
      (remove x (cdr list)))
     (t
-     (cons (car x) (remove x (cdr list))))))
+     (cons (car list) (remove x (cdr list))))))
 
 (defun digit-char-p (x)
-  (if (and (< #\0 x) (< x #\9))
+  (if (and (<= #\0 x) (<= x #\9))
       (- x #\0)
       nil))
 
 (defun parse-integer (string)
   (let ((value 0)
         (index 0)
-        (size (string-length string)))
+        (size (length string)))
     (while (< index size)
       (setq value (+ (* value 10) (digit-char-p (char string index))))
-      (incf index))))
+      (incf index))
+    value))
 
 (defun every (function seq)
   ;; string
   (let ((ret t)
         (index 0)
-        (size (string-length seq)))
+        (size (length seq)))
     (while (and ret (< index size))
       (unless (funcall function (char seq index))
-        (setq ret nil)))))
+        (setq ret nil))
+      (incf index))
+    ret))
 
 (defun eql (x y)
   (eq x y))
@@ -321,7 +331,6 @@
 
 (defun terminalp (ch)
   (or (null ch) (whitespacep ch) (char= #\) ch) (char= #\( ch)))
-
 
 (defun read-until (stream func)
   (let ((string "")
@@ -422,10 +431,8 @@
              (parse-integer string)
              (intern (string-upcase string))))))))
 
-
 (defun ls-read-from-string (string)
   (ls-read (make-string-stream string)))
-
 
 
 ;;;; Compiler
@@ -560,7 +567,7 @@
               *newline*
               (if rest-argument
                   (let ((js!rest (lookup-variable-translation rest-argument new-env)))
-                    (concat "var " js!rest ";" *newline*
+                    (concat "var " js!rest "= false;" *newline*
                             "for (var i = arguments.length-1; i>="
                             (integer-to-string (length required-arguments))
                             "; i--)" *newline*
@@ -788,7 +795,7 @@
 (defun macrop (x)
   (and (symbolp x) (eq (binding-type (lookup-function x *fenv*)) 'macro)))
 
-(defun ls-macroexpand-1 (form &optional env fenv)
+(defun ls-macroexpand-1 (form env fenv)
   (when (macrop (car form))
     (let ((binding (lookup-function (car form) *env*)))
       (if (eq (binding-type binding) 'macro)
@@ -811,7 +818,7 @@
     (t
      (error (concat "Invalid function designator " (symbol-name function))))))
 
-(defun ls-compile (sexp &optional env fenv)
+(defun ls-compile (sexp env fenv)
   (cond
     ((symbolp sexp) (lookup-variable-translation sexp env))
     ((integerp sexp) (integer-to-string sexp))
@@ -826,7 +833,7 @@
 
 (defun ls-compile-toplevel (sexp)
   (setq *toplevel-compilations* nil)
-  (let ((code (ls-compile sexp)))
+  (let ((code (ls-compile sexp nil nil)))
     (prog1
         (concat (join (mapcar (lambda (x) (concat x ";" *newline*))
                               *toplevel-compilations*)
