@@ -12,14 +12,24 @@
        (%compile-defvar ',name))
      (setq ,name ,value)))
 
-(defvar t 't)
-(defvar nil 'nil)
-
 (defmacro defun (name args &rest body)
   `(progn
      (eval-when-compile
        (%compile-defun ',name))
      (fsetq ,name (lambda ,args ,@body))))
+
+(defvar *package* (new))
+
+(defvar t 't)
+(defvar nil 'nil)
+
+(defun intern (name)
+  (let ((s (get *package* name)))
+    (if s s (set *package* name (make-symbol name)))))
+
+(defun find-symbol (name)
+  (get *package* name))
+
 
 (defmacro when (condition &rest body)
   `(if ,condition (progn ,@body) nil))
@@ -106,17 +116,6 @@
 
 (defmacro push (x place)
   `(setq ,place (cons ,x ,place)))
-
-(defvar *package* (new))
-
-(defun intern (name)
-  (let ((s (get *package* name)))
-    (if s
-        s
-        (set *package* name (make-symbol name)))))
-
-(defun find-symbol (name)
-  (get *package* name))
 
 (defmacro cond (&rest clausules)
   (if (null clausules)
@@ -844,3 +843,6 @@
 
 (defun eval (x)
   (js-eval (ls-compile x nil nil)))
+
+
+(debug (eq (ls-read-from-string "+") '+))
