@@ -652,6 +652,18 @@
              (ls-compile (ls-macroexpand-1 sexp env fenv) env fenv)
              (compile-funcall (car sexp) (cdr sexp) env fenv))))))
 
+(defmacro with-compilation-unit (&rest body)
+  `(progn
+     (setq *env* nil)
+     (setq *fenv* nil)
+     (setq *compilation-unit-checks* nil)
+     ,@body
+     (dolist (check *compilation-unit-checks*)
+       (funcall check))
+     (setq *env* nil)
+     (setq *fenv* nil)
+     (setq *compilation-unit-checks* nil)))
+
 (defun ls-compile-toplevel (sexp)
   (setq *toplevel-compilations* nil)
   (let ((code (ls-compile sexp nil nil)))
