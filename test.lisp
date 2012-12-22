@@ -218,9 +218,9 @@
     ((null (cdr forms))
      (car forms))
     (t
-     `(if ,(car forms)
-          t
-          (or ,@(cdr forms))))))
+     (let ((g (make-symbol "VAR")))
+       `(let ((,g ,(car forms)))
+          (if ,g ,g (or ,@(cdr forms))))))))
 
 
 (defmacro prog1 (form &rest body)
@@ -901,10 +901,10 @@
   (setq *toplevel-compilations* nil)
   (let ((code (ls-compile sexp nil nil)))
     (prog1
-        (join (mapcar (lambda (x) (concat x ";" *newline*))
-                      *toplevel-compilations*)
-              "")
-      code
+        (concat (join (mapcar (lambda (x) (concat x ";" *newline*))
+                       *toplevel-compilations*)
+                      "")
+                code)
       (setq *toplevel-compilations* nil))))
 
 
@@ -948,10 +948,13 @@
 (defun eval (x)
   (js-eval (ls-compile x nil nil)))
 
-;;; Set the initial global environment to be equal to the host global
-;;; environment at this point of the compilation.
+;; Set the initial global environment to be equal to the host global
+;; environment at this point of the compilation.
 (eval-when-compile
   (let ((c1 (ls-compile `(setq *fenv* ',*fenv*) nil nil))
         (c2 (ls-compile `(setq  *env*  ',*env*) nil nil)))
     (setq *toplevel-compilations*
           (append *toplevel-compilations* (list c1 c2)))))
+
+(with-compilation-unit
+    (debug (lookup-function 'eval nil)))
