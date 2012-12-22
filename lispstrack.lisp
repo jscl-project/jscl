@@ -299,7 +299,7 @@
 
 (define-compilation if (condition true false)
   (concat "("
-          (ls-compile condition env fenv)
+          (ls-compile condition env fenv) " !== " (ls-compile nil nil nil)
           " ? "
           (ls-compile true env fenv)
           " : "
@@ -331,7 +331,7 @@
               *newline*
               (if rest-argument
                   (let ((js!rest (lookup-variable-translation rest-argument new-env)))
-                    (concat "var " js!rest "= false;" *newline*
+                    (concat "var " js!rest "= " (ls-compile nil env fenv) ";" *newline*
                             "for (var i = arguments.length-1; i>="
                             (integer-to-string (length required-arguments))
                             "; i--)" *newline*
@@ -373,7 +373,6 @@
 
 (defun literal->js (sexp)
   (cond
-    ((null sexp) "false")
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
     ((symbolp sexp) (ls-compile `(intern ,(escape-string (symbol-name sexp))) *env* *fenv*))
@@ -396,7 +395,7 @@
 
 (define-compilation while (pred &rest body)
   (concat "(function(){ while("
-          (ls-compile pred env fenv)
+          (ls-compile pred env fenv) " !== " (ls-compile nil nil nil)
           "){"
           (ls-compile-block body env fenv)
           "}})()"))
@@ -466,6 +465,9 @@
 
 ;;; Primitives
 
+(defun compile-bool (x)
+  (concat "(" x "?" (ls-compile t nil nil) ": " (ls-compile nil nil nil) ")"))
+
 (define-compilation + (x y)
   (concat "((" (ls-compile x env fenv) ") + (" (ls-compile y env fenv) "))"))
 
@@ -479,13 +481,13 @@
   (concat "((" (ls-compile x env fenv) ") / (" (ls-compile y env fenv) "))"))
 
 (define-compilation < (x y)
-  (concat "((" (ls-compile x env fenv) ") < (" (ls-compile y env fenv) "))"))
+  (compile-bool (concat "((" (ls-compile x env fenv) ") < (" (ls-compile y env fenv) "))")))
 
 (define-compilation = (x y)
-  (concat "((" (ls-compile x env fenv) ") == (" (ls-compile y env fenv) "))"))
+  (compile-bool (concat "((" (ls-compile x env fenv) ") == (" (ls-compile y env fenv) "))")))
 
 (define-compilation numberp (x)
-  (concat "(typeof (" (ls-compile x env fenv) ") == \"number\")"))
+  (compile-bool (concat "(typeof (" (ls-compile x env fenv) ") == \"number\")")))
 
 
 (define-compilation mod (x y)
@@ -495,15 +497,16 @@
   (concat "(Math.floor(" (ls-compile x env fenv) "))"))
 
 (define-compilation null (x)
-  (concat "(" (ls-compile x env fenv) "== false)"))
+  (compile-bool (concat "(" (ls-compile x env fenv) "===" (ls-compile nil env fenv) ")")))
 
 (define-compilation cons (x y)
   (concat "{car: " (ls-compile x env fenv) ", cdr: " (ls-compile y env fenv) "}"))
 
 (define-compilation consp (x)
-  (concat "(function(){ var tmp = "
-          (ls-compile x env fenv)
-          "; return (typeof tmp == 'object' && 'car' in tmp);})()"))
+  (compile-bool
+   (concat "(function(){ var tmp = "
+           (ls-compile x env fenv)
+           "; return (typeof tmp == 'object' && 'car' in tmp);})()")))
 
 (define-compilation car (x)
   (concat "(" (ls-compile x env fenv) ").car"))
@@ -518,9 +521,10 @@
   (concat "((" (ls-compile x env fenv) ").cdr = " (ls-compile new env fenv) ")"))
 
 (define-compilation symbolp (x)
-  (concat "(function(){ var tmp = "
-          (ls-compile x env fenv)
-          "; return (typeof tmp == 'object' && 'name' in tmp); })()"))
+  (compile-bool
+   (concat "(function(){ var tmp = "
+           (ls-compile x env fenv)
+           "; return (typeof tmp == 'object' && 'name' in tmp); })()")))
 
 (define-compilation make-symbol (name)
   (concat "{name: " (ls-compile name env fenv) "}"))
@@ -529,16 +533,19 @@
   (concat "(" (ls-compile x env fenv) ").name"))
 
 (define-compilation eq (x y)
-  (concat "(" (ls-compile x env fenv) " === " (ls-compile y env fenv) ")"))
+  (compile-bool
+   (concat "(" (ls-compile x env fenv) " === " (ls-compile y env fenv) ")")))
 
 (define-compilation equal (x y)
-  (concat "(" (ls-compile x env fenv) " == " (ls-compile y env fenv) ")"))
+  (compile-bool
+   (concat "(" (ls-compile x env fenv) " == " (ls-compile y env fenv) ")")))
 
 (define-compilation string (x)
   (concat "String.fromCharCode(" (ls-compile x env fenv) ")"))
 
 (define-compilation stringp (x)
-  (concat "(typeof(" (ls-compile x env fenv) ") == \"string\")"))
+  (compile-bool
+   (concat "(typeof(" (ls-compile x env fenv) ") == \"string\")")))
 
 (define-compilation string-upcase (x)
   (concat "(" (ls-compile x env fenv) ").toUpperCase()"))
@@ -583,7 +590,7 @@
                                      ", ")
                 "];" *newline*
                 "var tail = (" (ls-compile last env fenv) ");" *newline*
-                "while (tail != false){" *newline*
+                "while (tail != " (ls-compile nil env fenv) "){" *newline*
                 "    args.push(tail.car);" *newline*
                 "    tail = tail.cdr;" *newline*
                 "}" *newline*
@@ -601,7 +608,11 @@
   "{}")
 
 (define-compilation get (object key)
-  (concat "(" (ls-compile object env fenv) ")[" (ls-compile key env fenv) "]"))
+  (concat "(function(){ var tmp = "
+          "(" (ls-compile object env fenv) ")[" (ls-compile key env fenv) "]"
+          ";"
+          "return tmp == undefined? " (ls-compile nil nil nil) ": tmp ;"
+          "})()"))
 
 (define-compilation set (object key value)
   (concat "(("
@@ -609,6 +620,11 @@
           ")["
           (ls-compile key env fenv) "]"
           " = " (ls-compile value env fenv) ")"))
+
+(define-compilation in (key object)
+  (compile-bool
+   (concat "(" (ls-compile key env fenv) " in " (ls-compile object env fenv) ")")))
+
 
 (defun macrop (x)
   (and (symbolp x) (eq (binding-type (lookup-function x *fenv*)) 'macro)))
