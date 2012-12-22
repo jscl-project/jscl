@@ -62,8 +62,8 @@
 (defun car (x) (car x))
 (defun caar (x) (car (car x)))
 (defun cadr (x) (car (cdr x)))
-(defun caddr (x) (car (cdr x)))
-(defun cadddr (x) (car (cdr x)))
+(defun caddr (x) (car (cdr (cdr x))))
+(defun cadddr (x) (car (cdr (cdr (cdr x)))))
 (defun cdr (x) (cdr x))
 (defun cdar (x) (cdr (car x)))
 (defun cddr (x) (cdr (cdr x)))
@@ -948,4 +948,4 @@
   (js-eval (ls-compile x nil nil)))
 
 
-(debug (ls-compile '(+ 1 2) nil nil))
+(debug (ls-compile 't nil nil))
