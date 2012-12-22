@@ -94,11 +94,14 @@
       x
       (list x)))
 
-(defun append (list1 list2)
+(defun append-two (list1 list2)
   (if (null list1)
       list2
       (cons (car list1)
             (append (cdr list1) list2))))
+
+(defun append (&rest lists)
+  (!reduce #'append-two lists '()))
 
 (defun reverse-aux (list acc)
   (if (null list)
