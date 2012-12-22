@@ -769,7 +769,7 @@
   (concat "{name: " (ls-compile name env fenv) "}"))
 
 (define-compilation symbol-name (x)
-  (concat "(" (ls-compile x env fenv) ").name"))
+  (concat "(function(){ var tmp = " (ls-compile x env fenv) "; tmp == false? 'NIL'? tmp.name)()"))
 
 (define-compilation eq (x y)
   (concat "(" (ls-compile x env fenv) " === " (ls-compile y env fenv) ")"))
