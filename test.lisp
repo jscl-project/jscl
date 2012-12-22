@@ -20,9 +20,6 @@
 
 (defvar *package* (new))
 
-(defvar t 't)
-(defvar nil 'nil)
-
 (defun intern (name)
   (let ((s (get *package* name)))
     (if s s (set *package* name (make-symbol name)))))
@@ -30,6 +27,8 @@
 (defun find-symbol (name)
   (get *package* name))
 
+(defvar t 't)
+(defvar nil 'nil)
 
 (defmacro when (condition &rest body)
   `(if ,condition (progn ,@body) nil))

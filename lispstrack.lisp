@@ -375,7 +375,7 @@
     ((null sexp) "false")
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
-    ((symbolp sexp) (concat "{name: \"" (escape-string (symbol-name sexp)) "\"}"))
+    ((symbolp sexp) (ls-compile `(intern ,(escape-string (symbol-name sexp))) *env* *fenv*))
     ((consp sexp) (concat "{car: "
                           (literal->js (car sexp))
                           ", cdr: "
@@ -383,11 +383,13 @@
 
 (let ((counter 0))
   (defun literal (form)
-    (if (null form)
-        (literal->js form)
-        (let ((var (concat "l" (integer-to-string (incf counter)))))
-          (push (concat "var " var " = " (literal->js form)) *toplevel-compilations*)
-          var))))
+    (cond
+      ((null form)
+       (literal->js form))
+      (t
+       (let ((var (concat "l" (integer-to-string (incf counter)))))
+         (push (concat "var " var " = " (literal->js form)) *toplevel-compilations*)
+         var)))))
 
 (define-compilation quote (sexp)
   (literal sexp))
