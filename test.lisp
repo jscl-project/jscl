@@ -513,7 +513,6 @@
   (push (make-binding name 'macro lambda t) *fenv*))
 
 
-
 (defvar *compilations* nil)
 
 (defun ls-compile-block (sexps env fenv)
@@ -521,15 +520,14 @@
    (remove nil (mapcar (lambda (x)
                          (ls-compile x env fenv))
                        sexps))
-   (concat ";" *newline*)))
-
+                 ";
+"))
 (defmacro define-compilation (name args &rest body)
   ;; Creates a new primitive `name' with parameters args and
   ;; @body. The body can access to the local environment through the
   ;; variable ENV.
   `(push (list ',name (lambda (env fenv ,@args) ,@body))
          *compilations*))
-
 
 (define-compilation if (condition true false)
   (concat "("
@@ -590,12 +588,27 @@
 
 ;;; Literals
 
+(defun escape-string (string)
+  (let ((output "")
+        (index 0)
+        (size (length string)))
+    (while (< index size)
+      (let ((ch (char string index)))
+        (when (or (char= ch #\") (char= ch #\\))
+          (setq output (concat output "\\")))
+        (when (or (char= ch #\newline))
+          (setq output (concat output "\\"))
+          (setq ch #\n))
+        (setq output (concat output (string ch))))
+      (incf index))
+    output))
+
 (defun literal->js (sexp)
   (cond
     ((null sexp) "false")
     ((integerp sexp) (integer-to-string sexp))
-    ((stringp sexp) (concat "\"" sexp "\""))
-    ((symbolp sexp) (concat "{name: \"" (symbol-name sexp) "\"}"))
+    ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
+    ((symbolp sexp) (ls-compile `(intern ,(escape-string (symbol-name sexp))) *env* *fenv*))
     ((consp sexp) (concat "{car: "
                           (literal->js (car sexp))
                           ", cdr: "
@@ -603,11 +616,13 @@
 
 (let ((counter 0))
   (defun literal (form)
-    (if (null form)
-        (literal->js form)
-        (let ((var (concat "l" (integer-to-string (incf counter)))))
-          (push (concat "var " var " = " (literal->js form)) *toplevel-compilations*)
-          var))))
+    (cond
+      ((null form)
+       (literal->js form))
+      (t
+       (let ((var (concat "l" (integer-to-string (incf counter)))))
+         (push (concat "var " var " = " (literal->js form)) *toplevel-compilations*)
+         var)))))
 
 (define-compilation quote (sexp)
   (literal sexp))
@@ -705,6 +720,10 @@
 (define-compilation = (x y)
   (concat "((" (ls-compile x env fenv) ") == (" (ls-compile y env fenv) "))"))
 
+(define-compilation numberp (x)
+  (concat "(typeof (" (ls-compile x env fenv) ") == \"number\")"))
+
+
 (define-compilation mod (x y)
   (concat "((" (ls-compile x env fenv) ") % (" (ls-compile y env fenv) "))"))
 
@@ -717,6 +736,11 @@
 (define-compilation cons (x y)
   (concat "{car: " (ls-compile x env fenv) ", cdr: " (ls-compile y env fenv) "}"))
 
+(define-compilation consp (x)
+  (concat "(function(){ var tmp = "
+          (ls-compile x env fenv)
+          "; return (typeof tmp == 'object' && 'car' in tmp);})()"))
+
 (define-compilation car (x)
   (concat "(" (ls-compile x env fenv) ").car"))
 
@@ -728,6 +752,11 @@
 
 (define-compilation setcdr (x new)
   (concat "((" (ls-compile x env fenv) ").cdr = " (ls-compile new env fenv) ")"))
+
+(define-compilation symbolp (x)
+  (concat "(function(){ var tmp = "
+          (ls-compile x env fenv)
+          "; return (typeof tmp == 'object' && 'name' in tmp); })()"))
 
 (define-compilation make-symbol (name)
   (concat "{name: " (ls-compile name env fenv) "}"))
@@ -743,6 +772,9 @@
 
 (define-compilation string (x)
   (concat "String.fromCharCode(" (ls-compile x env fenv) ")"))
+
+(define-compilation stringp (x)
+  (concat "(typeof(" (ls-compile x env fenv) ") == \"string\")"))
 
 (define-compilation string-upcase (x)
   (concat "(" (ls-compile x env fenv) ").toUpperCase()"))
@@ -773,6 +805,30 @@
                         args)
                 ", ")
           ")"))
+
+(define-compilation apply (func &rest args)
+  (if (null args)
+      (concat "(" (ls-compile func env fenv) ")()")
+      (let ((args (butlast args))
+            (last (car (last args))))
+        (concat "function(){" *newline*
+                "var f = " (ls-compile func env fenv) ";" *newline*
+                "var args = [" (join (mapcar (lambda (x)
+                                               (ls-compile x env fenv))
+                                             args)
+                                     ", ")
+                "];" *newline*
+                "var tail = (" (ls-compile last env fenv) ");" *newline*
+                "while (tail != false){" *newline*
+                "    args.push(tail[0]);" *newline*
+                "    args = args.slice(1);" *newline*
+                "}" *newline*
+                "return f.apply(this, args);" *newline*
+                "}" *newline*))))
+
+(define-compilation js-eval (string)
+  (concat "eval(" (ls-compile string env fenv)  ")"))
+
 
 (define-compilation error (string)
   (concat "(function (){ throw " (ls-compile string env fenv) ";" "return 0;})()"))
@@ -820,7 +876,7 @@
   (cond
     ((symbolp sexp) (lookup-variable-translation sexp env))
     ((integerp sexp) (integer-to-string sexp))
-    ((stringp sexp) (concat "\"" sexp "\""))
+    ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
     ((listp sexp)
      (if (assoc (car sexp) *compilations*)
          (let ((comp (second (assoc (car sexp) *compilations*))))
@@ -833,15 +889,43 @@
   (setq *toplevel-compilations* nil)
   (let ((code (ls-compile sexp nil nil)))
     (prog1
-        (concat (join (mapcar (lambda (x) (concat x ";" *newline*))
-                              *toplevel-compilations*)
-                      "")
-                code)
+        (join (mapcar (lambda (x) (concat x ";" *newline*))
+                      *toplevel-compilations*)
+              "")
+      code
       (setq *toplevel-compilations* nil))))
+
+#+common-lisp
+(progn
+  (defun read-whole-file (filename)
+    (with-open-file (in filename)
+      (let ((seq (make-array (file-length in) :element-type 'character)))
+        (read-sequence seq in)
+        seq)))
+
+  (defun ls-compile-file (filename output)
+    (setq *env* nil *fenv* nil)
+    (setq *compilation-unit-checks* nil)
+    (with-open-file (out output :direction :output :if-exists :supersede)
+      (let* ((source (read-whole-file filename))
+             (in (make-string-stream source)))
+        (loop
+           for x = (ls-read in)
+           until (eq x *eof*)
+           for compilation = (ls-compile-toplevel x)
+           when (plusp (length compilation))
+           do (write-line (concat compilation "; ") out))
+        (dolist (check *compilation-unit-checks*)
+          (funcall check))
+        (setq *compilation-unit-checks* nil))))
+
+  (defun bootstrap ()
+    (ls-compile-file "lispstrack.lisp" "lispstrack.js")))
+
 
 
 (defun eval (x)
   (js-eval (ls-compile x nil nil)))
 
 
-(debug (eq (ls-read-from-string "+") '+))
+(debug (ls-compile 'x nil nil))
