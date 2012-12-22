@@ -219,50 +219,50 @@
 (defun mark-binding-as-declared (b)
   (setcar (cdddr b) t))
 
-(let ((counter 0))
-  (defun gvarname (symbol)
-    (concat "v" (integer-to-string (incf counter))))
+(defvar *variable-counter* 0)
+(defun gvarname (symbol)
+  (concat "v" (integer-to-string (incf *variable-counter*))))
 
-  (defun lookup-variable (symbol env)
-    (or (assoc symbol env)
-        (assoc symbol *env*)
-        (let ((name (symbol-name symbol))
-              (binding (make-binding symbol 'variable (gvarname symbol) nil)))
-          (push binding *env*)
-          (push (lambda ()
-                  (unless (binding-declared (assoc symbol *env*))
-                    (error (concat "Undefined variable `" name "'"))))
-                *compilation-unit-checks*)
-          binding)))
+(defun lookup-variable (symbol env)
+  (or (assoc symbol env)
+      (assoc symbol *env*)
+      (let ((name (symbol-name symbol))
+            (binding (make-binding symbol 'variable (gvarname symbol) nil)))
+        (push binding *env*)
+        (push (lambda ()
+                (unless (binding-declared (assoc symbol *env*))
+                  (error (concat "Undefined variable `" name "'"))))
+              *compilation-unit-checks*)
+        binding)))
 
-  (defun lookup-variable-translation (symbol env)
-    (binding-translation (lookup-variable symbol env)))
+(defun lookup-variable-translation (symbol env)
+  (binding-translation (lookup-variable symbol env)))
 
-  (defun extend-local-env (args env)
-    (append (mapcar (lambda (symbol)
-                      (make-binding symbol 'variable (gvarname symbol) t))
-                    args)
-            env)))
+(defun extend-local-env (args env)
+  (append (mapcar (lambda (symbol)
+                    (make-binding symbol 'variable (gvarname symbol) t))
+                  args)
+          env))
 
-(let ((counter 0))
-  (defun lookup-function (symbol env)
-    (or (assoc symbol env)
-        (assoc symbol *fenv*)
-        (let ((name (symbol-name symbol))
-              (binding
-               (make-binding symbol
-                             'function
-                             (concat "f" (integer-to-string (incf counter)))
-                             nil)))
-          (push binding *fenv*)
-          (push (lambda ()
-                  (unless (binding-declared (assoc symbol *fenv*))
-                    (error (concat "Undefined function `" name "'"))))
-                *compilation-unit-checks*)
-          binding)))
+(defvar *function-counter* 0)
+(defun lookup-function (symbol env)
+  (or (assoc symbol env)
+      (assoc symbol *fenv*)
+      (let ((name (symbol-name symbol))
+            (binding
+             (make-binding symbol
+                           'function
+                           (concat "f" (integer-to-string (incf *function-counter*)))
+                           nil)))
+        (push binding *fenv*)
+        (push (lambda ()
+                (unless (binding-declared (assoc symbol *fenv*))
+                  (error (concat "Undefined function `" name "'"))))
+              *compilation-unit-checks*)
+        binding)))
 
-  (defun lookup-function-translation (symbol env)
-    (binding-translation (lookup-function symbol env))))
+(defun lookup-function-translation (symbol env)
+  (binding-translation (lookup-function symbol env)))
 
 
 (defvar *toplevel-compilations* nil)
@@ -381,11 +381,11 @@
                           ", cdr: "
 			  (literal->js (cdr sexp)) "}"))))
 
-(let ((counter 0))
-  (defun literal (form)
-    (let ((var (concat "l" (integer-to-string (incf counter)))))
-      (push (concat "var " var " = " (literal->js form)) *toplevel-compilations*)
-      var)))
+(defvar *literal-counter* 0)
+(defun literal (form)
+  (let ((var (concat "l" (integer-to-string (incf *literal-counter*)))))
+    (push (concat "var " var " = " (literal->js form)) *toplevel-compilations*)
+    var))
 
 (define-compilation quote (sexp)
   (literal sexp))
@@ -408,7 +408,7 @@
      (lookup-function-translation x fenv))))
 
 #+common-lisp
-c(defmacro eval-when-compile (&body body)
+(defmacro eval-when-compile (&body body)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      ,@body))
 
@@ -669,7 +669,7 @@ c(defmacro eval-when-compile (&body body)
   (setq *toplevel-compilations* nil)
   (let ((code (ls-compile sexp nil nil)))
     (prog1
-        (concat "/* " (princ-to-string sexp) " */"
+        (concat #+common-lisp (concat "/* " (princ-to-string sexp) " */")
                 (join (mapcar (lambda (x) (concat x ";" *newline*))
                               *toplevel-compilations*)
                "")
