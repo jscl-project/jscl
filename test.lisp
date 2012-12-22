@@ -36,6 +36,16 @@
 (defmacro unless (condition &rest body)
   `(if ,condition nil (progn ,@body)))
 
+(defmacro dolist (iter &rest body)
+  (let ((var (first iter))
+        (g!list (make-symbol "LIST")))
+    `(let ((,g!list ,(second iter))
+           (,var nil))
+       (while ,g!list
+         (setq ,var (car ,g!list))
+         ,@body
+         (setq ,g!list (cdr ,g!list))))))
+
 (defun = (x y) (= x y))
 (defun + (x y) (+ x y))
 (defun - (x y) (- x y))
@@ -895,6 +905,20 @@
       code
       (setq *toplevel-compilations* nil))))
 
+
+(defmacro with-compilation-unit (&rest body)
+  `(progn
+     (setq *env* nil)
+     (setq *fenv* nil)
+     (setq *compilation-unit-checks* nil)
+     ,@body
+     (dolist (check *compilation-unit-checks*)
+       (funcall check))
+     (setq *env* nil)
+     (setq *fenv* nil)
+     (setq *compilation-unit-checks* nil)))
+
+
 #+common-lisp
 (progn
   (defun read-whole-file (filename)
@@ -926,6 +950,3 @@
 
 (defun eval (x)
   (js-eval (ls-compile x nil nil)))
-
-
-(debug (ls-compile 'x nil nil))
