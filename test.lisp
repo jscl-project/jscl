@@ -626,13 +626,9 @@
 
 (let ((counter 0))
   (defun literal (form)
-    (cond
-      ((null form)
-       (literal->js form))
-      (t
-       (let ((var (concat "l" (integer-to-string (incf counter)))))
-         (push (concat "var " var " = " (literal->js form)) *toplevel-compilations*)
-         var)))))
+    (let ((var (concat "l" (integer-to-string (incf counter)))))
+      (push (concat "var " var " = " (literal->js form)) *toplevel-compilations*)
+      var)))
 
 (define-compilation quote (sexp)
   (literal sexp))
