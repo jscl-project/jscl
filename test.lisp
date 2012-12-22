@@ -908,14 +908,10 @@
 
 (defmacro with-compilation-unit (&rest body)
   `(progn
-     (setq *env* nil)
-     (setq *fenv* nil)
      (setq *compilation-unit-checks* nil)
      ,@body
      (dolist (check *compilation-unit-checks*)
        (funcall check))
-     (setq *env* nil)
-     (setq *fenv* nil)
      (setq *compilation-unit-checks* nil)))
 
 
@@ -950,3 +946,6 @@
 
 (defun eval (x)
   (js-eval (ls-compile x nil nil)))
+
+
+(debug (ls-compile '(+ 1 2) nil nil))
