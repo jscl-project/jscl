@@ -408,7 +408,7 @@
      (lookup-function-translation x fenv))))
 
 #+common-lisp
-(defmacro eval-when-compile (&body body)
+c(defmacro eval-when-compile (&body body)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      ,@body))
 

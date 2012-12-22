@@ -66,6 +66,8 @@
 (defun truncate (x y) (floor (/ x y)))
 
 (defun cons (x y ) (cons x y))
+(defun consp (x) (consp x))
+
 (defun car (x) (car x))
 (defun caar (x) (car (car x)))
 (defun cadr (x) (car (cdr x)))
@@ -275,6 +277,24 @@
      (remove x (cdr list)))
     (t
      (cons (car list) (remove x (cdr list))))))
+
+(defun remove-if (func list)
+  (cond
+    ((null list)
+     nil)
+    ((funcall func (car list))
+     (remove-if func (cdr list)))
+    (t
+     (cons (car list) (remove-if func (cdr list))))))
+
+(defun remove-if-not (func list)
+  (cond
+    ((null list)
+     nil)
+    ((funcall func (car list))
+     (cons (car list) (remove-if-not func (cdr list))))
+    (t
+     (remove-if-not func (cdr list)))))
 
 (defun digit-char-p (x)
   (if (and (<= #\0 x) (<= x #\9))
@@ -1015,10 +1035,15 @@
 ;;; ----------------------------------------------------------
 
 (defmacro with-compilation-unit (&rest body)
-  `(prog1 (progn ,@body)
+  `(prog1
+       (progn
+         (setq *compilation-unit-checks* nil)
+         (setq *env* (remove-if-not #'binding-declared *env*))
+         (setq *fenv* (remove-if-not #'binding-declared *fenv*))
+         ,@body)
      (dolist (check *compilation-unit-checks*)
        (funcall check))
-     (setq *compilation-unit-checks* nil)))
+     ))
 
 (defun eval (x)
   (let ((code
