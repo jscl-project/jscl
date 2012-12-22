@@ -946,7 +946,10 @@
 
 
 (defun eval (x)
-  (js-eval (ls-compile x nil nil)))
+  (let ((code
+         (with-compilation-unit
+             (ls-compile-toplevel x nil nil))))
+    (js-eval code)))
 
 ;; Set the initial global environment to be equal to the host global
 ;; environment at this point of the compilation.
@@ -956,5 +959,11 @@
     (setq *toplevel-compilations*
           (append *toplevel-compilations* (list c1 c2)))))
 
-(with-compilation-unit
-    (debug (lookup-function 'eval nil)))
+
+(js-eval
+ (concat "var lisp = {};"
+         "lisp.eval = " (lookup-function-translation 'eval nil) ";" *newline*
+         "lisp.read = " (lookup-function-translation 'ls-read-from-string nil) ";" *newline*
+         "lisp.evalString = function(str){" *newline*
+         "   return lisp.eval(lisp.read(str));" *newline*
+         "}" *newline*))
