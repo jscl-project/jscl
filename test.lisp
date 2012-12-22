@@ -2,9 +2,9 @@
 
 (eval-when-compile
   (%compile-defmacro 'defmacro
-     (lambda (name args &rest body)
+     '(lambda (name args &rest body)
        `(eval-when-compile
-          (%compile-defmacro ',name (lambda ,args ,@body))))))
+          (%compile-defmacro ',name '(lambda ,args ,@body))))))
 
 (defmacro defvar (name value)
   `(progn
@@ -945,12 +945,13 @@
     (ls-compile-file "lispstrack.lisp" "lispstrack.js")))
 
 
-
 (defun eval (x)
   (js-eval (ls-compile x nil nil)))
 
-
-(debug (apply #'+ 1 '(2)))
-
-;; (with-compilation-unit
-;;     (debug (ls-compile (quote (function 1+)) nil nil)))
+;;; Set the initial global environment to be equal to the host global
+;;; environment at this point of the compilation.
+(eval-when-compile
+  (let ((c1 (ls-compile `(setq *fenv* ',*fenv*) nil nil))
+        (c2 (ls-compile `(setq  *env*  ',*env*) nil nil)))
+    (setq *toplevel-compilations*
+          (append *toplevel-compilations* (list c1 c2)))))
