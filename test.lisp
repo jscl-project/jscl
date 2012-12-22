@@ -911,10 +911,10 @@
 (defmacro with-compilation-unit (&rest body)
   `(progn
      (setq *compilation-unit-checks* nil)
-     ,@body
-     (dolist (check *compilation-unit-checks*)
-       (funcall check))
-     (setq *compilation-unit-checks* nil)))
+     (prog1 (progn ,@body)
+       (dolist (check *compilation-unit-checks*)
+         (funcall check))
+       (setq *compilation-unit-checks* nil))))
 
 
 #+common-lisp
@@ -959,11 +959,14 @@
     (setq *toplevel-compilations*
           (append *toplevel-compilations* (list c1 c2)))))
 
-
 (js-eval
  (concat "var lisp = {};"
-         "lisp.eval = " (lookup-function-translation 'eval nil) ";" *newline*
          "lisp.read = " (lookup-function-translation 'ls-read-from-string nil) ";" *newline*
+         "lisp.eval = " (lookup-function-translation 'eval nil) ";" *newline*
+         "lisp.compile = " (lookup-function-translation 'ls-compile-toplevel nil) ";" *newline*
          "lisp.evalString = function(str){" *newline*
          "   return lisp.eval(lisp.read(str));" *newline*
+         "}" *newline*
+         "lisp.compileString = function(str){" *newline*
+         "   return lisp.compile(lisp.read(str));" *newline*
          "}" *newline*))
