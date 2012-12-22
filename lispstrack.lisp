@@ -504,8 +504,9 @@
   (concat "{car: " (ls-compile x env fenv) ", cdr: " (ls-compile y env fenv) "}"))
 
 (define-compilation consp (x)
-  (concat "('car' in " (ls-compile x env fenv) ")"))
-
+  (concat "(function(){ var tmp = "
+          (ls-compile x env fenv)
+          "; return (typeof tmp == 'object' && 'car' in tmp);})()"))
 
 (define-compilation car (x)
   (concat "(" (ls-compile x env fenv) ").car"))
@@ -520,7 +521,9 @@
   (concat "((" (ls-compile x env fenv) ").cdr = " (ls-compile new env fenv) ")"))
 
 (define-compilation symbolp (x)
-  (concat "('name' in " (ls-compile x env fenv) ")"))
+  (concat "(function(){ var tmp = "
+          (ls-compile x env fenv)
+          "; return (typeof tmp == 'object' && 'name' in tmp); })()"))
 
 (define-compilation make-symbol (name)
   (concat "{name: " (ls-compile name env fenv) "}"))
@@ -613,7 +616,7 @@
 (defun macrop (x)
   (and (symbolp x) (eq (binding-type (lookup-function x *fenv*)) 'macro)))
 
-(defun ls-macroexpand-1 (form &optional env fenv)
+(defun ls-macroexpand-1 (form env fenv)
   (when (macrop (car form))
     (let ((binding (lookup-function (car form) *env*)))
       (if (eq (binding-type binding) 'macro)
@@ -636,7 +639,7 @@
     (t
      (error (concat "Invalid function designator " (symbol-name function))))))
 
-(defun ls-compile (sexp &optional env fenv)
+(defun ls-compile (sexp env fenv)
   (cond
     ((symbolp sexp) (lookup-variable-translation sexp env))
     ((integerp sexp) (integer-to-string sexp))
@@ -651,7 +654,7 @@
 
 (defun ls-compile-toplevel (sexp)
   (setq *toplevel-compilations* nil)
-  (let ((code (ls-compile sexp)))
+  (let ((code (ls-compile sexp nil nil)))
     (prog1
         (concat "/* " (princ-to-string sexp) " */"
                 (join (mapcar (lambda (x) (concat x ";" *newline*))
