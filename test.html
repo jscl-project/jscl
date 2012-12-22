@@ -63,7 +63,7 @@
             if (input[0] != ','){
                 jqconsole.Write(JSON.stringify(lisp.evalString(input)) + '\n', 'jqconsole-output');
             } else {
-                jqconsole.Write(JSON.stringify(lisp.compileString(input.slice(0))) + '\n', 'jqconsole-output');
+                jqconsole.Write(JSON.stringify(lisp.compileString(input.slice(1))) + '\n', 'jqconsole-output');
             }
             // Restart the prompt.
             startPrompt();
