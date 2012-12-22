@@ -964,11 +964,12 @@ c(defmacro eval-when-compile (&body body)
   (and (symbolp x) (eq (binding-type (lookup-function x *fenv*)) 'macro)))
 
 (defun ls-macroexpand-1 (form env fenv)
-  (when (macrop (car form))
-    (let ((binding (lookup-function (car form) *env*)))
-      (if (eq (binding-type binding) 'macro)
-          (apply (eval (binding-translation binding)) (cdr form))
-          form))))
+  (if (macrop (car form))
+      (let ((binding (lookup-function (car form) *env*)))
+        (if (eq (binding-type binding) 'macro)
+            (apply (eval (binding-translation binding)) (cdr form))
+            form))
+      form))
 
 (defun compile-funcall (function args env fenv)
   (cond
