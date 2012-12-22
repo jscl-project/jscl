@@ -328,7 +328,7 @@
          (setcdr stream (1+ (cdr stream))))))
 
 (defun whitespacep (ch)
-  (or (char= ch #\space) (char= ch #\newline)))
+  (or (char= ch #\space) (char= ch #\newline) (char= ch #\tab)))
 
 (defun skip-whitespaces (stream)
   (let (ch)
@@ -421,6 +421,7 @@
 			 (read-until stream #'terminalp))))
             (cond
               ((string= cname "space") (char-code #\space))
+              ((string= cname "tab") (char-code #\tab))
               ((string= cname "newline") (char-code #\newline))
               (t (char-code (char cname 0))))))
          (#\+
