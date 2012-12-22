@@ -816,12 +816,13 @@
                 ", ")
           ")"))
 
+
 (define-compilation apply (func &rest args)
   (if (null args)
       (concat "(" (ls-compile func env fenv) ")()")
       (let ((args (butlast args))
             (last (car (last args))))
-        (concat "function(){" *newline*
+        (concat "(function(){" *newline*
                 "var f = " (ls-compile func env fenv) ";" *newline*
                 "var args = [" (join (mapcar (lambda (x)
                                                (ls-compile x env fenv))
@@ -830,11 +831,12 @@
                 "];" *newline*
                 "var tail = (" (ls-compile last env fenv) ");" *newline*
                 "while (tail != false){" *newline*
-                "    args.push(tail[0]);" *newline*
-                "    args = args.slice(1);" *newline*
+                "    args.push(tail.car);" *newline*
+                "    tail = tail.cdr;" *newline*
                 "}" *newline*
                 "return f.apply(this, args);" *newline*
-                "}" *newline*))))
+                "})()" *newline*))))
+
 
 (define-compilation js-eval (string)
   (concat "eval(" (ls-compile string env fenv)  ")"))
@@ -948,4 +950,7 @@
   (js-eval (ls-compile x nil nil)))
 
 
-(debug (ls-compile 't nil nil))
+(debug (apply #'+ 1 '(2)))
+
+;; (with-compilation-unit
+;;     (debug (ls-compile (quote (function 1+)) nil nil)))
