@@ -509,10 +509,16 @@
            "; return (typeof tmp == 'object' && 'car' in tmp);})()")))
 
 (define-compilation car (x)
-  (concat "(" (ls-compile x env fenv) ").car"))
+  (concat "(function () { var tmp = " (ls-compile x env fenv)
+          "; return tmp === " (ls-compile nil nil nil) "? "
+          (ls-compile nil nil nil)
+          ": tmp.car; })()"))
 
 (define-compilation cdr (x)
-  (concat "(" (ls-compile x env fenv) ").cdr"))
+  (concat "(function () { var tmp = " (ls-compile x env fenv)
+          "; return tmp === " (ls-compile nil nil nil) "? "
+          (ls-compile nil nil nil)
+          ": tmp.cdr; })()"))
 
 (define-compilation setcar (x new)
   (concat "((" (ls-compile x env fenv) ").car = " (ls-compile new env fenv) ")"))
