@@ -69,14 +69,17 @@
 (defun consp (x) (consp x))
 
 (defun car (x) (car x))
+(defun cdr (x) (cdr x))
+
 (defun caar (x) (car (car x)))
 (defun cadr (x) (car (cdr x)))
-(defun caddr (x) (car (cdr (cdr x))))
-(defun cadddr (x) (car (cdr (cdr (cdr x)))))
-(defun cdr (x) (cdr x))
 (defun cdar (x) (cdr (car x)))
-(defun cddr (x) (cdr (cdr (cdr x))))
-(defun cdddr (x) (cdr (cdr (cdr (cdr x)))))
+(defun cddr (x) (cdr (cdr x)))
+
+(defun caddr (x) (car (cdr (cdr x))))
+(defun cdddr (x) (cdr (cdr (cdr x))))
+
+(defun cadddr (x) (car (cdr (cdr (cdr x)))))
 
 (defun first (x) (car x))
 (defun second (x) (cadr x))
