@@ -739,7 +739,7 @@
      (lookup-function-translation x fenv))))
 
 #+common-lisp
-c(defmacro eval-when-compile (&body body)
+(defmacro eval-when-compile (&body body)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      ,@body))
 
@@ -831,7 +831,7 @@ c(defmacro eval-when-compile (&body body)
   (compile-bool (concat "(" (ls-compile x env fenv) "===" (ls-compile nil env fenv) ")")))
 
 (define-compilation cons (x y)
-  (concat "{car: " (ls-compile x env fenv) ", cdr: " (ls-compile y env fenv) "}"))
+  (concat "({car: " (ls-compile x env fenv) ", cdr: " (ls-compile y env fenv) "})"))
 
 (define-compilation consp (x)
   (compile-bool

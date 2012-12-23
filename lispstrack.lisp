@@ -500,7 +500,7 @@
   (compile-bool (concat "(" (ls-compile x env fenv) "===" (ls-compile nil env fenv) ")")))
 
 (define-compilation cons (x y)
-  (concat "{car: " (ls-compile x env fenv) ", cdr: " (ls-compile y env fenv) "}"))
+  (concat "({car: " (ls-compile x env fenv) ", cdr: " (ls-compile y env fenv) "})"))
 
 (define-compilation consp (x)
   (compile-bool
