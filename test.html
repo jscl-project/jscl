@@ -42,7 +42,7 @@
         font-weight: normal;
     }
     /* The text color of the output. */
-    .jqconsole-output {
+    .jqconsole-output, .jqconsole-header {
         color: gray;
     }
     .jqconsole-error {
@@ -58,7 +58,7 @@
     <script src="jqconsole.min.js" type="text/javascript" charset="utf-8"></script>
     <script>
       $(function () {
-        var jqconsole = $('#console').jqconsole('Welcome to Lisptrack!\n', '> ');
+        var jqconsole = $('#console').jqconsole('Welcome to Lisptrack!\n\n', '> ');
         jqconsole.RegisterMatching('(', ')', 'parents');
 
         var startPrompt = function () {
