@@ -76,6 +76,13 @@
             }
             // Restart the prompt.
             startPrompt();
+          }, function(input){
+            try {
+                lisp.read(input[0]==','? input.slice(1): input);
+            } catch(error) {
+                return 0;
+            }
+            return false;
           });
         };
         startPrompt();
