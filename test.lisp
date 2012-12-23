@@ -75,8 +75,8 @@
 (defun cadddr (x) (car (cdr (cdr (cdr x)))))
 (defun cdr (x) (cdr x))
 (defun cdar (x) (cdr (car x)))
-(defun cddr (x) (cdr (cdr x)))
-(defun cdddr (x) (cdr (cdr x)))
+(defun cddr (x) (cdr (cdr (cdr x))))
+(defun cdddr (x) (cdr (cdr (cdr (cdr x)))))
 
 (defun first (x) (car x))
 (defun second (x) (cadr x))
@@ -549,6 +549,7 @@
   (and b (fourth b)))
 (defun mark-binding-as-declared (b)
   (setcar (cdddr b) t))
+
 
 (defvar *variable-counter* 0)
 (defun gvarname (symbol)
