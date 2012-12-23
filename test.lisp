@@ -756,8 +756,8 @@
 
 (define-transformation let (bindings &rest body)
   (let ((bindings (mapcar #'ensure-list bindings)))
-    `((lambda ,(mapcar 'car bindings) ,@body)
-      ,@(mapcar 'cadr bindings))))
+    `((lambda ,(mapcar #'car bindings) ,@body)
+      ,@(mapcar #'cadr bindings))))
 
 ;;; A little backquote implementation without optimizations of any
 ;;; kind for lispstrack.
