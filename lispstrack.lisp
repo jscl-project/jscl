@@ -604,8 +604,7 @@
                 "})()" *newline*))))
 
 (define-compilation js-eval (string)
-  (concat "eval(" (ls-compile string env fenv)  ")"))
-
+  (concat "eval.apply(window, [" (ls-compile string env fenv)  "])"))
 
 (define-compilation error (string)
   (concat "(function (){ throw " (ls-compile string env fenv) ";" "return 0;})()"))
