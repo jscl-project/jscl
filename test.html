@@ -45,7 +45,10 @@
     .jqconsole-output {
         color: gray;
     }
-    </style>
+    .jqconsole-error {
+        color: red;
+    }
+</style>
   </head>
 
   <body>
@@ -55,13 +58,19 @@
     <script src="jqconsole.min.js" type="text/javascript" charset="utf-8"></script>
     <script>
       $(function () {
-        var jqconsole = $('#console').jqconsole('Hi\n', '> ');
+        var jqconsole = $('#console').jqconsole('Welcome to Lisptrack!\n', '> ');
+        jqconsole.RegisterMatching('(', ')', 'parents');
+
         var startPrompt = function () {
           // Start the prompt with history enabled.
           jqconsole.Prompt(true, function (input) {
             // Output input with the class jqconsole-output.
             if (input[0] != ','){
-                jqconsole.Write(JSON.stringify(lisp.evalString(input)) + '\n', 'jqconsole-output');
+                try {
+                    jqconsole.Write(JSON.stringify(lisp.evalString(input)) + '\n', 'jqconsole-output');
+                } catch(error) {
+                    jqconsole.Write('ERROR: ' + error + '\n', 'jqconsole-error');
+                }
             } else {
                 jqconsole.Write(JSON.stringify(lisp.compileString(input.slice(1))) + '\n', 'jqconsole-output');
             }
