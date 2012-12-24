@@ -754,7 +754,7 @@
 
 (define-compilation eval-when-compile (&rest body)
   (eval (cons 'progn body))
-  nil)
+  "")
 
 (defmacro define-transformation (name args form)
   `(define-compilation ,name ,args
