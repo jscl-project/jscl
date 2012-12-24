@@ -405,7 +405,6 @@
                       digits)
               ""))))
 
-
 ;;;; Reader
 
 ;;; The Lisp reader, parse strings and return Lisp objects. The main
@@ -1027,6 +1026,17 @@
 ;;; interactive development (eval), which works calling the compiler
 ;;; and evaluating the Javascript result globally.
 
+(defun print-to-string (form)
+  (cond
+    ((symbolp form) (symbol-name form))
+    ((integerp form) (integer-to-string form))
+    ((stringp form) (concat "\"" (escape-string form) "\""))
+    ((listp form)
+     (concat "("
+             (join (mapcar #'print-to-string form)
+                   " ")
+             ")"))))
+
 #+lispstrack
 (progn
  (defmacro with-compilation-unit (&rest body)
@@ -1059,6 +1069,7 @@
  (js-eval
   (concat "var lisp = {};"
           "lisp.read = " (lookup-function-translation 'ls-read-from-string nil) ";" *newline*
+          "lisp.print = " (lookup-function-translation 'print-to-string nil) ";" *newline*
           "lisp.eval = " (lookup-function-translation 'eval nil) ";" *newline*
           "lisp.compile = " (lookup-function-translation 'ls-compile-toplevel nil) ";" *newline*
           "lisp.evalString = function(str){" *newline*

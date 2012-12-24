@@ -73,12 +73,12 @@
             // Output input with the class jqconsole-output.
             if (input[0] != ','){
                 try {
-                    jqconsole.Write(JSON.stringify(lisp.evalString(input)) + '\n', 'jqconsole-output');
+                    jqconsole.Write(lisp.print(lisp.evalString(input)) + '\n', 'jqconsole-output');
                 } catch(error) {
                     jqconsole.Write('ERROR: ' + error + '\n', 'jqconsole-error');
                 }
             } else {
-                jqconsole.Write(JSON.stringify(lisp.compileString(input.slice(1))) + '\n', 'jqconsole-output');
+                jqconsole.Write(lisp.compileString(input.slice(1)) + '\n', 'jqconsole-output');
             }
             // Restart the prompt.
             startPrompt();
