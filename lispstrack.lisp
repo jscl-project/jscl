@@ -29,11 +29,14 @@
                         `(eval-when-compile
                            (%compile-defmacro ',name '(lambda ,args ,@body))))))
 
- (defmacro defvar (name value)
+ (defmacro %defvar (name value)
    `(progn
       (eval-when-compile
         (%compile-defvar ',name))
       (setq ,name ,value)))
+
+  (defmacro defvar (name value)
+    `(%defvar ,name ,value))
 
  (defmacro %defun (name args &rest body)
    `(progn
@@ -133,6 +136,11 @@
   (defmacro defun (name args &rest body)
     `(progn
        (%defun ,name ,args ,@body)
+       ',name))
+
+  (defmacro defvar (name value)
+    `(progn
+       (%defvar ,name ,value)
        ',name))
 
   (defun append-two (list1 list2)
