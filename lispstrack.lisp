@@ -970,6 +970,11 @@
   (compile-bool
    (concat "(" (ls-compile key env fenv) " in " (ls-compile object env fenv) ")")))
 
+(define-compilation functionp (x)
+  (compile-bool
+   (concat "(typeof " (ls-compile x env fenv) " == 'function')")))
+
+
 (defun macrop (x)
   (and (symbolp x) (eq (binding-type (lookup-function x *fenv*)) 'macro)))
 
@@ -1031,6 +1036,7 @@
     ((symbolp form) (symbol-name form))
     ((integerp form) (integer-to-string form))
     ((stringp form) (concat "\"" (escape-string form) "\""))
+    ((functionp form) (concat "#<FUNCTION>"))
     ((listp form)
      (concat "("
              (join (mapcar #'print-to-string form)
