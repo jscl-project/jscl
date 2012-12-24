@@ -1,3 +1,97 @@
+;;; Library
+
+#+lispstrack
+(progn
+ (eval-when-compile
+   (%compile-defmacro 'defmacro
+                      '(lambda (name args &rest body)
+                        `(eval-when-compile
+                           (%compile-defmacro ',name '(lambda ,args ,@body))))))
+
+ (defmacro defvar (name value)
+   `(progn
+      (eval-when-compile
+        (%compile-defvar ',name))
+      (setq ,name ,value)))
+
+ (defmacro defun (name args &rest body)
+   `(progn
+      (eval-when-compile
+        (%compile-defun ',name))
+      (fsetq ,name (lambda ,args ,@body))))
+
+ (defvar *package* (new))
+
+ (defvar nil (make-symbol "NIL"))
+ (set *package* "NIL" nil)
+
+ (defvar t (make-symbol "T"))
+ (set *package* "T" t)
+
+ (defun internp (name)
+   (in name *package*))
+
+ (defun intern (name)
+   (if (internp name)
+       (get *package* name)
+       (set *package* name (make-symbol name))))
+
+ (defun find-symbol (name)
+   (get *package* name))
+
+ (defmacro when (condition &rest body)
+   `(if ,condition (progn ,@body) nil))
+
+ (defmacro unless (condition &rest body)
+   `(if ,condition nil (progn ,@body)))
+
+ (defmacro dolist (iter &rest body)
+   (let ((var (first iter))
+         (g!list (make-symbol "LIST")))
+     `(let ((,g!list ,(second iter))
+            (,var nil))
+        (while ,g!list
+          (setq ,var (car ,g!list))
+          ,@body
+          (setq ,g!list (cdr ,g!list))))))
+
+ (defun = (x y) (= x y))
+ (defun + (x y) (+ x y))
+ (defun - (x y) (- x y))
+ (defun * (x y) (* x y))
+ (defun / (x y) (/ x y))
+ (defun 1+ (x) (+ x 1))
+ (defun 1- (x) (- x 1))
+ (defun zerop (x) (= x 0))
+ (defun not (x) (if x nil t))
+
+ (defun truncate (x y) (floor (/ x y)))
+
+ (defun cons (x y ) (cons x y))
+ (defun consp (x) (consp x))
+
+ (defun car (x) (car x))
+ (defun cdr (x) (cdr x))
+
+ (defun caar (x) (car (car x)))
+ (defun cadr (x) (car (cdr x)))
+ (defun cdar (x) (cdr (car x)))
+ (defun cddr (x) (cdr (cdr x)))
+ (defun caddr (x) (car (cdr (cdr x))))
+ (defun cdddr (x) (cdr (cdr (cdr x))))
+ (defun cadddr (x) (car (cdr (cdr (cdr x)))))
+
+ (defun first (x) (car x))
+ (defun second (x) (cadr x))
+ (defun third (x) (caddr x))
+ (defun fourth (x) (cadddr x))
+
+ (defun list (&rest args)
+   args)
+
+ (defun atom (x)
+   (not (consp x))))
+
 (defun ensure-list (x)
   (if (listp x)
       x
@@ -10,7 +104,206 @@
                (cdr list)
                (funcall func initial (car list)))))
 
-;;; Utils
+#+lispstrack
+(progn
+  (defun append-two (list1 list2)
+    (if (null list1)
+        list2
+        (cons (car list1)
+              (append (cdr list1) list2))))
+
+  (defun append (&rest lists)
+    (!reduce #'append-two lists '()))
+
+  (defun reverse-aux (list acc)
+    (if (null list)
+        acc
+        (reverse-aux (cdr list) (cons (car list) acc))))
+
+  (defun reverse (list)
+    (reverse-aux list '()))
+
+  (defmacro incf (x)
+    `(setq ,x (1+ ,x)))
+
+  (defmacro decf (x)
+    `(setq ,x (1- ,x)))
+
+  (defun list-length (list)
+    (let ((l 0))
+      (while (not (null list))
+        (incf l)
+        (setq list (cdr list)))
+      l))
+
+  (defun length (seq)
+    (if (stringp seq)
+        (string-length seq)
+        (list-length seq)))
+
+  (defun mapcar (func list)
+    (if (null list)
+        '()
+        (cons (funcall func (car list))
+              (mapcar func (cdr list)))))
+
+  (defmacro push (x place)
+    `(setq ,place (cons ,x ,place)))
+
+  (defmacro cond (&rest clausules)
+    (if (null clausules)
+        nil
+        (if (eq (caar clausules) t)
+            `(progn ,@(cdar clausules))
+            `(if ,(caar clausules)
+                 (progn ,@(cdar clausules))
+                 (cond ,@(cdr clausules))))))
+
+  (defmacro case (form &rest clausules)
+    (let ((!form (make-symbol "FORM")))
+      `(let ((,!form ,form))
+         (cond
+           ,@(mapcar (lambda (clausule)
+                       (if (eq (car clausule) t)
+                           clausule
+                           `((eql ,!form ,(car clausule))
+                             ,@(cdr clausule))))
+                     clausules)))))
+
+  (defmacro ecase (form &rest clausules)
+    `(case ,form
+       ,@(append
+          clausules
+          `((t
+             (error "ECASE expression failed."))))))
+
+  (defun code-char (x) x)
+  (defun char-code (x) x)
+  (defun char= (x y) (= x y))
+
+  (defmacro and (&rest forms)
+    (cond
+      ((null forms)
+       t)
+      ((null (cdr forms))
+       (car forms))
+      (t
+       `(if ,(car forms)
+            (and ,@(cdr forms))
+            nil))))
+
+  (defmacro or (&rest forms)
+    (cond
+      ((null forms)
+       nil)
+      ((null (cdr forms))
+       (car forms))
+      (t
+       (let ((g (make-symbol "VAR")))
+         `(let ((,g ,(car forms)))
+            (if ,g ,g (or ,@(cdr forms))))))))
+
+  (defmacro prog1 (form &rest body)
+    (let ((value (make-symbol "VALUE")))
+      `(let ((,value ,form))
+         ,@body
+         ,value)))
+
+  (defun <= (x y) (or (< x y) (= x y)))
+  (defun >= (x y) (not (< x y)))
+
+  (defun listp (x)
+    (or (consp x) (null x)))
+
+  (defun integerp (x)
+    (and (numberp x) (= (floor x) x)))
+
+  (defun last (x)
+    (if (null (cdr x))
+        x
+        (last (cdr x))))
+
+  (defun butlast (x)
+    (if (null (cdr x))
+        nil
+        (cons (car x) (butlast (cdr x)))))
+
+  (defun member (x list)
+    (cond
+      ((null list)
+       nil)
+      ((eql x (car list))
+       list)
+      (t
+       (member x (cdr list)))))
+
+  (defun remove (x list)
+    (cond
+      ((null list)
+       nil)
+      ((eql x (car list))
+       (remove x (cdr list)))
+      (t
+       (cons (car list) (remove x (cdr list))))))
+
+  (defun remove-if (func list)
+    (cond
+      ((null list)
+       nil)
+      ((funcall func (car list))
+       (remove-if func (cdr list)))
+      (t
+       (cons (car list) (remove-if func (cdr list))))))
+
+  (defun remove-if-not (func list)
+    (cond
+      ((null list)
+       nil)
+      ((funcall func (car list))
+       (cons (car list) (remove-if-not func (cdr list))))
+      (t
+       (remove-if-not func (cdr list)))))
+
+  (defun digit-char-p (x)
+    (if (and (<= #\0 x) (<= x #\9))
+        (- x #\0)
+        nil))
+
+  (defun parse-integer (string)
+    (let ((value 0)
+          (index 0)
+          (size (length string)))
+      (while (< index size)
+        (setq value (+ (* value 10) (digit-char-p (char string index))))
+        (incf index))
+      value))
+
+  (defun every (function seq)
+    ;; string
+    (let ((ret t)
+          (index 0)
+          (size (length seq)))
+      (while (and ret (< index size))
+        (unless (funcall function (char seq index))
+          (setq ret nil))
+        (incf index))
+      ret))
+
+  (defun eql (x y)
+    (eq x y))
+
+  (defun assoc (x alist)
+    (cond
+      ((null alist)
+       nil)
+      ((eql x (caar alist))
+       (car alist))
+      (t
+       (assoc x (cdr alist)))))
+
+  (defun string= (s1 s2)
+    (equal s1 s2)))
+
 
 #+common-lisp
 (progn
@@ -26,6 +319,7 @@
     (setf (car cons) new))
   (defun setcdr (cons new)
     (setf (cdr cons) new)))
+
 
 (defvar *newline* (string (code-char 10)))
 
@@ -47,24 +341,21 @@
              (join (cdr list) separator)))))
 
 (defun join-trailing (list separator)
-  (cond
-    ((null list)
-     "")
-    ((null (car list))
-     (join-trailing (cdr list) separator))
-    (t
-     (concat (car list) separator (join-trailing (cdr list) separator)))))
+  (if (null list)
+      ""
+      (concat (car list) separator (join-trailing (cdr list) separator))))
 
 (defun integer-to-string (x)
   (if (zerop x)
       "0"
       (let ((digits nil))
-        (while (not (= x 0))
+        (while (not (zerop x))
           (push (mod x 10) digits)
           (setq x (truncate x 10)))
         (join (mapcar (lambda (d) (string (char "0123456789" d)))
                       digits)
               ""))))
+
 
 ;;;; Reader
 
@@ -222,6 +513,7 @@
   (and b (fourth b)))
 (defun mark-binding-as-declared (b)
   (setcar (cdddr b) t))
+
 
 (defvar *variable-counter* 0)
 (defun gvarname (symbol)
@@ -610,6 +902,7 @@
 (define-compilation js-eval (string)
   (concat "eval.apply(window, [" (ls-compile string env fenv)  "])"))
 
+
 (define-compilation error (string)
   (concat "(function (){ throw " (ls-compile string env fenv) ";" "return 0;})()"))
 
@@ -679,12 +972,56 @@
   (setq *toplevel-compilations* nil)
   (let ((code (ls-compile sexp nil nil)))
     (prog1
-        (concat #+common-lisp (concat "/* " (princ-to-string sexp) " */")
+        (concat  #+common-lisp (concat "/* " (princ-to-string sexp) " */")
                 (join (mapcar (lambda (x) (concat x ";" *newline*))
                               *toplevel-compilations*)
                "")
                 code)
       (setq *toplevel-compilations* nil))))
+
+;;; ----------------------------------------------------------
+
+#+lispstrack
+(progn
+ (defmacro with-compilation-unit (&rest body)
+   `(prog1
+        (progn
+          (setq *compilation-unit-checks* nil)
+          (setq *env* (remove-if-not #'binding-declared *env*))
+          (setq *fenv* (remove-if-not #'binding-declared *fenv*))
+          ,@body)
+      (dolist (check *compilation-unit-checks*)
+        (funcall check))))
+
+ (defun eval (x)
+   (let ((code
+          (with-compilation-unit
+              (ls-compile-toplevel x nil nil))))
+     (js-eval code)))
+
+
+ ;; Set the initial global environment to be equal to the host global
+ ;; environment at this point of the compilation.
+ (eval-when-compile
+   (let ((c1 (ls-compile `(setq *fenv* ',*fenv*) nil nil))
+         (c2 (ls-compile `(setq *env* ',*env*) nil nil))
+         (c3 (ls-compile `(setq *variable-counter* ',*variable-counter*) nil nil))
+         (c4 (ls-compile `(setq *function-counter* ',*function-counter*) nil nil))
+         (c5 (ls-compile `(setq *literal-counter* ',*literal-counter*) nil nil)))
+     (setq *toplevel-compilations*
+           (append *toplevel-compilations* (list c1 c2 c3 c4 c5)))))
+
+ (js-eval
+  (concat "var lisp = {};"
+          "lisp.read = " (lookup-function-translation 'ls-read-from-string nil) ";" *newline*
+          "lisp.eval = " (lookup-function-translation 'eval nil) ";" *newline*
+          "lisp.compile = " (lookup-function-translation 'ls-compile-toplevel nil) ";" *newline*
+          "lisp.evalString = function(str){" *newline*
+          "   return lisp.eval(lisp.read(str));" *newline*
+          "}" *newline*
+          "lisp.compileString = function(str){" *newline*
+          "   return lisp.compile(lisp.read(str));" *newline*
+          "}" *newline*)))
 
 #+common-lisp
 (progn
