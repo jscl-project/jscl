@@ -35,11 +35,14 @@
         (%compile-defvar ',name))
       (setq ,name ,value)))
 
- (defmacro defun (name args &rest body)
+ (defmacro %defun (name args &rest body)
    `(progn
       (eval-when-compile
         (%compile-defun ',name))
       (fsetq ,name (lambda ,args ,@body))))
+
+  (defmacro defun (name args &rest body)
+    `(%defun ,name ,args ,@body))
 
  (defvar *package* (new))
 
@@ -127,6 +130,11 @@
 
 #+lispstrack
 (progn
+  (defmacro defun (name args &rest body)
+    `(progn
+       (%defun ,name ,args ,@body)
+       ',name))
+
   (defun append-two (list1 list2)
     (if (null list1)
         list2
