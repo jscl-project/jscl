@@ -1,5 +1,25 @@
-;;; Library
+;;; lispstrack.lisp ---
 
+;; Copyright (C) 2012 David Vazquez
+;;
+;; This program is free software: you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation, either version 3 of the
+;; License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;; General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; This code is executed when lispstrack compiles this file
+;;; itself. The compiler provides compilation of some special forms,
+;;; as well as funcalls and macroexpansion, but no functions. So, we
+;;; define the Lisp world from scratch. This code has to define enough
+;;; language to the compiler to be able to run.
 #+lispstrack
 (progn
  (eval-when-compile
@@ -305,11 +325,18 @@
     (equal s1 s2)))
 
 
+;;; The compiler offers some primitives and special forms which are
+;;; not found in Common Lisp, for instance, while. So, we grow Common
+;;; Lisp a bit to it can execute the rest of the file.
 #+common-lisp
 (progn
   (defmacro while (condition &body body)
     `(do ()
          ((not ,condition))
+       ,@body))
+
+  (defmacro eval-when-compile (&body body)
+    `(eval-when (:compile-toplevel :load-toplevel :execute)
        ,@body))
 
   (defun concat-two (s1 s2)
@@ -320,6 +347,11 @@
   (defun setcdr (cons new)
     (setf (cdr cons) new)))
 
+
+;;; At this point, no matter if Common Lisp or lispstrack is compiling
+;;; from here, this code will compile on both. We define some helper
+;;; functions now for string manipulation and so on. They will be
+;;; useful in the compiler, mostly.
 
 (defvar *newline* (string (code-char 10)))
 
@@ -359,10 +391,9 @@
 
 ;;;; Reader
 
-;;; It is a basic Lisp reader. It does not use advanced stuff
-;;; intentionally, because we want to use it to bootstrap a simple
-;;; Lisp. The main entry point is the function `ls-read', which
-;;; accepts a strings as argument and return the Lisp expression.
+;;; The Lisp reader, parse strings and return Lisp objects. The main
+;;; entry points are `ls-read' and `ls-read-from-string'.
+
 (defun make-string-stream (string)
   (cons string 0))
 
@@ -498,6 +529,11 @@
 
 ;;;; Compiler
 
+;;; Translate the Lisp code to Javascript. It will compile the special
+;;; forms. Some primitive functions are compiled as special forms
+;;; too. The respective real functions are defined in the target (see
+;;; the beginning of this file) as well as some primitive functions.
+
 (defvar *compilation-unit-checks* '())
 
 (defvar *env* '())
@@ -513,7 +549,6 @@
   (and b (fourth b)))
 (defun mark-binding-as-declared (b)
   (setcar (cdddr b) t))
-
 
 (defvar *variable-counter* 0)
 (defun gvarname (symbol)
@@ -560,7 +595,6 @@
 (defun lookup-function-translation (symbol env)
   (binding-translation (lookup-function symbol env)))
 
-
 (defvar *toplevel-compilations* nil)
 
 (defun %compile-defvar (name)
@@ -575,7 +609,6 @@
 
 (defun %compile-defmacro (name lambda)
   (push (make-binding name 'macro lambda t) *fenv*))
-
 
 (defvar *compilations* nil)
 
@@ -651,7 +684,6 @@
            (ls-compile val env fenv)))
 
 ;;; Literals
-
 (defun escape-string (string)
   (let ((output "")
         (index 0)
@@ -702,11 +734,6 @@
      (ls-compile x env fenv))
     ((symbolp x)
      (lookup-function-translation x fenv))))
-
-#+common-lisp
-(defmacro eval-when-compile (&body body)
-  `(eval-when (:compile-toplevel :load-toplevel :execute)
-     ,@body))
 
 (define-compilation eval-when-compile (&rest body)
   (eval (cons 'progn body))
@@ -927,7 +954,6 @@
   (compile-bool
    (concat "(" (ls-compile key env fenv) " in " (ls-compile object env fenv) ")")))
 
-
 (defun macrop (x)
   (and (symbolp x) (eq (binding-type (lookup-function x *fenv*)) 'macro)))
 
@@ -979,7 +1005,10 @@
                 code)
       (setq *toplevel-compilations* nil))))
 
-;;; ----------------------------------------------------------
+
+;;; Once we have the compiler, we define the runtime environment and
+;;; interactive development (eval), which works calling the compiler
+;;; and evaluating the Javascript result globally.
 
 #+lispstrack
 (progn
@@ -998,7 +1027,6 @@
           (with-compilation-unit
               (ls-compile-toplevel x nil nil))))
      (js-eval code)))
-
 
  ;; Set the initial global environment to be equal to the host global
  ;; environment at this point of the compilation.
@@ -1022,6 +1050,10 @@
           "lisp.compileString = function(str){" *newline*
           "   return lisp.compile(lisp.read(str));" *newline*
           "}" *newline*)))
+
+
+;;; Finally, we provide a couple of functions to easily bootstrap
+;;; this. It just calls the compiler with this file as input.
 
 #+common-lisp
 (progn
