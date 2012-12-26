@@ -35,7 +35,7 @@
         (%compile-defvar ',name))
       (setq ,name ,value)))
 
-  (defmacro defvar (name value)
+  (defmacro defvar (name &optional value)
     `(%defvar ,name ,value))
 
  (defmacro %defun (name args &rest body)
@@ -138,7 +138,7 @@
        (%defun ,name ,args ,@body)
        ',name))
 
-  (defmacro defvar (name value)
+  (defmacro defvar (name &optional value)
     `(progn
        (%defvar ,name ,value)
        ',name))
@@ -160,11 +160,11 @@
   (defun reverse (list)
     (reverse-aux list '()))
 
-  (defmacro incf (x)
-    `(setq ,x (1+ ,x)))
+  (defmacro incf (x &optional (delta 1))
+    `(setq ,x (+ ,x ,delta)))
 
-  (defmacro decf (x)
-    `(setq ,x (1- ,x)))
+  (defmacro decf (x &optional (delta 1))
+    `(setq ,x (- ,x ,delta)))
 
   (defun list-length (list)
     (let ((l 0))
