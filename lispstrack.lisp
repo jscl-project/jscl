@@ -646,11 +646,11 @@
 
 (defun ls-compile-block (sexps env fenv)
   (join-trailing
-   (remove (lambda (x)
-             (or (null x)
-                 (and (stringp x)
-                      (zerop (length x)))))
-           (mapcar (lambda (x) (ls-compile x env fenv))  sexps))
+   (remove-if (lambda (x)
+                (or (null x)
+                    (and (stringp x)
+                         (zerop (length x)))))
+              (mapcar (lambda (x) (ls-compile x env fenv))  sexps))
    (concat ";" *newline*)))
 
 (defmacro define-compilation (name args &rest body)
