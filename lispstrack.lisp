@@ -388,7 +388,7 @@
   (!reduce #'concat-two strs ""))
 
 ;;; Concatenate a list of strings, with a separator
-(defun join (list separator)
+(defun join (list &optional (separator ""))
   (cond
     ((null list)
      "")
@@ -399,7 +399,7 @@
              separator
              (join (cdr list) separator)))))
 
-(defun join-trailing (list separator)
+(defun join-trailing (list &optional (separator ""))
   (if (null list)
       ""
       (concat (car list) separator (join-trailing (cdr list) separator))))
@@ -738,7 +738,7 @@
                                                      (integer-to-string (+ idx n-required-arguments)) ":" *newline*
                                                      (lookup-variable-translation (car arg) new-env)
                                                      "="
-                                                     (ls-compile (cdr arg) new-env fenv)
+                                                     (ls-compile (cadr arg) new-env fenv)
                                                      ";" *newline*)
                                              cases)
                                        (incf idx)))
