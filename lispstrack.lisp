@@ -258,6 +258,12 @@
   (defun listp (x)
     (or (consp x) (null x)))
 
+  (defun nth (n list)
+    (cond
+      ((null list) list)
+      ((zerop n) (car list))
+      (t (nth (1- n) (cdr list)))))
+
   (defun integerp (x)
     (and (numberp x) (= (floor x) x)))
 
@@ -669,43 +675,92 @@
           (ls-compile false env fenv)
           ")"))
 
-;;; Return the required args of a lambda list
-(defun lambda-list-required-argument (lambda-list)
-  (if (or (null lambda-list) (eq (car lambda-list) '&rest))
+
+(defvar *lambda-list-keywords* '(&optional &rest))
+
+(defun list-until-keyword (list)
+  (if (or (null list) (member (car list) *lambda-list-keywords*))
       nil
-      (cons (car lambda-list) (lambda-list-required-argument (cdr lambda-list)))))
+      (cons (car list) (list-until-keyword (cdr list)))))
+
+(defun lambda-list-required-arguments (lambda-list)
+  (list-until-keyword lambda-list))
+
+(defun lambda-list-optional-arguments-with-default (lambda-list)
+  (mapcar #'ensure-list (list-until-keyword (cdr (member '&optional lambda-list)))))
+
+(defun lambda-list-optional-arguments (lambda-list)
+  (mapcar #'car (lambda-list-optional-arguments-with-default lambda-list)))
 
 (defun lambda-list-rest-argument (lambda-list)
-  (second (member '&rest lambda-list)))
+  (let ((rest (list-until-keyword (cdr (member '&rest lambda-list)))))
+    (when (cdr rest)
+      (error "Bad lambda-list"))
+    (car rest)))
 
 (define-compilation lambda (lambda-list &rest body)
-  (let ((required-arguments (lambda-list-required-argument lambda-list))
+  (let ((required-arguments (lambda-list-required-arguments lambda-list))
+        (optional-arguments (lambda-list-optional-arguments lambda-list))
         (rest-argument (lambda-list-rest-argument lambda-list)))
-    (let ((new-env (extend-local-env
-                    (append (and rest-argument (list rest-argument))
-                            required-arguments)
+    (let ((n-required-arguments (length required-arguments))
+          (n-optional-arguments (length optional-arguments))
+          (new-env (extend-local-env
+                    (append (ensure-list rest-argument)
+                            required-arguments
+                            optional-arguments)
                     env)))
       (concat "(function ("
               (join (mapcar (lambda (x)
                               (lookup-variable-translation x new-env))
-                            required-arguments)
+                            (append required-arguments optional-arguments))
                     ",")
-              "){"
-              *newline*
+              "){" *newline*
+              ;; Check number of arguments
+              (if required-arguments
+                  (concat "if (arguments.length < " (integer-to-string n-required-arguments)
+                          ") throw 'too few arguments';" *newline*)
+                  "")
+              (if (not rest-argument)
+                  (concat "if (arguments.length > "
+                          (integer-to-string (+ n-required-arguments n-optional-arguments))
+                          ") throw 'too many arguments';" *newline*)
+                  "")
+              ;; Optional arguments
+              (if optional-arguments
+                  (concat "switch(arguments.length){" *newline*
+                          (let ((optional-and-defaults
+                                 (lambda-list-optional-arguments-with-default lambda-list))
+                                (cases nil)
+                                (idx 0))
+                            (progn (while (< idx n-optional-arguments)
+                                     (let ((arg (nth idx optional-and-defaults)))
+                                       (push (concat "case "
+                                                     (integer-to-string (+ idx n-required-arguments)) ":" *newline*
+                                                     (lookup-variable-translation (car arg) new-env)
+                                                     "="
+                                                     (ls-compile (cdr arg) new-env fenv)
+                                                     ";" *newline*)
+                                             cases)
+                                       (incf idx)))
+                                   (push (concat "default: break;" *newline*) cases)
+                                   (join (reverse cases) "")))
+                          "}" *newline*)
+                  "")
+              ;; &rest argument
               (if rest-argument
                   (let ((js!rest (lookup-variable-translation rest-argument new-env)))
                     (concat "var " js!rest "= " (ls-compile nil env fenv) ";" *newline*
                             "for (var i = arguments.length-1; i>="
-                            (integer-to-string (length required-arguments))
+                            (integer-to-string (+ n-required-arguments n-optional-arguments))
                             "; i--)" *newline*
                             js!rest " = "
                             "{car: arguments[i], cdr: " js!rest "};"
                             *newline*))
                   "")
+              ;; Body
               (concat (ls-compile-block (butlast body) new-env fenv)
                       "return " (ls-compile (car (last body)) new-env fenv) ";")
-              *newline*
-              "})"))))
+              *newline* "})"))))
 
 (define-compilation fsetq (var val)
   (concat (lookup-function-translation var fenv)
@@ -777,8 +832,11 @@
   `(define-compilation ,name ,args
      (ls-compile ,form env fenv)))
 
-(define-transformation progn (&rest body)
-  `((lambda () ,@body)))
+(define-compilation progn (&rest body)
+  (concat "(function(){" *newline*
+          (ls-compile-block (butlast body) env fenv)
+          "return " (ls-compile (car (last body)) env fenv) ";"
+          "})()" *newline*))
 
 (define-transformation let (bindings &rest body)
   (let ((bindings (mapcar #'ensure-list bindings)))
@@ -1063,7 +1121,7 @@
  (defun eval (x)
    (let ((code
           (with-compilation-unit
-              (ls-compile-toplevel x nil nil))))
+              (ls-compile-toplevel x))))
      (js-eval code)))
 
  ;; Set the initial global environment to be equal to the host global
