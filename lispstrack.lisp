@@ -178,6 +178,9 @@
         (string-length seq)
         (list-length seq)))
 
+  (defun concat-two (s1 s2)
+    (concat-two s1 s2))
+
   (defun mapcar (func list)
     (if (null list)
         '()
@@ -248,6 +251,9 @@
 
   (defun <= (x y) (or (< x y) (= x y)))
   (defun >= (x y) (not (< x y)))
+
+  (defun plusp (x) (< 0 x))
+  (defun minusp (x) (< x 0))
 
   (defun listp (x)
     (or (consp x) (null x)))
@@ -373,9 +379,7 @@
 (defvar *newline* (string (code-char 10)))
 
 (defun concat (&rest strs)
-  (!reduce (lambda (s1 s2) (concat-two s1 s2))
-           strs
-           ""))
+  (!reduce #'concat-two strs ""))
 
 ;;; Concatenate a list of strings, with a separator
 (defun join (list separator)
@@ -404,6 +408,18 @@
         (join (mapcar (lambda (d) (string (char "0123456789" d)))
                       digits)
               ""))))
+
+(defun print-to-string (form)
+  (cond
+    ((symbolp form) (symbol-name form))
+    ((integerp form) (integer-to-string form))
+    ((stringp form) (concat "\"" (escape-string form) "\""))
+    ((functionp form) (concat "#<FUNCTION>"))
+    ((listp form)
+     (concat "("
+             (join (mapcar #'print-to-string form)
+                   " ")
+             ")"))))
 
 ;;;; Reader
 
@@ -630,11 +646,13 @@
 
 (defun ls-compile-block (sexps env fenv)
   (join-trailing
-   (remove nil (mapcar (lambda (x)
-                         (ls-compile x env fenv))
-                       sexps))
-                 ";
-"))
+   (remove (lambda (x)
+             (or (null x)
+                 (and (stringp x)
+                      (zerop (length x)))))
+           (mapcar (lambda (x) (ls-compile x env fenv))  sexps))
+   (concat ";" *newline*)))
+
 (defmacro define-compilation (name args &rest body)
   ;; Creates a new primitive `name' with parameters args and
   ;; @body. The body can access to the local environment through the
@@ -1019,8 +1037,7 @@
   (setq *toplevel-compilations* nil)
   (let ((code (ls-compile sexp nil nil)))
     (prog1
-        (concat  #+common-lisp (concat "/* " (princ-to-string sexp) " */")
-                (join (mapcar (lambda (x) (concat x ";" *newline*))
+        (concat (join (mapcar (lambda (x) (concat x ";" *newline*))
                               *toplevel-compilations*)
                "")
                 code)
@@ -1030,18 +1047,6 @@
 ;;; Once we have the compiler, we define the runtime environment and
 ;;; interactive development (eval), which works calling the compiler
 ;;; and evaluating the Javascript result globally.
-
-(defun print-to-string (form)
-  (cond
-    ((symbolp form) (symbol-name form))
-    ((integerp form) (integer-to-string form))
-    ((stringp form) (concat "\"" (escape-string form) "\""))
-    ((functionp form) (concat "#<FUNCTION>"))
-    ((listp form)
-     (concat "("
-             (join (mapcar #'print-to-string form)
-                   " ")
-             ")"))))
 
 #+lispstrack
 (progn
