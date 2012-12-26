@@ -890,7 +890,7 @@
            "; return (typeof tmp == 'object' && 'name' in tmp); })()")))
 
 (define-compilation make-symbol (name)
-  (concat "{name: " (ls-compile name env fenv) "}"))
+  (concat "({name: " (ls-compile name env fenv) "})"))
 
 (define-compilation symbol-name (x)
   (concat "(" (ls-compile x env fenv) ").name"))
