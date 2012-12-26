@@ -66,6 +66,52 @@
  (defun find-symbol (name)
    (get *package* name))
 
+ ;; Basic functions
+ (defun = (x y) (= x y))
+ (defun + (x y) (+ x y))
+ (defun - (x y) (- x y))
+ (defun * (x y) (* x y))
+ (defun / (x y) (/ x y))
+ (defun 1+ (x) (+ x 1))
+ (defun 1- (x) (- x 1))
+ (defun zerop (x) (= x 0))
+ (defun truncate (x y) (floor (/ x y)))
+
+ (defun eql (x y) (eq x y))
+
+ (defun not (x) (if x nil t))
+
+ (defun cons (x y ) (cons x y))
+ (defun consp (x) (consp x))
+ (defun car (x) (car x))
+ (defun cdr (x) (cdr x))
+ (defun caar (x) (car (car x)))
+ (defun cadr (x) (car (cdr x)))
+ (defun cdar (x) (cdr (car x)))
+ (defun cddr (x) (cdr (cdr x)))
+ (defun caddr (x) (car (cdr (cdr x))))
+ (defun cdddr (x) (cdr (cdr (cdr x))))
+ (defun cadddr (x) (car (cdr (cdr (cdr x)))))
+ (defun first (x) (car x))
+ (defun second (x) (cadr x))
+ (defun third (x) (caddr x))
+ (defun fourth (x) (cadddr x))
+
+ (defun list (&rest args) args)
+ (defun atom (x)
+   (not (consp x)))
+
+ ;; Basic macros
+
+  (defmacro incf (x &optional (delta 1))
+    `(setq ,x (+ ,x ,delta)))
+
+  (defmacro decf (x &optional (delta 1))
+    `(setq ,x (- ,x ,delta)))
+
+ (defmacro push (x place)
+   `(setq ,place (cons ,x ,place)))
+
  (defmacro when (condition &rest body)
    `(if ,condition (progn ,@body) nil))
 
@@ -82,43 +128,63 @@
           ,@body
           (setq ,g!list (cdr ,g!list))))))
 
- (defun = (x y) (= x y))
- (defun + (x y) (+ x y))
- (defun - (x y) (- x y))
- (defun * (x y) (* x y))
- (defun / (x y) (/ x y))
- (defun 1+ (x) (+ x 1))
- (defun 1- (x) (- x 1))
- (defun zerop (x) (= x 0))
- (defun not (x) (if x nil t))
+ (defmacro cond (&rest clausules)
+   (if (null clausules)
+       nil
+       (if (eq (caar clausules) t)
+           `(progn ,@(cdar clausules))
+           `(if ,(caar clausules)
+                (progn ,@(cdar clausules))
+                (cond ,@(cdr clausules))))))
 
- (defun truncate (x y) (floor (/ x y)))
+ (defmacro case (form &rest clausules)
+   (let ((!form (make-symbol "FORM")))
+     `(let ((,!form ,form))
+        (cond
+          ,@(mapcar (lambda (clausule)
+                      (if (eq (car clausule) t)
+                          clausule
+                          `((eql ,!form ,(car clausule))
+                            ,@(cdr clausule))))
+                    clausules)))))
 
- (defun cons (x y ) (cons x y))
- (defun consp (x) (consp x))
+  (defmacro ecase (form &rest clausules)
+    `(case ,form
+       ,@(append
+          clausules
+          `((t
+             (error "ECASE expression failed."))))))
 
- (defun car (x) (car x))
- (defun cdr (x) (cdr x))
+  (defmacro and (&rest forms)
+    (cond
+      ((null forms)
+       t)
+      ((null (cdr forms))
+       (car forms))
+      (t
+       `(if ,(car forms)
+            (and ,@(cdr forms))
+            nil))))
 
- (defun caar (x) (car (car x)))
- (defun cadr (x) (car (cdr x)))
- (defun cdar (x) (cdr (car x)))
- (defun cddr (x) (cdr (cdr x)))
- (defun caddr (x) (car (cdr (cdr x))))
- (defun cdddr (x) (cdr (cdr (cdr x))))
- (defun cadddr (x) (car (cdr (cdr (cdr x)))))
+  (defmacro or (&rest forms)
+    (cond
+      ((null forms)
+       nil)
+      ((null (cdr forms))
+       (car forms))
+      (t
+       (let ((g (make-symbol "VAR")))
+         `(let ((,g ,(car forms)))
+            (if ,g ,g (or ,@(cdr forms))))))))
 
- (defun first (x) (car x))
- (defun second (x) (cadr x))
- (defun third (x) (caddr x))
- (defun fourth (x) (cadddr x))
+    (defmacro prog1 (form &rest body)
+      (let ((value (make-symbol "VALUE")))
+        `(let ((,value ,form))
+           ,@body
+           ,value))))
 
- (defun list (&rest args)
-   args)
-
- (defun atom (x)
-   (not (consp x))))
-
+;;; This couple of helper functions will be defined in both Common
+;;; Lisp and in Lispstrack.
 (defun ensure-list (x)
   (if (listp x)
       x
@@ -131,6 +197,9 @@
                (cdr list)
                (funcall func initial (car list)))))
 
+;;; Go on growing the Lisp language in Lispstrack, with more high
+;;; level utilities as well as correct versions of other
+;;; constructions.
 #+lispstrack
 (progn
   (defmacro defun (name args &rest body)
@@ -160,12 +229,6 @@
   (defun reverse (list)
     (reverse-aux list '()))
 
-  (defmacro incf (x &optional (delta 1))
-    `(setq ,x (+ ,x ,delta)))
-
-  (defmacro decf (x &optional (delta 1))
-    `(setq ,x (- ,x ,delta)))
-
   (defun list-length (list)
     (let ((l 0))
       (while (not (null list))
@@ -187,70 +250,15 @@
         (cons (funcall func (car list))
               (mapcar func (cdr list)))))
 
-  (defmacro push (x place)
-    `(setq ,place (cons ,x ,place)))
-
-  (defmacro cond (&rest clausules)
-    (if (null clausules)
-        nil
-        (if (eq (caar clausules) t)
-            `(progn ,@(cdar clausules))
-            `(if ,(caar clausules)
-                 (progn ,@(cdar clausules))
-                 (cond ,@(cdr clausules))))))
-
-  (defmacro case (form &rest clausules)
-    (let ((!form (make-symbol "FORM")))
-      `(let ((,!form ,form))
-         (cond
-           ,@(mapcar (lambda (clausule)
-                       (if (eq (car clausule) t)
-                           clausule
-                           `((eql ,!form ,(car clausule))
-                             ,@(cdr clausule))))
-                     clausules)))))
-
-  (defmacro ecase (form &rest clausules)
-    `(case ,form
-       ,@(append
-          clausules
-          `((t
-             (error "ECASE expression failed."))))))
-
   (defun code-char (x) x)
   (defun char-code (x) x)
   (defun char= (x y) (= x y))
 
-  (defmacro and (&rest forms)
-    (cond
-      ((null forms)
-       t)
-      ((null (cdr forms))
-       (car forms))
-      (t
-       `(if ,(car forms)
-            (and ,@(cdr forms))
-            nil))))
-
-  (defmacro or (&rest forms)
-    (cond
-      ((null forms)
-       nil)
-      ((null (cdr forms))
-       (car forms))
-      (t
-       (let ((g (make-symbol "VAR")))
-         `(let ((,g ,(car forms)))
-            (if ,g ,g (or ,@(cdr forms))))))))
-
-  (defmacro prog1 (form &rest body)
-    (let ((value (make-symbol "VALUE")))
-      `(let ((,value ,form))
-         ,@body
-         ,value)))
-
   (defun <= (x y) (or (< x y) (= x y)))
   (defun >= (x y) (not (< x y)))
+
+  (defun integerp (x)
+    (and (numberp x) (= (floor x) x)))
 
   (defun plusp (x) (< 0 x))
   (defun minusp (x) (< x 0))
@@ -263,9 +271,6 @@
       ((null list) list)
       ((zerop n) (car list))
       (t (nth (1- n) (cdr list)))))
-
-  (defun integerp (x)
-    (and (numberp x) (= (floor x) x)))
 
   (defun last (x)
     (if (null (cdr x))
@@ -337,9 +342,6 @@
           (setq ret nil))
         (incf index))
       ret))
-
-  (defun eql (x y)
-    (eq x y))
 
   (defun assoc (x alist)
     (cond
