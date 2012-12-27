@@ -323,6 +323,15 @@
         (- x #\0)
         nil))
 
+  (defun subseq (seq a &optional b)
+    (cond
+     ((stringp seq)
+      (if b
+          (slice seq a b)
+          (slice seq a)))
+     (t
+      (error "Unsupported argument."))))
+
   (defun parse-integer (string)
     (let ((value 0)
           (index 0)
@@ -981,6 +990,17 @@
 
 (define-compilation string-length (x)
   (concat "(" (ls-compile x env fenv) ").length"))
+
+(define-compilation slice (string a &optional b)
+  (concat "(function(){" *newline*
+          "var str = " (ls-compile string env fenv) ";" *newline*
+          "var a = " (ls-compile a env fenv) ";" *newline*
+          "var b;" *newline*
+          (if b
+              (concat "b = " (ls-compile b env fenv) ";" *newline*)
+              "")
+          "return str.slice(a,b);" *newline*
+          "})()"))
 
 (define-compilation char (string index)
   (concat "("
