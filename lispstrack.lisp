@@ -418,8 +418,7 @@
          (push (mod x 10) digits)
          (setq x (truncate x 10)))
        (join (mapcar (lambda (d) (string (char "0123456789" d)))
-                     digits)
-             "")))))
+                     digits))))))
 
 (defun print-to-string (form)
   (cond
@@ -752,7 +751,7 @@
                                              cases)
                                        (incf idx)))
                                    (push (concat "default: break;" *newline*) cases)
-                                   (join (reverse cases) "")))
+                                   (join (reverse cases))))
                           "}" *newline*)
                   "")
               ;; &rest argument
@@ -1105,8 +1104,7 @@
   (let ((code (ls-compile sexp nil nil)))
     (prog1
         (concat (join (mapcar (lambda (x) (concat x ";" *newline*))
-                              *toplevel-compilations*)
-               "")
+                              *toplevel-compilations*))
                 code)
       (setq *toplevel-compilations* nil))))
 
