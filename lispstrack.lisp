@@ -407,15 +407,19 @@
       (concat (car list) separator (join-trailing (cdr list) separator))))
 
 (defun integer-to-string (x)
-  (if (zerop x)
-      "0"
-      (let ((digits nil))
-        (while (not (zerop x))
-          (push (mod x 10) digits)
-          (setq x (truncate x 10)))
-        (join (mapcar (lambda (d) (string (char "0123456789" d)))
-                      digits)
-              ""))))
+  (cond
+    ((zerop x)
+     "0")
+    ((minusp x)
+     (concat "-" (integer-to-string (- 0 x))))
+    (t
+     (let ((digits nil))
+       (while (not (zerop x))
+         (push (mod x 10) digits)
+         (setq x (truncate x 10)))
+       (join (mapcar (lambda (d) (string (char "0123456789" d)))
+                     digits)
+             "")))))
 
 (defun print-to-string (form)
   (cond
