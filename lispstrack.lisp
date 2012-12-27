@@ -509,6 +509,31 @@
       (setq ch (%read-char stream)))
     string))
 
+(defun read-sharp (stream)
+  (%read-char stream)
+  (ecase (%read-char stream)
+    (#\'
+     (list 'function (ls-read stream)))
+    (#\\
+     (let ((cname
+            (concat (string (%read-char stream))
+                    (read-until stream #'terminalp))))
+       (cond
+         ((string= cname "space") (char-code #\space))
+         ((string= cname "tab") (char-code #\tab))
+         ((string= cname "newline") (char-code #\newline))
+         (t (char-code (char cname 0))))))
+    (#\+
+     (let ((feature (read-until stream #'terminalp)))
+       (cond
+         ((string= feature "common-lisp")
+          (ls-read stream)              ;ignore
+          (ls-read stream))
+         ((string= feature "lispstrack")
+          (ls-read stream))
+         (t
+          (error "Unknown reader form.")))))))
+
 (defvar *eof* (make-symbol "EOF"))
 (defun ls-read (stream)
   (skip-whitespaces-and-comments stream)
@@ -534,29 +559,7 @@
            (progn (%read-char stream) (list 'unquote-splicing (ls-read stream)))
            (list 'unquote (ls-read stream))))
       ((char= ch #\#)
-       (%read-char stream)
-       (ecase (%read-char stream)
-         (#\'
-          (list 'function (ls-read stream)))
-         (#\\
-          (let ((cname
-		 (concat (string (%read-char stream))
-			 (read-until stream #'terminalp))))
-            (cond
-              ((string= cname "space") (char-code #\space))
-              ((string= cname "tab") (char-code #\tab))
-              ((string= cname "newline") (char-code #\newline))
-              (t (char-code (char cname 0))))))
-         (#\+
-          (let ((feature (read-until stream #'terminalp)))
-            (cond
-              ((string= feature "common-lisp")
-               (ls-read stream)         ;ignore
-               (ls-read stream))
-              ((string= feature "lispstrack")
-               (ls-read stream))
-              (t
-               (error "Unknown reader form.")))))))
+       (read-sharp stream))
       (t
        (let ((string (read-until stream #'terminalp)))
          (if (every #'digit-char-p string)
