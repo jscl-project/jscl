@@ -848,7 +848,7 @@
     ((consp sexp) (concat "{car: "
                           (literal->js (car sexp))
                           ", cdr: "
-			  (literal->js (cdr sexp)) "}"))))
+                          (literal->js (cdr sexp)) "}"))))
 
 (defvar *literal-counter* 0)
 (defun literal (form)
@@ -1002,7 +1002,7 @@
 
 (define-compilation cdr (x)
   (concat "(function(){" *newline*
-          (indent "var tmp = " (ls-compile x env fenv) ";"
+          (indent "var tmp = " (ls-compile x env fenv) ";" *newline*
                   "return tmp === " (ls-compile nil nil nil) "? "
                   (ls-compile nil nil nil)
                   ": tmp.cdr;" *newline*)
