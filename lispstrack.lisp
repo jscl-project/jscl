@@ -421,6 +421,25 @@
       ""
       (concat (car list) separator (join-trailing (cdr list) separator))))
 
+;;; Like CONCAT, but prefix each line with four spaces.
+(defun indent (&rest string)
+  (let ((input (!reduce #'concat string "")))
+    (let ((output "")
+          (index 0)
+          (size (length input)))
+      (when (plusp size)
+        (setq output "    "))
+      (while (< index size)
+        (setq output
+              (concat output
+                      (if (and (char= (char input index) #\newline)
+                               (< index (1- size))
+                               (not (char= (char input (1+ index)) #\newline)))
+                          (concat (string #\newline) "    ")
+                          (subseq input index (1+ index)))))
+        (incf index))
+      output)))
+
 (defun integer-to-string (x)
   (cond
     ((zerop x)
@@ -747,51 +766,53 @@
                     ",")
               "){" *newline*
               ;; Check number of arguments
-              (if required-arguments
-                  (concat "if (arguments.length < " (integer-to-string n-required-arguments)
-                          ") throw 'too few arguments';" *newline*)
-                  "")
-              (if (not rest-argument)
-                  (concat "if (arguments.length > "
-                          (integer-to-string (+ n-required-arguments n-optional-arguments))
-                          ") throw 'too many arguments';" *newline*)
-                  "")
-              ;; Optional arguments
-              (if optional-arguments
-                  (concat "switch(arguments.length){" *newline*
-                          (let ((optional-and-defaults
-                                 (lambda-list-optional-arguments-with-default lambda-list))
-                                (cases nil)
-                                (idx 0))
-                            (progn (while (< idx n-optional-arguments)
-                                     (let ((arg (nth idx optional-and-defaults)))
-                                       (push (concat "case "
-                                                     (integer-to-string (+ idx n-required-arguments)) ":" *newline*
-                                                     (lookup-variable-translation (car arg) new-env)
-                                                     "="
-                                                     (ls-compile (cadr arg) new-env fenv)
-                                                     ";" *newline*)
-                                             cases)
-                                       (incf idx)))
-                                   (push (concat "default: break;" *newline*) cases)
-                                   (join (reverse cases))))
-                          "}" *newline*)
-                  "")
-              ;; &rest argument
-              (if rest-argument
-                  (let ((js!rest (lookup-variable-translation rest-argument new-env)))
-                    (concat "var " js!rest "= " (ls-compile nil env fenv) ";" *newline*
-                            "for (var i = arguments.length-1; i>="
-                            (integer-to-string (+ n-required-arguments n-optional-arguments))
-                            "; i--)" *newline*
-                            js!rest " = "
-                            "{car: arguments[i], cdr: " js!rest "};"
-                            *newline*))
-                  "")
-              ;; Body
-              (concat (ls-compile-block (butlast body) new-env fenv)
-                      "return " (ls-compile (car (last body)) new-env fenv) ";") *newline*
-                      "})"))))
+              (indent
+               (if required-arguments
+                   (concat "if (arguments.length < " (integer-to-string n-required-arguments)
+                           ") throw 'too few arguments';" *newline*)
+                   "")
+               (if (not rest-argument)
+                   (concat "if (arguments.length > "
+                           (integer-to-string (+ n-required-arguments n-optional-arguments))
+                           ") throw 'too many arguments';" *newline*)
+                   "")
+               ;; Optional arguments
+               (if optional-arguments
+                   (concat "switch(arguments.length){" *newline*
+                           (let ((optional-and-defaults
+                                  (lambda-list-optional-arguments-with-default lambda-list))
+                                 (cases nil)
+                                 (idx 0))
+                             (progn
+                               (while (< idx n-optional-arguments)
+                                 (let ((arg (nth idx optional-and-defaults)))
+                                   (push (concat "case "
+                                                 (integer-to-string (+ idx n-required-arguments)) ":" *newline*
+                                                 (lookup-variable-translation (car arg) new-env)
+                                                 "="
+                                                 (ls-compile (cadr arg) new-env fenv)
+                                                 ";" *newline*)
+                                         cases)
+                                   (incf idx)))
+                                    (push (concat "default: break;" *newline*) cases)
+                                    (join (reverse cases))))
+                           "}" *newline*)
+                   "")
+               ;; &rest argument
+               (if rest-argument
+                   (let ((js!rest (lookup-variable-translation rest-argument new-env)))
+                     (concat "var " js!rest "= " (ls-compile nil env fenv) ";" *newline*
+                             "for (var i = arguments.length-1; i>="
+                             (integer-to-string (+ n-required-arguments n-optional-arguments))
+                             "; i--)" *newline*
+                             (indent js!rest " = "
+                                     "{car: arguments[i], cdr: ") js!rest "};"
+                                     *newline*))
+                   "")
+               ;; Body
+               (concat (ls-compile-block (butlast body) new-env fenv)
+                       "return " (ls-compile (car (last body)) new-env fenv) ";")) *newline*
+              "})"))))
 
 (define-compilation fsetq (var val)
   (concat (lookup-function-translation var fenv)
@@ -843,8 +864,11 @@
 
 (define-compilation while (pred &rest body)
   (concat "(function(){" *newline*
-          "while(" (ls-compile pred env fenv) " !== " (ls-compile nil nil nil) "){" *newline*
-          (ls-compile-block body env fenv)
+          (indent "while("
+                  (ls-compile pred env fenv)
+                  " !== "
+                  (ls-compile nil nil nil) "){" *newline*
+                  (indent (ls-compile-block body env fenv)))
           "}})()"))
 
 (define-compilation function (x)
@@ -864,8 +888,8 @@
 
 (define-compilation progn (&rest body)
   (concat "(function(){" *newline*
-          (ls-compile-block (butlast body) env fenv)
-          "return " (ls-compile (car (last body)) env fenv) ";" *newline*
+          (indent (ls-compile-block (butlast body) env fenv)
+                  "return " (ls-compile (car (last body)) env fenv) ";" *newline*)
           "})()"))
 
 (define-compilation let (bindings &rest body)
@@ -879,8 +903,9 @@
                               variables)
                       ",")
                 "){" *newline*
-                (ls-compile-block (butlast body) new-env fenv)
-                "return " (ls-compile (car (last body)) new-env fenv) ";" *newline*
+                (indent (ls-compile-block (butlast body) new-env fenv)
+                        "return " (ls-compile (car (last body)) new-env fenv)
+                        ";" *newline*)
                 "})(" (join (mapcar (lambda (x) (ls-compile x env fenv))
                                     values)
                             ",")
@@ -963,24 +988,24 @@
 (define-compilation consp (x)
   (compile-bool
    (concat "(function(){" *newline*
-           "var tmp = " (ls-compile x env fenv) ";" *newline*
-           "return (typeof tmp == 'object' && 'car' in tmp);" *newline*
+           (indent "var tmp = " (ls-compile x env fenv) ";" *newline*
+                   "return (typeof tmp == 'object' && 'car' in tmp);" *newline*)
            "})()")))
 
 (define-compilation car (x)
   (concat "(function(){" *newline*
-          "var tmp = " (ls-compile x env fenv) ";" *newline*
-          "return tmp === " (ls-compile nil nil nil)
-          "? " (ls-compile nil nil nil)
-          ": tmp.car;" *newline*
+          (indent "var tmp = " (ls-compile x env fenv) ";" *newline*
+                  "return tmp === " (ls-compile nil nil nil)
+                  "? " (ls-compile nil nil nil)
+                  ": tmp.car;" *newline*)
           "})()"))
 
 (define-compilation cdr (x)
   (concat "(function(){" *newline*
-          "var tmp = " (ls-compile x env fenv) ";"
-          "return tmp === " (ls-compile nil nil nil) "? "
-          (ls-compile nil nil nil)
-          ": tmp.cdr;" *newline*
+          (indent "var tmp = " (ls-compile x env fenv) ";"
+                  "return tmp === " (ls-compile nil nil nil) "? "
+                  (ls-compile nil nil nil)
+                  ": tmp.cdr;" *newline*)
           "})()"))
 
 (define-compilation setcar (x new)
@@ -992,8 +1017,8 @@
 (define-compilation symbolp (x)
   (compile-bool
    (concat "(function(){" *newline*
-           "var tmp = " (ls-compile x env fenv) ";" *newline*
-           "return (typeof tmp == 'object' && 'name' in tmp);" *newline*
+           (indent "var tmp = " (ls-compile x env fenv) ";" *newline*
+                   "return (typeof tmp == 'object' && 'name' in tmp);" *newline*)
            "})()")))
 
 (define-compilation make-symbol (name)
@@ -1025,13 +1050,13 @@
 
 (define-compilation slice (string a &optional b)
   (concat "(function(){" *newline*
-          "var str = " (ls-compile string env fenv) ";" *newline*
-          "var a = " (ls-compile a env fenv) ";" *newline*
-          "var b;" *newline*
-          (if b
-              (concat "b = " (ls-compile b env fenv) ";" *newline*)
-              "")
-          "return str.slice(a,b);" *newline*
+          (indent "var str = " (ls-compile string env fenv) ";" *newline*
+                  "var a = " (ls-compile a env fenv) ";" *newline*
+                  "var b;" *newline*
+                  (if b
+                      (concat "b = " (ls-compile b env fenv) ";" *newline*)
+                      "")
+                  "return str.slice(a,b);" *newline*)
           "})()"))
 
 (define-compilation char (string index)
@@ -1064,19 +1089,19 @@
       (let ((args (butlast args))
             (last (car (last args))))
         (concat "(function(){" *newline*
-                "var f = " (ls-compile func env fenv) ";" *newline*
-                "var args = [" (join (mapcar (lambda (x)
-                                               (ls-compile x env fenv))
-                                             args)
-                                     ", ")
-                "];" *newline*
-                "var tail = (" (ls-compile last env fenv) ");" *newline*
-                "while (tail != " (ls-compile nil env fenv) "){" *newline*
-                "    args.push(tail.car);" *newline*
-                "    tail = tail.cdr;" *newline*
-                "}" *newline*
-                "return f.apply(this, args);" *newline*
-                "})()"))))
+                (indent "var f = " (ls-compile func env fenv) ";" *newline*
+                        "var args = [" (join (mapcar (lambda (x)
+                                                       (ls-compile x env fenv))
+                                                     args)
+                                             ", ")
+                        "];" *newline*
+                        "var tail = (" (ls-compile last env fenv) ");" *newline*
+                        (indent "while (tail != " (ls-compile nil env fenv) "){" *newline*
+                                "    args.push(tail.car);" *newline*
+                                "    tail = tail.cdr;" *newline*
+                                "}" *newline*
+                                "return f.apply(this, args);" *newline*)
+                        "})()")))))
 
 (define-compilation js-eval (string)
   (concat "eval.apply(window, [" (ls-compile string env fenv)  "])"))
@@ -1090,8 +1115,9 @@
 
 (define-compilation get (object key)
   (concat "(function(){" *newline*
-          "var tmp = " "(" (ls-compile object env fenv) ")[" (ls-compile key env fenv) "];" *newline*
-          "return tmp == undefined? " (ls-compile nil nil nil) ": tmp ;" *newline*
+          (indent "var tmp = " "(" (ls-compile object env fenv) ")"
+                  "[" (ls-compile key env fenv) "];" *newline*
+                  "return tmp == undefined? " (ls-compile nil nil nil) ": tmp ;" *newline*)
           "})()"))
 
 (define-compilation set (object key value)
