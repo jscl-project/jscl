@@ -790,8 +790,8 @@
                   "")
               ;; Body
               (concat (ls-compile-block (butlast body) new-env fenv)
-                      "return " (ls-compile (car (last body)) new-env fenv) ";")
-              *newline* "})"))))
+                      "return " (ls-compile (car (last body)) new-env fenv) ";") *newline*
+                      "})"))))
 
 (define-compilation fsetq (var val)
   (concat (lookup-function-translation var fenv)
@@ -842,9 +842,8 @@
   (concat "console.log(" (ls-compile form env fenv) ")"))
 
 (define-compilation while (pred &rest body)
-  (concat "(function(){ while("
-          (ls-compile pred env fenv) " !== " (ls-compile nil nil nil)
-          "){"
+  (concat "(function(){" *newline*
+          "while(" (ls-compile pred env fenv) " !== " (ls-compile nil nil nil) "){" *newline*
           (ls-compile-block body env fenv)
           "}})()"))
 
@@ -866,13 +865,26 @@
 (define-compilation progn (&rest body)
   (concat "(function(){" *newline*
           (ls-compile-block (butlast body) env fenv)
-          "return " (ls-compile (car (last body)) env fenv) ";"
-          "})()" *newline*))
+          "return " (ls-compile (car (last body)) env fenv) ";" *newline*
+          "})()"))
 
-(define-transformation let (bindings &rest body)
+(define-compilation let (bindings &rest body)
   (let ((bindings (mapcar #'ensure-list bindings)))
-    `((lambda ,(mapcar #'car bindings) ,@body)
-      ,@(mapcar #'cadr bindings))))
+    (let ((variables (mapcar #'first bindings))
+          (values    (mapcar #'second bindings)))
+      (let ((new-env (extend-local-env variables env)))
+        (concat "(function("
+                (join (mapcar (lambda (x)
+                                (lookup-variable-translation x new-env))
+                              variables)
+                      ",")
+                "){" *newline*
+                (ls-compile-block (butlast body) new-env fenv)
+                "return " (ls-compile (car (last body)) new-env fenv) ";" *newline*
+                "})(" (join (mapcar (lambda (x) (ls-compile x env fenv))
+                                    values)
+                            ",")
+                ")")))))
 
 ;;; A little backquote implementation without optimizations of any
 ;;; kind for lispstrack.
@@ -950,21 +962,26 @@
 
 (define-compilation consp (x)
   (compile-bool
-   (concat "(function(){ var tmp = "
-           (ls-compile x env fenv)
-           "; return (typeof tmp == 'object' && 'car' in tmp);})()")))
+   (concat "(function(){" *newline*
+           "var tmp = " (ls-compile x env fenv) ";" *newline*
+           "return (typeof tmp == 'object' && 'car' in tmp);" *newline*
+           "})()")))
 
 (define-compilation car (x)
-  (concat "(function () { var tmp = " (ls-compile x env fenv)
-          "; return tmp === " (ls-compile nil nil nil) "? "
-          (ls-compile nil nil nil)
-          ": tmp.car; })()"))
+  (concat "(function(){" *newline*
+          "var tmp = " (ls-compile x env fenv) ";" *newline*
+          "return tmp === " (ls-compile nil nil nil)
+          "? " (ls-compile nil nil nil)
+          ": tmp.car;" *newline*
+          "})()"))
 
 (define-compilation cdr (x)
-  (concat "(function () { var tmp = " (ls-compile x env fenv)
-          "; return tmp === " (ls-compile nil nil nil) "? "
+  (concat "(function(){" *newline*
+          "var tmp = " (ls-compile x env fenv) ";"
+          "return tmp === " (ls-compile nil nil nil) "? "
           (ls-compile nil nil nil)
-          ": tmp.cdr; })()"))
+          ": tmp.cdr;" *newline*
+          "})()"))
 
 (define-compilation setcar (x new)
   (concat "((" (ls-compile x env fenv) ").car = " (ls-compile new env fenv) ")"))
@@ -974,9 +991,10 @@
 
 (define-compilation symbolp (x)
   (compile-bool
-   (concat "(function(){ var tmp = "
-           (ls-compile x env fenv)
-           "; return (typeof tmp == 'object' && 'name' in tmp); })()")))
+   (concat "(function(){" *newline*
+           "var tmp = " (ls-compile x env fenv) ";" *newline*
+           "return (typeof tmp == 'object' && 'name' in tmp);" *newline*
+           "})()")))
 
 (define-compilation make-symbol (name)
   (concat "({name: " (ls-compile name env fenv) "})"))
@@ -1058,7 +1076,7 @@
                 "    tail = tail.cdr;" *newline*
                 "}" *newline*
                 "return f.apply(this, args);" *newline*
-                "})()" *newline*))))
+                "})()"))))
 
 (define-compilation js-eval (string)
   (concat "eval.apply(window, [" (ls-compile string env fenv)  "])"))
@@ -1071,10 +1089,9 @@
   "{}")
 
 (define-compilation get (object key)
-  (concat "(function(){ var tmp = "
-          "(" (ls-compile object env fenv) ")[" (ls-compile key env fenv) "]"
-          ";"
-          "return tmp == undefined? " (ls-compile nil nil nil) ": tmp ;"
+  (concat "(function(){" *newline*
+          "var tmp = " "(" (ls-compile object env fenv) ")[" (ls-compile key env fenv) "];" *newline*
+          "return tmp == undefined? " (ls-compile nil nil nil) ": tmp ;" *newline*
           "})()"))
 
 (define-compilation set (object key value)
