@@ -38,11 +38,18 @@
   (defmacro defvar (name &optional value)
     `(%defvar ,name ,value))
 
- (defmacro %defun (name args &rest body)
-   `(progn
-      (eval-when-compile
-        (%compile-defun ',name))
-      (fsetq ,name (lambda ,args ,@body))))
+  (defmacro named-lambda (name args &rest body)
+    (let ((x (make-symbol "FN")))
+      `(let ((,x (lambda ,args ,@body)))
+         (set ,x "fname" ,name)
+         ,x)))
+
+  (defmacro %defun (name args &rest body)
+    `(progn
+       (eval-when-compile
+         (%compile-defun ',name))
+       (fsetq ,name (named-lambda ,(symbol-name name) ,args
+                      ,@body))))
 
   (defmacro defun (name args &rest body)
     `(%defun ,name ,args ,@body))
@@ -428,12 +435,17 @@
        (join (mapcar (lambda (d) (string (char "0123456789" d)))
                      digits))))))
 
+#+lispstrack
 (defun print-to-string (form)
   (cond
     ((symbolp form) (symbol-name form))
     ((integerp form) (integer-to-string form))
     ((stringp form) (concat "\"" (escape-string form) "\""))
-    ((functionp form) (concat "#<FUNCTION>"))
+    ((functionp form)
+     (let ((name (get form "fname")))
+       (if name
+           (concat "#<FUNCTION " name ">")
+           (concat "#<FUNCTION>"))))
     ((listp form)
      (concat "("
              (join-trailing (mapcar #'print-to-string (butlast form)) " ")
