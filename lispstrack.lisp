@@ -273,14 +273,13 @@
       (t (nth (1- n) (cdr list)))))
 
   (defun last (x)
-    (if (null (cdr x))
-        x
-        (last (cdr x))))
+    (if (consp (cdr x))
+        (last (cdr x))
+        x))
 
   (defun butlast (x)
-    (if (null (cdr x))
-        nil
-        (cons (car x) (butlast (cdr x)))))
+    (and (consp (cdr x))
+         (cons (car x) (butlast (cdr x)))))
 
   (defun member (x list)
     (cond
