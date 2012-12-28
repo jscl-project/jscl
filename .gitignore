@@ -3,3 +3,4 @@ test.js
 *.fasl
 /jqconsole.min.js
 /jquery.js
+/lispstrack.js
