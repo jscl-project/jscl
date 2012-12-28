@@ -436,8 +436,11 @@
     ((functionp form) (concat "#<FUNCTION>"))
     ((listp form)
      (concat "("
-             (join (mapcar #'print-to-string form)
-                   " ")
+             (join-trailing (mapcar #'print-to-string (butlast form)) " ")
+             (let ((last (last form)))
+               (if (null (cdr last))
+                   (print-to-string (car last))
+                   (concat (print-to-string (car last)) " . " (print-to-string (cdr last)))))
              ")"))))
 
 ;;;; Reader
