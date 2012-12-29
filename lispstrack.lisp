@@ -859,9 +859,6 @@
 (define-compilation quote (sexp)
   (literal sexp))
 
-(define-compilation debug (form)
-  (concat "console.log(" (ls-compile form env fenv) ")"))
-
 (define-compilation while (pred &rest body)
   (concat "(function(){" *newline*
           (indent "while("
@@ -1134,6 +1131,9 @@
 (define-compilation functionp (x)
   (compile-bool
    (concat "(typeof " (ls-compile x env fenv) " == 'function')")))
+
+(define-compilation write-string (x)
+  (concat "lisp.write(" (ls-compile x env fenv) ")"))
 
 
 (defun macrop (x)

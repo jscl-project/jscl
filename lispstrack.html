@@ -48,7 +48,10 @@
         font-weight: normal;
     }
     /* The text color of the output. */
-    .jqconsole-output, .jqconsole-header {
+    .jqconsole-output {
+        color: green;
+    }
+    .jqconsole-return, .jqconsole-header {
         color: gray;
     }
     .jqconsole-error {
@@ -67,18 +70,23 @@
         var jqconsole = $('#console').jqconsole('Welcome to Lisptrack!\n\n', '> ');
         jqconsole.RegisterMatching('(', ')', 'parents');
 
+        lisp.write = function(str){
+           jqconsole.Write(str, 'jqconsole-output');
+           return str;
+        }
+
         var startPrompt = function () {
           // Start the prompt with history enabled.
           jqconsole.Prompt(true, function (input) {
-            // Output input with the class jqconsole-output.
+            // Output input with the class jqconsole-return.
             if (input[0] != ','){
                 try {
-                    jqconsole.Write(lisp.print(lisp.evalString(input)) + '\n', 'jqconsole-output');
+                    jqconsole.Write(lisp.print(lisp.evalString(input)) + '\n', 'jqconsole-return');
                 } catch(error) {
                     jqconsole.Write('ERROR: ' + error + '\n', 'jqconsole-error');
                 }
             } else {
-                jqconsole.Write(lisp.compileString(input.slice(1)) + '\n', 'jqconsole-output');
+                jqconsole.Write(lisp.compileString(input.slice(1)) + '\n', 'jqconsole-return');
             }
             // Restart the prompt.
             startPrompt();
