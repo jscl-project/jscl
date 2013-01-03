@@ -945,105 +945,84 @@
 
 ;;; Primitives
 
+(defmacro define-builtin (name args &rest body)
+  `(define-compilation ,name ,args
+     (let ,(mapcar (lambda (arg) `(,arg (ls-compile ,arg env fenv))) args)
+       ,@body)))
+
 (defun compile-bool (x)
   (concat "(" x "?" (ls-compile t nil nil) ": " (ls-compile nil nil nil) ")"))
 
-(define-compilation + (x y)
-  (concat "((" (ls-compile x env fenv) ") + (" (ls-compile y env fenv) "))"))
+(define-builtin + (x y) (concat "((" x ") + (" y "))"))
+(define-builtin - (x y) (concat "((" x ") - (" y "))"))
+(define-builtin * (x y) (concat "((" x ") * (" y "))"))
+(define-builtin / (x y) (concat "((" x ") / (" y "))"))
 
-(define-compilation - (x y)
-  (concat "((" (ls-compile x env fenv) ") - (" (ls-compile y env fenv) "))"))
+(define-builtin mod (x y) (concat "((" x ") % (" y "))"))
 
-(define-compilation * (x y)
-  (concat "((" (ls-compile x env fenv) ") * (" (ls-compile y env fenv) "))"))
+(define-builtin < (x y) (compile-bool (concat "((" x ") < (" y "))")))
+(define-builtin = (x y) (compile-bool (concat "((" x ") == (" y "))")))
 
-(define-compilation / (x y)
-  (concat "((" (ls-compile x env fenv) ") / (" (ls-compile y env fenv) "))"))
+(define-builtin numberp (x) (compile-bool (concat "(typeof (" x ") == \"number\")")))
 
-(define-compilation < (x y)
-  (compile-bool (concat "((" (ls-compile x env fenv) ") < (" (ls-compile y env fenv) "))")))
+(define-builtin floor (x) (concat "(Math.floor(" x "))"))
 
-(define-compilation = (x y)
-  (compile-bool (concat "((" (ls-compile x env fenv) ") == (" (ls-compile y env fenv) "))")))
+(define-builtin null (x) (compile-bool (concat "(" x "===" (ls-compile nil env fenv) ")")))
 
-(define-compilation numberp (x)
-  (compile-bool (concat "(typeof (" (ls-compile x env fenv) ") == \"number\")")))
-
-
-(define-compilation mod (x y)
-  (concat "((" (ls-compile x env fenv) ") % (" (ls-compile y env fenv) "))"))
-
-(define-compilation floor (x)
-  (concat "(Math.floor(" (ls-compile x env fenv) "))"))
-
-(define-compilation null (x)
-  (compile-bool (concat "(" (ls-compile x env fenv) "===" (ls-compile nil env fenv) ")")))
-
-(define-compilation cons (x y)
-  (concat "({car: " (ls-compile x env fenv) ", cdr: " (ls-compile y env fenv) "})"))
-
-(define-compilation consp (x)
+(define-builtin cons (x y) (concat "({car: " x ", cdr: " y "})"))
+(define-builtin consp (x)
   (compile-bool
    (concat "(function(){" *newline*
-           (indent "var tmp = " (ls-compile x env fenv) ";" *newline*
+           (indent "var tmp = " x ";" *newline*
                    "return (typeof tmp == 'object' && 'car' in tmp);" *newline*)
            "})()")))
 
-(define-compilation car (x)
+(define-builtin car (x)
   (concat "(function(){" *newline*
-          (indent "var tmp = " (ls-compile x env fenv) ";" *newline*
+          (indent "var tmp = " x ";" *newline*
                   "return tmp === " (ls-compile nil nil nil)
                   "? " (ls-compile nil nil nil)
                   ": tmp.car;" *newline*)
           "})()"))
 
-(define-compilation cdr (x)
+(define-builtin cdr (x)
   (concat "(function(){" *newline*
-          (indent "var tmp = " (ls-compile x env fenv) ";" *newline*
+          (indent "var tmp = " x ";" *newline*
                   "return tmp === " (ls-compile nil nil nil) "? "
                   (ls-compile nil nil nil)
                   ": tmp.cdr;" *newline*)
           "})()"))
 
-(define-compilation setcar (x new)
-  (concat "((" (ls-compile x env fenv) ").car = " (ls-compile new env fenv) ")"))
+(define-builtin setcar (x new) (concat "((" x ").car = " new ")"))
+(define-builtin setcdr (x new) (concat "((" x ").cdr = " new ")"))
 
-(define-compilation setcdr (x new)
-  (concat "((" (ls-compile x env fenv) ").cdr = " (ls-compile new env fenv) ")"))
-
-(define-compilation symbolp (x)
+(define-builtin symbolp (x)
   (compile-bool
    (concat "(function(){" *newline*
-           (indent "var tmp = " (ls-compile x env fenv) ";" *newline*
+           (indent "var tmp = " x ";" *newline*
                    "return (typeof tmp == 'object' && 'name' in tmp);" *newline*)
            "})()")))
 
-(define-compilation make-symbol (name)
-  (concat "({name: " (ls-compile name env fenv) "})"))
+(define-builtin make-symbol (name)
+  (concat "({name: " name "})"))
 
-(define-compilation symbol-name (x)
-  (concat "(" (ls-compile x env fenv) ").name"))
+(define-builtin symbol-name (x)
+  (concat "(" x ").name"))
 
-(define-compilation eq (x y)
-  (compile-bool
-   (concat "(" (ls-compile x env fenv) " === " (ls-compile y env fenv) ")")))
+(define-builtin eq    (x y) (compile-bool (concat "(" x " === " y ")")))
+(define-builtin equal (x y) (compile-bool (concat "(" x  " == " y ")")))
 
-(define-compilation equal (x y)
-  (compile-bool
-   (concat "(" (ls-compile x env fenv) " == " (ls-compile y env fenv) ")")))
+(define-builtin string (x)
+  (concat "String.fromCharCode(" x ")"))
 
-(define-compilation string (x)
-  (concat "String.fromCharCode(" (ls-compile x env fenv) ")"))
+(define-builtin stringp (x)
+  (compile-bool (concat "(typeof(" x ") == \"string\")")))
 
-(define-compilation stringp (x)
-  (compile-bool
-   (concat "(typeof(" (ls-compile x env fenv) ") == \"string\")")))
+(define-builtin string-upcase (x)
+  (concat "(" x ").toUpperCase()"))
 
-(define-compilation string-upcase (x)
-  (concat "(" (ls-compile x env fenv) ").toUpperCase()"))
-
-(define-compilation string-length (x)
-  (concat "(" (ls-compile x env fenv) ").length"))
+(define-builtin string-length (x)
+  (concat "(" x ").length"))
 
 (define-compilation slice (string a &optional b)
   (concat "(function(){" *newline*
@@ -1056,19 +1035,11 @@
                   "return str.slice(a,b);" *newline*)
           "})()"))
 
-(define-compilation char (string index)
-  (concat "("
-          (ls-compile string env fenv)
-          ").charCodeAt("
-          (ls-compile index env fenv)
-          ")"))
+(define-builtin char (string index)
+  (concat "(" string ").charCodeAt(" index ")"))
 
-(define-compilation concat-two (string1 string2)
-  (concat "("
-          (ls-compile string1 env fenv)
-          ").concat("
-          (ls-compile string2 env fenv)
-          ")"))
+(define-builtin concat-two (string1 string2)
+  (concat "(" string1 ").concat(" string2 ")"))
 
 (define-compilation funcall (func &rest args)
   (concat "("
@@ -1100,40 +1071,31 @@
                                 "return f.apply(this, args);" *newline*)
                         "})()")))))
 
-(define-compilation js-eval (string)
-  (concat "eval.apply(window, [" (ls-compile string env fenv)  "])"))
+(define-builtin js-eval (string)
+  (concat "eval.apply(window, [" string  "])"))
 
+(define-builtin error (string)
+  (concat "(function (){ throw " string ";" "return 0;})()"))
 
-(define-compilation error (string)
-  (concat "(function (){ throw " (ls-compile string env fenv) ";" "return 0;})()"))
+(define-builtin new () "{}")
 
-(define-compilation new ()
-  "{}")
-
-(define-compilation get (object key)
+(define-builtin get (object key)
   (concat "(function(){" *newline*
-          (indent "var tmp = " "(" (ls-compile object env fenv) ")"
-                  "[" (ls-compile key env fenv) "];" *newline*
+          (indent "var tmp = " "(" object ")[" key "];" *newline*
                   "return tmp == undefined? " (ls-compile nil nil nil) ": tmp ;" *newline*)
           "})()"))
 
-(define-compilation set (object key value)
-  (concat "(("
-          (ls-compile object env fenv)
-          ")["
-          (ls-compile key env fenv) "]"
-          " = " (ls-compile value env fenv) ")"))
+(define-builtin set (object key value)
+  (concat "((" object ")[" key "] = " value ")"))
 
-(define-compilation in (key object)
-  (compile-bool
-   (concat "(" (ls-compile key env fenv) " in " (ls-compile object env fenv) ")")))
+(define-builtin in (key object)
+  (compile-bool (concat "((" key ") in (" object "))")))
 
-(define-compilation functionp (x)
-  (compile-bool
-   (concat "(typeof " (ls-compile x env fenv) " == 'function')")))
+(define-builtin functionp (x)
+  (compile-bool (concat "(typeof " x " == 'function')")))
 
-(define-compilation write-string (x)
-  (concat "lisp.write(" (ls-compile x env fenv) ")"))
+(define-builtin write-string (x)
+  (concat "lisp.write(" x ")"))
 
 
 (defun macrop (x)
