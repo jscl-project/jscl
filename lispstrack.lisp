@@ -975,12 +975,12 @@
                                                 ".';"
                                                 *newline*)))
                              decls)
-                   ,@body)
+                   (concat "return " (progn ,@body) ";" *newline*))
            "})()"))
 
 (defun num-op-num (x op y)
   (type-check (("x" "number" x) ("y" "number" y))
-    (concat "return x" op "y;" *newline*)))
+    (concat "x" op "y")))
 
 (define-builtin + (x y) (num-op-num x "+" y))
 (define-builtin - (x y) (num-op-num x "-" y))
@@ -1000,7 +1000,7 @@
 
 (define-builtin floor (x)
   (type-check (("x" "number" x))
-    "return (Math.floor(x));"))
+    "Math.floor(x)"))
 
 (define-builtin cons (x y) (concat "({car: " x ", cdr: " y "})"))
 (define-builtin consp (x)
@@ -1028,11 +1028,11 @@
 
 (define-builtin setcar (x new)
   (type-check (("x" "object" x))
-    (concat "return (x.car = " new ");")))
+    (concat "(x.car = " new ")")))
 
 (define-builtin setcdr (x new)
   (type-check (("x" "object" x))
-    (concat "return (x.cdr = " new ");")))
+    (concat "(x.cdr = " new ")")))
 
 (define-builtin symbolp (x)
   (compile-bool
@@ -1043,7 +1043,7 @@
 
 (define-builtin make-symbol (name)
   (type-check (("name" "string" name))
-    "return ({name: name});"))
+    "({name: name})"))
 
 (define-builtin symbol-name (x)
   (concat "(" x ").name"))
@@ -1053,18 +1053,18 @@
 
 (define-builtin string (x)
   (type-check (("x" "number" x))
-    "return String.fromCharCode(x);"))
+    "String.fromCharCode(x)"))
 
 (define-builtin stringp (x)
   (compile-bool (concat "(typeof(" x ") == \"string\")")))
 
 (define-builtin string-upcase (x)
   (type-check (("x" "string" x))
-    "return x.toUpperCase();"))
+    "x.toUpperCase()"))
 
 (define-builtin string-length (x)
   (type-check (("x" "string" x))
-    "return x.length;"))
+    "x.length"))
 
 (define-compilation slice (string a &optional b)
   (concat "(function(){" *newline*
@@ -1078,15 +1078,17 @@
           "})()"))
 
 (define-builtin char (string index)
-  (concat "(" string ").charCodeAt(" index ")"))
+  (type-check (("string" "string" string)
+               ("index" "number" index))
+    "string.charCodeAt(index)"))
 
 (define-builtin concat-two (string1 string2)
-  (concat "(" string1 ").concat(" string2 ")"))
+  (type-check (("string1" "string" string1)
+               ("string2" "string" string2))
+    "string1.concat(string2)"))
 
 (define-compilation funcall (func &rest args)
-  (concat "("
-          (ls-compile func env fenv)
-          ")("
+  (concat "(" (ls-compile func env fenv) ")("
           (join (mapcar (lambda (x)
                           (ls-compile x env fenv))
                         args)
@@ -1114,7 +1116,8 @@
                         "})()")))))
 
 (define-builtin js-eval (string)
-  (concat "eval.apply(window, [" string  "])"))
+  (type-check (("string" "string" string))
+    "eval.apply(window, [string])"))
 
 (define-builtin error (string)
   (concat "(function (){ throw " string ";" "return 0;})()"))
@@ -1137,7 +1140,8 @@
   (compile-bool (concat "(typeof " x " == 'function')")))
 
 (define-builtin write-string (x)
-  (concat "lisp.write(" x ")"))
+  (type-check (("x" "string" x))
+    "lisp.write(x)"))
 
 (defun macrop (x)
   (and (symbolp x) (eq (binding-type (lookup-function x *fenv*)) 'macro)))
