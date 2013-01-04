@@ -45,7 +45,7 @@
     `(%defvar ,name ,value))
 
   (defmacro named-lambda (name args &rest body)
-    (let ((x (make-symbol "FN")))
+    (let ((x (gensym "FN")))
       `(let ((,x (lambda ,args ,@body)))
          (set ,x "fname" ,name)
          ,x)))
@@ -81,6 +81,11 @@
 
  (defun find-symbol (name)
    (get *package* name))
+
+ (defvar *gensym-counter* 0)
+ (defun gensym (&optional (prefix "G"))
+   (setq *gensym-counter* (+ *gensym-counter* 1))
+   (make-symbol (concat-two prefix (integer-to-string *gensym-counter*))))
 
  ;; Basic functions
  (defun = (x y) (= x y))
@@ -136,7 +141,7 @@
 
  (defmacro dolist (iter &body body)
    (let ((var (first iter))
-         (g!list (make-symbol "LIST")))
+         (g!list (gensym)))
      `(let ((,g!list ,(second iter))
             (,var nil))
         (while ,g!list
@@ -145,7 +150,7 @@
           (setq ,g!list (cdr ,g!list))))))
 
  (defmacro dotimes (iter &body body)
-   (let ((g!to (make-symbol "G!TO"))
+   (let ((g!to (gensym))
          (var (first iter))
          (to (second iter))
          (result (third iter)))
@@ -166,7 +171,7 @@
                 (cond ,@(cdr clausules))))))
 
  (defmacro case (form &rest clausules)
-   (let ((!form (make-symbol "FORM")))
+   (let ((!form (gensym)))
      `(let ((,!form ,form))
         (cond
           ,@(mapcar (lambda (clausule)
@@ -201,15 +206,15 @@
       ((null (cdr forms))
        (car forms))
       (t
-       (let ((g (make-symbol "VAR")))
+       (let ((g (gensym)))
          `(let ((,g ,(car forms)))
             (if ,g ,g (or ,@(cdr forms))))))))
 
-    (defmacro prog1 (form &body body)
-      (let ((value (make-symbol "VALUE")))
-        `(let ((,value ,form))
-           ,@body
-           ,value))))
+   (defmacro prog1 (form &body body)
+   (let ((value (gensym)))
+     `(let ((,value ,form))
+        ,@body
+        ,value))))
 
 ;;; This couple of helper functions will be defined in both Common
 ;;; Lisp and in Lispstrack.
@@ -1245,9 +1250,10 @@
          (c2 (ls-compile `(setq *env* ',*env*) nil nil))
          (c3 (ls-compile `(setq *variable-counter* ',*variable-counter*) nil nil))
          (c4 (ls-compile `(setq *function-counter* ',*function-counter*) nil nil))
-         (c5 (ls-compile `(setq *literal-counter* ',*literal-counter*) nil nil)))
+         (c5 (ls-compile `(setq *literal-counter* ',*literal-counter*) nil nil))
+         (c6 (ls-compile `(setq *gensym-counter* ',*gensym-counter*) nil nil)))
      (setq *toplevel-compilations*
-           (append *toplevel-compilations* (list c1 c2 c3 c4 c5)))))
+           (append *toplevel-compilations* (list c1 c2 c3 c4 c5 c6)))))
 
  (js-eval
   (concat "var lisp = {};"
