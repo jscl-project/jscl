@@ -508,7 +508,7 @@
   (let ((string "")
         (ch))
     (setq ch (%peek-char stream))
-    (while (not (funcall func ch))
+    (while (and ch (not (funcall func ch)))
       (setq string (concat string (string ch)))
       (%read-char stream)
       (setq ch (%peek-char stream)))
