@@ -1,4 +1,4 @@
-;;; lispstrack.lisp ---
+;;; ecmalisp.lisp ---
 
 ;; Copyright (C) 2012 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
@@ -16,12 +16,12 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-;;; This code is executed when lispstrack compiles this file
+;;; This code is executed when ecmalisp compiles this file
 ;;; itself. The compiler provides compilation of some special forms,
 ;;; as well as funcalls and macroexpansion, but no functions. So, we
 ;;; define the Lisp world from scratch. This code has to define enough
 ;;; language to the compiler to be able to run.
-#+lispstrack
+#+ecmalisp
 (progn
  (eval-when-compile
    (%compile-defmacro 'defmacro
@@ -217,7 +217,7 @@
         ,value))))
 
 ;;; This couple of helper functions will be defined in both Common
-;;; Lisp and in Lispstrack.
+;;; Lisp and in Ecmalisp.
 (defun ensure-list (x)
   (if (listp x)
       x
@@ -230,10 +230,10 @@
                (cdr list)
                (funcall func initial (car list)))))
 
-;;; Go on growing the Lisp language in Lispstrack, with more high
+;;; Go on growing the Lisp language in Ecmalisp, with more high
 ;;; level utilities as well as correct versions of other
 ;;; constructions.
-#+lispstrack
+#+ecmalisp
 (progn
   (defmacro defun (name args &body body)
     `(progn
@@ -416,7 +416,7 @@
   (defun setcdr (cons new)
     (setf (cdr cons) new)))
 
-;;; At this point, no matter if Common Lisp or lispstrack is compiling
+;;; At this point, no matter if Common Lisp or ecmalisp is compiling
 ;;; from here, this code will compile on both. We define some helper
 ;;; functions now for string manipulation and so on. They will be
 ;;; useful in the compiler, mostly.
@@ -478,7 +478,7 @@
 
 ;;; Printer
 
-#+lispstrack
+#+ecmalisp
 (progn
   (defun print-to-string (form)
     (cond
@@ -608,7 +608,7 @@
          ((string= feature "common-lisp")
           (ls-read stream)              ;ignore
           (ls-read stream))
-         ((string= feature "lispstrack")
+         ((string= feature "ecmalisp")
           (ls-read stream))
          (t
           (error "Unknown reader form.")))))))
@@ -943,7 +943,7 @@
                 ")")))))
 
 ;;; A little backquote implementation without optimizations of any
-;;; kind for lispstrack.
+;;; kind for ecmalisp.
 (defun backquote-expand-1 (form)
   (cond
     ((symbolp form)
@@ -1225,7 +1225,7 @@
 ;;; interactive development (eval), which works calling the compiler
 ;;; and evaluating the Javascript result globally.
 
-#+lispstrack
+#+ecmalisp
 (progn
  (defmacro with-compilation-unit (&body body)
    `(prog1
@@ -1297,4 +1297,4 @@
         (setq *compilation-unit-checks* nil))))
 
   (defun bootstrap ()
-    (ls-compile-file "lispstrack.lisp" "lispstrack.js")))
+    (ls-compile-file "ecmalisp.lisp" "ecmalisp.js")))

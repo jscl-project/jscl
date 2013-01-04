@@ -1,0 +1,4 @@
+* Ecmalisp
+
+Ecmalisp is a in-progress Lisp-to-Javascript compiler, which is
+bootstrapped from Common Lisp and executed from the browser.
