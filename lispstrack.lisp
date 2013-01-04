@@ -62,6 +62,9 @@
  (defvar t (make-symbol "T"))
  (set *package* "T" t)
 
+ (defun null (x)
+   (eq x nil))
+
  (defun internp (name)
    (in name *package*))
 
@@ -966,8 +969,6 @@
 (define-builtin numberp (x) (compile-bool (concat "(typeof (" x ") == \"number\")")))
 
 (define-builtin floor (x) (concat "(Math.floor(" x "))"))
-
-(define-builtin null (x) (compile-bool (concat "(" x "===" (ls-compile nil env fenv) ")")))
 
 (define-builtin cons (x y) (concat "({car: " x ", cdr: " y "})"))
 (define-builtin consp (x)
