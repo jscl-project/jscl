@@ -128,13 +128,13 @@
  (defmacro push (x place)
    `(setq ,place (cons ,x ,place)))
 
- (defmacro when (condition &rest body)
+ (defmacro when (condition &body body)
    `(if ,condition (progn ,@body) nil))
 
- (defmacro unless (condition &rest body)
+ (defmacro unless (condition &body body)
    `(if ,condition nil (progn ,@body)))
 
- (defmacro dolist (iter &rest body)
+ (defmacro dolist (iter &body body)
    (let ((var (first iter))
          (g!list (make-symbol "LIST")))
      `(let ((,g!list ,(second iter))
@@ -143,6 +143,18 @@
           (setq ,var (car ,g!list))
           ,@body
           (setq ,g!list (cdr ,g!list))))))
+
+ (defmacro dotimes (iter &body body)
+   (let ((g!to (make-symbol "G!TO"))
+         (var (first iter))
+         (to (second iter))
+         (result (third iter)))
+     `(let ((,var 0)
+            (,g!to ,to))
+        (while (< ,var ,g!to)
+          ,@body
+          (incf ,var))
+        ,result)))
 
  (defmacro cond (&rest clausules)
    (if (null clausules)
@@ -193,7 +205,7 @@
          `(let ((,g ,(car forms)))
             (if ,g ,g (or ,@(cdr forms))))))))
 
-    (defmacro prog1 (form &rest body)
+    (defmacro prog1 (form &body body)
       (let ((value (make-symbol "VALUE")))
         `(let ((,value ,form))
            ,@body
@@ -218,7 +230,7 @@
 ;;; constructions.
 #+lispstrack
 (progn
-  (defmacro defun (name args &rest body)
+  (defmacro defun (name args &body body)
     `(progn
        (%defun ,name ,args ,@body)
        ',name))
@@ -459,26 +471,37 @@
        (join (mapcar (lambda (d) (string (char "0123456789" d)))
                      digits))))))
 
+;;; Printer
 
 #+lispstrack
-(defun print-to-string (form)
-  (cond
-    ((symbolp form) (symbol-name form))
-    ((integerp form) (integer-to-string form))
-    ((stringp form) (concat "\"" (escape-string form) "\""))
-    ((functionp form)
-     (let ((name (get form "fname")))
-       (if name
-           (concat "#<FUNCTION " name ">")
-           (concat "#<FUNCTION>"))))
-    ((listp form)
-     (concat "("
-             (join-trailing (mapcar #'print-to-string (butlast form)) " ")
-             (let ((last (last form)))
-               (if (null (cdr last))
-                   (print-to-string (car last))
-                   (concat (print-to-string (car last)) " . " (print-to-string (cdr last)))))
-             ")"))))
+(progn
+  (defun print-to-string (form)
+    (cond
+      ((symbolp form) (symbol-name form))
+      ((integerp form) (integer-to-string form))
+      ((stringp form) (concat "\"" (escape-string form) "\""))
+      ((functionp form)
+       (let ((name (get form "fname")))
+         (if name
+             (concat "#<FUNCTION " name ">")
+             (concat "#<FUNCTION>"))))
+      ((listp form)
+       (concat "("
+               (join-trailing (mapcar #'print-to-string (butlast form)) " ")
+               (let ((last (last form)))
+                 (if (null (cdr last))
+                     (print-to-string (car last))
+                     (concat (print-to-string (car last)) " . " (print-to-string (cdr last)))))
+               ")"))))
+
+  (defun write-line (x)
+    (write-string x)
+    (write-string *newline*)
+    x)
+
+  (defun print (x)
+    (write-line (print-to-string x))))
+
 
 ;;;; Reader
 
@@ -715,7 +738,7 @@
               (mapcar (lambda (x) (ls-compile x env fenv))  sexps))
    (concat ";" *newline*)))
 
-(defmacro define-compilation (name args &rest body)
+(defmacro define-compilation (name args &body body)
   ;; Creates a new primitive `name' with parameters args and
   ;; @body. The body can access to the local environment through the
   ;; variable ENV.
@@ -951,7 +974,7 @@
 
 ;;; Primitives
 
-(defmacro define-builtin (name args &rest body)
+(defmacro define-builtin (name args &body body)
   `(define-compilation ,name ,args
      (let ,(mapcar (lambda (arg) `(,arg (ls-compile ,arg env fenv))) args)
        ,@body)))
@@ -1199,7 +1222,7 @@
 
 #+lispstrack
 (progn
- (defmacro with-compilation-unit (&rest body)
+ (defmacro with-compilation-unit (&body body)
    `(prog1
         (progn
           (setq *compilation-unit-checks* nil)
