@@ -725,7 +725,7 @@
     (push (concat "var " (binding-translation b)) *toplevel-compilations*)))
 
 (defun %compile-defun (name)
-  (let ((b (lookup-function name *env*)))
+  (let ((b (lookup-function name *fenv*)))
     (mark-binding-as-declared b)
     (push (concat "var " (binding-translation b)) *toplevel-compilations*)))
 
