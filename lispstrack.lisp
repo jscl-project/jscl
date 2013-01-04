@@ -27,7 +27,13 @@
    (%compile-defmacro 'defmacro
                       '(lambda (name args &rest body)
                         `(eval-when-compile
-                           (%compile-defmacro ',name '(lambda ,args ,@body))))))
+                           (%compile-defmacro ',name
+                                              '(lambda ,(mapcar (lambda (x)
+                                                                  (if (eq x '&body)
+                                                                      '&rest
+                                                                      x))
+                                                                args)
+                                                ,@body))))))
 
  (defmacro %defvar (name value)
    `(progn
@@ -264,9 +270,6 @@
   (defun char-code (x) x)
   (defun char= (x y) (= x y))
 
-  (defun <= (x y) (or (< x y) (= x y)))
-  (defun >= (x y) (not (< x y)))
-
   (defun integerp (x)
     (and (numberp x) (= (floor x) x)))
 
@@ -396,7 +399,6 @@
   (defun setcdr (cons new)
     (setf (cdr cons) new)))
 
-
 ;;; At this point, no matter if Common Lisp or lispstrack is compiling
 ;;; from here, this code will compile on both. We define some helper
 ;;; functions now for string manipulation and so on. They will be
@@ -456,6 +458,7 @@
          (setq x (truncate x 10)))
        (join (mapcar (lambda (d) (string (char "0123456789" d)))
                      digits))))))
+
 
 #+lispstrack
 (defun print-to-string (form)
@@ -801,7 +804,7 @@
                                     (join (reverse cases))))
                            "}" *newline*)
                    "")
-               ;; &rest argument
+               ;; &rest/&body argument
                (if rest-argument
                    (let ((js!rest (lookup-variable-translation rest-argument new-env)))
                      (concat "var " js!rest "= " (ls-compile nil env fenv) ";" *newline*
@@ -956,19 +959,48 @@
 (defun compile-bool (x)
   (concat "(" x "?" (ls-compile t nil nil) ": " (ls-compile nil nil nil) ")"))
 
-(define-builtin + (x y) (concat "((" x ") + (" y "))"))
-(define-builtin - (x y) (concat "((" x ") - (" y "))"))
-(define-builtin * (x y) (concat "((" x ") * (" y "))"))
-(define-builtin / (x y) (concat "((" x ") / (" y "))"))
+;;; DECLS is a list of (JSVARNAME TYPE LISPFORM) declarations.
+(defmacro type-check (decls &body body)
+  `(concat "(function(){" *newline*
+           (indent ,@(mapcar (lambda (decl)
+                               `(concat "var " ,(first decl) " = " ,(third decl) ";" *newline*))
+                             decls)
 
-(define-builtin mod (x y) (concat "((" x ") % (" y "))"))
+                   ,@(mapcar (lambda (decl)
+                               `(concat "if (typeof " ,(first decl) " != '" ,(second decl) "')" *newline*
+                                        (indent "throw 'The value ' + "
+                                                ,(first decl)
+                                                " + ' is not a type "
+                                                ,(second decl)
+                                                ".';"
+                                                *newline*)))
+                             decls)
+                   ,@body)
+           "})()"))
 
-(define-builtin < (x y) (compile-bool (concat "((" x ") < (" y "))")))
-(define-builtin = (x y) (compile-bool (concat "((" x ") == (" y "))")))
+(defun num-op-num (x op y)
+  (type-check (("x" "number" x) ("y" "number" y))
+    (concat "return x" op "y;" *newline*)))
 
-(define-builtin numberp (x) (compile-bool (concat "(typeof (" x ") == \"number\")")))
+(define-builtin + (x y) (num-op-num x "+" y))
+(define-builtin - (x y) (num-op-num x "-" y))
+(define-builtin * (x y) (num-op-num x "*" y))
+(define-builtin / (x y) (num-op-num x "/" y))
 
-(define-builtin floor (x) (concat "(Math.floor(" x "))"))
+(define-builtin mod (x y) (num-op-num x "%" y))
+
+(define-builtin < (x y)  (compile-bool (num-op-num x "<" y)))
+(define-builtin > (x y)  (compile-bool (num-op-num x ">" y)))
+(define-builtin = (x y)  (compile-bool (num-op-num x "==" y)))
+(define-builtin <= (x y) (compile-bool (num-op-num x "<=" y)))
+(define-builtin >= (x y) (compile-bool (num-op-num x ">=" y)))
+
+(define-builtin numberp (x)
+  (compile-bool (concat "(typeof (" x ") == \"number\")")))
+
+(define-builtin floor (x)
+  (type-check (("x" "number" x))
+    "return (Math.floor(x));"))
 
 (define-builtin cons (x y) (concat "({car: " x ", cdr: " y "})"))
 (define-builtin consp (x)
@@ -994,8 +1026,13 @@
                   ": tmp.cdr;" *newline*)
           "})()"))
 
-(define-builtin setcar (x new) (concat "((" x ").car = " new ")"))
-(define-builtin setcdr (x new) (concat "((" x ").cdr = " new ")"))
+(define-builtin setcar (x new)
+  (type-check (("x" "object" x))
+    (concat "return (x.car = " new ");")))
+
+(define-builtin setcdr (x new)
+  (type-check (("x" "object" x))
+    (concat "return (x.cdr = " new ");")))
 
 (define-builtin symbolp (x)
   (compile-bool
@@ -1005,7 +1042,8 @@
            "})()")))
 
 (define-builtin make-symbol (name)
-  (concat "({name: " name "})"))
+  (type-check (("name" "string" name))
+    "return ({name: name});"))
 
 (define-builtin symbol-name (x)
   (concat "(" x ").name"))
@@ -1014,16 +1052,19 @@
 (define-builtin equal (x y) (compile-bool (concat "(" x  " == " y ")")))
 
 (define-builtin string (x)
-  (concat "String.fromCharCode(" x ")"))
+  (type-check (("x" "number" x))
+    "return String.fromCharCode(x);"))
 
 (define-builtin stringp (x)
   (compile-bool (concat "(typeof(" x ") == \"string\")")))
 
 (define-builtin string-upcase (x)
-  (concat "(" x ").toUpperCase()"))
+  (type-check (("x" "string" x))
+    "return x.toUpperCase();"))
 
 (define-builtin string-length (x)
-  (concat "(" x ").length"))
+  (type-check (("x" "string" x))
+    "return x.length;"))
 
 (define-compilation slice (string a &optional b)
   (concat "(function(){" *newline*
@@ -1097,7 +1138,6 @@
 
 (define-builtin write-string (x)
   (concat "lisp.write(" x ")"))
-
 
 (defun macrop (x)
   (and (symbolp x) (eq (binding-type (lookup-function x *fenv*)) 'macro)))
