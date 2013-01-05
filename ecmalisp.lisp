@@ -1148,7 +1148,7 @@
     "eval.apply(window, [string])"))
 
 (define-builtin error (string)
-  (concat "(function (){ throw " string ";" "return 0;})()"))
+  (concat "(function (){ throw " string "; })()"))
 
 (define-builtin new () "{}")
 
@@ -1297,4 +1297,8 @@
         (setq *compilation-unit-checks* nil))))
 
   (defun bootstrap ()
+    (setq *variable-counter* 0
+          *gensym-counter* 0
+          *function-counter* 0
+          *literal-counter* 0)
     (ls-compile-file "ecmalisp.lisp" "ecmalisp.js")))
