@@ -64,7 +64,19 @@ var v1;
         })((function (v5){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return ((v5 === v2)?v3: v2);
+            return (function(){
+                try {
+                    return (function(){
+                        return ((v5 === v2)?v3: v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 1)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     (function(){
@@ -74,7 +86,19 @@ var v1;
         })((function (v7){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (((v7) in (v1))?v3: v2);
+            return (function(){
+                try {
+                    return (function(){
+                        return (((v7) in (v1))?v3: v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 2)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     (function(){
@@ -84,15 +108,27 @@ var v1;
         })((function (v9){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (f2(v9) !== v2 ? (function(){
-                var tmp = (v1)[v9];
-                return tmp == undefined? v2: tmp ;
-            })() : ((v1)[v9] = (function(){
-                var name = v9;
-                if (typeof name != 'string')
-                    throw 'The value ' + name + ' is not a type string.';
-                return ({name: name});
-            })()));
+            return (function(){
+                try {
+                    return (function(){
+                        return (f2(v9) !== v2 ? (function(){
+                            var tmp = (v1)[v9];
+                            return tmp == undefined? v2: tmp ;
+                        })() : ((v1)[v9] = (function(){
+                            var name = v9;
+                            if (typeof name != 'string')
+                                throw 'The value ' + name + ' is not a type string.';
+                            return ({name: name});
+                        })()));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 3)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     (function(){
@@ -103,8 +139,20 @@ var v1;
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
             return (function(){
-                var tmp = (v1)[v11];
-                return tmp == undefined? v2: tmp ;
+                try {
+                    return (function(){
+                        return (function(){
+                            var tmp = (v1)[v11];
+                            return tmp == undefined? v2: tmp ;
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 4)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -122,28 +170,40 @@ var v1;
             v14="G";
             default: break;
             }
-            v12 = (function(){
-                var x = v12;
-                var y = 1;
-                if (typeof x != 'number')
-                    throw 'The value ' + x + ' is not a type number.';
-                if (typeof y != 'number')
-                    throw 'The value ' + y + ' is not a type number.';
-                return x+y;
-            })();
             return (function(){
-                var name = (function(){
-                    var string1 = v14;
-                    var string2 = f6(v12);
-                    if (typeof string1 != 'string')
-                        throw 'The value ' + string1 + ' is not a type string.';
-                    if (typeof string2 != 'string')
-                        throw 'The value ' + string2 + ' is not a type string.';
-                    return string1.concat(string2);
-                })();
-                if (typeof name != 'string')
-                    throw 'The value ' + name + ' is not a type string.';
-                return ({name: name});
+                try {
+                    return (function(){
+                        v12 = (function(){
+                            var x = v12;
+                            var y = 1;
+                            if (typeof x != 'number')
+                                throw 'The value ' + x + ' is not a type number.';
+                            if (typeof y != 'number')
+                                throw 'The value ' + y + ' is not a type number.';
+                            return x+y;
+                        })();
+                        return (function(){
+                            var name = (function(){
+                                var string1 = v14;
+                                var string2 = f6(v12);
+                                if (typeof string1 != 'string')
+                                    throw 'The value ' + string1 + ' is not a type string.';
+                                if (typeof string2 != 'string')
+                                    throw 'The value ' + string2 + ' is not a type string.';
+                                return string1.concat(string2);
+                            })();
+                            if (typeof name != 'string')
+                                throw 'The value ' + name + ' is not a type string.';
+                            return ({name: name});
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 5)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -154,15 +214,27 @@ var v1;
         })((function (v16,v17){
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
-            return ((function(){
-                var x = v16;
-                var y = v17;
-                if (typeof x != 'number')
-                    throw 'The value ' + x + ' is not a type number.';
-                if (typeof y != 'number')
-                    throw 'The value ' + y + ' is not a type number.';
-                return x==y;
-            })()?v3: v2);
+            return (function(){
+                try {
+                    return (function(){
+                        return ((function(){
+                            var x = v16;
+                            var y = v17;
+                            if (typeof x != 'number')
+                                throw 'The value ' + x + ' is not a type number.';
+                            if (typeof y != 'number')
+                                throw 'The value ' + y + ' is not a type number.';
+                            return x==y;
+                        })()?v3: v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 6)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     (function(){
@@ -173,13 +245,25 @@ var v1;
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
             return (function(){
-                var x = v19;
-                var y = v20;
-                if (typeof x != 'number')
-                    throw 'The value ' + x + ' is not a type number.';
-                if (typeof y != 'number')
-                    throw 'The value ' + y + ' is not a type number.';
-                return x+y;
+                try {
+                    return (function(){
+                        return (function(){
+                            var x = v19;
+                            var y = v20;
+                            if (typeof x != 'number')
+                                throw 'The value ' + x + ' is not a type number.';
+                            if (typeof y != 'number')
+                                throw 'The value ' + y + ' is not a type number.';
+                            return x+y;
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 7)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -191,13 +275,25 @@ var v1;
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
             return (function(){
-                var x = v22;
-                var y = v23;
-                if (typeof x != 'number')
-                    throw 'The value ' + x + ' is not a type number.';
-                if (typeof y != 'number')
-                    throw 'The value ' + y + ' is not a type number.';
-                return x-y;
+                try {
+                    return (function(){
+                        return (function(){
+                            var x = v22;
+                            var y = v23;
+                            if (typeof x != 'number')
+                                throw 'The value ' + x + ' is not a type number.';
+                            if (typeof y != 'number')
+                                throw 'The value ' + y + ' is not a type number.';
+                            return x-y;
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 8)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -209,13 +305,25 @@ var v1;
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
             return (function(){
-                var x = v25;
-                var y = v26;
-                if (typeof x != 'number')
-                    throw 'The value ' + x + ' is not a type number.';
-                if (typeof y != 'number')
-                    throw 'The value ' + y + ' is not a type number.';
-                return x*y;
+                try {
+                    return (function(){
+                        return (function(){
+                            var x = v25;
+                            var y = v26;
+                            if (typeof x != 'number')
+                                throw 'The value ' + x + ' is not a type number.';
+                            if (typeof y != 'number')
+                                throw 'The value ' + y + ' is not a type number.';
+                            return x*y;
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 9)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -227,13 +335,25 @@ var v1;
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
             return (function(){
-                var x = v28;
-                var y = v29;
-                if (typeof x != 'number')
-                    throw 'The value ' + x + ' is not a type number.';
-                if (typeof y != 'number')
-                    throw 'The value ' + y + ' is not a type number.';
-                return x/y;
+                try {
+                    return (function(){
+                        return (function(){
+                            var x = v28;
+                            var y = v29;
+                            if (typeof x != 'number')
+                                throw 'The value ' + x + ' is not a type number.';
+                            if (typeof y != 'number')
+                                throw 'The value ' + y + ' is not a type number.';
+                            return x/y;
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 10)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -245,13 +365,25 @@ var v1;
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
             return (function(){
-                var x = v31;
-                var y = 1;
-                if (typeof x != 'number')
-                    throw 'The value ' + x + ' is not a type number.';
-                if (typeof y != 'number')
-                    throw 'The value ' + y + ' is not a type number.';
-                return x+y;
+                try {
+                    return (function(){
+                        return (function(){
+                            var x = v31;
+                            var y = 1;
+                            if (typeof x != 'number')
+                                throw 'The value ' + x + ' is not a type number.';
+                            if (typeof y != 'number')
+                                throw 'The value ' + y + ' is not a type number.';
+                            return x+y;
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 11)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -263,13 +395,25 @@ var v1;
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
             return (function(){
-                var x = v33;
-                var y = 1;
-                if (typeof x != 'number')
-                    throw 'The value ' + x + ' is not a type number.';
-                if (typeof y != 'number')
-                    throw 'The value ' + y + ' is not a type number.';
-                return x-y;
+                try {
+                    return (function(){
+                        return (function(){
+                            var x = v33;
+                            var y = 1;
+                            if (typeof x != 'number')
+                                throw 'The value ' + x + ' is not a type number.';
+                            if (typeof y != 'number')
+                                throw 'The value ' + y + ' is not a type number.';
+                            return x-y;
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 12)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -280,15 +424,27 @@ var v1;
         })((function (v35){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return ((function(){
-                var x = v35;
-                var y = 0;
-                if (typeof x != 'number')
-                    throw 'The value ' + x + ' is not a type number.';
-                if (typeof y != 'number')
-                    throw 'The value ' + y + ' is not a type number.';
-                return x==y;
-            })()?v3: v2);
+            return (function(){
+                try {
+                    return (function(){
+                        return ((function(){
+                            var x = v35;
+                            var y = 0;
+                            if (typeof x != 'number')
+                                throw 'The value ' + x + ' is not a type number.';
+                            if (typeof y != 'number')
+                                throw 'The value ' + y + ' is not a type number.';
+                            return x==y;
+                        })()?v3: v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 13)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     (function(){
@@ -299,18 +455,30 @@ var v1;
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
             return (function(){
-                var x = (function(){
-                    var x = v37;
-                    var y = v38;
-                    if (typeof x != 'number')
-                        throw 'The value ' + x + ' is not a type number.';
-                    if (typeof y != 'number')
-                        throw 'The value ' + y + ' is not a type number.';
-                    return x/y;
-                })();
-                if (typeof x != 'number')
-                    throw 'The value ' + x + ' is not a type number.';
-                return Math.floor(x);
+                try {
+                    return (function(){
+                        return (function(){
+                            var x = (function(){
+                                var x = v37;
+                                var y = v38;
+                                if (typeof x != 'number')
+                                    throw 'The value ' + x + ' is not a type number.';
+                                if (typeof y != 'number')
+                                    throw 'The value ' + y + ' is not a type number.';
+                                return x/y;
+                            })();
+                            if (typeof x != 'number')
+                                throw 'The value ' + x + ' is not a type number.';
+                            return Math.floor(x);
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 14)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -321,7 +489,19 @@ var v1;
         })((function (v40,v41){
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
-            return ((v40 === v41)?v3: v2);
+            return (function(){
+                try {
+                    return (function(){
+                        return ((v40 === v41)?v3: v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 15)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     (function(){
@@ -331,7 +511,19 @@ var v1;
         })((function (v43){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (v43 !== v2 ? v2 : v3);
+            return (function(){
+                try {
+                    return (function(){
+                        return (v43 !== v2 ? v2 : v3);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 16)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     (function(){
@@ -341,7 +533,19 @@ var v1;
         })((function (v45,v46){
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
-            return ({car: v45, cdr: v46});
+            return (function(){
+                try {
+                    return (function(){
+                        return ({car: v45, cdr: v46});
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 17)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     (function(){
@@ -351,10 +555,22 @@ var v1;
         })((function (v48){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return ((function(){
-                var tmp = v48;
-                return (typeof tmp == 'object' && 'car' in tmp);
-            })()?v3: v2);
+            return (function(){
+                try {
+                    return (function(){
+                        return ((function(){
+                            var tmp = v48;
+                            return (typeof tmp == 'object' && 'car' in tmp);
+                        })()?v3: v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 18)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     (function(){
@@ -365,8 +581,20 @@ var v1;
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
             return (function(){
-                var tmp = v50;
-                return tmp === v2? v2: tmp.car;
+                try {
+                    return (function(){
+                        return (function(){
+                            var tmp = v50;
+                            return tmp === v2? v2: tmp.car;
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 19)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -378,8 +606,20 @@ var v1;
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
             return (function(){
-                var tmp = v52;
-                return tmp === v2? v2: tmp.cdr;
+                try {
+                    return (function(){
+                        return (function(){
+                            var tmp = v52;
+                            return tmp === v2? v2: tmp.cdr;
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 20)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -391,11 +631,23 @@ var v1;
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
             return (function(){
-                var tmp = (function(){
-                    var tmp = v54;
-                    return tmp === v2? v2: tmp.car;
-                })();
-                return tmp === v2? v2: tmp.car;
+                try {
+                    return (function(){
+                        return (function(){
+                            var tmp = (function(){
+                                var tmp = v54;
+                                return tmp === v2? v2: tmp.car;
+                            })();
+                            return tmp === v2? v2: tmp.car;
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 21)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -407,11 +659,23 @@ var v1;
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
             return (function(){
-                var tmp = (function(){
-                    var tmp = v56;
-                    return tmp === v2? v2: tmp.cdr;
-                })();
-                return tmp === v2? v2: tmp.car;
+                try {
+                    return (function(){
+                        return (function(){
+                            var tmp = (function(){
+                                var tmp = v56;
+                                return tmp === v2? v2: tmp.cdr;
+                            })();
+                            return tmp === v2? v2: tmp.car;
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 22)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -423,11 +687,23 @@ var v1;
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
             return (function(){
-                var tmp = (function(){
-                    var tmp = v58;
-                    return tmp === v2? v2: tmp.car;
-                })();
-                return tmp === v2? v2: tmp.cdr;
+                try {
+                    return (function(){
+                        return (function(){
+                            var tmp = (function(){
+                                var tmp = v58;
+                                return tmp === v2? v2: tmp.car;
+                            })();
+                            return tmp === v2? v2: tmp.cdr;
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 23)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -439,11 +715,23 @@ var v1;
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
             return (function(){
-                var tmp = (function(){
-                    var tmp = v60;
-                    return tmp === v2? v2: tmp.cdr;
-                })();
-                return tmp === v2? v2: tmp.cdr;
+                try {
+                    return (function(){
+                        return (function(){
+                            var tmp = (function(){
+                                var tmp = v60;
+                                return tmp === v2? v2: tmp.cdr;
+                            })();
+                            return tmp === v2? v2: tmp.cdr;
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 24)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -455,14 +743,26 @@ var v1;
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
             return (function(){
-                var tmp = (function(){
-                    var tmp = (function(){
-                        var tmp = v62;
-                        return tmp === v2? v2: tmp.cdr;
+                try {
+                    return (function(){
+                        return (function(){
+                            var tmp = (function(){
+                                var tmp = (function(){
+                                    var tmp = v62;
+                                    return tmp === v2? v2: tmp.cdr;
+                                })();
+                                return tmp === v2? v2: tmp.cdr;
+                            })();
+                            return tmp === v2? v2: tmp.car;
+                        })();
                     })();
-                    return tmp === v2? v2: tmp.cdr;
-                })();
-                return tmp === v2? v2: tmp.car;
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 25)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -474,14 +774,26 @@ var v1;
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
             return (function(){
-                var tmp = (function(){
-                    var tmp = (function(){
-                        var tmp = v64;
-                        return tmp === v2? v2: tmp.cdr;
+                try {
+                    return (function(){
+                        return (function(){
+                            var tmp = (function(){
+                                var tmp = (function(){
+                                    var tmp = v64;
+                                    return tmp === v2? v2: tmp.cdr;
+                                })();
+                                return tmp === v2? v2: tmp.cdr;
+                            })();
+                            return tmp === v2? v2: tmp.cdr;
+                        })();
                     })();
-                    return tmp === v2? v2: tmp.cdr;
-                })();
-                return tmp === v2? v2: tmp.cdr;
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 26)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -493,17 +805,29 @@ var v1;
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
             return (function(){
-                var tmp = (function(){
-                    var tmp = (function(){
-                        var tmp = (function(){
-                            var tmp = v66;
-                            return tmp === v2? v2: tmp.cdr;
+                try {
+                    return (function(){
+                        return (function(){
+                            var tmp = (function(){
+                                var tmp = (function(){
+                                    var tmp = (function(){
+                                        var tmp = v66;
+                                        return tmp === v2? v2: tmp.cdr;
+                                    })();
+                                    return tmp === v2? v2: tmp.cdr;
+                                })();
+                                return tmp === v2? v2: tmp.cdr;
+                            })();
+                            return tmp === v2? v2: tmp.car;
                         })();
-                        return tmp === v2? v2: tmp.cdr;
                     })();
-                    return tmp === v2? v2: tmp.cdr;
-                })();
-                return tmp === v2? v2: tmp.car;
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 27)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -515,8 +839,20 @@ var v1;
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
             return (function(){
-                var tmp = v68;
-                return tmp === v2? v2: tmp.car;
+                try {
+                    return (function(){
+                        return (function(){
+                            var tmp = v68;
+                            return tmp === v2? v2: tmp.car;
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 28)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -527,7 +863,19 @@ var v1;
         })((function (v70){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return f23(v70);
+            return (function(){
+                try {
+                    return (function(){
+                        return f23(v70);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 29)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     (function(){
@@ -537,7 +885,19 @@ var v1;
         })((function (v72){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return f26(v72);
+            return (function(){
+                try {
+                    return (function(){
+                        return f26(v72);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 30)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     (function(){
@@ -547,7 +907,19 @@ var v1;
         })((function (v74){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return f28(v74);
+            return (function(){
+                try {
+                    return (function(){
+                        return f28(v74);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 31)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     (function(){
@@ -558,7 +930,19 @@ var v1;
             var v76= v2;
             for (var i = arguments.length-1; i>=0; i--)
                 v76 = {car: arguments[i], cdr: v76};
-            return v76;
+            return (function(){
+                try {
+                    return (function(){
+                        return v76;
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 32)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     (function(){
@@ -568,10 +952,22 @@ var v1;
         })((function (v78){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return f17(((function(){
-                var tmp = v78;
-                return (typeof tmp == 'object' && 'car' in tmp);
-            })()?v3: v2));
+            return (function(){
+                try {
+                    return (function(){
+                        return f17(((function(){
+                            var tmp = v78;
+                            return (typeof tmp == 'object' && 'car' in tmp);
+                        })()?v3: v2));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 33)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return ;
@@ -584,7 +980,19 @@ var f35;
     })((function (v80){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
-        return (f36(v80) !== v2 ? v80 : f33(v80));
+        return (function(){
+            try {
+                return (function(){
+                    return (f36(v80) !== v2 ? v80 : f33(v80));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 34)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
     }));
 })(); 
 var f37;
@@ -595,13 +1003,25 @@ var f37;
     })((function (v82,v83,v84){
         if (arguments.length < 3) throw 'too few arguments';
         if (arguments.length > 3) throw 'too many arguments';
-        return (f1(v83) !== v2 ? v84 : f37(v82, (function(){
-            var tmp = v83;
-            return tmp === v2? v2: tmp.cdr;
-        })(), (v82)(v84, (function(){
-            var tmp = v83;
-            return tmp === v2? v2: tmp.car;
-        })())));
+        return (function(){
+            try {
+                return (function(){
+                    return (f1(v83) !== v2 ? v84 : f37(v82, (function(){
+                        var tmp = v83;
+                        return tmp === v2? v2: tmp.cdr;
+                    })(), (v82)(v84, (function(){
+                        var tmp = v83;
+                        return tmp === v2? v2: tmp.car;
+                    })())));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 35)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
     }));
 })(); 
 var l33 = f3("STRING=");
@@ -676,13 +1096,25 @@ var f38;
             })((function (v86,v87){
                 if (arguments.length < 2) throw 'too few arguments';
                 if (arguments.length > 2) throw 'too many arguments';
-                return (f1(v86) !== v2 ? v87 : ({car: (function(){
-                    var tmp = v86;
-                    return tmp === v2? v2: tmp.car;
-                })(), cdr: f39((function(){
-                    var tmp = v86;
-                    return tmp === v2? v2: tmp.cdr;
-                })(), v87)}));
+                return (function(){
+                    try {
+                        return (function(){
+                            return (f1(v86) !== v2 ? v87 : ({car: (function(){
+                                var tmp = v86;
+                                return tmp === v2? v2: tmp.car;
+                            })(), cdr: f39((function(){
+                                var tmp = v86;
+                                return tmp === v2? v2: tmp.cdr;
+                            })(), v87)}));
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 36)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l1;
@@ -696,7 +1128,19 @@ var f38;
                 var v89= v2;
                 for (var i = arguments.length-1; i>=0; i--)
                     v89 = {car: arguments[i], cdr: v89};
-                return f37(f38, v89, l2);
+                return (function(){
+                    try {
+                        return (function(){
+                            return f37(f38, v89, l2);
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 37)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l3;
@@ -709,13 +1153,25 @@ var f38;
             })((function (v91,v92){
                 if (arguments.length < 2) throw 'too few arguments';
                 if (arguments.length > 2) throw 'too many arguments';
-                return (f1(v91) !== v2 ? v92 : f40((function(){
-                    var tmp = v91;
-                    return tmp === v2? v2: tmp.cdr;
-                })(), ({car: (function(){
-                    var tmp = v91;
-                    return tmp === v2? v2: tmp.car;
-                })(), cdr: v92})));
+                return (function(){
+                    try {
+                        return (function(){
+                            return (f1(v91) !== v2 ? v92 : f40((function(){
+                                var tmp = v91;
+                                return tmp === v2? v2: tmp.cdr;
+                            })(), ({car: (function(){
+                                var tmp = v91;
+                                return tmp === v2? v2: tmp.car;
+                            })(), cdr: v92})));
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 38)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l4;
@@ -728,7 +1184,19 @@ var f38;
             })((function (v94){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return f40(v94, l5);
+                return (function(){
+                    try {
+                        return (function(){
+                            return f40(v94, l5);
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 39)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l6;
@@ -741,25 +1209,50 @@ var f38;
             })((function (v96){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return (function(v97){
-                    (function(){
-                        while(f17(f1(v96)) !== v2){
-                            v97 = (function(){
-                                var x = v97;
-                                var y = 1;
-                                if (typeof x != 'number')
-                                    throw 'The value ' + x + ' is not a type number.';
-                                if (typeof y != 'number')
-                                    throw 'The value ' + y + ' is not a type number.';
-                                return x+y;
-                            })();
-                            v96 = (function(){
-                                var tmp = v96;
-                                return tmp === v2? v2: tmp.cdr;
-                            })();
-                    }})();
-                    return v97;
-                })(0);
+                return (function(){
+                    try {
+                        return (function(){
+                            return (function(v97){
+                                (function(){
+                                    try {
+                                        return (function(){
+                                            return (function(){
+                                                while(f17(f1(v96)) !== v2){
+                                                    v97 = (function(){
+                                                        var x = v97;
+                                                        var y = 1;
+                                                        if (typeof x != 'number')
+                                                            throw 'The value ' + x + ' is not a type number.';
+                                                        if (typeof y != 'number')
+                                                            throw 'The value ' + y + ' is not a type number.';
+                                                        return x+y;
+                                                    })();
+                                                    v96 = (function(){
+                                                        var tmp = v96;
+                                                        return tmp === v2? v2: tmp.cdr;
+                                                    })();
+                                                }return v2;
+                                            })();
+                                        })();
+                                    }
+                                    catch (cf){
+                                        if (cf.type == 'block' && cf.id == 41)
+                                            return cf.value;
+                                        else
+                                            throw cf;
+                                    }
+                                })();
+                                return v97;
+                            })(0);
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 40)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l7;
@@ -772,12 +1265,24 @@ var f38;
             })((function (v99){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return (((typeof(v99) == "string")?v3: v2) !== v2 ? (function(){
-                    var x = v99;
-                    if (typeof x != 'string')
-                        throw 'The value ' + x + ' is not a type string.';
-                    return x.length;
-                })() : f42(v99));
+                return (function(){
+                    try {
+                        return (function(){
+                            return (((typeof(v99) == "string")?v3: v2) !== v2 ? (function(){
+                                var x = v99;
+                                if (typeof x != 'string')
+                                    throw 'The value ' + x + ' is not a type string.';
+                                return x.length;
+                            })() : f42(v99));
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 42)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l8;
@@ -791,13 +1296,25 @@ var f38;
                 if (arguments.length < 2) throw 'too few arguments';
                 if (arguments.length > 2) throw 'too many arguments';
                 return (function(){
-                    var string1 = v101;
-                    var string2 = v102;
-                    if (typeof string1 != 'string')
-                        throw 'The value ' + string1 + ' is not a type string.';
-                    if (typeof string2 != 'string')
-                        throw 'The value ' + string2 + ' is not a type string.';
-                    return string1.concat(string2);
+                    try {
+                        return (function(){
+                            return (function(){
+                                var string1 = v101;
+                                var string2 = v102;
+                                if (typeof string1 != 'string')
+                                    throw 'The value ' + string1 + ' is not a type string.';
+                                if (typeof string2 != 'string')
+                                    throw 'The value ' + string2 + ' is not a type string.';
+                                return string1.concat(string2);
+                            })();
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 43)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
                 })();
             }));
         })();
@@ -811,13 +1328,25 @@ var f38;
             })((function (v104,v105){
                 if (arguments.length < 2) throw 'too few arguments';
                 if (arguments.length > 2) throw 'too many arguments';
-                return (f1(v105) !== v2 ? l10 : ({car: (v104)((function(){
-                    var tmp = v105;
-                    return tmp === v2? v2: tmp.car;
-                })()), cdr: f45(v104, (function(){
-                    var tmp = v105;
-                    return tmp === v2? v2: tmp.cdr;
-                })())}));
+                return (function(){
+                    try {
+                        return (function(){
+                            return (f1(v105) !== v2 ? l10 : ({car: (v104)((function(){
+                                var tmp = v105;
+                                return tmp === v2? v2: tmp.car;
+                            })()), cdr: f45(v104, (function(){
+                                var tmp = v105;
+                                return tmp === v2? v2: tmp.cdr;
+                            })())}));
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 44)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l11;
@@ -830,7 +1359,19 @@ var f38;
             })((function (v107){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return v107;
+                return (function(){
+                    try {
+                        return (function(){
+                            return v107;
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 45)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l12;
@@ -843,7 +1384,19 @@ var f38;
             })((function (v109){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return f45(f46, v109);
+                return (function(){
+                    try {
+                        return (function(){
+                            return f45(f46, v109);
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 46)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l13;
@@ -856,7 +1409,19 @@ var f38;
             })((function (v111){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return v111;
+                return (function(){
+                    try {
+                        return (function(){
+                            return v111;
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 47)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l14;
@@ -869,7 +1434,19 @@ var f38;
             })((function (v113){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return v113;
+                return (function(){
+                    try {
+                        return (function(){
+                            return v113;
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 48)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l15;
@@ -882,15 +1459,27 @@ var f38;
             })((function (v115,v116){
                 if (arguments.length < 2) throw 'too few arguments';
                 if (arguments.length > 2) throw 'too many arguments';
-                return ((function(){
-                    var x = v115;
-                    var y = v116;
-                    if (typeof x != 'number')
-                        throw 'The value ' + x + ' is not a type number.';
-                    if (typeof y != 'number')
-                        throw 'The value ' + y + ' is not a type number.';
-                    return x==y;
-                })()?v3: v2);
+                return (function(){
+                    try {
+                        return (function(){
+                            return ((function(){
+                                var x = v115;
+                                var y = v116;
+                                if (typeof x != 'number')
+                                    throw 'The value ' + x + ' is not a type number.';
+                                if (typeof y != 'number')
+                                    throw 'The value ' + y + ' is not a type number.';
+                                return x==y;
+                            })()?v3: v2);
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 49)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l16;
@@ -903,20 +1492,32 @@ var f38;
             })((function (v118){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return (((typeof (v118) == "number")?v3: v2) !== v2 ? ((function(){
-                    var x = (function(){
-                        var x = v118;
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        return Math.floor(x);
-                    })();
-                    var y = v118;
-                    if (typeof x != 'number')
-                        throw 'The value ' + x + ' is not a type number.';
-                    if (typeof y != 'number')
-                        throw 'The value ' + y + ' is not a type number.';
-                    return x==y;
-                })()?v3: v2) : v2);
+                return (function(){
+                    try {
+                        return (function(){
+                            return (((typeof (v118) == "number")?v3: v2) !== v2 ? ((function(){
+                                var x = (function(){
+                                    var x = v118;
+                                    if (typeof x != 'number')
+                                        throw 'The value ' + x + ' is not a type number.';
+                                    return Math.floor(x);
+                                })();
+                                var y = v118;
+                                if (typeof x != 'number')
+                                    throw 'The value ' + x + ' is not a type number.';
+                                if (typeof y != 'number')
+                                    throw 'The value ' + y + ' is not a type number.';
+                                return x==y;
+                            })()?v3: v2) : v2);
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 50)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l17;
@@ -929,15 +1530,27 @@ var f38;
             })((function (v120){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return ((function(){
-                    var x = 0;
-                    var y = v120;
-                    if (typeof x != 'number')
-                        throw 'The value ' + x + ' is not a type number.';
-                    if (typeof y != 'number')
-                        throw 'The value ' + y + ' is not a type number.';
-                    return x<y;
-                })()?v3: v2);
+                return (function(){
+                    try {
+                        return (function(){
+                            return ((function(){
+                                var x = 0;
+                                var y = v120;
+                                if (typeof x != 'number')
+                                    throw 'The value ' + x + ' is not a type number.';
+                                if (typeof y != 'number')
+                                    throw 'The value ' + y + ' is not a type number.';
+                                return x<y;
+                            })()?v3: v2);
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 51)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l18;
@@ -950,15 +1563,27 @@ var f38;
             })((function (v122){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return ((function(){
-                    var x = v122;
-                    var y = 0;
-                    if (typeof x != 'number')
-                        throw 'The value ' + x + ' is not a type number.';
-                    if (typeof y != 'number')
-                        throw 'The value ' + y + ' is not a type number.';
-                    return x<y;
-                })()?v3: v2);
+                return (function(){
+                    try {
+                        return (function(){
+                            return ((function(){
+                                var x = v122;
+                                var y = 0;
+                                if (typeof x != 'number')
+                                    throw 'The value ' + x + ' is not a type number.';
+                                if (typeof y != 'number')
+                                    throw 'The value ' + y + ' is not a type number.';
+                                return x<y;
+                            })()?v3: v2);
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 52)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l19;
@@ -971,12 +1596,24 @@ var f38;
             })((function (v124){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return (function(v125){
-                    return (v125 !== v2 ? v125 : f1(v124));
-                })(((function(){
-                    var tmp = v124;
-                    return (typeof tmp == 'object' && 'car' in tmp);
-                })()?v3: v2));
+                return (function(){
+                    try {
+                        return (function(){
+                            return (function(v125){
+                                return (v125 !== v2 ? v125 : f1(v124));
+                            })(((function(){
+                                var tmp = v124;
+                                return (typeof tmp == 'object' && 'car' in tmp);
+                            })()?v3: v2));
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 53)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l20;
@@ -989,19 +1626,31 @@ var f38;
             })((function (v127,v128){
                 if (arguments.length < 2) throw 'too few arguments';
                 if (arguments.length > 2) throw 'too many arguments';
-                return (f1(v128) !== v2 ? (function(){
-                    return v128;
-                })() : (f14(v127) !== v2 ? (function(){
-                    return (function(){
-                        var tmp = v128;
-                        return tmp === v2? v2: tmp.car;
-                    })();
-                })() : (function(){
-                    return f54(f13(v127), (function(){
-                        var tmp = v128;
-                        return tmp === v2? v2: tmp.cdr;
-                    })());
-                })()));
+                return (function(){
+                    try {
+                        return (function(){
+                            return (f1(v128) !== v2 ? (function(){
+                                return v128;
+                            })() : (f14(v127) !== v2 ? (function(){
+                                return (function(){
+                                    var tmp = v128;
+                                    return tmp === v2? v2: tmp.car;
+                                })();
+                            })() : (function(){
+                                return f54(f13(v127), (function(){
+                                    var tmp = v128;
+                                    return tmp === v2? v2: tmp.cdr;
+                                })());
+                            })()));
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 54)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l21;
@@ -1014,16 +1663,28 @@ var f38;
             })((function (v130){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return (((function(){
-                    var tmp = (function(){
-                        var tmp = v130;
-                        return tmp === v2? v2: tmp.cdr;
-                    })();
-                    return (typeof tmp == 'object' && 'car' in tmp);
-                })()?v3: v2) !== v2 ? f55((function(){
-                    var tmp = v130;
-                    return tmp === v2? v2: tmp.cdr;
-                })()) : v130);
+                return (function(){
+                    try {
+                        return (function(){
+                            return (((function(){
+                                var tmp = (function(){
+                                    var tmp = v130;
+                                    return tmp === v2? v2: tmp.cdr;
+                                })();
+                                return (typeof tmp == 'object' && 'car' in tmp);
+                            })()?v3: v2) !== v2 ? f55((function(){
+                                var tmp = v130;
+                                return tmp === v2? v2: tmp.cdr;
+                            })()) : v130);
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 55)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l22;
@@ -1036,19 +1697,31 @@ var f38;
             })((function (v132){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return (((function(){
-                    var tmp = (function(){
-                        var tmp = v132;
-                        return tmp === v2? v2: tmp.cdr;
-                    })();
-                    return (typeof tmp == 'object' && 'car' in tmp);
-                })()?v3: v2) !== v2 ? ({car: (function(){
-                    var tmp = v132;
-                    return tmp === v2? v2: tmp.car;
-                })(), cdr: f56((function(){
-                    var tmp = v132;
-                    return tmp === v2? v2: tmp.cdr;
-                })())}) : v2);
+                return (function(){
+                    try {
+                        return (function(){
+                            return (((function(){
+                                var tmp = (function(){
+                                    var tmp = v132;
+                                    return tmp === v2? v2: tmp.cdr;
+                                })();
+                                return (typeof tmp == 'object' && 'car' in tmp);
+                            })()?v3: v2) !== v2 ? ({car: (function(){
+                                var tmp = v132;
+                                return tmp === v2? v2: tmp.car;
+                            })(), cdr: f56((function(){
+                                var tmp = v132;
+                                return tmp === v2? v2: tmp.cdr;
+                            })())}) : v2);
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 56)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l23;
@@ -1061,19 +1734,31 @@ var f38;
             })((function (v134,v135){
                 if (arguments.length < 2) throw 'too few arguments';
                 if (arguments.length > 2) throw 'too many arguments';
-                return (f1(v135) !== v2 ? (function(){
-                    return v2;
-                })() : (f16(v134, (function(){
-                    var tmp = v135;
-                    return tmp === v2? v2: tmp.car;
-                })()) !== v2 ? (function(){
-                    return v135;
-                })() : (function(){
-                    return f57(v134, (function(){
-                        var tmp = v135;
-                        return tmp === v2? v2: tmp.cdr;
-                    })());
-                })()));
+                return (function(){
+                    try {
+                        return (function(){
+                            return (f1(v135) !== v2 ? (function(){
+                                return v2;
+                            })() : (f16(v134, (function(){
+                                var tmp = v135;
+                                return tmp === v2? v2: tmp.car;
+                            })()) !== v2 ? (function(){
+                                return v135;
+                            })() : (function(){
+                                return f57(v134, (function(){
+                                    var tmp = v135;
+                                    return tmp === v2? v2: tmp.cdr;
+                                })());
+                            })()));
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 57)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l24;
@@ -1086,25 +1771,37 @@ var f38;
             })((function (v137,v138){
                 if (arguments.length < 2) throw 'too few arguments';
                 if (arguments.length > 2) throw 'too many arguments';
-                return (f1(v138) !== v2 ? (function(){
-                    return v2;
-                })() : (f16(v137, (function(){
-                    var tmp = v138;
-                    return tmp === v2? v2: tmp.car;
-                })()) !== v2 ? (function(){
-                    return f58(v137, (function(){
-                        var tmp = v138;
-                        return tmp === v2? v2: tmp.cdr;
-                    })());
-                })() : (function(){
-                    return ({car: (function(){
-                        var tmp = v138;
-                        return tmp === v2? v2: tmp.car;
-                    })(), cdr: f58(v137, (function(){
-                        var tmp = v138;
-                        return tmp === v2? v2: tmp.cdr;
-                    })())});
-                })()));
+                return (function(){
+                    try {
+                        return (function(){
+                            return (f1(v138) !== v2 ? (function(){
+                                return v2;
+                            })() : (f16(v137, (function(){
+                                var tmp = v138;
+                                return tmp === v2? v2: tmp.car;
+                            })()) !== v2 ? (function(){
+                                return f58(v137, (function(){
+                                    var tmp = v138;
+                                    return tmp === v2? v2: tmp.cdr;
+                                })());
+                            })() : (function(){
+                                return ({car: (function(){
+                                    var tmp = v138;
+                                    return tmp === v2? v2: tmp.car;
+                                })(), cdr: f58(v137, (function(){
+                                    var tmp = v138;
+                                    return tmp === v2? v2: tmp.cdr;
+                                })())});
+                            })()));
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 58)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l25;
@@ -1117,25 +1814,37 @@ var f38;
             })((function (v140,v141){
                 if (arguments.length < 2) throw 'too few arguments';
                 if (arguments.length > 2) throw 'too many arguments';
-                return (f1(v141) !== v2 ? (function(){
-                    return v2;
-                })() : ((v140)((function(){
-                    var tmp = v141;
-                    return tmp === v2? v2: tmp.car;
-                })()) !== v2 ? (function(){
-                    return f59(v140, (function(){
-                        var tmp = v141;
-                        return tmp === v2? v2: tmp.cdr;
-                    })());
-                })() : (function(){
-                    return ({car: (function(){
-                        var tmp = v141;
-                        return tmp === v2? v2: tmp.car;
-                    })(), cdr: f59(v140, (function(){
-                        var tmp = v141;
-                        return tmp === v2? v2: tmp.cdr;
-                    })())});
-                })()));
+                return (function(){
+                    try {
+                        return (function(){
+                            return (f1(v141) !== v2 ? (function(){
+                                return v2;
+                            })() : ((v140)((function(){
+                                var tmp = v141;
+                                return tmp === v2? v2: tmp.car;
+                            })()) !== v2 ? (function(){
+                                return f59(v140, (function(){
+                                    var tmp = v141;
+                                    return tmp === v2? v2: tmp.cdr;
+                                })());
+                            })() : (function(){
+                                return ({car: (function(){
+                                    var tmp = v141;
+                                    return tmp === v2? v2: tmp.car;
+                                })(), cdr: f59(v140, (function(){
+                                    var tmp = v141;
+                                    return tmp === v2? v2: tmp.cdr;
+                                })())});
+                            })()));
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 59)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l26;
@@ -1148,25 +1857,37 @@ var f38;
             })((function (v143,v144){
                 if (arguments.length < 2) throw 'too few arguments';
                 if (arguments.length > 2) throw 'too many arguments';
-                return (f1(v144) !== v2 ? (function(){
-                    return v2;
-                })() : ((v143)((function(){
-                    var tmp = v144;
-                    return tmp === v2? v2: tmp.car;
-                })()) !== v2 ? (function(){
-                    return ({car: (function(){
-                        var tmp = v144;
-                        return tmp === v2? v2: tmp.car;
-                    })(), cdr: f60(v143, (function(){
-                        var tmp = v144;
-                        return tmp === v2? v2: tmp.cdr;
-                    })())});
-                })() : (function(){
-                    return f60(v143, (function(){
-                        var tmp = v144;
-                        return tmp === v2? v2: tmp.cdr;
-                    })());
-                })()));
+                return (function(){
+                    try {
+                        return (function(){
+                            return (f1(v144) !== v2 ? (function(){
+                                return v2;
+                            })() : ((v143)((function(){
+                                var tmp = v144;
+                                return tmp === v2? v2: tmp.car;
+                            })()) !== v2 ? (function(){
+                                return ({car: (function(){
+                                    var tmp = v144;
+                                    return tmp === v2? v2: tmp.car;
+                                })(), cdr: f60(v143, (function(){
+                                    var tmp = v144;
+                                    return tmp === v2? v2: tmp.cdr;
+                                })())});
+                            })() : (function(){
+                                return f60(v143, (function(){
+                                    var tmp = v144;
+                                    return tmp === v2? v2: tmp.cdr;
+                                })());
+                            })()));
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 60)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l27;
@@ -1179,31 +1900,43 @@ var f38;
             })((function (v146){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return ((((function(){
-                    var x = 48;
-                    var y = v146;
-                    if (typeof x != 'number')
-                        throw 'The value ' + x + ' is not a type number.';
-                    if (typeof y != 'number')
-                        throw 'The value ' + y + ' is not a type number.';
-                    return x<=y;
-                })()?v3: v2) !== v2 ? ((function(){
-                    var x = v146;
-                    var y = 57;
-                    if (typeof x != 'number')
-                        throw 'The value ' + x + ' is not a type number.';
-                    if (typeof y != 'number')
-                        throw 'The value ' + y + ' is not a type number.';
-                    return x<=y;
-                })()?v3: v2) : v2) !== v2 ? (function(){
-                    var x = v146;
-                    var y = 48;
-                    if (typeof x != 'number')
-                        throw 'The value ' + x + ' is not a type number.';
-                    if (typeof y != 'number')
-                        throw 'The value ' + y + ' is not a type number.';
-                    return x-y;
-                })() : v2);
+                return (function(){
+                    try {
+                        return (function(){
+                            return ((((function(){
+                                var x = 48;
+                                var y = v146;
+                                if (typeof x != 'number')
+                                    throw 'The value ' + x + ' is not a type number.';
+                                if (typeof y != 'number')
+                                    throw 'The value ' + y + ' is not a type number.';
+                                return x<=y;
+                            })()?v3: v2) !== v2 ? ((function(){
+                                var x = v146;
+                                var y = 57;
+                                if (typeof x != 'number')
+                                    throw 'The value ' + x + ' is not a type number.';
+                                if (typeof y != 'number')
+                                    throw 'The value ' + y + ' is not a type number.';
+                                return x<=y;
+                            })()?v3: v2) : v2) !== v2 ? (function(){
+                                var x = v146;
+                                var y = 48;
+                                if (typeof x != 'number')
+                                    throw 'The value ' + x + ' is not a type number.';
+                                if (typeof y != 'number')
+                                    throw 'The value ' + y + ' is not a type number.';
+                                return x-y;
+                            })() : v2);
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 61)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l28;
@@ -1221,22 +1954,34 @@ var f38;
                 v150=v2;
                 default: break;
                 }
-                return (((typeof(v148) == "string")?v3: v2) !== v2 ? (function(){
-                    return (v150 !== v2 ? (function(){
-                        var str = v148;
-                        var a = v149;
-                        var b;
-                        b = v150;
-                        return str.slice(a,b);
-                    })() : (function(){
-                        var str = v148;
-                        var a = v149;
-                        var b;
-                        return str.slice(a,b);
-                    })());
-                })() : (function(){
-                    return (function (){ throw "Unsupported argument."; })();
-                })());
+                return (function(){
+                    try {
+                        return (function(){
+                            return (((typeof(v148) == "string")?v3: v2) !== v2 ? (function(){
+                                return (v150 !== v2 ? (function(){
+                                    var str = v148;
+                                    var a = v149;
+                                    var b;
+                                    b = v150;
+                                    return str.slice(a,b);
+                                })() : (function(){
+                                    var str = v148;
+                                    var a = v149;
+                                    var b;
+                                    return str.slice(a,b);
+                                })());
+                            })() : (function(){
+                                return (function (){ throw "Unsupported argument."; })();
+                            })());
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 62)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l29;
@@ -1249,54 +1994,79 @@ var f38;
             })((function (v152){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return (function(v153,v154,v155){
-                    (function(){
-                        while(((function(){
-                            var x = v154;
-                            var y = v155;
-                            if (typeof x != 'number')
-                                throw 'The value ' + x + ' is not a type number.';
-                            if (typeof y != 'number')
-                                throw 'The value ' + y + ' is not a type number.';
-                            return x<y;
-                        })()?v3: v2) !== v2){
-                            v153 = (function(){
-                                var x = (function(){
-                                    var x = v153;
-                                    var y = 10;
-                                    if (typeof x != 'number')
-                                        throw 'The value ' + x + ' is not a type number.';
-                                    if (typeof y != 'number')
-                                        throw 'The value ' + y + ' is not a type number.';
-                                    return x*y;
+                return (function(){
+                    try {
+                        return (function(){
+                            return (function(v153,v154,v155){
+                                (function(){
+                                    try {
+                                        return (function(){
+                                            return (function(){
+                                                while(((function(){
+                                                    var x = v154;
+                                                    var y = v155;
+                                                    if (typeof x != 'number')
+                                                        throw 'The value ' + x + ' is not a type number.';
+                                                    if (typeof y != 'number')
+                                                        throw 'The value ' + y + ' is not a type number.';
+                                                    return x<y;
+                                                })()?v3: v2) !== v2){
+                                                    v153 = (function(){
+                                                        var x = (function(){
+                                                            var x = v153;
+                                                            var y = 10;
+                                                            if (typeof x != 'number')
+                                                                throw 'The value ' + x + ' is not a type number.';
+                                                            if (typeof y != 'number')
+                                                                throw 'The value ' + y + ' is not a type number.';
+                                                            return x*y;
+                                                        })();
+                                                        var y = f61((function(){
+                                                            var string = v152;
+                                                            var index = v154;
+                                                            if (typeof string != 'string')
+                                                                throw 'The value ' + string + ' is not a type string.';
+                                                            if (typeof index != 'number')
+                                                                throw 'The value ' + index + ' is not a type number.';
+                                                            return string.charCodeAt(index);
+                                                        })());
+                                                        if (typeof x != 'number')
+                                                            throw 'The value ' + x + ' is not a type number.';
+                                                        if (typeof y != 'number')
+                                                            throw 'The value ' + y + ' is not a type number.';
+                                                        return x+y;
+                                                    })();
+                                                    v154 = (function(){
+                                                        var x = v154;
+                                                        var y = 1;
+                                                        if (typeof x != 'number')
+                                                            throw 'The value ' + x + ' is not a type number.';
+                                                        if (typeof y != 'number')
+                                                            throw 'The value ' + y + ' is not a type number.';
+                                                        return x+y;
+                                                    })();
+                                                }return v2;
+                                            })();
+                                        })();
+                                    }
+                                    catch (cf){
+                                        if (cf.type == 'block' && cf.id == 64)
+                                            return cf.value;
+                                        else
+                                            throw cf;
+                                    }
                                 })();
-                                var y = f61((function(){
-                                    var string = v152;
-                                    var index = v154;
-                                    if (typeof string != 'string')
-                                        throw 'The value ' + string + ' is not a type string.';
-                                    if (typeof index != 'number')
-                                        throw 'The value ' + index + ' is not a type number.';
-                                    return string.charCodeAt(index);
-                                })());
-                                if (typeof x != 'number')
-                                    throw 'The value ' + x + ' is not a type number.';
-                                if (typeof y != 'number')
-                                    throw 'The value ' + y + ' is not a type number.';
-                                return x+y;
-                            })();
-                            v154 = (function(){
-                                var x = v154;
-                                var y = 1;
-                                if (typeof x != 'number')
-                                    throw 'The value ' + x + ' is not a type number.';
-                                if (typeof y != 'number')
-                                    throw 'The value ' + y + ' is not a type number.';
-                                return x+y;
-                            })();
-                    }})();
-                    return v153;
-                })(0,0,f43(v152));
+                                return v153;
+                            })(0,0,f43(v152));
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 63)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l30;
@@ -1309,88 +2079,148 @@ var f38;
             })((function (v157,v158){
                 if (arguments.length < 2) throw 'too few arguments';
                 if (arguments.length > 2) throw 'too many arguments';
-                return (function(v159,v160,v161){
-                    (function(){
-                        while((v159 !== v2 ? ((function(){
-                            var x = v160;
-                            var y = v161;
-                            if (typeof x != 'number')
-                                throw 'The value ' + x + ' is not a type number.';
-                            if (typeof y != 'number')
-                                throw 'The value ' + y + ' is not a type number.';
-                            return x<y;
-                        })()?v3: v2) : v2) !== v2){
-                            ((v157)((function(){
-                                var string = v158;
-                                var index = v160;
-                                if (typeof string != 'string')
-                                    throw 'The value ' + string + ' is not a type string.';
-                                if (typeof index != 'number')
-                                    throw 'The value ' + index + ' is not a type number.';
-                                return string.charCodeAt(index);
-                            })()) !== v2 ? v2 : (function(){
-                                return v159 = v2;
-                            })());
-                            v160 = (function(){
-                                var x = v160;
-                                var y = 1;
-                                if (typeof x != 'number')
-                                    throw 'The value ' + x + ' is not a type number.';
-                                if (typeof y != 'number')
-                                    throw 'The value ' + y + ' is not a type number.';
-                                return x+y;
-                            })();
-                    }})();
-                    return v159;
-                })(v3,0,f43(v158));
+                return (function(){
+                    try {
+                        return (function(){
+                            return (function(v159,v160){
+                                (function(){
+                                    try {
+                                        return (function(){
+                                            return (function(){
+                                                while(((function(){
+                                                    var x = v159;
+                                                    var y = v160;
+                                                    if (typeof x != 'number')
+                                                        throw 'The value ' + x + ' is not a type number.';
+                                                    if (typeof y != 'number')
+                                                        throw 'The value ' + y + ' is not a type number.';
+                                                    return x<y;
+                                                })()?v3: v2) !== v2){
+                                                    ((v157)((function(){
+                                                        var string = v158;
+                                                        var index = v159;
+                                                        if (typeof string != 'string')
+                                                            throw 'The value ' + string + ' is not a type string.';
+                                                        if (typeof index != 'number')
+                                                            throw 'The value ' + index + ' is not a type number.';
+                                                        return string.charCodeAt(index);
+                                                    })()) !== v2 ? v2 : (function(){
+                                                        return (function(){ throw ({type: 'block', id: 65, value: v2, message: 'Return from unknown block EVERY.'})})();
+                                                    })());
+                                                    v159 = (function(){
+                                                        var x = v159;
+                                                        var y = 1;
+                                                        if (typeof x != 'number')
+                                                            throw 'The value ' + x + ' is not a type number.';
+                                                        if (typeof y != 'number')
+                                                            throw 'The value ' + y + ' is not a type number.';
+                                                        return x+y;
+                                                    })();
+                                                }return v2;
+                                            })();
+                                        })();
+                                    }
+                                    catch (cf){
+                                        if (cf.type == 'block' && cf.id == 66)
+                                            return cf.value;
+                                        else
+                                            throw cf;
+                                    }
+                                })();
+                                return v3;
+                            })(0,f43(v158));
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 65)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l31;
     })();
     (function(){
         (function(){
-            return f65 = (function(v162){
-                ((v162)["fname"] = "ASSOC");
-                return v162;
-            })((function (v163,v164){
+            return f65 = (function(v161){
+                ((v161)["fname"] = "ASSOC");
+                return v161;
+            })((function (v162,v163){
                 if (arguments.length < 2) throw 'too few arguments';
                 if (arguments.length > 2) throw 'too many arguments';
-                return (function(v165){
-                    (function(){
-                        while((v164 !== v2 ? f17(v165) : v2) !== v2){
-                            (f16(v163, f22(v164)) !== v2 ? v165 = v3 : v164 = (function(){
-                                var tmp = v164;
-                                return tmp === v2? v2: tmp.cdr;
-                            })());
-                    }})();
-                    return (function(){
-                        var tmp = v164;
-                        return tmp === v2? v2: tmp.car;
-                    })();
-                })(v2);
+                return (function(){
+                    try {
+                        return (function(){
+                            (function(){
+                                try {
+                                    return (function(){
+                                        return (function(){
+                                            while(v163 !== v2){
+                                                (f16(v162, f22(v163)) !== v2 ? (function(){ throw ({type: 'block', id: 68, value: v2, message: 'Return from unknown block NIL.'})})() : v163 = (function(){
+                                                    var tmp = v163;
+                                                    return tmp === v2? v2: tmp.cdr;
+                                                })());
+                                            }return v2;
+                                        })();
+                                    })();
+                                }
+                                catch (cf){
+                                    if (cf.type == 'block' && cf.id == 68)
+                                        return cf.value;
+                                    else
+                                        throw cf;
+                                }
+                            })();
+                            return (function(){
+                                var tmp = v163;
+                                return tmp === v2? v2: tmp.car;
+                            })();
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 67)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l32;
     })();
     return (function(){
         (function(){
-            return f66 = (function(v166){
-                ((v166)["fname"] = "STRING=");
-                return v166;
-            })((function (v167,v168){
+            return f66 = (function(v164){
+                ((v164)["fname"] = "STRING=");
+                return v164;
+            })((function (v165,v166){
                 if (arguments.length < 2) throw 'too few arguments';
                 if (arguments.length > 2) throw 'too many arguments';
-                return ((v167 == v168)?v3: v2);
+                return (function(){
+                    try {
+                        return (function(){
+                            return ((v165 == v166)?v3: v2);
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 69)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l33;
     })();
 })(); 
 var l34 = f3("*NEWLINE*");
-var v169;
+var v167;
 (function(){
     (function(){
-        return v169 = (function(){
+        return v167 = (function(){
             var x = f48(10);
             if (typeof x != 'number')
                 throw 'The value ' + x + ' is not a type number.';
@@ -1403,14 +2233,26 @@ var l35 = f3("CONCAT");
 var f67;
 (function(){
     (function(){
-        return f67 = (function(v170){
-            ((v170)["fname"] = "CONCAT");
-            return v170;
+        return f67 = (function(v168){
+            ((v168)["fname"] = "CONCAT");
+            return v168;
         })((function (){
-            var v171= v2;
+            var v169= v2;
             for (var i = arguments.length-1; i>=0; i--)
-                v171 = {car: arguments[i], cdr: v171};
-            return f37(f44, v171, "");
+                v169 = {car: arguments[i], cdr: v169};
+            return (function(){
+                try {
+                    return (function(){
+                        return f37(f44, v169, "");
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 70)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l35;
@@ -1419,36 +2261,48 @@ var l36 = f3("JOIN");
 var f68;
 (function(){
     (function(){
-        return f68 = (function(v172){
-            ((v172)["fname"] = "JOIN");
-            return v172;
-        })((function (v173,v174){
+        return f68 = (function(v170){
+            ((v170)["fname"] = "JOIN");
+            return v170;
+        })((function (v171,v172){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
             switch(arguments.length){
             case 1:
-            v174="";
+            v172="";
             default: break;
             }
-            return (f1(v173) !== v2 ? (function(){
-                return "";
-            })() : (f1((function(){
-                var tmp = v173;
-                return tmp === v2? v2: tmp.cdr;
-            })()) !== v2 ? (function(){
-                return (function(){
-                    var tmp = v173;
-                    return tmp === v2? v2: tmp.car;
-                })();
-            })() : (function(){
-                return f67((function(){
-                    var tmp = v173;
-                    return tmp === v2? v2: tmp.car;
-                })(), v174, f68((function(){
-                    var tmp = v173;
-                    return tmp === v2? v2: tmp.cdr;
-                })(), v174));
-            })()));
+            return (function(){
+                try {
+                    return (function(){
+                        return (f1(v171) !== v2 ? (function(){
+                            return "";
+                        })() : (f1((function(){
+                            var tmp = v171;
+                            return tmp === v2? v2: tmp.cdr;
+                        })()) !== v2 ? (function(){
+                            return (function(){
+                                var tmp = v171;
+                                return tmp === v2? v2: tmp.car;
+                            })();
+                        })() : (function(){
+                            return f67((function(){
+                                var tmp = v171;
+                                return tmp === v2? v2: tmp.car;
+                            })(), v172, f68((function(){
+                                var tmp = v171;
+                                return tmp === v2? v2: tmp.cdr;
+                            })(), v172));
+                        })()));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 71)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l36;
@@ -1457,24 +2311,36 @@ var l37 = f3("JOIN-TRAILING");
 var f69;
 (function(){
     (function(){
-        return f69 = (function(v175){
-            ((v175)["fname"] = "JOIN-TRAILING");
-            return v175;
-        })((function (v176,v177){
+        return f69 = (function(v173){
+            ((v173)["fname"] = "JOIN-TRAILING");
+            return v173;
+        })((function (v174,v175){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
             switch(arguments.length){
             case 1:
-            v177="";
+            v175="";
             default: break;
             }
-            return (f1(v176) !== v2 ? "" : f67((function(){
-                var tmp = v176;
-                return tmp === v2? v2: tmp.car;
-            })(), v177, f69((function(){
-                var tmp = v176;
-                return tmp === v2? v2: tmp.cdr;
-            })(), v177)));
+            return (function(){
+                try {
+                    return (function(){
+                        return (f1(v174) !== v2 ? "" : f67((function(){
+                            var tmp = v174;
+                            return tmp === v2? v2: tmp.car;
+                        })(), v175, f69((function(){
+                            var tmp = v174;
+                            return tmp === v2? v2: tmp.cdr;
+                        })(), v175)));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 72)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l37;
@@ -1483,71 +2349,96 @@ var l38 = f3("INDENT");
 var f70;
 (function(){
     (function(){
-        return f70 = (function(v178){
-            ((v178)["fname"] = "INDENT");
-            return v178;
+        return f70 = (function(v176){
+            ((v176)["fname"] = "INDENT");
+            return v176;
         })((function (){
-            var v179= v2;
+            var v177= v2;
             for (var i = arguments.length-1; i>=0; i--)
-                v179 = {car: arguments[i], cdr: v179};
-            return (function(v180){
-                return (function(v181,v182,v183){
-                    (f52(v183) !== v2 ? (function(){
-                        return v181 = "    ";
-                    })() : v2);
-                    (function(){
-                        while(((function(){
-                            var x = v182;
-                            var y = v183;
-                            if (typeof x != 'number')
-                                throw 'The value ' + x + ' is not a type number.';
-                            if (typeof y != 'number')
-                                throw 'The value ' + y + ' is not a type number.';
-                            return x<y;
-                        })()?v3: v2) !== v2){
-                            v181 = f67(v181, ((f50((function(){
-                                var string = v180;
-                                var index = v182;
-                                if (typeof string != 'string')
-                                    throw 'The value ' + string + ' is not a type string.';
-                                if (typeof index != 'number')
-                                    throw 'The value ' + index + ' is not a type number.';
-                                return string.charCodeAt(index);
-                            })(), 10) !== v2 ? (((function(){
-                                var x = v182;
-                                var y = f13(v183);
-                                if (typeof x != 'number')
-                                    throw 'The value ' + x + ' is not a type number.';
-                                if (typeof y != 'number')
-                                    throw 'The value ' + y + ' is not a type number.';
-                                return x<y;
-                            })()?v3: v2) !== v2 ? f17(f50((function(){
-                                var string = v180;
-                                var index = f12(v182);
-                                if (typeof string != 'string')
-                                    throw 'The value ' + string + ' is not a type string.';
-                                if (typeof index != 'number')
-                                    throw 'The value ' + index + ' is not a type number.';
-                                return string.charCodeAt(index);
-                            })(), 10)) : v2) : v2) !== v2 ? f67((function(){
-                                var x = 10;
-                                if (typeof x != 'number')
-                                    throw 'The value ' + x + ' is not a type number.';
-                                return String.fromCharCode(x);
-                            })(), "    ") : f62(v180, v182, f12(v182))));
-                            v182 = (function(){
-                                var x = v182;
-                                var y = 1;
-                                if (typeof x != 'number')
-                                    throw 'The value ' + x + ' is not a type number.';
-                                if (typeof y != 'number')
-                                    throw 'The value ' + y + ' is not a type number.';
-                                return x+y;
-                            })();
-                    }})();
-                    return v181;
-                })("",0,f43(v180));
-            })(f68(v179));
+                v177 = {car: arguments[i], cdr: v177};
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v178){
+                            return (function(v179,v180,v181){
+                                (f52(v181) !== v2 ? (function(){
+                                    return v179 = "    ";
+                                })() : v2);
+                                (function(){
+                                    try {
+                                        return (function(){
+                                            return (function(){
+                                                while(((function(){
+                                                    var x = v180;
+                                                    var y = v181;
+                                                    if (typeof x != 'number')
+                                                        throw 'The value ' + x + ' is not a type number.';
+                                                    if (typeof y != 'number')
+                                                        throw 'The value ' + y + ' is not a type number.';
+                                                    return x<y;
+                                                })()?v3: v2) !== v2){
+                                                    v179 = f67(v179, ((f50((function(){
+                                                        var string = v178;
+                                                        var index = v180;
+                                                        if (typeof string != 'string')
+                                                            throw 'The value ' + string + ' is not a type string.';
+                                                        if (typeof index != 'number')
+                                                            throw 'The value ' + index + ' is not a type number.';
+                                                        return string.charCodeAt(index);
+                                                    })(), 10) !== v2 ? (((function(){
+                                                        var x = v180;
+                                                        var y = f13(v181);
+                                                        if (typeof x != 'number')
+                                                            throw 'The value ' + x + ' is not a type number.';
+                                                        if (typeof y != 'number')
+                                                            throw 'The value ' + y + ' is not a type number.';
+                                                        return x<y;
+                                                    })()?v3: v2) !== v2 ? f17(f50((function(){
+                                                        var string = v178;
+                                                        var index = f12(v180);
+                                                        if (typeof string != 'string')
+                                                            throw 'The value ' + string + ' is not a type string.';
+                                                        if (typeof index != 'number')
+                                                            throw 'The value ' + index + ' is not a type number.';
+                                                        return string.charCodeAt(index);
+                                                    })(), 10)) : v2) : v2) !== v2 ? f67((function(){
+                                                        var x = 10;
+                                                        if (typeof x != 'number')
+                                                            throw 'The value ' + x + ' is not a type number.';
+                                                        return String.fromCharCode(x);
+                                                    })(), "    ") : f62(v178, v180, f12(v180))));
+                                                    v180 = (function(){
+                                                        var x = v180;
+                                                        var y = 1;
+                                                        if (typeof x != 'number')
+                                                            throw 'The value ' + x + ' is not a type number.';
+                                                        if (typeof y != 'number')
+                                                            throw 'The value ' + y + ' is not a type number.';
+                                                        return x+y;
+                                                    })();
+                                                }return v2;
+                                            })();
+                                        })();
+                                    }
+                                    catch (cf){
+                                        if (cf.type == 'block' && cf.id == 74)
+                                            return cf.value;
+                                        else
+                                            throw cf;
+                                    }
+                                })();
+                                return v179;
+                            })("",0,f43(v178));
+                        })(f68(v177));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 73)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l38;
@@ -1556,59 +2447,84 @@ var l39 = f3("INTEGER-TO-STRING");
 var f6;
 (function(){
     (function(){
-        return f6 = (function(v184){
-            ((v184)["fname"] = "INTEGER-TO-STRING");
-            return v184;
-        })((function (v185){
+        return f6 = (function(v182){
+            ((v182)["fname"] = "INTEGER-TO-STRING");
+            return v182;
+        })((function (v183){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (f14(v185) !== v2 ? (function(){
-                return "0";
-            })() : (f53(v185) !== v2 ? (function(){
-                return f67("-", f6((function(){
-                    var x = 0;
-                    var y = v185;
-                    if (typeof x != 'number')
-                        throw 'The value ' + x + ' is not a type number.';
-                    if (typeof y != 'number')
-                        throw 'The value ' + y + ' is not a type number.';
-                    return x-y;
-                })()));
-            })() : (function(){
-                return (function(v186){
-                    (function(){
-                        while(f17(f14(v185)) !== v2){
-                            v186 = ({car: (function(){
-                                var x = v185;
-                                var y = 10;
+            return (function(){
+                try {
+                    return (function(){
+                        return (f14(v183) !== v2 ? (function(){
+                            return "0";
+                        })() : (f53(v183) !== v2 ? (function(){
+                            return f67("-", f6((function(){
+                                var x = 0;
+                                var y = v183;
                                 if (typeof x != 'number')
                                     throw 'The value ' + x + ' is not a type number.';
                                 if (typeof y != 'number')
                                     throw 'The value ' + y + ' is not a type number.';
-                                return x%y;
-                            })(), cdr: v186});
-                            v185 = f15(v185, 10);
-                    }})();
-                    return f68(f45((function (v187){
-                        if (arguments.length < 1) throw 'too few arguments';
-                        if (arguments.length > 1) throw 'too many arguments';
-                        return (function(){
-                            var x = (function(){
-                                var string = "0123456789";
-                                var index = v187;
-                                if (typeof string != 'string')
-                                    throw 'The value ' + string + ' is not a type string.';
-                                if (typeof index != 'number')
-                                    throw 'The value ' + index + ' is not a type number.';
-                                return string.charCodeAt(index);
-                            })();
-                            if (typeof x != 'number')
-                                throw 'The value ' + x + ' is not a type number.';
-                            return String.fromCharCode(x);
-                        })();
-                    }), v186));
-                })(v2);
-            })()));
+                                return x-y;
+                            })()));
+                        })() : (function(){
+                            return (function(v184){
+                                (function(){
+                                    try {
+                                        return (function(){
+                                            return (function(){
+                                                while(f17(f14(v183)) !== v2){
+                                                    v184 = ({car: (function(){
+                                                        var x = v183;
+                                                        var y = 10;
+                                                        if (typeof x != 'number')
+                                                            throw 'The value ' + x + ' is not a type number.';
+                                                        if (typeof y != 'number')
+                                                            throw 'The value ' + y + ' is not a type number.';
+                                                        return x%y;
+                                                    })(), cdr: v184});
+                                                    v183 = f15(v183, 10);
+                                                }return v2;
+                                            })();
+                                        })();
+                                    }
+                                    catch (cf){
+                                        if (cf.type == 'block' && cf.id == 76)
+                                            return cf.value;
+                                        else
+                                            throw cf;
+                                    }
+                                })();
+                                return f68(f45((function (v185){
+                                    if (arguments.length < 1) throw 'too few arguments';
+                                    if (arguments.length > 1) throw 'too many arguments';
+                                    return (function(){
+                                        var x = (function(){
+                                            var string = "0123456789";
+                                            var index = v185;
+                                            if (typeof string != 'string')
+                                                throw 'The value ' + string + ' is not a type string.';
+                                            if (typeof index != 'number')
+                                                throw 'The value ' + index + ' is not a type number.';
+                                            return string.charCodeAt(index);
+                                        })();
+                                        if (typeof x != 'number')
+                                            throw 'The value ' + x + ' is not a type number.';
+                                        return String.fromCharCode(x);
+                                    })();
+                                }), v184));
+                            })(v2);
+                        })()));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 75)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l39;
@@ -1622,84 +2538,120 @@ var f71;
 (function(){
     (function(){
         (function(){
-            return f71 = (function(v188){
-                ((v188)["fname"] = "PRINT-TO-STRING");
-                return v188;
-            })((function (v189){
+            return f71 = (function(v186){
+                ((v186)["fname"] = "PRINT-TO-STRING");
+                return v186;
+            })((function (v187){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return (((function(){
-                    var tmp = v189;
-                    return (typeof tmp == 'object' && 'name' in tmp);
-                })()?v3: v2) !== v2 ? (function(){
-                    return (v189).name;
-                })() : (f51(v189) !== v2 ? (function(){
-                    return f6(v189);
-                })() : (((typeof(v189) == "string")?v3: v2) !== v2 ? (function(){
-                    return f67("\"", f72(v189), "\"");
-                })() : (((typeof v189 == 'function')?v3: v2) !== v2 ? (function(){
-                    return (function(v190){
-                        return (v190 !== v2 ? f67("#<FUNCTION ", v190, ">") : f67("#<FUNCTION>"));
-                    })((function(){
-                        var tmp = (v189)["fname"];
-                        return tmp == undefined? v2: tmp ;
-                    })());
-                })() : (f36(v189) !== v2 ? (function(){
-                    return f67("(", f69(f45(f71, f56(v189)), " "), (function(v191){
-                        return (f1((function(){
-                            var tmp = v191;
-                            return tmp === v2? v2: tmp.cdr;
-                        })()) !== v2 ? f71((function(){
-                            var tmp = v191;
-                            return tmp === v2? v2: tmp.car;
-                        })()) : f67(f71((function(){
-                            var tmp = v191;
-                            return tmp === v2? v2: tmp.car;
-                        })()), " . ", f71((function(){
-                            var tmp = v191;
-                            return tmp === v2? v2: tmp.cdr;
-                        })())));
-                    })(f55(v189)), ")");
-                })() : v2)))));
+                return (function(){
+                    try {
+                        return (function(){
+                            return (((function(){
+                                var tmp = v187;
+                                return (typeof tmp == 'object' && 'name' in tmp);
+                            })()?v3: v2) !== v2 ? (function(){
+                                return (v187).name;
+                            })() : (f51(v187) !== v2 ? (function(){
+                                return f6(v187);
+                            })() : (((typeof(v187) == "string")?v3: v2) !== v2 ? (function(){
+                                return f67("\"", f72(v187), "\"");
+                            })() : (((typeof v187 == 'function')?v3: v2) !== v2 ? (function(){
+                                return (function(v188){
+                                    return (v188 !== v2 ? f67("#<FUNCTION ", v188, ">") : f67("#<FUNCTION>"));
+                                })((function(){
+                                    var tmp = (v187)["fname"];
+                                    return tmp == undefined? v2: tmp ;
+                                })());
+                            })() : (f36(v187) !== v2 ? (function(){
+                                return f67("(", f69(f45(f71, f56(v187)), " "), (function(v189){
+                                    return (f1((function(){
+                                        var tmp = v189;
+                                        return tmp === v2? v2: tmp.cdr;
+                                    })()) !== v2 ? f71((function(){
+                                        var tmp = v189;
+                                        return tmp === v2? v2: tmp.car;
+                                    })()) : f67(f71((function(){
+                                        var tmp = v189;
+                                        return tmp === v2? v2: tmp.car;
+                                    })()), " . ", f71((function(){
+                                        var tmp = v189;
+                                        return tmp === v2? v2: tmp.cdr;
+                                    })())));
+                                })(f55(v187)), ")");
+                            })() : v2)))));
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 77)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l40;
     })();
     (function(){
         (function(){
-            return f73 = (function(v192){
-                ((v192)["fname"] = "WRITE-LINE");
-                return v192;
-            })((function (v193){
+            return f73 = (function(v190){
+                ((v190)["fname"] = "WRITE-LINE");
+                return v190;
+            })((function (v191){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                (function(){
-                    var x = v193;
-                    if (typeof x != 'string')
-                        throw 'The value ' + x + ' is not a type string.';
-                    return lisp.write(x);
+                return (function(){
+                    try {
+                        return (function(){
+                            (function(){
+                                var x = v191;
+                                if (typeof x != 'string')
+                                    throw 'The value ' + x + ' is not a type string.';
+                                return lisp.write(x);
+                            })();
+                            (function(){
+                                var x = v167;
+                                if (typeof x != 'string')
+                                    throw 'The value ' + x + ' is not a type string.';
+                                return lisp.write(x);
+                            })();
+                            return v191;
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 78)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
                 })();
-                (function(){
-                    var x = v169;
-                    if (typeof x != 'string')
-                        throw 'The value ' + x + ' is not a type string.';
-                    return lisp.write(x);
-                })();
-                return v193;
             }));
         })();
         return l41;
     })();
     return (function(){
         (function(){
-            return f74 = (function(v194){
-                ((v194)["fname"] = "PRINT");
-                return v194;
-            })((function (v195){
+            return f74 = (function(v192){
+                ((v192)["fname"] = "PRINT");
+                return v192;
+            })((function (v193){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                f73(f71(v195));
-                return v195;
+                return (function(){
+                    try {
+                        return (function(){
+                            f73(f71(v193));
+                            return v193;
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 79)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l42;
@@ -1709,13 +2661,25 @@ var l43 = f3("MAKE-STRING-STREAM");
 var f75;
 (function(){
     (function(){
-        return f75 = (function(v196){
-            ((v196)["fname"] = "MAKE-STRING-STREAM");
-            return v196;
-        })((function (v197){
+        return f75 = (function(v194){
+            ((v194)["fname"] = "MAKE-STRING-STREAM");
+            return v194;
+        })((function (v195){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return ({car: v197, cdr: 0});
+            return (function(){
+                try {
+                    return (function(){
+                        return ({car: v195, cdr: 0});
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 80)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l43;
@@ -1724,41 +2688,53 @@ var l44 = f3("%PEEK-CHAR");
 var f76;
 (function(){
     (function(){
-        return f76 = (function(v198){
-            ((v198)["fname"] = "%PEEK-CHAR");
-            return v198;
-        })((function (v199){
+        return f76 = (function(v196){
+            ((v196)["fname"] = "%PEEK-CHAR");
+            return v196;
+        })((function (v197){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (((function(){
-                var x = (function(){
-                    var tmp = v199;
-                    return tmp === v2? v2: tmp.cdr;
-                })();
-                var y = f43((function(){
-                    var tmp = v199;
-                    return tmp === v2? v2: tmp.car;
-                })());
-                if (typeof x != 'number')
-                    throw 'The value ' + x + ' is not a type number.';
-                if (typeof y != 'number')
-                    throw 'The value ' + y + ' is not a type number.';
-                return x<y;
-            })()?v3: v2) !== v2 ? (function(){
-                var string = (function(){
-                    var tmp = v199;
-                    return tmp === v2? v2: tmp.car;
-                })();
-                var index = (function(){
-                    var tmp = v199;
-                    return tmp === v2? v2: tmp.cdr;
-                })();
-                if (typeof string != 'string')
-                    throw 'The value ' + string + ' is not a type string.';
-                if (typeof index != 'number')
-                    throw 'The value ' + index + ' is not a type number.';
-                return string.charCodeAt(index);
-            })() : v2);
+            return (function(){
+                try {
+                    return (function(){
+                        return (((function(){
+                            var x = (function(){
+                                var tmp = v197;
+                                return tmp === v2? v2: tmp.cdr;
+                            })();
+                            var y = f43((function(){
+                                var tmp = v197;
+                                return tmp === v2? v2: tmp.car;
+                            })());
+                            if (typeof x != 'number')
+                                throw 'The value ' + x + ' is not a type number.';
+                            if (typeof y != 'number')
+                                throw 'The value ' + y + ' is not a type number.';
+                            return x<y;
+                        })()?v3: v2) !== v2 ? (function(){
+                            var string = (function(){
+                                var tmp = v197;
+                                return tmp === v2? v2: tmp.car;
+                            })();
+                            var index = (function(){
+                                var tmp = v197;
+                                return tmp === v2? v2: tmp.cdr;
+                            })();
+                            if (typeof string != 'string')
+                                throw 'The value ' + string + ' is not a type string.';
+                            if (typeof index != 'number')
+                                throw 'The value ' + index + ' is not a type number.';
+                            return string.charCodeAt(index);
+                        })() : v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 81)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l44;
@@ -1767,52 +2743,64 @@ var l45 = f3("%READ-CHAR");
 var f77;
 (function(){
     (function(){
-        return f77 = (function(v200){
-            ((v200)["fname"] = "%READ-CHAR");
-            return v200;
-        })((function (v201){
+        return f77 = (function(v198){
+            ((v198)["fname"] = "%READ-CHAR");
+            return v198;
+        })((function (v199){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (((function(){
-                var x = (function(){
-                    var tmp = v201;
-                    return tmp === v2? v2: tmp.cdr;
-                })();
-                var y = f43((function(){
-                    var tmp = v201;
-                    return tmp === v2? v2: tmp.car;
-                })());
-                if (typeof x != 'number')
-                    throw 'The value ' + x + ' is not a type number.';
-                if (typeof y != 'number')
-                    throw 'The value ' + y + ' is not a type number.';
-                return x<y;
-            })()?v3: v2) !== v2 ? (function(v202){
-                (function(){
-                    var x = v201;
-                    if (typeof x != 'object')
-                        throw 'The value ' + x + ' is not a type object.';
-                    return (x.cdr = f12((function(){
-                        var tmp = v201;
-                        return tmp === v2? v2: tmp.cdr;
-                    })()));
-                })();
-                return v202;
-            })((function(){
-                var string = (function(){
-                    var tmp = v201;
-                    return tmp === v2? v2: tmp.car;
-                })();
-                var index = (function(){
-                    var tmp = v201;
-                    return tmp === v2? v2: tmp.cdr;
-                })();
-                if (typeof string != 'string')
-                    throw 'The value ' + string + ' is not a type string.';
-                if (typeof index != 'number')
-                    throw 'The value ' + index + ' is not a type number.';
-                return string.charCodeAt(index);
-            })()) : v2);
+            return (function(){
+                try {
+                    return (function(){
+                        return (((function(){
+                            var x = (function(){
+                                var tmp = v199;
+                                return tmp === v2? v2: tmp.cdr;
+                            })();
+                            var y = f43((function(){
+                                var tmp = v199;
+                                return tmp === v2? v2: tmp.car;
+                            })());
+                            if (typeof x != 'number')
+                                throw 'The value ' + x + ' is not a type number.';
+                            if (typeof y != 'number')
+                                throw 'The value ' + y + ' is not a type number.';
+                            return x<y;
+                        })()?v3: v2) !== v2 ? (function(v200){
+                            (function(){
+                                var x = v199;
+                                if (typeof x != 'object')
+                                    throw 'The value ' + x + ' is not a type object.';
+                                return (x.cdr = f12((function(){
+                                    var tmp = v199;
+                                    return tmp === v2? v2: tmp.cdr;
+                                })()));
+                            })();
+                            return v200;
+                        })((function(){
+                            var string = (function(){
+                                var tmp = v199;
+                                return tmp === v2? v2: tmp.car;
+                            })();
+                            var index = (function(){
+                                var tmp = v199;
+                                return tmp === v2? v2: tmp.cdr;
+                            })();
+                            if (typeof string != 'string')
+                                throw 'The value ' + string + ' is not a type string.';
+                            if (typeof index != 'number')
+                                throw 'The value ' + index + ' is not a type number.';
+                            return string.charCodeAt(index);
+                        })()) : v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 82)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l45;
@@ -1821,17 +2809,29 @@ var l46 = f3("WHITESPACEP");
 var f78;
 (function(){
     (function(){
-        return f78 = (function(v203){
-            ((v203)["fname"] = "WHITESPACEP");
-            return v203;
-        })((function (v204){
+        return f78 = (function(v201){
+            ((v201)["fname"] = "WHITESPACEP");
+            return v201;
+        })((function (v202){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (function(v205){
-                return (v205 !== v2 ? v205 : (function(v206){
-                    return (v206 !== v2 ? v206 : f50(v204, 9));
-                })(f50(v204, 10)));
-            })(f50(v204, 32));
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v203){
+                            return (v203 !== v2 ? v203 : (function(v204){
+                                return (v204 !== v2 ? v204 : f50(v202, 9));
+                            })(f50(v202, 10)));
+                        })(f50(v202, 32));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 83)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l46;
@@ -1840,20 +2840,45 @@ var l47 = f3("SKIP-WHITESPACES");
 var f79;
 (function(){
     (function(){
-        return f79 = (function(v207){
-            ((v207)["fname"] = "SKIP-WHITESPACES");
-            return v207;
-        })((function (v208){
+        return f79 = (function(v205){
+            ((v205)["fname"] = "SKIP-WHITESPACES");
+            return v205;
+        })((function (v206){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (function(v209){
-                v209 = f76(v208);
-                return (function(){
-                    while((v209 !== v2 ? f78(v209) : v2) !== v2){
-                        f77(v208);
-                        v209 = f76(v208);
-                }})();
-            })(v2);
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v207){
+                            v207 = f76(v206);
+                            return (function(){
+                                try {
+                                    return (function(){
+                                        return (function(){
+                                            while((v207 !== v2 ? f78(v207) : v2) !== v2){
+                                                f77(v206);
+                                                v207 = f76(v206);
+                                            }return v2;
+                                        })();
+                                    })();
+                                }
+                                catch (cf){
+                                    if (cf.type == 'block' && cf.id == 85)
+                                        return cf.value;
+                                    else
+                                        throw cf;
+                                }
+                            })();
+                        })(v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 84)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l47;
@@ -1862,19 +2887,31 @@ var l48 = f3("TERMINALP");
 var f80;
 (function(){
     (function(){
-        return f80 = (function(v210){
-            ((v210)["fname"] = "TERMINALP");
-            return v210;
-        })((function (v211){
+        return f80 = (function(v208){
+            ((v208)["fname"] = "TERMINALP");
+            return v208;
+        })((function (v209){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (function(v212){
-                return (v212 !== v2 ? v212 : (function(v213){
-                    return (v213 !== v2 ? v213 : (function(v214){
-                        return (v214 !== v2 ? v214 : f50(40, v211));
-                    })(f50(41, v211)));
-                })(f78(v211)));
-            })(f1(v211));
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v210){
+                            return (v210 !== v2 ? v210 : (function(v211){
+                                return (v211 !== v2 ? v211 : (function(v212){
+                                    return (v212 !== v2 ? v212 : f50(40, v209));
+                                })(f50(41, v209)));
+                            })(f78(v209)));
+                        })(f1(v209));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 86)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l48;
@@ -1883,27 +2920,52 @@ var l49 = f3("READ-UNTIL");
 var f81;
 (function(){
     (function(){
-        return f81 = (function(v215){
-            ((v215)["fname"] = "READ-UNTIL");
-            return v215;
-        })((function (v216,v217){
+        return f81 = (function(v213){
+            ((v213)["fname"] = "READ-UNTIL");
+            return v213;
+        })((function (v214,v215){
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
-            return (function(v218,v219){
-                v219 = f76(v216);
-                (function(){
-                    while((v219 !== v2 ? f17((v217)(v219)) : v2) !== v2){
-                        v218 = f67(v218, (function(){
-                            var x = v219;
-                            if (typeof x != 'number')
-                                throw 'The value ' + x + ' is not a type number.';
-                            return String.fromCharCode(x);
-                        })());
-                        f77(v216);
-                        v219 = f76(v216);
-                }})();
-                return v218;
-            })("",v2);
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v216,v217){
+                            v217 = f76(v214);
+                            (function(){
+                                try {
+                                    return (function(){
+                                        return (function(){
+                                            while((v217 !== v2 ? f17((v215)(v217)) : v2) !== v2){
+                                                v216 = f67(v216, (function(){
+                                                    var x = v217;
+                                                    if (typeof x != 'number')
+                                                        throw 'The value ' + x + ' is not a type number.';
+                                                    return String.fromCharCode(x);
+                                                })());
+                                                f77(v214);
+                                                v217 = f76(v214);
+                                            }return v2;
+                                        })();
+                                    })();
+                                }
+                                catch (cf){
+                                    if (cf.type == 'block' && cf.id == 88)
+                                        return cf.value;
+                                    else
+                                        throw cf;
+                                }
+                            })();
+                            return v216;
+                        })("",v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 87)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l49;
@@ -1912,26 +2974,51 @@ var l50 = f3("SKIP-WHITESPACES-AND-COMMENTS");
 var f82;
 (function(){
     (function(){
-        return f82 = (function(v220){
-            ((v220)["fname"] = "SKIP-WHITESPACES-AND-COMMENTS");
-            return v220;
-        })((function (v221){
+        return f82 = (function(v218){
+            ((v218)["fname"] = "SKIP-WHITESPACES-AND-COMMENTS");
+            return v218;
+        })((function (v219){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (function(v222){
-                f79(v221);
-                v222 = f76(v221);
-                return (function(){
-                    while((v222 !== v2 ? f50(v222, 59) : v2) !== v2){
-                        f81(v221, (function (v223){
-                            if (arguments.length < 1) throw 'too few arguments';
-                            if (arguments.length > 1) throw 'too many arguments';
-                            return f50(v223, 10);
-                        }));
-                        f79(v221);
-                        v222 = f76(v221);
-                }})();
-            })(v2);
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v220){
+                            f79(v219);
+                            v220 = f76(v219);
+                            return (function(){
+                                try {
+                                    return (function(){
+                                        return (function(){
+                                            while((v220 !== v2 ? f50(v220, 59) : v2) !== v2){
+                                                f81(v219, (function (v221){
+                                                    if (arguments.length < 1) throw 'too few arguments';
+                                                    if (arguments.length > 1) throw 'too many arguments';
+                                                    return f50(v221, 10);
+                                                }));
+                                                f79(v219);
+                                                v220 = f76(v219);
+                                            }return v2;
+                                        })();
+                                    })();
+                                }
+                                catch (cf){
+                                    if (cf.type == 'block' && cf.id == 90)
+                                        return cf.value;
+                                    else
+                                        throw cf;
+                                }
+                            })();
+                        })(v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 89)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l50;
@@ -1940,32 +3027,44 @@ var l51 = f3("%READ-LIST");
 var f83;
 (function(){
     (function(){
-        return f83 = (function(v224){
-            ((v224)["fname"] = "%READ-LIST");
-            return v224;
-        })((function (v225){
+        return f83 = (function(v222){
+            ((v222)["fname"] = "%READ-LIST");
+            return v222;
+        })((function (v223){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            f82(v225);
-            return (function(v226){
-                return (f1(v226) !== v2 ? (function(){
-                    return (function (){ throw "Unspected EOF"; })();
-                })() : (f50(v226, 41) !== v2 ? (function(){
-                    f77(v225);
-                    return v2;
-                })() : (f50(v226, 46) !== v2 ? (function(){
-                    f77(v225);
-                    return (function(v227){
-                        f82(v225);
-                        (f50(f77(v225), 41) !== v2 ? v2 : (function(){
-                            return (function (){ throw "')' was expected."; })();
-                        })());
-                        return v227;
-                    })(f84(v225));
-                })() : (function(){
-                    return ({car: f84(v225), cdr: f83(v225)});
-                })())));
-            })(f76(v225));
+            return (function(){
+                try {
+                    return (function(){
+                        f82(v223);
+                        return (function(v224){
+                            return (f1(v224) !== v2 ? (function(){
+                                return (function (){ throw "Unspected EOF"; })();
+                            })() : (f50(v224, 41) !== v2 ? (function(){
+                                f77(v223);
+                                return v2;
+                            })() : (f50(v224, 46) !== v2 ? (function(){
+                                f77(v223);
+                                return (function(v225){
+                                    f82(v223);
+                                    (f50(f77(v223), 41) !== v2 ? v2 : (function(){
+                                        return (function (){ throw "')' was expected."; })();
+                                    })());
+                                    return v225;
+                                })(f84(v223));
+                            })() : (function(){
+                                return ({car: f84(v223), cdr: f83(v223)});
+                            })())));
+                        })(f76(v223));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 91)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l51;
@@ -1974,32 +3073,57 @@ var l52 = f3("READ-STRING");
 var f85;
 (function(){
     (function(){
-        return f85 = (function(v228){
-            ((v228)["fname"] = "READ-STRING");
-            return v228;
-        })((function (v229){
+        return f85 = (function(v226){
+            ((v226)["fname"] = "READ-STRING");
+            return v226;
+        })((function (v227){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (function(v230,v231){
-                v231 = f77(v229);
-                (function(){
-                    while(f17(f16(v231, 34)) !== v2){
-                        (f1(v231) !== v2 ? (function(){
-                            return (function (){ throw "Unexpected EOF"; })();
-                        })() : v2);
-                        (f16(v231, 92) !== v2 ? (function(){
-                            return v231 = f77(v229);
-                        })() : v2);
-                        v230 = f67(v230, (function(){
-                            var x = v231;
-                            if (typeof x != 'number')
-                                throw 'The value ' + x + ' is not a type number.';
-                            return String.fromCharCode(x);
-                        })());
-                        v231 = f77(v229);
-                }})();
-                return v230;
-            })("",v2);
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v228,v229){
+                            v229 = f77(v227);
+                            (function(){
+                                try {
+                                    return (function(){
+                                        return (function(){
+                                            while(f17(f16(v229, 34)) !== v2){
+                                                (f1(v229) !== v2 ? (function(){
+                                                    return (function (){ throw "Unexpected EOF"; })();
+                                                })() : v2);
+                                                (f16(v229, 92) !== v2 ? (function(){
+                                                    return v229 = f77(v227);
+                                                })() : v2);
+                                                v228 = f67(v228, (function(){
+                                                    var x = v229;
+                                                    if (typeof x != 'number')
+                                                        throw 'The value ' + x + ' is not a type number.';
+                                                    return String.fromCharCode(x);
+                                                })());
+                                                v229 = f77(v227);
+                                            }return v2;
+                                        })();
+                                    })();
+                                }
+                                catch (cf){
+                                    if (cf.type == 'block' && cf.id == 93)
+                                        return cf.value;
+                                    else
+                                        throw cf;
+                                }
+                            })();
+                            return v228;
+                        })("",v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 92)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l52;
@@ -2012,65 +3136,77 @@ var l53 = 39;
 var f86;
 (function(){
     (function(){
-        return f86 = (function(v232){
-            ((v232)["fname"] = "READ-SHARP");
-            return v232;
-        })((function (v233){
+        return f86 = (function(v230){
+            ((v230)["fname"] = "READ-SHARP");
+            return v230;
+        })((function (v231){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            f77(v233);
-            return (function(v234){
-                return (f16(v234, l53) !== v2 ? (function(){
-                    return f33(l54, f84(v233));
-                })() : (f16(v234, l55) !== v2 ? (function(){
-                    return (function(v235){
-                        return (f66(v235, "space") !== v2 ? (function(){
-                            return f49(32);
-                        })() : (f66(v235, "tab") !== v2 ? (function(){
-                            return f49(9);
-                        })() : (f66(v235, "newline") !== v2 ? (function(){
-                            return f49(10);
-                        })() : (function(){
-                            return f49((function(){
-                                var string = v235;
-                                var index = 0;
-                                if (typeof string != 'string')
-                                    throw 'The value ' + string + ' is not a type string.';
-                                if (typeof index != 'number')
-                                    throw 'The value ' + index + ' is not a type number.';
-                                return string.charCodeAt(index);
-                            })());
-                        })())));
-                    })(f67((function(){
-                        var x = f77(v233);
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        return String.fromCharCode(x);
-                    })(), f81(v233, f80)));
-                })() : (f16(v234, l56) !== v2 ? (function(){
-                    return (function(v236){
-                        return (f66(v236, "common-lisp") !== v2 ? (function(){
-                            f84(v233);
-                            return f84(v233);
-                        })() : (f66(v236, "ecmalisp") !== v2 ? (function(){
-                            return f84(v233);
-                        })() : (function(){
-                            return (function (){ throw "Unknown reader form."; })();
-                        })()));
-                    })(f81(v233, f80));
-                })() : (function(){
-                    return (function (){ throw "ECASE expression failed."; })();
-                })())));
-            })(f77(v233));
+            return (function(){
+                try {
+                    return (function(){
+                        f77(v231);
+                        return (function(v232){
+                            return (f16(v232, l53) !== v2 ? (function(){
+                                return f33(l54, f84(v231));
+                            })() : (f16(v232, l55) !== v2 ? (function(){
+                                return (function(v233){
+                                    return (f66(v233, "space") !== v2 ? (function(){
+                                        return f49(32);
+                                    })() : (f66(v233, "tab") !== v2 ? (function(){
+                                        return f49(9);
+                                    })() : (f66(v233, "newline") !== v2 ? (function(){
+                                        return f49(10);
+                                    })() : (function(){
+                                        return f49((function(){
+                                            var string = v233;
+                                            var index = 0;
+                                            if (typeof string != 'string')
+                                                throw 'The value ' + string + ' is not a type string.';
+                                            if (typeof index != 'number')
+                                                throw 'The value ' + index + ' is not a type number.';
+                                            return string.charCodeAt(index);
+                                        })());
+                                    })())));
+                                })(f67((function(){
+                                    var x = f77(v231);
+                                    if (typeof x != 'number')
+                                        throw 'The value ' + x + ' is not a type number.';
+                                    return String.fromCharCode(x);
+                                })(), f81(v231, f80)));
+                            })() : (f16(v232, l56) !== v2 ? (function(){
+                                return (function(v234){
+                                    return (f66(v234, "common-lisp") !== v2 ? (function(){
+                                        f84(v231);
+                                        return f84(v231);
+                                    })() : (f66(v234, "ecmalisp") !== v2 ? (function(){
+                                        return f84(v231);
+                                    })() : (function(){
+                                        return (function (){ throw "Unknown reader form."; })();
+                                    })()));
+                                })(f81(v231, f80));
+                            })() : (function(){
+                                return (function (){ throw "ECASE expression failed."; })();
+                            })())));
+                        })(f77(v231));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 94)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l57;
 })(); 
 var l58 = f3("*EOF*");
-var v237;
+var v235;
 (function(){
     (function(){
-        return v237 = (function(){
+        return v235 = (function(){
             var name = "EOF";
             if (typeof name != 'string')
                 throw 'The value ' + name + ' is not a type string.';
@@ -2087,47 +3223,59 @@ var l59 = f3("QUOTE");
 var f84;
 (function(){
     (function(){
-        return f84 = (function(v238){
-            ((v238)["fname"] = "LS-READ");
-            return v238;
-        })((function (v239){
+        return f84 = (function(v236){
+            ((v236)["fname"] = "LS-READ");
+            return v236;
+        })((function (v237){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            f82(v239);
-            return (function(v240){
-                return (f1(v240) !== v2 ? (function(){
-                    return v237;
-                })() : (f50(v240, 40) !== v2 ? (function(){
-                    f77(v239);
-                    return f83(v239);
-                })() : (f50(v240, 39) !== v2 ? (function(){
-                    f77(v239);
-                    return f33(l59, f84(v239));
-                })() : (f50(v240, 96) !== v2 ? (function(){
-                    f77(v239);
-                    return f33(l60, f84(v239));
-                })() : (f50(v240, 34) !== v2 ? (function(){
-                    f77(v239);
-                    return f85(v239);
-                })() : (f50(v240, 44) !== v2 ? (function(){
-                    f77(v239);
-                    return (f16(f76(v239), 64) !== v2 ? (function(){
-                        f77(v239);
-                        return f33(l61, f84(v239));
-                    })() : f33(l62, f84(v239)));
-                })() : (f50(v240, 35) !== v2 ? (function(){
-                    return f86(v239);
-                })() : (function(){
-                    return (function(v241){
-                        return (f64(f61, v241) !== v2 ? f63(v241) : f3((function(){
-                            var x = v241;
-                            if (typeof x != 'string')
-                                throw 'The value ' + x + ' is not a type string.';
-                            return x.toUpperCase();
-                        })()));
-                    })(f81(v239, f80));
-                })())))))));
-            })(f76(v239));
+            return (function(){
+                try {
+                    return (function(){
+                        f82(v237);
+                        return (function(v238){
+                            return (f1(v238) !== v2 ? (function(){
+                                return v235;
+                            })() : (f50(v238, 40) !== v2 ? (function(){
+                                f77(v237);
+                                return f83(v237);
+                            })() : (f50(v238, 39) !== v2 ? (function(){
+                                f77(v237);
+                                return f33(l59, f84(v237));
+                            })() : (f50(v238, 96) !== v2 ? (function(){
+                                f77(v237);
+                                return f33(l60, f84(v237));
+                            })() : (f50(v238, 34) !== v2 ? (function(){
+                                f77(v237);
+                                return f85(v237);
+                            })() : (f50(v238, 44) !== v2 ? (function(){
+                                f77(v237);
+                                return (f16(f76(v237), 64) !== v2 ? (function(){
+                                    f77(v237);
+                                    return f33(l61, f84(v237));
+                                })() : f33(l62, f84(v237)));
+                            })() : (f50(v238, 35) !== v2 ? (function(){
+                                return f86(v237);
+                            })() : (function(){
+                                return (function(v239){
+                                    return (f64(f61, v239) !== v2 ? f63(v239) : f3((function(){
+                                        var x = v239;
+                                        if (typeof x != 'string')
+                                            throw 'The value ' + x + ' is not a type string.';
+                                        return x.toUpperCase();
+                                    })()));
+                                })(f81(v237, f80));
+                            })())))))));
+                        })(f76(v237));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 95)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l63;
@@ -2136,23 +3284,35 @@ var l64 = f3("LS-READ-FROM-STRING");
 var f87;
 (function(){
     (function(){
-        return f87 = (function(v242){
-            ((v242)["fname"] = "LS-READ-FROM-STRING");
-            return v242;
-        })((function (v243){
+        return f87 = (function(v240){
+            ((v240)["fname"] = "LS-READ-FROM-STRING");
+            return v240;
+        })((function (v241){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return f84(f75(v243));
+            return (function(){
+                try {
+                    return (function(){
+                        return f84(f75(v241));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 96)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l64;
 })(); 
 var l66 = f3("*COMPILATION-UNIT-CHECKS*");
 var l65 = f3("NIL");
-var v244;
+var v242;
 (function(){
     (function(){
-        return v244 = l65;
+        return v242 = l65;
     })();
     return l66;
 })(); 
@@ -2160,13 +3320,25 @@ var l67 = f3("MAKE-BINDING");
 var f88;
 (function(){
     (function(){
-        return f88 = (function(v245){
-            ((v245)["fname"] = "MAKE-BINDING");
-            return v245;
-        })((function (v246,v247,v248,v249){
+        return f88 = (function(v243){
+            ((v243)["fname"] = "MAKE-BINDING");
+            return v243;
+        })((function (v244,v245,v246,v247){
             if (arguments.length < 4) throw 'too few arguments';
             if (arguments.length > 4) throw 'too many arguments';
-            return f33(v246, v247, v248, v249);
+            return (function(){
+                try {
+                    return (function(){
+                        return f33(v244, v245, v246, v247);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 97)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l67;
@@ -2175,13 +3347,25 @@ var l68 = f3("BINDING-NAME");
 var f89;
 (function(){
     (function(){
-        return f89 = (function(v250){
-            ((v250)["fname"] = "BINDING-NAME");
-            return v250;
-        })((function (v251){
+        return f89 = (function(v248){
+            ((v248)["fname"] = "BINDING-NAME");
+            return v248;
+        })((function (v249){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return f29(v251);
+            return (function(){
+                try {
+                    return (function(){
+                        return f29(v249);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 98)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l68;
@@ -2190,13 +3374,25 @@ var l69 = f3("BINDING-TYPE");
 var f90;
 (function(){
     (function(){
-        return f90 = (function(v252){
-            ((v252)["fname"] = "BINDING-TYPE");
-            return v252;
-        })((function (v253){
+        return f90 = (function(v250){
+            ((v250)["fname"] = "BINDING-TYPE");
+            return v250;
+        })((function (v251){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return f30(v253);
+            return (function(){
+                try {
+                    return (function(){
+                        return f30(v251);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 99)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l69;
@@ -2205,13 +3401,25 @@ var l70 = f3("BINDING-TRANSLATION");
 var f91;
 (function(){
     (function(){
-        return f91 = (function(v254){
-            ((v254)["fname"] = "BINDING-TRANSLATION");
-            return v254;
-        })((function (v255){
+        return f91 = (function(v252){
+            ((v252)["fname"] = "BINDING-TRANSLATION");
+            return v252;
+        })((function (v253){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return f31(v255);
+            return (function(){
+                try {
+                    return (function(){
+                        return f31(v253);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 100)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l70;
@@ -2220,13 +3428,25 @@ var l71 = f3("BINDING-DECLARED");
 var f92;
 (function(){
     (function(){
-        return f92 = (function(v256){
-            ((v256)["fname"] = "BINDING-DECLARED");
-            return v256;
-        })((function (v257){
+        return f92 = (function(v254){
+            ((v254)["fname"] = "BINDING-DECLARED");
+            return v254;
+        })((function (v255){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (v257 !== v2 ? f32(v257) : v2);
+            return (function(){
+                try {
+                    return (function(){
+                        return (v255 !== v2 ? f32(v255) : v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 101)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l71;
@@ -2235,17 +3455,29 @@ var l72 = f3("MARK-BINDING-AS-DECLARED");
 var f93;
 (function(){
     (function(){
-        return f93 = (function(v258){
-            ((v258)["fname"] = "MARK-BINDING-AS-DECLARED");
-            return v258;
-        })((function (v259){
+        return f93 = (function(v256){
+            ((v256)["fname"] = "MARK-BINDING-AS-DECLARED");
+            return v256;
+        })((function (v257){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
             return (function(){
-                var x = f27(v259);
-                if (typeof x != 'object')
-                    throw 'The value ' + x + ' is not a type object.';
-                return (x.car = v3);
+                try {
+                    return (function(){
+                        return (function(){
+                            var x = f27(v257);
+                            if (typeof x != 'object')
+                                throw 'The value ' + x + ' is not a type object.';
+                            return (x.car = v3);
+                        })();
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 102)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
             })();
         }));
     })();
@@ -2255,12 +3487,24 @@ var l73 = f3("MAKE-LEXENV");
 var f94;
 (function(){
     (function(){
-        return f94 = (function(v260){
-            ((v260)["fname"] = "MAKE-LEXENV");
-            return v260;
+        return f94 = (function(v258){
+            ((v258)["fname"] = "MAKE-LEXENV");
+            return v258;
         })((function (){
             if (arguments.length > 0) throw 'too many arguments';
-            return f33(v2, v2, v2);
+            return (function(){
+                try {
+                    return (function(){
+                        return f33(v2, v2, v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 103)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l73;
@@ -2269,13 +3513,25 @@ var l74 = f3("COPY-LEXENV");
 var f95;
 (function(){
     (function(){
-        return f95 = (function(v261){
-            ((v261)["fname"] = "COPY-LEXENV");
-            return v261;
-        })((function (v262){
+        return f95 = (function(v259){
+            ((v259)["fname"] = "COPY-LEXENV");
+            return v259;
+        })((function (v260){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return f47(v262);
+            return (function(){
+                try {
+                    return (function(){
+                        return f47(v260);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 104)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l74;
@@ -2287,44 +3543,56 @@ var l75 = f3("VARIABLE");
 var f96;
 (function(){
     (function(){
-        return f96 = (function(v263){
-            ((v263)["fname"] = "PUSH-TO-LEXENV");
-            return v263;
-        })((function (v264,v265,v266){
+        return f96 = (function(v261){
+            ((v261)["fname"] = "PUSH-TO-LEXENV");
+            return v261;
+        })((function (v262,v263,v264){
             if (arguments.length < 3) throw 'too few arguments';
             if (arguments.length > 3) throw 'too many arguments';
-            return (function(v267){
-                return (f16(v267, l75) !== v2 ? (function(){
+            return (function(){
+                try {
                     return (function(){
-                        var x = v265;
-                        if (typeof x != 'object')
-                            throw 'The value ' + x + ' is not a type object.';
-                        return (x.car = ({car: v264, cdr: (function(){
-                            var tmp = v265;
-                            return tmp === v2? v2: tmp.car;
-                        })()}));
+                        return (function(v265){
+                            return (f16(v265, l75) !== v2 ? (function(){
+                                return (function(){
+                                    var x = v263;
+                                    if (typeof x != 'object')
+                                        throw 'The value ' + x + ' is not a type object.';
+                                    return (x.car = ({car: v262, cdr: (function(){
+                                        var tmp = v263;
+                                        return tmp === v2? v2: tmp.car;
+                                    })()}));
+                                })();
+                            })() : (f16(v265, l76) !== v2 ? (function(){
+                                return (function(){
+                                    var x = (function(){
+                                        var tmp = v263;
+                                        return tmp === v2? v2: tmp.cdr;
+                                    })();
+                                    if (typeof x != 'object')
+                                        throw 'The value ' + x + ' is not a type object.';
+                                    return (x.car = ({car: v262, cdr: f23(v263)}));
+                                })();
+                            })() : (f16(v265, l77) !== v2 ? (function(){
+                                return (function(){
+                                    var x = f25(v263);
+                                    if (typeof x != 'object')
+                                        throw 'The value ' + x + ' is not a type object.';
+                                    return (x.car = ({car: v262, cdr: f26(v263)}));
+                                })();
+                            })() : (function(){
+                                return (function (){ throw "ECASE expression failed."; })();
+                            })())));
+                        })(v264);
                     })();
-                })() : (f16(v267, l76) !== v2 ? (function(){
-                    return (function(){
-                        var x = (function(){
-                            var tmp = v265;
-                            return tmp === v2? v2: tmp.cdr;
-                        })();
-                        if (typeof x != 'object')
-                            throw 'The value ' + x + ' is not a type object.';
-                        return (x.car = ({car: v264, cdr: f23(v265)}));
-                    })();
-                })() : (f16(v267, l77) !== v2 ? (function(){
-                    return (function(){
-                        var x = f25(v265);
-                        if (typeof x != 'object')
-                            throw 'The value ' + x + ' is not a type object.';
-                        return (x.car = ({car: v264, cdr: f26(v265)}));
-                    })();
-                })() : (function(){
-                    return (function (){ throw "ECASE expression failed."; })();
-                })())));
-            })(v266);
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 105)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l78;
@@ -2333,16 +3601,28 @@ var l79 = f3("EXTEND-LEXENV");
 var f97;
 (function(){
     (function(){
-        return f97 = (function(v268){
-            ((v268)["fname"] = "EXTEND-LEXENV");
-            return v268;
-        })((function (v269,v270,v271){
+        return f97 = (function(v266){
+            ((v266)["fname"] = "EXTEND-LEXENV");
+            return v266;
+        })((function (v267,v268,v269){
             if (arguments.length < 3) throw 'too few arguments';
             if (arguments.length > 3) throw 'too many arguments';
-            return (function(v272){
-                f96(v269, v272, v271);
-                return v272;
-            })(f95(v270));
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v270){
+                            f96(v267, v270, v269);
+                            return v270;
+                        })(f95(v268));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 106)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l79;
@@ -2354,32 +3634,44 @@ var l80 = f3("VARIABLE");
 var f98;
 (function(){
     (function(){
-        return f98 = (function(v273){
-            ((v273)["fname"] = "LOOKUP-IN-LEXENV");
-            return v273;
-        })((function (v274,v275,v276){
+        return f98 = (function(v271){
+            ((v271)["fname"] = "LOOKUP-IN-LEXENV");
+            return v271;
+        })((function (v272,v273,v274){
             if (arguments.length < 3) throw 'too few arguments';
             if (arguments.length > 3) throw 'too many arguments';
-            return f65(v274, (function(v277){
-                return (f16(v277, l80) !== v2 ? (function(){
-                    return f29(v275);
-                })() : (f16(v277, l81) !== v2 ? (function(){
-                    return f30(v275);
-                })() : (f16(v277, l82) !== v2 ? (function(){
-                    return f31(v275);
-                })() : (function(){
-                    return (function (){ throw "ECASE expression failed."; })();
-                })())));
-            })(v276));
+            return (function(){
+                try {
+                    return (function(){
+                        return f65(v272, (function(v275){
+                            return (f16(v275, l80) !== v2 ? (function(){
+                                return f29(v273);
+                            })() : (f16(v275, l81) !== v2 ? (function(){
+                                return f30(v273);
+                            })() : (f16(v275, l82) !== v2 ? (function(){
+                                return f31(v273);
+                            })() : (function(){
+                                return (function (){ throw "ECASE expression failed."; })();
+                            })())));
+                        })(v274));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 107)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l83;
 })(); 
 var l84 = f3("*ENVIRONMENT*");
-var v278;
+var v276;
 (function(){
     (function(){
-        return v278 = f94();
+        return v276 = f94();
     })();
     return l84;
 })(); 
@@ -2387,23 +3679,35 @@ var l85 = f3("CLEAR-UNDECLARED-GLOBAL-BINDINGS");
 var f99;
 (function(){
     (function(){
-        return f99 = (function(v279){
-            ((v279)["fname"] = "CLEAR-UNDECLARED-GLOBAL-BINDINGS");
-            return v279;
+        return f99 = (function(v277){
+            ((v277)["fname"] = "CLEAR-UNDECLARED-GLOBAL-BINDINGS");
+            return v277;
         })((function (){
             if (arguments.length > 0) throw 'too many arguments';
-            return (function(v280,v281){
-                return v278 = f33(v280, v281, f31(v278));
-            })(f29(v278),f30(v278));
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v278,v279){
+                            return v276 = f33(v278, v279, f31(v276));
+                        })(f29(v276),f30(v276));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 108)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l85;
 })(); 
 var l86 = f3("*VARIABLE-COUNTER*");
-var v282;
+var v280;
 (function(){
     (function(){
-        return v282 = 0;
+        return v280 = 0;
     })();
     return l86;
 })(); 
@@ -2411,21 +3715,33 @@ var l87 = f3("GVARNAME");
 var f100;
 (function(){
     (function(){
-        return f100 = (function(v283){
-            ((v283)["fname"] = "GVARNAME");
-            return v283;
-        })((function (v284){
+        return f100 = (function(v281){
+            ((v281)["fname"] = "GVARNAME");
+            return v281;
+        })((function (v282){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return f67("v", f6(v282 = (function(){
-                var x = v282;
-                var y = 1;
-                if (typeof x != 'number')
-                    throw 'The value ' + x + ' is not a type number.';
-                if (typeof y != 'number')
-                    throw 'The value ' + y + ' is not a type number.';
-                return x+y;
-            })()));
+            return (function(){
+                try {
+                    return (function(){
+                        return f67("v", f6(v280 = (function(){
+                            var x = v280;
+                            var y = 1;
+                            if (typeof x != 'number')
+                                throw 'The value ' + x + ' is not a type number.';
+                            if (typeof y != 'number')
+                                throw 'The value ' + y + ' is not a type number.';
+                            return x+y;
+                        })()));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 109)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l87;
@@ -2439,26 +3755,38 @@ var l88 = f3("VARIABLE");
 var f101;
 (function(){
     (function(){
-        return f101 = (function(v285){
-            ((v285)["fname"] = "LOOKUP-VARIABLE");
-            return v285;
-        })((function (v286,v287){
+        return f101 = (function(v283){
+            ((v283)["fname"] = "LOOKUP-VARIABLE");
+            return v283;
+        })((function (v284,v285){
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
-            return (function(v288){
-                return (v288 !== v2 ? v288 : (function(v289){
-                    return (v289 !== v2 ? v289 : (function(v290,v291){
-                        f96(v291, v278, l88);
-                        v244 = ({car: (function (){
-                            if (arguments.length > 0) throw 'too many arguments';
-                            return (f98(v286, v278, l89) !== v2 ? v2 : (function(){
-                                return (function (){ throw f67("Undefined variable `", v290, "'"); })();
-                            })());
-                        }), cdr: v244});
-                        return v291;
-                    })((v286).name,f88(v286, l90, f100(v286), v2)));
-                })(f98(v286, v278, l91)));
-            })(f98(v286, v287, l92));
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v286){
+                            return (v286 !== v2 ? v286 : (function(v287){
+                                return (v287 !== v2 ? v287 : (function(v288,v289){
+                                    f96(v289, v276, l88);
+                                    v242 = ({car: (function (){
+                                        if (arguments.length > 0) throw 'too many arguments';
+                                        return (f98(v284, v276, l89) !== v2 ? v2 : (function(){
+                                            return (function (){ throw f67("Undefined variable `", v288, "'"); })();
+                                        })());
+                                    }), cdr: v242});
+                                    return v289;
+                                })((v284).name,f88(v284, l90, f100(v284), v2)));
+                            })(f98(v284, v276, l91)));
+                        })(f98(v284, v285, l92));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 110)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l93;
@@ -2467,13 +3795,25 @@ var l94 = f3("LOOKUP-VARIABLE-TRANSLATION");
 var f102;
 (function(){
     (function(){
-        return f102 = (function(v292){
-            ((v292)["fname"] = "LOOKUP-VARIABLE-TRANSLATION");
-            return v292;
-        })((function (v293,v294){
+        return f102 = (function(v290){
+            ((v290)["fname"] = "LOOKUP-VARIABLE-TRANSLATION");
+            return v290;
+        })((function (v291,v292){
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
-            return f91(f101(v293, v294));
+            return (function(){
+                try {
+                    return (function(){
+                        return f91(f101(v291, v292));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 111)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l94;
@@ -2484,40 +3824,65 @@ var l95 = f3("VARIABLE");
 var f103;
 (function(){
     (function(){
-        return f103 = (function(v295){
-            ((v295)["fname"] = "EXTEND-LOCAL-ENV");
-            return v295;
-        })((function (v296,v297){
+        return f103 = (function(v293){
+            ((v293)["fname"] = "EXTEND-LOCAL-ENV");
+            return v293;
+        })((function (v294,v295){
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
-            return (function(v298){
-                return (function(v299,v300){
-                    (function(){
-                        while(v299 !== v2){
-                            v300 = (function(){
-                                var tmp = v299;
-                                return tmp === v2? v2: tmp.car;
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v296){
+                            return (function(){
+                                try {
+                                    return (function(){
+                                        return (function(v297,v298){
+                                            (function(){
+                                                while(v297 !== v2){
+                                                    v298 = (function(){
+                                                        var tmp = v297;
+                                                        return tmp === v2? v2: tmp.car;
+                                                    })();
+                                                    (function(v299){
+                                                        return f96(v299, v296, l95);
+                                                    })(f88(v298, l96, f100(v298), v3));
+                                                    v297 = (function(){
+                                                        var tmp = v297;
+                                                        return tmp === v2? v2: tmp.cdr;
+                                                    })();
+                                                }return v2;
+                                            })();
+                                            return v296;
+                                        })(v294,v2);
+                                    })();
+                                }
+                                catch (cf){
+                                    if (cf.type == 'block' && cf.id == 113)
+                                        return cf.value;
+                                    else
+                                        throw cf;
+                                }
                             })();
-                            (function(v301){
-                                return f96(v301, v298, l95);
-                            })(f88(v300, l96, f100(v300), v3));
-                            v299 = (function(){
-                                var tmp = v299;
-                                return tmp === v2? v2: tmp.cdr;
-                            })();
-                    }})();
-                    return v298;
-                })(v296,v2);
-            })(f95(v297));
+                        })(f95(v295));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 112)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l97;
 })(); 
 var l98 = f3("*FUNCTION-COUNTER*");
-var v302;
+var v300;
 (function(){
     (function(){
-        return v302 = 0;
+        return v300 = 0;
     })();
     return l98;
 })(); 
@@ -2530,34 +3895,46 @@ var l99 = f3("FUNCTION");
 var f104;
 (function(){
     (function(){
-        return f104 = (function(v303){
-            ((v303)["fname"] = "LOOKUP-FUNCTION");
-            return v303;
-        })((function (v304,v305){
+        return f104 = (function(v301){
+            ((v301)["fname"] = "LOOKUP-FUNCTION");
+            return v301;
+        })((function (v302,v303){
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
-            return (function(v306){
-                return (v306 !== v2 ? v306 : (function(v307){
-                    return (v307 !== v2 ? v307 : (function(v308,v309){
-                        f96(v309, v278, l99);
-                        v244 = ({car: (function (){
-                            if (arguments.length > 0) throw 'too many arguments';
-                            return (f92(f98(v304, v278, l100)) !== v2 ? v2 : (function(){
-                                return (function (){ throw f67("Undefined function `", v308, "'"); })();
-                            })());
-                        }), cdr: v244});
-                        return v309;
-                    })((v304).name,f88(v304, l101, f67("f", f6(v302 = (function(){
-                        var x = v302;
-                        var y = 1;
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        if (typeof y != 'number')
-                            throw 'The value ' + y + ' is not a type number.';
-                        return x+y;
-                    })())), v2)));
-                })(f98(v304, v278, l102)));
-            })(f98(v304, v305, l103));
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v304){
+                            return (v304 !== v2 ? v304 : (function(v305){
+                                return (v305 !== v2 ? v305 : (function(v306,v307){
+                                    f96(v307, v276, l99);
+                                    v242 = ({car: (function (){
+                                        if (arguments.length > 0) throw 'too many arguments';
+                                        return (f92(f98(v302, v276, l100)) !== v2 ? v2 : (function(){
+                                            return (function (){ throw f67("Undefined function `", v306, "'"); })();
+                                        })());
+                                    }), cdr: v242});
+                                    return v307;
+                                })((v302).name,f88(v302, l101, f67("f", f6(v300 = (function(){
+                                    var x = v300;
+                                    var y = 1;
+                                    if (typeof x != 'number')
+                                        throw 'The value ' + x + ' is not a type number.';
+                                    if (typeof y != 'number')
+                                        throw 'The value ' + y + ' is not a type number.';
+                                    return x+y;
+                                })())), v2)));
+                            })(f98(v302, v276, l102)));
+                        })(f98(v302, v303, l103));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 114)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l104;
@@ -2566,22 +3943,34 @@ var l105 = f3("LOOKUP-FUNCTION-TRANSLATION");
 var f105;
 (function(){
     (function(){
-        return f105 = (function(v310){
-            ((v310)["fname"] = "LOOKUP-FUNCTION-TRANSLATION");
-            return v310;
-        })((function (v311,v312){
+        return f105 = (function(v308){
+            ((v308)["fname"] = "LOOKUP-FUNCTION-TRANSLATION");
+            return v308;
+        })((function (v309,v310){
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
-            return f91(f104(v311, v312));
+            return (function(){
+                try {
+                    return (function(){
+                        return f91(f104(v309, v310));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 115)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l105;
 })(); 
 var l106 = f3("*TOPLEVEL-COMPILATIONS*");
-var v313;
+var v311;
 (function(){
     (function(){
-        return v313 = v2;
+        return v311 = v2;
     })();
     return l106;
 })(); 
@@ -2589,16 +3978,28 @@ var l107 = f3("%COMPILE-DEFVAR");
 var f106;
 (function(){
     (function(){
-        return f106 = (function(v314){
-            ((v314)["fname"] = "%COMPILE-DEFVAR");
-            return v314;
-        })((function (v315){
+        return f106 = (function(v312){
+            ((v312)["fname"] = "%COMPILE-DEFVAR");
+            return v312;
+        })((function (v313){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (function(v316){
-                f93(v316);
-                return v313 = ({car: f67("var ", f91(v316)), cdr: v313});
-            })(f101(v315, v278));
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v314){
+                            f93(v314);
+                            return v311 = ({car: f67("var ", f91(v314)), cdr: v311});
+                        })(f101(v313, v276));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 116)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l107;
@@ -2607,16 +4008,28 @@ var l108 = f3("%COMPILE-DEFUN");
 var f107;
 (function(){
     (function(){
-        return f107 = (function(v317){
-            ((v317)["fname"] = "%COMPILE-DEFUN");
-            return v317;
-        })((function (v318){
+        return f107 = (function(v315){
+            ((v315)["fname"] = "%COMPILE-DEFUN");
+            return v315;
+        })((function (v316){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (function(v319){
-                f93(v319);
-                return v313 = ({car: f67("var ", f91(v319)), cdr: v313});
-            })(f104(v318, v278));
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v317){
+                            f93(v317);
+                            return v311 = ({car: f67("var ", f91(v317)), cdr: v311});
+                        })(f104(v316, v276));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 117)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l108;
@@ -2627,22 +4040,34 @@ var l109 = f3("MACRO");
 var f108;
 (function(){
     (function(){
-        return f108 = (function(v320){
-            ((v320)["fname"] = "%COMPILE-DEFMACRO");
-            return v320;
-        })((function (v321,v322){
+        return f108 = (function(v318){
+            ((v318)["fname"] = "%COMPILE-DEFMACRO");
+            return v318;
+        })((function (v319,v320){
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
-            return f96(f88(v321, l109, v322, v3), v278, l110);
+            return (function(){
+                try {
+                    return (function(){
+                        return f96(f88(v319, l109, v320, v3), v276, l110);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 118)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l111;
 })(); 
 var l112 = f3("*COMPILATIONS*");
-var v323;
+var v321;
 (function(){
     (function(){
-        return v323 = v2;
+        return v321 = v2;
     })();
     return l112;
 })(); 
@@ -2650,39 +4075,51 @@ var l113 = f3("LS-COMPILE-BLOCK");
 var f109;
 (function(){
     (function(){
-        return f109 = (function(v324){
-            ((v324)["fname"] = "LS-COMPILE-BLOCK");
-            return v324;
-        })((function (v325,v326){
+        return f109 = (function(v322){
+            ((v322)["fname"] = "LS-COMPILE-BLOCK");
+            return v322;
+        })((function (v323,v324){
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
-            return f69(f59((function (v327){
-                if (arguments.length < 1) throw 'too few arguments';
-                if (arguments.length > 1) throw 'too many arguments';
-                return (function(v328){
-                    return (v328 !== v2 ? v328 : (((typeof(v327) == "string")?v3: v2) !== v2 ? f14(f43(v327)) : v2));
-                })(f1(v327));
-            }), f45((function (v329){
-                if (arguments.length < 1) throw 'too few arguments';
-                if (arguments.length > 1) throw 'too many arguments';
-                return f110(v329, v326);
-            }), v325)), f67(";", v169));
+            return (function(){
+                try {
+                    return (function(){
+                        return f69(f59((function (v325){
+                            if (arguments.length < 1) throw 'too few arguments';
+                            if (arguments.length > 1) throw 'too many arguments';
+                            return (function(v326){
+                                return (v326 !== v2 ? v326 : (((typeof(v325) == "string")?v3: v2) !== v2 ? f14(f43(v325)) : v2));
+                            })(f1(v325));
+                        }), f45((function (v327){
+                            if (arguments.length < 1) throw 'too few arguments';
+                            if (arguments.length > 1) throw 'too many arguments';
+                            return f110(v327, v324);
+                        }), v323)), f67(";", v167));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 119)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l113;
 })(); 
 var l114 = f3("IF");
-v323 = ({car: f33(l114, (function (v330,v331,v332,v333){
+v321 = ({car: f33(l114, (function (v328,v329,v330,v331){
     if (arguments.length < 4) throw 'too few arguments';
     if (arguments.length > 4) throw 'too many arguments';
-    return f67("(", f110(v331, v330), " !== ", f110(v2), " ? ", f110(v332, v330), " : ", f110(v333, v330), ")");
-})), cdr: v323}); 
+    return f67("(", f110(v329, v328), " !== ", f110(v2), " ? ", f110(v330, v328), " : ", f110(v331, v328), ")");
+})), cdr: v321}); 
 var l116 = f3("*LAMBDA-LIST-KEYWORDS*");
 var l115 = {car: f3("&OPTIONAL"), cdr: {car: f3("&REST"), cdr: f3("NIL")}};
-var v334;
+var v332;
 (function(){
     (function(){
-        return v334 = l115;
+        return v332 = l115;
     })();
     return l116;
 })(); 
@@ -2690,24 +4127,36 @@ var l117 = f3("LIST-UNTIL-KEYWORD");
 var f111;
 (function(){
     (function(){
-        return f111 = (function(v335){
-            ((v335)["fname"] = "LIST-UNTIL-KEYWORD");
-            return v335;
-        })((function (v336){
+        return f111 = (function(v333){
+            ((v333)["fname"] = "LIST-UNTIL-KEYWORD");
+            return v333;
+        })((function (v334){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return ((function(v337){
-                return (v337 !== v2 ? v337 : f57((function(){
-                    var tmp = v336;
-                    return tmp === v2? v2: tmp.car;
-                })(), v334));
-            })(f1(v336)) !== v2 ? v2 : ({car: (function(){
-                var tmp = v336;
-                return tmp === v2? v2: tmp.car;
-            })(), cdr: f111((function(){
-                var tmp = v336;
-                return tmp === v2? v2: tmp.cdr;
-            })())}));
+            return (function(){
+                try {
+                    return (function(){
+                        return ((function(v335){
+                            return (v335 !== v2 ? v335 : f57((function(){
+                                var tmp = v334;
+                                return tmp === v2? v2: tmp.car;
+                            })(), v332));
+                        })(f1(v334)) !== v2 ? v2 : ({car: (function(){
+                            var tmp = v334;
+                            return tmp === v2? v2: tmp.car;
+                        })(), cdr: f111((function(){
+                            var tmp = v334;
+                            return tmp === v2? v2: tmp.cdr;
+                        })())}));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 120)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l117;
@@ -2716,13 +4165,25 @@ var l118 = f3("LAMBDA-LIST-REQUIRED-ARGUMENTS");
 var f112;
 (function(){
     (function(){
-        return f112 = (function(v338){
-            ((v338)["fname"] = "LAMBDA-LIST-REQUIRED-ARGUMENTS");
-            return v338;
-        })((function (v339){
+        return f112 = (function(v336){
+            ((v336)["fname"] = "LAMBDA-LIST-REQUIRED-ARGUMENTS");
+            return v336;
+        })((function (v337){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return f111(v339);
+            return (function(){
+                try {
+                    return (function(){
+                        return f111(v337);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 121)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l118;
@@ -2732,16 +4193,28 @@ var l119 = f3("&OPTIONAL");
 var f113;
 (function(){
     (function(){
-        return f113 = (function(v340){
-            ((v340)["fname"] = "LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT");
-            return v340;
-        })((function (v341){
+        return f113 = (function(v338){
+            ((v338)["fname"] = "LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT");
+            return v338;
+        })((function (v339){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return f45(f35, f111((function(){
-                var tmp = f57(l119, v341);
-                return tmp === v2? v2: tmp.cdr;
-            })()));
+            return (function(){
+                try {
+                    return (function(){
+                        return f45(f35, f111((function(){
+                            var tmp = f57(l119, v339);
+                            return tmp === v2? v2: tmp.cdr;
+                        })()));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 122)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l120;
@@ -2750,13 +4223,25 @@ var l121 = f3("LAMBDA-LIST-OPTIONAL-ARGUMENTS");
 var f114;
 (function(){
     (function(){
-        return f114 = (function(v342){
-            ((v342)["fname"] = "LAMBDA-LIST-OPTIONAL-ARGUMENTS");
-            return v342;
-        })((function (v343){
+        return f114 = (function(v340){
+            ((v340)["fname"] = "LAMBDA-LIST-OPTIONAL-ARGUMENTS");
+            return v340;
+        })((function (v341){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return f45(f20, f113(v343));
+            return (function(){
+                try {
+                    return (function(){
+                        return f45(f20, f113(v341));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 123)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l121;
@@ -2766,177 +4251,227 @@ var l122 = f3("&REST");
 var f115;
 (function(){
     (function(){
-        return f115 = (function(v344){
-            ((v344)["fname"] = "LAMBDA-LIST-REST-ARGUMENT");
-            return v344;
-        })((function (v345){
+        return f115 = (function(v342){
+            ((v342)["fname"] = "LAMBDA-LIST-REST-ARGUMENT");
+            return v342;
+        })((function (v343){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (function(v346){
-                ((function(){
-                    var tmp = v346;
-                    return tmp === v2? v2: tmp.cdr;
-                })() !== v2 ? (function(){
-                    return (function (){ throw "Bad lambda-list"; })();
-                })() : v2);
-                return (function(){
-                    var tmp = v346;
-                    return tmp === v2? v2: tmp.car;
-                })();
-            })(f111((function(){
-                var tmp = f57(l122, v345);
-                return tmp === v2? v2: tmp.cdr;
-            })()));
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v344){
+                            ((function(){
+                                var tmp = v344;
+                                return tmp === v2? v2: tmp.cdr;
+                            })() !== v2 ? (function(){
+                                return (function (){ throw "Bad lambda-list"; })();
+                            })() : v2);
+                            return (function(){
+                                var tmp = v344;
+                                return tmp === v2? v2: tmp.car;
+                            })();
+                        })(f111((function(){
+                            var tmp = f57(l122, v343);
+                            return tmp === v2? v2: tmp.cdr;
+                        })()));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 124)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l123;
 })(); 
 var l124 = f3("LAMBDA");
-v323 = ({car: f33(l124, (function (v348,v349){
+v321 = ({car: f33(l124, (function (v346,v347){
     if (arguments.length < 2) throw 'too few arguments';
-    var v347= v2;
+    var v345= v2;
     for (var i = arguments.length-1; i>=2; i--)
-        v347 = {car: arguments[i], cdr: v347};
-    return (function(v350,v351,v352){
-        return (function(v353,v354,v355){
-            return f67("(function (", f68(f45((function (v356){
+        v345 = {car: arguments[i], cdr: v345};
+    return (function(v348,v349,v350){
+        return (function(v351,v352,v353){
+            return f67("(function (", f68(f45((function (v354){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return f102(v356, v355);
-            }), f39(v350, v351)), ","), "){", v169, f70((v350 !== v2 ? f67("if (arguments.length < ", f6(v353), ") throw 'too few arguments';", v169) : ""), (f17(v352) !== v2 ? f67("if (arguments.length > ", f6((function(){
-                var x = v353;
-                var y = v354;
+                return f102(v354, v353);
+            }), f39(v348, v349)), ","), "){", v167, f70((v348 !== v2 ? f67("if (arguments.length < ", f6(v351), ") throw 'too few arguments';", v167) : ""), (f17(v350) !== v2 ? f67("if (arguments.length > ", f6((function(){
+                var x = v351;
+                var y = v352;
                 if (typeof x != 'number')
                     throw 'The value ' + x + ' is not a type number.';
                 if (typeof y != 'number')
                     throw 'The value ' + y + ' is not a type number.';
                 return x+y;
-            })()), ") throw 'too many arguments';", v169) : ""), (v351 !== v2 ? f67("switch(arguments.length){", v169, (function(v357,v358,v359){
+            })()), ") throw 'too many arguments';", v167) : ""), (v349 !== v2 ? f67("switch(arguments.length){", v167, (function(v355,v356,v357){
                 return (function(){
                     (function(){
-                        while(((function(){
-                            var x = v359;
-                            var y = v354;
-                            if (typeof x != 'number')
-                                throw 'The value ' + x + ' is not a type number.';
-                            if (typeof y != 'number')
-                                throw 'The value ' + y + ' is not a type number.';
-                            return x<y;
-                        })()?v3: v2) !== v2){
-                            (function(v360){
-                                v358 = ({car: f67("case ", f6((function(){
-                                    var x = v359;
-                                    var y = v353;
-                                    if (typeof x != 'number')
-                                        throw 'The value ' + x + ' is not a type number.';
-                                    if (typeof y != 'number')
-                                        throw 'The value ' + y + ' is not a type number.';
-                                    return x+y;
-                                })()), ":", v169, f102((function(){
-                                    var tmp = v360;
-                                    return tmp === v2? v2: tmp.car;
-                                })(), v355), "=", f110(f23(v360), v355), ";", v169), cdr: v358});
-                                return v359 = (function(){
-                                    var x = v359;
-                                    var y = 1;
-                                    if (typeof x != 'number')
-                                        throw 'The value ' + x + ' is not a type number.';
-                                    if (typeof y != 'number')
-                                        throw 'The value ' + y + ' is not a type number.';
-                                    return x+y;
+                        try {
+                            return (function(){
+                                return (function(){
+                                    while(((function(){
+                                        var x = v357;
+                                        var y = v352;
+                                        if (typeof x != 'number')
+                                            throw 'The value ' + x + ' is not a type number.';
+                                        if (typeof y != 'number')
+                                            throw 'The value ' + y + ' is not a type number.';
+                                        return x<y;
+                                    })()?v3: v2) !== v2){
+                                        (function(v358){
+                                            v356 = ({car: f67("case ", f6((function(){
+                                                var x = v357;
+                                                var y = v351;
+                                                if (typeof x != 'number')
+                                                    throw 'The value ' + x + ' is not a type number.';
+                                                if (typeof y != 'number')
+                                                    throw 'The value ' + y + ' is not a type number.';
+                                                return x+y;
+                                            })()), ":", v167, f102((function(){
+                                                var tmp = v358;
+                                                return tmp === v2? v2: tmp.car;
+                                            })(), v353), "=", f110(f23(v358), v353), ";", v167), cdr: v356});
+                                            return v357 = (function(){
+                                                var x = v357;
+                                                var y = 1;
+                                                if (typeof x != 'number')
+                                                    throw 'The value ' + x + ' is not a type number.';
+                                                if (typeof y != 'number')
+                                                    throw 'The value ' + y + ' is not a type number.';
+                                                return x+y;
+                                            })();
+                                        })(f54(v357, v355));
+                                    }return v2;
                                 })();
-                            })(f54(v359, v357));
-                    }})();
-                    v358 = ({car: f67("default: break;", v169), cdr: v358});
-                    return f68(f41(v358));
+                            })();
+                        }
+                        catch (cf){
+                            if (cf.type == 'block' && cf.id == 125)
+                                return cf.value;
+                            else
+                                throw cf;
+                        }
+                    })();
+                    v356 = ({car: f67("default: break;", v167), cdr: v356});
+                    return f68(f41(v356));
                 })();
-            })(f113(v349),v2,0), "}", v169) : ""), (v352 !== v2 ? (function(v361){
-                return f67("var ", v361, "= ", f110(v2), ";", v169, "for (var i = arguments.length-1; i>=", f6((function(){
-                    var x = v353;
-                    var y = v354;
+            })(f113(v347),v2,0), "}", v167) : ""), (v350 !== v2 ? (function(v359){
+                return f67("var ", v359, "= ", f110(v2), ";", v167, "for (var i = arguments.length-1; i>=", f6((function(){
+                    var x = v351;
+                    var y = v352;
                     if (typeof x != 'number')
                         throw 'The value ' + x + ' is not a type number.';
                     if (typeof y != 'number')
                         throw 'The value ' + y + ' is not a type number.';
                     return x+y;
-                })()), "; i--)", v169, f70(v361, " = ", "{car: arguments[i], cdr: "), v361, "};", v169);
-            })(f102(v352, v355)) : ""), f67(f109(f56(v347), v355), "return ", f110((function(){
-                var tmp = f55(v347);
+                })()), "; i--)", v167, f70(v359, " = ", "{car: arguments[i], cdr: "), v359, "};", v167);
+            })(f102(v350, v353)) : ""), f67(f109(f56(v345), v353), "return ", f110((function(){
+                var tmp = f55(v345);
                 return tmp === v2? v2: tmp.car;
-            })(), v355), ";")), v169, "})");
-        })(f43(v350),f43(v351),f103(f39(f35(v352), v350, v351), v348));
-    })(f112(v349),f114(v349),f115(v349));
-})), cdr: v323}); 
+            })(), v353), ";")), v167, "})");
+        })(f43(v348),f43(v349),f103(f39(f35(v350), v348, v349), v346));
+    })(f112(v347),f114(v347),f115(v347));
+})), cdr: v321}); 
 var l125 = f3("FSETQ");
-v323 = ({car: f33(l125, (function (v362,v363,v364){
+v321 = ({car: f33(l125, (function (v360,v361,v362){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return f67(f105(v363, v362), " = ", f110(v364, v362));
-})), cdr: v323}); 
+    return f67(f105(v361, v360), " = ", f110(v362, v360));
+})), cdr: v321}); 
 var l126 = f3("SETQ");
-v323 = ({car: f33(l126, (function (v365,v366,v367){
+v321 = ({car: f33(l126, (function (v363,v364,v365){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return f67(f102(v366, v365), " = ", f110(v367, v365));
-})), cdr: v323}); 
+    return f67(f102(v364, v363), " = ", f110(v365, v363));
+})), cdr: v321}); 
 var l127 = f3("ESCAPE-STRING");
 var f72;
 (function(){
     (function(){
-        return f72 = (function(v368){
-            ((v368)["fname"] = "ESCAPE-STRING");
-            return v368;
-        })((function (v369){
+        return f72 = (function(v366){
+            ((v366)["fname"] = "ESCAPE-STRING");
+            return v366;
+        })((function (v367){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (function(v370,v371,v372){
-                (function(){
-                    while(((function(){
-                        var x = v371;
-                        var y = v372;
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        if (typeof y != 'number')
-                            throw 'The value ' + y + ' is not a type number.';
-                        return x<y;
-                    })()?v3: v2) !== v2){
-                        (function(v373){
-                            ((function(v374){
-                                return (v374 !== v2 ? v374 : f50(v373, 92));
-                            })(f50(v373, 34)) !== v2 ? (function(){
-                                return v370 = f67(v370, "\\");
-                            })() : v2);
-                            (f50(v373, 10) !== v2 ? (function(){
-                                v370 = f67(v370, "\\");
-                                return v373 = 110;
-                            })() : v2);
-                            return v370 = f67(v370, (function(){
-                                var x = v373;
-                                if (typeof x != 'number')
-                                    throw 'The value ' + x + ' is not a type number.';
-                                return String.fromCharCode(x);
-                            })());
-                        })((function(){
-                            var string = v369;
-                            var index = v371;
-                            if (typeof string != 'string')
-                                throw 'The value ' + string + ' is not a type string.';
-                            if (typeof index != 'number')
-                                throw 'The value ' + index + ' is not a type number.';
-                            return string.charCodeAt(index);
-                        })());
-                        v371 = (function(){
-                            var x = v371;
-                            var y = 1;
-                            if (typeof x != 'number')
-                                throw 'The value ' + x + ' is not a type number.';
-                            if (typeof y != 'number')
-                                throw 'The value ' + y + ' is not a type number.';
-                            return x+y;
-                        })();
-                }})();
-                return v370;
-            })("",0,f43(v369));
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v368,v369,v370){
+                            (function(){
+                                try {
+                                    return (function(){
+                                        return (function(){
+                                            while(((function(){
+                                                var x = v369;
+                                                var y = v370;
+                                                if (typeof x != 'number')
+                                                    throw 'The value ' + x + ' is not a type number.';
+                                                if (typeof y != 'number')
+                                                    throw 'The value ' + y + ' is not a type number.';
+                                                return x<y;
+                                            })()?v3: v2) !== v2){
+                                                (function(v371){
+                                                    ((function(v372){
+                                                        return (v372 !== v2 ? v372 : f50(v371, 92));
+                                                    })(f50(v371, 34)) !== v2 ? (function(){
+                                                        return v368 = f67(v368, "\\");
+                                                    })() : v2);
+                                                    (f50(v371, 10) !== v2 ? (function(){
+                                                        v368 = f67(v368, "\\");
+                                                        return v371 = 110;
+                                                    })() : v2);
+                                                    return v368 = f67(v368, (function(){
+                                                        var x = v371;
+                                                        if (typeof x != 'number')
+                                                            throw 'The value ' + x + ' is not a type number.';
+                                                        return String.fromCharCode(x);
+                                                    })());
+                                                })((function(){
+                                                    var string = v367;
+                                                    var index = v369;
+                                                    if (typeof string != 'string')
+                                                        throw 'The value ' + string + ' is not a type string.';
+                                                    if (typeof index != 'number')
+                                                        throw 'The value ' + index + ' is not a type number.';
+                                                    return string.charCodeAt(index);
+                                                })());
+                                                v369 = (function(){
+                                                    var x = v369;
+                                                    var y = 1;
+                                                    if (typeof x != 'number')
+                                                        throw 'The value ' + x + ' is not a type number.';
+                                                    if (typeof y != 'number')
+                                                        throw 'The value ' + y + ' is not a type number.';
+                                                    return x+y;
+                                                })();
+                                            }return v2;
+                                        })();
+                                    })();
+                                }
+                                catch (cf){
+                                    if (cf.type == 'block' && cf.id == 127)
+                                        return cf.value;
+                                    else
+                                        throw cf;
+                                }
+                            })();
+                            return v368;
+                        })("",0,f43(v367));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 126)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l127;
@@ -2946,42 +4481,54 @@ var l128 = f3("INTERN");
 var f116;
 (function(){
     (function(){
-        return f116 = (function(v375){
-            ((v375)["fname"] = "LITERAL->JS");
-            return v375;
-        })((function (v376){
+        return f116 = (function(v373){
+            ((v373)["fname"] = "LITERAL->JS");
+            return v373;
+        })((function (v374){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (f51(v376) !== v2 ? (function(){
-                return f6(v376);
-            })() : (((typeof(v376) == "string")?v3: v2) !== v2 ? (function(){
-                return f67("\"", f72(v376), "\"");
-            })() : (((function(){
-                var tmp = v376;
-                return (typeof tmp == 'object' && 'name' in tmp);
-            })()?v3: v2) !== v2 ? (function(){
-                return f110(f39(f33(l128), f33(f72((v376).name))), v278);
-            })() : (((function(){
-                var tmp = v376;
-                return (typeof tmp == 'object' && 'car' in tmp);
-            })()?v3: v2) !== v2 ? (function(){
-                return f67("{car: ", f116((function(){
-                    var tmp = v376;
-                    return tmp === v2? v2: tmp.car;
-                })()), ", cdr: ", f116((function(){
-                    var tmp = v376;
-                    return tmp === v2? v2: tmp.cdr;
-                })()), "}");
-            })() : v2))));
+            return (function(){
+                try {
+                    return (function(){
+                        return (f51(v374) !== v2 ? (function(){
+                            return f6(v374);
+                        })() : (((typeof(v374) == "string")?v3: v2) !== v2 ? (function(){
+                            return f67("\"", f72(v374), "\"");
+                        })() : (((function(){
+                            var tmp = v374;
+                            return (typeof tmp == 'object' && 'name' in tmp);
+                        })()?v3: v2) !== v2 ? (function(){
+                            return f110(f39(f33(l128), f33(f72((v374).name))), v276);
+                        })() : (((function(){
+                            var tmp = v374;
+                            return (typeof tmp == 'object' && 'car' in tmp);
+                        })()?v3: v2) !== v2 ? (function(){
+                            return f67("{car: ", f116((function(){
+                                var tmp = v374;
+                                return tmp === v2? v2: tmp.car;
+                            })()), ", cdr: ", f116((function(){
+                                var tmp = v374;
+                                return tmp === v2? v2: tmp.cdr;
+                            })()), "}");
+                        })() : v2))));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 128)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l129;
 })(); 
 var l130 = f3("*LITERAL-COUNTER*");
-var v377;
+var v375;
 (function(){
     (function(){
-        return v377 = 0;
+        return v375 = 0;
     })();
     return l130;
 })(); 
@@ -2989,110 +4536,122 @@ var l131 = f3("LITERAL");
 var f117;
 (function(){
     (function(){
-        return f117 = (function(v378){
-            ((v378)["fname"] = "LITERAL");
-            return v378;
-        })((function (v379){
+        return f117 = (function(v376){
+            ((v376)["fname"] = "LITERAL");
+            return v376;
+        })((function (v377){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (function(v380){
-                v313 = ({car: f67("var ", v380, " = ", f116(v379)), cdr: v313});
-                return v380;
-            })(f67("l", f6(v377 = (function(){
-                var x = v377;
-                var y = 1;
-                if (typeof x != 'number')
-                    throw 'The value ' + x + ' is not a type number.';
-                if (typeof y != 'number')
-                    throw 'The value ' + y + ' is not a type number.';
-                return x+y;
-            })())));
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v378){
+                            v311 = ({car: f67("var ", v378, " = ", f116(v377)), cdr: v311});
+                            return v378;
+                        })(f67("l", f6(v375 = (function(){
+                            var x = v375;
+                            var y = 1;
+                            if (typeof x != 'number')
+                                throw 'The value ' + x + ' is not a type number.';
+                            if (typeof y != 'number')
+                                throw 'The value ' + y + ' is not a type number.';
+                            return x+y;
+                        })())));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 129)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l131;
 })(); 
 var l132 = f3("QUOTE");
-v323 = ({car: f33(l132, (function (v381,v382){
+v321 = ({car: f33(l132, (function (v379,v380){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return f117(v382);
-})), cdr: v323}); 
-var l133 = f3("WHILE");
-v323 = ({car: f33(l133, (function (v384,v385){
+    return f117(v380);
+})), cdr: v321}); 
+var l133 = f3("%WHILE");
+v321 = ({car: f33(l133, (function (v382,v383){
     if (arguments.length < 2) throw 'too few arguments';
-    var v383= v2;
+    var v381= v2;
     for (var i = arguments.length-1; i>=2; i--)
-        v383 = {car: arguments[i], cdr: v383};
-    return f67("(function(){", v169, f70("while(", f110(v385, v384), " !== ", f110(v2), "){", v169, f70(f109(v383, v384))), "}})()");
-})), cdr: v323}); 
+        v381 = {car: arguments[i], cdr: v381};
+    return f67("(function(){", v167, f70("while(", f110(v383, v382), " !== ", f110(v2), "){", v167, f70(f109(v381, v382)), "}", "return ", f110(v2), ";", v167), "})()");
+})), cdr: v321}); 
 var l135 = f3("LAMBDA");
 var l134 = f3("FUNCTION");
-v323 = ({car: f33(l134, (function (v386,v387){
+v321 = ({car: f33(l134, (function (v384,v385){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return ((f36(v387) !== v2 ? (((function(){
-        var tmp = v387;
+    return ((f36(v385) !== v2 ? (((function(){
+        var tmp = v385;
         return tmp === v2? v2: tmp.car;
     })() === l135)?v3: v2) : v2) !== v2 ? (function(){
-        return f110(v387, v386);
+        return f110(v385, v384);
     })() : (((function(){
-        var tmp = v387;
+        var tmp = v385;
         return (typeof tmp == 'object' && 'name' in tmp);
     })()?v3: v2) !== v2 ? (function(){
-        return f105(v387, v386);
+        return f105(v385, v384);
     })() : v2));
-})), cdr: v323}); 
+})), cdr: v321}); 
 var l137 = f3("PROGN");
 var l136 = f3("EVAL-WHEN-COMPILE");
-v323 = ({car: f33(l136, (function (v389){
+v321 = ({car: f33(l136, (function (v387){
+    if (arguments.length < 1) throw 'too few arguments';
+    var v386= v2;
+    for (var i = arguments.length-1; i>=1; i--)
+        v386 = {car: arguments[i], cdr: v386};
+    f118(({car: l137, cdr: v386}));
+    return "";
+})), cdr: v321}); 
+var l138 = f3("PROGN");
+v321 = ({car: f33(l138, (function (v389){
     if (arguments.length < 1) throw 'too few arguments';
     var v388= v2;
     for (var i = arguments.length-1; i>=1; i--)
         v388 = {car: arguments[i], cdr: v388};
-    f118(({car: l137, cdr: v388}));
-    return "";
-})), cdr: v323}); 
-var l138 = f3("PROGN");
-v323 = ({car: f33(l138, (function (v391){
-    if (arguments.length < 1) throw 'too few arguments';
-    var v390= v2;
-    for (var i = arguments.length-1; i>=1; i--)
-        v390 = {car: arguments[i], cdr: v390};
-    return f67("(function(){", v169, f70(f109(f56(v390), v391), "return ", f110((function(){
-        var tmp = f55(v390);
+    return f67("(function(){", v167, f70(f109(f56(v388), v389), "return ", f110((function(){
+        var tmp = f55(v388);
         return tmp === v2? v2: tmp.car;
-    })(), v391), ";", v169), "})()");
-})), cdr: v323}); 
+    })(), v389), ";", v167), "})()");
+})), cdr: v321}); 
 var l139 = f3("LET");
-v323 = ({car: f33(l139, (function (v393,v394){
+v321 = ({car: f33(l139, (function (v391,v392){
     if (arguments.length < 2) throw 'too few arguments';
-    var v392= v2;
+    var v390= v2;
     for (var i = arguments.length-1; i>=2; i--)
-        v392 = {car: arguments[i], cdr: v392};
-    return (function(v395){
-        return (function(v396,v397){
-            return (function(v398){
-                return f67("(function(", f68(f45((function (v399){
+        v390 = {car: arguments[i], cdr: v390};
+    return (function(v393){
+        return (function(v394,v395){
+            return (function(v396){
+                return f67("(function(", f68(f45((function (v397){
                     if (arguments.length < 1) throw 'too few arguments';
                     if (arguments.length > 1) throw 'too many arguments';
-                    return f102(v399, v398);
-                }), v396), ","), "){", v169, f70(f109(f56(v392), v398), "return ", f110((function(){
-                    var tmp = f55(v392);
+                    return f102(v397, v396);
+                }), v394), ","), "){", v167, f70(f109(f56(v390), v396), "return ", f110((function(){
+                    var tmp = f55(v390);
                     return tmp === v2? v2: tmp.car;
-                })(), v398), ";", v169), "})(", f68(f45((function (v400){
+                })(), v396), ";", v167), "})(", f68(f45((function (v398){
                     if (arguments.length < 1) throw 'too few arguments';
                     if (arguments.length > 1) throw 'too many arguments';
-                    return f110(v400, v393);
-                }), v397), ","), ")");
-            })(f103(v396, v393));
-        })(f45(f29, v395),f45(f30, v395));
-    })(f45(f35, v394));
-})), cdr: v323}); 
+                    return f110(v398, v391);
+                }), v395), ","), ")");
+            })(f103(v394, v391));
+        })(f45(f29, v393),f45(f30, v393));
+    })(f45(f35, v392));
+})), cdr: v321}); 
 var l140 = f3("*BLOCK-COUNTER*");
-var v401;
+var v399;
 (function(){
     (function(){
-        return v401 = 0;
+        return v399 = 0;
     })();
     return l140;
 })(); 
@@ -3100,17 +4659,17 @@ var l144 = f3("BLOCK");
 var l143 = f3("BLOCK");
 var l142 = f3("PROGN");
 var l141 = f3("BLOCK");
-v323 = ({car: f33(l141, (function (v403,v404){
+v321 = ({car: f33(l141, (function (v401,v402){
     if (arguments.length < 2) throw 'too few arguments';
-    var v402= v2;
+    var v400= v2;
     for (var i = arguments.length-1; i>=2; i--)
-        v402 = {car: arguments[i], cdr: v402};
-    return (function(v405){
-        return (function(v406){
-            return f67("(function(){", v169, f70("try {", v169, f70("return ", f110(f39(f33(l142), v402), f97(v406, v403, l143))), ";", v169, "}", v169, "catch (cf){", v169, "    if (cf.type == 'block' && cf.id == ", v405, ")", v169, "        return cf.value;", v169, "    else", v169, "        throw cf;", v169, "}", v169), "})()", v169);
-        })(f88(v404, l144, v405, v3));
-    })(f6(v401 = (function(){
-        var x = v401;
+        v400 = {car: arguments[i], cdr: v400};
+    return (function(v403){
+        return (function(v404){
+            return f67("(function(){", v167, f70("try {", v167, f70("return ", f110(f39(f33(l142), v400), f97(v404, v401, l143))), ";", v167, "}", v167, "catch (cf){", v167, "    if (cf.type == 'block' && cf.id == ", v403, ")", v167, "        return cf.value;", v167, "    else", v167, "        throw cf;", v167, "}", v167), "})()");
+        })(f88(v402, l144, v403, v3));
+    })(f6(v399 = (function(){
+        var x = v399;
         var y = 1;
         if (typeof x != 'number')
             throw 'The value ' + x + ' is not a type number.';
@@ -3118,21 +4677,21 @@ v323 = ({car: f33(l141, (function (v403,v404){
             throw 'The value ' + y + ' is not a type number.';
         return x+y;
     })()));
-})), cdr: v323}); 
+})), cdr: v321}); 
 var l146 = f3("BLOCK");
 var l145 = f3("RETURN-FROM");
-v323 = ({car: f33(l145, (function (v407,v408,v409){
+v321 = ({car: f33(l145, (function (v405,v406,v407){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
     switch(arguments.length){
     case 2:
-    v409=v2;
+    v407=v2;
     default: break;
     }
-    return (function(v410){
-        return (v410 !== v2 ? f67("(function(){ throw ({", "type: 'block', ", "id: ", f91(v410), ", ", "value: ", f110(v409, v407), ", ", "message: 'Return from unknown block ", (v408).name, ".'", "})})()") : (function (){ throw f67("Unknown block `", (v408).name, "'."); })());
-    })(f98(v408, v407, l146));
-})), cdr: v323}); 
+    return (function(v408){
+        return (v408 !== v2 ? f67("(function(){ throw ({", "type: 'block', ", "id: ", f91(v408), ", ", "value: ", f110(v407, v405), ", ", "message: 'Return from unknown block ", (v406).name, ".'", "})})()") : (function (){ throw f67("Unknown block `", (v406).name, "'."); })());
+    })(f98(v406, v405, l146));
+})), cdr: v321}); 
 var l155 = f3("BACKQUOTE-EXPAND-1");
 var l154 = f3("LIST");
 var l153 = f3("UNQUOTE-SPLICING");
@@ -3145,51 +4704,63 @@ var l147 = f3("QUOTE");
 var f119;
 (function(){
     (function(){
-        return f119 = (function(v411){
-            ((v411)["fname"] = "BACKQUOTE-EXPAND-1");
-            return v411;
-        })((function (v412){
+        return f119 = (function(v409){
+            ((v409)["fname"] = "BACKQUOTE-EXPAND-1");
+            return v409;
+        })((function (v410){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (((function(){
-                var tmp = v412;
-                return (typeof tmp == 'object' && 'name' in tmp);
-            })()?v3: v2) !== v2 ? (function(){
-                return f33(l147, v412);
-            })() : (f34(v412) !== v2 ? (function(){
-                return v412;
-            })() : ((((function(){
-                var tmp = v412;
-                return tmp === v2? v2: tmp.car;
-            })() === l148)?v3: v2) !== v2 ? (function(){
-                return (function(){
-                    var tmp = v412;
-                    return tmp === v2? v2: tmp.car;
-                })();
-            })() : ((((function(){
-                var tmp = v412;
-                return tmp === v2? v2: tmp.car;
-            })() === l149)?v3: v2) !== v2 ? (function(){
-                return f119(f119(f23(v412)));
-            })() : (function(){
-                return ({car: l150, cdr: f45((function (v413){
-                    if (arguments.length < 1) throw 'too few arguments';
-                    if (arguments.length > 1) throw 'too many arguments';
-                    return ((f36(v413) !== v2 ? (((function(){
-                        var tmp = v413;
-                        return tmp === v2? v2: tmp.car;
-                    })() === l151)?v3: v2) : v2) !== v2 ? (function(){
-                        return f33(l152, f23(v413));
-                    })() : ((f36(v413) !== v2 ? (((function(){
-                        var tmp = v413;
-                        return tmp === v2? v2: tmp.car;
-                    })() === l153)?v3: v2) : v2) !== v2 ? (function(){
-                        return f23(v413);
-                    })() : (function(){
-                        return f33(l154, f119(v413));
-                    })()));
-                }), v412)});
-            })()))));
+            return (function(){
+                try {
+                    return (function(){
+                        return (((function(){
+                            var tmp = v410;
+                            return (typeof tmp == 'object' && 'name' in tmp);
+                        })()?v3: v2) !== v2 ? (function(){
+                            return f33(l147, v410);
+                        })() : (f34(v410) !== v2 ? (function(){
+                            return v410;
+                        })() : ((((function(){
+                            var tmp = v410;
+                            return tmp === v2? v2: tmp.car;
+                        })() === l148)?v3: v2) !== v2 ? (function(){
+                            return (function(){
+                                var tmp = v410;
+                                return tmp === v2? v2: tmp.car;
+                            })();
+                        })() : ((((function(){
+                            var tmp = v410;
+                            return tmp === v2? v2: tmp.car;
+                        })() === l149)?v3: v2) !== v2 ? (function(){
+                            return f119(f119(f23(v410)));
+                        })() : (function(){
+                            return ({car: l150, cdr: f45((function (v411){
+                                if (arguments.length < 1) throw 'too few arguments';
+                                if (arguments.length > 1) throw 'too many arguments';
+                                return ((f36(v411) !== v2 ? (((function(){
+                                    var tmp = v411;
+                                    return tmp === v2? v2: tmp.car;
+                                })() === l151)?v3: v2) : v2) !== v2 ? (function(){
+                                    return f33(l152, f23(v411));
+                                })() : ((f36(v411) !== v2 ? (((function(){
+                                    var tmp = v411;
+                                    return tmp === v2? v2: tmp.car;
+                                })() === l153)?v3: v2) : v2) !== v2 ? (function(){
+                                    return f23(v411);
+                                })() : (function(){
+                                    return f33(l154, f119(v411));
+                                })()));
+                            }), v410)});
+                        })()))));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 130)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l155;
@@ -3199,37 +4770,61 @@ var l156 = f3("BACKQUOTE");
 var f120;
 (function(){
     (function(){
-        return f120 = (function(v414){
-            ((v414)["fname"] = "BACKQUOTE-EXPAND");
-            return v414;
-        })((function (v415){
+        return f120 = (function(v412){
+            ((v412)["fname"] = "BACKQUOTE-EXPAND");
+            return v412;
+        })((function (v413){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return ((f36(v415) !== v2 ? (((function(){
-                var tmp = v415;
-                return tmp === v2? v2: tmp.car;
-            })() === l156)?v3: v2) : v2) !== v2 ? f119(f23(v415)) : v415);
+            return (function(){
+                try {
+                    return (function(){
+                        return ((f36(v413) !== v2 ? (((function(){
+                            var tmp = v413;
+                            return tmp === v2? v2: tmp.car;
+                        })() === l156)?v3: v2) : v2) !== v2 ? f119(f23(v413)) : v413);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 131)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l157;
 })(); 
 var l158 = f3("BACKQUOTE");
-v323 = ({car: f33(l158, (function (v416,v417){
+v321 = ({car: f33(l158, (function (v414,v415){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return f110(f119(v417), v416);
-})), cdr: v323}); 
+    return f110(f119(v415), v414);
+})), cdr: v321}); 
 var l159 = f3("COMPILE-BOOL");
 var f121;
 (function(){
     (function(){
-        return f121 = (function(v418){
-            ((v418)["fname"] = "COMPILE-BOOL");
-            return v418;
-        })((function (v419){
+        return f121 = (function(v416){
+            ((v416)["fname"] = "COMPILE-BOOL");
+            return v416;
+        })((function (v417){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return f67("(", v419, "?", f110(v3), ": ", f110(v2), ")");
+            return (function(){
+                try {
+                    return (function(){
+                        return f67("(", v417, "?", f110(v3), ": ", f110(v2), ")");
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 132)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l159;
@@ -3238,392 +4833,416 @@ var l160 = f3("NUM-OP-NUM");
 var f122;
 (function(){
     (function(){
-        return f122 = (function(v420){
-            ((v420)["fname"] = "NUM-OP-NUM");
-            return v420;
-        })((function (v421,v422,v423){
+        return f122 = (function(v418){
+            ((v418)["fname"] = "NUM-OP-NUM");
+            return v418;
+        })((function (v419,v420,v421){
             if (arguments.length < 3) throw 'too few arguments';
             if (arguments.length > 3) throw 'too many arguments';
-            return f67("(function(){", v169, f70(f67("var ", "x", " = ", v421, ";", v169), f67("var ", "y", " = ", v423, ";", v169), f67("if (typeof ", "x", " != '", "number", "')", v169, f70("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", v169)), f67("if (typeof ", "y", " != '", "number", "')", v169, f70("throw 'The value ' + ", "y", " + ' is not a type ", "number", ".';", v169)), f67("return ", (function(){
-                return f67("x", v422, "y");
-            })(), ";", v169)), "})()");
+            return (function(){
+                try {
+                    return (function(){
+                        return f67("(function(){", v167, f70(f67("var ", "x", " = ", v419, ";", v167), f67("var ", "y", " = ", v421, ";", v167), f67("if (typeof ", "x", " != '", "number", "')", v167, f70("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", v167)), f67("if (typeof ", "y", " != '", "number", "')", v167, f70("throw 'The value ' + ", "y", " + ' is not a type ", "number", ".';", v167)), f67("return ", (function(){
+                            return f67("x", v420, "y");
+                        })(), ";", v167)), "})()");
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 133)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l160;
 })(); 
 var l161 = f3("+");
-v323 = ({car: f33(l161, (function (v424,v425,v426){
+v321 = ({car: f33(l161, (function (v422,v423,v424){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v427,v428){
-        return f122(v427, "+", v428);
-    })(f110(v425, v424),f110(v426, v424));
-})), cdr: v323}); 
+    return (function(v425,v426){
+        return f122(v425, "+", v426);
+    })(f110(v423, v422),f110(v424, v422));
+})), cdr: v321}); 
 var l162 = f3("-");
-v323 = ({car: f33(l162, (function (v429,v430,v431){
+v321 = ({car: f33(l162, (function (v427,v428,v429){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v432,v433){
-        return f122(v432, "-", v433);
-    })(f110(v430, v429),f110(v431, v429));
-})), cdr: v323}); 
+    return (function(v430,v431){
+        return f122(v430, "-", v431);
+    })(f110(v428, v427),f110(v429, v427));
+})), cdr: v321}); 
 var l163 = f3("*");
-v323 = ({car: f33(l163, (function (v434,v435,v436){
+v321 = ({car: f33(l163, (function (v432,v433,v434){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v437,v438){
-        return f122(v437, "*", v438);
-    })(f110(v435, v434),f110(v436, v434));
-})), cdr: v323}); 
+    return (function(v435,v436){
+        return f122(v435, "*", v436);
+    })(f110(v433, v432),f110(v434, v432));
+})), cdr: v321}); 
 var l164 = f3("/");
-v323 = ({car: f33(l164, (function (v439,v440,v441){
+v321 = ({car: f33(l164, (function (v437,v438,v439){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v442,v443){
-        return f122(v442, "/", v443);
-    })(f110(v440, v439),f110(v441, v439));
-})), cdr: v323}); 
+    return (function(v440,v441){
+        return f122(v440, "/", v441);
+    })(f110(v438, v437),f110(v439, v437));
+})), cdr: v321}); 
 var l165 = f3("MOD");
-v323 = ({car: f33(l165, (function (v444,v445,v446){
+v321 = ({car: f33(l165, (function (v442,v443,v444){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v447,v448){
-        return f122(v447, "%", v448);
-    })(f110(v445, v444),f110(v446, v444));
-})), cdr: v323}); 
+    return (function(v445,v446){
+        return f122(v445, "%", v446);
+    })(f110(v443, v442),f110(v444, v442));
+})), cdr: v321}); 
 var l166 = f3("<");
-v323 = ({car: f33(l166, (function (v449,v450,v451){
+v321 = ({car: f33(l166, (function (v447,v448,v449){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v452,v453){
-        return f121(f122(v452, "<", v453));
-    })(f110(v450, v449),f110(v451, v449));
-})), cdr: v323}); 
+    return (function(v450,v451){
+        return f121(f122(v450, "<", v451));
+    })(f110(v448, v447),f110(v449, v447));
+})), cdr: v321}); 
 var l167 = f3(">");
-v323 = ({car: f33(l167, (function (v454,v455,v456){
+v321 = ({car: f33(l167, (function (v452,v453,v454){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v457,v458){
-        return f121(f122(v457, ">", v458));
-    })(f110(v455, v454),f110(v456, v454));
-})), cdr: v323}); 
+    return (function(v455,v456){
+        return f121(f122(v455, ">", v456));
+    })(f110(v453, v452),f110(v454, v452));
+})), cdr: v321}); 
 var l168 = f3("=");
-v323 = ({car: f33(l168, (function (v459,v460,v461){
+v321 = ({car: f33(l168, (function (v457,v458,v459){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v462,v463){
-        return f121(f122(v462, "==", v463));
-    })(f110(v460, v459),f110(v461, v459));
-})), cdr: v323}); 
+    return (function(v460,v461){
+        return f121(f122(v460, "==", v461));
+    })(f110(v458, v457),f110(v459, v457));
+})), cdr: v321}); 
 var l169 = f3("<=");
-v323 = ({car: f33(l169, (function (v464,v465,v466){
+v321 = ({car: f33(l169, (function (v462,v463,v464){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v467,v468){
-        return f121(f122(v467, "<=", v468));
-    })(f110(v465, v464),f110(v466, v464));
-})), cdr: v323}); 
+    return (function(v465,v466){
+        return f121(f122(v465, "<=", v466));
+    })(f110(v463, v462),f110(v464, v462));
+})), cdr: v321}); 
 var l170 = f3(">=");
-v323 = ({car: f33(l170, (function (v469,v470,v471){
+v321 = ({car: f33(l170, (function (v467,v468,v469){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v472,v473){
-        return f121(f122(v472, ">=", v473));
-    })(f110(v470, v469),f110(v471, v469));
-})), cdr: v323}); 
+    return (function(v470,v471){
+        return f121(f122(v470, ">=", v471));
+    })(f110(v468, v467),f110(v469, v467));
+})), cdr: v321}); 
 var l171 = f3("NUMBERP");
-v323 = ({car: f33(l171, (function (v474,v475){
+v321 = ({car: f33(l171, (function (v472,v473){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v476){
-        return f121(f67("(typeof (", v476, ") == \"number\")"));
-    })(f110(v475, v474));
-})), cdr: v323}); 
+    return (function(v474){
+        return f121(f67("(typeof (", v474, ") == \"number\")"));
+    })(f110(v473, v472));
+})), cdr: v321}); 
 var l172 = f3("FLOOR");
-v323 = ({car: f33(l172, (function (v477,v478){
+v321 = ({car: f33(l172, (function (v475,v476){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v479){
-        return f67("(function(){", v169, f70(f67("var ", "x", " = ", v479, ";", v169), f67("if (typeof ", "x", " != '", "number", "')", v169, f70("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", v169)), f67("return ", (function(){
+    return (function(v477){
+        return f67("(function(){", v167, f70(f67("var ", "x", " = ", v477, ";", v167), f67("if (typeof ", "x", " != '", "number", "')", v167, f70("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", v167)), f67("return ", (function(){
             return "Math.floor(x)";
-        })(), ";", v169)), "})()");
-    })(f110(v478, v477));
-})), cdr: v323}); 
+        })(), ";", v167)), "})()");
+    })(f110(v476, v475));
+})), cdr: v321}); 
 var l173 = f3("CONS");
-v323 = ({car: f33(l173, (function (v480,v481,v482){
+v321 = ({car: f33(l173, (function (v478,v479,v480){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v483,v484){
-        return f67("({car: ", v483, ", cdr: ", v484, "})");
-    })(f110(v481, v480),f110(v482, v480));
-})), cdr: v323}); 
+    return (function(v481,v482){
+        return f67("({car: ", v481, ", cdr: ", v482, "})");
+    })(f110(v479, v478),f110(v480, v478));
+})), cdr: v321}); 
 var l174 = f3("CONSP");
-v323 = ({car: f33(l174, (function (v485,v486){
+v321 = ({car: f33(l174, (function (v483,v484){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v487){
-        return f121(f67("(function(){", v169, f70("var tmp = ", v487, ";", v169, "return (typeof tmp == 'object' && 'car' in tmp);", v169), "})()"));
-    })(f110(v486, v485));
-})), cdr: v323}); 
+    return (function(v485){
+        return f121(f67("(function(){", v167, f70("var tmp = ", v485, ";", v167, "return (typeof tmp == 'object' && 'car' in tmp);", v167), "})()"));
+    })(f110(v484, v483));
+})), cdr: v321}); 
 var l175 = f3("CAR");
-v323 = ({car: f33(l175, (function (v488,v489){
+v321 = ({car: f33(l175, (function (v486,v487){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v490){
-        return f67("(function(){", v169, f70("var tmp = ", v490, ";", v169, "return tmp === ", f110(v2), "? ", f110(v2), ": tmp.car;", v169), "})()");
-    })(f110(v489, v488));
-})), cdr: v323}); 
+    return (function(v488){
+        return f67("(function(){", v167, f70("var tmp = ", v488, ";", v167, "return tmp === ", f110(v2), "? ", f110(v2), ": tmp.car;", v167), "})()");
+    })(f110(v487, v486));
+})), cdr: v321}); 
 var l176 = f3("CDR");
-v323 = ({car: f33(l176, (function (v491,v492){
+v321 = ({car: f33(l176, (function (v489,v490){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v493){
-        return f67("(function(){", v169, f70("var tmp = ", v493, ";", v169, "return tmp === ", f110(v2), "? ", f110(v2), ": tmp.cdr;", v169), "})()");
-    })(f110(v492, v491));
-})), cdr: v323}); 
+    return (function(v491){
+        return f67("(function(){", v167, f70("var tmp = ", v491, ";", v167, "return tmp === ", f110(v2), "? ", f110(v2), ": tmp.cdr;", v167), "})()");
+    })(f110(v490, v489));
+})), cdr: v321}); 
 var l177 = f3("SETCAR");
-v323 = ({car: f33(l177, (function (v494,v495,v496){
+v321 = ({car: f33(l177, (function (v492,v493,v494){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v497,v498){
-        return f67("(function(){", v169, f70(f67("var ", "x", " = ", v497, ";", v169), f67("if (typeof ", "x", " != '", "object", "')", v169, f70("throw 'The value ' + ", "x", " + ' is not a type ", "object", ".';", v169)), f67("return ", (function(){
-            return f67("(x.car = ", v498, ")");
-        })(), ";", v169)), "})()");
-    })(f110(v495, v494),f110(v496, v494));
-})), cdr: v323}); 
+    return (function(v495,v496){
+        return f67("(function(){", v167, f70(f67("var ", "x", " = ", v495, ";", v167), f67("if (typeof ", "x", " != '", "object", "')", v167, f70("throw 'The value ' + ", "x", " + ' is not a type ", "object", ".';", v167)), f67("return ", (function(){
+            return f67("(x.car = ", v496, ")");
+        })(), ";", v167)), "})()");
+    })(f110(v493, v492),f110(v494, v492));
+})), cdr: v321}); 
 var l178 = f3("SETCDR");
-v323 = ({car: f33(l178, (function (v499,v500,v501){
+v321 = ({car: f33(l178, (function (v497,v498,v499){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v502,v503){
-        return f67("(function(){", v169, f70(f67("var ", "x", " = ", v502, ";", v169), f67("if (typeof ", "x", " != '", "object", "')", v169, f70("throw 'The value ' + ", "x", " + ' is not a type ", "object", ".';", v169)), f67("return ", (function(){
-            return f67("(x.cdr = ", v503, ")");
-        })(), ";", v169)), "})()");
-    })(f110(v500, v499),f110(v501, v499));
-})), cdr: v323}); 
+    return (function(v500,v501){
+        return f67("(function(){", v167, f70(f67("var ", "x", " = ", v500, ";", v167), f67("if (typeof ", "x", " != '", "object", "')", v167, f70("throw 'The value ' + ", "x", " + ' is not a type ", "object", ".';", v167)), f67("return ", (function(){
+            return f67("(x.cdr = ", v501, ")");
+        })(), ";", v167)), "})()");
+    })(f110(v498, v497),f110(v499, v497));
+})), cdr: v321}); 
 var l179 = f3("SYMBOLP");
-v323 = ({car: f33(l179, (function (v504,v505){
+v321 = ({car: f33(l179, (function (v502,v503){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v506){
-        return f121(f67("(function(){", v169, f70("var tmp = ", v506, ";", v169, "return (typeof tmp == 'object' && 'name' in tmp);", v169), "})()"));
-    })(f110(v505, v504));
-})), cdr: v323}); 
+    return (function(v504){
+        return f121(f67("(function(){", v167, f70("var tmp = ", v504, ";", v167, "return (typeof tmp == 'object' && 'name' in tmp);", v167), "})()"));
+    })(f110(v503, v502));
+})), cdr: v321}); 
 var l180 = f3("MAKE-SYMBOL");
-v323 = ({car: f33(l180, (function (v507,v508){
+v321 = ({car: f33(l180, (function (v505,v506){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v509){
-        return f67("(function(){", v169, f70(f67("var ", "name", " = ", v509, ";", v169), f67("if (typeof ", "name", " != '", "string", "')", v169, f70("throw 'The value ' + ", "name", " + ' is not a type ", "string", ".';", v169)), f67("return ", (function(){
+    return (function(v507){
+        return f67("(function(){", v167, f70(f67("var ", "name", " = ", v507, ";", v167), f67("if (typeof ", "name", " != '", "string", "')", v167, f70("throw 'The value ' + ", "name", " + ' is not a type ", "string", ".';", v167)), f67("return ", (function(){
             return "({name: name})";
-        })(), ";", v169)), "})()");
-    })(f110(v508, v507));
-})), cdr: v323}); 
+        })(), ";", v167)), "})()");
+    })(f110(v506, v505));
+})), cdr: v321}); 
 var l181 = f3("SYMBOL-NAME");
-v323 = ({car: f33(l181, (function (v510,v511){
+v321 = ({car: f33(l181, (function (v508,v509){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v512){
-        return f67("(", v512, ").name");
-    })(f110(v511, v510));
-})), cdr: v323}); 
+    return (function(v510){
+        return f67("(", v510, ").name");
+    })(f110(v509, v508));
+})), cdr: v321}); 
 var l182 = f3("EQ");
-v323 = ({car: f33(l182, (function (v513,v514,v515){
+v321 = ({car: f33(l182, (function (v511,v512,v513){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v516,v517){
-        return f121(f67("(", v516, " === ", v517, ")"));
-    })(f110(v514, v513),f110(v515, v513));
-})), cdr: v323}); 
+    return (function(v514,v515){
+        return f121(f67("(", v514, " === ", v515, ")"));
+    })(f110(v512, v511),f110(v513, v511));
+})), cdr: v321}); 
 var l183 = f3("EQUAL");
-v323 = ({car: f33(l183, (function (v518,v519,v520){
+v321 = ({car: f33(l183, (function (v516,v517,v518){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v521,v522){
-        return f121(f67("(", v521, " == ", v522, ")"));
-    })(f110(v519, v518),f110(v520, v518));
-})), cdr: v323}); 
+    return (function(v519,v520){
+        return f121(f67("(", v519, " == ", v520, ")"));
+    })(f110(v517, v516),f110(v518, v516));
+})), cdr: v321}); 
 var l184 = f3("STRING");
-v323 = ({car: f33(l184, (function (v523,v524){
+v321 = ({car: f33(l184, (function (v521,v522){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v525){
-        return f67("(function(){", v169, f70(f67("var ", "x", " = ", v525, ";", v169), f67("if (typeof ", "x", " != '", "number", "')", v169, f70("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", v169)), f67("return ", (function(){
+    return (function(v523){
+        return f67("(function(){", v167, f70(f67("var ", "x", " = ", v523, ";", v167), f67("if (typeof ", "x", " != '", "number", "')", v167, f70("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", v167)), f67("return ", (function(){
             return "String.fromCharCode(x)";
-        })(), ";", v169)), "})()");
-    })(f110(v524, v523));
-})), cdr: v323}); 
+        })(), ";", v167)), "})()");
+    })(f110(v522, v521));
+})), cdr: v321}); 
 var l185 = f3("STRINGP");
-v323 = ({car: f33(l185, (function (v526,v527){
+v321 = ({car: f33(l185, (function (v524,v525){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v528){
-        return f121(f67("(typeof(", v528, ") == \"string\")"));
-    })(f110(v527, v526));
-})), cdr: v323}); 
+    return (function(v526){
+        return f121(f67("(typeof(", v526, ") == \"string\")"));
+    })(f110(v525, v524));
+})), cdr: v321}); 
 var l186 = f3("STRING-UPCASE");
-v323 = ({car: f33(l186, (function (v529,v530){
+v321 = ({car: f33(l186, (function (v527,v528){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v531){
-        return f67("(function(){", v169, f70(f67("var ", "x", " = ", v531, ";", v169), f67("if (typeof ", "x", " != '", "string", "')", v169, f70("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", v169)), f67("return ", (function(){
+    return (function(v529){
+        return f67("(function(){", v167, f70(f67("var ", "x", " = ", v529, ";", v167), f67("if (typeof ", "x", " != '", "string", "')", v167, f70("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", v167)), f67("return ", (function(){
             return "x.toUpperCase()";
-        })(), ";", v169)), "})()");
-    })(f110(v530, v529));
-})), cdr: v323}); 
+        })(), ";", v167)), "})()");
+    })(f110(v528, v527));
+})), cdr: v321}); 
 var l187 = f3("STRING-LENGTH");
-v323 = ({car: f33(l187, (function (v532,v533){
+v321 = ({car: f33(l187, (function (v530,v531){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v534){
-        return f67("(function(){", v169, f70(f67("var ", "x", " = ", v534, ";", v169), f67("if (typeof ", "x", " != '", "string", "')", v169, f70("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", v169)), f67("return ", (function(){
+    return (function(v532){
+        return f67("(function(){", v167, f70(f67("var ", "x", " = ", v532, ";", v167), f67("if (typeof ", "x", " != '", "string", "')", v167, f70("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", v167)), f67("return ", (function(){
             return "x.length";
-        })(), ";", v169)), "})()");
-    })(f110(v533, v532));
-})), cdr: v323}); 
+        })(), ";", v167)), "})()");
+    })(f110(v531, v530));
+})), cdr: v321}); 
 var l188 = f3("SLICE");
-v323 = ({car: f33(l188, (function (v535,v536,v537,v538){
+v321 = ({car: f33(l188, (function (v533,v534,v535,v536){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 4) throw 'too many arguments';
     switch(arguments.length){
     case 3:
-    v538=v2;
+    v536=v2;
     default: break;
     }
-    return f67("(function(){", v169, f70("var str = ", f110(v536, v535), ";", v169, "var a = ", f110(v537, v535), ";", v169, "var b;", v169, (v538 !== v2 ? f67("b = ", f110(v538, v535), ";", v169) : ""), "return str.slice(a,b);", v169), "})()");
-})), cdr: v323}); 
+    return f67("(function(){", v167, f70("var str = ", f110(v534, v533), ";", v167, "var a = ", f110(v535, v533), ";", v167, "var b;", v167, (v536 !== v2 ? f67("b = ", f110(v536, v533), ";", v167) : ""), "return str.slice(a,b);", v167), "})()");
+})), cdr: v321}); 
 var l189 = f3("CHAR");
-v323 = ({car: f33(l189, (function (v539,v540,v541){
+v321 = ({car: f33(l189, (function (v537,v538,v539){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v542,v543){
-        return f67("(function(){", v169, f70(f67("var ", "string", " = ", v542, ";", v169), f67("var ", "index", " = ", v543, ";", v169), f67("if (typeof ", "string", " != '", "string", "')", v169, f70("throw 'The value ' + ", "string", " + ' is not a type ", "string", ".';", v169)), f67("if (typeof ", "index", " != '", "number", "')", v169, f70("throw 'The value ' + ", "index", " + ' is not a type ", "number", ".';", v169)), f67("return ", (function(){
+    return (function(v540,v541){
+        return f67("(function(){", v167, f70(f67("var ", "string", " = ", v540, ";", v167), f67("var ", "index", " = ", v541, ";", v167), f67("if (typeof ", "string", " != '", "string", "')", v167, f70("throw 'The value ' + ", "string", " + ' is not a type ", "string", ".';", v167)), f67("if (typeof ", "index", " != '", "number", "')", v167, f70("throw 'The value ' + ", "index", " + ' is not a type ", "number", ".';", v167)), f67("return ", (function(){
             return "string.charCodeAt(index)";
-        })(), ";", v169)), "})()");
-    })(f110(v540, v539),f110(v541, v539));
-})), cdr: v323}); 
+        })(), ";", v167)), "})()");
+    })(f110(v538, v537),f110(v539, v537));
+})), cdr: v321}); 
 var l190 = f3("CONCAT-TWO");
-v323 = ({car: f33(l190, (function (v544,v545,v546){
+v321 = ({car: f33(l190, (function (v542,v543,v544){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v547,v548){
-        return f67("(function(){", v169, f70(f67("var ", "string1", " = ", v547, ";", v169), f67("var ", "string2", " = ", v548, ";", v169), f67("if (typeof ", "string1", " != '", "string", "')", v169, f70("throw 'The value ' + ", "string1", " + ' is not a type ", "string", ".';", v169)), f67("if (typeof ", "string2", " != '", "string", "')", v169, f70("throw 'The value ' + ", "string2", " + ' is not a type ", "string", ".';", v169)), f67("return ", (function(){
+    return (function(v545,v546){
+        return f67("(function(){", v167, f70(f67("var ", "string1", " = ", v545, ";", v167), f67("var ", "string2", " = ", v546, ";", v167), f67("if (typeof ", "string1", " != '", "string", "')", v167, f70("throw 'The value ' + ", "string1", " + ' is not a type ", "string", ".';", v167)), f67("if (typeof ", "string2", " != '", "string", "')", v167, f70("throw 'The value ' + ", "string2", " + ' is not a type ", "string", ".';", v167)), f67("return ", (function(){
             return "string1.concat(string2)";
-        })(), ";", v169)), "})()");
-    })(f110(v545, v544),f110(v546, v544));
-})), cdr: v323}); 
+        })(), ";", v167)), "})()");
+    })(f110(v543, v542),f110(v544, v542));
+})), cdr: v321}); 
 var l191 = f3("FUNCALL");
-v323 = ({car: f33(l191, (function (v550,v551){
+v321 = ({car: f33(l191, (function (v548,v549){
     if (arguments.length < 2) throw 'too few arguments';
-    var v549= v2;
+    var v547= v2;
     for (var i = arguments.length-1; i>=2; i--)
-        v549 = {car: arguments[i], cdr: v549};
-    return f67("(", f110(v551, v550), ")(", f68(f45((function (v552){
+        v547 = {car: arguments[i], cdr: v547};
+    return f67("(", f110(v549, v548), ")(", f68(f45((function (v550){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
-        return f110(v552, v550);
-    }), v549), ", "), ")");
-})), cdr: v323}); 
+        return f110(v550, v548);
+    }), v547), ", "), ")");
+})), cdr: v321}); 
 var l192 = f3("APPLY");
-v323 = ({car: f33(l192, (function (v554,v555){
+v321 = ({car: f33(l192, (function (v552,v553){
     if (arguments.length < 2) throw 'too few arguments';
-    var v553= v2;
+    var v551= v2;
     for (var i = arguments.length-1; i>=2; i--)
-        v553 = {car: arguments[i], cdr: v553};
-    return (f1(v553) !== v2 ? f67("(", f110(v555, v554), ")()") : (function(v556,v557){
-        return f67("(function(){", v169, f70("var f = ", f110(v555, v554), ";", v169, "var args = [", f68(f45((function (v558){
+        v551 = {car: arguments[i], cdr: v551};
+    return (f1(v551) !== v2 ? f67("(", f110(v553, v552), ")()") : (function(v554,v555){
+        return f67("(function(){", v167, f70("var f = ", f110(v553, v552), ";", v167, "var args = [", f68(f45((function (v556){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return f110(v558, v554);
-        }), v556), ", "), "];", v169, "var tail = (", f110(v557, v554), ");", v169, f70("while (tail != ", f110(v2), "){", v169, "    args.push(tail.car);", v169, "    tail = tail.cdr;", v169, "}", v169, "return f.apply(this, args);", v169), "})()"));
-    })(f56(v553),(function(){
-        var tmp = f55(v553);
+            return f110(v556, v552);
+        }), v554), ", "), "];", v167, "var tail = (", f110(v555, v552), ");", v167, f70("while (tail != ", f110(v2), "){", v167, "    args.push(tail.car);", v167, "    tail = tail.cdr;", v167, "}", v167, "return f.apply(this, args);", v167), "})()"));
+    })(f56(v551),(function(){
+        var tmp = f55(v551);
         return tmp === v2? v2: tmp.car;
     })()));
-})), cdr: v323}); 
+})), cdr: v321}); 
 var l193 = f3("JS-EVAL");
-v323 = ({car: f33(l193, (function (v559,v560){
+v321 = ({car: f33(l193, (function (v557,v558){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v561){
-        return f67("(function(){", v169, f70(f67("var ", "string", " = ", v561, ";", v169), f67("if (typeof ", "string", " != '", "string", "')", v169, f70("throw 'The value ' + ", "string", " + ' is not a type ", "string", ".';", v169)), f67("return ", (function(){
+    return (function(v559){
+        return f67("(function(){", v167, f70(f67("var ", "string", " = ", v559, ";", v167), f67("if (typeof ", "string", " != '", "string", "')", v167, f70("throw 'The value ' + ", "string", " + ' is not a type ", "string", ".';", v167)), f67("return ", (function(){
             return "eval.apply(window, [string])";
-        })(), ";", v169)), "})()");
-    })(f110(v560, v559));
-})), cdr: v323}); 
+        })(), ";", v167)), "})()");
+    })(f110(v558, v557));
+})), cdr: v321}); 
 var l194 = f3("ERROR");
-v323 = ({car: f33(l194, (function (v562,v563){
+v321 = ({car: f33(l194, (function (v560,v561){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v564){
-        return f67("(function (){ throw ", v564, "; })()");
-    })(f110(v563, v562));
-})), cdr: v323}); 
+    return (function(v562){
+        return f67("(function (){ throw ", v562, "; })()");
+    })(f110(v561, v560));
+})), cdr: v321}); 
 var l195 = f3("NEW");
-v323 = ({car: f33(l195, (function (v565){
+v321 = ({car: f33(l195, (function (v563){
     if (arguments.length < 1) throw 'too few arguments';
     if (arguments.length > 1) throw 'too many arguments';
     return (function(){
         return "{}";
     })();
-})), cdr: v323}); 
+})), cdr: v321}); 
 var l196 = f3("GET");
-v323 = ({car: f33(l196, (function (v566,v567,v568){
+v321 = ({car: f33(l196, (function (v564,v565,v566){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v569,v570){
-        return f67("(function(){", v169, f70("var tmp = ", "(", v569, ")[", v570, "];", v169, "return tmp == undefined? ", f110(v2), ": tmp ;", v169), "})()");
-    })(f110(v567, v566),f110(v568, v566));
-})), cdr: v323}); 
+    return (function(v567,v568){
+        return f67("(function(){", v167, f70("var tmp = ", "(", v567, ")[", v568, "];", v167, "return tmp == undefined? ", f110(v2), ": tmp ;", v167), "})()");
+    })(f110(v565, v564),f110(v566, v564));
+})), cdr: v321}); 
 var l197 = f3("SET");
-v323 = ({car: f33(l197, (function (v571,v572,v573,v574){
+v321 = ({car: f33(l197, (function (v569,v570,v571,v572){
     if (arguments.length < 4) throw 'too few arguments';
     if (arguments.length > 4) throw 'too many arguments';
-    return (function(v575,v576,v577){
-        return f67("((", v575, ")[", v576, "] = ", v577, ")");
-    })(f110(v572, v571),f110(v573, v571),f110(v574, v571));
-})), cdr: v323}); 
+    return (function(v573,v574,v575){
+        return f67("((", v573, ")[", v574, "] = ", v575, ")");
+    })(f110(v570, v569),f110(v571, v569),f110(v572, v569));
+})), cdr: v321}); 
 var l198 = f3("IN");
-v323 = ({car: f33(l198, (function (v578,v579,v580){
+v321 = ({car: f33(l198, (function (v576,v577,v578){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
-    return (function(v581,v582){
-        return f121(f67("((", v581, ") in (", v582, "))"));
-    })(f110(v579, v578),f110(v580, v578));
-})), cdr: v323}); 
+    return (function(v579,v580){
+        return f121(f67("((", v579, ") in (", v580, "))"));
+    })(f110(v577, v576),f110(v578, v576));
+})), cdr: v321}); 
 var l199 = f3("FUNCTIONP");
-v323 = ({car: f33(l199, (function (v583,v584){
+v321 = ({car: f33(l199, (function (v581,v582){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v585){
-        return f121(f67("(typeof ", v585, " == 'function')"));
-    })(f110(v584, v583));
-})), cdr: v323}); 
+    return (function(v583){
+        return f121(f67("(typeof ", v583, " == 'function')"));
+    })(f110(v582, v581));
+})), cdr: v321}); 
 var l200 = f3("WRITE-STRING");
-v323 = ({car: f33(l200, (function (v586,v587){
+v321 = ({car: f33(l200, (function (v584,v585){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
-    return (function(v588){
-        return f67("(function(){", v169, f70(f67("var ", "x", " = ", v588, ";", v169), f67("if (typeof ", "x", " != '", "string", "')", v169, f70("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", v169)), f67("return ", (function(){
+    return (function(v586){
+        return f67("(function(){", v167, f70(f67("var ", "x", " = ", v586, ";", v167), f67("if (typeof ", "x", " != '", "string", "')", v167, f70("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", v167)), f67("return ", (function(){
             return "lisp.write(x)";
-        })(), ";", v169)), "})()");
-    })(f110(v587, v586));
-})), cdr: v323}); 
+        })(), ";", v167)), "})()");
+    })(f110(v585, v584));
+})), cdr: v321}); 
 var l202 = f3("MACROP");
 var l201 = f3("MACRO");
 var f123;
 (function(){
     (function(){
-        return f123 = (function(v589){
-            ((v589)["fname"] = "MACROP");
-            return v589;
-        })((function (v590){
+        return f123 = (function(v587){
+            ((v587)["fname"] = "MACROP");
+            return v587;
+        })((function (v588){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            return (((function(){
-                var tmp = v590;
-                return (typeof tmp == 'object' && 'name' in tmp);
-            })()?v3: v2) !== v2 ? ((f90(f104(v590, v278)) === l201)?v3: v2) : v2);
+            return (function(){
+                try {
+                    return (function(){
+                        return (((function(){
+                            var tmp = v588;
+                            return (typeof tmp == 'object' && 'name' in tmp);
+                        })()?v3: v2) !== v2 ? ((f90(f104(v588, v276)) === l201)?v3: v2) : v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 134)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l202;
@@ -3633,33 +5252,45 @@ var l203 = f3("MACRO");
 var f124;
 (function(){
     (function(){
-        return f124 = (function(v591){
-            ((v591)["fname"] = "LS-MACROEXPAND-1");
-            return v591;
-        })((function (v592,v593){
+        return f124 = (function(v589){
+            ((v589)["fname"] = "LS-MACROEXPAND-1");
+            return v589;
+        })((function (v590,v591){
             if (arguments.length < 2) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
-            return (f123((function(){
-                var tmp = v592;
-                return tmp === v2? v2: tmp.car;
-            })()) !== v2 ? (function(v594){
-                return (((f90(v594) === l203)?v3: v2) !== v2 ? (function(){
-                    var f = f118(f91(v594));
-                    var args = [];
-                    var tail = ((function(){
-                        var tmp = v592;
-                        return tmp === v2? v2: tmp.cdr;
-                    })());
-                        while (tail != v2){
-                            args.push(tail.car);
-                            tail = tail.cdr;
-                        }
-                        return f.apply(this, args);
-                    })() : v592);
-            })(f104((function(){
-                var tmp = v592;
-                return tmp === v2? v2: tmp.car;
-            })(), v278)) : v592);
+            return (function(){
+                try {
+                    return (function(){
+                        return (f123((function(){
+                            var tmp = v590;
+                            return tmp === v2? v2: tmp.car;
+                        })()) !== v2 ? (function(v592){
+                            return (((f90(v592) === l203)?v3: v2) !== v2 ? (function(){
+                                var f = f118(f91(v592));
+                                var args = [];
+                                var tail = ((function(){
+                                    var tmp = v590;
+                                    return tmp === v2? v2: tmp.cdr;
+                                })());
+                                    while (tail != v2){
+                                        args.push(tail.car);
+                                        tail = tail.cdr;
+                                    }
+                                    return f.apply(this, args);
+                                })() : v590);
+                        })(f104((function(){
+                            var tmp = v590;
+                            return tmp === v2? v2: tmp.car;
+                        })(), v276)) : v590);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 135)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l204;
@@ -3669,33 +5300,45 @@ var l205 = f3("LAMBDA");
 var f125;
 (function(){
     (function(){
-        return f125 = (function(v595){
-            ((v595)["fname"] = "COMPILE-FUNCALL");
-            return v595;
-        })((function (v596,v597,v598){
+        return f125 = (function(v593){
+            ((v593)["fname"] = "COMPILE-FUNCALL");
+            return v593;
+        })((function (v594,v595,v596){
             if (arguments.length < 3) throw 'too few arguments';
             if (arguments.length > 3) throw 'too many arguments';
-            return (((function(){
-                var tmp = v596;
-                return (typeof tmp == 'object' && 'name' in tmp);
-            })()?v3: v2) !== v2 ? (function(){
-                return f67(f105(v596, v598), "(", f68(f45((function (v599){
-                    if (arguments.length < 1) throw 'too few arguments';
-                    if (arguments.length > 1) throw 'too many arguments';
-                    return f110(v599, v598);
-                }), v597), ", "), ")");
-            })() : ((f36(v596) !== v2 ? (((function(){
-                var tmp = v596;
-                return tmp === v2? v2: tmp.car;
-            })() === l205)?v3: v2) : v2) !== v2 ? (function(){
-                return f67("(", f110(v596, v598), ")(", f68(f45((function (v600){
-                    if (arguments.length < 1) throw 'too few arguments';
-                    if (arguments.length > 1) throw 'too many arguments';
-                    return f110(v600, v598);
-                }), v597), ", "), ")");
-            })() : (function(){
-                return (function (){ throw f67("Invalid function designator ", (v596).name); })();
-            })()));
+            return (function(){
+                try {
+                    return (function(){
+                        return (((function(){
+                            var tmp = v594;
+                            return (typeof tmp == 'object' && 'name' in tmp);
+                        })()?v3: v2) !== v2 ? (function(){
+                            return f67(f105(v594, v596), "(", f68(f45((function (v597){
+                                if (arguments.length < 1) throw 'too few arguments';
+                                if (arguments.length > 1) throw 'too many arguments';
+                                return f110(v597, v596);
+                            }), v595), ", "), ")");
+                        })() : ((f36(v594) !== v2 ? (((function(){
+                            var tmp = v594;
+                            return tmp === v2? v2: tmp.car;
+                        })() === l205)?v3: v2) : v2) !== v2 ? (function(){
+                            return f67("(", f110(v594, v596), ")(", f68(f45((function (v598){
+                                if (arguments.length < 1) throw 'too few arguments';
+                                if (arguments.length > 1) throw 'too many arguments';
+                                return f110(v598, v596);
+                            }), v595), ", "), ")");
+                        })() : (function(){
+                            return (function (){ throw f67("Invalid function designator ", (v594).name); })();
+                        })()));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 136)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l206;
@@ -3704,58 +5347,70 @@ var l207 = f3("LS-COMPILE");
 var f110;
 (function(){
     (function(){
-        return f110 = (function(v601){
-            ((v601)["fname"] = "LS-COMPILE");
-            return v601;
-        })((function (v602,v603){
+        return f110 = (function(v599){
+            ((v599)["fname"] = "LS-COMPILE");
+            return v599;
+        })((function (v600,v601){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 2) throw 'too many arguments';
             switch(arguments.length){
             case 1:
-            v603=f94();
+            v601=f94();
             default: break;
             }
-            return (((function(){
-                var tmp = v602;
-                return (typeof tmp == 'object' && 'name' in tmp);
-            })()?v3: v2) !== v2 ? (function(){
-                return f102(v602, v603);
-            })() : (f51(v602) !== v2 ? (function(){
-                return f6(v602);
-            })() : (((typeof(v602) == "string")?v3: v2) !== v2 ? (function(){
-                return f67("\"", f72(v602), "\"");
-            })() : (f36(v602) !== v2 ? (function(){
-                return (f65((function(){
-                    var tmp = v602;
-                    return tmp === v2? v2: tmp.car;
-                })(), v323) !== v2 ? (function(v604){
+            return (function(){
+                try {
                     return (function(){
-                        var f = v604;
-                        var args = [v603];
-                        var tail = ((function(){
-                            var tmp = v602;
-                            return tmp === v2? v2: tmp.cdr;
-                        })());
-                            while (tail != v2){
-                                args.push(tail.car);
-                                tail = tail.cdr;
-                            }
-                            return f.apply(this, args);
-                        })();
-                })(f30(f65((function(){
-                    var tmp = v602;
-                    return tmp === v2? v2: tmp.car;
-                })(), v323))) : (f123((function(){
-                    var tmp = v602;
-                    return tmp === v2? v2: tmp.car;
-                })()) !== v2 ? f110(f124(v602, v603), v603) : f125((function(){
-                    var tmp = v602;
-                    return tmp === v2? v2: tmp.car;
-                })(), (function(){
-                    var tmp = v602;
-                    return tmp === v2? v2: tmp.cdr;
-                })(), v603)));
-            })() : v2))));
+                        return (((function(){
+                            var tmp = v600;
+                            return (typeof tmp == 'object' && 'name' in tmp);
+                        })()?v3: v2) !== v2 ? (function(){
+                            return f102(v600, v601);
+                        })() : (f51(v600) !== v2 ? (function(){
+                            return f6(v600);
+                        })() : (((typeof(v600) == "string")?v3: v2) !== v2 ? (function(){
+                            return f67("\"", f72(v600), "\"");
+                        })() : (f36(v600) !== v2 ? (function(){
+                            return (f65((function(){
+                                var tmp = v600;
+                                return tmp === v2? v2: tmp.car;
+                            })(), v321) !== v2 ? (function(v602){
+                                return (function(){
+                                    var f = v602;
+                                    var args = [v601];
+                                    var tail = ((function(){
+                                        var tmp = v600;
+                                        return tmp === v2? v2: tmp.cdr;
+                                    })());
+                                        while (tail != v2){
+                                            args.push(tail.car);
+                                            tail = tail.cdr;
+                                        }
+                                        return f.apply(this, args);
+                                    })();
+                            })(f30(f65((function(){
+                                var tmp = v600;
+                                return tmp === v2? v2: tmp.car;
+                            })(), v321))) : (f123((function(){
+                                var tmp = v600;
+                                return tmp === v2? v2: tmp.car;
+                            })()) !== v2 ? f110(f124(v600, v601), v601) : f125((function(){
+                                var tmp = v600;
+                                return tmp === v2? v2: tmp.car;
+                            })(), (function(){
+                                var tmp = v600;
+                                return tmp === v2? v2: tmp.cdr;
+                            })(), v601)));
+                        })() : v2))));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 137)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l207;
@@ -3764,23 +5419,35 @@ var l208 = f3("LS-COMPILE-TOPLEVEL");
 var f126;
 (function(){
     (function(){
-        return f126 = (function(v605){
-            ((v605)["fname"] = "LS-COMPILE-TOPLEVEL");
-            return v605;
-        })((function (v606){
+        return f126 = (function(v603){
+            ((v603)["fname"] = "LS-COMPILE-TOPLEVEL");
+            return v603;
+        })((function (v604){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
-            v313 = v2;
-            return (function(v607){
-                return (function(v608){
-                    v313 = v2;
-                    return v608;
-                })(f67(f68(f45((function (v609){
-                    if (arguments.length < 1) throw 'too few arguments';
-                    if (arguments.length > 1) throw 'too many arguments';
-                    return f67(v609, ";", v169);
-                }), v313)), v607));
-            })(f110(v606));
+            return (function(){
+                try {
+                    return (function(){
+                        v311 = v2;
+                        return (function(v605){
+                            return (function(v606){
+                                v311 = v2;
+                                return v606;
+                            })(f67(f68(f45((function (v607){
+                                if (arguments.length < 1) throw 'too few arguments';
+                                if (arguments.length > 1) throw 'too many arguments';
+                                return f67(v607, ";", v167);
+                            }), v311)), v605));
+                        })(f110(v604));
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 138)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
         }));
     })();
     return l208;
@@ -3789,66 +5456,91 @@ var l219 = f3("LS-COMPILE-TOPLEVEL");
 var l218 = f3("EVAL");
 var l217 = f3("PRINT-TO-STRING");
 var l216 = f3("LS-READ-FROM-STRING");
-var l215 = 0;
+var l215 = 140;
 var l214 = 148;
 var l213 = 209;
 var l212 = 126;
-var l211 = 615;
-var l210 = {car: {car: {car: f3("*BLOCK-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v401", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*LITERAL-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v377", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*LAMBDA-LIST-KEYWORDS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v334", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*COMPILATIONS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v323", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*TOPLEVEL-COMPILATIONS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v313", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*FUNCTION-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v302", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*VARIABLE-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v282", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*ENVIRONMENT*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v278", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*COMPILATION-UNIT-CHECKS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v244", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*EOF*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v237", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*NEWLINE*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v169", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*GENSYM-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v12", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("T"), cdr: {car: f3("VARIABLE"), cdr: {car: "v3", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NIL"), cdr: {car: f3("VARIABLE"), cdr: {car: "v2", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*PACKAGE*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v1", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}}}}}}}}}}}}}, cdr: {car: {car: {car: f3("WITH-COMPILATION-UNIT"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROG1"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("SETQ"), cdr: {car: f3("*COMPILATION-UNIT-CHECKS*"), cdr: {car: f3("NIL"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("CLEAR-UNDECLARED-GLOBAL-BINDINGS"), cdr: f3("NIL")}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DOLIST"), cdr: {car: {car: f3("CHECK"), cdr: {car: f3("*COMPILATION-UNIT-CHECKS*"), cdr: f3("NIL")}}, cdr: {car: {car: f3("FUNCALL"), cdr: {car: f3("CHECK"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-COMPILE-TOPLEVEL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f126", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COMPILE-FUNCALL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f125", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-MACROEXPAND-1"), cdr: {car: f3("FUNCTION"), cdr: {car: "f124", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MACROP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f123", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NUM-OP-NUM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f122", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("TYPE-CHECK"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("DECLS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CONCAT"), cdr: {car: "(function(){", cdr: {car: f3("*NEWLINE*"), cdr: {car: {car: f3("INDENT"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("DECL"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CONCAT"), cdr: {car: "var ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: " = ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("THIRD"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: ";", cdr: {car: f3("*NEWLINE*"), cdr: f3("NIL")}}}}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("DECLS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("DECL"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CONCAT"), cdr: {car: "if (typeof ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: " != '", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: "')", cdr: {car: f3("*NEWLINE*"), cdr: {car: {car: f3("INDENT"), cdr: {car: "throw 'The value ' + ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: " + ' is not a type ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: ".';", cdr: {car: f3("*NEWLINE*"), cdr: f3("NIL")}}}}}}}, cdr: f3("NIL")}}}}}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("DECLS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("CONCAT"), cdr: {car: "return ", cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: ";", cdr: {car: f3("*NEWLINE*"), cdr: f3("NIL")}}}}}, cdr: f3("NIL")}}}}, cdr: {car: "})()", cdr: f3("NIL")}}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COMPILE-BOOL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f121", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFINE-BUILTIN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("DEFINE-COMPILATION"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ARG"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARG"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LS-COMPILE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARG"), cdr: f3("NIL")}}, cdr: {car: f3("ENV"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("ARGS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE-EXPAND-1"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE-EXPAND"), cdr: {car: f3("FUNCTION"), cdr: {car: "f120", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE-EXPAND-1"), cdr: {car: f3("FUNCTION"), cdr: {car: "f119", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFINE-TRANSFORMATION"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("DEFINE-COMPILATION"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LS-COMPILE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: {car: f3("ENV"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EVAL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f118", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LITERAL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f117", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LITERAL->JS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f116", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-REST-ARGUMENT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f115", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-OPTIONAL-ARGUMENTS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f114", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f113", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-REQUIRED-ARGUMENTS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f112", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LIST-UNTIL-KEYWORD"), cdr: {car: f3("FUNCTION"), cdr: {car: "f111", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFINE-COMPILATION"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PUSH"), cdr: {car: {car: f3("LIST"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ENV"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("*COMPILATIONS*"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-COMPILE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f110", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-COMPILE-BLOCK"), cdr: {car: f3("FUNCTION"), cdr: {car: "f109", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%COMPILE-DEFMACRO"), cdr: {car: f3("FUNCTION"), cdr: {car: "f108", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%COMPILE-DEFUN"), cdr: {car: f3("FUNCTION"), cdr: {car: "f107", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%COMPILE-DEFVAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f106", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-FUNCTION-TRANSLATION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f105", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-FUNCTION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f104", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EXTEND-LOCAL-ENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f103", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-VARIABLE-TRANSLATION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f102", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-VARIABLE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f101", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("GVARNAME"), cdr: {car: f3("FUNCTION"), cdr: {car: "f100", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CLEAR-UNDECLARED-GLOBAL-BINDINGS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f99", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-IN-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f98", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EXTEND-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f97", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PUSH-TO-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f96", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COPY-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f95", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAKE-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f94", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MARK-BINDING-AS-DECLARED"), cdr: {car: f3("FUNCTION"), cdr: {car: "f93", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-DECLARED"), cdr: {car: f3("FUNCTION"), cdr: {car: "f92", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-TRANSLATION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f91", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-TYPE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f90", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-NAME"), cdr: {car: f3("FUNCTION"), cdr: {car: "f89", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAKE-BINDING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f88", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-READ-FROM-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f87", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("READ-SHARP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f86", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("READ-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f85", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-READ"), cdr: {car: f3("FUNCTION"), cdr: {car: "f84", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%READ-LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f83", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SKIP-WHITESPACES-AND-COMMENTS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f82", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("READ-UNTIL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f81", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("TERMINALP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f80", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SKIP-WHITESPACES"), cdr: {car: f3("FUNCTION"), cdr: {car: "f79", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("WHITESPACEP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f78", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%READ-CHAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f77", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%PEEK-CHAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f76", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAKE-STRING-STREAM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f75", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PRINT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f74", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("WRITE-LINE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f73", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ESCAPE-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f72", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PRINT-TO-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f71", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INDENT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f70", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("JOIN-TRAILING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f69", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("JOIN"), cdr: {car: f3("FUNCTION"), cdr: {car: "f68", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONCAT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f67", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("STRING="), cdr: {car: f3("FUNCTION"), cdr: {car: "f66", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ASSOC"), cdr: {car: f3("FUNCTION"), cdr: {car: "f65", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EVERY"), cdr: {car: f3("FUNCTION"), cdr: {car: "f64", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PARSE-INTEGER"), cdr: {car: f3("FUNCTION"), cdr: {car: "f63", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SUBSEQ"), cdr: {car: f3("FUNCTION"), cdr: {car: "f62", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DIGIT-CHAR-P"), cdr: {car: f3("FUNCTION"), cdr: {car: "f61", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REMOVE-IF-NOT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f60", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REMOVE-IF"), cdr: {car: f3("FUNCTION"), cdr: {car: "f59", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REMOVE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f58", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MEMBER"), cdr: {car: f3("FUNCTION"), cdr: {car: "f57", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BUTLAST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f56", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f55", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f54", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MINUSP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f53", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PLUSP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f52", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTEGERP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f51", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CHAR="), cdr: {car: f3("FUNCTION"), cdr: {car: "f50", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CHAR-CODE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f49", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CODE-CHAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f48", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COPY-LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f47", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("IDENTITY"), cdr: {car: f3("FUNCTION"), cdr: {car: "f46", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAPCAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f45", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONCAT-TWO"), cdr: {car: f3("FUNCTION"), cdr: {car: "f44", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LENGTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f43", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LIST-LENGTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f42", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REVERSE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f41", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REVERSE-AUX"), cdr: {car: f3("FUNCTION"), cdr: {car: "f40", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("APPEND"), cdr: {car: f3("FUNCTION"), cdr: {car: "f39", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("APPEND-TWO"), cdr: {car: f3("FUNCTION"), cdr: {car: "f38", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFVAR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("&OPTIONAL"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("%DEFVAR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFUN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("%DEFUN"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("!REDUCE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f37", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LISTP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f36", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ENSURE-LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f35", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PROG1"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("VALUE"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("OR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("COND"), cdr: {car: {car: {car: f3("NULL"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("NULL"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("T"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("G"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G"), cdr: f3("NIL")}}, cdr: {car: {car: f3("OR"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("AND"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("COND"), cdr: {car: {car: {car: f3("NULL"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: f3("T"), cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("NULL"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("T"), cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("AND"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ECASE"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: {car: f3("&REST"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CASE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("APPEND"), cdr: {car: f3("CLAUSULES"), cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: {car: f3("T"), cdr: {car: {car: f3("ERROR"), cdr: {car: "ECASE expression failed.", cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CASE"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: {car: f3("&REST"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("!FORM"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("!FORM"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("COND"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("CLAUSULE"), cdr: f3("NIL")}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("EQ"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("CLAUSULE"), cdr: f3("NIL")}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}, cdr: {car: f3("CLAUSULE"), cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: {car: f3("EQL"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("!FORM"), cdr: f3("NIL")}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("CLAUSULE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("CLAUSULE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COND"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("NULL"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("EQ"), cdr: {car: {car: f3("CAAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("COND"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DOTIMES"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ITER"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("G!TO"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: {car: {car: f3("VAR"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("TO"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("RESULT"), cdr: {car: {car: f3("THIRD"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: 0, cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!TO"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("TO"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("WHILE"), cdr: {car: {car: f3("<"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!TO"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("INCF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("RESULT"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DOLIST"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ITER"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("VAR"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("G!LIST"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("WHILE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: {car: f3("CAR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: {car: {car: f3("CDR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("THIRD"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("UNLESS"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("CONDITION"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("CONDITION"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("WHEN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("CONDITION"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("CONDITION"), cdr: f3("NIL")}}, cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PUSH"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: {car: f3("PLACE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("PLACE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("CONS"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("PLACE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DECF"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: {car: f3("&OPTIONAL"), cdr: {car: {car: f3("DELTA"), cdr: {car: 1, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("-"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("DELTA"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INCF"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: {car: f3("&OPTIONAL"), cdr: {car: {car: f3("DELTA"), cdr: {car: 1, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("+"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("DELTA"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ATOM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f34", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f33", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("FOURTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f32", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("THIRD"), cdr: {car: f3("FUNCTION"), cdr: {car: "f31", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SECOND"), cdr: {car: f3("FUNCTION"), cdr: {car: "f30", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("FIRST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f29", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CADDDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f28", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDDDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f27", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CADDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f26", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f25", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f24", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CADR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f23", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CAAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f22", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f21", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f20", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONSP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f19", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f18", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NOT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f17", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EQL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f16", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("TRUNCATE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f15", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ZEROP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f14", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("1-"), cdr: {car: f3("FUNCTION"), cdr: {car: "f13", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("1+"), cdr: {car: f3("FUNCTION"), cdr: {car: "f12", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("/"), cdr: {car: f3("FUNCTION"), cdr: {car: "f11", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*"), cdr: {car: f3("FUNCTION"), cdr: {car: "f10", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("-"), cdr: {car: f3("FUNCTION"), cdr: {car: "f9", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("+"), cdr: {car: f3("FUNCTION"), cdr: {car: "f8", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("="), cdr: {car: f3("FUNCTION"), cdr: {car: "f7", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTEGER-TO-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f6", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("GENSYM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f5", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("FIND-SYMBOL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f4", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTERN"), cdr: {car: f3("FUNCTION"), cdr: {car: "f3", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTERNP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f2", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("RETURN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("VALUE"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("RETURN-FROM"), cdr: {car: f3("NIL"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NULL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f1", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFUN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("%DEFUN"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%DEFUN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("EVAL-WHEN-COMPILE"), cdr: {car: {car: f3("%COMPILE-DEFUN"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("FSETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("NAMED-LAMBDA"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SYMBOL-NAME"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NAMED-LAMBDA"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("X"), cdr: {car: {car: f3("GENSYM"), cdr: {car: "FN", cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("SET"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: "fname", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFVAR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("&OPTIONAL"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("%DEFVAR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%DEFVAR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("EVAL-WHEN-COMPILE"), cdr: {car: {car: f3("%COMPILE-DEFVAR"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFMACRO"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("EVAL-WHEN-COMPILE"), cdr: {car: {car: f3("%COMPILE-DEFMACRO"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: f3("NIL")}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("EQ"), cdr: {car: f3("X"), cdr: {car: {car: f3("QUOTE"), cdr: {car: f3("&BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: f3("&REST"), cdr: f3("NIL")}}, cdr: {car: f3("X"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("ARGS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}};
+var l211 = 613;
+var l210 = {car: {car: {car: f3("*BLOCK-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v399", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*LITERAL-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v375", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*LAMBDA-LIST-KEYWORDS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v332", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*COMPILATIONS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v321", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*TOPLEVEL-COMPILATIONS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v311", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*FUNCTION-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v300", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*VARIABLE-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v280", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*ENVIRONMENT*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v276", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*COMPILATION-UNIT-CHECKS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v242", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*EOF*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v235", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*NEWLINE*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v167", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*GENSYM-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v12", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("T"), cdr: {car: f3("VARIABLE"), cdr: {car: "v3", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NIL"), cdr: {car: f3("VARIABLE"), cdr: {car: "v2", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*PACKAGE*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v1", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}}}}}}}}}}}}}, cdr: {car: {car: {car: f3("WITH-COMPILATION-UNIT"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROG1"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("SETQ"), cdr: {car: f3("*COMPILATION-UNIT-CHECKS*"), cdr: {car: f3("NIL"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("CLEAR-UNDECLARED-GLOBAL-BINDINGS"), cdr: f3("NIL")}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DOLIST"), cdr: {car: {car: f3("CHECK"), cdr: {car: f3("*COMPILATION-UNIT-CHECKS*"), cdr: f3("NIL")}}, cdr: {car: {car: f3("FUNCALL"), cdr: {car: f3("CHECK"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-COMPILE-TOPLEVEL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f126", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COMPILE-FUNCALL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f125", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-MACROEXPAND-1"), cdr: {car: f3("FUNCTION"), cdr: {car: "f124", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MACROP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f123", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NUM-OP-NUM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f122", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("TYPE-CHECK"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("DECLS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CONCAT"), cdr: {car: "(function(){", cdr: {car: f3("*NEWLINE*"), cdr: {car: {car: f3("INDENT"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("DECL"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CONCAT"), cdr: {car: "var ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: " = ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("THIRD"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: ";", cdr: {car: f3("*NEWLINE*"), cdr: f3("NIL")}}}}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("DECLS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("DECL"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CONCAT"), cdr: {car: "if (typeof ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: " != '", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: "')", cdr: {car: f3("*NEWLINE*"), cdr: {car: {car: f3("INDENT"), cdr: {car: "throw 'The value ' + ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: " + ' is not a type ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: ".';", cdr: {car: f3("*NEWLINE*"), cdr: f3("NIL")}}}}}}}, cdr: f3("NIL")}}}}}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("DECLS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("CONCAT"), cdr: {car: "return ", cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: ";", cdr: {car: f3("*NEWLINE*"), cdr: f3("NIL")}}}}}, cdr: f3("NIL")}}}}, cdr: {car: "})()", cdr: f3("NIL")}}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COMPILE-BOOL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f121", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFINE-BUILTIN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("DEFINE-COMPILATION"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ARG"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARG"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LS-COMPILE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARG"), cdr: f3("NIL")}}, cdr: {car: f3("ENV"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("ARGS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE-EXPAND-1"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE-EXPAND"), cdr: {car: f3("FUNCTION"), cdr: {car: "f120", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE-EXPAND-1"), cdr: {car: f3("FUNCTION"), cdr: {car: "f119", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFINE-TRANSFORMATION"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("DEFINE-COMPILATION"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LS-COMPILE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: {car: f3("ENV"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EVAL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f118", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LITERAL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f117", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LITERAL->JS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f116", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-REST-ARGUMENT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f115", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-OPTIONAL-ARGUMENTS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f114", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f113", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-REQUIRED-ARGUMENTS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f112", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LIST-UNTIL-KEYWORD"), cdr: {car: f3("FUNCTION"), cdr: {car: "f111", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFINE-COMPILATION"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PUSH"), cdr: {car: {car: f3("LIST"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ENV"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("*COMPILATIONS*"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-COMPILE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f110", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-COMPILE-BLOCK"), cdr: {car: f3("FUNCTION"), cdr: {car: "f109", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%COMPILE-DEFMACRO"), cdr: {car: f3("FUNCTION"), cdr: {car: "f108", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%COMPILE-DEFUN"), cdr: {car: f3("FUNCTION"), cdr: {car: "f107", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%COMPILE-DEFVAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f106", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-FUNCTION-TRANSLATION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f105", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-FUNCTION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f104", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EXTEND-LOCAL-ENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f103", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-VARIABLE-TRANSLATION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f102", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-VARIABLE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f101", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("GVARNAME"), cdr: {car: f3("FUNCTION"), cdr: {car: "f100", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CLEAR-UNDECLARED-GLOBAL-BINDINGS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f99", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-IN-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f98", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EXTEND-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f97", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PUSH-TO-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f96", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COPY-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f95", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAKE-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f94", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MARK-BINDING-AS-DECLARED"), cdr: {car: f3("FUNCTION"), cdr: {car: "f93", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-DECLARED"), cdr: {car: f3("FUNCTION"), cdr: {car: "f92", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-TRANSLATION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f91", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-TYPE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f90", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-NAME"), cdr: {car: f3("FUNCTION"), cdr: {car: "f89", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAKE-BINDING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f88", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-READ-FROM-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f87", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("READ-SHARP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f86", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("READ-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f85", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-READ"), cdr: {car: f3("FUNCTION"), cdr: {car: "f84", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%READ-LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f83", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SKIP-WHITESPACES-AND-COMMENTS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f82", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("READ-UNTIL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f81", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("TERMINALP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f80", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SKIP-WHITESPACES"), cdr: {car: f3("FUNCTION"), cdr: {car: "f79", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("WHITESPACEP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f78", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%READ-CHAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f77", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%PEEK-CHAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f76", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAKE-STRING-STREAM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f75", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PRINT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f74", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("WRITE-LINE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f73", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ESCAPE-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f72", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PRINT-TO-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f71", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INDENT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f70", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("JOIN-TRAILING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f69", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("JOIN"), cdr: {car: f3("FUNCTION"), cdr: {car: "f68", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONCAT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f67", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("STRING="), cdr: {car: f3("FUNCTION"), cdr: {car: "f66", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ASSOC"), cdr: {car: f3("FUNCTION"), cdr: {car: "f65", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EVERY"), cdr: {car: f3("FUNCTION"), cdr: {car: "f64", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PARSE-INTEGER"), cdr: {car: f3("FUNCTION"), cdr: {car: "f63", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SUBSEQ"), cdr: {car: f3("FUNCTION"), cdr: {car: "f62", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DIGIT-CHAR-P"), cdr: {car: f3("FUNCTION"), cdr: {car: "f61", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REMOVE-IF-NOT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f60", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REMOVE-IF"), cdr: {car: f3("FUNCTION"), cdr: {car: "f59", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REMOVE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f58", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MEMBER"), cdr: {car: f3("FUNCTION"), cdr: {car: "f57", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BUTLAST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f56", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f55", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f54", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MINUSP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f53", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PLUSP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f52", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTEGERP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f51", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CHAR="), cdr: {car: f3("FUNCTION"), cdr: {car: "f50", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CHAR-CODE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f49", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CODE-CHAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f48", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COPY-LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f47", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("IDENTITY"), cdr: {car: f3("FUNCTION"), cdr: {car: "f46", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAPCAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f45", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONCAT-TWO"), cdr: {car: f3("FUNCTION"), cdr: {car: "f44", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LENGTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f43", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LIST-LENGTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f42", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REVERSE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f41", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REVERSE-AUX"), cdr: {car: f3("FUNCTION"), cdr: {car: "f40", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("APPEND"), cdr: {car: f3("FUNCTION"), cdr: {car: "f39", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("APPEND-TWO"), cdr: {car: f3("FUNCTION"), cdr: {car: "f38", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFVAR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("&OPTIONAL"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("%DEFVAR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFUN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("%DEFUN"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("!REDUCE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f37", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LISTP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f36", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ENSURE-LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f35", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PROG1"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("VALUE"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("OR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("COND"), cdr: {car: {car: {car: f3("NULL"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("NULL"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("T"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("G"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G"), cdr: f3("NIL")}}, cdr: {car: {car: f3("OR"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("AND"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("COND"), cdr: {car: {car: {car: f3("NULL"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: f3("T"), cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("NULL"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("T"), cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("AND"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ECASE"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: {car: f3("&REST"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CASE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("APPEND"), cdr: {car: f3("CLAUSULES"), cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: {car: f3("T"), cdr: {car: {car: f3("ERROR"), cdr: {car: "ECASE expression failed.", cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CASE"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: {car: f3("&REST"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("!FORM"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("!FORM"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("COND"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("CLAUSULE"), cdr: f3("NIL")}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("EQ"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("CLAUSULE"), cdr: f3("NIL")}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}, cdr: {car: f3("CLAUSULE"), cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: {car: f3("EQL"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("!FORM"), cdr: f3("NIL")}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("CLAUSULE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("CLAUSULE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COND"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("NULL"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("EQ"), cdr: {car: {car: f3("CAAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("COND"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DOTIMES"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ITER"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("G!TO"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: {car: {car: f3("VAR"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("TO"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("RESULT"), cdr: {car: {car: f3("THIRD"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("BLOCK"), cdr: {car: f3("NIL"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: 0, cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!TO"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("TO"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("%WHILE"), cdr: {car: {car: f3("<"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!TO"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("INCF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("RESULT"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DOLIST"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ITER"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("VAR"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("G!LIST"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("BLOCK"), cdr: {car: f3("NIL"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("%WHILE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: {car: f3("CAR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: {car: {car: f3("CDR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("THIRD"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("UNLESS"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("CONDITION"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("CONDITION"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("WHEN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("CONDITION"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("CONDITION"), cdr: f3("NIL")}}, cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PUSH"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: {car: f3("PLACE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("PLACE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("CONS"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("PLACE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DECF"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: {car: f3("&OPTIONAL"), cdr: {car: {car: f3("DELTA"), cdr: {car: 1, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("-"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("DELTA"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INCF"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: {car: f3("&OPTIONAL"), cdr: {car: {car: f3("DELTA"), cdr: {car: 1, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("+"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("DELTA"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ATOM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f34", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f33", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("FOURTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f32", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("THIRD"), cdr: {car: f3("FUNCTION"), cdr: {car: "f31", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SECOND"), cdr: {car: f3("FUNCTION"), cdr: {car: "f30", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("FIRST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f29", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CADDDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f28", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDDDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f27", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CADDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f26", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f25", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f24", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CADR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f23", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CAAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f22", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f21", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f20", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONSP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f19", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f18", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NOT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f17", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EQL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f16", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("TRUNCATE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f15", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ZEROP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f14", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("1-"), cdr: {car: f3("FUNCTION"), cdr: {car: "f13", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("1+"), cdr: {car: f3("FUNCTION"), cdr: {car: "f12", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("/"), cdr: {car: f3("FUNCTION"), cdr: {car: "f11", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*"), cdr: {car: f3("FUNCTION"), cdr: {car: "f10", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("-"), cdr: {car: f3("FUNCTION"), cdr: {car: "f9", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("+"), cdr: {car: f3("FUNCTION"), cdr: {car: "f8", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("="), cdr: {car: f3("FUNCTION"), cdr: {car: "f7", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTEGER-TO-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f6", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("GENSYM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f5", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("FIND-SYMBOL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f4", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTERN"), cdr: {car: f3("FUNCTION"), cdr: {car: "f3", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTERNP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f2", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("WHILE"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("CONDITION"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("BLOCK"), cdr: {car: f3("NIL"), cdr: {car: {car: f3("%WHILE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("CONDITION"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("RETURN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&OPTIONAL"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("RETURN-FROM"), cdr: {car: f3("NIL"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NULL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f1", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFUN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("%DEFUN"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%DEFUN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("EVAL-WHEN-COMPILE"), cdr: {car: {car: f3("%COMPILE-DEFUN"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("FSETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("NAMED-LAMBDA"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SYMBOL-NAME"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BLOCK"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NAMED-LAMBDA"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("X"), cdr: {car: {car: f3("GENSYM"), cdr: {car: "FN", cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("SET"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: "fname", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFVAR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("&OPTIONAL"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("%DEFVAR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%DEFVAR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("EVAL-WHEN-COMPILE"), cdr: {car: {car: f3("%COMPILE-DEFVAR"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFMACRO"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("EVAL-WHEN-COMPILE"), cdr: {car: {car: f3("%COMPILE-DEFMACRO"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: f3("NIL")}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("EQ"), cdr: {car: f3("X"), cdr: {car: {car: f3("QUOTE"), cdr: {car: f3("&BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: f3("&REST"), cdr: f3("NIL")}}, cdr: {car: f3("X"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("ARGS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}};
 var l209 = f3("EVAL");
 var f118;
 (function(){
-    v278 = l210;
-    v282 = l211;
-    v302 = l212;
-    v377 = l213;
+    v276 = l210;
+    v280 = l211;
+    v300 = l212;
+    v375 = l213;
     v12 = l214;
-    return v401 = l215;
+    return v399 = l215;
 })();
 (function(){
     (function(){
         (function(){
-            return f118 = (function(v610){
-                ((v610)["fname"] = "EVAL");
-                return v610;
-            })((function (v611){
+            return f118 = (function(v608){
+                ((v608)["fname"] = "EVAL");
+                return v608;
+            })((function (v609){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
-                return (function(v612){
-                    return (function(){
-                        var string = v612;
-                        if (typeof string != 'string')
-                            throw 'The value ' + string + ' is not a type string.';
-                        return eval.apply(window, [string]);
-                    })();
-                })((function(v613){
-                    (function(v614,v615){
-                        (function(){
-                            while(v614 !== v2){
-                                v615 = (function(){
-                                    var tmp = v614;
-                                    return tmp === v2? v2: tmp.car;
+                return (function(){
+                    try {
+                        return (function(){
+                            return (function(v610){
+                                return (function(){
+                                    var string = v610;
+                                    if (typeof string != 'string')
+                                        throw 'The value ' + string + ' is not a type string.';
+                                    return eval.apply(window, [string]);
                                 })();
-                                (v615)();
-                                v614 = (function(){
-                                    var tmp = v614;
-                                    return tmp === v2? v2: tmp.cdr;
+                            })((function(v611){
+                                (function(){
+                                    try {
+                                        return (function(){
+                                            return (function(v612,v613){
+                                                (function(){
+                                                    while(v612 !== v2){
+                                                        v613 = (function(){
+                                                            var tmp = v612;
+                                                            return tmp === v2? v2: tmp.car;
+                                                        })();
+                                                        (v613)();
+                                                        v612 = (function(){
+                                                            var tmp = v612;
+                                                            return tmp === v2? v2: tmp.cdr;
+                                                        })();
+                                                    }return v2;
+                                                })();
+                                                return v2;
+                                            })(v242,v2);
+                                        })();
+                                    }
+                                    catch (cf){
+                                        if (cf.type == 'block' && cf.id == 140)
+                                            return cf.value;
+                                        else
+                                            throw cf;
+                                    }
                                 })();
-                        }})();
-                        return v2;
-                    })(v244,v2);
-                    return v613;
-                })((function(){
-                    v244 = v2;
-                    f99();
-                    return f126(v611);
-                })()));
+                                return v611;
+                            })((function(){
+                                v242 = v2;
+                                f99();
+                                return f126(v609);
+                            })()));
+                        })();
+                    }
+                    catch (cf){
+                        if (cf.type == 'block' && cf.id == 139)
+                            return cf.value;
+                        else
+                            throw cf;
+                    }
+                })();
             }));
         })();
         return l209;
     })();
     return (function(){
-        var string = f67("var lisp = {};", "lisp.read = ", f105(l216, v2), ";", v169, "lisp.print = ", f105(l217, v2), ";", v169, "lisp.eval = ", f105(l218, v2), ";", v169, "lisp.compile = ", f105(l219, v2), ";", v169, "lisp.evalString = function(str){", v169, "   return lisp.eval(lisp.read(str));", v169, "}", v169, "lisp.compileString = function(str){", v169, "   return lisp.compile(lisp.read(str));", v169, "}", v169);
+        var string = f67("var lisp = {};", "lisp.read = ", f105(l216, v2), ";", v167, "lisp.print = ", f105(l217, v2), ";", v167, "lisp.eval = ", f105(l218, v2), ";", v167, "lisp.compile = ", f105(l219, v2), ";", v167, "lisp.evalString = function(str){", v167, "   return lisp.eval(lisp.read(str));", v167, "}", v167, "lisp.compileString = function(str){", v167, "   return lisp.compile(lisp.read(str));", v167, "}", v167);
         if (typeof string != 'string')
             throw 'The value ' + string + ' is not a type string.';
         return eval.apply(window, [string]);

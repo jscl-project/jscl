@@ -148,25 +148,27 @@
  (defmacro dolist (iter &body body)
    (let ((var (first iter))
          (g!list (gensym)))
-     `(let ((,g!list ,(second iter))
-            (,var nil))
-        (while ,g!list
-          (setq ,var (car ,g!list))
-          ,@body
-          (setq ,g!list (cdr ,g!list)))
-        ,(third iter))))
+     `(block nil
+        (let ((,g!list ,(second iter))
+              (,var nil))
+          (%while ,g!list
+            (setq ,var (car ,g!list))
+            ,@body
+            (setq ,g!list (cdr ,g!list)))
+          ,(third iter)))))
 
  (defmacro dotimes (iter &body body)
    (let ((g!to (gensym))
          (var (first iter))
          (to (second iter))
          (result (third iter)))
-     `(let ((,var 0)
-            (,g!to ,to))
-        (while (< ,var ,g!to)
-          ,@body
-          (incf ,var))
-        ,result)))
+     `(block nil
+        (let ((,var 0)
+              (,g!to ,to))
+          (%while (< ,var ,g!to)
+                  ,@body
+                  (incf ,var))
+          ,result))))
 
  (defmacro cond (&rest clausules)
    (if (null clausules)
