@@ -71,6 +71,9 @@
  (defun null (x)
    (eq x nil))
 
+ (defmacro return (value)
+   `(return-from nil ,value))
+
  (defun internp (name)
    (in name *package*))
 
@@ -676,7 +679,7 @@
   (setcar (cdddr b) t))
 
 (defun make-lexenv ()
-  (list nil nil))
+  (list nil nil nil))
 
 (defun copy-lexenv (lexenv)
   (copy-list lexenv))
@@ -686,7 +689,9 @@
     (variable
      (setcar lexenv (cons binding (car lexenv))))
     (function
-     (setcar (cdr lexenv) (cons binding (cadr lexenv))))))
+     (setcar (cdr lexenv) (cons binding (cadr lexenv))))
+    (block
+     (setcar (cddr lexenv) (cons binding (caddr lexenv))))))
 
 (defun extend-lexenv (binding lexenv namespace)
   (let ((env (copy-lexenv lexenv)))
@@ -695,15 +700,16 @@
 
 (defun lookup-in-lexenv (name lexenv namespace)
   (assoc name (ecase namespace
-                (variable (car lexenv))
-                (function (cadr lexenv)))))
+                (variable (first lexenv))
+                (function (second lexenv))
+                (block (third lexenv)))))
 
 (defvar *environment* (make-lexenv))
 
 (defun clear-undeclared-global-bindings ()
   (let ((variables (first *environment*))
         (functions (second *environment*)))
-    (list variables functions)))
+    (setq *environment* (list variables functions (third *environment*)))))
 
 
 (defvar *variable-counter* 0)
@@ -975,6 +981,36 @@
                                     values)
                             ",")
                 ")")))))
+
+
+(defvar *block-counter* 0)
+
+(define-compilation block (name &rest body)
+  (let ((tr (integer-to-string (incf *block-counter*))))
+    (let ((b (make-binding name 'block tr t)))
+      (concat "(function(){" *newline*
+              (indent "try {" *newline*
+                      (indent "return " (ls-compile `(progn ,@body)
+                                                    (extend-lexenv b env 'block))) ";" *newline*
+                      "}" *newline*
+                      "catch (cf){" *newline*
+                      "    if (cf.type == 'block' && cf.id == " tr ")" *newline*
+                      "        return cf.value;" *newline*
+                      "    else" *newline*
+                      "        throw cf;" *newline*
+                      "}" *newline*)
+              "})()" *newline*))))
+
+(define-compilation return-from (name &optional value)
+  (let ((b (lookup-in-lexenv name env 'block)))
+    (if b
+        (concat "(function(){ throw ({"
+                "type: 'block', "
+                "id: " (binding-translation b) ", "
+                "value: " (ls-compile value env) ", "
+                "message: 'Return from unknown block " (symbol-name name) ".'"
+                "})})()")
+        (error (concat "Unknown block `" (symbol-name name) "'.")))))
 
 ;;; A little backquote implementation without optimizations of any
 ;;; kind for ecmalisp.
@@ -1285,7 +1321,8 @@
                    (setq *variable-counter* ',*variable-counter*)
                    (setq *function-counter* ',*function-counter*)
                    (setq *literal-counter* ',*literal-counter*)
-                   (setq *gensym-counter* ',*gensym-counter*)))))
+                   (setq *gensym-counter* ',*gensym-counter*)
+                   (setq *block-counter* ',*block-counter*)))))
       (setq *toplevel-compilations*
             (append *toplevel-compilations* (list tmp)))))
 
@@ -1334,5 +1371,6 @@
     (setq *variable-counter* 0
           *gensym-counter* 0
           *function-counter* 0
-          *literal-counter* 0)
+          *literal-counter* 0
+          *block-counter* 0)
     (ls-compile-file "ecmalisp.lisp" "ecmalisp.js")))

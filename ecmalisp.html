@@ -83,7 +83,7 @@
                 try {
                     jqconsole.Write(lisp.print(lisp.evalString(input)) + '\n', 'jqconsole-return');
                 } catch(error) {
-                    jqconsole.Write('ERROR: ' + error + '\n', 'jqconsole-error');
+                    jqconsole.Write('ERROR: ' + (error.message || error) + '\n', 'jqconsole-error');
                 }
             } else {
                 jqconsole.Write(lisp.compileString(input.slice(1)) + '\n', 'jqconsole-return');
