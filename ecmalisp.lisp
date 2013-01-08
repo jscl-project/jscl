@@ -450,7 +450,7 @@
 
 ;;; Like CONCAT, but prefix each line with four spaces.
 (defun indent (&rest string)
-  (let ((input (!reduce #'concat string "")))
+  (let ((input (join string)))
     (let ((output "")
           (index 0)
           (size (length input)))
