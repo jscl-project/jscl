@@ -283,6 +283,11 @@
         (cons (funcall func (car list))
               (mapcar func (cdr list)))))
 
+  (defun identity (x) x)
+
+  (defun copy-list (x)
+    (mapcar #'identity x))
+
   (defun code-char (x) x)
   (defun char-code (x) x)
   (defun char= (x y) (= x y))
