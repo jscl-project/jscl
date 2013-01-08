@@ -1,6 +1,6 @@
 ;;; ecmalisp.lisp ---
 
-;; Copyright (C) 2012 David Vazquez
+;; Copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
 
 ;; This program is free software: you can redistribute it and/or
