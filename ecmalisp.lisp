@@ -71,7 +71,7 @@
  (defun null (x)
    (eq x nil))
 
- (defmacro return (value)
+ (defmacro return (&optional value)
    `(return-from nil ,value))
 
  (defmacro while (condition &body body)
@@ -393,12 +393,11 @@
       t))
 
   (defun assoc (x alist)
-    (let ((found nil))
-      (while (and alist (not found))
-        (if (eql x (caar alist))
-            (setq found t)
-            (setq alist (cdr alist))))
-      (car alist)))
+    (while alist
+      (if (eql x (caar alist))
+          (return)
+          (setq alist (cdr alist))))
+    (car alist))
 
   (defun string= (s1 s2)
     (equal s1 s2)))
