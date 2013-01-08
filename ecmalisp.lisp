@@ -510,7 +510,8 @@
     x)
 
   (defun print (x)
-    (write-line (print-to-string x))))
+    (write-line (print-to-string x))
+    x))
 
 
 ;;;; Reader
