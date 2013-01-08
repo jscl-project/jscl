@@ -55,7 +55,7 @@
        (eval-when-compile
          (%compile-defun ',name))
        (fsetq ,name (named-lambda ,(symbol-name name) ,args
-                      ,@body))))
+                      (block ,name ,@body)))))
 
   (defmacro defun (name args &rest body)
     `(%defun ,name ,args ,@body))
@@ -73,6 +73,9 @@
 
  (defmacro return (value)
    `(return-from nil ,value))
+
+ (defmacro while (condition &body body)
+   `(block nil (%while ,condition ,@body)))
 
  (defun internp (name)
    (in name *package*))
@@ -381,14 +384,13 @@
 
   (defun every (function seq)
     ;; string
-    (let ((ret t)
-          (index 0)
+    (let ((index 0)
           (size (length seq)))
-      (while (and ret (< index size))
+      (while (< index size)
         (unless (funcall function (char seq index))
-          (setq ret nil))
+          (return-from every nil))
         (incf index))
-      ret))
+      t))
 
   (defun assoc (x alist)
     (let ((found nil))
@@ -933,14 +935,13 @@
 (define-compilation quote (sexp)
   (literal sexp))
 
-(define-compilation while (pred &rest body)
+(define-compilation %while (pred &rest body)
   (concat "(function(){" *newline*
-          (indent "while("
-                  (ls-compile pred env)
-                  " !== "
-                  (ls-compile nil) "){" *newline*
-                  (indent (ls-compile-block body env)))
-          "}})()"))
+          (indent "while(" (ls-compile pred env) " !== " (ls-compile nil) "){" *newline*
+                  (indent (ls-compile-block body env))
+                  "}"
+                  "return " (ls-compile nil) ";" *newline*)
+          "})()"))
 
 (define-compilation function (x)
   (cond
@@ -999,7 +1000,7 @@
                       "    else" *newline*
                       "        throw cf;" *newline*
                       "}" *newline*)
-              "})()" *newline*))))
+              "})()"))))
 
 (define-compilation return-from (name &optional value)
   (let ((b (lookup-in-lexenv name env 'block)))
