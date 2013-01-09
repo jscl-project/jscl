@@ -993,7 +993,8 @@
       (concat "(function(){" *newline*
               (indent "try {" *newline*
                       (indent "return " (ls-compile `(progn ,@body)
-                                                    (extend-lexenv b env 'block))) ";" *newline*
+                                                    (extend-lexenv b env 'block))
+                              ";" *newline*)
                       "}" *newline*
                       "catch (cf){" *newline*
                       "    if (cf.type == 'block' && cf.id == " tr ")" *newline*
@@ -1013,6 +1014,31 @@
                 "message: 'Return from unknown block " (symbol-name name) ".'"
                 "})})()")
         (error (concat "Unknown block `" (symbol-name name) "'.")))))
+
+
+(define-compilation catch (id &rest body)
+  (concat "(function(){" *newline*
+          (indent "var id = " (ls-compile id env) ";" *newline*
+                  "try {" *newline*
+                  (indent "return " (ls-compile `(progn ,@body))
+                          ";" *newline*)
+                  "}" *newline*
+                  "catch (cf){" *newline*
+                  "    if (cf.type == 'catch' && cf.id == id)" *newline*
+                  "        return cf.value;" *newline*
+                  "    else" *newline*
+                  "        throw cf;" *newline*
+                  "}" *newline*)
+          "})()"))
+
+(define-compilation throw (id &optional value)
+  (concat "(function(){ throw ({"
+          "type: 'catch', "
+          "id: " (ls-compile id env) ", "
+          "value: " (ls-compile value env) ", "
+          "message: 'Throw uncatched.'"
+          "})})()"))
+
 
 ;;; A little backquote implementation without optimizations of any
 ;;; kind for ecmalisp.
