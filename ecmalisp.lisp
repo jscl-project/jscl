@@ -153,7 +153,7 @@
                (,var nil))
            (%while ,g!list
                    (setq ,var (car ,g!list))
-                   ,@body
+                   (tagbody ,@body)
                    (setq ,g!list (cdr ,g!list)))
            ,(third iter)))))
 
@@ -166,7 +166,7 @@
          (let ((,var 0)
                (,g!to ,to))
            (%while (< ,var ,g!to)
-                   ,@body
+                   (tagbody ,@body)
                    (incf ,var))
            ,result))))
 
