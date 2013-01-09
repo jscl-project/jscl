@@ -1039,6 +1039,17 @@
           "message: 'Throw uncatched.'"
           "})})()"))
 
+(define-compilation unwind-protect (form &rest clean-up)
+  (concat "(function(){" *newline*
+          (indent "var ret = " (ls-compile nil) ";" *newline*
+                  "try {" *newline*
+                  (indent "ret = " (ls-compile form env) ";" *newline*)
+                  "} finally {" *newline*
+                  (indent (ls-compile-block clean-up env))
+                  "}" *newline*
+                  "return ret;" *newline*)
+          "})()"))
+
 
 ;;; A little backquote implementation without optimizations of any
 ;;; kind for ecmalisp.
