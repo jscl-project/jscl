@@ -2672,30 +2672,20 @@ var f6;
     })();
     return l40;
 })(); 
-var l41 = f3("JS!SELFCALL");
+var l41 = f3("JS!BOOL");
 var f72;
 (function(){
     (function(){
         return f72 = (function(v195){
-            ((v195)["fname"] = "JS!SELFCALL");
+            ((v195)["fname"] = "JS!BOOL");
             return v195;
-        })((function (){
-            var v196= v2;
-            for (var i = arguments.length-1; i>=0; i--)
-                v196 = {car: arguments[i], cdr: v196};
+        })((function (v196){
+            if (arguments.length < 1) throw 'too few arguments';
+            if (arguments.length > 1) throw 'too many arguments';
             return (function(){
                 try {
                     return (function(){
-                        return f68("(function(){", v176, (function(){
-                            var f = f71;
-                            var args = [];
-                            var tail = (v196);
-                                while (tail != v2){
-                                    args.push(tail.car);
-                                    tail = tail.cdr;
-                                }
-                                return f.apply(this, args);
-                            })(), "})()");
+                        return f68("(", v196, "?", f73(v3), ": ", f73(v2), ")");
                     })();
                 }
                 catch (cf){
@@ -2710,15 +2700,15 @@ var f72;
     return l41;
 })(); 
 var l44 = f3("PRINT");
-var f76;
+var f77;
 var l43 = f3("WRITE-LINE");
-var f75;
+var f76;
 var l42 = f3("PRIN1-TO-STRING");
-var f73;
+var f74;
 (function(){
     (function(){
         (function(){
-            return f73 = (function(v197){
+            return f74 = (function(v197){
                 ((v197)["fname"] = "PRIN1-TO-STRING");
                 return v197;
             })((function (v198){
@@ -2735,7 +2725,7 @@ var f73;
                             })() : (f51(v198) !== v2 ? (function(){
                                 return f6(v198);
                             })() : (((typeof(v198) == "string")?v3: v2) !== v2 ? (function(){
-                                return f68("\"", f74(v198), "\"");
+                                return f68("\"", f75(v198), "\"");
                             })() : (((typeof v198 == 'function')?v3: v2) !== v2 ? (function(){
                                 return (function(v199){
                                     return (v199 !== v2 ? f68("#<FUNCTION ", v199, ">") : f68("#<FUNCTION>"));
@@ -2744,17 +2734,17 @@ var f73;
                                     return tmp == undefined? v2: tmp ;
                                 })());
                             })() : (f36(v198) !== v2 ? (function(){
-                                return f68("(", f70(f45(f73, f56(v198)), " "), (function(v200){
+                                return f68("(", f70(f45(f74, f56(v198)), " "), (function(v200){
                                     return (f1((function(){
                                         var tmp = v200;
                                         return tmp === v2? v2: tmp.cdr;
-                                    })()) !== v2 ? f73((function(){
+                                    })()) !== v2 ? f74((function(){
                                         var tmp = v200;
                                         return tmp === v2? v2: tmp.car;
-                                    })()) : f68(f73((function(){
+                                    })()) : f68(f74((function(){
                                         var tmp = v200;
                                         return tmp === v2? v2: tmp.car;
-                                    })()), " . ", f73((function(){
+                                    })()), " . ", f74((function(){
                                         var tmp = v200;
                                         return tmp === v2? v2: tmp.cdr;
                                     })())));
@@ -2775,7 +2765,7 @@ var f73;
     })();
     (function(){
         (function(){
-            return f75 = (function(v201){
+            return f76 = (function(v201){
                 ((v201)["fname"] = "WRITE-LINE");
                 return v201;
             })((function (v202){
@@ -2812,7 +2802,7 @@ var f73;
     })();
     return (function(){
         (function(){
-            return f76 = (function(v203){
+            return f77 = (function(v203){
                 ((v203)["fname"] = "PRINT");
                 return v203;
             })((function (v204){
@@ -2821,7 +2811,7 @@ var f73;
                 return (function(){
                     try {
                         return (function(){
-                            f75(f73(v204));
+                            f76(f74(v204));
                             return v204;
                         })();
                     }
@@ -2838,10 +2828,10 @@ var f73;
     })();
 })(); 
 var l45 = f3("MAKE-STRING-STREAM");
-var f77;
+var f78;
 (function(){
     (function(){
-        return f77 = (function(v205){
+        return f78 = (function(v205){
             ((v205)["fname"] = "MAKE-STRING-STREAM");
             return v205;
         })((function (v206){
@@ -2865,10 +2855,10 @@ var f77;
     return l45;
 })(); 
 var l46 = f3("%PEEK-CHAR");
-var f78;
+var f79;
 (function(){
     (function(){
-        return f78 = (function(v207){
+        return f79 = (function(v207){
             ((v207)["fname"] = "%PEEK-CHAR");
             return v207;
         })((function (v208){
@@ -2920,10 +2910,10 @@ var f78;
     return l46;
 })(); 
 var l47 = f3("%READ-CHAR");
-var f79;
+var f80;
 (function(){
     (function(){
-        return f79 = (function(v209){
+        return f80 = (function(v209){
             ((v209)["fname"] = "%READ-CHAR");
             return v209;
         })((function (v210){
@@ -2986,10 +2976,10 @@ var f79;
     return l47;
 })(); 
 var l48 = f3("WHITESPACEP");
-var f80;
+var f81;
 (function(){
     (function(){
-        return f80 = (function(v212){
+        return f81 = (function(v212){
             ((v212)["fname"] = "WHITESPACEP");
             return v212;
         })((function (v213){
@@ -3017,10 +3007,10 @@ var f80;
     return l48;
 })(); 
 var l49 = f3("SKIP-WHITESPACES");
-var f81;
+var f82;
 (function(){
     (function(){
-        return f81 = (function(v216){
+        return f82 = (function(v216){
             ((v216)["fname"] = "SKIP-WHITESPACES");
             return v216;
         })((function (v217){
@@ -3030,14 +3020,14 @@ var f81;
                 try {
                     return (function(){
                         return (function(v218){
-                            v218 = f78(v217);
+                            v218 = f79(v217);
                             return (function(){
                                 try {
                                     return (function(){
                                         return (function(){
-                                            while((v218 !== v2 ? f80(v218) : v2) !== v2){
-                                                f79(v217);
-                                                v218 = f78(v217);
+                                            while((v218 !== v2 ? f81(v218) : v2) !== v2){
+                                                f80(v217);
+                                                v218 = f79(v217);
                                             }return v2;
                                         })();
                                     })();
@@ -3064,10 +3054,10 @@ var f81;
     return l49;
 })(); 
 var l50 = f3("TERMINALP");
-var f82;
+var f83;
 (function(){
     (function(){
-        return f82 = (function(v219){
+        return f83 = (function(v219){
             ((v219)["fname"] = "TERMINALP");
             return v219;
         })((function (v220){
@@ -3081,7 +3071,7 @@ var f82;
                                 return (v222 !== v2 ? v222 : (function(v223){
                                     return (v223 !== v2 ? v223 : f50(40, v220));
                                 })(f50(41, v220)));
-                            })(f80(v220)));
+                            })(f81(v220)));
                         })(f1(v220));
                     })();
                 }
@@ -3097,10 +3087,10 @@ var f82;
     return l50;
 })(); 
 var l51 = f3("READ-UNTIL");
-var f83;
+var f84;
 (function(){
     (function(){
-        return f83 = (function(v224){
+        return f84 = (function(v224){
             ((v224)["fname"] = "READ-UNTIL");
             return v224;
         })((function (v225,v226){
@@ -3110,7 +3100,7 @@ var f83;
                 try {
                     return (function(){
                         return (function(v227,v228){
-                            v228 = f78(v225);
+                            v228 = f79(v225);
                             (function(){
                                 try {
                                     return (function(){
@@ -3122,8 +3112,8 @@ var f83;
                                                         throw 'The value ' + x + ' is not a type number.';
                                                     return String.fromCharCode(x);
                                                 })());
-                                                f79(v225);
-                                                v228 = f78(v225);
+                                                f80(v225);
+                                                v228 = f79(v225);
                                             }return v2;
                                         })();
                                     })();
@@ -3151,10 +3141,10 @@ var f83;
     return l51;
 })(); 
 var l52 = f3("SKIP-WHITESPACES-AND-COMMENTS");
-var f84;
+var f85;
 (function(){
     (function(){
-        return f84 = (function(v229){
+        return f85 = (function(v229){
             ((v229)["fname"] = "SKIP-WHITESPACES-AND-COMMENTS");
             return v229;
         })((function (v230){
@@ -3164,20 +3154,20 @@ var f84;
                 try {
                     return (function(){
                         return (function(v231){
-                            f81(v230);
-                            v231 = f78(v230);
+                            f82(v230);
+                            v231 = f79(v230);
                             return (function(){
                                 try {
                                     return (function(){
                                         return (function(){
                                             while((v231 !== v2 ? f50(v231, 59) : v2) !== v2){
-                                                f83(v230, (function (v232){
+                                                f84(v230, (function (v232){
                                                     if (arguments.length < 1) throw 'too few arguments';
                                                     if (arguments.length > 1) throw 'too many arguments';
                                                     return f50(v232, 10);
                                                 }));
-                                                f81(v230);
-                                                v231 = f78(v230);
+                                                f82(v230);
+                                                v231 = f79(v230);
                                             }return v2;
                                         })();
                                     })();
@@ -3204,10 +3194,10 @@ var f84;
     return l52;
 })(); 
 var l53 = f3("%READ-LIST");
-var f85;
+var f86;
 (function(){
     (function(){
-        return f85 = (function(v233){
+        return f86 = (function(v233){
             ((v233)["fname"] = "%READ-LIST");
             return v233;
         })((function (v234){
@@ -3216,26 +3206,26 @@ var f85;
             return (function(){
                 try {
                     return (function(){
-                        f84(v234);
+                        f85(v234);
                         return (function(v235){
                             return (f1(v235) !== v2 ? (function(){
                                 return (function (){ throw "Unspected EOF"; })();
                             })() : (f50(v235, 41) !== v2 ? (function(){
-                                f79(v234);
+                                f80(v234);
                                 return v2;
                             })() : (f50(v235, 46) !== v2 ? (function(){
-                                f79(v234);
+                                f80(v234);
                                 return (function(v236){
-                                    f84(v234);
-                                    (f50(f79(v234), 41) !== v2 ? v2 : (function(){
+                                    f85(v234);
+                                    (f50(f80(v234), 41) !== v2 ? v2 : (function(){
                                         return (function (){ throw "')' was expected."; })();
                                     })());
                                     return v236;
-                                })(f86(v234));
+                                })(f87(v234));
                             })() : (function(){
-                                return ({car: f86(v234), cdr: f85(v234)});
+                                return ({car: f87(v234), cdr: f86(v234)});
                             })())));
-                        })(f78(v234));
+                        })(f79(v234));
                     })();
                 }
                 catch (cf){
@@ -3250,10 +3240,10 @@ var f85;
     return l53;
 })(); 
 var l54 = f3("READ-STRING");
-var f87;
+var f88;
 (function(){
     (function(){
-        return f87 = (function(v237){
+        return f88 = (function(v237){
             ((v237)["fname"] = "READ-STRING");
             return v237;
         })((function (v238){
@@ -3263,7 +3253,7 @@ var f87;
                 try {
                     return (function(){
                         return (function(v239,v240){
-                            v240 = f79(v238);
+                            v240 = f80(v238);
                             (function(){
                                 try {
                                     return (function(){
@@ -3273,7 +3263,7 @@ var f87;
                                                     return (function (){ throw "Unexpected EOF"; })();
                                                 })() : v2);
                                                 (f16(v240, 92) !== v2 ? (function(){
-                                                    return v240 = f79(v238);
+                                                    return v240 = f80(v238);
                                                 })() : v2);
                                                 v239 = f68(v239, (function(){
                                                     var x = v240;
@@ -3281,7 +3271,7 @@ var f87;
                                                         throw 'The value ' + x + ' is not a type number.';
                                                     return String.fromCharCode(x);
                                                 })());
-                                                v240 = f79(v238);
+                                                v240 = f80(v238);
                                             }return v2;
                                         })();
                                     })();
@@ -3313,10 +3303,10 @@ var l58 = 43;
 var l57 = 92;
 var l56 = f3("FUNCTION");
 var l55 = 39;
-var f88;
+var f89;
 (function(){
     (function(){
-        return f88 = (function(v241){
+        return f89 = (function(v241){
             ((v241)["fname"] = "READ-SHARP");
             return v241;
         })((function (v242){
@@ -3325,10 +3315,10 @@ var f88;
             return (function(){
                 try {
                     return (function(){
-                        f79(v242);
+                        f80(v242);
                         return (function(v243){
                             return (f16(v243, l55) !== v2 ? (function(){
-                                return f33(l56, f86(v242));
+                                return f33(l56, f87(v242));
                             })() : (f16(v243, l57) !== v2 ? (function(){
                                 return (function(v244){
                                     return (f67(v244, "space") !== v2 ? (function(){
@@ -3349,26 +3339,26 @@ var f88;
                                         })());
                                     })())));
                                 })(f68((function(){
-                                    var x = f79(v242);
+                                    var x = f80(v242);
                                     if (typeof x != 'number')
                                         throw 'The value ' + x + ' is not a type number.';
                                     return String.fromCharCode(x);
-                                })(), f83(v242, f82)));
+                                })(), f84(v242, f83)));
                             })() : (f16(v243, l58) !== v2 ? (function(){
                                 return (function(v245){
                                     return (f67(v245, "common-lisp") !== v2 ? (function(){
-                                        f86(v242);
-                                        return f86(v242);
+                                        f87(v242);
+                                        return f87(v242);
                                     })() : (f67(v245, "ecmalisp") !== v2 ? (function(){
-                                        return f86(v242);
+                                        return f87(v242);
                                     })() : (function(){
                                         return (function (){ throw "Unknown reader form."; })();
                                     })()));
-                                })(f83(v242, f82));
+                                })(f84(v242, f83));
                             })() : (function(){
                                 return (function (){ throw "ECASE expression failed."; })();
                             })())));
-                        })(f79(v242));
+                        })(f80(v242));
                     })();
                 }
                 catch (cf){
@@ -3400,10 +3390,10 @@ var l64 = f3("UNQUOTE");
 var l63 = f3("UNQUOTE-SPLICING");
 var l62 = f3("BACKQUOTE");
 var l61 = f3("QUOTE");
-var f86;
+var f87;
 (function(){
     (function(){
-        return f86 = (function(v247){
+        return f87 = (function(v247){
             ((v247)["fname"] = "LS-READ");
             return v247;
         })((function (v248){
@@ -3412,30 +3402,30 @@ var f86;
             return (function(){
                 try {
                     return (function(){
-                        f84(v248);
+                        f85(v248);
                         return (function(v249){
                             return (f1(v249) !== v2 ? (function(){
                                 return v246;
                             })() : (f50(v249, 40) !== v2 ? (function(){
-                                f79(v248);
-                                return f85(v248);
+                                f80(v248);
+                                return f86(v248);
                             })() : (f50(v249, 39) !== v2 ? (function(){
-                                f79(v248);
-                                return f33(l61, f86(v248));
+                                f80(v248);
+                                return f33(l61, f87(v248));
                             })() : (f50(v249, 96) !== v2 ? (function(){
-                                f79(v248);
-                                return f33(l62, f86(v248));
+                                f80(v248);
+                                return f33(l62, f87(v248));
                             })() : (f50(v249, 34) !== v2 ? (function(){
-                                f79(v248);
-                                return f87(v248);
-                            })() : (f50(v249, 44) !== v2 ? (function(){
-                                f79(v248);
-                                return (f16(f78(v248), 64) !== v2 ? (function(){
-                                    f79(v248);
-                                    return f33(l63, f86(v248));
-                                })() : f33(l64, f86(v248)));
-                            })() : (f50(v249, 35) !== v2 ? (function(){
+                                f80(v248);
                                 return f88(v248);
+                            })() : (f50(v249, 44) !== v2 ? (function(){
+                                f80(v248);
+                                return (f16(f79(v248), 64) !== v2 ? (function(){
+                                    f80(v248);
+                                    return f33(l63, f87(v248));
+                                })() : f33(l64, f87(v248)));
+                            })() : (f50(v249, 35) !== v2 ? (function(){
+                                return f89(v248);
                             })() : (function(){
                                 return (function(v250){
                                     return (f65(f61, v250) !== v2 ? f63(v250) : f3((function(){
@@ -3444,9 +3434,9 @@ var f86;
                                             throw 'The value ' + x + ' is not a type string.';
                                         return x.toUpperCase();
                                     })()));
-                                })(f83(v248, f82));
+                                })(f84(v248, f83));
                             })())))))));
-                        })(f78(v248));
+                        })(f79(v248));
                     })();
                 }
                 catch (cf){
@@ -3461,10 +3451,10 @@ var f86;
     return l65;
 })(); 
 var l66 = f3("LS-READ-FROM-STRING");
-var f89;
+var f90;
 (function(){
     (function(){
-        return f89 = (function(v251){
+        return f90 = (function(v251){
             ((v251)["fname"] = "LS-READ-FROM-STRING");
             return v251;
         })((function (v252){
@@ -3473,7 +3463,7 @@ var f89;
             return (function(){
                 try {
                     return (function(){
-                        return f86(f77(v252));
+                        return f87(f78(v252));
                     })();
                 }
                 catch (cf){
@@ -3497,10 +3487,10 @@ var v253;
     return l68;
 })(); 
 var l69 = f3("MAKE-BINDING");
-var f90;
+var f91;
 (function(){
     (function(){
-        return f90 = (function(v254){
+        return f91 = (function(v254){
             ((v254)["fname"] = "MAKE-BINDING");
             return v254;
         })((function (v255,v256,v257,v258){
@@ -3524,10 +3514,10 @@ var f90;
     return l69;
 })(); 
 var l70 = f3("BINDING-NAME");
-var f91;
+var f92;
 (function(){
     (function(){
-        return f91 = (function(v259){
+        return f92 = (function(v259){
             ((v259)["fname"] = "BINDING-NAME");
             return v259;
         })((function (v260){
@@ -3551,10 +3541,10 @@ var f91;
     return l70;
 })(); 
 var l71 = f3("BINDING-TYPE");
-var f92;
+var f93;
 (function(){
     (function(){
-        return f92 = (function(v261){
+        return f93 = (function(v261){
             ((v261)["fname"] = "BINDING-TYPE");
             return v261;
         })((function (v262){
@@ -3578,10 +3568,10 @@ var f92;
     return l71;
 })(); 
 var l72 = f3("BINDING-TRANSLATION");
-var f93;
+var f94;
 (function(){
     (function(){
-        return f93 = (function(v263){
+        return f94 = (function(v263){
             ((v263)["fname"] = "BINDING-TRANSLATION");
             return v263;
         })((function (v264){
@@ -3605,10 +3595,10 @@ var f93;
     return l72;
 })(); 
 var l73 = f3("BINDING-DECLARED");
-var f94;
+var f95;
 (function(){
     (function(){
-        return f94 = (function(v265){
+        return f95 = (function(v265){
             ((v265)["fname"] = "BINDING-DECLARED");
             return v265;
         })((function (v266){
@@ -3632,10 +3622,10 @@ var f94;
     return l73;
 })(); 
 var l74 = f3("MARK-BINDING-AS-DECLARED");
-var f95;
+var f96;
 (function(){
     (function(){
-        return f95 = (function(v267){
+        return f96 = (function(v267){
             ((v267)["fname"] = "MARK-BINDING-AS-DECLARED");
             return v267;
         })((function (v268){
@@ -3664,10 +3654,10 @@ var f95;
     return l74;
 })(); 
 var l75 = f3("MAKE-LEXENV");
-var f96;
+var f97;
 (function(){
     (function(){
-        return f96 = (function(v269){
+        return f97 = (function(v269){
             ((v269)["fname"] = "MAKE-LEXENV");
             return v269;
         })((function (){
@@ -3690,10 +3680,10 @@ var f96;
     return l75;
 })(); 
 var l76 = f3("COPY-LEXENV");
-var f97;
+var f98;
 (function(){
     (function(){
-        return f97 = (function(v270){
+        return f98 = (function(v270){
             ((v270)["fname"] = "COPY-LEXENV");
             return v270;
         })((function (v271){
@@ -3721,10 +3711,10 @@ var l80 = f3("GOTAG");
 var l79 = f3("BLOCK");
 var l78 = f3("FUNCTION");
 var l77 = f3("VARIABLE");
-var f98;
+var f99;
 (function(){
     (function(){
-        return f98 = (function(v272){
+        return f99 = (function(v272){
             ((v272)["fname"] = "PUSH-TO-LEXENV");
             return v272;
         })((function (v273,v274,v275){
@@ -3786,10 +3776,10 @@ var f98;
     return l81;
 })(); 
 var l82 = f3("EXTEND-LEXENV");
-var f99;
+var f100;
 (function(){
     (function(){
-        return f99 = (function(v277){
+        return f100 = (function(v277){
             ((v277)["fname"] = "EXTEND-LEXENV");
             return v277;
         })((function (v278,v279,v280){
@@ -3809,7 +3799,7 @@ var f99;
                                                         var tmp = v282;
                                                         return tmp === v2? v2: tmp.car;
                                                     })();
-                                                    f98(v283, v281, v280);
+                                                    f99(v283, v281, v280);
                                                     v282 = (function(){
                                                         var tmp = v282;
                                                         return tmp === v2? v2: tmp.cdr;
@@ -3827,7 +3817,7 @@ var f99;
                                         throw cf;
                                 }
                             })();
-                        })(f97(v279));
+                        })(f98(v279));
                     })();
                 }
                 catch (cf){
@@ -3846,10 +3836,10 @@ var l86 = f3("GOTAG");
 var l85 = f3("BLOCK");
 var l84 = f3("FUNCTION");
 var l83 = f3("VARIABLE");
-var f100;
+var f101;
 (function(){
     (function(){
-        return f100 = (function(v284){
+        return f101 = (function(v284){
             ((v284)["fname"] = "LOOKUP-IN-LEXENV");
             return v284;
         })((function (v285,v286,v287){
@@ -3888,15 +3878,15 @@ var l88 = f3("*ENVIRONMENT*");
 var v289;
 (function(){
     (function(){
-        return v289 = f96();
+        return v289 = f97();
     })();
     return l88;
 })(); 
 var l89 = f3("CLEAR-UNDECLARED-GLOBAL-BINDINGS");
-var f101;
+var f102;
 (function(){
     (function(){
-        return f101 = (function(v290){
+        return f102 = (function(v290){
             ((v290)["fname"] = "CLEAR-UNDECLARED-GLOBAL-BINDINGS");
             return v290;
         })((function (){
@@ -3929,10 +3919,10 @@ var v293;
     return l90;
 })(); 
 var l91 = f3("GVARNAME");
-var f102;
+var f103;
 (function(){
     (function(){
-        return f102 = (function(v294){
+        return f103 = (function(v294){
             ((v294)["fname"] = "GVARNAME");
             return v294;
         })((function (v295){
@@ -3969,10 +3959,10 @@ var l95 = f3("VARIABLE");
 var l94 = f3("VARIABLE");
 var l93 = f3("VARIABLE");
 var l92 = f3("VARIABLE");
-var f103;
+var f104;
 (function(){
     (function(){
-        return f103 = (function(v296){
+        return f104 = (function(v296){
             ((v296)["fname"] = "LOOKUP-VARIABLE");
             return v296;
         })((function (v297,v298){
@@ -3984,17 +3974,17 @@ var f103;
                         return (function(v299){
                             return (v299 !== v2 ? v299 : (function(v300){
                                 return (v300 !== v2 ? v300 : (function(v301,v302){
-                                    f98(v302, v289, l92);
+                                    f99(v302, v289, l92);
                                     v253 = ({car: (function (){
                                         if (arguments.length > 0) throw 'too many arguments';
-                                        return (f100(v297, v289, l93) !== v2 ? v2 : (function(){
+                                        return (f101(v297, v289, l93) !== v2 ? v2 : (function(){
                                             return (function (){ throw f68("Undefined variable `", v301, "'"); })();
                                         })());
                                     }), cdr: v253});
                                     return v302;
-                                })((v297).name,f90(v297, l94, f102(v297), v2)));
-                            })(f100(v297, v289, l95)));
-                        })(f100(v297, v298, l96));
+                                })((v297).name,f91(v297, l94, f103(v297), v2)));
+                            })(f101(v297, v289, l95)));
+                        })(f101(v297, v298, l96));
                     })();
                 }
                 catch (cf){
@@ -4009,10 +3999,10 @@ var f103;
     return l97;
 })(); 
 var l98 = f3("LOOKUP-VARIABLE-TRANSLATION");
-var f104;
+var f105;
 (function(){
     (function(){
-        return f104 = (function(v303){
+        return f105 = (function(v303){
             ((v303)["fname"] = "LOOKUP-VARIABLE-TRANSLATION");
             return v303;
         })((function (v304,v305){
@@ -4021,7 +4011,7 @@ var f104;
             return (function(){
                 try {
                     return (function(){
-                        return f93(f103(v304, v305));
+                        return f94(f104(v304, v305));
                     })();
                 }
                 catch (cf){
@@ -4038,10 +4028,10 @@ var f104;
 var l101 = f3("EXTEND-LOCAL-ENV");
 var l100 = f3("VARIABLE");
 var l99 = f3("VARIABLE");
-var f105;
+var f106;
 (function(){
     (function(){
-        return f105 = (function(v306){
+        return f106 = (function(v306){
             ((v306)["fname"] = "EXTEND-LOCAL-ENV");
             return v306;
         })((function (v307,v308){
@@ -4062,8 +4052,8 @@ var f105;
                                                         return tmp === v2? v2: tmp.car;
                                                     })();
                                                     (function(v312){
-                                                        return f98(v312, v309, l99);
-                                                    })(f90(v311, l100, f102(v311), v3));
+                                                        return f99(v312, v309, l99);
+                                                    })(f91(v311, l100, f103(v311), v3));
                                                     v310 = (function(){
                                                         var tmp = v310;
                                                         return tmp === v2? v2: tmp.cdr;
@@ -4081,7 +4071,7 @@ var f105;
                                         throw cf;
                                 }
                             })();
-                        })(f97(v308));
+                        })(f98(v308));
                     })();
                 }
                 catch (cf){
@@ -4109,10 +4099,10 @@ var l106 = f3("FUNCTION");
 var l105 = f3("FUNCTION");
 var l104 = f3("FUNCTION");
 var l103 = f3("FUNCTION");
-var f106;
+var f107;
 (function(){
     (function(){
-        return f106 = (function(v314){
+        return f107 = (function(v314){
             ((v314)["fname"] = "LOOKUP-FUNCTION");
             return v314;
         })((function (v315,v316){
@@ -4124,15 +4114,15 @@ var f106;
                         return (function(v317){
                             return (v317 !== v2 ? v317 : (function(v318){
                                 return (v318 !== v2 ? v318 : (function(v319,v320){
-                                    f98(v320, v289, l103);
+                                    f99(v320, v289, l103);
                                     v253 = ({car: (function (){
                                         if (arguments.length > 0) throw 'too many arguments';
-                                        return (f94(f100(v315, v289, l104)) !== v2 ? v2 : (function(){
+                                        return (f95(f101(v315, v289, l104)) !== v2 ? v2 : (function(){
                                             return (function (){ throw f68("Undefined function `", v319, "'"); })();
                                         })());
                                     }), cdr: v253});
                                     return v320;
-                                })((v315).name,f90(v315, l105, f68("f", f6(v313 = (function(){
+                                })((v315).name,f91(v315, l105, f68("f", f6(v313 = (function(){
                                     var x = v313;
                                     var y = 1;
                                     if (typeof x != 'number')
@@ -4141,8 +4131,8 @@ var f106;
                                         throw 'The value ' + y + ' is not a type number.';
                                     return x+y;
                                 })())), v2)));
-                            })(f100(v315, v289, l106)));
-                        })(f100(v315, v316, l107));
+                            })(f101(v315, v289, l106)));
+                        })(f101(v315, v316, l107));
                     })();
                 }
                 catch (cf){
@@ -4157,10 +4147,10 @@ var f106;
     return l108;
 })(); 
 var l109 = f3("LOOKUP-FUNCTION-TRANSLATION");
-var f107;
+var f108;
 (function(){
     (function(){
-        return f107 = (function(v321){
+        return f108 = (function(v321){
             ((v321)["fname"] = "LOOKUP-FUNCTION-TRANSLATION");
             return v321;
         })((function (v322,v323){
@@ -4169,7 +4159,7 @@ var f107;
             return (function(){
                 try {
                     return (function(){
-                        return f93(f106(v322, v323));
+                        return f94(f107(v322, v323));
                     })();
                 }
                 catch (cf){
@@ -4192,10 +4182,10 @@ var v324;
     return l110;
 })(); 
 var l111 = f3("%COMPILE-DEFVAR");
-var f108;
+var f109;
 (function(){
     (function(){
-        return f108 = (function(v325){
+        return f109 = (function(v325){
             ((v325)["fname"] = "%COMPILE-DEFVAR");
             return v325;
         })((function (v326){
@@ -4205,9 +4195,9 @@ var f108;
                 try {
                     return (function(){
                         return (function(v327){
-                            f95(v327);
-                            return v324 = ({car: f68("var ", f93(v327)), cdr: v324});
-                        })(f103(v326, v289));
+                            f96(v327);
+                            return v324 = ({car: f68("var ", f94(v327)), cdr: v324});
+                        })(f104(v326, v289));
                     })();
                 }
                 catch (cf){
@@ -4222,10 +4212,10 @@ var f108;
     return l111;
 })(); 
 var l112 = f3("%COMPILE-DEFUN");
-var f109;
+var f110;
 (function(){
     (function(){
-        return f109 = (function(v328){
+        return f110 = (function(v328){
             ((v328)["fname"] = "%COMPILE-DEFUN");
             return v328;
         })((function (v329){
@@ -4235,9 +4225,9 @@ var f109;
                 try {
                     return (function(){
                         return (function(v330){
-                            f95(v330);
-                            return v324 = ({car: f68("var ", f93(v330)), cdr: v324});
-                        })(f106(v329, v289));
+                            f96(v330);
+                            return v324 = ({car: f68("var ", f94(v330)), cdr: v324});
+                        })(f107(v329, v289));
                     })();
                 }
                 catch (cf){
@@ -4254,10 +4244,10 @@ var f109;
 var l115 = f3("%COMPILE-DEFMACRO");
 var l114 = f3("FUNCTION");
 var l113 = f3("MACRO");
-var f110;
+var f111;
 (function(){
     (function(){
-        return f110 = (function(v331){
+        return f111 = (function(v331){
             ((v331)["fname"] = "%COMPILE-DEFMACRO");
             return v331;
         })((function (v332,v333){
@@ -4266,7 +4256,7 @@ var f110;
             return (function(){
                 try {
                     return (function(){
-                        return f98(f90(v332, l113, v333, v3), v289, l114);
+                        return f99(f91(v332, l113, v333, v3), v289, l114);
                     })();
                 }
                 catch (cf){
@@ -4289,10 +4279,10 @@ var v334;
     return l116;
 })(); 
 var l117 = f3("LS-COMPILE-BLOCK");
-var f111;
+var f112;
 (function(){
     (function(){
-        return f111 = (function(v335){
+        return f112 = (function(v335){
             ((v335)["fname"] = "LS-COMPILE-BLOCK");
             return v335;
         })((function (v336,v337){
@@ -4310,7 +4300,7 @@ var f111;
                         }), f45((function (v340){
                             if (arguments.length < 1) throw 'too few arguments';
                             if (arguments.length > 1) throw 'too many arguments';
-                            return f112(v340, v337);
+                            return f73(v340, v337);
                         }), v336)), f68(";", v176));
                     })();
                 }
@@ -4332,7 +4322,7 @@ v334 = ({car: f33(l118, (function (v341,v342,v343,v344){
     return (function(){
         try {
             return (function(){
-                return f68("(", f112(v342, v341), " !== ", f112(v2), " ? ", f112(v343, v341), " : ", f112(v344, v341), ")");
+                return f68("(", f73(v342, v341), " !== ", f73(v2), " ? ", f73(v343, v341), " : ", f73(v344, v341), ")");
             })();
         }
         catch (cf){
@@ -4531,7 +4521,7 @@ v334 = ({car: f33(l128, (function (v359,v360){
                         return f68("(function (", f69(f45((function (v367){
                             if (arguments.length < 1) throw 'too few arguments';
                             if (arguments.length > 1) throw 'too many arguments';
-                            return f104(v367, v366);
+                            return f105(v367, v366);
                         }), f39(v361, v362)), ","), "){", v176, f71((v361 !== v2 ? f68("if (arguments.length < ", f6(v364), ") throw 'too few arguments';", v176) : ""), (f17(v363) !== v2 ? f68("if (arguments.length > ", f6((function(){
                             var x = v364;
                             var y = v365;
@@ -4564,10 +4554,10 @@ v334 = ({car: f33(l128, (function (v359,v360){
                                                             if (typeof y != 'number')
                                                                 throw 'The value ' + y + ' is not a type number.';
                                                             return x+y;
-                                                        })()), ":", v176, f104((function(){
+                                                        })()), ":", v176, f105((function(){
                                                             var tmp = v371;
                                                             return tmp === v2? v2: tmp.car;
-                                                        })(), v366), "=", f112(f23(v371), v366), ";", v176), cdr: v369});
+                                                        })(), v366), "=", f73(f23(v371), v366), ";", v176), cdr: v369});
                                                         return v370 = (function(){
                                                             var x = v370;
                                                             var y = 1;
@@ -4593,7 +4583,7 @@ v334 = ({car: f33(l128, (function (v359,v360){
                                 return f69(f41(v369));
                             })();
                         })(f115(v360),v2,0), "}", v176) : ""), (v363 !== v2 ? (function(v372){
-                            return f68("var ", v372, "= ", f112(v2), ";", v176, "for (var i = arguments.length-1; i>=", f6((function(){
+                            return f68("var ", v372, "= ", f73(v2), ";", v176, "for (var i = arguments.length-1; i>=", f6((function(){
                                 var x = v364;
                                 var y = v365;
                                 if (typeof x != 'number')
@@ -4602,11 +4592,11 @@ v334 = ({car: f33(l128, (function (v359,v360){
                                     throw 'The value ' + y + ' is not a type number.';
                                 return x+y;
                             })()), "; i--)", v176, f71(v372, " = ", "{car: arguments[i], cdr: "), v372, "};", v176);
-                        })(f104(v363, v366)) : ""), f68(f111(f56(v358), v366), "return ", f112((function(){
+                        })(f105(v363, v366)) : ""), f68(f112(f56(v358), v366), "return ", f73((function(){
                             var tmp = f55(v358);
                             return tmp === v2? v2: tmp.car;
                         })(), v366), ";")), v176, "})");
-                    })(f43(v361),f43(v362),f105(f39(f35(v363), v361, v362), v359));
+                    })(f43(v361),f43(v362),f106(f39(f35(v363), v361, v362), v359));
                 })(f114(v360),f116(v360),f117(v360));
             })();
         }
@@ -4625,7 +4615,7 @@ v334 = ({car: f33(l129, (function (v373,v374,v375){
     return (function(){
         try {
             return (function(){
-                return f68(f107(v374, v373), " = ", f112(v375, v373));
+                return f68(f108(v374, v373), " = ", f73(v375, v373));
             })();
         }
         catch (cf){
@@ -4643,7 +4633,7 @@ v334 = ({car: f33(l130, (function (v376,v377,v378){
     return (function(){
         try {
             return (function(){
-                return f68(f104(v377, v376), " = ", f112(v378, v376));
+                return f68(f105(v377, v376), " = ", f73(v378, v376));
             })();
         }
         catch (cf){
@@ -4655,10 +4645,10 @@ v334 = ({car: f33(l130, (function (v376,v377,v378){
     })();
 })), cdr: v334}); 
 var l131 = f3("ESCAPE-STRING");
-var f74;
+var f75;
 (function(){
     (function(){
-        return f74 = (function(v379){
+        return f75 = (function(v379){
             ((v379)["fname"] = "ESCAPE-STRING");
             return v379;
         })((function (v380){
@@ -4758,12 +4748,12 @@ var f118;
                         return (f51(v387) !== v2 ? (function(){
                             return f6(v387);
                         })() : (((typeof(v387) == "string")?v3: v2) !== v2 ? (function(){
-                            return f68("\"", f74(v387), "\"");
+                            return f68("\"", f75(v387), "\"");
                         })() : (((function(){
                             var tmp = v387;
                             return (typeof tmp == 'object' && 'name' in tmp);
                         })()?v3: v2) !== v2 ? (function(){
-                            return f112(f39(f33(l132), f33(f74((v387).name))), v289);
+                            return f73(f39(f33(l132), f33(f75((v387).name))), v289);
                         })() : (((function(){
                             var tmp = v387;
                             return (typeof tmp == 'object' && 'car' in tmp);
@@ -4862,7 +4852,7 @@ v334 = ({car: f33(l137, (function (v395,v396){
     return (function(){
         try {
             return (function(){
-                return f68("(function(){", v176, f71("while(", f112(v396, v395), " !== ", f112(v2), "){", v176, f71(f111(v394, v395)), "}", "return ", f112(v2), ";", v176), "})()");
+                return f68("(function(){", v176, f71("while(", f73(v396, v395), " !== ", f73(v2), "){", v176, f71(f112(v394, v395)), "}", "return ", f73(v2), ";", v176), "})()");
             })();
         }
         catch (cf){
@@ -4885,12 +4875,12 @@ v334 = ({car: f33(l138, (function (v397,v398){
                     var tmp = v398;
                     return tmp === v2? v2: tmp.car;
                 })() === l139)?v3: v2) : v2) !== v2 ? (function(){
-                    return f112(v398, v397);
+                    return f73(v398, v397);
                 })() : (((function(){
                     var tmp = v398;
                     return (typeof tmp == 'object' && 'name' in tmp);
                 })()?v3: v2) !== v2 ? (function(){
-                    return f107(v398, v397);
+                    return f108(v398, v397);
                 })() : v2));
             })();
         }
@@ -4933,7 +4923,7 @@ v334 = ({car: f33(l142, (function (v402){
     return (function(){
         try {
             return (function(){
-                return f68("(function(){", v176, f71(f111(f56(v401), v402), "return ", f112((function(){
+                return f68("(function(){", v176, f71(f112(f56(v401), v402), "return ", f73((function(){
                     var tmp = f55(v401);
                     return tmp === v2? v2: tmp.car;
                 })(), v402), ";", v176), "})()");
@@ -4962,16 +4952,16 @@ v334 = ({car: f33(l143, (function (v404,v405){
                             return f68("(function(", f69(f45((function (v410){
                                 if (arguments.length < 1) throw 'too few arguments';
                                 if (arguments.length > 1) throw 'too many arguments';
-                                return f104(v410, v409);
-                            }), v407), ","), "){", v176, f71(f111(f56(v403), v409), "return ", f112((function(){
+                                return f105(v410, v409);
+                            }), v407), ","), "){", v176, f71(f112(f56(v403), v409), "return ", f73((function(){
                                 var tmp = f55(v403);
                                 return tmp === v2? v2: tmp.car;
                             })(), v409), ";", v176), "})(", f69(f45((function (v411){
                                 if (arguments.length < 1) throw 'too few arguments';
                                 if (arguments.length > 1) throw 'too many arguments';
-                                return f112(v411, v404);
+                                return f73(v411, v404);
                             }), v408), ","), ")");
-                        })(f105(v407, v404));
+                        })(f106(v407, v404));
                     })(f45(f29, v406),f45(f30, v406));
                 })(f45(f35, v405));
             })();
@@ -5006,8 +4996,8 @@ v334 = ({car: f33(l145, (function (v414,v415){
             return (function(){
                 return (function(v416){
                     return (function(v417){
-                        return f68("(function(){", v176, f71("try {", v176, f71("return ", f112(f39(f33(l146), v413), f99(f33(v417), v414, l147)), ";", v176), "}", v176, "catch (cf){", v176, "    if (cf.type == 'block' && cf.id == ", v416, ")", v176, "        return cf.value;", v176, "    else", v176, "        throw cf;", v176, "}", v176), "})()");
-                    })(f90(v415, l148, v416, v3));
+                        return f68("(function(){", v176, f71("try {", v176, f71("return ", f73(f39(f33(l146), v413), f100(f33(v417), v414, l147)), ";", v176), "}", v176, "catch (cf){", v176, "    if (cf.type == 'block' && cf.id == ", v416, ")", v176, "        return cf.value;", v176, "    else", v176, "        throw cf;", v176, "}", v176), "})()");
+                    })(f91(v415, l148, v416, v3));
                 })(f6(v412 = (function(){
                     var x = v412;
                     var y = 1;
@@ -5041,8 +5031,8 @@ v334 = ({car: f33(l149, (function (v418,v419,v420){
         try {
             return (function(){
                 return (function(v421){
-                    return (v421 !== v2 ? f68("(function(){ throw ({", "type: 'block', ", "id: ", f93(v421), ", ", "value: ", f112(v420, v418), ", ", "message: 'Return from unknown block ", (v419).name, ".'", "})})()") : (function (){ throw f68("Unknown block `", (v419).name, "'."); })());
-                })(f100(v419, v418, l150));
+                    return (v421 !== v2 ? f68("(function(){", v176, f71("throw ({", "type: 'block', ", "id: ", f94(v421), ", ", "value: ", f73(v420, v418), ", ", "message: 'Return from unknown block ", (v419).name, ".'", "})"), "})()") : (function (){ throw f68("Unknown block `", (v419).name, "'."); })());
+                })(f101(v419, v418, l150));
             })();
         }
         catch (cf){
@@ -5063,7 +5053,7 @@ v334 = ({car: f33(l151, (function (v423,v424){
     return (function(){
         try {
             return (function(){
-                return f68("(function(){", v176, f71("var id = ", f112(v424, v423), ";", v176, "try {", v176, f71("return ", f112(f39(f33(l152), v422)), ";", v176), "}", v176, "catch (cf){", v176, "    if (cf.type == 'catch' && cf.id == id)", v176, "        return cf.value;", v176, "    else", v176, "        throw cf;", v176, "}", v176), "})()");
+                return f68("(function(){", v176, f71("var id = ", f73(v424, v423), ";", v176, "try {", v176, f71("return ", f73(f39(f33(l152), v422)), ";", v176), "}", v176, "catch (cf){", v176, "    if (cf.type == 'catch' && cf.id == id)", v176, "        return cf.value;", v176, "    else", v176, "        throw cf;", v176, "}", v176), "})()");
             })();
         }
         catch (cf){
@@ -5086,7 +5076,7 @@ v334 = ({car: f33(l153, (function (v425,v426,v427){
     return (function(){
         try {
             return (function(){
-                return f68("(function(){ throw ({", "type: 'catch', ", "id: ", f112(v426, v425), ", ", "value: ", f112(v427, v425), ", ", "message: 'Throw uncatched.'", "})})()");
+                return f68("(function(){", v176, f71("throw ({", "type: 'catch', ", "id: ", f73(v426, v425), ", ", "value: ", f73(v427, v425), ", ", "message: 'Throw uncatched.'", "})"), "})()");
             })();
         }
         catch (cf){
@@ -5161,12 +5151,12 @@ var f122;
                 try {
                     return (function(){
                         return (function(v437){
-                            return f99(v437, v434, l157);
+                            return f100(v437, v434, l157);
                         })(f45((function (v438){
                             if (arguments.length < 1) throw 'too few arguments';
                             if (arguments.length > 1) throw 'too many arguments';
                             return (function(v439){
-                                return f90(v438, l158, f33(v435, v439), v3);
+                                return f91(v438, l158, f33(v435, v439), v3);
                             })(f6(v429 = (function(){
                                 var x = v429;
                                 var y = 1;
@@ -5204,7 +5194,7 @@ v334 = ({car: f33(l160, (function (v441){
         try {
             return (function(){
                 (f64(f121, v440) !== v2 ? v2 : (function(){
-                    return (function(){ throw ({type: 'block', id: 152, value: f112(f39(f33(l161), v440, f33(l162)), v441), message: 'Return from unknown block TAGBODY.'})})();
+                    return (function(){ throw ({type: 'block', id: 152, value: f73(f39(f33(l161), v440, f33(l162)), v441), message: 'Return from unknown block TAGBODY.'})})();
                 })());
                 (f121((function(){
                     var tmp = v440;
@@ -5215,9 +5205,9 @@ v334 = ({car: f33(l160, (function (v441){
                 return (function(v442){
                     return (function(v443,v444){
                         (function(v445){
-                            return v444 = f30(f93(v445));
-                        })(f100(f29(v440), v443, l163));
-                        return f72("var tagbody_", v442, " = ", v444, ";", v176, "tbloop:", v176, "while (true) {", v176, f71("try {", v176, f71((function(v446){
+                            return v444 = f30(f94(v445));
+                        })(f101(f29(v440), v443, l163));
+                        return f68("(function(){", v176, f71("var tagbody_", v442, " = ", v444, ";", v176, "tbloop:", v176, "while (true) {", v176, f71("try {", v176, f71((function(v446){
                             return f68("switch(tagbody_", v442, "){", v176, "case ", v444, ":", v176, (function(){
                                 try {
                                     return (function(){
@@ -5229,9 +5219,9 @@ v334 = ({car: f33(l160, (function (v441){
                                                         return tmp === v2? v2: tmp.car;
                                                     })();
                                                     v446 = f68(v446, (function(){
-                                                        return (f17(f121(v448)) !== v2 ? f71(f112(v448, v443), ";", v176) : (function(v449){
-                                                            return f68("case ", f30(f93(v449)), ":", v176);
-                                                        })(f100(v448, v443, l164)));
+                                                        return (f17(f121(v448)) !== v2 ? f71(f73(v448, v443), ";", v176) : (function(v449){
+                                                            return f68("case ", f30(f94(v449)), ":", v176);
+                                                        })(f101(v448, v443, l164)));
                                                     })());
                                                     v447 = (function(){
                                                         var tmp = v447;
@@ -5253,7 +5243,7 @@ v334 = ({car: f33(l160, (function (v441){
                                         throw cf;
                                 }
                             })(), "default:", v176, "    break tbloop;", v176, "}", v176);
-                        })("")), "}", v176, "catch (jump) {", v176, "    if (jump.type == 'tagbody' && jump.id == ", v442, ")", v176, "        tagbody_", v442, " = jump.label;", v176, "    else", v176, "        throw(jump);", v176, "}", v176), "}", v176, "return ", f112(v2), ";", v176);
+                        })("")), "}", v176, "catch (jump) {", v176, "    if (jump.type == 'tagbody' && jump.id == ", v442, ")", v176, "        tagbody_", v442, " = jump.label;", v176, "    else", v176, "        throw(jump);", v176, "}", v176), "}", v176, "return ", f73(v2), ";", v176), "})()");
                     })(f122(v441, v442, v440),v2);
                 })(f6(v428));
             })();
@@ -5275,8 +5265,8 @@ v334 = ({car: f33(l165, (function (v450,v451){
         try {
             return (function(){
                 return (function(v452,v453){
-                    return (v452 !== v2 ? f72(f68("throw ({", "type: 'tagbody', ", "id: ", f29(f93(v452)), ", ", "label: ", f30(f93(v452)), ", ", "message: 'Attempt to GO to non-existing tag ", v453, "'", "})")) : (function (){ throw f68("Unknown tag `", v453, "'."); })());
-                })(f100(v451, v450, l166),(((function(){
+                    return (v452 !== v2 ? f68("(function(){", v176, f71("throw ({", "type: 'tagbody', ", "id: ", f29(f94(v452)), ", ", "label: ", f30(f94(v452)), ", ", "message: 'Attempt to GO to non-existing tag ", v453, "'", "})", v176), "})()") : (function (){ throw f68("Unknown tag `", v453, "'."); })());
+                })(f101(v451, v450, l166),(((function(){
                     var tmp = v451;
                     return (typeof tmp == 'object' && 'name' in tmp);
                 })()?v3: v2) !== v2 ? (function(){
@@ -5303,7 +5293,7 @@ v334 = ({car: f33(l167, (function (v455,v456){
     return (function(){
         try {
             return (function(){
-                return f68("(function(){", v176, f71("var ret = ", f112(v2), ";", v176, "try {", v176, f71("ret = ", f112(v456, v455), ";", v176), "} finally {", v176, f71(f111(v454, v455)), "}", v176, "return ret;", v176), "})()");
+                return f68("(function(){", v176, f71("var ret = ", f73(v2), ";", v176, "try {", v176, f71("ret = ", f73(v456, v455), ";", v176), "} finally {", v176, f71(f112(v454, v455)), "}", v176, "return ret;", v176), "})()");
             })();
         }
         catch (cf){
@@ -5425,7 +5415,7 @@ v334 = ({car: f33(l179, (function (v462,v463){
     return (function(){
         try {
             return (function(){
-                return f112(f123(v463), v462);
+                return f73(f123(v463), v462);
             })();
         }
         catch (cf){
@@ -5436,20 +5426,22 @@ v334 = ({car: f33(l179, (function (v462,v463){
         }
     })();
 })), cdr: v334}); 
-var l180 = f3("COMPILE-BOOL");
+var l180 = f3("NUM-OP-NUM");
 var f125;
 (function(){
     (function(){
         return f125 = (function(v464){
-            ((v464)["fname"] = "COMPILE-BOOL");
+            ((v464)["fname"] = "NUM-OP-NUM");
             return v464;
-        })((function (v465){
-            if (arguments.length < 1) throw 'too few arguments';
-            if (arguments.length > 1) throw 'too many arguments';
+        })((function (v465,v466,v467){
+            if (arguments.length < 3) throw 'too few arguments';
+            if (arguments.length > 3) throw 'too many arguments';
             return (function(){
                 try {
                     return (function(){
-                        return f68("(", v465, "?", f112(v3), ": ", f112(v2), ")");
+                        return f68("(function(){", v176, f71(f68("var ", "x", " = ", v465, ";", v176), f68("var ", "y", " = ", v467, ";", v176), f68("if (typeof ", "x", " != '", "number", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", v176)), f68("if (typeof ", "y", " != '", "number", "')", v176, f71("throw 'The value ' + ", "y", " + ' is not a type ", "number", ".';", v176)), f68("return ", (function(){
+                            return f68("x", v466, "y");
+                        })(), ";", v176)), "})()");
                     })();
                 }
                 catch (cf){
@@ -5463,45 +5455,36 @@ var f125;
     })();
     return l180;
 })(); 
-var l181 = f3("NUM-OP-NUM");
-var f126;
-(function(){
-    (function(){
-        return f126 = (function(v466){
-            ((v466)["fname"] = "NUM-OP-NUM");
-            return v466;
-        })((function (v467,v468,v469){
-            if (arguments.length < 3) throw 'too few arguments';
-            if (arguments.length > 3) throw 'too many arguments';
-            return (function(){
-                try {
-                    return (function(){
-                        return f68("(function(){", v176, f71(f68("var ", "x", " = ", v467, ";", v176), f68("var ", "y", " = ", v469, ";", v176), f68("if (typeof ", "x", " != '", "number", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", v176)), f68("if (typeof ", "y", " != '", "number", "')", v176, f71("throw 'The value ' + ", "y", " + ' is not a type ", "number", ".';", v176)), f68("return ", (function(){
-                            return f68("x", v468, "y");
-                        })(), ";", v176)), "})()");
-                    })();
-                }
-                catch (cf){
-                    if (cf.type == 'block' && cf.id == 160)
-                        return cf.value;
-                    else
-                        throw cf;
-                }
-            })();
-        }));
-    })();
-    return l181;
-})(); 
-var l182 = f3("+");
-v334 = ({car: f33(l182, (function (v470,v471,v472){
+var l181 = f3("+");
+v334 = ({car: f33(l181, (function (v468,v469,v470){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v473,v474){
-                    return f126(v473, "+", v474);
-                })(f112(v471, v470),f112(v472, v470));
+                return (function(v471,v472){
+                    return f125(v471, "+", v472);
+                })(f73(v469, v468),f73(v470, v468));
+            })();
+        }
+        catch (cf){
+            if (cf.type == 'block' && cf.id == 160)
+                return cf.value;
+            else
+                throw cf;
+        }
+    })();
+})), cdr: v334}); 
+var l182 = f3("-");
+v334 = ({car: f33(l182, (function (v473,v474,v475){
+    if (arguments.length < 3) throw 'too few arguments';
+    if (arguments.length > 3) throw 'too many arguments';
+    return (function(){
+        try {
+            return (function(){
+                return (function(v476,v477){
+                    return f125(v476, "-", v477);
+                })(f73(v474, v473),f73(v475, v473));
             })();
         }
         catch (cf){
@@ -5512,16 +5495,16 @@ v334 = ({car: f33(l182, (function (v470,v471,v472){
         }
     })();
 })), cdr: v334}); 
-var l183 = f3("-");
-v334 = ({car: f33(l183, (function (v475,v476,v477){
+var l183 = f3("*");
+v334 = ({car: f33(l183, (function (v478,v479,v480){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v478,v479){
-                    return f126(v478, "-", v479);
-                })(f112(v476, v475),f112(v477, v475));
+                return (function(v481,v482){
+                    return f125(v481, "*", v482);
+                })(f73(v479, v478),f73(v480, v478));
             })();
         }
         catch (cf){
@@ -5532,16 +5515,16 @@ v334 = ({car: f33(l183, (function (v475,v476,v477){
         }
     })();
 })), cdr: v334}); 
-var l184 = f3("*");
-v334 = ({car: f33(l184, (function (v480,v481,v482){
+var l184 = f3("/");
+v334 = ({car: f33(l184, (function (v483,v484,v485){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v483,v484){
-                    return f126(v483, "*", v484);
-                })(f112(v481, v480),f112(v482, v480));
+                return (function(v486,v487){
+                    return f125(v486, "/", v487);
+                })(f73(v484, v483),f73(v485, v483));
             })();
         }
         catch (cf){
@@ -5552,16 +5535,16 @@ v334 = ({car: f33(l184, (function (v480,v481,v482){
         }
     })();
 })), cdr: v334}); 
-var l185 = f3("/");
-v334 = ({car: f33(l185, (function (v485,v486,v487){
+var l185 = f3("MOD");
+v334 = ({car: f33(l185, (function (v488,v489,v490){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v488,v489){
-                    return f126(v488, "/", v489);
-                })(f112(v486, v485),f112(v487, v485));
+                return (function(v491,v492){
+                    return f125(v491, "%", v492);
+                })(f73(v489, v488),f73(v490, v488));
             })();
         }
         catch (cf){
@@ -5572,16 +5555,16 @@ v334 = ({car: f33(l185, (function (v485,v486,v487){
         }
     })();
 })), cdr: v334}); 
-var l186 = f3("MOD");
-v334 = ({car: f33(l186, (function (v490,v491,v492){
+var l186 = f3("<");
+v334 = ({car: f33(l186, (function (v493,v494,v495){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v493,v494){
-                    return f126(v493, "%", v494);
-                })(f112(v491, v490),f112(v492, v490));
+                return (function(v496,v497){
+                    return f72(f125(v496, "<", v497));
+                })(f73(v494, v493),f73(v495, v493));
             })();
         }
         catch (cf){
@@ -5592,16 +5575,16 @@ v334 = ({car: f33(l186, (function (v490,v491,v492){
         }
     })();
 })), cdr: v334}); 
-var l187 = f3("<");
-v334 = ({car: f33(l187, (function (v495,v496,v497){
+var l187 = f3(">");
+v334 = ({car: f33(l187, (function (v498,v499,v500){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v498,v499){
-                    return f125(f126(v498, "<", v499));
-                })(f112(v496, v495),f112(v497, v495));
+                return (function(v501,v502){
+                    return f72(f125(v501, ">", v502));
+                })(f73(v499, v498),f73(v500, v498));
             })();
         }
         catch (cf){
@@ -5612,16 +5595,16 @@ v334 = ({car: f33(l187, (function (v495,v496,v497){
         }
     })();
 })), cdr: v334}); 
-var l188 = f3(">");
-v334 = ({car: f33(l188, (function (v500,v501,v502){
+var l188 = f3("=");
+v334 = ({car: f33(l188, (function (v503,v504,v505){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v503,v504){
-                    return f125(f126(v503, ">", v504));
-                })(f112(v501, v500),f112(v502, v500));
+                return (function(v506,v507){
+                    return f72(f125(v506, "==", v507));
+                })(f73(v504, v503),f73(v505, v503));
             })();
         }
         catch (cf){
@@ -5632,16 +5615,16 @@ v334 = ({car: f33(l188, (function (v500,v501,v502){
         }
     })();
 })), cdr: v334}); 
-var l189 = f3("=");
-v334 = ({car: f33(l189, (function (v505,v506,v507){
+var l189 = f3("<=");
+v334 = ({car: f33(l189, (function (v508,v509,v510){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v508,v509){
-                    return f125(f126(v508, "==", v509));
-                })(f112(v506, v505),f112(v507, v505));
+                return (function(v511,v512){
+                    return f72(f125(v511, "<=", v512));
+                })(f73(v509, v508),f73(v510, v508));
             })();
         }
         catch (cf){
@@ -5652,16 +5635,16 @@ v334 = ({car: f33(l189, (function (v505,v506,v507){
         }
     })();
 })), cdr: v334}); 
-var l190 = f3("<=");
-v334 = ({car: f33(l190, (function (v510,v511,v512){
+var l190 = f3(">=");
+v334 = ({car: f33(l190, (function (v513,v514,v515){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v513,v514){
-                    return f125(f126(v513, "<=", v514));
-                })(f112(v511, v510),f112(v512, v510));
+                return (function(v516,v517){
+                    return f72(f125(v516, ">=", v517));
+                })(f73(v514, v513),f73(v515, v513));
             })();
         }
         catch (cf){
@@ -5672,16 +5655,16 @@ v334 = ({car: f33(l190, (function (v510,v511,v512){
         }
     })();
 })), cdr: v334}); 
-var l191 = f3(">=");
-v334 = ({car: f33(l191, (function (v515,v516,v517){
-    if (arguments.length < 3) throw 'too few arguments';
-    if (arguments.length > 3) throw 'too many arguments';
+var l191 = f3("NUMBERP");
+v334 = ({car: f33(l191, (function (v518,v519){
+    if (arguments.length < 2) throw 'too few arguments';
+    if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v518,v519){
-                    return f125(f126(v518, ">=", v519));
-                })(f112(v516, v515),f112(v517, v515));
+                return (function(v520){
+                    return f72(f68("(typeof (", v520, ") == \"number\")"));
+                })(f73(v519, v518));
             })();
         }
         catch (cf){
@@ -5692,16 +5675,18 @@ v334 = ({car: f33(l191, (function (v515,v516,v517){
         }
     })();
 })), cdr: v334}); 
-var l192 = f3("NUMBERP");
-v334 = ({car: f33(l192, (function (v520,v521){
+var l192 = f3("FLOOR");
+v334 = ({car: f33(l192, (function (v521,v522){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v522){
-                    return f125(f68("(typeof (", v522, ") == \"number\")"));
-                })(f112(v521, v520));
+                return (function(v523){
+                    return f68("(function(){", v176, f71(f68("var ", "x", " = ", v523, ";", v176), f68("if (typeof ", "x", " != '", "number", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", v176)), f68("return ", (function(){
+                        return "Math.floor(x)";
+                    })(), ";", v176)), "})()");
+                })(f73(v522, v521));
             })();
         }
         catch (cf){
@@ -5712,18 +5697,16 @@ v334 = ({car: f33(l192, (function (v520,v521){
         }
     })();
 })), cdr: v334}); 
-var l193 = f3("FLOOR");
-v334 = ({car: f33(l193, (function (v523,v524){
-    if (arguments.length < 2) throw 'too few arguments';
-    if (arguments.length > 2) throw 'too many arguments';
+var l193 = f3("CONS");
+v334 = ({car: f33(l193, (function (v524,v525,v526){
+    if (arguments.length < 3) throw 'too few arguments';
+    if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v525){
-                    return f68("(function(){", v176, f71(f68("var ", "x", " = ", v525, ";", v176), f68("if (typeof ", "x", " != '", "number", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", v176)), f68("return ", (function(){
-                        return "Math.floor(x)";
-                    })(), ";", v176)), "})()");
-                })(f112(v524, v523));
+                return (function(v527,v528){
+                    return f68("({car: ", v527, ", cdr: ", v528, "})");
+                })(f73(v525, v524),f73(v526, v524));
             })();
         }
         catch (cf){
@@ -5734,16 +5717,16 @@ v334 = ({car: f33(l193, (function (v523,v524){
         }
     })();
 })), cdr: v334}); 
-var l194 = f3("CONS");
-v334 = ({car: f33(l194, (function (v526,v527,v528){
-    if (arguments.length < 3) throw 'too few arguments';
-    if (arguments.length > 3) throw 'too many arguments';
+var l194 = f3("CONSP");
+v334 = ({car: f33(l194, (function (v529,v530){
+    if (arguments.length < 2) throw 'too few arguments';
+    if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v529,v530){
-                    return f68("({car: ", v529, ", cdr: ", v530, "})");
-                })(f112(v527, v526),f112(v528, v526));
+                return (function(v531){
+                    return f72(f68("(function(){", v176, f71("var tmp = ", v531, ";", v176, "return (typeof tmp == 'object' && 'car' in tmp);", v176), "})()"));
+                })(f73(v530, v529));
             })();
         }
         catch (cf){
@@ -5754,16 +5737,16 @@ v334 = ({car: f33(l194, (function (v526,v527,v528){
         }
     })();
 })), cdr: v334}); 
-var l195 = f3("CONSP");
-v334 = ({car: f33(l195, (function (v531,v532){
+var l195 = f3("CAR");
+v334 = ({car: f33(l195, (function (v532,v533){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v533){
-                    return f125(f68("(function(){", v176, f71("var tmp = ", v533, ";", v176, "return (typeof tmp == 'object' && 'car' in tmp);", v176), "})()"));
-                })(f112(v532, v531));
+                return (function(v534){
+                    return f68("(function(){", v176, f71("var tmp = ", v534, ";", v176, "return tmp === ", f73(v2), "? ", f73(v2), ": tmp.car;", v176), "})()");
+                })(f73(v533, v532));
             })();
         }
         catch (cf){
@@ -5774,16 +5757,16 @@ v334 = ({car: f33(l195, (function (v531,v532){
         }
     })();
 })), cdr: v334}); 
-var l196 = f3("CAR");
-v334 = ({car: f33(l196, (function (v534,v535){
+var l196 = f3("CDR");
+v334 = ({car: f33(l196, (function (v535,v536){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v536){
-                    return f68("(function(){", v176, f71("var tmp = ", v536, ";", v176, "return tmp === ", f112(v2), "? ", f112(v2), ": tmp.car;", v176), "})()");
-                })(f112(v535, v534));
+                return (function(v537){
+                    return f68("(function(){", v176, f71("var tmp = ", v537, ";", v176, "return tmp === ", f73(v2), "? ", f73(v2), ": tmp.cdr;", v176), "})()");
+                })(f73(v536, v535));
             })();
         }
         catch (cf){
@@ -5794,16 +5777,18 @@ v334 = ({car: f33(l196, (function (v534,v535){
         }
     })();
 })), cdr: v334}); 
-var l197 = f3("CDR");
-v334 = ({car: f33(l197, (function (v537,v538){
-    if (arguments.length < 2) throw 'too few arguments';
-    if (arguments.length > 2) throw 'too many arguments';
+var l197 = f3("SETCAR");
+v334 = ({car: f33(l197, (function (v538,v539,v540){
+    if (arguments.length < 3) throw 'too few arguments';
+    if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v539){
-                    return f68("(function(){", v176, f71("var tmp = ", v539, ";", v176, "return tmp === ", f112(v2), "? ", f112(v2), ": tmp.cdr;", v176), "})()");
-                })(f112(v538, v537));
+                return (function(v541,v542){
+                    return f68("(function(){", v176, f71(f68("var ", "x", " = ", v541, ";", v176), f68("if (typeof ", "x", " != '", "object", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "object", ".';", v176)), f68("return ", (function(){
+                        return f68("(x.car = ", v542, ")");
+                    })(), ";", v176)), "})()");
+                })(f73(v539, v538),f73(v540, v538));
             })();
         }
         catch (cf){
@@ -5814,18 +5799,18 @@ v334 = ({car: f33(l197, (function (v537,v538){
         }
     })();
 })), cdr: v334}); 
-var l198 = f3("SETCAR");
-v334 = ({car: f33(l198, (function (v540,v541,v542){
+var l198 = f3("SETCDR");
+v334 = ({car: f33(l198, (function (v543,v544,v545){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v543,v544){
-                    return f68("(function(){", v176, f71(f68("var ", "x", " = ", v543, ";", v176), f68("if (typeof ", "x", " != '", "object", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "object", ".';", v176)), f68("return ", (function(){
-                        return f68("(x.car = ", v544, ")");
+                return (function(v546,v547){
+                    return f68("(function(){", v176, f71(f68("var ", "x", " = ", v546, ";", v176), f68("if (typeof ", "x", " != '", "object", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "object", ".';", v176)), f68("return ", (function(){
+                        return f68("(x.cdr = ", v547, ")");
                     })(), ";", v176)), "})()");
-                })(f112(v541, v540),f112(v542, v540));
+                })(f73(v544, v543),f73(v545, v543));
             })();
         }
         catch (cf){
@@ -5836,18 +5821,16 @@ v334 = ({car: f33(l198, (function (v540,v541,v542){
         }
     })();
 })), cdr: v334}); 
-var l199 = f3("SETCDR");
-v334 = ({car: f33(l199, (function (v545,v546,v547){
-    if (arguments.length < 3) throw 'too few arguments';
-    if (arguments.length > 3) throw 'too many arguments';
+var l199 = f3("SYMBOLP");
+v334 = ({car: f33(l199, (function (v548,v549){
+    if (arguments.length < 2) throw 'too few arguments';
+    if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v548,v549){
-                    return f68("(function(){", v176, f71(f68("var ", "x", " = ", v548, ";", v176), f68("if (typeof ", "x", " != '", "object", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "object", ".';", v176)), f68("return ", (function(){
-                        return f68("(x.cdr = ", v549, ")");
-                    })(), ";", v176)), "})()");
-                })(f112(v546, v545),f112(v547, v545));
+                return (function(v550){
+                    return f72(f68("(function(){", v176, f71("var tmp = ", v550, ";", v176, "return (typeof tmp == 'object' && 'name' in tmp);", v176), "})()"));
+                })(f73(v549, v548));
             })();
         }
         catch (cf){
@@ -5858,16 +5841,18 @@ v334 = ({car: f33(l199, (function (v545,v546,v547){
         }
     })();
 })), cdr: v334}); 
-var l200 = f3("SYMBOLP");
-v334 = ({car: f33(l200, (function (v550,v551){
+var l200 = f3("MAKE-SYMBOL");
+v334 = ({car: f33(l200, (function (v551,v552){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v552){
-                    return f125(f68("(function(){", v176, f71("var tmp = ", v552, ";", v176, "return (typeof tmp == 'object' && 'name' in tmp);", v176), "})()"));
-                })(f112(v551, v550));
+                return (function(v553){
+                    return f68("(function(){", v176, f71(f68("var ", "name", " = ", v553, ";", v176), f68("if (typeof ", "name", " != '", "string", "')", v176, f71("throw 'The value ' + ", "name", " + ' is not a type ", "string", ".';", v176)), f68("return ", (function(){
+                        return "({name: name})";
+                    })(), ";", v176)), "})()");
+                })(f73(v552, v551));
             })();
         }
         catch (cf){
@@ -5878,18 +5863,16 @@ v334 = ({car: f33(l200, (function (v550,v551){
         }
     })();
 })), cdr: v334}); 
-var l201 = f3("MAKE-SYMBOL");
-v334 = ({car: f33(l201, (function (v553,v554){
+var l201 = f3("SYMBOL-NAME");
+v334 = ({car: f33(l201, (function (v554,v555){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v555){
-                    return f68("(function(){", v176, f71(f68("var ", "name", " = ", v555, ";", v176), f68("if (typeof ", "name", " != '", "string", "')", v176, f71("throw 'The value ' + ", "name", " + ' is not a type ", "string", ".';", v176)), f68("return ", (function(){
-                        return "({name: name})";
-                    })(), ";", v176)), "})()");
-                })(f112(v554, v553));
+                return (function(v556){
+                    return f68("(", v556, ").name");
+                })(f73(v555, v554));
             })();
         }
         catch (cf){
@@ -5900,16 +5883,16 @@ v334 = ({car: f33(l201, (function (v553,v554){
         }
     })();
 })), cdr: v334}); 
-var l202 = f3("SYMBOL-NAME");
-v334 = ({car: f33(l202, (function (v556,v557){
-    if (arguments.length < 2) throw 'too few arguments';
-    if (arguments.length > 2) throw 'too many arguments';
+var l202 = f3("EQ");
+v334 = ({car: f33(l202, (function (v557,v558,v559){
+    if (arguments.length < 3) throw 'too few arguments';
+    if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v558){
-                    return f68("(", v558, ").name");
-                })(f112(v557, v556));
+                return (function(v560,v561){
+                    return f72(f68("(", v560, " === ", v561, ")"));
+                })(f73(v558, v557),f73(v559, v557));
             })();
         }
         catch (cf){
@@ -5920,16 +5903,16 @@ v334 = ({car: f33(l202, (function (v556,v557){
         }
     })();
 })), cdr: v334}); 
-var l203 = f3("EQ");
-v334 = ({car: f33(l203, (function (v559,v560,v561){
+var l203 = f3("EQUAL");
+v334 = ({car: f33(l203, (function (v562,v563,v564){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v562,v563){
-                    return f125(f68("(", v562, " === ", v563, ")"));
-                })(f112(v560, v559),f112(v561, v559));
+                return (function(v565,v566){
+                    return f72(f68("(", v565, " == ", v566, ")"));
+                })(f73(v563, v562),f73(v564, v562));
             })();
         }
         catch (cf){
@@ -5940,16 +5923,18 @@ v334 = ({car: f33(l203, (function (v559,v560,v561){
         }
     })();
 })), cdr: v334}); 
-var l204 = f3("EQUAL");
-v334 = ({car: f33(l204, (function (v564,v565,v566){
-    if (arguments.length < 3) throw 'too few arguments';
-    if (arguments.length > 3) throw 'too many arguments';
+var l204 = f3("STRING");
+v334 = ({car: f33(l204, (function (v567,v568){
+    if (arguments.length < 2) throw 'too few arguments';
+    if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v567,v568){
-                    return f125(f68("(", v567, " == ", v568, ")"));
-                })(f112(v565, v564),f112(v566, v564));
+                return (function(v569){
+                    return f68("(function(){", v176, f71(f68("var ", "x", " = ", v569, ";", v176), f68("if (typeof ", "x", " != '", "number", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", v176)), f68("return ", (function(){
+                        return "String.fromCharCode(x)";
+                    })(), ";", v176)), "})()");
+                })(f73(v568, v567));
             })();
         }
         catch (cf){
@@ -5960,18 +5945,16 @@ v334 = ({car: f33(l204, (function (v564,v565,v566){
         }
     })();
 })), cdr: v334}); 
-var l205 = f3("STRING");
-v334 = ({car: f33(l205, (function (v569,v570){
+var l205 = f3("STRINGP");
+v334 = ({car: f33(l205, (function (v570,v571){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v571){
-                    return f68("(function(){", v176, f71(f68("var ", "x", " = ", v571, ";", v176), f68("if (typeof ", "x", " != '", "number", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", v176)), f68("return ", (function(){
-                        return "String.fromCharCode(x)";
-                    })(), ";", v176)), "})()");
-                })(f112(v570, v569));
+                return (function(v572){
+                    return f72(f68("(typeof(", v572, ") == \"string\")"));
+                })(f73(v571, v570));
             })();
         }
         catch (cf){
@@ -5982,16 +5965,18 @@ v334 = ({car: f33(l205, (function (v569,v570){
         }
     })();
 })), cdr: v334}); 
-var l206 = f3("STRINGP");
-v334 = ({car: f33(l206, (function (v572,v573){
+var l206 = f3("STRING-UPCASE");
+v334 = ({car: f33(l206, (function (v573,v574){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v574){
-                    return f125(f68("(typeof(", v574, ") == \"string\")"));
-                })(f112(v573, v572));
+                return (function(v575){
+                    return f68("(function(){", v176, f71(f68("var ", "x", " = ", v575, ";", v176), f68("if (typeof ", "x", " != '", "string", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", v176)), f68("return ", (function(){
+                        return "x.toUpperCase()";
+                    })(), ";", v176)), "})()");
+                })(f73(v574, v573));
             })();
         }
         catch (cf){
@@ -6002,18 +5987,18 @@ v334 = ({car: f33(l206, (function (v572,v573){
         }
     })();
 })), cdr: v334}); 
-var l207 = f3("STRING-UPCASE");
-v334 = ({car: f33(l207, (function (v575,v576){
+var l207 = f3("STRING-LENGTH");
+v334 = ({car: f33(l207, (function (v576,v577){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v577){
-                    return f68("(function(){", v176, f71(f68("var ", "x", " = ", v577, ";", v176), f68("if (typeof ", "x", " != '", "string", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", v176)), f68("return ", (function(){
-                        return "x.toUpperCase()";
+                return (function(v578){
+                    return f68("(function(){", v176, f71(f68("var ", "x", " = ", v578, ";", v176), f68("if (typeof ", "x", " != '", "string", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", v176)), f68("return ", (function(){
+                        return "x.length";
                     })(), ";", v176)), "})()");
-                })(f112(v576, v575));
+                })(f73(v577, v576));
             })();
         }
         catch (cf){
@@ -6024,18 +6009,19 @@ v334 = ({car: f33(l207, (function (v575,v576){
         }
     })();
 })), cdr: v334}); 
-var l208 = f3("STRING-LENGTH");
-v334 = ({car: f33(l208, (function (v578,v579){
-    if (arguments.length < 2) throw 'too few arguments';
-    if (arguments.length > 2) throw 'too many arguments';
+var l208 = f3("SLICE");
+v334 = ({car: f33(l208, (function (v579,v580,v581,v582){
+    if (arguments.length < 3) throw 'too few arguments';
+    if (arguments.length > 4) throw 'too many arguments';
+    switch(arguments.length){
+    case 3:
+    v582=v2;
+    default: break;
+    }
     return (function(){
         try {
             return (function(){
-                return (function(v580){
-                    return f68("(function(){", v176, f71(f68("var ", "x", " = ", v580, ";", v176), f68("if (typeof ", "x", " != '", "string", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", v176)), f68("return ", (function(){
-                        return "x.length";
-                    })(), ";", v176)), "})()");
-                })(f112(v579, v578));
+                return f68("(function(){", v176, f71("var str = ", f73(v580, v579), ";", v176, "var a = ", f73(v581, v579), ";", v176, "var b;", v176, (v582 !== v2 ? f68("b = ", f73(v582, v579), ";", v176) : ""), "return str.slice(a,b);", v176), "})()");
             })();
         }
         catch (cf){
@@ -6046,19 +6032,18 @@ v334 = ({car: f33(l208, (function (v578,v579){
         }
     })();
 })), cdr: v334}); 
-var l209 = f3("SLICE");
-v334 = ({car: f33(l209, (function (v581,v582,v583,v584){
+var l209 = f3("CHAR");
+v334 = ({car: f33(l209, (function (v583,v584,v585){
     if (arguments.length < 3) throw 'too few arguments';
-    if (arguments.length > 4) throw 'too many arguments';
-    switch(arguments.length){
-    case 3:
-    v584=v2;
-    default: break;
-    }
+    if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return f68("(function(){", v176, f71("var str = ", f112(v582, v581), ";", v176, "var a = ", f112(v583, v581), ";", v176, "var b;", v176, (v584 !== v2 ? f68("b = ", f112(v584, v581), ";", v176) : ""), "return str.slice(a,b);", v176), "})()");
+                return (function(v586,v587){
+                    return f68("(function(){", v176, f71(f68("var ", "string", " = ", v586, ";", v176), f68("var ", "index", " = ", v587, ";", v176), f68("if (typeof ", "string", " != '", "string", "')", v176, f71("throw 'The value ' + ", "string", " + ' is not a type ", "string", ".';", v176)), f68("if (typeof ", "index", " != '", "number", "')", v176, f71("throw 'The value ' + ", "index", " + ' is not a type ", "number", ".';", v176)), f68("return ", (function(){
+                        return "string.charCodeAt(index)";
+                    })(), ";", v176)), "})()");
+                })(f73(v584, v583),f73(v585, v583));
             })();
         }
         catch (cf){
@@ -6069,18 +6054,18 @@ v334 = ({car: f33(l209, (function (v581,v582,v583,v584){
         }
     })();
 })), cdr: v334}); 
-var l210 = f3("CHAR");
-v334 = ({car: f33(l210, (function (v585,v586,v587){
+var l210 = f3("CONCAT-TWO");
+v334 = ({car: f33(l210, (function (v588,v589,v590){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v588,v589){
-                    return f68("(function(){", v176, f71(f68("var ", "string", " = ", v588, ";", v176), f68("var ", "index", " = ", v589, ";", v176), f68("if (typeof ", "string", " != '", "string", "')", v176, f71("throw 'The value ' + ", "string", " + ' is not a type ", "string", ".';", v176)), f68("if (typeof ", "index", " != '", "number", "')", v176, f71("throw 'The value ' + ", "index", " + ' is not a type ", "number", ".';", v176)), f68("return ", (function(){
-                        return "string.charCodeAt(index)";
+                return (function(v591,v592){
+                    return f68("(function(){", v176, f71(f68("var ", "string1", " = ", v591, ";", v176), f68("var ", "string2", " = ", v592, ";", v176), f68("if (typeof ", "string1", " != '", "string", "')", v176, f71("throw 'The value ' + ", "string1", " + ' is not a type ", "string", ".';", v176)), f68("if (typeof ", "string2", " != '", "string", "')", v176, f71("throw 'The value ' + ", "string2", " + ' is not a type ", "string", ".';", v176)), f68("return ", (function(){
+                        return "string1.concat(string2)";
                     })(), ";", v176)), "})()");
-                })(f112(v586, v585),f112(v587, v585));
+                })(f73(v589, v588),f73(v590, v588));
             })();
         }
         catch (cf){
@@ -6091,18 +6076,20 @@ v334 = ({car: f33(l210, (function (v585,v586,v587){
         }
     })();
 })), cdr: v334}); 
-var l211 = f3("CONCAT-TWO");
-v334 = ({car: f33(l211, (function (v590,v591,v592){
-    if (arguments.length < 3) throw 'too few arguments';
-    if (arguments.length > 3) throw 'too many arguments';
+var l211 = f3("FUNCALL");
+v334 = ({car: f33(l211, (function (v594,v595){
+    if (arguments.length < 2) throw 'too few arguments';
+    var v593= v2;
+    for (var i = arguments.length-1; i>=2; i--)
+        v593 = {car: arguments[i], cdr: v593};
     return (function(){
         try {
             return (function(){
-                return (function(v593,v594){
-                    return f68("(function(){", v176, f71(f68("var ", "string1", " = ", v593, ";", v176), f68("var ", "string2", " = ", v594, ";", v176), f68("if (typeof ", "string1", " != '", "string", "')", v176, f71("throw 'The value ' + ", "string1", " + ' is not a type ", "string", ".';", v176)), f68("if (typeof ", "string2", " != '", "string", "')", v176, f71("throw 'The value ' + ", "string2", " + ' is not a type ", "string", ".';", v176)), f68("return ", (function(){
-                        return "string1.concat(string2)";
-                    })(), ";", v176)), "})()");
-                })(f112(v591, v590),f112(v592, v590));
+                return f68("(", f73(v595, v594), ")(", f69(f45((function (v596){
+                    if (arguments.length < 1) throw 'too few arguments';
+                    if (arguments.length > 1) throw 'too many arguments';
+                    return f73(v596, v594);
+                }), v593), ", "), ")");
             })();
         }
         catch (cf){
@@ -6113,20 +6100,25 @@ v334 = ({car: f33(l211, (function (v590,v591,v592){
         }
     })();
 })), cdr: v334}); 
-var l212 = f3("FUNCALL");
-v334 = ({car: f33(l212, (function (v596,v597){
+var l212 = f3("APPLY");
+v334 = ({car: f33(l212, (function (v598,v599){
     if (arguments.length < 2) throw 'too few arguments';
-    var v595= v2;
+    var v597= v2;
     for (var i = arguments.length-1; i>=2; i--)
-        v595 = {car: arguments[i], cdr: v595};
+        v597 = {car: arguments[i], cdr: v597};
     return (function(){
         try {
             return (function(){
-                return f68("(", f112(v597, v596), ")(", f69(f45((function (v598){
-                    if (arguments.length < 1) throw 'too few arguments';
-                    if (arguments.length > 1) throw 'too many arguments';
-                    return f112(v598, v596);
-                }), v595), ", "), ")");
+                return (f1(v597) !== v2 ? f68("(", f73(v599, v598), ")()") : (function(v600,v601){
+                    return f68("(function(){", v176, f71("var f = ", f73(v599, v598), ";", v176, "var args = [", f69(f45((function (v602){
+                        if (arguments.length < 1) throw 'too few arguments';
+                        if (arguments.length > 1) throw 'too many arguments';
+                        return f73(v602, v598);
+                    }), v600), ", "), "];", v176, "var tail = (", f73(v601, v598), ");", v176, "while (tail != ", f73(v2), "){", v176, "    args.push(tail.car);", v176, "    tail = tail.cdr;", v176, "}", v176, "return f.apply(this, args);", v176), "})()");
+                })(f56(v597),(function(){
+                    var tmp = f55(v597);
+                    return tmp === v2? v2: tmp.car;
+                })()));
             })();
         }
         catch (cf){
@@ -6137,25 +6129,18 @@ v334 = ({car: f33(l212, (function (v596,v597){
         }
     })();
 })), cdr: v334}); 
-var l213 = f3("APPLY");
-v334 = ({car: f33(l213, (function (v600,v601){
+var l213 = f3("JS-EVAL");
+v334 = ({car: f33(l213, (function (v603,v604){
     if (arguments.length < 2) throw 'too few arguments';
-    var v599= v2;
-    for (var i = arguments.length-1; i>=2; i--)
-        v599 = {car: arguments[i], cdr: v599};
+    if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (f1(v599) !== v2 ? f68("(", f112(v601, v600), ")()") : (function(v602,v603){
-                    return f68("(function(){", v176, f71("var f = ", f112(v601, v600), ";", v176, "var args = [", f69(f45((function (v604){
-                        if (arguments.length < 1) throw 'too few arguments';
-                        if (arguments.length > 1) throw 'too many arguments';
-                        return f112(v604, v600);
-                    }), v602), ", "), "];", v176, "var tail = (", f112(v603, v600), ");", v176, f71("while (tail != ", f112(v2), "){", v176, "    args.push(tail.car);", v176, "    tail = tail.cdr;", v176, "}", v176, "return f.apply(this, args);", v176), "})()"));
-                })(f56(v599),(function(){
-                    var tmp = f55(v599);
-                    return tmp === v2? v2: tmp.car;
-                })()));
+                return (function(v605){
+                    return f68("(function(){", v176, f71(f68("var ", "string", " = ", v605, ";", v176), f68("if (typeof ", "string", " != '", "string", "')", v176, f71("throw 'The value ' + ", "string", " + ' is not a type ", "string", ".';", v176)), f68("return ", (function(){
+                        return "eval.apply(window, [string])";
+                    })(), ";", v176)), "})()");
+                })(f73(v604, v603));
             })();
         }
         catch (cf){
@@ -6166,18 +6151,16 @@ v334 = ({car: f33(l213, (function (v600,v601){
         }
     })();
 })), cdr: v334}); 
-var l214 = f3("JS-EVAL");
-v334 = ({car: f33(l214, (function (v605,v606){
+var l214 = f3("ERROR");
+v334 = ({car: f33(l214, (function (v606,v607){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v607){
-                    return f68("(function(){", v176, f71(f68("var ", "string", " = ", v607, ";", v176), f68("if (typeof ", "string", " != '", "string", "')", v176, f71("throw 'The value ' + ", "string", " + ' is not a type ", "string", ".';", v176)), f68("return ", (function(){
-                        return "eval.apply(window, [string])";
-                    })(), ";", v176)), "})()");
-                })(f112(v606, v605));
+                return (function(v608){
+                    return f68("(function(){", v176, f71("throw ", v608, ";", v176), "})()");
+                })(f73(v607, v606));
             })();
         }
         catch (cf){
@@ -6188,28 +6171,8 @@ v334 = ({car: f33(l214, (function (v605,v606){
         }
     })();
 })), cdr: v334}); 
-var l215 = f3("ERROR");
-v334 = ({car: f33(l215, (function (v608,v609){
-    if (arguments.length < 2) throw 'too few arguments';
-    if (arguments.length > 2) throw 'too many arguments';
-    return (function(){
-        try {
-            return (function(){
-                return (function(v610){
-                    return f68("(function (){ throw ", v610, "; })()");
-                })(f112(v609, v608));
-            })();
-        }
-        catch (cf){
-            if (cf.type == 'block' && cf.id == 194)
-                return cf.value;
-            else
-                throw cf;
-        }
-    })();
-})), cdr: v334}); 
-var l216 = f3("NEW");
-v334 = ({car: f33(l216, (function (v611){
+var l215 = f3("NEW");
+v334 = ({car: f33(l215, (function (v609){
     if (arguments.length < 1) throw 'too few arguments';
     if (arguments.length > 1) throw 'too many arguments';
     return (function(){
@@ -6221,6 +6184,26 @@ v334 = ({car: f33(l216, (function (v611){
             })();
         }
         catch (cf){
+            if (cf.type == 'block' && cf.id == 194)
+                return cf.value;
+            else
+                throw cf;
+        }
+    })();
+})), cdr: v334}); 
+var l216 = f3("GET");
+v334 = ({car: f33(l216, (function (v610,v611,v612){
+    if (arguments.length < 3) throw 'too few arguments';
+    if (arguments.length > 3) throw 'too many arguments';
+    return (function(){
+        try {
+            return (function(){
+                return (function(v613,v614){
+                    return f68("(function(){", v176, f71("var tmp = ", "(", v613, ")[", v614, "];", v176, "return tmp == undefined? ", f73(v2), ": tmp ;", v176), "})()");
+                })(f73(v611, v610),f73(v612, v610));
+            })();
+        }
+        catch (cf){
             if (cf.type == 'block' && cf.id == 195)
                 return cf.value;
             else
@@ -6228,16 +6211,16 @@ v334 = ({car: f33(l216, (function (v611){
         }
     })();
 })), cdr: v334}); 
-var l217 = f3("GET");
-v334 = ({car: f33(l217, (function (v612,v613,v614){
-    if (arguments.length < 3) throw 'too few arguments';
-    if (arguments.length > 3) throw 'too many arguments';
+var l217 = f3("SET");
+v334 = ({car: f33(l217, (function (v615,v616,v617,v618){
+    if (arguments.length < 4) throw 'too few arguments';
+    if (arguments.length > 4) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v615,v616){
-                    return f68("(function(){", v176, f71("var tmp = ", "(", v615, ")[", v616, "];", v176, "return tmp == undefined? ", f112(v2), ": tmp ;", v176), "})()");
-                })(f112(v613, v612),f112(v614, v612));
+                return (function(v619,v620,v621){
+                    return f68("((", v619, ")[", v620, "] = ", v621, ")");
+                })(f73(v616, v615),f73(v617, v615),f73(v618, v615));
             })();
         }
         catch (cf){
@@ -6248,16 +6231,16 @@ v334 = ({car: f33(l217, (function (v612,v613,v614){
         }
     })();
 })), cdr: v334}); 
-var l218 = f3("SET");
-v334 = ({car: f33(l218, (function (v617,v618,v619,v620){
-    if (arguments.length < 4) throw 'too few arguments';
-    if (arguments.length > 4) throw 'too many arguments';
+var l218 = f3("IN");
+v334 = ({car: f33(l218, (function (v622,v623,v624){
+    if (arguments.length < 3) throw 'too few arguments';
+    if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v621,v622,v623){
-                    return f68("((", v621, ")[", v622, "] = ", v623, ")");
-                })(f112(v618, v617),f112(v619, v617),f112(v620, v617));
+                return (function(v625,v626){
+                    return f72(f68("((", v625, ") in (", v626, "))"));
+                })(f73(v623, v622),f73(v624, v622));
             })();
         }
         catch (cf){
@@ -6268,16 +6251,16 @@ v334 = ({car: f33(l218, (function (v617,v618,v619,v620){
         }
     })();
 })), cdr: v334}); 
-var l219 = f3("IN");
-v334 = ({car: f33(l219, (function (v624,v625,v626){
-    if (arguments.length < 3) throw 'too few arguments';
-    if (arguments.length > 3) throw 'too many arguments';
+var l219 = f3("FUNCTIONP");
+v334 = ({car: f33(l219, (function (v627,v628){
+    if (arguments.length < 2) throw 'too few arguments';
+    if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v627,v628){
-                    return f125(f68("((", v627, ") in (", v628, "))"));
-                })(f112(v625, v624),f112(v626, v624));
+                return (function(v629){
+                    return f72(f68("(typeof ", v629, " == 'function')"));
+                })(f73(v628, v627));
             })();
         }
         catch (cf){
@@ -6288,16 +6271,18 @@ v334 = ({car: f33(l219, (function (v624,v625,v626){
         }
     })();
 })), cdr: v334}); 
-var l220 = f3("FUNCTIONP");
-v334 = ({car: f33(l220, (function (v629,v630){
+var l220 = f3("WRITE-STRING");
+v334 = ({car: f33(l220, (function (v630,v631){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v631){
-                    return f125(f68("(typeof ", v631, " == 'function')"));
-                })(f112(v630, v629));
+                return (function(v632){
+                    return f68("(function(){", v176, f71(f68("var ", "x", " = ", v632, ";", v176), f68("if (typeof ", "x", " != '", "string", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", v176)), f68("return ", (function(){
+                        return "lisp.write(x)";
+                    })(), ";", v176)), "})()");
+                })(f73(v631, v630));
             })();
         }
         catch (cf){
@@ -6308,46 +6293,72 @@ v334 = ({car: f33(l220, (function (v629,v630){
         }
     })();
 })), cdr: v334}); 
-var l221 = f3("WRITE-STRING");
-v334 = ({car: f33(l221, (function (v632,v633){
-    if (arguments.length < 2) throw 'too few arguments';
-    if (arguments.length > 2) throw 'too many arguments';
-    return (function(){
-        try {
-            return (function(){
-                return (function(v634){
-                    return f68("(function(){", v176, f71(f68("var ", "x", " = ", v634, ";", v176), f68("if (typeof ", "x", " != '", "string", "')", v176, f71("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", v176)), f68("return ", (function(){
-                        return "lisp.write(x)";
-                    })(), ";", v176)), "})()");
-                })(f112(v633, v632));
-            })();
-        }
-        catch (cf){
-            if (cf.type == 'block' && cf.id == 200)
-                return cf.value;
-            else
-                throw cf;
-        }
-    })();
-})), cdr: v334}); 
-var l223 = f3("MACROP");
-var l222 = f3("MACRO");
-var f127;
+var l222 = f3("MACROP");
+var l221 = f3("MACRO");
+var f126;
 (function(){
     (function(){
-        return f127 = (function(v635){
-            ((v635)["fname"] = "MACROP");
-            return v635;
-        })((function (v636){
+        return f126 = (function(v633){
+            ((v633)["fname"] = "MACROP");
+            return v633;
+        })((function (v634){
             if (arguments.length < 1) throw 'too few arguments';
             if (arguments.length > 1) throw 'too many arguments';
             return (function(){
                 try {
                     return (function(){
                         return (((function(){
-                            var tmp = v636;
+                            var tmp = v634;
                             return (typeof tmp == 'object' && 'name' in tmp);
-                        })()?v3: v2) !== v2 ? ((f92(f106(v636, v289)) === l222)?v3: v2) : v2);
+                        })()?v3: v2) !== v2 ? ((f93(f107(v634, v289)) === l221)?v3: v2) : v2);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 200)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
+        }));
+    })();
+    return l222;
+})(); 
+var l224 = f3("LS-MACROEXPAND-1");
+var l223 = f3("MACRO");
+var f127;
+(function(){
+    (function(){
+        return f127 = (function(v635){
+            ((v635)["fname"] = "LS-MACROEXPAND-1");
+            return v635;
+        })((function (v636,v637){
+            if (arguments.length < 2) throw 'too few arguments';
+            if (arguments.length > 2) throw 'too many arguments';
+            return (function(){
+                try {
+                    return (function(){
+                        return (f126((function(){
+                            var tmp = v636;
+                            return tmp === v2? v2: tmp.car;
+                        })()) !== v2 ? (function(v638){
+                            return (((f93(v638) === l223)?v3: v2) !== v2 ? (function(){
+                                var f = f120(f94(v638));
+                                var args = [];
+                                var tail = ((function(){
+                                    var tmp = v636;
+                                    return tmp === v2? v2: tmp.cdr;
+                                })());
+                                    while (tail != v2){
+                                        args.push(tail.car);
+                                        tail = tail.cdr;
+                                    }
+                                    return f.apply(this, args);
+                                })() : v636);
+                        })(f107((function(){
+                            var tmp = v636;
+                            return tmp === v2? v2: tmp.car;
+                        })(), v289)) : v636);
                     })();
                 }
                 catch (cf){
@@ -6359,43 +6370,43 @@ var f127;
             })();
         }));
     })();
-    return l223;
+    return l224;
 })(); 
-var l225 = f3("LS-MACROEXPAND-1");
-var l224 = f3("MACRO");
+var l226 = f3("COMPILE-FUNCALL");
+var l225 = f3("LAMBDA");
 var f128;
 (function(){
     (function(){
-        return f128 = (function(v637){
-            ((v637)["fname"] = "LS-MACROEXPAND-1");
-            return v637;
-        })((function (v638,v639){
-            if (arguments.length < 2) throw 'too few arguments';
-            if (arguments.length > 2) throw 'too many arguments';
+        return f128 = (function(v639){
+            ((v639)["fname"] = "COMPILE-FUNCALL");
+            return v639;
+        })((function (v640,v641,v642){
+            if (arguments.length < 3) throw 'too few arguments';
+            if (arguments.length > 3) throw 'too many arguments';
             return (function(){
                 try {
                     return (function(){
-                        return (f127((function(){
-                            var tmp = v638;
+                        return (((function(){
+                            var tmp = v640;
+                            return (typeof tmp == 'object' && 'name' in tmp);
+                        })()?v3: v2) !== v2 ? (function(){
+                            return f68(f108(v640, v642), "(", f69(f45((function (v643){
+                                if (arguments.length < 1) throw 'too few arguments';
+                                if (arguments.length > 1) throw 'too many arguments';
+                                return f73(v643, v642);
+                            }), v641), ", "), ")");
+                        })() : ((f36(v640) !== v2 ? (((function(){
+                            var tmp = v640;
                             return tmp === v2? v2: tmp.car;
-                        })()) !== v2 ? (function(v640){
-                            return (((f92(v640) === l224)?v3: v2) !== v2 ? (function(){
-                                var f = f120(f93(v640));
-                                var args = [];
-                                var tail = ((function(){
-                                    var tmp = v638;
-                                    return tmp === v2? v2: tmp.cdr;
-                                })());
-                                    while (tail != v2){
-                                        args.push(tail.car);
-                                        tail = tail.cdr;
-                                    }
-                                    return f.apply(this, args);
-                                })() : v638);
-                        })(f106((function(){
-                            var tmp = v638;
-                            return tmp === v2? v2: tmp.car;
-                        })(), v289)) : v638);
+                        })() === l225)?v3: v2) : v2) !== v2 ? (function(){
+                            return f68("(", f73(v640, v642), ")(", f69(f45((function (v644){
+                                if (arguments.length < 1) throw 'too few arguments';
+                                if (arguments.length > 1) throw 'too many arguments';
+                                return f73(v644, v642);
+                            }), v641), ", "), ")");
+                        })() : (function(){
+                            return (function (){ throw f68("Invalid function designator ", (v640).name); })();
+                        })()));
                     })();
                 }
                 catch (cf){
@@ -6407,43 +6418,67 @@ var f128;
             })();
         }));
     })();
-    return l225;
+    return l226;
 })(); 
-var l227 = f3("COMPILE-FUNCALL");
-var l226 = f3("LAMBDA");
-var f129;
+var l227 = f3("LS-COMPILE");
+var f73;
 (function(){
     (function(){
-        return f129 = (function(v641){
-            ((v641)["fname"] = "COMPILE-FUNCALL");
-            return v641;
-        })((function (v642,v643,v644){
-            if (arguments.length < 3) throw 'too few arguments';
-            if (arguments.length > 3) throw 'too many arguments';
+        return f73 = (function(v645){
+            ((v645)["fname"] = "LS-COMPILE");
+            return v645;
+        })((function (v646,v647){
+            if (arguments.length < 1) throw 'too few arguments';
+            if (arguments.length > 2) throw 'too many arguments';
+            switch(arguments.length){
+            case 1:
+            v647=f97();
+            default: break;
+            }
             return (function(){
                 try {
                     return (function(){
                         return (((function(){
-                            var tmp = v642;
+                            var tmp = v646;
                             return (typeof tmp == 'object' && 'name' in tmp);
                         })()?v3: v2) !== v2 ? (function(){
-                            return f68(f107(v642, v644), "(", f69(f45((function (v645){
-                                if (arguments.length < 1) throw 'too few arguments';
-                                if (arguments.length > 1) throw 'too many arguments';
-                                return f112(v645, v644);
-                            }), v643), ", "), ")");
-                        })() : ((f36(v642) !== v2 ? (((function(){
-                            var tmp = v642;
-                            return tmp === v2? v2: tmp.car;
-                        })() === l226)?v3: v2) : v2) !== v2 ? (function(){
-                            return f68("(", f112(v642, v644), ")(", f69(f45((function (v646){
-                                if (arguments.length < 1) throw 'too few arguments';
-                                if (arguments.length > 1) throw 'too many arguments';
-                                return f112(v646, v644);
-                            }), v643), ", "), ")");
-                        })() : (function(){
-                            return (function (){ throw f68("Invalid function designator ", (v642).name); })();
-                        })()));
+                            return f105(v646, v647);
+                        })() : (f51(v646) !== v2 ? (function(){
+                            return f6(v646);
+                        })() : (((typeof(v646) == "string")?v3: v2) !== v2 ? (function(){
+                            return f68("\"", f75(v646), "\"");
+                        })() : (f36(v646) !== v2 ? (function(){
+                            return (f66((function(){
+                                var tmp = v646;
+                                return tmp === v2? v2: tmp.car;
+                            })(), v334) !== v2 ? (function(v648){
+                                return (function(){
+                                    var f = v648;
+                                    var args = [v647];
+                                    var tail = ((function(){
+                                        var tmp = v646;
+                                        return tmp === v2? v2: tmp.cdr;
+                                    })());
+                                        while (tail != v2){
+                                            args.push(tail.car);
+                                            tail = tail.cdr;
+                                        }
+                                        return f.apply(this, args);
+                                    })();
+                            })(f30(f66((function(){
+                                var tmp = v646;
+                                return tmp === v2? v2: tmp.car;
+                            })(), v334))) : (f126((function(){
+                                var tmp = v646;
+                                return tmp === v2? v2: tmp.car;
+                            })()) !== v2 ? f73(f127(v646, v647), v647) : f128((function(){
+                                var tmp = v646;
+                                return tmp === v2? v2: tmp.car;
+                            })(), (function(){
+                                var tmp = v646;
+                                return tmp === v2? v2: tmp.cdr;
+                            })(), v647)));
+                        })() : v2))));
                     })();
                 }
                 catch (cf){
@@ -6457,65 +6492,30 @@ var f129;
     })();
     return l227;
 })(); 
-var l228 = f3("LS-COMPILE");
-var f112;
+var l228 = f3("LS-COMPILE-TOPLEVEL");
+var f129;
 (function(){
     (function(){
-        return f112 = (function(v647){
-            ((v647)["fname"] = "LS-COMPILE");
-            return v647;
-        })((function (v648,v649){
+        return f129 = (function(v649){
+            ((v649)["fname"] = "LS-COMPILE-TOPLEVEL");
+            return v649;
+        })((function (v650){
             if (arguments.length < 1) throw 'too few arguments';
-            if (arguments.length > 2) throw 'too many arguments';
-            switch(arguments.length){
-            case 1:
-            v649=f96();
-            default: break;
-            }
+            if (arguments.length > 1) throw 'too many arguments';
             return (function(){
                 try {
                     return (function(){
-                        return (((function(){
-                            var tmp = v648;
-                            return (typeof tmp == 'object' && 'name' in tmp);
-                        })()?v3: v2) !== v2 ? (function(){
-                            return f104(v648, v649);
-                        })() : (f51(v648) !== v2 ? (function(){
-                            return f6(v648);
-                        })() : (((typeof(v648) == "string")?v3: v2) !== v2 ? (function(){
-                            return f68("\"", f74(v648), "\"");
-                        })() : (f36(v648) !== v2 ? (function(){
-                            return (f66((function(){
-                                var tmp = v648;
-                                return tmp === v2? v2: tmp.car;
-                            })(), v334) !== v2 ? (function(v650){
-                                return (function(){
-                                    var f = v650;
-                                    var args = [v649];
-                                    var tail = ((function(){
-                                        var tmp = v648;
-                                        return tmp === v2? v2: tmp.cdr;
-                                    })());
-                                        while (tail != v2){
-                                            args.push(tail.car);
-                                            tail = tail.cdr;
-                                        }
-                                        return f.apply(this, args);
-                                    })();
-                            })(f30(f66((function(){
-                                var tmp = v648;
-                                return tmp === v2? v2: tmp.car;
-                            })(), v334))) : (f127((function(){
-                                var tmp = v648;
-                                return tmp === v2? v2: tmp.car;
-                            })()) !== v2 ? f112(f128(v648, v649), v649) : f129((function(){
-                                var tmp = v648;
-                                return tmp === v2? v2: tmp.car;
-                            })(), (function(){
-                                var tmp = v648;
-                                return tmp === v2? v2: tmp.cdr;
-                            })(), v649)));
-                        })() : v2))));
+                        v324 = v2;
+                        return (function(v651){
+                            return (function(v652){
+                                v324 = v2;
+                                return v652;
+                            })(f68(f69(f45((function (v653){
+                                if (arguments.length < 1) throw 'too few arguments';
+                                if (arguments.length > 1) throw 'too many arguments';
+                                return f68(v653, ";", v176);
+                            }), v324)), v651));
+                        })(f73(v650));
                     })();
                 }
                 catch (cf){
@@ -6529,96 +6529,59 @@ var f112;
     })();
     return l228;
 })(); 
-var l229 = f3("LS-COMPILE-TOPLEVEL");
-var f130;
-(function(){
-    (function(){
-        return f130 = (function(v651){
-            ((v651)["fname"] = "LS-COMPILE-TOPLEVEL");
-            return v651;
-        })((function (v652){
-            if (arguments.length < 1) throw 'too few arguments';
-            if (arguments.length > 1) throw 'too many arguments';
-            return (function(){
-                try {
-                    return (function(){
-                        v324 = v2;
-                        return (function(v653){
-                            return (function(v654){
-                                v324 = v2;
-                                return v654;
-                            })(f68(f69(f45((function (v655){
-                                if (arguments.length < 1) throw 'too few arguments';
-                                if (arguments.length > 1) throw 'too many arguments';
-                                return f68(v655, ";", v176);
-                            }), v324)), v653));
-                        })(f112(v652));
-                    })();
-                }
-                catch (cf){
-                    if (cf.type == 'block' && cf.id == 205)
-                        return cf.value;
-                    else
-                        throw cf;
-                }
-            })();
-        }));
-    })();
-    return l229;
-})(); 
-var l240 = f3("LS-COMPILE-TOPLEVEL");
-var l239 = f3("EVAL");
-var l238 = f3("PRIN1-TO-STRING");
-var l237 = f3("LS-READ-FROM-STRING");
-var l236 = 207;
-var l235 = 157;
-var l234 = 230;
-var l233 = 130;
-var l232 = 661;
-var l231 = {car: {car: {car: f3("*GO-TAG-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v429", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*TAGBODY-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v428", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*BLOCK-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v412", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*LITERAL-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v388", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*LAMBDA-LIST-KEYWORDS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v345", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*COMPILATIONS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v334", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*TOPLEVEL-COMPILATIONS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v324", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*FUNCTION-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v313", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*VARIABLE-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v293", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*ENVIRONMENT*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v289", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*COMPILATION-UNIT-CHECKS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v253", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*EOF*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v246", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*NEWLINE*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v176", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*GENSYM-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v12", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("T"), cdr: {car: f3("VARIABLE"), cdr: {car: "v3", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NIL"), cdr: {car: f3("VARIABLE"), cdr: {car: "v2", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*PACKAGE*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v1", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}}}}}}}}}}}}}}}, cdr: {car: {car: {car: f3("WITH-COMPILATION-UNIT"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROG1"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("SETQ"), cdr: {car: f3("*COMPILATION-UNIT-CHECKS*"), cdr: {car: f3("NIL"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("CLEAR-UNDECLARED-GLOBAL-BINDINGS"), cdr: f3("NIL")}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DOLIST"), cdr: {car: {car: f3("CHECK"), cdr: {car: f3("*COMPILATION-UNIT-CHECKS*"), cdr: f3("NIL")}}, cdr: {car: {car: f3("FUNCALL"), cdr: {car: f3("CHECK"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-COMPILE-TOPLEVEL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f130", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COMPILE-FUNCALL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f129", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-MACROEXPAND-1"), cdr: {car: f3("FUNCTION"), cdr: {car: "f128", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MACROP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f127", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NUM-OP-NUM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f126", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("TYPE-CHECK"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("DECLS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CONCAT"), cdr: {car: "(function(){", cdr: {car: f3("*NEWLINE*"), cdr: {car: {car: f3("INDENT"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("DECL"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CONCAT"), cdr: {car: "var ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: " = ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("THIRD"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: ";", cdr: {car: f3("*NEWLINE*"), cdr: f3("NIL")}}}}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("DECLS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("DECL"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CONCAT"), cdr: {car: "if (typeof ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: " != '", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: "')", cdr: {car: f3("*NEWLINE*"), cdr: {car: {car: f3("INDENT"), cdr: {car: "throw 'The value ' + ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: " + ' is not a type ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: ".';", cdr: {car: f3("*NEWLINE*"), cdr: f3("NIL")}}}}}}}, cdr: f3("NIL")}}}}}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("DECLS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("CONCAT"), cdr: {car: "return ", cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: ";", cdr: {car: f3("*NEWLINE*"), cdr: f3("NIL")}}}}}, cdr: f3("NIL")}}}}, cdr: {car: "})()", cdr: f3("NIL")}}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COMPILE-BOOL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f125", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFINE-BUILTIN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("DEFINE-COMPILATION"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ARG"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARG"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LS-COMPILE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARG"), cdr: f3("NIL")}}, cdr: {car: f3("ENV"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("ARGS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE-EXPAND-1"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE-EXPAND"), cdr: {car: f3("FUNCTION"), cdr: {car: "f124", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE-EXPAND-1"), cdr: {car: f3("FUNCTION"), cdr: {car: "f123", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DECLARE-TAGBODY-TAGS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f122", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("GO-TAG-P"), cdr: {car: f3("FUNCTION"), cdr: {car: "f121", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFINE-TRANSFORMATION"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("DEFINE-COMPILATION"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LS-COMPILE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: {car: f3("ENV"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EVAL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f120", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LITERAL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f119", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LITERAL->JS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f118", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-REST-ARGUMENT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f117", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-OPTIONAL-ARGUMENTS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f116", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f115", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-REQUIRED-ARGUMENTS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f114", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LIST-UNTIL-KEYWORD"), cdr: {car: f3("FUNCTION"), cdr: {car: "f113", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFINE-COMPILATION"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PUSH"), cdr: {car: {car: f3("LIST"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ENV"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("BLOCK"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("*COMPILATIONS*"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-COMPILE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f112", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-COMPILE-BLOCK"), cdr: {car: f3("FUNCTION"), cdr: {car: "f111", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%COMPILE-DEFMACRO"), cdr: {car: f3("FUNCTION"), cdr: {car: "f110", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%COMPILE-DEFUN"), cdr: {car: f3("FUNCTION"), cdr: {car: "f109", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%COMPILE-DEFVAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f108", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-FUNCTION-TRANSLATION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f107", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-FUNCTION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f106", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EXTEND-LOCAL-ENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f105", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-VARIABLE-TRANSLATION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f104", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-VARIABLE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f103", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("GVARNAME"), cdr: {car: f3("FUNCTION"), cdr: {car: "f102", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CLEAR-UNDECLARED-GLOBAL-BINDINGS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f101", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-IN-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f100", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EXTEND-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f99", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PUSH-TO-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f98", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COPY-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f97", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAKE-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f96", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MARK-BINDING-AS-DECLARED"), cdr: {car: f3("FUNCTION"), cdr: {car: "f95", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-DECLARED"), cdr: {car: f3("FUNCTION"), cdr: {car: "f94", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-TRANSLATION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f93", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-TYPE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f92", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-NAME"), cdr: {car: f3("FUNCTION"), cdr: {car: "f91", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAKE-BINDING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f90", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-READ-FROM-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f89", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("READ-SHARP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f88", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("READ-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f87", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-READ"), cdr: {car: f3("FUNCTION"), cdr: {car: "f86", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%READ-LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f85", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SKIP-WHITESPACES-AND-COMMENTS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f84", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("READ-UNTIL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f83", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("TERMINALP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f82", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SKIP-WHITESPACES"), cdr: {car: f3("FUNCTION"), cdr: {car: "f81", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("WHITESPACEP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f80", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%READ-CHAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f79", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%PEEK-CHAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f78", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAKE-STRING-STREAM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f77", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PRINT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f76", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("WRITE-LINE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f75", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ESCAPE-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f74", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PRIN1-TO-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f73", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("JS!SELFCALL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f72", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INDENT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f71", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("JOIN-TRAILING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f70", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("JOIN"), cdr: {car: f3("FUNCTION"), cdr: {car: "f69", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONCATF"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("VARIABLE"), cdr: {car: f3("&REST"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VARIABLE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("CONCAT"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VARIABLE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONCAT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f68", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("STRING="), cdr: {car: f3("FUNCTION"), cdr: {car: "f67", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ASSOC"), cdr: {car: f3("FUNCTION"), cdr: {car: "f66", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EVERY"), cdr: {car: f3("FUNCTION"), cdr: {car: "f65", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SOME"), cdr: {car: f3("FUNCTION"), cdr: {car: "f64", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PARSE-INTEGER"), cdr: {car: f3("FUNCTION"), cdr: {car: "f63", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SUBSEQ"), cdr: {car: f3("FUNCTION"), cdr: {car: "f62", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DIGIT-CHAR-P"), cdr: {car: f3("FUNCTION"), cdr: {car: "f61", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REMOVE-IF-NOT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f60", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REMOVE-IF"), cdr: {car: f3("FUNCTION"), cdr: {car: "f59", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REMOVE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f58", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MEMBER"), cdr: {car: f3("FUNCTION"), cdr: {car: "f57", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BUTLAST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f56", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f55", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f54", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MINUSP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f53", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PLUSP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f52", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTEGERP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f51", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CHAR="), cdr: {car: f3("FUNCTION"), cdr: {car: "f50", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CHAR-CODE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f49", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CODE-CHAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f48", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COPY-LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f47", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("IDENTITY"), cdr: {car: f3("FUNCTION"), cdr: {car: "f46", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAPCAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f45", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONCAT-TWO"), cdr: {car: f3("FUNCTION"), cdr: {car: "f44", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LENGTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f43", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LIST-LENGTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f42", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REVERSE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f41", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REVERSE-AUX"), cdr: {car: f3("FUNCTION"), cdr: {car: "f40", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("APPEND"), cdr: {car: f3("FUNCTION"), cdr: {car: "f39", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("APPEND-TWO"), cdr: {car: f3("FUNCTION"), cdr: {car: "f38", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFVAR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("&OPTIONAL"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("%DEFVAR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFUN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("%DEFUN"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("!REDUCE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f37", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LISTP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f36", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ENSURE-LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f35", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PROG1"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("VALUE"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("OR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("COND"), cdr: {car: {car: {car: f3("NULL"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("NULL"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("T"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("G"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G"), cdr: f3("NIL")}}, cdr: {car: {car: f3("OR"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("AND"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("COND"), cdr: {car: {car: {car: f3("NULL"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: f3("T"), cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("NULL"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("T"), cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("AND"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ECASE"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: {car: f3("&REST"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CASE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("APPEND"), cdr: {car: f3("CLAUSULES"), cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: {car: f3("T"), cdr: {car: {car: f3("ERROR"), cdr: {car: "ECASE expression failed.", cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CASE"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: {car: f3("&REST"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("!FORM"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("!FORM"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("COND"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("CLAUSULE"), cdr: f3("NIL")}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("EQ"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("CLAUSULE"), cdr: f3("NIL")}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}, cdr: {car: f3("CLAUSULE"), cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: {car: f3("EQL"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("!FORM"), cdr: f3("NIL")}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("CLAUSULE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("CLAUSULE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COND"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("NULL"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("EQ"), cdr: {car: {car: f3("CAAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("COND"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DOTIMES"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ITER"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("G!TO"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: {car: {car: f3("VAR"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("TO"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("RESULT"), cdr: {car: {car: f3("THIRD"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("BLOCK"), cdr: {car: f3("NIL"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: 0, cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!TO"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("TO"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("%WHILE"), cdr: {car: {car: f3("<"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!TO"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("INCF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("RESULT"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DOLIST"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ITER"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("VAR"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("G!LIST"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("BLOCK"), cdr: {car: f3("NIL"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("%WHILE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: {car: f3("CAR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: {car: {car: f3("CDR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("THIRD"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("UNLESS"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("CONDITION"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("CONDITION"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("WHEN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("CONDITION"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("CONDITION"), cdr: f3("NIL")}}, cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PUSH"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: {car: f3("PLACE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("PLACE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("CONS"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("PLACE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DECF"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: {car: f3("&OPTIONAL"), cdr: {car: {car: f3("DELTA"), cdr: {car: 1, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("-"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("DELTA"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INCF"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: {car: f3("&OPTIONAL"), cdr: {car: {car: f3("DELTA"), cdr: {car: 1, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("+"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("DELTA"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ATOM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f34", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f33", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("FOURTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f32", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("THIRD"), cdr: {car: f3("FUNCTION"), cdr: {car: "f31", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SECOND"), cdr: {car: f3("FUNCTION"), cdr: {car: "f30", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("FIRST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f29", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CADDDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f28", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDDDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f27", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CADDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f26", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f25", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f24", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CADR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f23", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CAAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f22", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f21", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f20", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONSP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f19", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f18", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NOT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f17", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EQL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f16", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("TRUNCATE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f15", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ZEROP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f14", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("1-"), cdr: {car: f3("FUNCTION"), cdr: {car: "f13", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("1+"), cdr: {car: f3("FUNCTION"), cdr: {car: "f12", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("/"), cdr: {car: f3("FUNCTION"), cdr: {car: "f11", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*"), cdr: {car: f3("FUNCTION"), cdr: {car: "f10", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("-"), cdr: {car: f3("FUNCTION"), cdr: {car: "f9", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("+"), cdr: {car: f3("FUNCTION"), cdr: {car: "f8", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("="), cdr: {car: f3("FUNCTION"), cdr: {car: "f7", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTEGER-TO-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f6", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("GENSYM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f5", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("FIND-SYMBOL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f4", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTERN"), cdr: {car: f3("FUNCTION"), cdr: {car: "f3", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTERNP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f2", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("WHILE"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("CONDITION"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("BLOCK"), cdr: {car: f3("NIL"), cdr: {car: {car: f3("%WHILE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("CONDITION"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("RETURN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&OPTIONAL"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("RETURN-FROM"), cdr: {car: f3("NIL"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NULL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f1", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFUN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("%DEFUN"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%DEFUN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("EVAL-WHEN-COMPILE"), cdr: {car: {car: f3("%COMPILE-DEFUN"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("FSETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("NAMED-LAMBDA"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SYMBOL-NAME"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BLOCK"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NAMED-LAMBDA"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("X"), cdr: {car: {car: f3("GENSYM"), cdr: {car: "FN", cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("SET"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: "fname", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFVAR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("&OPTIONAL"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("%DEFVAR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%DEFVAR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("EVAL-WHEN-COMPILE"), cdr: {car: {car: f3("%COMPILE-DEFVAR"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFMACRO"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("EVAL-WHEN-COMPILE"), cdr: {car: {car: f3("%COMPILE-DEFMACRO"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: f3("NIL")}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("EQ"), cdr: {car: f3("X"), cdr: {car: {car: f3("QUOTE"), cdr: {car: f3("&BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: f3("&REST"), cdr: f3("NIL")}}, cdr: {car: f3("X"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("ARGS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}, cdr: {car: f3("NIL"), cdr: {car: f3("NIL"), cdr: f3("NIL")}}}};
-var l230 = f3("EVAL");
+var l239 = f3("LS-COMPILE-TOPLEVEL");
+var l238 = f3("EVAL");
+var l237 = f3("PRIN1-TO-STRING");
+var l236 = f3("LS-READ-FROM-STRING");
+var l235 = 206;
+var l234 = 156;
+var l233 = 229;
+var l232 = 129;
+var l231 = 659;
+var l230 = {car: {car: {car: f3("*GO-TAG-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v429", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*TAGBODY-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v428", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*BLOCK-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v412", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*LITERAL-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v388", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*LAMBDA-LIST-KEYWORDS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v345", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*COMPILATIONS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v334", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*TOPLEVEL-COMPILATIONS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v324", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*FUNCTION-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v313", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*VARIABLE-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v293", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*ENVIRONMENT*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v289", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*COMPILATION-UNIT-CHECKS*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v253", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*EOF*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v246", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*NEWLINE*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v176", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*GENSYM-COUNTER*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v12", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("T"), cdr: {car: f3("VARIABLE"), cdr: {car: "v3", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NIL"), cdr: {car: f3("VARIABLE"), cdr: {car: "v2", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*PACKAGE*"), cdr: {car: f3("VARIABLE"), cdr: {car: "v1", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}}}}}}}}}}}}}}}, cdr: {car: {car: {car: f3("WITH-COMPILATION-UNIT"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROG1"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("SETQ"), cdr: {car: f3("*COMPILATION-UNIT-CHECKS*"), cdr: {car: f3("NIL"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("CLEAR-UNDECLARED-GLOBAL-BINDINGS"), cdr: f3("NIL")}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DOLIST"), cdr: {car: {car: f3("CHECK"), cdr: {car: f3("*COMPILATION-UNIT-CHECKS*"), cdr: f3("NIL")}}, cdr: {car: {car: f3("FUNCALL"), cdr: {car: f3("CHECK"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-COMPILE-TOPLEVEL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f129", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COMPILE-FUNCALL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f128", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-MACROEXPAND-1"), cdr: {car: f3("FUNCTION"), cdr: {car: "f127", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MACROP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f126", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NUM-OP-NUM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f125", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("TYPE-CHECK"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("DECLS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("JS!SELFCALL"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("DECL"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CONCAT"), cdr: {car: "var ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: " = ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("THIRD"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: ";", cdr: {car: f3("*NEWLINE*"), cdr: f3("NIL")}}}}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("DECLS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("DECL"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CONCAT"), cdr: {car: "if (typeof ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: " != '", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: "')", cdr: {car: f3("*NEWLINE*"), cdr: {car: {car: f3("INDENT"), cdr: {car: "throw 'The value ' + ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: " + ' is not a type ", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("DECL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: ".';", cdr: {car: f3("*NEWLINE*"), cdr: f3("NIL")}}}}}}}, cdr: f3("NIL")}}}}}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("DECLS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("CONCAT"), cdr: {car: "return ", cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: ";", cdr: {car: f3("*NEWLINE*"), cdr: f3("NIL")}}}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFINE-BUILTIN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("DEFINE-COMPILATION"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ARG"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARG"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LS-COMPILE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARG"), cdr: f3("NIL")}}, cdr: {car: f3("ENV"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("ARGS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE-EXPAND-1"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE-EXPAND"), cdr: {car: f3("FUNCTION"), cdr: {car: "f124", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE-EXPAND-1"), cdr: {car: f3("FUNCTION"), cdr: {car: "f123", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DECLARE-TAGBODY-TAGS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f122", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("GO-TAG-P"), cdr: {car: f3("FUNCTION"), cdr: {car: "f121", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFINE-TRANSFORMATION"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("DEFINE-COMPILATION"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LS-COMPILE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: {car: f3("ENV"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EVAL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f120", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LITERAL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f119", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LITERAL->JS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f118", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-REST-ARGUMENT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f117", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-OPTIONAL-ARGUMENTS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f116", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f115", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAMBDA-LIST-REQUIRED-ARGUMENTS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f114", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LIST-UNTIL-KEYWORD"), cdr: {car: f3("FUNCTION"), cdr: {car: "f113", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFINE-COMPILATION"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PUSH"), cdr: {car: {car: f3("LIST"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ENV"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("BLOCK"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("*COMPILATIONS*"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-COMPILE-BLOCK"), cdr: {car: f3("FUNCTION"), cdr: {car: "f112", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%COMPILE-DEFMACRO"), cdr: {car: f3("FUNCTION"), cdr: {car: "f111", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%COMPILE-DEFUN"), cdr: {car: f3("FUNCTION"), cdr: {car: "f110", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%COMPILE-DEFVAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f109", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-FUNCTION-TRANSLATION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f108", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-FUNCTION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f107", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EXTEND-LOCAL-ENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f106", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-VARIABLE-TRANSLATION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f105", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-VARIABLE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f104", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("GVARNAME"), cdr: {car: f3("FUNCTION"), cdr: {car: "f103", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CLEAR-UNDECLARED-GLOBAL-BINDINGS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f102", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LOOKUP-IN-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f101", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EXTEND-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f100", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PUSH-TO-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f99", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COPY-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f98", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAKE-LEXENV"), cdr: {car: f3("FUNCTION"), cdr: {car: "f97", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MARK-BINDING-AS-DECLARED"), cdr: {car: f3("FUNCTION"), cdr: {car: "f96", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-DECLARED"), cdr: {car: f3("FUNCTION"), cdr: {car: "f95", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-TRANSLATION"), cdr: {car: f3("FUNCTION"), cdr: {car: "f94", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-TYPE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f93", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BINDING-NAME"), cdr: {car: f3("FUNCTION"), cdr: {car: "f92", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAKE-BINDING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f91", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-READ-FROM-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f90", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("READ-SHARP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f89", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("READ-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f88", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-READ"), cdr: {car: f3("FUNCTION"), cdr: {car: "f87", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%READ-LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f86", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SKIP-WHITESPACES-AND-COMMENTS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f85", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("READ-UNTIL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f84", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("TERMINALP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f83", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SKIP-WHITESPACES"), cdr: {car: f3("FUNCTION"), cdr: {car: "f82", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("WHITESPACEP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f81", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%READ-CHAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f80", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%PEEK-CHAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f79", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAKE-STRING-STREAM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f78", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PRINT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f77", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("WRITE-LINE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f76", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ESCAPE-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f75", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PRIN1-TO-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f74", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("JS!SELFCALL"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CONCAT"), cdr: {car: "(function(){", cdr: {car: f3("*NEWLINE*"), cdr: {car: {car: f3("INDENT"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: "})()", cdr: f3("NIL")}}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LS-COMPILE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f73", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("JS!BOOL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f72", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INDENT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f71", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("JOIN-TRAILING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f70", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("JOIN"), cdr: {car: f3("FUNCTION"), cdr: {car: "f69", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONCATF"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("VARIABLE"), cdr: {car: f3("&REST"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VARIABLE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("CONCAT"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VARIABLE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONCAT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f68", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("STRING="), cdr: {car: f3("FUNCTION"), cdr: {car: "f67", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ASSOC"), cdr: {car: f3("FUNCTION"), cdr: {car: "f66", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EVERY"), cdr: {car: f3("FUNCTION"), cdr: {car: "f65", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SOME"), cdr: {car: f3("FUNCTION"), cdr: {car: "f64", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PARSE-INTEGER"), cdr: {car: f3("FUNCTION"), cdr: {car: "f63", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SUBSEQ"), cdr: {car: f3("FUNCTION"), cdr: {car: "f62", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DIGIT-CHAR-P"), cdr: {car: f3("FUNCTION"), cdr: {car: "f61", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REMOVE-IF-NOT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f60", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REMOVE-IF"), cdr: {car: f3("FUNCTION"), cdr: {car: "f59", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REMOVE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f58", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MEMBER"), cdr: {car: f3("FUNCTION"), cdr: {car: "f57", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BUTLAST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f56", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LAST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f55", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f54", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MINUSP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f53", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PLUSP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f52", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTEGERP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f51", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CHAR="), cdr: {car: f3("FUNCTION"), cdr: {car: "f50", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CHAR-CODE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f49", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CODE-CHAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f48", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COPY-LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f47", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("IDENTITY"), cdr: {car: f3("FUNCTION"), cdr: {car: "f46", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("MAPCAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f45", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONCAT-TWO"), cdr: {car: f3("FUNCTION"), cdr: {car: "f44", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LENGTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f43", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LIST-LENGTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f42", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REVERSE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f41", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("REVERSE-AUX"), cdr: {car: f3("FUNCTION"), cdr: {car: "f40", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("APPEND"), cdr: {car: f3("FUNCTION"), cdr: {car: "f39", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("APPEND-TWO"), cdr: {car: f3("FUNCTION"), cdr: {car: "f38", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFVAR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("&OPTIONAL"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("%DEFVAR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFUN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("%DEFUN"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("!REDUCE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f37", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LISTP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f36", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ENSURE-LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f35", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PROG1"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("VALUE"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("OR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("COND"), cdr: {car: {car: {car: f3("NULL"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("NULL"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("T"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("G"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G"), cdr: f3("NIL")}}, cdr: {car: {car: f3("OR"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("AND"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("COND"), cdr: {car: {car: {car: f3("NULL"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: {car: f3("T"), cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("NULL"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("T"), cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("AND"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("FORMS"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ECASE"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: {car: f3("&REST"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("CASE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("APPEND"), cdr: {car: f3("CLAUSULES"), cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: {car: f3("T"), cdr: {car: {car: f3("ERROR"), cdr: {car: "ECASE expression failed.", cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CASE"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("FORM"), cdr: {car: f3("&REST"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("!FORM"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("!FORM"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("FORM"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("COND"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("CLAUSULE"), cdr: f3("NIL")}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("EQ"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("CLAUSULE"), cdr: f3("NIL")}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}, cdr: {car: f3("CLAUSULE"), cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: {car: f3("EQL"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("!FORM"), cdr: f3("NIL")}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAR"), cdr: {car: f3("CLAUSULE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("CLAUSULE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("COND"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&REST"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("NULL"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("EQ"), cdr: {car: {car: f3("CAAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("CAAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDAR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("COND"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: {car: f3("CDR"), cdr: {car: f3("CLAUSULES"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DOTIMES"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ITER"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("G!TO"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: {car: {car: f3("VAR"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("TO"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("RESULT"), cdr: {car: {car: f3("THIRD"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("BLOCK"), cdr: {car: f3("NIL"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: 0, cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!TO"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("TO"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("%WHILE"), cdr: {car: {car: f3("<"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!TO"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("INCF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("RESULT"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DOLIST"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("ITER"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("VAR"), cdr: {car: {car: f3("FIRST"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("G!LIST"), cdr: {car: {car: f3("GENSYM"), cdr: f3("NIL")}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("BLOCK"), cdr: {car: f3("NIL"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SECOND"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("%WHILE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VAR"), cdr: f3("NIL")}}, cdr: {car: {car: f3("CAR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: {car: {car: f3("CDR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("G!LIST"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("THIRD"), cdr: {car: f3("ITER"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("UNLESS"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("CONDITION"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("CONDITION"), cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("WHEN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("CONDITION"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("CONDITION"), cdr: f3("NIL")}}, cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: f3("NIL"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("PUSH"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: {car: f3("PLACE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("PLACE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("CONS"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("PLACE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DECF"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: {car: f3("&OPTIONAL"), cdr: {car: {car: f3("DELTA"), cdr: {car: 1, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("-"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("DELTA"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INCF"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: {car: f3("&OPTIONAL"), cdr: {car: {car: f3("DELTA"), cdr: {car: 1, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("+"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("DELTA"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ATOM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f34", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LIST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f33", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("FOURTH"), cdr: {car: f3("FUNCTION"), cdr: {car: "f32", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("THIRD"), cdr: {car: f3("FUNCTION"), cdr: {car: "f31", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("SECOND"), cdr: {car: f3("FUNCTION"), cdr: {car: "f30", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("FIRST"), cdr: {car: f3("FUNCTION"), cdr: {car: "f29", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CADDDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f28", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDDDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f27", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CADDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f26", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f25", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f24", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CADR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f23", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CAAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f22", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CDR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f21", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CAR"), cdr: {car: f3("FUNCTION"), cdr: {car: "f20", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONSP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f19", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("CONS"), cdr: {car: f3("FUNCTION"), cdr: {car: "f18", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NOT"), cdr: {car: f3("FUNCTION"), cdr: {car: "f17", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("EQL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f16", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("TRUNCATE"), cdr: {car: f3("FUNCTION"), cdr: {car: "f15", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("ZEROP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f14", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("1-"), cdr: {car: f3("FUNCTION"), cdr: {car: "f13", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("1+"), cdr: {car: f3("FUNCTION"), cdr: {car: "f12", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("/"), cdr: {car: f3("FUNCTION"), cdr: {car: "f11", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("*"), cdr: {car: f3("FUNCTION"), cdr: {car: "f10", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("-"), cdr: {car: f3("FUNCTION"), cdr: {car: "f9", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("+"), cdr: {car: f3("FUNCTION"), cdr: {car: "f8", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("="), cdr: {car: f3("FUNCTION"), cdr: {car: "f7", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTEGER-TO-STRING"), cdr: {car: f3("FUNCTION"), cdr: {car: "f6", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("GENSYM"), cdr: {car: f3("FUNCTION"), cdr: {car: "f5", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("FIND-SYMBOL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f4", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTERN"), cdr: {car: f3("FUNCTION"), cdr: {car: "f3", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("INTERNP"), cdr: {car: f3("FUNCTION"), cdr: {car: "f2", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("WHILE"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("CONDITION"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("BLOCK"), cdr: {car: f3("NIL"), cdr: {car: {car: f3("%WHILE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("CONDITION"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("RETURN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("&OPTIONAL"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("RETURN-FROM"), cdr: {car: f3("NIL"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NULL"), cdr: {car: f3("FUNCTION"), cdr: {car: "f1", cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFUN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("%DEFUN"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%DEFUN"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("EVAL-WHEN-COMPILE"), cdr: {car: {car: f3("%COMPILE-DEFUN"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("FSETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("NAMED-LAMBDA"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("SYMBOL-NAME"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BLOCK"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("NAMED-LAMBDA"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: f3("X"), cdr: {car: {car: f3("GENSYM"), cdr: {car: "FN", cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("LET"), cdr: {car: {car: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("ARGS"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}, cdr: {car: {car: f3("SET"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: {car: "fname", cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("X"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFVAR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("&OPTIONAL"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("%DEFVAR"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("%DEFVAR"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("PROGN"), cdr: {car: {car: f3("EVAL-WHEN-COMPILE"), cdr: {car: {car: f3("%COMPILE-DEFVAR"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("SETQ"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("VALUE"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("DEFMACRO"), cdr: {car: f3("MACRO"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("NAME"), cdr: {car: f3("ARGS"), cdr: {car: f3("&REST"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}}}, cdr: {car: {car: f3("BACKQUOTE"), cdr: {car: {car: f3("EVAL-WHEN-COMPILE"), cdr: {car: {car: f3("%COMPILE-DEFMACRO"), cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: f3("NAME"), cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("UNQUOTE"), cdr: {car: {car: f3("MAPCAR"), cdr: {car: {car: f3("LAMBDA"), cdr: {car: {car: f3("X"), cdr: f3("NIL")}, cdr: {car: {car: f3("IF"), cdr: {car: {car: f3("EQ"), cdr: {car: f3("X"), cdr: {car: {car: f3("QUOTE"), cdr: {car: f3("&BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: {car: f3("QUOTE"), cdr: {car: f3("&REST"), cdr: f3("NIL")}}, cdr: {car: f3("X"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}, cdr: {car: f3("ARGS"), cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: {car: {car: f3("UNQUOTE-SPLICING"), cdr: {car: f3("BODY"), cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}, cdr: f3("NIL")}}}, cdr: {car: f3("T"), cdr: f3("NIL")}}}}, cdr: f3("NIL")}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}, cdr: {car: f3("NIL"), cdr: {car: f3("NIL"), cdr: f3("NIL")}}}};
+var l229 = f3("EVAL");
 var f120;
 (function(){
-    v289 = l231;
-    v293 = l232;
-    v313 = l233;
-    v388 = l234;
-    v12 = l235;
-    return v412 = l236;
+    v289 = l230;
+    v293 = l231;
+    v313 = l232;
+    v388 = l233;
+    v12 = l234;
+    return v412 = l235;
 })();
 (function(){
     (function(){
         (function(){
-            return f120 = (function(v656){
-                ((v656)["fname"] = "EVAL");
-                return v656;
-            })((function (v657){
+            return f120 = (function(v654){
+                ((v654)["fname"] = "EVAL");
+                return v654;
+            })((function (v655){
                 if (arguments.length < 1) throw 'too few arguments';
                 if (arguments.length > 1) throw 'too many arguments';
                 return (function(){
                     try {
                         return (function(){
-                            return (function(v658){
+                            return (function(v656){
                                 return (function(){
-                                    var string = v658;
+                                    var string = v656;
                                     if (typeof string != 'string')
                                         throw 'The value ' + string + ' is not a type string.';
                                     return eval.apply(window, [string]);
                                 })();
-                            })((function(v659){
+                            })((function(v657){
                                 (function(){
                                     try {
                                         return (function(){
-                                            return (function(v660,v661){
+                                            return (function(v658,v659){
                                                 (function(){
-                                                    while(v660 !== v2){
-                                                        v661 = (function(){
-                                                            var tmp = v660;
+                                                    while(v658 !== v2){
+                                                        v659 = (function(){
+                                                            var tmp = v658;
                                                             return tmp === v2? v2: tmp.car;
                                                         })();
-                                                        (v661)();
-                                                        v660 = (function(){
-                                                            var tmp = v660;
+                                                        (v659)();
+                                                        v658 = (function(){
+                                                            var tmp = v658;
                                                             return tmp === v2? v2: tmp.cdr;
                                                         })();
                                                     }return v2;
@@ -6628,22 +6591,22 @@ var f120;
                                         })();
                                     }
                                     catch (cf){
-                                        if (cf.type == 'block' && cf.id == 207)
+                                        if (cf.type == 'block' && cf.id == 206)
                                             return cf.value;
                                         else
                                             throw cf;
                                     }
                                 })();
-                                return v659;
+                                return v657;
                             })((function(){
                                 v253 = v2;
-                                f101();
-                                return f130(v657);
+                                f102();
+                                return f129(v655);
                             })()));
                         })();
                     }
                     catch (cf){
-                        if (cf.type == 'block' && cf.id == 206)
+                        if (cf.type == 'block' && cf.id == 205)
                             return cf.value;
                         else
                             throw cf;
@@ -6651,10 +6614,10 @@ var f120;
                 })();
             }));
         })();
-        return l230;
+        return l229;
     })();
     return (function(){
-        var string = f68("var lisp = {};", "lisp.read = ", f107(l237, v2), ";", v176, "lisp.print = ", f107(l238, v2), ";", v176, "lisp.eval = ", f107(l239, v2), ";", v176, "lisp.compile = ", f107(l240, v2), ";", v176, "lisp.evalString = function(str){", v176, "   return lisp.eval(lisp.read(str));", v176, "}", v176, "lisp.compileString = function(str){", v176, "   return lisp.compile(lisp.read(str));", v176, "}", v176);
+        var string = f68("var lisp = {};", "lisp.read = ", f108(l236, v2), ";", v176, "lisp.print = ", f108(l237, v2), ";", v176, "lisp.eval = ", f108(l238, v2), ";", v176, "lisp.compile = ", f108(l239, v2), ";", v176, "lisp.evalString = function(str){", v176, "   return lisp.eval(lisp.read(str));", v176, "}", v176, "lisp.compileString = function(str){", v176, "   return lisp.compile(lisp.read(str));", v176, "}", v176);
         if (typeof string != 'string')
             throw 'The value ' + string + ' is not a type string.';
         return eval.apply(window, [string]);

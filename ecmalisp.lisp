@@ -515,8 +515,18 @@
                      digits))))))
 
 
-(defun js!selfcall (&rest args)
-  (concat "(function(){" *newline* (apply #'indent args) "})()"))
+;;; Wrap X with a Javascript code to convert the result from
+;;; Javascript generalized booleans to T or NIL.
+(defun js!bool (x)
+  (concat "(" x "?" (ls-compile t) ": " (ls-compile nil) ")"))
+
+;;; Concatenate the arguments and wrap them with a self-calling
+;;; Javascript anonymous function. It is used to make some Javascript
+;;; statements valid expressions and provide a private scope as well.
+;;; It could be defined as function, but we could do some
+;;; preprocessing in the future.
+(defmacro js!selfcall (&body body)
+  `(concat "(function(){" *newline* (indent ,@body) "})()"))
 
 
 ;;; Printer
@@ -972,12 +982,11 @@
   (literal sexp))
 
 (define-compilation %while (pred &rest body)
-  (concat "(function(){" *newline*
-          (indent "while(" (ls-compile pred env) " !== " (ls-compile nil) "){" *newline*
-                  (indent (ls-compile-block body env))
-                  "}"
-                  "return " (ls-compile nil) ";" *newline*)
-          "})()"))
+  (js!selfcall
+    "while(" (ls-compile pred env) " !== " (ls-compile nil) "){" *newline*
+    (indent (ls-compile-block body env))
+    "}"
+    "return " (ls-compile nil) ";" *newline*))
 
 (define-compilation function (x)
   (cond
@@ -995,10 +1004,9 @@
      (ls-compile ,form env)))
 
 (define-compilation progn (&rest body)
-  (concat "(function(){" *newline*
-          (indent (ls-compile-block (butlast body) env)
-                  "return " (ls-compile (car (last body)) env) ";" *newline*)
-          "})()"))
+  (js!selfcall
+    (ls-compile-block (butlast body) env)
+    "return " (ls-compile (car (last body)) env) ";" *newline*))
 
 (define-compilation let (bindings &rest body)
   (let ((bindings (mapcar #'ensure-list bindings)))
@@ -1025,54 +1033,54 @@
 (define-compilation block (name &rest body)
   (let ((tr (integer-to-string (incf *block-counter*))))
     (let ((b (make-binding name 'block tr t)))
-      (concat "(function(){" *newline*
-              (indent "try {" *newline*
-                      (indent "return " (ls-compile `(progn ,@body)
-                                                    (extend-lexenv (list b) env 'block))
-                              ";" *newline*)
-                      "}" *newline*
-                      "catch (cf){" *newline*
-                      "    if (cf.type == 'block' && cf.id == " tr ")" *newline*
-                      "        return cf.value;" *newline*
-                      "    else" *newline*
-                      "        throw cf;" *newline*
-                      "}" *newline*)
-              "})()"))))
+      (js!selfcall
+        "try {" *newline*
+        (indent "return " (ls-compile `(progn ,@body)
+                                      (extend-lexenv (list b) env 'block))
+                ";" *newline*)
+        "}" *newline*
+        "catch (cf){" *newline*
+        "    if (cf.type == 'block' && cf.id == " tr ")" *newline*
+        "        return cf.value;" *newline*
+        "    else" *newline*
+        "        throw cf;" *newline*
+        "}" *newline*))))
 
 (define-compilation return-from (name &optional value)
   (let ((b (lookup-in-lexenv name env 'block)))
     (if b
-        (concat "(function(){ throw ({"
-                "type: 'block', "
-                "id: " (binding-translation b) ", "
-                "value: " (ls-compile value env) ", "
-                "message: 'Return from unknown block " (symbol-name name) ".'"
-                "})})()")
+        (js!selfcall
+          "throw ({"
+          "type: 'block', "
+          "id: " (binding-translation b) ", "
+          "value: " (ls-compile value env) ", "
+          "message: 'Return from unknown block " (symbol-name name) ".'"
+          "})")
         (error (concat "Unknown block `" (symbol-name name) "'.")))))
 
 
 (define-compilation catch (id &rest body)
-  (concat "(function(){" *newline*
-          (indent "var id = " (ls-compile id env) ";" *newline*
-                  "try {" *newline*
-                  (indent "return " (ls-compile `(progn ,@body))
-                          ";" *newline*)
-                  "}" *newline*
-                  "catch (cf){" *newline*
-                  "    if (cf.type == 'catch' && cf.id == id)" *newline*
-                  "        return cf.value;" *newline*
-                  "    else" *newline*
-                  "        throw cf;" *newline*
-                  "}" *newline*)
-          "})()"))
+  (js!selfcall
+    "var id = " (ls-compile id env) ";" *newline*
+    "try {" *newline*
+    (indent "return " (ls-compile `(progn ,@body))
+            ";" *newline*)
+    "}" *newline*
+    "catch (cf){" *newline*
+    "    if (cf.type == 'catch' && cf.id == id)" *newline*
+    "        return cf.value;" *newline*
+    "    else" *newline*
+    "        throw cf;" *newline*
+    "}" *newline*))
 
 (define-compilation throw (id &optional value)
-  (concat "(function(){ throw ({"
-          "type: 'catch', "
-          "id: " (ls-compile id env) ", "
-          "value: " (ls-compile value env) ", "
-          "message: 'Throw uncatched.'"
-          "})})()"))
+  (js!selfcall
+    "throw ({"
+    "type: 'catch', "
+    "id: " (ls-compile id env) ", "
+    "value: " (ls-compile value env) ", "
+    "message: 'Throw uncatched.'"
+    "})"))
 
 
 (defvar *tagbody-counter* 0)
@@ -1138,25 +1146,24 @@
              ((integerp label) (integer-to-string label)))))
     (if b
         (js!selfcall
-         (concat "throw ({"
-                 "type: 'tagbody', "
-                 "id: " (first (binding-translation b)) ", "
-                 "label: " (second (binding-translation b)) ", "
-                 "message: 'Attempt to GO to non-existing tag " n "'"
-                 "})" *newline*))
+          "throw ({"
+          "type: 'tagbody', "
+          "id: " (first (binding-translation b)) ", "
+          "label: " (second (binding-translation b)) ", "
+          "message: 'Attempt to GO to non-existing tag " n "'"
+          "})" *newline*)
         (error (concat "Unknown tag `" n "'.")))))
 
 
 (define-compilation unwind-protect (form &rest clean-up)
-  (concat "(function(){" *newline*
-          (indent "var ret = " (ls-compile nil) ";" *newline*
-                  "try {" *newline*
-                  (indent "ret = " (ls-compile form env) ";" *newline*)
-                  "} finally {" *newline*
-                  (indent (ls-compile-block clean-up env))
-                  "}" *newline*
-                  "return ret;" *newline*)
-          "})()"))
+  (js!selfcall
+    "var ret = " (ls-compile nil) ";" *newline*
+    "try {" *newline*
+    (indent "ret = " (ls-compile form env) ";" *newline*)
+    "} finally {" *newline*
+    (indent (ls-compile-block clean-up env))
+    "}" *newline*
+    "return ret;" *newline*))
 
 
 ;;; A little backquote implementation without optimizations of any
@@ -1201,27 +1208,22 @@
      (let ,(mapcar (lambda (arg) `(,arg (ls-compile ,arg env))) args)
        ,@body)))
 
-(defun compile-bool (x)
-  (concat "(" x "?" (ls-compile t) ": " (ls-compile nil) ")"))
-
 ;;; DECLS is a list of (JSVARNAME TYPE LISPFORM) declarations.
 (defmacro type-check (decls &body body)
-  `(concat "(function(){" *newline*
-           (indent ,@(mapcar (lambda (decl)
-                               `(concat "var " ,(first decl) " = " ,(third decl) ";" *newline*))
-                             decls)
-
-                   ,@(mapcar (lambda (decl)
-                               `(concat "if (typeof " ,(first decl) " != '" ,(second decl) "')" *newline*
-                                        (indent "throw 'The value ' + "
-                                                ,(first decl)
-                                                " + ' is not a type "
-                                                ,(second decl)
-                                                ".';"
-                                                *newline*)))
-                             decls)
-                   (concat "return " (progn ,@body) ";" *newline*))
-           "})()"))
+  `(js!selfcall
+     ,@(mapcar (lambda (decl)
+                   `(concat "var " ,(first decl) " = " ,(third decl) ";" *newline*))
+                 decls)
+     ,@(mapcar (lambda (decl)
+                 `(concat "if (typeof " ,(first decl) " != '" ,(second decl) "')" *newline*
+                          (indent "throw 'The value ' + "
+                                  ,(first decl)
+                                  " + ' is not a type "
+                                  ,(second decl)
+                                  ".';"
+                                  *newline*)))
+               decls)
+     (concat "return " (progn ,@body) ";" *newline*)))
 
 (defun num-op-num (x op y)
   (type-check (("x" "number" x) ("y" "number" y))
@@ -1234,14 +1236,14 @@
 
 (define-builtin mod (x y) (num-op-num x "%" y))
 
-(define-builtin < (x y)  (compile-bool (num-op-num x "<" y)))
-(define-builtin > (x y)  (compile-bool (num-op-num x ">" y)))
-(define-builtin = (x y)  (compile-bool (num-op-num x "==" y)))
-(define-builtin <= (x y) (compile-bool (num-op-num x "<=" y)))
-(define-builtin >= (x y) (compile-bool (num-op-num x ">=" y)))
+(define-builtin < (x y)  (js!bool (num-op-num x "<" y)))
+(define-builtin > (x y)  (js!bool (num-op-num x ">" y)))
+(define-builtin = (x y)  (js!bool (num-op-num x "==" y)))
+(define-builtin <= (x y) (js!bool (num-op-num x "<=" y)))
+(define-builtin >= (x y) (js!bool (num-op-num x ">=" y)))
 
 (define-builtin numberp (x)
-  (compile-bool (concat "(typeof (" x ") == \"number\")")))
+  (js!bool (concat "(typeof (" x ") == \"number\")")))
 
 (define-builtin floor (x)
   (type-check (("x" "number" x))
@@ -1249,27 +1251,24 @@
 
 (define-builtin cons (x y) (concat "({car: " x ", cdr: " y "})"))
 (define-builtin consp (x)
-  (compile-bool
-   (concat "(function(){" *newline*
-           (indent "var tmp = " x ";" *newline*
-                   "return (typeof tmp == 'object' && 'car' in tmp);" *newline*)
-           "})()")))
+  (js!bool
+   (js!selfcall
+     "var tmp = " x ";" *newline*
+     "return (typeof tmp == 'object' && 'car' in tmp);" *newline*)))
 
 (define-builtin car (x)
-  (concat "(function(){" *newline*
-          (indent "var tmp = " x ";" *newline*
-                  "return tmp === " (ls-compile nil)
-                  "? " (ls-compile nil)
-                  ": tmp.car;" *newline*)
-          "})()"))
+  (js!selfcall
+    "var tmp = " x ";" *newline*
+    "return tmp === " (ls-compile nil)
+    "? " (ls-compile nil)
+    ": tmp.car;" *newline*))
 
 (define-builtin cdr (x)
-  (concat "(function(){" *newline*
-          (indent "var tmp = " x ";" *newline*
-                  "return tmp === " (ls-compile nil) "? "
-                  (ls-compile nil)
-                  ": tmp.cdr;" *newline*)
-          "})()"))
+  (js!selfcall
+    "var tmp = " x ";" *newline*
+    "return tmp === " (ls-compile nil) "? "
+    (ls-compile nil)
+    ": tmp.cdr;" *newline*))
 
 (define-builtin setcar (x new)
   (type-check (("x" "object" x))
@@ -1280,11 +1279,10 @@
     (concat "(x.cdr = " new ")")))
 
 (define-builtin symbolp (x)
-  (compile-bool
-   (concat "(function(){" *newline*
-           (indent "var tmp = " x ";" *newline*
-                   "return (typeof tmp == 'object' && 'name' in tmp);" *newline*)
-           "})()")))
+  (js!bool
+   (js!selfcall
+     "var tmp = " x ";" *newline*
+     "return (typeof tmp == 'object' && 'name' in tmp);" *newline*)))
 
 (define-builtin make-symbol (name)
   (type-check (("name" "string" name))
@@ -1293,15 +1291,15 @@
 (define-builtin symbol-name (x)
   (concat "(" x ").name"))
 
-(define-builtin eq    (x y) (compile-bool (concat "(" x " === " y ")")))
-(define-builtin equal (x y) (compile-bool (concat "(" x  " == " y ")")))
+(define-builtin eq    (x y) (js!bool (concat "(" x " === " y ")")))
+(define-builtin equal (x y) (js!bool (concat "(" x  " == " y ")")))
 
 (define-builtin string (x)
   (type-check (("x" "number" x))
     "String.fromCharCode(x)"))
 
 (define-builtin stringp (x)
-  (compile-bool (concat "(typeof(" x ") == \"string\")")))
+  (js!bool (concat "(typeof(" x ") == \"string\")")))
 
 (define-builtin string-upcase (x)
   (type-check (("x" "string" x))
@@ -1312,15 +1310,14 @@
     "x.length"))
 
 (define-compilation slice (string a &optional b)
-  (concat "(function(){" *newline*
-          (indent "var str = " (ls-compile string env) ";" *newline*
-                  "var a = " (ls-compile a env) ";" *newline*
-                  "var b;" *newline*
-                  (if b
-                      (concat "b = " (ls-compile b env) ";" *newline*)
-                      "")
-                  "return str.slice(a,b);" *newline*)
-          "})()"))
+  (js!selfcall
+    "var str = " (ls-compile string env) ";" *newline*
+    "var a = " (ls-compile a env) ";" *newline*
+    "var b;" *newline*
+    (if b
+        (concat "b = " (ls-compile b env) ";" *newline*)
+        "")
+    "return str.slice(a,b);" *newline*))
 
 (define-builtin char (string index)
   (type-check (("string" "string" string)
@@ -1345,44 +1342,42 @@
       (concat "(" (ls-compile func env) ")()")
       (let ((args (butlast args))
             (last (car (last args))))
-        (concat "(function(){" *newline*
-                (indent "var f = " (ls-compile func env) ";" *newline*
-                        "var args = [" (join (mapcar (lambda (x)
-                                                       (ls-compile x env))
-                                                     args)
-                                             ", ")
-                        "];" *newline*
-                        "var tail = (" (ls-compile last env) ");" *newline*
-                        (indent "while (tail != " (ls-compile nil) "){" *newline*
-                                "    args.push(tail.car);" *newline*
-                                "    tail = tail.cdr;" *newline*
-                                "}" *newline*
-                                "return f.apply(this, args);" *newline*)
-                        "})()")))))
+        (js!selfcall
+          "var f = " (ls-compile func env) ";" *newline*
+          "var args = [" (join (mapcar (lambda (x)
+                                         (ls-compile x env))
+                                       args)
+                               ", ")
+          "];" *newline*
+          "var tail = (" (ls-compile last env) ");" *newline*
+          "while (tail != " (ls-compile nil) "){" *newline*
+          "    args.push(tail.car);" *newline*
+          "    tail = tail.cdr;" *newline*
+          "}" *newline*
+          "return f.apply(this, args);" *newline*))))
 
 (define-builtin js-eval (string)
   (type-check (("string" "string" string))
     "eval.apply(window, [string])"))
 
 (define-builtin error (string)
-  (concat "(function (){ throw " string "; })()"))
+  (js!selfcall "throw " string ";" *newline*))
 
 (define-builtin new () "{}")
 
 (define-builtin get (object key)
-  (concat "(function(){" *newline*
-          (indent "var tmp = " "(" object ")[" key "];" *newline*
-                  "return tmp == undefined? " (ls-compile nil) ": tmp ;" *newline*)
-          "})()"))
+  (js!selfcall
+    "var tmp = " "(" object ")[" key "];" *newline*
+    "return tmp == undefined? " (ls-compile nil) ": tmp ;" *newline*))
 
 (define-builtin set (object key value)
   (concat "((" object ")[" key "] = " value ")"))
 
 (define-builtin in (key object)
-  (compile-bool (concat "((" key ") in (" object "))")))
+  (js!bool (concat "((" key ") in (" object "))")))
 
 (define-builtin functionp (x)
-  (compile-bool (concat "(typeof " x " == 'function')")))
+  (js!bool (concat "(typeof " x " == 'function')")))
 
 (define-builtin write-string (x)
   (type-check (("x" "string" x))
