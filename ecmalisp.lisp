@@ -755,9 +755,10 @@
 (defvar *environment* (make-lexenv))
 
 (defun clear-undeclared-global-bindings ()
-  (let ((variables (first *environment*))
-        (functions (second *environment*)))
-    (setq *environment* (list variables functions (third *environment*)))))
+  (setq *environment*
+	(mapcar (lambda (namespace)
+		  (remove-if-not #'binding-declared namespace))
+		*environment*)))
 
 
 (defvar *variable-counter* 0)
@@ -771,8 +772,9 @@
             (binding (make-binding symbol 'variable (gvarname symbol) nil)))
         (push-to-lexenv binding *environment* 'variable)
         (push (lambda ()
-                (unless (lookup-in-lexenv symbol *environment* 'variable)
-                  (error (concat "Undefined variable `" name "'"))))
+		(let ((b (lookup-in-lexenv symbol *environment* 'variable)))
+		  (unless (binding-declared b)
+		      (error (concat "Undefined variable `" name "'")))))
               *compilation-unit-checks*)
         binding)))
 
@@ -797,8 +799,9 @@
                            nil)))
         (push-to-lexenv binding *environment* 'function)
         (push (lambda ()
-                (unless (binding-declared (lookup-in-lexenv symbol *environment* 'function))
-                  (error (concat "Undefined function `" name "'"))))
+		(let ((b (lookup-in-lexenv symbol *environment* 'function)))
+		  (unless (binding-declared b)
+		    (error (concat "Undefined function `" name "'")))))
               *compilation-unit-checks*)
         binding)))
 
