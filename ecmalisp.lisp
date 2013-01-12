@@ -481,24 +481,39 @@
       ""
       (concat (car list) separator (join-trailing (cdr list) separator))))
 
-;;; Like CONCAT, but prefix each line with four spaces.
+
+;;; Like CONCAT, but prefix each line with four spaces. Two versions
+;;; of this function are available, because the Ecmalisp version is
+;;; very slow and bootstraping was annoying.
+
+#+ecmalisp
 (defun indent (&rest string)
   (let ((input (join string)))
     (let ((output "")
           (index 0)
           (size (length input)))
-      (when (plusp size)
-        (setq output "    "))
+      (when (plusp (length input)) (concatf output "    "))
       (while (< index size)
-        (setq output
-              (concat output
-                      (if (and (char= (char input index) #\newline)
-                               (< index (1- size))
-                               (not (char= (char input (1+ index)) #\newline)))
-                          (concat (string #\newline) "    ")
-                          (subseq input index (1+ index)))))
+        (let ((str
+               (if (and (char= (char input index) #\newline)
+                        (< index (1- size))
+                        (not (char= (char input (1+ index)) #\newline)))
+                   (concat (string #\newline) "    ")
+                   (string (char input index)))))
+          (concatf output str))
         (incf index))
       output)))
+
+#+common-lisp
+(defun indent (&rest string)
+  (with-output-to-string (*standard-output*)
+    (with-input-from-string (input (join string))
+      (loop
+         for line = (read-line input nil)
+         while line
+         do (write-string "    ")
+         do (write-line line)))))
+
 
 (defun integer-to-string (x)
   (cond
