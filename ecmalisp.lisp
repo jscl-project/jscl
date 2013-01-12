@@ -263,13 +263,14 @@
   (defun append (&rest lists)
     (!reduce #'append-two lists '()))
 
-  (defun reverse-aux (list acc)
-    (if (null list)
-        acc
-        (reverse-aux (cdr list) (cons (car list) acc))))
+  (defun revappend (list1 list2)
+    (while list1
+      (push (car list1) list2)
+      (setq list1 (cdr list1)))
+    list2)
 
   (defun reverse (list)
-    (reverse-aux list '()))
+    (revappend list '()))
 
   (defun list-length (list)
     (let ((l 0))
@@ -310,29 +311,29 @@
   (defun listp (x)
     (or (consp x) (null x)))
 
+  (defun nthcdr (n list)
+    (while (and (plusp n) list)
+      (setq n (1- n))
+      (setq list (cdr list)))
+    list)
+
   (defun nth (n list)
-    (cond
-      ((null list) list)
-      ((zerop n) (car list))
-      (t (nth (1- n) (cdr list)))))
+    (car (nthcdr n list)))
 
   (defun last (x)
-    (if (consp (cdr x))
-        (last (cdr x))
-        x))
+    (while (consp (cdr x))
+      (setq x (cdr x)))
+    x)
 
   (defun butlast (x)
     (and (consp (cdr x))
          (cons (car x) (butlast (cdr x)))))
 
   (defun member (x list)
-    (cond
-      ((null list)
-       nil)
-      ((eql x (car list))
-       list)
-      (t
-       (member x (cdr list)))))
+    (while list
+      (when (eql x (car list))
+        (return list))
+      (setq list (cdr list))))
 
   (defun remove (x list)
     (cond
