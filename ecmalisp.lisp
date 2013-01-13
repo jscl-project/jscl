@@ -223,7 +223,14 @@
     (let ((value (gensym)))
       `(let ((,value ,form))
          ,@body
-         ,value))))
+         ,value)))
+
+  (defmacro prog2 (form1 result &body body)
+    `(prog1 (progn ,form1 ,result) ,@body))
+
+
+
+)
 
 ;;; This couple of helper functions will be defined in both Common
 ;;; Lisp and in Ecmalisp.
