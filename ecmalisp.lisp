@@ -792,7 +792,7 @@
   (or (lookup-in-lexenv symbol env 'variable)
       (lookup-in-lexenv symbol *environment* 'variable)
       (let ((name (symbol-name symbol))
-            (binding (make-binding symbol 'variable (gvarname symbol) nil)))
+            (binding (make-binding symbol 'special-variable (gvarname symbol) nil)))
         (push-to-lexenv binding *environment* 'variable)
         (push (lambda ()
 		(let ((b (lookup-in-lexenv symbol *environment* 'variable)))
@@ -807,7 +807,7 @@
 (defun extend-local-env (args env)
   (let ((new (copy-lexenv env)))
     (dolist (symbol args new)
-      (let ((b (make-binding symbol 'variable (gvarname symbol) t)))
+      (let ((b (make-binding symbol 'lexical-variable (gvarname symbol) t)))
         (push-to-lexenv b new 'variable)))))
 
 (defvar *function-counter* 0)
@@ -968,9 +968,10 @@
           (ls-compile val env)))
 
 (define-compilation setq (var val)
-  (concat (lookup-variable-translation var env)
-          " = "
-           (ls-compile val env)))
+  (let ((b (lookup-variable var env)))
+    (ecase (binding-type b)
+      (lexical-variable (concat (binding-translation b) " = " (ls-compile val env)))
+      (special-variable (ls-compile `(set ',var ,val) env)))))
 
 
 ;;; Literals
@@ -1448,7 +1449,13 @@
 
 (defun ls-compile (sexp &optional (env (make-lexenv)))
   (cond
-    ((symbolp sexp) (lookup-variable-translation sexp env))
+    ((symbolp sexp)
+     (let ((b (lookup-variable sexp env)))
+       (ecase (binding-type b)
+	 (lexical-variable
+	  (lookup-variable-translation sexp env))
+	 (special-variable
+	  (ls-compile `(symbol-value ',sexp) env)))))
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
     ((listp sexp)
