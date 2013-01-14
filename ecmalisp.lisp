@@ -63,11 +63,8 @@
 
   (defvar *package* (new))
 
-  (defvar nil (make-symbol "NIL"))
-  (oset *package* "NIL" nil)
-
-  (defvar t (make-symbol "T"))
-  (oset *package* "T" t)
+  (defvar nil 'nil)
+  (defvar t 't)
 
   (defun null (x)
     (eq x nil))
@@ -473,9 +470,6 @@
 (defmacro concatf (variable &body form)
   `(setq ,variable (concat ,variable (progn ,@form))))
 
-(defun mapconcat (func list)
-  (join (mapcar func list)))
-
 ;;; Concatenate a list of strings, with a separator
 (defun join (list &optional (separator ""))
   (cond
@@ -493,6 +487,8 @@
       ""
       (concat (car list) separator (join-trailing (cdr list) separator))))
 
+(defun mapconcat (func list)
+  (join (mapcar func list)))
 
 ;;; Like CONCAT, but prefix each line with four spaces. Two versions
 ;;; of this function are available, because the Ecmalisp version is
@@ -526,6 +522,9 @@
          do (write-string "    ")
          do (write-line line)))))
 
+
+(defun test ()
+  (mapcar (lambda (x) (1+ x)) '(1 2 3 4)))
 
 (defun integer-to-string (x)
   (cond
