@@ -21,6 +21,7 @@
 ;;; as well as funcalls and macroexpansion, but no functions. So, we
 ;;; define the Lisp world from scratch. This code has to define enough
 ;;; language to the compiler to be able to run.
+
 #+ecmalisp
 (progn
   (eval-when-compile
@@ -28,7 +29,7 @@
                        '(lambda (name args &rest body)
                          `(eval-when-compile
                             (%compile-defmacro ',name
-                                               '(lambda ,(mapcar (lambda (x)
+					       '(lambda ,(mapcar (lambda (x)
                                                                    (if (eq x '&body)
                                                                        '&rest
                                                                        x))
@@ -471,6 +472,9 @@
 
 (defmacro concatf (variable &body form)
   `(setq ,variable (concat ,variable (progn ,@form))))
+
+(defun mapconcat (func list)
+  (join (mapcar func list)))
 
 ;;; Concatenate a list of strings, with a separator
 (defun join (list &optional (separator ""))
@@ -973,6 +977,12 @@
       (lexical-variable (concat (binding-translation b) " = " (ls-compile val env)))
       (special-variable (ls-compile `(set ',var ,val) env)))))
 
+;;; FFI Variable accessors
+(define-compilation js-vref (var)
+  var)
+(define-compilation js-vset (var val)
+  (concat "(" var " = " (ls-compile val env) ")"))
+
 
 ;;; Literals
 (defun escape-string (string)
@@ -990,24 +1000,44 @@
       (incf index))
     output))
 
-(defun literal->js (sexp)
+
+(defvar *literal-symbols* nil)
+(defvar *literal-counter* 0)
+
+(defun genlit ()
+  (concat "l" (integer-to-string (incf *literal-counter*))))
+
+(defun literal (sexp &optional recursive)
   (cond
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
-    ((symbolp sexp) (ls-compile `(intern ,(escape-string (symbol-name sexp))) *environment*))
-    ((consp sexp) (concat "{car: "
-                          (literal->js (car sexp))
-                          ", cdr: "
-                          (literal->js (cdr sexp)) "}"))))
+    ((symbolp sexp)
+     (or (cdr (assoc sexp *literal-symbols*))
+	 (let ((v (genlit))
+	       (s (concat "{name: \"" (escape-string (symbol-name sexp)) "\"}")))
+	   (push (cons sexp v) *literal-symbols*)
+	   (push (concat "var " v " = " s) *toplevel-compilations*)
+	   v)))
+    ((consp sexp)
+     (let ((c (concat "{car: " (literal (car sexp) t) ", "
+		      "cdr: " (literal (cdr sexp) t) "}")))
+       (if recursive
+	   c
+	   (let ((v (genlit)))
+	     (push (concat "var " v " = " c) *toplevel-compilations*)
+	     v))))))
 
-(defvar *literal-counter* 0)
-(defun literal (form)
-  (let ((var (concat "l" (integer-to-string (incf *literal-counter*)))))
-    (push (concat "var " var " = " (literal->js form)) *toplevel-compilations*)
-    var))
-
+#+common-lisp
 (define-compilation quote (sexp)
   (literal sexp))
+
+#+ecmalisp
+(define-compilation quote (sexp)
+  (let ((v (genlit)))
+    (push (ls-compile `(js-vset ,v ,sexp) env)
+	  *toplevel-compilations*)
+    v))
+
 
 (define-compilation %while (pred &rest body)
   (js!selfcall
@@ -1453,7 +1483,7 @@
      (let ((b (lookup-variable sexp env)))
        (ecase (binding-type b)
 	 (lexical-variable
-	  (lookup-variable-translation sexp env))
+	  (binding-translation b))
 	 (special-variable
 	  (ls-compile `(symbol-value ',sexp) env)))))
     ((integerp sexp) (integer-to-string sexp))
@@ -1467,13 +1497,17 @@
              (compile-funcall (car sexp) (cdr sexp) env))))))
 
 (defun ls-compile-toplevel (sexp)
-  (setq *toplevel-compilations* nil)
-  (let ((code (ls-compile sexp)))
-    (prog1
-        (concat (join (mapcar (lambda (x) (concat x ";" *newline*))
-                              *toplevel-compilations*))
-                code)
-      (setq *toplevel-compilations* nil))))
+  (cond
+    ((and (consp sexp) (eq (car sexp) 'progn))
+     (mapconcat 'ls-compile-toplevel (cdr sexp)))
+    (t
+     (setq *toplevel-compilations* nil)
+     (let ((code (ls-compile sexp)))
+       (prog1
+	   (concat (join (mapcar (lambda (x) (concat x ";" *newline*))
+				 *toplevel-compilations*))
+		   code)
+	 (setq *toplevel-compilations* nil))))))
 
 
 ;;; Once we have the compiler, we define the runtime environment and
@@ -1507,22 +1541,22 @@
                    (setq *function-counter* ',*function-counter*)
                    (setq *literal-counter* ',*literal-counter*)
                    (setq *gensym-counter* ',*gensym-counter*)
-                   (setq *block-counter* ',*block-counter*)))))
+                   (setq *block-counter* ',*block-counter*)
+		   ,@(mapcar (lambda (s)
+			       `(oset *package* ,(symbol-name (car s))
+				      (js-vref ,(cdr s))))
+			     *literal-symbols*)))))
       (setq *toplevel-compilations*
             (append *toplevel-compilations* (list tmp)))))
 
-  (js-eval
-   (concat "var lisp = {};"
-           "lisp.read = " (lookup-function-translation 'ls-read-from-string nil) ";" *newline*
-           "lisp.print = " (lookup-function-translation 'prin1-to-string nil) ";" *newline*
-           "lisp.eval = " (lookup-function-translation 'eval nil) ";" *newline*
-           "lisp.compile = " (lookup-function-translation 'ls-compile-toplevel nil) ";" *newline*
-           "lisp.evalString = function(str){" *newline*
-           "   return lisp.eval(lisp.read(str));" *newline*
-           "}" *newline*
-           "lisp.compileString = function(str){" *newline*
-           "   return lisp.compile(lisp.read(str));" *newline*
-           "}" *newline*)))
+  (js-eval "var lisp")
+  (js-vset "lisp" (new))
+  (js-vset "lisp.read" #'ls-read-from-string)
+  (js-vset "lisp.print" #'prin1-to-string)
+  (js-vset "lisp.eval" #'eval)
+  (js-vset "lisp.compile" #'ls-compile-toplevel)
+  (js-vset "lisp.evalString" (lambda (str) (eval (ls-read-from-string str))))
+  (js-vset "lisp.compileString" (lambda (str) (ls-compile-toplevel (ls-read-from-string str)))))
 
 
 ;;; Finally, we provide a couple of functions to easily bootstrap
@@ -1553,6 +1587,7 @@
 
   (defun bootstrap ()
     (setq *environment* (make-lexenv))
+    (setq *literal-symbols* nil)
     (setq *variable-counter* 0
           *gensym-counter* 0
           *function-counter* 0
