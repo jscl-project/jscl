@@ -523,9 +523,6 @@
          do (write-line line)))))
 
 
-(defun test ()
-  (mapcar (lambda (x) (1+ x)) '(1 2 3 4)))
-
 (defun integer-to-string (x)
   (cond
     ((zerop x)
@@ -1026,16 +1023,8 @@
 	     (push (concat "var " v " = " c) *toplevel-compilations*)
 	     v))))))
 
-#+common-lisp
 (define-compilation quote (sexp)
   (literal sexp))
-
-#+ecmalisp
-(define-compilation quote (sexp)
-  (let ((v (genlit)))
-    (push (ls-compile `(js-vset ,v ,sexp) env)
-	  *toplevel-compilations*)
-    v))
 
 
 (define-compilation %while (pred &rest body)
@@ -1484,7 +1473,7 @@
 	 (lexical-variable
 	  (binding-translation b))
 	 (special-variable
-	  (ls-compile `(symbol-value ',sexp) env)))))
+          (ls-compile `(symbol-value ',sexp) env)))))
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
     ((listp sexp)
