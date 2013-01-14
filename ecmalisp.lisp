@@ -1499,13 +1499,17 @@
 (defun ls-compile-toplevel (sexp)
   (cond
     ((and (consp sexp) (eq (car sexp) 'progn))
-     (mapconcat 'ls-compile-toplevel (cdr sexp)))
+     (let ((subs (mapcar 'ls-compile-toplevel (cdr sexp))))
+       (join-trailing
+	(remove-if (lambda (s) (or (null s) (equal s "")))
+		   subs)
+	(concat ";" *newline*))))
     (t
      (setq *toplevel-compilations* nil)
      (let ((code (ls-compile sexp)))
        (prog1
-	   (concat (join (mapcar (lambda (x) (concat x ";" *newline*))
-				 *toplevel-compilations*))
+	   (concat (join-trailing *toplevel-compilations*
+				  (concat ";" *newline*))
 		   code)
 	 (setq *toplevel-compilations* nil))))))
 
