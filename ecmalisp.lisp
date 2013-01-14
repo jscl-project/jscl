@@ -47,7 +47,7 @@
   (defmacro named-lambda (name args &rest body)
     (let ((x (gensym "FN")))
       `(let ((,x (lambda ,args ,@body)))
-         (set ,x "fname" ,name)
+         (oset ,x "fname" ,name)
          ,x)))
 
   (defmacro %defun (name args &rest body)
@@ -63,10 +63,10 @@
   (defvar *package* (new))
 
   (defvar nil (make-symbol "NIL"))
-  (set *package* "NIL" nil)
+  (oset *package* "NIL" nil)
 
   (defvar t (make-symbol "T"))
-  (set *package* "T" t)
+  (oset *package* "T" t)
 
   (defun null (x)
     (eq x nil))
@@ -82,11 +82,11 @@
 
   (defun intern (name)
     (if (internp name)
-        (get *package* name)
-        (set *package* name (make-symbol name))))
+        (oget *package* name)
+        (oset *package* name (make-symbol name))))
 
   (defun find-symbol (name)
-    (get *package* name))
+    (oget *package* name))
 
   (defvar *gensym-counter* 0)
   (defun gensym (&optional (prefix "G"))
@@ -562,7 +562,7 @@
       ((integerp form) (integer-to-string form))
       ((stringp form) (concat "\"" (escape-string form) "\""))
       ((functionp form)
-       (let ((name (get form "fname")))
+       (let ((name (oget form "fname")))
          (if name
              (concat "#<FUNCTION " name ">")
              (concat "#<FUNCTION>"))))
@@ -972,6 +972,7 @@
           " = "
            (ls-compile val env)))
 
+
 ;;; Literals
 (defun escape-string (string)
   (let ((output "")
@@ -1317,6 +1318,15 @@
 (define-builtin symbol-name (x)
   (concat "(" x ").name"))
 
+(define-builtin set (symbol value)
+  (concat "(" symbol ").value =" value))
+
+(define-builtin symbol-value (x)
+  (concat "(" x ").value"))
+
+(define-builtin symbol-function (x)
+  (concat "(" x ").function"))
+
 (define-builtin eq    (x y) (js!bool (concat "(" x " === " y ")")))
 (define-builtin equal (x y) (js!bool (concat "(" x  " == " y ")")))
 
@@ -1391,12 +1401,12 @@
 
 (define-builtin new () "{}")
 
-(define-builtin get (object key)
+(define-builtin oget (object key)
   (js!selfcall
     "var tmp = " "(" object ")[" key "];" *newline*
     "return tmp == undefined? " (ls-compile nil) ": tmp ;" *newline*))
 
-(define-builtin set (object key value)
+(define-builtin oset (object key value)
   (concat "((" object ")[" key "] = " value ")"))
 
 (define-builtin in (key object)
