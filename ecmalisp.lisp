@@ -850,10 +850,7 @@
 
 (defun ls-compile-block (sexps env)
   (join-trailing
-   (remove-if (lambda (x)
-                (or (null x)
-                    (and (stringp x)
-                         (zerop (length x)))))
+   (remove-if #'null
               (mapcar (lambda (x) (ls-compile x env))  sexps))
    (concat ";" *newline*)))
 
@@ -1049,7 +1046,7 @@
 
 (define-compilation eval-when-compile (&rest body)
   (eval (cons 'progn body))
-  "")
+  nil)
 
 (defmacro define-transformation (name args form)
   `(define-compilation ,name ,args
@@ -1301,7 +1298,9 @@
   (type-check (("x" "number" x))
     "Math.floor(x)"))
 
-(define-builtin cons (x y) (concat "({car: " x ", cdr: " y "})"))
+(define-builtin cons (x y)
+  (concat "({car: " x ", cdr: " y "})"))
+
 (define-builtin consp (x)
   (js!bool
    (js!selfcall
@@ -1490,22 +1489,24 @@
              (ls-compile (ls-macroexpand-1 sexp env) env)
              (compile-funcall (car sexp) (cdr sexp) env))))))
 
+(defun null-or-empty-p (x)
+  (zerop (length x)))
+
 (defun ls-compile-toplevel (sexp)
+  (setq *toplevel-compilations* nil)
   (cond
     ((and (consp sexp) (eq (car sexp) 'progn))
-     (let ((subs (mapcar 'ls-compile-toplevel (cdr sexp))))
-       (join-trailing
-	(remove-if (lambda (s) (or (null s) (equal s "")))
-		   subs)
-	(concat ";" *newline*))))
+     (let ((subs (mapcar #'ls-compile-toplevel (cdr sexp))))
+       (join (remove-if #'null-or-empty-p subs))))
     (t
-     (setq *toplevel-compilations* nil)
      (let ((code (ls-compile sexp)))
        (prog1
-	   (concat (join-trailing *toplevel-compilations*
-				  (concat ";" *newline*))
-		   code)
-	 (setq *toplevel-compilations* nil))))))
+           (concat (join-trailing (remove-if #'null-or-empty-p *toplevel-compilations*)
+                                  (concat ";" *newline*))
+                   (if code
+                       (concat code ";" *newline*)
+                       ""))
+         (setq *toplevel-compilations* nil))))))
 
 
 ;;; Once we have the compiler, we define the runtime environment and
@@ -1529,24 +1530,6 @@
                (ls-compile-toplevel x))))
       (js-eval code)))
 
-  ;; Set the initial global environment to be equal to the host global
-  ;; environment at this point of the compilation.
-  (eval-when-compile
-    (let ((tmp (ls-compile
-                `(progn
-                   (setq *environment* ',*environment*)
-                   (setq *variable-counter* ',*variable-counter*)
-                   (setq *function-counter* ',*function-counter*)
-                   (setq *literal-counter* ',*literal-counter*)
-                   (setq *gensym-counter* ',*gensym-counter*)
-                   (setq *block-counter* ',*block-counter*)
-		   ,@(mapcar (lambda (s)
-			       `(oset *package* ,(symbol-name (car s))
-				      (js-vref ,(cdr s))))
-			     *literal-symbols*)))))
-      (setq *toplevel-compilations*
-            (append *toplevel-compilations* (list tmp)))))
-
   (js-eval "var lisp")
   (js-vset "lisp" (new))
   (js-vset "lisp.read" #'ls-read-from-string)
@@ -1554,7 +1537,24 @@
   (js-vset "lisp.eval" #'eval)
   (js-vset "lisp.compile" #'ls-compile-toplevel)
   (js-vset "lisp.evalString" (lambda (str) (eval (ls-read-from-string str))))
-  (js-vset "lisp.compileString" (lambda (str) (ls-compile-toplevel (ls-read-from-string str)))))
+  (js-vset "lisp.compileString" (lambda (str) (ls-compile-toplevel (ls-read-from-string str))))
+
+  ;; Set the initial global environment to be equal to the host global
+  ;; environment at this point of the compilation.
+  (eval-when-compile
+    (let ((tmp (ls-compile
+                `(progn
+		   ,@(mapcar (lambda (s)
+			       `(oset *package* ,(symbol-name (car s))
+				      (js-vref ,(cdr s))))
+			     *literal-symbols*)
+                   (setq *environment* ',*environment*)
+                   (setq *variable-counter* ',*variable-counter*)
+                   (setq *function-counter* ',*function-counter*)
+                   (setq *gensym-counter* ',*gensym-counter*)
+                   (setq *block-counter* ',*block-counter*)))))
+      (setq *toplevel-compilations*
+            (append *toplevel-compilations* (list tmp))))))
 
 
 ;;; Finally, we provide a couple of functions to easily bootstrap
@@ -1578,7 +1578,7 @@
            until (eq x *eof*)
            for compilation = (ls-compile-toplevel x)
            when (plusp (length compilation))
-           do (write-line (concat compilation "; ") out))
+           do (write-string compilation out))
         (dolist (check *compilation-unit-checks*)
           (funcall check))
         (setq *compilation-unit-checks* nil))))
