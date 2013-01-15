@@ -1008,12 +1008,18 @@
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
     ((symbolp sexp)
+     #+common-lisp
      (or (cdr (assoc sexp *literal-symbols*))
 	 (let ((v (genlit))
 	       (s (concat "{name: \"" (escape-string (symbol-name sexp)) "\"}")))
 	   (push (cons sexp v) *literal-symbols*)
 	   (push (concat "var " v " = " s) *toplevel-compilations*)
-	   v)))
+	   v))
+     #+ecmalisp
+     (let ((v (genlit)))
+       (push (concat "var " v " = " (ls-compile `(intern ,(symbol-name sexp))))
+             *toplevel-compilations*)
+       v))
     ((consp sexp)
      (let ((c (concat "{car: " (literal (car sexp) t) ", "
 		      "cdr: " (literal (cdr sexp) t) "}")))
