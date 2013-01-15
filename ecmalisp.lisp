@@ -24,17 +24,21 @@
 
 #+ecmalisp
 (progn
+
+  'defmacro
   (eval-when-compile
     (%compile-defmacro 'defmacro
                        '(lambda (name args &rest body)
-                         `(eval-when-compile
-                            (%compile-defmacro ',name
-					       '(lambda ,(mapcar (lambda (x)
-                                                                   (if (eq x '&body)
-                                                                       '&rest
-                                                                       x))
-                                                                 args)
-                                                 ,@body))))))
+                         `(progn
+                            (eval-when-compile
+                              (%compile-defmacro ',name
+                                                 '(lambda ,(mapcar (lambda (x)
+                                                                     (if (eq x '&body)
+                                                                         '&rest
+                                                                         x))
+                                                                   args)
+                                                   ,@body)))
+                            ',name))))
 
   (defmacro defvar (name value)
     `(progn
@@ -816,17 +820,28 @@
 (defun lookup-function-translation (symbol env)
   (binding-translation (lookup-function symbol env)))
 
+;;; Toplevel compilations
 (defvar *toplevel-compilations* nil)
+
+(defun toplevel-compilation (string)
+  (push string *toplevel-compilations*))
+
+(defun null-or-empty-p (x)
+  (zerop (length x)))
+
+(defun get-toplevel-compilations ()
+  (reverse (remove-if #'null-or-empty-p *toplevel-compilations*)))
+
 
 (defun %compile-defvar (name)
   (let ((b (lookup-variable name *environment*)))
     (mark-binding-as-declared b)
-    (push (concat "var " (binding-translation b)) *toplevel-compilations*)))
+    (toplevel-compilation (concat "var " (binding-translation b)))))
 
 (defun %compile-defun (name)
   (let ((b (lookup-function name *environment*)))
     (mark-binding-as-declared b)
-    (push (concat "var " (binding-translation b)) *toplevel-compilations*)))
+    (toplevel-compilation (concat "var " (binding-translation b)))))
 
 (defun %compile-defmacro (name lambda)
   (push-to-lexenv (make-binding name 'macro lambda t) *environment* 'function))
@@ -995,12 +1010,12 @@
 	 (let ((v (genlit))
 	       (s (concat "{name: \"" (escape-string (symbol-name sexp)) "\"}")))
 	   (push (cons sexp v) *literal-symbols*)
-	   (push (concat "var " v " = " s) *toplevel-compilations*)
+	   (toplevel-compilation (concat "var " v " = " s))
 	   v))
      #+ecmalisp
-     (let ((v (genlit)))
-       (push (concat "var " v " = " (ls-compile `(intern ,(symbol-name sexp))))
-             *toplevel-compilations*)
+     (let ((v (genlit))
+           (s (ls-compile `(intern ,(symbol-name sexp)))))
+       (toplevel-compilation (concat "var " v " = " s))
        v))
     ((consp sexp)
      (let ((c (concat "{car: " (literal (car sexp) t) ", "
@@ -1008,7 +1023,7 @@
        (if recursive
 	   c
 	   (let ((v (genlit)))
-	     (push (concat "var " v " = " c) *toplevel-compilations*)
+	     (toplevel-compilation (concat "var " v " = " c))
 	     v))))))
 
 (define-compilation quote (sexp)
@@ -1474,9 +1489,6 @@
              (ls-compile (ls-macroexpand-1 sexp env) env)
              (compile-funcall (car sexp) (cdr sexp) env))))))
 
-(defun null-or-empty-p (x)
-  (zerop (length x)))
-
 (defun ls-compile-toplevel (sexp)
   (setq *toplevel-compilations* nil)
   (cond
@@ -1486,8 +1498,7 @@
     (t
      (let ((code (ls-compile sexp)))
        (prog1
-           (concat (join-trailing (remove-if #'null-or-empty-p *toplevel-compilations*)
-                                  (concat ";" *newline*))
+           (concat (join-trailing (get-toplevel-compilations) (concat ";" *newline*))
                    (if code
                        (concat code ";" *newline*)
                        ""))
@@ -1527,25 +1538,22 @@
   ;; Set the initial global environment to be equal to the host global
   ;; environment at this point of the compilation.
   (eval-when-compile
-    (let ((tmp (ls-compile
-                `(progn
-		   ,@(mapcar (lambda (s)
-			       `(oset *package* ,(symbol-name (car s))
-				      (js-vref ,(cdr s))))
-			     *literal-symbols*)
-                   (setq *environment* ',*environment*)
-                   (setq *variable-counter* ,*variable-counter*)
-                   (setq *function-counter* ,*function-counter*)
-                   (setq *gensym-counter* ,*gensym-counter*)
-                   (setq *block-counter* ,*block-counter*)))))
-      (setq *toplevel-compilations*
-            (append *toplevel-compilations* (list tmp)))))
-  ;; KLUDGE:
+    (toplevel-compilation
+     (ls-compile
+      `(progn
+         ,@(mapcar (lambda (s)
+                     `(oset *package* ,(symbol-name (car s))
+                            (js-vref ,(cdr s))))
+                   *literal-symbols*)
+         (setq *environment* ',*environment*)
+         (setq *variable-counter* ,*variable-counter*)
+         (setq *function-counter* ,*function-counter*)
+         (setq *gensym-counter* ,*gensym-counter*)
+         (setq *block-counter* ,*block-counter*)))))
+
   (eval-when-compile
-    (let ((tmp (ls-compile
-                `(setq *literal-counter* ,*literal-counter*))))
-      (setq *toplevel-compilations*
-            (append *toplevel-compilations* (list tmp))))))
+    (toplevel-compilation
+     (ls-compile `(setq *literal-counter* ,*literal-counter*)))))
 
 
 ;;; Finally, we provide a couple of functions to easily bootstrap
