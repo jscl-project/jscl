@@ -36,30 +36,26 @@
                                                                  args)
                                                  ,@body))))))
 
-  (defmacro %defvar (name value)
+  (defmacro defvar (name value)
     `(progn
        (eval-when-compile
          (%compile-defvar ',name))
-       (setq ,name ,value)))
+       (setq ,name ,value)
+       ',name))
 
-  (defmacro defvar (name &optional value)
-    `(%defvar ,name ,value))
-
-  (defmacro named-lambda (name args &rest body)
+  (defmacro named-lambda (name args &body body)
     (let ((x (gensym "FN")))
       `(let ((,x (lambda ,args ,@body)))
          (oset ,x "fname" ,name)
          ,x)))
 
-  (defmacro %defun (name args &rest body)
+  (defmacro defun (name args &body body)
     `(progn
        (eval-when-compile
          (%compile-defun ',name))
        (fsetq ,name (named-lambda ,(symbol-name name) ,args
-                      (block ,name ,@body)))))
-
-  (defmacro defun (name args &rest body)
-    `(%defun ,name ,args ,@body))
+                      (block ,name ,@body)))
+       ',name))
 
   (defvar *package* (new))
 
@@ -226,9 +222,8 @@
   (defmacro prog2 (form1 result &body body)
     `(prog1 (progn ,form1 ,result) ,@body))
 
+  )
 
-
-)
 
 ;;; This couple of helper functions will be defined in both Common
 ;;; Lisp and in Ecmalisp.
@@ -249,16 +244,6 @@
 ;;; constructions.
 #+ecmalisp
 (progn
-  (defmacro defun (name args &body body)
-    `(progn
-       (%defun ,name ,args ,@body)
-       ',name))
-
-  (defmacro defvar (name &optional value)
-    `(progn
-       (%defvar ,name ,value)
-       ',name))
-
   (defun append-two (list1 list2)
     (if (null list1)
         list2
@@ -1549,10 +1534,16 @@
 				      (js-vref ,(cdr s))))
 			     *literal-symbols*)
                    (setq *environment* ',*environment*)
-                   (setq *variable-counter* ',*variable-counter*)
-                   (setq *function-counter* ',*function-counter*)
-                   (setq *gensym-counter* ',*gensym-counter*)
-                   (setq *block-counter* ',*block-counter*)))))
+                   (setq *variable-counter* ,*variable-counter*)
+                   (setq *function-counter* ,*function-counter*)
+                   (setq *gensym-counter* ,*gensym-counter*)
+                   (setq *block-counter* ,*block-counter*)))))
+      (setq *toplevel-compilations*
+            (append *toplevel-compilations* (list tmp)))))
+  ;; KLUDGE:
+  (eval-when-compile
+    (let ((tmp (ls-compile
+                `(setq *literal-counter* ,*literal-counter*))))
       (setq *toplevel-compilations*
             (append *toplevel-compilations* (list tmp))))))
 
