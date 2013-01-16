@@ -71,16 +71,12 @@
   (defmacro while (condition &body body)
     `(block nil (%while ,condition ,@body)))
 
-  (defun internp (name)
-    (in name *package*))
-
-  (defun intern (name)
-    (if (internp name)
-        (oget *package* name)
-        (oset *package* name (make-symbol name))))
-
   (defun find-symbol (name)
     (oget *package* name))
+
+  (defun intern (name)
+    (let ((s (find-symbol name)))
+      (if s s (oset *package* name (make-symbol name)))))
 
   (defvar *gensym-counter* 0)
   (defun gensym (&optional (prefix "G"))
