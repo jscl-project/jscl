@@ -1507,19 +1507,18 @@
              (compile-funcall (car sexp) (cdr sexp) env))))))
 
 (defun ls-compile-toplevel (sexp)
-  (setq *toplevel-compilations* nil)
-  (cond
-    ((and (consp sexp) (eq (car sexp) 'progn))
-     (let ((subs (mapcar #'ls-compile-toplevel (cdr sexp))))
-       (join (remove-if #'null-or-empty-p subs))))
-    (t
-     (let ((code (ls-compile sexp)))
-       (prog1
-           (concat (join-trailing (get-toplevel-compilations) (concat ";" *newline*))
-                   (if code
-                       (concat code ";" *newline*)
-                       ""))
-         (setq *toplevel-compilations* nil))))))
+  (let ((*toplevel-compilations* nil))
+    (cond
+      ((and (consp sexp) (eq (car sexp) 'progn))
+       (let ((subs (mapcar #'ls-compile-toplevel (cdr sexp))))
+         (join (remove-if #'null-or-empty-p subs))))
+      (t
+       (let ((code (ls-compile sexp)))
+         (concat (join-trailing (get-toplevel-compilations)
+                                (concat ";" *newline*))
+                 (if code
+                     (concat code ";" *newline*)
+                     "")))))))
 
 
 ;;; Once we have the compiler, we define the runtime environment and
