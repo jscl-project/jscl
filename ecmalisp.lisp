@@ -1315,6 +1315,10 @@
     "if (func === undefined) throw \"Function `\" + symbol.name + \"' is undefined.\";" *newline*
     "return func;" *newline*))
 
+(define-builtin symbol-plist (x)
+  (concat "((" x ").plist || " (ls-compile nil) ")"))
+
+
 (define-builtin eq    (x y) (js!bool (concat "(" x " === " y ")")))
 (define-builtin equal (x y) (js!bool (concat "(" x  " == " y ")")))
 
