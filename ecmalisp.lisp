@@ -1309,7 +1309,11 @@
     "return value;" *newline*))
 
 (define-builtin symbol-function (x)
-  (concat "(" x ").function"))
+  (js!selfcall
+    "var symbol = " x ";" *newline*
+    "var func = symbol.function;" *newline*
+    "if (func === undefined) throw \"Function `\" + symbol.name + \"' is undefined.\";" *newline*
+    "return func;" *newline*))
 
 (define-builtin eq    (x y) (js!bool (concat "(" x " === " y ")")))
 (define-builtin equal (x y) (js!bool (concat "(" x  " == " y ")")))
@@ -1505,7 +1509,6 @@
                    *literal-symbols*)
          (setq *environment* ',*environment*)
          (setq *variable-counter* ,*variable-counter*)
-         (setq *function-counter* ,*function-counter*)
          (setq *gensym-counter* ,*gensym-counter*)
          (setq *block-counter* ,*block-counter*)))))
 
@@ -1545,7 +1548,6 @@
     (setq *literal-symbols* nil)
     (setq *variable-counter* 0
           *gensym-counter* 0
-          *function-counter* 0
           *literal-counter* 0
           *block-counter* 0)
     (ls-compile-file "ecmalisp.lisp" "ecmalisp.js")))
