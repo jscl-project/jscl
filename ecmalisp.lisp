@@ -38,7 +38,22 @@
                                                    ,@body)))
                             ',name))))
 
+  (setq nil 'nil)
+  (setq t 't)
+
+  (defmacro when (condition &body body)
+    `(if ,condition (progn ,@body) nil))
+
+  (defmacro unless (condition &body body)
+    `(if ,condition nil (progn ,@body)))
+
   (defmacro defvar (name value)
+    `(progn
+       (unless (boundp ',name)
+	 (setq ,name ,value))
+       ',name))
+
+  (defmacro defparameter (name value)
     `(progn
        (setq ,name ,value)
        ',name))
@@ -56,9 +71,6 @@
        ',name))
 
   (defvar *package* (new))
-
-  (defvar nil 'nil)
-  (defvar t 't)
 
   (defun null (x)
     (eq x nil))
@@ -130,12 +142,6 @@
 
   (defmacro push (x place)
     `(setq ,place (cons ,x ,place)))
-
-  (defmacro when (condition &body body)
-    `(if ,condition (progn ,@body) nil))
-
-  (defmacro unless (condition &body body)
-    `(if ,condition nil (progn ,@body)))
 
   (defmacro dolist (iter &body body)
     (let ((var (first iter))
