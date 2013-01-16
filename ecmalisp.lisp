@@ -24,8 +24,6 @@
 
 #+ecmalisp
 (progn
-
-  'defmacro
   (eval-when-compile
     (%compile-defmacro 'defmacro
                        '(lambda (name args &rest body)
@@ -811,6 +809,7 @@
   (reverse (remove-if #'null-or-empty-p *toplevel-compilations*)))
 
 (defun %compile-defmacro (name lambda)
+  (toplevel-compilation (ls-compile `',name))
   (push-to-lexenv (make-binding name 'macro lambda t) *environment* 'function))
 
 (defvar *compilations* nil)
