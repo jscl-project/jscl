@@ -416,7 +416,20 @@
     (car alist))
 
   (defun string= (s1 s2)
-    (equal s1 s2)))
+    (equal s1 s2))
+
+  (defun fdefinition (x)
+    (cond
+      ((functionp x)
+       x)
+      ((symbolp x)
+       (symbol-function x))
+      (t
+       (error "Invalid function"))))
+
+  (defun disassemble (function)
+    (write-line (lambda-code (fdefinition function)))
+    nil))
 
 
 ;;; The compiler offers some primitives and special forms which are
@@ -1200,9 +1213,10 @@
 ;;; Primitives
 
 (defmacro define-builtin (name args &body body)
-  `(define-compilation ,name ,args
-     (let ,(mapcar (lambda (arg) `(,arg (ls-compile ,arg env))) args)
-       ,@body)))
+  `(progn
+     (define-compilation ,name ,args
+       (let ,(mapcar (lambda (arg) `(,arg (ls-compile ,arg env))) args)
+         ,@body))))
 
 ;;; DECLS is a list of (JSVARNAME TYPE LISPFORM) declarations.
 (defmacro type-check (decls &body body)
@@ -1311,6 +1325,9 @@
 
 (define-builtin symbol-plist (x)
   (concat "((" x ").plist || " (ls-compile nil) ")"))
+
+(define-builtin lambda-code (x)
+  (concat "(" x ").toString()"))
 
 
 (define-builtin eq    (x y) (js!bool (concat "(" x " === " y ")")))
