@@ -58,16 +58,18 @@
        (setq ,name ,value)
        ',name))
 
-  (defmacro named-lambda (name args &body body)
+  (defmacro named-lambda (name args &rest body)
     (let ((x (gensym "FN")))
       `(let ((,x (lambda ,args ,@body)))
          (oset ,x "fname" ,name)
          ,x)))
 
-  (defmacro defun (name args &body body)
+  (defmacro defun (name args &rest body)
     `(progn
-       (fset ',name (named-lambda ,(symbol-name name) ,args
-                      (block ,name ,@body)))
+       (fset ',name
+             (named-lambda ,(symbol-name name)
+                 ,args
+               (block ,name ,@body)))
        ',name))
 
   (defvar *package* (new))
@@ -96,6 +98,9 @@
   (defun gensym (&optional (prefix "G"))
     (setq *gensym-counter* (+ *gensym-counter* 1))
     (make-symbol (concat-two prefix (integer-to-string *gensym-counter*))))
+
+  (defun boundp (x)
+    (boundp x))
 
   ;; Basic functions
   (defun = (x y) (= x y))
@@ -1023,20 +1028,55 @@
     (ls-compile-block (butlast body) env)
     "return " (ls-compile (car (last body)) env) ";" *newline*))
 
+
+(defun dynamic-binding-wrapper (bindings body)
+  (if (null bindings)
+      body
+      (concat
+       "try {" *newline*
+       (indent
+        "var tmp;" *newline*
+        (join
+         (mapcar (lambda (b)
+                   (let ((s (ls-compile `(quote ,(car b)))))
+                     (concat "tmp = " s ".value;" *newline*
+                             s ".value = " (cdr b) ";" *newline*
+                             (cdr b) " = tmp;" *newline*)))
+                 bindings))
+        body)
+       "}" *newline*
+       "finally {"  *newline*
+       (indent
+        (join-trailing
+         (mapcar (lambda (b)
+                   (let ((s (ls-compile `(quote ,(car b)))))
+                     (concat s ".value" " = " (cdr b))))
+                 bindings)
+         (concat ";" *newline*)))
+       "}" *newline*)))
+
+
 (define-compilation let (bindings &rest body)
   (let ((bindings (mapcar #'ensure-list bindings)))
     (let ((variables (mapcar #'first bindings))
           (values    (mapcar #'second bindings)))
-      (let ((new-env (extend-local-env variables env)))
+      (let ((new-env (extend-local-env (remove-if #'boundp variables) env))
+            (dynamic-bindings))
         (concat "(function("
                 (join (mapcar (lambda (x)
-                                (translate-variable x new-env))
+                                (if (boundp x)
+                                    (let ((v (gvarname x)))
+                                      (push (cons x v) dynamic-bindings)
+                                      v)
+                                    (translate-variable x new-env)))
                               variables)
                       ",")
                 "){" *newline*
-                (indent (ls-compile-block (butlast body) new-env)
-                        "return " (ls-compile (car (last body)) new-env)
-                        ";" *newline*)
+                (let ((body
+                       (concat (ls-compile-block (butlast body) new-env)
+                               "return " (ls-compile (car (last body)) new-env)
+                               ";" *newline*)))
+                  (indent (dynamic-binding-wrapper dynamic-bindings body)))
                 "})(" (join (mapcar (lambda (x) (ls-compile x env))
                                     values)
                             ",")
