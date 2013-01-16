@@ -1420,19 +1420,10 @@
         form)))
 
 (defun compile-funcall (function args env)
-  (cond
-    ((symbolp function)
-     (concat (ls-compile `(quote ,function)) ".function("
-             (join (mapcar (lambda (x) (ls-compile x env)) args)
-                   ", ")
-             ")"))
-    ((and (listp function) (eq (car function) 'lambda))
-     (concat "(" (ls-compile function env) ")("
-             (join (mapcar (lambda (x) (ls-compile x env)) args)
-                   ", ")
-             ")"))
-    (t
-     (error (concat "Invalid function designator " (symbol-name function))))))
+  (concat (ls-compile `#',function) "("
+          (join (mapcar (lambda (x) (ls-compile x env)) args)
+                ", ")
+          ")"))
 
 (defun ls-compile (sexp &optional (env (make-lexenv)))
   (cond
