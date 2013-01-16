@@ -42,8 +42,6 @@
 
   (defmacro defvar (name value)
     `(progn
-       (eval-when-compile
-         (%compile-defvar ',name))
        (setq ,name ,value)
        ',name))
 
@@ -224,9 +222,8 @@
          ,value)))
 
   (defmacro prog2 (form1 result &body body)
-    `(prog1 (progn ,form1 ,result) ,@body))
+    `(prog1 (progn ,form1 ,result) ,@body)))
 
-  )
 
 
 ;;; This couple of helper functions will be defined in both Common
@@ -569,6 +566,10 @@
     (write-string *newline*)
     x)
 
+  (defun warn (string)
+    (write-string "WARNING: ")
+    (write-line string))
+
   (defun print (x)
     (write-line (prin1-to-string x))
     x))
@@ -777,21 +778,8 @@
 (defun gvarname (symbol)
   (concat "v" (integer-to-string (incf *variable-counter*))))
 
-(defun lookup-variable (symbol env)
-  (or (lookup-in-lexenv symbol env 'variable)
-      (lookup-in-lexenv symbol *environment* 'variable)
-      (let ((name (symbol-name symbol))
-            (binding (make-binding symbol 'special-variable (gvarname symbol) nil)))
-        (push-to-lexenv binding *environment* 'variable)
-        (push (lambda ()
-		(let ((b (lookup-in-lexenv symbol *environment* 'variable)))
-		  (unless (binding-declared b)
-		      (error (concat "Undefined variable `" name "'")))))
-              *compilation-unit-checks*)
-        binding)))
-
-(defun lookup-variable-translation (symbol env)
-  (binding-translation (lookup-variable symbol env)))
+(defun translate-variable (symbol env)
+  (binding-translation (lookup-in-lexenv symbol env 'variable)))
 
 (defun extend-local-env (args env)
   (let ((new (copy-lexenv env)))
@@ -831,12 +819,6 @@
 
 (defun get-toplevel-compilations ()
   (reverse (remove-if #'null-or-empty-p *toplevel-compilations*)))
-
-
-(defun %compile-defvar (name)
-  (let ((b (lookup-variable name *environment*)))
-    (mark-binding-as-declared b)
-    (toplevel-compilation (concat "var " (binding-translation b)))))
 
 (defun %compile-defun (name)
   (let ((b (lookup-function name *environment*)))
@@ -906,7 +888,7 @@
                     env)))
       (concat "(function ("
               (join (mapcar (lambda (x)
-                              (lookup-variable-translation x new-env))
+                              (translate-variable x new-env))
                             (append required-arguments optional-arguments))
                     ",")
               "){" *newline*
@@ -933,7 +915,7 @@
                                  (let ((arg (nth idx optional-and-defaults)))
                                    (push (concat "case "
                                                  (integer-to-string (+ idx n-required-arguments)) ":" *newline*
-                                                 (lookup-variable-translation (car arg) new-env)
+                                                 (translate-variable (car arg) new-env)
                                                  "="
                                                  (ls-compile (cadr arg) new-env)
                                                  ";" *newline*)
@@ -945,7 +927,7 @@
                    "")
                ;; &rest/&body argument
                (if rest-argument
-                   (let ((js!rest (lookup-variable-translation rest-argument new-env)))
+                   (let ((js!rest (translate-variable rest-argument new-env)))
                      (concat "var " js!rest "= " (ls-compile nil) ";" *newline*
                              "for (var i = arguments.length-1; i>="
                              (integer-to-string (+ n-required-arguments n-optional-arguments))
@@ -965,14 +947,15 @@
           (ls-compile val env)))
 
 (define-compilation setq (var val)
-  (let ((b (lookup-variable var env)))
-    (ecase (binding-type b)
-      (lexical-variable (concat (binding-translation b) " = " (ls-compile val env)))
-      (special-variable (ls-compile `(set ',var ,val) env)))))
+  (let ((b (lookup-in-lexenv var env 'variable)))
+    (if (eq (binding-type b) 'lexical-variable)
+        (concat (binding-translation b) " = " (ls-compile val env))
+        (ls-compile `(set ',var ,val) env))))
 
 ;;; FFI Variable accessors
 (define-compilation js-vref (var)
   var)
+
 (define-compilation js-vset (var val)
   (concat "(" var " = " (ls-compile val env) ")"))
 
@@ -1064,7 +1047,7 @@
       (let ((new-env (extend-local-env variables env)))
         (concat "(function("
                 (join (mapcar (lambda (x)
-                                (lookup-variable-translation x new-env))
+                                (translate-variable x new-env))
                               variables)
                       ",")
                 "){" *newline*
@@ -1346,7 +1329,11 @@
   (concat "(" symbol ").value =" value))
 
 (define-builtin symbol-value (x)
-  (concat "(" x ").value"))
+  (js!selfcall
+    "var symbol = " x ";" *newline*
+    "var value = symbol.value;" *newline*
+    "if (value === undefined) throw \"Variable `\" + symbol.name + \"' is unbound.\";" *newline*
+    "return value;" *newline*))
 
 (define-builtin symbol-function (x)
   (concat "(" x ").function"))
@@ -1473,12 +1460,10 @@
 (defun ls-compile (sexp &optional (env (make-lexenv)))
   (cond
     ((symbolp sexp)
-     (let ((b (lookup-variable sexp env)))
-       (ecase (binding-type b)
-	 (lexical-variable
-	  (binding-translation b))
-	 (special-variable
-          (ls-compile `(symbol-value ',sexp) env)))))
+     (let ((b (lookup-in-lexenv sexp env 'variable)))
+       (if (eq (binding-type b) 'lexical-variable)
+           (binding-translation b)
+           (ls-compile `(symbol-value ',sexp) env))))
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
     ((listp sexp)
