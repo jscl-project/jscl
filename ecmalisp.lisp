@@ -1304,10 +1304,13 @@
   (concat "(" x ").name"))
 
 (define-builtin set (symbol value)
-  (concat "(" symbol ").value =" value))
+  (concat "(" symbol ").value = " value))
 
 (define-builtin fset (symbol value)
-  (concat "(" symbol ").function =" value))
+  (concat "(" symbol ").function = " value))
+
+(define-builtin boundp (x)
+  (js!bool (concat "(" x ".value !== undefined)")))
 
 (define-builtin symbol-value (x)
   (js!selfcall
