@@ -955,18 +955,12 @@
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
     ((symbolp sexp)
-     #+common-lisp
      (or (cdr (assoc sexp *literal-symbols*))
 	 (let ((v (genlit))
 	       (s (concat "{name: \"" (escape-string (symbol-name sexp)) "\"}")))
 	   (push (cons sexp v) *literal-symbols*)
 	   (toplevel-compilation (concat "var " v " = " s))
-	   v))
-     #+ecmalisp
-     (let ((v (genlit))
-           (s (ls-compile `(intern ,(symbol-name sexp)))))
-       (toplevel-compilation (concat "var " v " = " s))
-       v))
+	   v)))
     ((consp sexp)
      (let ((c (concat "{car: " (literal (car sexp) t) ", "
 		      "cdr: " (literal (cdr sexp) t) "}")))
@@ -1414,8 +1408,8 @@
 (defun macro (x)
   (and (symbolp x)
        (let ((b (lookup-in-lexenv x *environment* 'function)))
-         (eq (binding-type b) 'macro)
-         b)))
+         (and (eq (binding-type b) 'macro)
+              b))))
 
 (defun ls-macroexpand-1 (form)
   (let ((macro-binding (macro (car form))))
@@ -1502,6 +1496,7 @@
                      `(oset *package* ,(symbol-name (car s))
                             (js-vref ,(cdr s))))
                    *literal-symbols*)
+         (setq *literal-symbols* ',*literal-symbols*)
          (setq *environment* ',*environment*)
          (setq *variable-counter* ,*variable-counter*)
          (setq *gensym-counter* ,*gensym-counter*)
@@ -1509,7 +1504,8 @@
 
   (eval-when-compile
     (toplevel-compilation
-     (ls-compile `(setq *literal-counter* ,*literal-counter*)))))
+     (ls-compile
+      `(setq *literal-counter* ,*literal-counter*)))))
 
 
 ;;; Finally, we provide a couple of functions to easily bootstrap
