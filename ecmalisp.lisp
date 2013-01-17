@@ -890,10 +890,10 @@
 (defun lambda-docstring-wrapper (docstring &rest strs)
   (if docstring
       (js!selfcall
-        "var func = " (reduce #'concat strs) ";" *newline*
+        "var func = " (join strs) ";" *newline*
         "func.docstring = '" docstring "';" *newline*
         "return func;" *newline*)
-      (reduce #'concat strs)))
+      (join strs)))
 
 (define-compilation lambda (lambda-list &rest body)
   (let ((required-arguments (lambda-list-required-arguments lambda-list))

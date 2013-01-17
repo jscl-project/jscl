@@ -817,37 +817,41 @@ var l34 = {name: "CAR"};
     (l34).function = (function(v48){
         ((v48)["fname"] = "CAR");
         return v48;
-    })((function (v47){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
+    })((function(){
+        var func = (function (v47){
+            if (arguments.length < 1) throw 'too few arguments';
+            if (arguments.length > 1) throw 'too many arguments';
+            return (function(){
+                try {
                     return (function(){
-                        var tmp = v47;
-                        return tmp === (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()? (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(): tmp.car;
+                        return (function(){
+                            var tmp = v47;
+                            return tmp === (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })()? (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })(): tmp.car;
+                        })();
                     })();
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 20)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    }));
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 20)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
+        
+        });
+        func.docstring = 'Return the CAR part of a cons, or NIL if X is null.';
+        return func;
+    })());
     return l34;
 })();
 var l35 = {name: "CDR"};
@@ -4206,9 +4210,121 @@ var l97 = {name: "WRITE-LINE"};
     }));
     return l96;
 })();
-var l98 = {name: "*NEWLINE*"};
+var l98 = {name: "DOCUMENTATION"};
+var l99 = {name: "FUNCTION"};
+var l100 = {name: "VARIABLE"};
 (function(){
-    (((l98.value !== undefined)?(function(){
+    (l98).function = (function(v185){
+        ((v185)["fname"] = "DOCUMENTATION");
+        return v185;
+    })((function(){
+        var func = (function (v181,v182){
+            if (arguments.length < 2) throw 'too few arguments';
+            if (arguments.length > 2) throw 'too many arguments';
+            return (function(){
+                try {
+                    return (function(){
+                        return (function(v183){
+                            return ((function(){
+                                var symbol = l30;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v183, l99) !== (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })() ? (function(){
+                                return (function(v184){
+                                    return (function(){
+                                        var tmp = (v184)["docstring"];
+                                        return tmp == undefined? (function(){
+                                            var symbol = l2;
+                                            var value = symbol.value;
+                                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                            return value;
+                                        })(): tmp ;
+                                    })();
+                                })((function(){
+                                    var symbol = l95;
+                                    var func = symbol.function;
+                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                    return func;
+                                })()(v181));
+                            })() : ((function(){
+                                var symbol = l30;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v183, l100) !== (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })() ? (function(){
+                                (((function(){
+                                    var tmp = v181;
+                                    return (typeof tmp == 'object' && 'name' in tmp);
+                                })()?(function(){
+                                    var symbol = l3;
+                                    var value = symbol.value;
+                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                    return value;
+                                })(): (function(){
+                                    var symbol = l2;
+                                    var value = symbol.value;
+                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                    return value;
+                                })()) !== (function(){
+                                    var symbol = l2;
+                                    var value = symbol.value;
+                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                    return value;
+                                })() ? (function(){
+                                    var symbol = l2;
+                                    var value = symbol.value;
+                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                    return value;
+                                })() : (function(){
+                                    return (function(){
+                                        throw "Wrong argument type! it should be a symbol";
+                                    })();
+                                })());
+                                return (function(){
+                                    var tmp = (v181)["vardoc"];
+                                    return tmp == undefined? (function(){
+                                        var symbol = l2;
+                                        var value = symbol.value;
+                                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                        return value;
+                                    })(): tmp ;
+                                })();
+                            })() : (function(){
+                                return (function(){
+                                    throw "ECASE expression failed.";
+                                })();
+                            })()));
+                        })(v182);
+                    })();
+                }
+                catch (cf){
+                    if (cf.type == 'block' && cf.id == 82)
+                        return cf.value;
+                    else
+                        throw cf;
+                }
+            })();
+        
+        });
+        func.docstring = 'Return the documentation of X. TYPE must be the symbol VARIABLE or FUNCTION.';
+        return func;
+    })());
+    return l98;
+})();
+var l101 = {name: "*NEWLINE*"};
+(function(){
+    (((l101.value !== undefined)?(function(){
         var symbol = l3;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -4229,7 +4345,7 @@ var l98 = {name: "*NEWLINE*"};
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })() : (function(){
-        return (l98).value = (function(){
+        return (l101).value = (function(){
             var x = (function(){
                 var symbol = l74;
                 var func = symbol.function;
@@ -4241,23 +4357,23 @@ var l98 = {name: "*NEWLINE*"};
             return String.fromCharCode(x);
         })();
     })());
-    return l98;
+    return l101;
 })();
-var l99 = {name: "CONCAT"};
+var l102 = {name: "CONCAT"};
 (function(){
-    (l99).function = (function(v182){
-        ((v182)["fname"] = "CONCAT");
-        return v182;
+    (l102).function = (function(v187){
+        ((v187)["fname"] = "CONCAT");
+        return v187;
     })((function (){
-        var v181= (function(){
+        var v186= (function(){
             var symbol = l2;
             var value = symbol.value;
             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
             return value;
         })();
         for (var i = arguments.length-1; i>=0; i--)
-            v181 = {car: arguments[i], cdr: 
-        v181};
+            v186 = {car: arguments[i], cdr: 
+        v186};
         return (function(){
             try {
                 return (function(){
@@ -4271,11 +4387,11 @@ var l99 = {name: "CONCAT"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v181, "");
+                    })(), v186, "");
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 82)
+                if (cf.type == 'block' && cf.id == 83)
                     return cf.value;
                 else
                     throw cf;
@@ -4283,21 +4399,21 @@ var l99 = {name: "CONCAT"};
         })();
     
     }));
-    return l99;
+    return l102;
 })();
-var l100 = {name: "CONCATF"};
-l100;
-var l101 = {name: "JOIN"};
+var l103 = {name: "CONCATF"};
+l103;
+var l104 = {name: "JOIN"};
 (function(){
-    (l101).function = (function(v185){
-        ((v185)["fname"] = "JOIN");
-        return v185;
-    })((function (v183,v184){
+    (l104).function = (function(v190){
+        ((v190)["fname"] = "JOIN");
+        return v190;
+    })((function (v188,v189){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         switch(arguments.length){
         case 1:
-        v184="";
+        v189="";
         default: break;
         }
         return (function(){
@@ -4308,7 +4424,7 @@ var l101 = {name: "JOIN"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v183) !== (function(){
+                    })()(v188) !== (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -4321,7 +4437,7 @@ var l101 = {name: "JOIN"};
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var tmp = v183;
+                        var tmp = v188;
                         return tmp === (function(){
                             var symbol = l2;
                             var value = symbol.value;
@@ -4340,7 +4456,7 @@ var l101 = {name: "JOIN"};
                         return value;
                     })() ? (function(){
                         return (function(){
-                            var tmp = v183;
+                            var tmp = v188;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -4355,12 +4471,12 @@ var l101 = {name: "JOIN"};
                         })();
                     })() : (function(){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var tmp = v183;
+                            var tmp = v188;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -4372,13 +4488,13 @@ var l101 = {name: "JOIN"};
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(): tmp.car;
-                        })(), v184, (function(){
-                            var symbol = l101;
+                        })(), v189, (function(){
+                            var symbol = l104;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var tmp = v183;
+                            var tmp = v188;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -4390,84 +4506,8 @@ var l101 = {name: "JOIN"};
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(): tmp.cdr;
-                        })(), v184));
+                        })(), v189));
                     })()));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 83)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    }));
-    return l101;
-})();
-var l102 = {name: "JOIN-TRAILING"};
-(function(){
-    (l102).function = (function(v188){
-        ((v188)["fname"] = "JOIN-TRAILING");
-        return v188;
-    })((function (v186,v187){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
-        switch(arguments.length){
-        case 1:
-        v187="";
-        default: break;
-        }
-        return (function(){
-            try {
-                return (function(){
-                    return ((function(){
-                        var symbol = l11;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v186) !== (function(){
-                        var symbol = l2;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })() ? "" : (function(){
-                        var symbol = l99;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()((function(){
-                        var tmp = v186;
-                        return tmp === (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()? (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(): tmp.car;
-                    })(), v187, (function(){
-                        var symbol = l102;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()((function(){
-                        var tmp = v186;
-                        return tmp === (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()? (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(): tmp.cdr;
-                    })(), v187)));
                 })();
             }
             catch (cf){
@@ -4479,30 +4519,71 @@ var l102 = {name: "JOIN-TRAILING"};
         })();
     
     }));
-    return l102;
+    return l104;
 })();
-var l103 = {name: "MAPCONCAT"};
+var l105 = {name: "JOIN-TRAILING"};
 (function(){
-    (l103).function = (function(v191){
-        ((v191)["fname"] = "MAPCONCAT");
-        return v191;
-    })((function (v189,v190){
-        if (arguments.length < 2) throw 'too few arguments';
+    (l105).function = (function(v193){
+        ((v193)["fname"] = "JOIN-TRAILING");
+        return v193;
+    })((function (v191,v192){
+        if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
+        switch(arguments.length){
+        case 1:
+        v192="";
+        default: break;
+        }
         return (function(){
             try {
                 return (function(){
-                    return (function(){
-                        var symbol = l101;
+                    return ((function(){
+                        var symbol = l11;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v191) !== (function(){
+                        var symbol = l2;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })() ? "" : (function(){
+                        var symbol = l102;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l71;
+                        var tmp = v191;
+                        return tmp === (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()? (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(): tmp.car;
+                    })(), v192, (function(){
+                        var symbol = l105;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v189, v190));
+                    })()((function(){
+                        var tmp = v191;
+                        return tmp === (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()? (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(): tmp.cdr;
+                    })(), v192)));
                 })();
             }
             catch (cf){
@@ -4514,28 +4595,63 @@ var l103 = {name: "MAPCONCAT"};
         })();
     
     }));
-    return l103;
+    return l105;
 })();
-var l104 = {name: "INDENT"};
+var l106 = {name: "MAPCONCAT"};
 (function(){
-    (l104).function = (function(v198){
-        ((v198)["fname"] = "INDENT");
-        return v198;
+    (l106).function = (function(v196){
+        ((v196)["fname"] = "MAPCONCAT");
+        return v196;
+    })((function (v194,v195){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(){
+                        var symbol = l104;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()((function(){
+                        var symbol = l71;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v194, v195));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 86)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    }));
+    return l106;
+})();
+var l107 = {name: "INDENT"};
+(function(){
+    (l107).function = (function(v203){
+        ((v203)["fname"] = "INDENT");
+        return v203;
     })((function (){
-        var v192= (function(){
+        var v197= (function(){
             var symbol = l2;
             var value = symbol.value;
             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
             return value;
         })();
         for (var i = arguments.length-1; i>=0; i--)
-            v192 = {car: arguments[i], cdr: 
-        v192};
+            v197 = {car: arguments[i], cdr: 
+        v197};
         return (function(){
             try {
                 return (function(){
-                    return (function(v193){
-                        return (function(v194,v195,v196){
+                    return (function(v198){
+                        return (function(v199,v200,v201){
                             ((function(){
                                 var symbol = l78;
                                 var func = symbol.function;
@@ -4546,18 +4662,18 @@ var l104 = {name: "INDENT"};
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v193)) !== (function(){
+                            })()(v198)) !== (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })() ? (function(){
-                                return v194 = (function(){
-                                    var symbol = l99;
+                                return v199 = (function(){
+                                    var symbol = l102;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v194, (function(){
+                                })()(v199, (function(){
                                     return "    ";
                                 })());
                             })() : (function(){
@@ -4571,8 +4687,8 @@ var l104 = {name: "INDENT"};
                                     return (function(){
                                         return (function(){
                                             while(((function(){
-                                                var x = v195;
-                                                var y = v196;
+                                                var x = v200;
+                                                var y = v201;
                                                 if (typeof x != 'number')
                                                     throw 'The value ' + x + ' is not a type number.';
                                                 if (typeof y != 'number')
@@ -4594,14 +4710,14 @@ var l104 = {name: "INDENT"};
                                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                 return value;
                                             })()){
-                                                (function(v197){
-                                                    return v194 = (function(){
-                                                        var symbol = l99;
+                                                (function(v202){
+                                                    return v199 = (function(){
+                                                        var symbol = l102;
                                                         var func = symbol.function;
                                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                         return func;
-                                                    })()(v194, (function(){
-                                                        return v197;
+                                                    })()(v199, (function(){
+                                                        return v202;
                                                     })());
                                                 })((((function(){
                                                     var symbol = l76;
@@ -4609,8 +4725,8 @@ var l104 = {name: "INDENT"};
                                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                     return func;
                                                 })()((function(){
-                                                    var string = v193;
-                                                    var index = v195;
+                                                    var string = v198;
+                                                    var index = v200;
                                                     if (typeof string != 'string')
                                                         throw 'The value ' + string + ' is not a type string.';
                                                     if (typeof index != 'number')
@@ -4622,13 +4738,13 @@ var l104 = {name: "INDENT"};
                                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                     return value;
                                                 })() ? (((function(){
-                                                    var x = v195;
+                                                    var x = v200;
                                                     var y = (function(){
                                                         var symbol = l27;
                                                         var func = symbol.function;
                                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                         return func;
-                                                    })()(v196);
+                                                    })()(v201);
                                                     if (typeof x != 'number')
                                                         throw 'The value ' + x + ' is not a type number.';
                                                     if (typeof y != 'number')
@@ -4660,13 +4776,13 @@ var l104 = {name: "INDENT"};
                                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                     return func;
                                                 })()((function(){
-                                                    var string = v193;
+                                                    var string = v198;
                                                     var index = (function(){
                                                         var symbol = l26;
                                                         var func = symbol.function;
                                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                         return func;
-                                                    })()(v195);
+                                                    })()(v200);
                                                     if (typeof string != 'string')
                                                         throw 'The value ' + string + ' is not a type string.';
                                                     if (typeof index != 'number')
@@ -4688,7 +4804,7 @@ var l104 = {name: "INDENT"};
                                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                     return value;
                                                 })() ? (function(){
-                                                    var symbol = l99;
+                                                    var symbol = l102;
                                                     var func = symbol.function;
                                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                     return func;
@@ -4699,8 +4815,8 @@ var l104 = {name: "INDENT"};
                                                     return String.fromCharCode(x);
                                                 })(), "    ") : (function(){
                                                     var x = (function(){
-                                                        var string = v193;
-                                                        var index = v195;
+                                                        var string = v198;
+                                                        var index = v200;
                                                         if (typeof string != 'string')
                                                             throw 'The value ' + string + ' is not a type string.';
                                                         if (typeof index != 'number')
@@ -4711,8 +4827,8 @@ var l104 = {name: "INDENT"};
                                                         throw 'The value ' + x + ' is not a type number.';
                                                     return String.fromCharCode(x);
                                                 })()));
-                                                v195 = (function(){
-                                                    var x = v195;
+                                                v200 = (function(){
+                                                    var x = v200;
                                                     var y = 1;
                                                     if (typeof x != 'number')
                                                         throw 'The value ' + x + ' is not a type number.';
@@ -4730,29 +4846,29 @@ var l104 = {name: "INDENT"};
                                     })();
                                 }
                                 catch (cf){
-                                    if (cf.type == 'block' && cf.id == 87)
+                                    if (cf.type == 'block' && cf.id == 88)
                                         return cf.value;
                                     else
                                         throw cf;
                                 }
                             })();
-                            return v194;
+                            return v199;
                         })("",0,(function(){
                             var symbol = l69;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v193));
+                        })()(v198));
                     })((function(){
-                        var symbol = l101;
+                        var symbol = l104;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v192));
+                    })()(v197));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 86)
+                if (cf.type == 'block' && cf.id == 87)
                     return cf.value;
                 else
                     throw cf;
@@ -4760,13 +4876,13 @@ var l104 = {name: "INDENT"};
         })();
     
     }));
-    return l104;
+    return l107;
 })();
 (function(){
-    (l19).function = (function(v202){
-        ((v202)["fname"] = "INTEGER-TO-STRING");
-        return v202;
-    })((function (v199){
+    (l19).function = (function(v207){
+        ((v207)["fname"] = "INTEGER-TO-STRING");
+        return v207;
+    })((function (v204){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
@@ -4777,7 +4893,7 @@ var l104 = {name: "INDENT"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v199) !== (function(){
+                    })()(v204) !== (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -4789,14 +4905,14 @@ var l104 = {name: "INDENT"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v199) !== (function(){
+                    })()(v204) !== (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })() ? (function(){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
@@ -4807,7 +4923,7 @@ var l104 = {name: "INDENT"};
                             return func;
                         })()((function(){
                             var x = 0;
-                            var y = v199;
+                            var y = v204;
                             if (typeof x != 'number')
                                 throw 'The value ' + x + ' is not a type number.';
                             if (typeof y != 'number')
@@ -4815,7 +4931,7 @@ var l104 = {name: "INDENT"};
                             return x-y;
                         })()));
                     })() : (function(){
-                        return (function(v200){
+                        return (function(v205){
                             (function(){
                                 try {
                                     return (function(){
@@ -4830,27 +4946,27 @@ var l104 = {name: "INDENT"};
                                                 var func = symbol.function;
                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                 return func;
-                                            })()(v199)) !== (function(){
+                                            })()(v204)) !== (function(){
                                                 var symbol = l2;
                                                 var value = symbol.value;
                                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                 return value;
                                             })()){
-                                                v200 = ({car: (function(){
-                                                    var x = v199;
+                                                v205 = ({car: (function(){
+                                                    var x = v204;
                                                     var y = 10;
                                                     if (typeof x != 'number')
                                                         throw 'The value ' + x + ' is not a type number.';
                                                     if (typeof y != 'number')
                                                         throw 'The value ' + y + ' is not a type number.';
                                                     return x%y;
-                                                })(), cdr: v200});
-                                                v199 = (function(){
+                                                })(), cdr: v205});
+                                                v204 = (function(){
                                                     var symbol = l29;
                                                     var func = symbol.function;
                                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                     return func;
-                                                })()(v199, 10);
+                                                })()(v204, 10);
                                             }return (function(){
                                                 var symbol = l2;
                                                 var value = symbol.value;
@@ -4861,14 +4977,14 @@ var l104 = {name: "INDENT"};
                                     })();
                                 }
                                 catch (cf){
-                                    if (cf.type == 'block' && cf.id == 89)
+                                    if (cf.type == 'block' && cf.id == 90)
                                         return cf.value;
                                     else
                                         throw cf;
                                 }
                             })();
                             return (function(){
-                                var symbol = l101;
+                                var symbol = l104;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
@@ -4877,13 +4993,13 @@ var l104 = {name: "INDENT"};
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()((function (v201){
+                            })()((function (v206){
                                 if (arguments.length < 1) throw 'too few arguments';
                                 if (arguments.length > 1) throw 'too many arguments';
                                 return (function(){
                                     var x = (function(){
                                         var string = "0123456789";
-                                        var index = v201;
+                                        var index = v206;
                                         if (typeof string != 'string')
                                             throw 'The value ' + string + ' is not a type string.';
                                         if (typeof index != 'number')
@@ -4895,7 +5011,7 @@ var l104 = {name: "INDENT"};
                                     return String.fromCharCode(x);
                                 })();
                             
-                            }), v200));
+                            }), v205));
                         })((function(){
                             var symbol = l2;
                             var value = symbol.value;
@@ -4906,7 +5022,7 @@ var l104 = {name: "INDENT"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 88)
+                if (cf.type == 'block' && cf.id == 89)
                     return cf.value;
                 else
                     throw cf;
@@ -4916,25 +5032,25 @@ var l104 = {name: "INDENT"};
     }));
     return l19;
 })();
-var l105 = {name: "JS!BOOL"};
-var l106 = {name: "LS-COMPILE"};
+var l108 = {name: "JS!BOOL"};
+var l109 = {name: "LS-COMPILE"};
 (function(){
-    (l105).function = (function(v204){
-        ((v204)["fname"] = "JS!BOOL");
-        return v204;
-    })((function (v203){
+    (l108).function = (function(v209){
+        ((v209)["fname"] = "JS!BOOL");
+        return v209;
+    })((function (v208){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (function(){
-                        var symbol = l99;
+                        var symbol = l102;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()("(", v203, "?", (function(){
-                        var symbol = l106;
+                    })()("(", v208, "?", (function(){
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -4944,7 +5060,7 @@ var l106 = {name: "LS-COMPILE"};
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })()), ": ", (function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -4957,7 +5073,7 @@ var l106 = {name: "LS-COMPILE"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 90)
+                if (cf.type == 'block' && cf.id == 91)
                     return cf.value;
                 else
                     throw cf;
@@ -4965,24 +5081,24 @@ var l106 = {name: "LS-COMPILE"};
         })();
     
     }));
-    return l105;
+    return l108;
 })();
-var l107 = {name: "JS!SELFCALL"};
-l107;
-var l108 = {name: "PRIN1-TO-STRING"};
-var l109 = {name: "ESCAPE-STRING"};
+var l110 = {name: "JS!SELFCALL"};
+l110;
+var l111 = {name: "PRIN1-TO-STRING"};
+var l112 = {name: "ESCAPE-STRING"};
 (function(){
-    (l108).function = (function(v208){
-        ((v208)["fname"] = "PRIN1-TO-STRING");
-        return v208;
-    })((function (v205){
+    (l111).function = (function(v213){
+        ((v213)["fname"] = "PRIN1-TO-STRING");
+        return v213;
+    })((function (v210){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (((function(){
-                        var tmp = v205;
+                        var tmp = v210;
                         return (typeof tmp == 'object' && 'name' in tmp);
                     })()?(function(){
                         var symbol = l3;
@@ -5000,13 +5116,13 @@ var l109 = {name: "ESCAPE-STRING"};
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })() ? (function(){
-                        return (v205).name;
+                        return (v210).name;
                     })() : ((function(){
                         var symbol = l77;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v205) !== (function(){
+                    })()(v210) !== (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5017,8 +5133,8 @@ var l109 = {name: "ESCAPE-STRING"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v205);
-                    })() : (((typeof(v205) == "string")?(function(){
+                        })()(v210);
+                    })() : (((typeof(v210) == "string")?(function(){
                         var symbol = l3;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5035,17 +5151,17 @@ var l109 = {name: "ESCAPE-STRING"};
                         return value;
                     })() ? (function(){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("\"", (function(){
-                            var symbol = l109;
+                            var symbol = l112;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v205), "\"");
-                    })() : (((typeof v205 == 'function')?(function(){
+                        })()(v210), "\"");
+                    })() : (((typeof v210 == 'function')?(function(){
                         var symbol = l3;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5061,25 +5177,25 @@ var l109 = {name: "ESCAPE-STRING"};
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })() ? (function(){
-                        return (function(v206){
-                            return (v206 !== (function(){
+                        return (function(v211){
+                            return (v211 !== (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })() ? (function(){
-                                var symbol = l99;
+                                var symbol = l102;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()("#<FUNCTION ", v206, ">") : (function(){
-                                var symbol = l99;
+                            })()("#<FUNCTION ", v211, ">") : (function(){
+                                var symbol = l102;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
                             })()("#<FUNCTION>"));
                         })((function(){
-                            var tmp = (v205)["fname"];
+                            var tmp = (v210)["fname"];
                             return tmp == undefined? (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -5092,19 +5208,19 @@ var l109 = {name: "ESCAPE-STRING"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v205) !== (function(){
+                    })()(v210) !== (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })() ? (function(){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("(", (function(){
-                            var symbol = l102;
+                            var symbol = l105;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
@@ -5114,7 +5230,7 @@ var l109 = {name: "ESCAPE-STRING"};
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l108;
+                            var symbol = l111;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
@@ -5123,14 +5239,14 @@ var l109 = {name: "ESCAPE-STRING"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v205)), " "), (function(v207){
+                        })()(v210)), " "), (function(v212){
                             return ((function(){
                                 var symbol = l11;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
                             })()((function(){
-                                var tmp = v207;
+                                var tmp = v212;
                                 return tmp === (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
@@ -5148,12 +5264,12 @@ var l109 = {name: "ESCAPE-STRING"};
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })() ? (function(){
-                                var symbol = l108;
+                                var symbol = l111;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
                             })()((function(){
-                                var tmp = v207;
+                                var tmp = v212;
                                 return tmp === (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
@@ -5166,17 +5282,17 @@ var l109 = {name: "ESCAPE-STRING"};
                                     return value;
                                 })(): tmp.car;
                             })()) : (function(){
-                                var symbol = l99;
+                                var symbol = l102;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
                             })()((function(){
-                                var symbol = l108;
+                                var symbol = l111;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
                             })()((function(){
-                                var tmp = v207;
+                                var tmp = v212;
                                 return tmp === (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
@@ -5189,12 +5305,12 @@ var l109 = {name: "ESCAPE-STRING"};
                                     return value;
                                 })(): tmp.car;
                             })()), " . ", (function(){
-                                var symbol = l108;
+                                var symbol = l111;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
                             })()((function(){
-                                var tmp = v207;
+                                var tmp = v212;
                                 return tmp === (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
@@ -5212,54 +5328,13 @@ var l109 = {name: "ESCAPE-STRING"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v205)), ")");
+                        })()(v210)), ")");
                     })() : (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })())))));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 91)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    }));
-    return l108;
-})();
-(function(){
-    (l97).function = (function(v210){
-        ((v210)["fname"] = "WRITE-LINE");
-        return v210;
-    })((function (v209){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    (function(){
-                        var x = v209;
-                        if (typeof x != 'string')
-                            throw 'The value ' + x + ' is not a type string.';
-                        return lisp.write(x);
-                    })();
-                    (function(){
-                        var x = (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })();
-                        if (typeof x != 'string')
-                            throw 'The value ' + x + ' is not a type string.';
-                        return lisp.write(x);
-                    })();
-                    return v209;
                 })();
             }
             catch (cf){
@@ -5271,14 +5346,55 @@ var l109 = {name: "ESCAPE-STRING"};
         })();
     
     }));
+    return l111;
+})();
+(function(){
+    (l97).function = (function(v215){
+        ((v215)["fname"] = "WRITE-LINE");
+        return v215;
+    })((function (v214){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    (function(){
+                        var x = v214;
+                        if (typeof x != 'string')
+                            throw 'The value ' + x + ' is not a type string.';
+                        return lisp.write(x);
+                    })();
+                    (function(){
+                        var x = (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })();
+                        if (typeof x != 'string')
+                            throw 'The value ' + x + ' is not a type string.';
+                        return lisp.write(x);
+                    })();
+                    return v214;
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 93)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    }));
     return l97;
 })();
-var l110 = {name: "WARN"};
+var l113 = {name: "WARN"};
 (function(){
-    (l110).function = (function(v212){
-        ((v212)["fname"] = "WARN");
-        return v212;
-    })((function (v211){
+    (l113).function = (function(v217){
+        ((v217)["fname"] = "WARN");
+        return v217;
+    })((function (v216){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
@@ -5295,43 +5411,7 @@ var l110 = {name: "WARN"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v211);
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 93)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    }));
-    return l110;
-})();
-var l111 = {name: "PRINT"};
-(function(){
-    (l111).function = (function(v214){
-        ((v214)["fname"] = "PRINT");
-        return v214;
-    })((function (v213){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    (function(){
-                        var symbol = l97;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()((function(){
-                        var symbol = l108;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v213));
-                    return v213;
+                    })()(v216);
                 })();
             }
             catch (cf){
@@ -5343,20 +5423,31 @@ var l111 = {name: "PRINT"};
         })();
     
     }));
-    return l111;
+    return l113;
 })();
-var l112 = {name: "MAKE-STRING-STREAM"};
+var l114 = {name: "PRINT"};
 (function(){
-    (l112).function = (function(v216){
-        ((v216)["fname"] = "MAKE-STRING-STREAM");
-        return v216;
-    })((function (v215){
+    (l114).function = (function(v219){
+        ((v219)["fname"] = "PRINT");
+        return v219;
+    })((function (v218){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return ({car: v215, cdr: 0});
+                    (function(){
+                        var symbol = l97;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()((function(){
+                        var symbol = l111;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v218));
+                    return v218;
                 })();
             }
             catch (cf){
@@ -5368,14 +5459,39 @@ var l112 = {name: "MAKE-STRING-STREAM"};
         })();
     
     }));
-    return l112;
+    return l114;
 })();
-var l113 = {name: "%PEEK-CHAR"};
+var l115 = {name: "MAKE-STRING-STREAM"};
 (function(){
-    (l113).function = (function(v218){
-        ((v218)["fname"] = "%PEEK-CHAR");
-        return v218;
-    })((function (v217){
+    (l115).function = (function(v221){
+        ((v221)["fname"] = "MAKE-STRING-STREAM");
+        return v221;
+    })((function (v220){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return ({car: v220, cdr: 0});
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 96)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    }));
+    return l115;
+})();
+var l116 = {name: "%PEEK-CHAR"};
+(function(){
+    (l116).function = (function(v223){
+        ((v223)["fname"] = "%PEEK-CHAR");
+        return v223;
+    })((function (v222){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
@@ -5383,7 +5499,7 @@ var l113 = {name: "%PEEK-CHAR"};
                 return (function(){
                     return (((function(){
                         var x = (function(){
-                            var tmp = v217;
+                            var tmp = v222;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -5402,7 +5518,7 @@ var l113 = {name: "%PEEK-CHAR"};
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var tmp = v217;
+                            var tmp = v222;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -5437,7 +5553,7 @@ var l113 = {name: "%PEEK-CHAR"};
                         return value;
                     })() ? (function(){
                         var string = (function(){
-                            var tmp = v217;
+                            var tmp = v222;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -5451,7 +5567,7 @@ var l113 = {name: "%PEEK-CHAR"};
                             })(): tmp.car;
                         })();
                         var index = (function(){
-                            var tmp = v217;
+                            var tmp = v222;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -5478,7 +5594,7 @@ var l113 = {name: "%PEEK-CHAR"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 96)
+                if (cf.type == 'block' && cf.id == 97)
                     return cf.value;
                 else
                     throw cf;
@@ -5486,14 +5602,14 @@ var l113 = {name: "%PEEK-CHAR"};
         })();
     
     }));
-    return l113;
+    return l116;
 })();
-var l114 = {name: "%READ-CHAR"};
+var l117 = {name: "%READ-CHAR"};
 (function(){
-    (l114).function = (function(v221){
-        ((v221)["fname"] = "%READ-CHAR");
-        return v221;
-    })((function (v219){
+    (l117).function = (function(v226){
+        ((v226)["fname"] = "%READ-CHAR");
+        return v226;
+    })((function (v224){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
@@ -5501,7 +5617,7 @@ var l114 = {name: "%READ-CHAR"};
                 return (function(){
                     return (((function(){
                         var x = (function(){
-                            var tmp = v219;
+                            var tmp = v224;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -5520,7 +5636,7 @@ var l114 = {name: "%READ-CHAR"};
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var tmp = v219;
+                            var tmp = v224;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -5553,9 +5669,9 @@ var l114 = {name: "%READ-CHAR"};
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
-                    })() ? (function(v220){
+                    })() ? (function(v225){
                         (function(){
-                            var x = v219;
+                            var x = v224;
                             if (typeof x != 'object')
                                 throw 'The value ' + x + ' is not a type object.';
                             return (x.cdr = (function(){
@@ -5564,7 +5680,7 @@ var l114 = {name: "%READ-CHAR"};
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
                             })()((function(){
-                                var tmp = v219;
+                                var tmp = v224;
                                 return tmp === (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
@@ -5578,10 +5694,10 @@ var l114 = {name: "%READ-CHAR"};
                                 })(): tmp.cdr;
                             })()));
                         })();
-                        return v220;
+                        return v225;
                     })((function(){
                         var string = (function(){
-                            var tmp = v219;
+                            var tmp = v224;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -5595,7 +5711,7 @@ var l114 = {name: "%READ-CHAR"};
                             })(): tmp.car;
                         })();
                         var index = (function(){
-                            var tmp = v219;
+                            var tmp = v224;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -5622,60 +5738,6 @@ var l114 = {name: "%READ-CHAR"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 97)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    }));
-    return l114;
-})();
-var l115 = {name: "WHITESPACEP"};
-(function(){
-    (l115).function = (function(v225){
-        ((v225)["fname"] = "WHITESPACEP");
-        return v225;
-    })((function (v222){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v223){
-                        return (v223 !== (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })() ? v223 : (function(v224){
-                            return (v224 !== (function(){
-                                var symbol = l2;
-                                var value = symbol.value;
-                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                return value;
-                            })() ? v224 : (function(){
-                                var symbol = l76;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v222, 9));
-                        })((function(){
-                            var symbol = l76;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v222, 10)));
-                    })((function(){
-                        var symbol = l76;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v222, 32));
-                })();
-            }
-            catch (cf){
                 if (cf.type == 'block' && cf.id == 98)
                     return cf.value;
                 else
@@ -5684,85 +5746,49 @@ var l115 = {name: "WHITESPACEP"};
         })();
     
     }));
-    return l115;
+    return l117;
 })();
-var l116 = {name: "SKIP-WHITESPACES"};
+var l118 = {name: "WHITESPACEP"};
 (function(){
-    (l116).function = (function(v228){
-        ((v228)["fname"] = "SKIP-WHITESPACES");
-        return v228;
-    })((function (v226){
+    (l118).function = (function(v230){
+        ((v230)["fname"] = "WHITESPACEP");
+        return v230;
+    })((function (v227){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v227){
-                        v227 = (function(){
-                            var symbol = l113;
+                    return (function(v228){
+                        return (v228 !== (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })() ? v228 : (function(v229){
+                            return (v229 !== (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })() ? v229 : (function(){
+                                var symbol = l76;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v227, 9));
+                        })((function(){
+                            var symbol = l76;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v226);
-                        return (function(){
-                            try {
-                                return (function(){
-                                    return (function(){
-                                        while((v227 !== (function(){
-                                            var symbol = l2;
-                                            var value = symbol.value;
-                                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                            return value;
-                                        })() ? (function(){
-                                            var symbol = l115;
-                                            var func = symbol.function;
-                                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                            return func;
-                                        })()(v227) : (function(){
-                                            var symbol = l2;
-                                            var value = symbol.value;
-                                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                            return value;
-                                        })()) !== (function(){
-                                            var symbol = l2;
-                                            var value = symbol.value;
-                                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                            return value;
-                                        })()){
-                                            (function(){
-                                                var symbol = l114;
-                                                var func = symbol.function;
-                                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                                return func;
-                                            })()(v226);
-                                            v227 = (function(){
-                                                var symbol = l113;
-                                                var func = symbol.function;
-                                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                                return func;
-                                            })()(v226);
-                                        }return (function(){
-                                            var symbol = l2;
-                                            var value = symbol.value;
-                                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                            return value;
-                                        })();
-                                    })();
-                                })();
-                            }
-                            catch (cf){
-                                if (cf.type == 'block' && cf.id == 100)
-                                    return cf.value;
-                                else
-                                    throw cf;
-                            }
-                        })();
+                        })()(v227, 10)));
                     })((function(){
-                        var symbol = l2;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })());
+                        var symbol = l76;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v227, 32));
                 })();
             }
             catch (cf){
@@ -5774,107 +5800,41 @@ var l116 = {name: "SKIP-WHITESPACES"};
         })();
     
     }));
-    return l116;
+    return l118;
 })();
-var l117 = {name: "TERMINALP"};
+var l119 = {name: "SKIP-WHITESPACES"};
 (function(){
-    (l117).function = (function(v233){
-        ((v233)["fname"] = "TERMINALP");
+    (l119).function = (function(v233){
+        ((v233)["fname"] = "SKIP-WHITESPACES");
         return v233;
-    })((function (v229){
+    })((function (v231){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v230){
-                        return (v230 !== (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })() ? v230 : (function(v231){
-                            return (v231 !== (function(){
-                                var symbol = l2;
-                                var value = symbol.value;
-                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                return value;
-                            })() ? v231 : (function(v232){
-                                return (v232 !== (function(){
-                                    var symbol = l2;
-                                    var value = symbol.value;
-                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                    return value;
-                                })() ? v232 : (function(){
-                                    var symbol = l76;
-                                    var func = symbol.function;
-                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                    return func;
-                                })()(40, v229));
-                            })((function(){
-                                var symbol = l76;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(41, v229)));
-                        })((function(){
-                            var symbol = l115;
+                    return (function(v232){
+                        v232 = (function(){
+                            var symbol = l116;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v229)));
-                    })((function(){
-                        var symbol = l11;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v229));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 101)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    }));
-    return l117;
-})();
-var l118 = {name: "READ-UNTIL"};
-(function(){
-    (l118).function = (function(v238){
-        ((v238)["fname"] = "READ-UNTIL");
-        return v238;
-    })((function (v234,v235){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v236,v237){
-                        v237 = (function(){
-                            var symbol = l113;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v234);
-                        (function(){
+                        })()(v231);
+                        return (function(){
                             try {
                                 return (function(){
                                     return (function(){
-                                        while((v237 !== (function(){
+                                        while((v232 !== (function(){
                                             var symbol = l2;
                                             var value = symbol.value;
                                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                             return value;
                                         })() ? (function(){
-                                            var symbol = l31;
+                                            var symbol = l118;
                                             var func = symbol.function;
                                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                             return func;
-                                        })()((v235)(v237)) : (function(){
+                                        })()(v232) : (function(){
                                             var symbol = l2;
                                             var value = symbol.value;
                                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5885,29 +5845,18 @@ var l118 = {name: "READ-UNTIL"};
                                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                             return value;
                                         })()){
-                                            v236 = (function(){
-                                                var symbol = l99;
-                                                var func = symbol.function;
-                                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                                return func;
-                                            })()(v236, (function(){
-                                                var x = v237;
-                                                if (typeof x != 'number')
-                                                    throw 'The value ' + x + ' is not a type number.';
-                                                return String.fromCharCode(x);
-                                            })());
                                             (function(){
-                                                var symbol = l114;
+                                                var symbol = l117;
                                                 var func = symbol.function;
                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                 return func;
-                                            })()(v234);
-                                            v237 = (function(){
-                                                var symbol = l113;
+                                            })()(v231);
+                                            v232 = (function(){
+                                                var symbol = l116;
                                                 var func = symbol.function;
                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                 return func;
-                                            })()(v234);
+                                            })()(v231);
                                         }return (function(){
                                             var symbol = l2;
                                             var value = symbol.value;
@@ -5918,19 +5867,84 @@ var l118 = {name: "READ-UNTIL"};
                                 })();
                             }
                             catch (cf){
-                                if (cf.type == 'block' && cf.id == 103)
+                                if (cf.type == 'block' && cf.id == 101)
                                     return cf.value;
                                 else
                                     throw cf;
                             }
                         })();
-                        return v236;
-                    })("",(function(){
+                    })((function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })());
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 100)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    }));
+    return l119;
+})();
+var l120 = {name: "TERMINALP"};
+(function(){
+    (l120).function = (function(v238){
+        ((v238)["fname"] = "TERMINALP");
+        return v238;
+    })((function (v234){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v235){
+                        return (v235 !== (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })() ? v235 : (function(v236){
+                            return (v236 !== (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })() ? v236 : (function(v237){
+                                return (v237 !== (function(){
+                                    var symbol = l2;
+                                    var value = symbol.value;
+                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                    return value;
+                                })() ? v237 : (function(){
+                                    var symbol = l76;
+                                    var func = symbol.function;
+                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                    return func;
+                                })()(40, v234));
+                            })((function(){
+                                var symbol = l76;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(41, v234)));
+                        })((function(){
+                            var symbol = l118;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(v234)));
+                    })((function(){
+                        var symbol = l11;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v234));
                 })();
             }
             catch (cf){
@@ -5942,47 +5956,41 @@ var l118 = {name: "READ-UNTIL"};
         })();
     
     }));
-    return l118;
+    return l120;
 })();
-var l119 = {name: "SKIP-WHITESPACES-AND-COMMENTS"};
+var l121 = {name: "READ-UNTIL"};
 (function(){
-    (l119).function = (function(v242){
-        ((v242)["fname"] = "SKIP-WHITESPACES-AND-COMMENTS");
-        return v242;
-    })((function (v239){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    (l121).function = (function(v243){
+        ((v243)["fname"] = "READ-UNTIL");
+        return v243;
+    })((function (v239,v240){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v240){
-                        (function(){
+                    return (function(v241,v242){
+                        v242 = (function(){
                             var symbol = l116;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()(v239);
-                        v240 = (function(){
-                            var symbol = l113;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v239);
-                        return (function(){
+                        (function(){
                             try {
                                 return (function(){
                                     return (function(){
-                                        while((v240 !== (function(){
+                                        while((v242 !== (function(){
                                             var symbol = l2;
                                             var value = symbol.value;
                                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                             return value;
                                         })() ? (function(){
-                                            var symbol = l76;
+                                            var symbol = l31;
                                             var func = symbol.function;
                                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                             return func;
-                                        })()(v240, 59) : (function(){
+                                        })()((v240)(v242)) : (function(){
                                             var symbol = l2;
                                             var value = symbol.value;
                                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5993,30 +6001,25 @@ var l119 = {name: "SKIP-WHITESPACES-AND-COMMENTS"};
                                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                             return value;
                                         })()){
-                                            (function(){
-                                                var symbol = l118;
+                                            v241 = (function(){
+                                                var symbol = l102;
                                                 var func = symbol.function;
                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                 return func;
-                                            })()(v239, (function (v241){
-                                                if (arguments.length < 1) throw 'too few arguments';
-                                                if (arguments.length > 1) throw 'too many arguments';
-                                                return (function(){
-                                                    var symbol = l76;
-                                                    var func = symbol.function;
-                                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                                    return func;
-                                                })()(v241, 10);
-                                            
-                                            }));
+                                            })()(v241, (function(){
+                                                var x = v242;
+                                                if (typeof x != 'number')
+                                                    throw 'The value ' + x + ' is not a type number.';
+                                                return String.fromCharCode(x);
+                                            })());
                                             (function(){
-                                                var symbol = l116;
+                                                var symbol = l117;
                                                 var func = symbol.function;
                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                 return func;
                                             })()(v239);
-                                            v240 = (function(){
-                                                var symbol = l113;
+                                            v242 = (function(){
+                                                var symbol = l116;
                                                 var func = symbol.function;
                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                 return func;
@@ -6031,7 +6034,120 @@ var l119 = {name: "SKIP-WHITESPACES-AND-COMMENTS"};
                                 })();
                             }
                             catch (cf){
-                                if (cf.type == 'block' && cf.id == 105)
+                                if (cf.type == 'block' && cf.id == 104)
+                                    return cf.value;
+                                else
+                                    throw cf;
+                            }
+                        })();
+                        return v241;
+                    })("",(function(){
+                        var symbol = l2;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })());
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 103)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    }));
+    return l121;
+})();
+var l122 = {name: "SKIP-WHITESPACES-AND-COMMENTS"};
+(function(){
+    (l122).function = (function(v247){
+        ((v247)["fname"] = "SKIP-WHITESPACES-AND-COMMENTS");
+        return v247;
+    })((function (v244){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v245){
+                        (function(){
+                            var symbol = l119;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(v244);
+                        v245 = (function(){
+                            var symbol = l116;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(v244);
+                        return (function(){
+                            try {
+                                return (function(){
+                                    return (function(){
+                                        while((v245 !== (function(){
+                                            var symbol = l2;
+                                            var value = symbol.value;
+                                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                            return value;
+                                        })() ? (function(){
+                                            var symbol = l76;
+                                            var func = symbol.function;
+                                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                            return func;
+                                        })()(v245, 59) : (function(){
+                                            var symbol = l2;
+                                            var value = symbol.value;
+                                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                            return value;
+                                        })()) !== (function(){
+                                            var symbol = l2;
+                                            var value = symbol.value;
+                                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                            return value;
+                                        })()){
+                                            (function(){
+                                                var symbol = l121;
+                                                var func = symbol.function;
+                                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                                return func;
+                                            })()(v244, (function (v246){
+                                                if (arguments.length < 1) throw 'too few arguments';
+                                                if (arguments.length > 1) throw 'too many arguments';
+                                                return (function(){
+                                                    var symbol = l76;
+                                                    var func = symbol.function;
+                                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                                    return func;
+                                                })()(v246, 10);
+                                            
+                                            }));
+                                            (function(){
+                                                var symbol = l119;
+                                                var func = symbol.function;
+                                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                                return func;
+                                            })()(v244);
+                                            v245 = (function(){
+                                                var symbol = l116;
+                                                var func = symbol.function;
+                                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                                return func;
+                                            })()(v244);
+                                        }return (function(){
+                                            var symbol = l2;
+                                            var value = symbol.value;
+                                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                            return value;
+                                        })();
+                                    })();
+                                })();
+                            }
+                            catch (cf){
+                                if (cf.type == 'block' && cf.id == 106)
                                     return cf.value;
                                 else
                                     throw cf;
@@ -6046,7 +6162,7 @@ var l119 = {name: "SKIP-WHITESPACES-AND-COMMENTS"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 104)
+                if (cf.type == 'block' && cf.id == 105)
                     return cf.value;
                 else
                     throw cf;
@@ -6054,33 +6170,33 @@ var l119 = {name: "SKIP-WHITESPACES-AND-COMMENTS"};
         })();
     
     }));
-    return l119;
+    return l122;
 })();
-var l120 = {name: "%READ-LIST"};
-var l121 = {name: "LS-READ"};
+var l123 = {name: "%READ-LIST"};
+var l124 = {name: "LS-READ"};
 (function(){
-    (l120).function = (function(v246){
-        ((v246)["fname"] = "%READ-LIST");
-        return v246;
-    })((function (v243){
+    (l123).function = (function(v251){
+        ((v251)["fname"] = "%READ-LIST");
+        return v251;
+    })((function (v248){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     (function(){
-                        var symbol = l119;
+                        var symbol = l122;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v243);
-                    return (function(v244){
+                    })()(v248);
+                    return (function(v249){
                         return ((function(){
                             var symbol = l11;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v244) !== (function(){
+                        })()(v249) !== (function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6094,18 +6210,18 @@ var l121 = {name: "LS-READ"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v244, 41) !== (function(){
+                        })()(v249, 41) !== (function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })() ? (function(){
                             (function(){
-                                var symbol = l114;
+                                var symbol = l117;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v243);
+                            })()(v248);
                             return (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -6117,36 +6233,36 @@ var l121 = {name: "LS-READ"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v244, 46) !== (function(){
+                        })()(v249, 46) !== (function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })() ? (function(){
                             (function(){
-                                var symbol = l114;
+                                var symbol = l117;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v243);
-                            return (function(v245){
+                            })()(v248);
+                            return (function(v250){
                                 (function(){
-                                    var symbol = l119;
+                                    var symbol = l122;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v243);
+                                })()(v248);
                                 ((function(){
                                     var symbol = l76;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
                                 })()((function(){
-                                    var symbol = l114;
+                                    var symbol = l117;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v243), 41) !== (function(){
+                                })()(v248), 41) !== (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6161,36 +6277,36 @@ var l121 = {name: "LS-READ"};
                                         throw "')' was expected.";
                                     })();
                                 })());
-                                return v245;
+                                return v250;
                             })((function(){
-                                var symbol = l121;
+                                var symbol = l124;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v243));
+                            })()(v248));
                         })() : (function(){
                             return ({car: (function(){
-                                var symbol = l121;
+                                var symbol = l124;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v243), cdr: (function(){
-                                var symbol = l120;
+                            })()(v248), cdr: (function(){
+                                var symbol = l123;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v243)});
+                            })()(v248)});
                         })())));
                     })((function(){
-                        var symbol = l113;
+                        var symbol = l116;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v243));
+                    })()(v248));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 106)
+                if (cf.type == 'block' && cf.id == 107)
                     return cf.value;
                 else
                     throw cf;
@@ -6198,26 +6314,26 @@ var l121 = {name: "LS-READ"};
         })();
     
     }));
-    return l120;
+    return l123;
 })();
-var l122 = {name: "READ-STRING"};
+var l125 = {name: "READ-STRING"};
 (function(){
-    (l122).function = (function(v250){
-        ((v250)["fname"] = "READ-STRING");
-        return v250;
-    })((function (v247){
+    (l125).function = (function(v255){
+        ((v255)["fname"] = "READ-STRING");
+        return v255;
+    })((function (v252){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v248,v249){
-                        v249 = (function(){
-                            var symbol = l114;
+                    return (function(v253,v254){
+                        v254 = (function(){
+                            var symbol = l117;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v247);
+                        })()(v252);
                         (function(){
                             try {
                                 return (function(){
@@ -6232,7 +6348,7 @@ var l122 = {name: "READ-STRING"};
                                             var func = symbol.function;
                                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                             return func;
-                                        })()(v249, 34)) !== (function(){
+                                        })()(v254, 34)) !== (function(){
                                             var symbol = l2;
                                             var value = symbol.value;
                                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6243,7 +6359,7 @@ var l122 = {name: "READ-STRING"};
                                                 var func = symbol.function;
                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                 return func;
-                                            })()(v249) !== (function(){
+                                            })()(v254) !== (function(){
                                                 var symbol = l2;
                                                 var value = symbol.value;
                                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6263,41 +6379,41 @@ var l122 = {name: "READ-STRING"};
                                                 var func = symbol.function;
                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                 return func;
-                                            })()(v249, 92) !== (function(){
+                                            })()(v254, 92) !== (function(){
                                                 var symbol = l2;
                                                 var value = symbol.value;
                                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                 return value;
                                             })() ? (function(){
-                                                return v249 = (function(){
-                                                    var symbol = l114;
+                                                return v254 = (function(){
+                                                    var symbol = l117;
                                                     var func = symbol.function;
                                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                     return func;
-                                                })()(v247);
+                                                })()(v252);
                                             })() : (function(){
                                                 var symbol = l2;
                                                 var value = symbol.value;
                                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                 return value;
                                             })());
-                                            v248 = (function(){
-                                                var symbol = l99;
+                                            v253 = (function(){
+                                                var symbol = l102;
                                                 var func = symbol.function;
                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                 return func;
-                                            })()(v248, (function(){
-                                                var x = v249;
+                                            })()(v253, (function(){
+                                                var x = v254;
                                                 if (typeof x != 'number')
                                                     throw 'The value ' + x + ' is not a type number.';
                                                 return String.fromCharCode(x);
                                             })());
-                                            v249 = (function(){
-                                                var symbol = l114;
+                                            v254 = (function(){
+                                                var symbol = l117;
                                                 var func = symbol.function;
                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                 return func;
-                                            })()(v247);
+                                            })()(v252);
                                         }return (function(){
                                             var symbol = l2;
                                             var value = symbol.value;
@@ -6308,13 +6424,13 @@ var l122 = {name: "READ-STRING"};
                                 })();
                             }
                             catch (cf){
-                                if (cf.type == 'block' && cf.id == 108)
+                                if (cf.type == 'block' && cf.id == 109)
                                     return cf.value;
                                 else
                                     throw cf;
                             }
                         })();
-                        return v248;
+                        return v253;
                     })("",(function(){
                         var symbol = l2;
                         var value = symbol.value;
@@ -6324,7 +6440,7 @@ var l122 = {name: "READ-STRING"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 107)
+                if (cf.type == 'block' && cf.id == 108)
                     return cf.value;
                 else
                     throw cf;
@@ -6332,33 +6448,32 @@ var l122 = {name: "READ-STRING"};
         })();
     
     }));
-    return l122;
+    return l125;
 })();
-var l123 = {name: "READ-SHARP"};
-var l124 = {name: "FUNCTION"};
+var l126 = {name: "READ-SHARP"};
 (function(){
-    (l123).function = (function(v255){
-        ((v255)["fname"] = "READ-SHARP");
-        return v255;
-    })((function (v251){
+    (l126).function = (function(v260){
+        ((v260)["fname"] = "READ-SHARP");
+        return v260;
+    })((function (v256){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     (function(){
-                        var symbol = l114;
+                        var symbol = l117;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v251);
-                    return (function(v252){
+                    })()(v256);
+                    return (function(v257){
                         return ((function(){
                             var symbol = l30;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v252, 39) !== (function(){
+                        })()(v257, 39) !== (function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6369,30 +6484,30 @@ var l124 = {name: "FUNCTION"};
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(l124, (function(){
-                                var symbol = l121;
+                            })()(l99, (function(){
+                                var symbol = l124;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v251));
+                            })()(v256));
                         })() : ((function(){
                             var symbol = l30;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v252, 92) !== (function(){
+                        })()(v257, 92) !== (function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })() ? (function(){
-                            return (function(v253){
+                            return (function(v258){
                                 return ((function(){
                                     var symbol = l94;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v253, "space") !== (function(){
+                                })()(v258, "space") !== (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6409,7 +6524,7 @@ var l124 = {name: "FUNCTION"};
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v253, "tab") !== (function(){
+                                })()(v258, "tab") !== (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6426,7 +6541,7 @@ var l124 = {name: "FUNCTION"};
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v253, "newline") !== (function(){
+                                })()(v258, "newline") !== (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6445,7 +6560,7 @@ var l124 = {name: "FUNCTION"};
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
                                     })()((function(){
-                                        var string = v253;
+                                        var string = v258;
                                         var index = 0;
                                         if (typeof string != 'string')
                                             throw 'The value ' + string + ' is not a type string.';
@@ -6455,27 +6570,27 @@ var l124 = {name: "FUNCTION"};
                                     })());
                                 })())));
                             })((function(){
-                                var symbol = l99;
+                                var symbol = l102;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
                             })()((function(){
                                 var x = (function(){
-                                    var symbol = l114;
+                                    var symbol = l117;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v251);
+                                })()(v256);
                                 if (typeof x != 'number')
                                     throw 'The value ' + x + ' is not a type number.';
                                 return String.fromCharCode(x);
                             })(), (function(){
-                                var symbol = l118;
+                                var symbol = l121;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v251, (function(){
-                                var symbol = l117;
+                            })()(v256, (function(){
+                                var symbol = l120;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
@@ -6485,65 +6600,65 @@ var l124 = {name: "FUNCTION"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v252, 43) !== (function(){
+                        })()(v257, 43) !== (function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })() ? (function(){
-                            return (function(v254){
+                            return (function(v259){
                                 return ((function(){
                                     var symbol = l94;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v254, "common-lisp") !== (function(){
+                                })()(v259, "common-lisp") !== (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
                                 })() ? (function(){
                                     (function(){
-                                        var symbol = l121;
+                                        var symbol = l124;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
-                                    })()(v251);
+                                    })()(v256);
                                     return (function(){
-                                        var symbol = l121;
+                                        var symbol = l124;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
-                                    })()(v251);
+                                    })()(v256);
                                 })() : ((function(){
                                     var symbol = l94;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v254, "ecmalisp") !== (function(){
+                                })()(v259, "ecmalisp") !== (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
                                 })() ? (function(){
                                     return (function(){
-                                        var symbol = l121;
+                                        var symbol = l124;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
-                                    })()(v251);
+                                    })()(v256);
                                 })() : (function(){
                                     return (function(){
                                         throw "Unknown reader form.";
                                     })();
                                 })()));
                             })((function(){
-                                var symbol = l118;
+                                var symbol = l121;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v251, (function(){
-                                var symbol = l117;
+                            })()(v256, (function(){
+                                var symbol = l120;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
@@ -6554,321 +6669,7 @@ var l124 = {name: "FUNCTION"};
                             })();
                         })())));
                     })((function(){
-                        var symbol = l114;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v251));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 109)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    }));
-    return l123;
-})();
-var l125 = {name: "*EOF*"};
-(function(){
-    (((l125.value !== undefined)?(function(){
-        var symbol = l3;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })(): (function(){
-        var symbol = l2;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()) !== (function(){
-        var symbol = l2;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })() ? (function(){
-        var symbol = l2;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })() : (function(){
-        return (l125).value = (function(){
-            var name = "EOF";
-            if (typeof name != 'string')
-                throw 'The value ' + name + ' is not a type string.';
-            return ({name: name});
-        })();
-    })());
-    return l125;
-})();
-var l126 = {name: "QUOTE"};
-var l127 = {name: "BACKQUOTE"};
-var l128 = {name: "UNQUOTE-SPLICING"};
-var l129 = {name: "UNQUOTE"};
-(function(){
-    (l121).function = (function(v259){
-        ((v259)["fname"] = "LS-READ");
-        return v259;
-    })((function (v256){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    (function(){
-                        var symbol = l119;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v256);
-                    return (function(v257){
-                        return ((function(){
-                            var symbol = l11;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v257) !== (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })() ? (function(){
-                            return (function(){
-                                var symbol = l125;
-                                var value = symbol.value;
-                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                return value;
-                            })();
-                        })() : ((function(){
-                            var symbol = l76;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v257, 40) !== (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })() ? (function(){
-                            (function(){
-                                var symbol = l114;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v256);
-                            return (function(){
-                                var symbol = l120;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v256);
-                        })() : ((function(){
-                            var symbol = l76;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v257, 39) !== (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })() ? (function(){
-                            (function(){
-                                var symbol = l114;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v256);
-                            return (function(){
-                                var symbol = l47;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(l126, (function(){
-                                var symbol = l121;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v256));
-                        })() : ((function(){
-                            var symbol = l76;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v257, 96) !== (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })() ? (function(){
-                            (function(){
-                                var symbol = l114;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v256);
-                            return (function(){
-                                var symbol = l47;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(l127, (function(){
-                                var symbol = l121;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v256));
-                        })() : ((function(){
-                            var symbol = l76;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v257, 34) !== (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })() ? (function(){
-                            (function(){
-                                var symbol = l114;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v256);
-                            return (function(){
-                                var symbol = l122;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v256);
-                        })() : ((function(){
-                            var symbol = l76;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v257, 44) !== (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })() ? (function(){
-                            (function(){
-                                var symbol = l114;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v256);
-                            return ((function(){
-                                var symbol = l30;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()((function(){
-                                var symbol = l113;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v256), 64) !== (function(){
-                                var symbol = l2;
-                                var value = symbol.value;
-                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                return value;
-                            })() ? (function(){
-                                (function(){
-                                    var symbol = l114;
-                                    var func = symbol.function;
-                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                    return func;
-                                })()(v256);
-                                return (function(){
-                                    var symbol = l47;
-                                    var func = symbol.function;
-                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                    return func;
-                                })()(l128, (function(){
-                                    var symbol = l121;
-                                    var func = symbol.function;
-                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                    return func;
-                                })()(v256));
-                            })() : (function(){
-                                var symbol = l47;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(l129, (function(){
-                                var symbol = l121;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v256)));
-                        })() : ((function(){
-                            var symbol = l76;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v257, 35) !== (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })() ? (function(){
-                            return (function(){
-                                var symbol = l123;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v256);
-                        })() : (function(){
-                            return (function(v258){
-                                return ((function(){
-                                    var symbol = l92;
-                                    var func = symbol.function;
-                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                    return func;
-                                })()((function(){
-                                    var symbol = l88;
-                                    var func = symbol.function;
-                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                    return func;
-                                })(), v258) !== (function(){
-                                    var symbol = l2;
-                                    var value = symbol.value;
-                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                    return value;
-                                })() ? (function(){
-                                    var symbol = l90;
-                                    var func = symbol.function;
-                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                    return func;
-                                })()(v258) : (function(){
-                                    var symbol = l15;
-                                    var func = symbol.function;
-                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                    return func;
-                                })()((function(){
-                                    var x = v258;
-                                    if (typeof x != 'string')
-                                        throw 'The value ' + x + ' is not a type string.';
-                                    return x.toUpperCase();
-                                })()));
-                            })((function(){
-                                var symbol = l118;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v256, (function(){
-                                var symbol = l117;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()));
-                        })())))))));
-                    })((function(){
-                        var symbol = l113;
+                        var symbol = l117;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -6884,46 +6685,11 @@ var l129 = {name: "UNQUOTE"};
         })();
     
     }));
-    return l121;
+    return l126;
 })();
-var l130 = {name: "LS-READ-FROM-STRING"};
+var l127 = {name: "*EOF*"};
 (function(){
-    (l130).function = (function(v261){
-        ((v261)["fname"] = "LS-READ-FROM-STRING");
-        return v261;
-    })((function (v260){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(){
-                        var symbol = l121;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()((function(){
-                        var symbol = l112;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v260));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 111)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    }));
-    return l130;
-})();
-var l131 = {name: "*COMPILATION-UNIT-CHECKS*"};
-(function(){
-    (((l131.value !== undefined)?(function(){
+    (((l127.value !== undefined)?(function(){
         var symbol = l3;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6944,27 +6710,319 @@ var l131 = {name: "*COMPILATION-UNIT-CHECKS*"};
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })() : (function(){
-        return (l131).value = l2;
+        return (l127).value = (function(){
+            var name = "EOF";
+            if (typeof name != 'string')
+                throw 'The value ' + name + ' is not a type string.';
+            return ({name: name});
+        })();
     })());
-    return l131;
+    return l127;
 })();
-var l132 = {name: "MAKE-BINDING"};
+var l128 = {name: "QUOTE"};
+var l129 = {name: "BACKQUOTE"};
+var l130 = {name: "UNQUOTE-SPLICING"};
+var l131 = {name: "UNQUOTE"};
+(function(){
+    (l124).function = (function(v264){
+        ((v264)["fname"] = "LS-READ");
+        return v264;
+    })((function (v261){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    (function(){
+                        var symbol = l122;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v261);
+                    return (function(v262){
+                        return ((function(){
+                            var symbol = l11;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(v262) !== (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })() ? (function(){
+                            return (function(){
+                                var symbol = l127;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })();
+                        })() : ((function(){
+                            var symbol = l76;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(v262, 40) !== (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })() ? (function(){
+                            (function(){
+                                var symbol = l117;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v261);
+                            return (function(){
+                                var symbol = l123;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v261);
+                        })() : ((function(){
+                            var symbol = l76;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(v262, 39) !== (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })() ? (function(){
+                            (function(){
+                                var symbol = l117;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v261);
+                            return (function(){
+                                var symbol = l47;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(l128, (function(){
+                                var symbol = l124;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v261));
+                        })() : ((function(){
+                            var symbol = l76;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(v262, 96) !== (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })() ? (function(){
+                            (function(){
+                                var symbol = l117;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v261);
+                            return (function(){
+                                var symbol = l47;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(l129, (function(){
+                                var symbol = l124;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v261));
+                        })() : ((function(){
+                            var symbol = l76;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(v262, 34) !== (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })() ? (function(){
+                            (function(){
+                                var symbol = l117;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v261);
+                            return (function(){
+                                var symbol = l125;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v261);
+                        })() : ((function(){
+                            var symbol = l76;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(v262, 44) !== (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })() ? (function(){
+                            (function(){
+                                var symbol = l117;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v261);
+                            return ((function(){
+                                var symbol = l30;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()((function(){
+                                var symbol = l116;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v261), 64) !== (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })() ? (function(){
+                                (function(){
+                                    var symbol = l117;
+                                    var func = symbol.function;
+                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                    return func;
+                                })()(v261);
+                                return (function(){
+                                    var symbol = l47;
+                                    var func = symbol.function;
+                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                    return func;
+                                })()(l130, (function(){
+                                    var symbol = l124;
+                                    var func = symbol.function;
+                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                    return func;
+                                })()(v261));
+                            })() : (function(){
+                                var symbol = l47;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(l131, (function(){
+                                var symbol = l124;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v261)));
+                        })() : ((function(){
+                            var symbol = l76;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(v262, 35) !== (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })() ? (function(){
+                            return (function(){
+                                var symbol = l126;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v261);
+                        })() : (function(){
+                            return (function(v263){
+                                return ((function(){
+                                    var symbol = l92;
+                                    var func = symbol.function;
+                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                    return func;
+                                })()((function(){
+                                    var symbol = l88;
+                                    var func = symbol.function;
+                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                    return func;
+                                })(), v263) !== (function(){
+                                    var symbol = l2;
+                                    var value = symbol.value;
+                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                    return value;
+                                })() ? (function(){
+                                    var symbol = l90;
+                                    var func = symbol.function;
+                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                    return func;
+                                })()(v263) : (function(){
+                                    var symbol = l15;
+                                    var func = symbol.function;
+                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                    return func;
+                                })()((function(){
+                                    var x = v263;
+                                    if (typeof x != 'string')
+                                        throw 'The value ' + x + ' is not a type string.';
+                                    return x.toUpperCase();
+                                })()));
+                            })((function(){
+                                var symbol = l121;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v261, (function(){
+                                var symbol = l120;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()));
+                        })())))))));
+                    })((function(){
+                        var symbol = l116;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v261));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 111)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    }));
+    return l124;
+})();
+var l132 = {name: "LS-READ-FROM-STRING"};
 (function(){
     (l132).function = (function(v266){
-        ((v266)["fname"] = "MAKE-BINDING");
+        ((v266)["fname"] = "LS-READ-FROM-STRING");
         return v266;
-    })((function (v262,v263,v264,v265){
-        if (arguments.length < 4) throw 'too few arguments';
-        if (arguments.length > 4) throw 'too many arguments';
+    })((function (v265){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (function(){
-                        var symbol = l47;
+                        var symbol = l124;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v262, v263, v264, v265);
+                    })()((function(){
+                        var symbol = l115;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v265));
                 })();
             }
             catch (cf){
@@ -6978,23 +7036,50 @@ var l132 = {name: "MAKE-BINDING"};
     }));
     return l132;
 })();
-var l133 = {name: "BINDING-NAME"};
+var l133 = {name: "*COMPILATION-UNIT-CHECKS*"};
 (function(){
-    (l133).function = (function(v268){
-        ((v268)["fname"] = "BINDING-NAME");
-        return v268;
-    })((function (v267){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    (((l133.value !== undefined)?(function(){
+        var symbol = l3;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })(): (function(){
+        var symbol = l2;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()) !== (function(){
+        var symbol = l2;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })() ? (function(){
+        var symbol = l2;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })() : (function(){
+        return (l133).value = l2;
+    })());
+    return l133;
+})();
+var l134 = {name: "MAKE-BINDING"};
+(function(){
+    (l134).function = (function(v271){
+        ((v271)["fname"] = "MAKE-BINDING");
+        return v271;
+    })((function (v267,v268,v269,v270){
+        if (arguments.length < 4) throw 'too few arguments';
+        if (arguments.length > 4) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (function(){
-                        var symbol = l43;
+                        var symbol = l47;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v267);
+                    })()(v267, v268, v269, v270);
                 })();
             }
             catch (cf){
@@ -7006,25 +7091,25 @@ var l133 = {name: "BINDING-NAME"};
         })();
     
     }));
-    return l133;
+    return l134;
 })();
-var l134 = {name: "BINDING-TYPE"};
+var l135 = {name: "BINDING-NAME"};
 (function(){
-    (l134).function = (function(v270){
-        ((v270)["fname"] = "BINDING-TYPE");
-        return v270;
-    })((function (v269){
+    (l135).function = (function(v273){
+        ((v273)["fname"] = "BINDING-NAME");
+        return v273;
+    })((function (v272){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (function(){
-                        var symbol = l44;
+                        var symbol = l43;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v269);
+                    })()(v272);
                 })();
             }
             catch (cf){
@@ -7036,25 +7121,25 @@ var l134 = {name: "BINDING-TYPE"};
         })();
     
     }));
-    return l134;
+    return l135;
 })();
-var l135 = {name: "BINDING-VALUE"};
+var l136 = {name: "BINDING-TYPE"};
 (function(){
-    (l135).function = (function(v272){
-        ((v272)["fname"] = "BINDING-VALUE");
-        return v272;
-    })((function (v271){
+    (l136).function = (function(v275){
+        ((v275)["fname"] = "BINDING-TYPE");
+        return v275;
+    })((function (v274){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (function(){
-                        var symbol = l45;
+                        var symbol = l44;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v271);
+                    })()(v274);
                 })();
             }
             catch (cf){
@@ -7066,35 +7151,25 @@ var l135 = {name: "BINDING-VALUE"};
         })();
     
     }));
-    return l135;
+    return l136;
 })();
-var l136 = {name: "BINDING-DECLARED"};
+var l137 = {name: "BINDING-VALUE"};
 (function(){
-    (l136).function = (function(v274){
-        ((v274)["fname"] = "BINDING-DECLARED");
-        return v274;
-    })((function (v273){
+    (l137).function = (function(v277){
+        ((v277)["fname"] = "BINDING-VALUE");
+        return v277;
+    })((function (v276){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (v273 !== (function(){
-                        var symbol = l2;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })() ? (function(){
-                        var symbol = l46;
+                    return (function(){
+                        var symbol = l45;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v273) : (function(){
-                        var symbol = l2;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })());
+                    })()(v276);
                 })();
             }
             catch (cf){
@@ -7106,34 +7181,50 @@ var l136 = {name: "BINDING-DECLARED"};
         })();
     
     }));
-    return l136;
+    return l137;
 })();
-var l137 = {name: "MARK-BINDING-AS-DECLARED"};
+var l138 = {name: "SET-BINDING-VALUE"};
 (function(){
-    (l137).function = (function(v276){
-        ((v276)["fname"] = "MARK-BINDING-AS-DECLARED");
-        return v276;
-    })((function (v275){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    (l138).function = (function(v280){
+        ((v280)["fname"] = "SET-BINDING-VALUE");
+        return v280;
+    })((function (v278,v279){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (function(){
                         var x = (function(){
-                            var symbol = l41;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v275);
+                            var tmp = (function(){
+                                var tmp = v278;
+                                return tmp === (function(){
+                                    var symbol = l2;
+                                    var value = symbol.value;
+                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                    return value;
+                                })()? (function(){
+                                    var symbol = l2;
+                                    var value = symbol.value;
+                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                    return value;
+                                })(): tmp.cdr;
+                            })();
+                            return tmp === (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })()? (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })(): tmp.cdr;
+                        })();
                         if (typeof x != 'object')
                             throw 'The value ' + x + ' is not a type object.';
-                        return (x.car = (function(){
-                            var symbol = l3;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })());
+                        return (x.car = v279);
                     })();
                 })();
             }
@@ -7146,13 +7237,93 @@ var l137 = {name: "MARK-BINDING-AS-DECLARED"};
         })();
     
     }));
-    return l137;
+    return l138;
 })();
-var l138 = {name: "MAKE-LEXENV"};
+var l139 = {name: "BINDING-DECLARED"};
 (function(){
-    (l138).function = (function(v277){
-        ((v277)["fname"] = "MAKE-LEXENV");
-        return v277;
+    (l139).function = (function(v282){
+        ((v282)["fname"] = "BINDING-DECLARED");
+        return v282;
+    })((function (v281){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (v281 !== (function(){
+                        var symbol = l2;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })() ? (function(){
+                        var symbol = l46;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v281) : (function(){
+                        var symbol = l2;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })());
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 118)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    }));
+    return l139;
+})();
+var l140 = {name: "MARK-BINDING-AS-DECLARED"};
+(function(){
+    (l140).function = (function(v284){
+        ((v284)["fname"] = "MARK-BINDING-AS-DECLARED");
+        return v284;
+    })((function (v283){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(){
+                        var x = (function(){
+                            var symbol = l41;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(v283);
+                        if (typeof x != 'object')
+                            throw 'The value ' + x + ' is not a type object.';
+                        return (x.car = (function(){
+                            var symbol = l3;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })());
+                    })();
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 119)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    }));
+    return l140;
+})();
+var l141 = {name: "MAKE-LEXENV"};
+(function(){
+    (l141).function = (function(v285){
+        ((v285)["fname"] = "MAKE-LEXENV");
+        return v285;
     })((function (){
         if (arguments.length > 0) throw 'too many arguments';
         return (function(){
@@ -7187,7 +7358,7 @@ var l138 = {name: "MAKE-LEXENV"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 118)
+                if (cf.type == 'block' && cf.id == 120)
                     return cf.value;
                 else
                     throw cf;
@@ -7195,14 +7366,14 @@ var l138 = {name: "MAKE-LEXENV"};
         })();
     
     }));
-    return l138;
+    return l141;
 })();
-var l139 = {name: "COPY-LEXENV"};
+var l142 = {name: "COPY-LEXENV"};
 (function(){
-    (l139).function = (function(v279){
-        ((v279)["fname"] = "COPY-LEXENV");
-        return v279;
-    })((function (v278){
+    (l142).function = (function(v287){
+        ((v287)["fname"] = "COPY-LEXENV");
+        return v287;
+    })((function (v286){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
@@ -7213,11 +7384,11 @@ var l139 = {name: "COPY-LEXENV"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v278);
+                    })()(v286);
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 119)
+                if (cf.type == 'block' && cf.id == 121)
                     return cf.value;
                 else
                     throw cf;
@@ -7225,40 +7396,39 @@ var l139 = {name: "COPY-LEXENV"};
         })();
     
     }));
-    return l139;
+    return l142;
 })();
-var l140 = {name: "PUSH-TO-LEXENV"};
-var l141 = {name: "VARIABLE"};
-var l142 = {name: "BLOCK"};
-var l143 = {name: "GOTAG"};
+var l143 = {name: "PUSH-TO-LEXENV"};
+var l144 = {name: "BLOCK"};
+var l145 = {name: "GOTAG"};
 (function(){
-    (l140).function = (function(v284){
-        ((v284)["fname"] = "PUSH-TO-LEXENV");
-        return v284;
-    })((function (v280,v281,v282){
+    (l143).function = (function(v292){
+        ((v292)["fname"] = "PUSH-TO-LEXENV");
+        return v292;
+    })((function (v288,v289,v290){
         if (arguments.length < 3) throw 'too few arguments';
         if (arguments.length > 3) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v283){
+                    return (function(v291){
                         return ((function(){
                             var symbol = l30;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v283, l141) !== (function(){
+                        })()(v291, l100) !== (function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })() ? (function(){
                             return (function(){
-                                var x = v281;
+                                var x = v289;
                                 if (typeof x != 'object')
                                     throw 'The value ' + x + ' is not a type object.';
-                                return (x.car = ({car: v280, cdr: (function(){
-                                    var tmp = v281;
+                                return (x.car = ({car: v288, cdr: (function(){
+                                    var tmp = v289;
                                     return tmp === (function(){
                                         var symbol = l2;
                                         var value = symbol.value;
@@ -7277,7 +7447,7 @@ var l143 = {name: "GOTAG"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v283, l124) !== (function(){
+                        })()(v291, l99) !== (function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -7285,7 +7455,7 @@ var l143 = {name: "GOTAG"};
                         })() ? (function(){
                             return (function(){
                                 var x = (function(){
-                                    var tmp = v281;
+                                    var tmp = v289;
                                     return tmp === (function(){
                                         var symbol = l2;
                                         var value = symbol.value;
@@ -7300,19 +7470,19 @@ var l143 = {name: "GOTAG"};
                                 })();
                                 if (typeof x != 'object')
                                     throw 'The value ' + x + ' is not a type object.';
-                                return (x.car = ({car: v280, cdr: (function(){
+                                return (x.car = ({car: v288, cdr: (function(){
                                     var symbol = l37;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v281)}));
+                                })()(v289)}));
                             })();
                         })() : ((function(){
                             var symbol = l30;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v283, l142) !== (function(){
+                        })()(v291, l144) !== (function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -7324,22 +7494,22 @@ var l143 = {name: "GOTAG"};
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v281);
+                                })()(v289);
                                 if (typeof x != 'object')
                                     throw 'The value ' + x + ' is not a type object.';
-                                return (x.car = ({car: v280, cdr: (function(){
+                                return (x.car = ({car: v288, cdr: (function(){
                                     var symbol = l40;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v281)}));
+                                })()(v289)}));
                             })();
                         })() : ((function(){
                             var symbol = l30;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v283, l143) !== (function(){
+                        })()(v291, l145) !== (function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -7351,26 +7521,26 @@ var l143 = {name: "GOTAG"};
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v281);
+                                })()(v289);
                                 if (typeof x != 'object')
                                     throw 'The value ' + x + ' is not a type object.';
-                                return (x.car = ({car: v280, cdr: (function(){
+                                return (x.car = ({car: v288, cdr: (function(){
                                     var symbol = l42;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v281)}));
+                                })()(v289)}));
                             })();
                         })() : (function(){
                             return (function(){
                                 throw "ECASE expression failed.";
                             })();
                         })()))));
-                    })(v282);
+                    })(v290);
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 120)
+                if (cf.type == 'block' && cf.id == 122)
                     return cf.value;
                 else
                     throw cf;
@@ -7378,33 +7548,33 @@ var l143 = {name: "GOTAG"};
         })();
     
     }));
-    return l140;
+    return l143;
 })();
-var l144 = {name: "EXTEND-LEXENV"};
+var l146 = {name: "EXTEND-LEXENV"};
 (function(){
-    (l144).function = (function(v291){
-        ((v291)["fname"] = "EXTEND-LEXENV");
-        return v291;
-    })((function (v285,v286,v287){
+    (l146).function = (function(v299){
+        ((v299)["fname"] = "EXTEND-LEXENV");
+        return v299;
+    })((function (v293,v294,v295){
         if (arguments.length < 3) throw 'too few arguments';
         if (arguments.length > 3) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v288){
+                    return (function(v296){
                         return (function(){
                             try {
                                 return (function(){
-                                    return (function(v289,v290){
+                                    return (function(v297,v298){
                                         (function(){
-                                            while(v289 !== (function(){
+                                            while(v297 !== (function(){
                                                 var symbol = l2;
                                                 var value = symbol.value;
                                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                 return value;
                                             })()){
-                                                v290 = (function(){
-                                                    var tmp = v289;
+                                                v298 = (function(){
+                                                    var tmp = v297;
                                                     return tmp === (function(){
                                                         var symbol = l2;
                                                         var value = symbol.value;
@@ -7419,11 +7589,11 @@ var l144 = {name: "EXTEND-LEXENV"};
                                                 })();
                                                 (function(){
                                                     (function(){
-                                                        var symbol = l140;
+                                                        var symbol = l143;
                                                         var func = symbol.function;
                                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                         return func;
-                                                    })()(v290, v288, v287);
+                                                    })()(v298, v296, v295);
                                                     return (function(){
                                                         var symbol = l2;
                                                         var value = symbol.value;
@@ -7431,8 +7601,8 @@ var l144 = {name: "EXTEND-LEXENV"};
                                                         return value;
                                                     })();
                                                 })();
-                                                v289 = (function(){
-                                                    var tmp = v289;
+                                                v297 = (function(){
+                                                    var tmp = v297;
                                                     return tmp === (function(){
                                                         var symbol = l2;
                                                         var value = symbol.value;
@@ -7452,13 +7622,13 @@ var l144 = {name: "EXTEND-LEXENV"};
                                                 return value;
                                             })();
                                         })();
-                                        return v288;
+                                        return v296;
                                     })((function(){
                                         var symbol = l67;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
-                                    })()(v285),(function(){
+                                    })()(v293),(function(){
                                         var symbol = l2;
                                         var value = symbol.value;
                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -7467,122 +7637,18 @@ var l144 = {name: "EXTEND-LEXENV"};
                                 })();
                             }
                             catch (cf){
-                                if (cf.type == 'block' && cf.id == 122)
+                                if (cf.type == 'block' && cf.id == 124)
                                     return cf.value;
                                 else
                                     throw cf;
                             }
                         })();
                     })((function(){
-                        var symbol = l139;
+                        var symbol = l142;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v286));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 121)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    }));
-    return l144;
-})();
-var l145 = {name: "LOOKUP-IN-LEXENV"};
-(function(){
-    (l145).function = (function(v296){
-        ((v296)["fname"] = "LOOKUP-IN-LEXENV");
-        return v296;
-    })((function (v292,v293,v294){
-        if (arguments.length < 3) throw 'too few arguments';
-        if (arguments.length > 3) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(){
-                        var symbol = l93;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v292, (function(v295){
-                        return ((function(){
-                            var symbol = l30;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v295, l141) !== (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })() ? (function(){
-                            return (function(){
-                                var symbol = l43;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v293);
-                        })() : ((function(){
-                            var symbol = l30;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v295, l124) !== (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })() ? (function(){
-                            return (function(){
-                                var symbol = l44;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v293);
-                        })() : ((function(){
-                            var symbol = l30;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v295, l142) !== (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })() ? (function(){
-                            return (function(){
-                                var symbol = l45;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v293);
-                        })() : ((function(){
-                            var symbol = l30;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v295, l143) !== (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })() ? (function(){
-                            return (function(){
-                                var symbol = l46;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v293);
-                        })() : (function(){
-                            return (function(){
-                                throw "ECASE expression failed.";
-                            })();
-                        })()))));
-                    })(v294));
+                    })()(v294));
                 })();
             }
             catch (cf){
@@ -7594,112 +7660,103 @@ var l145 = {name: "LOOKUP-IN-LEXENV"};
         })();
     
     }));
-    return l145;
-})();
-var l146 = {name: "*GLOBAL-ENVIRONMENT*"};
-(function(){
-    (((l146.value !== undefined)?(function(){
-        var symbol = l3;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })(): (function(){
-        var symbol = l2;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()) !== (function(){
-        var symbol = l2;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })() ? (function(){
-        var symbol = l2;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })() : (function(){
-        return (l146).value = (function(){
-            var symbol = l138;
-            var func = symbol.function;
-            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-            return func;
-        })()();
-    })());
     return l146;
 })();
-var l147 = {name: "*ENVIRONMENT*"};
+var l147 = {name: "LOOKUP-IN-LEXENV"};
 (function(){
-    (((l147.value !== undefined)?(function(){
-        var symbol = l3;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })(): (function(){
-        var symbol = l2;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()) !== (function(){
-        var symbol = l2;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })() ? (function(){
-        var symbol = l2;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })() : (function(){
-        return (l147).value = (function(){
-            var symbol = l138;
-            var func = symbol.function;
-            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-            return func;
-        })()();
-    })());
-    return l147;
-})();
-var l148 = {name: "CLEAR-UNDECLARED-GLOBAL-BINDINGS"};
-(function(){
-    (l148).function = (function(v298){
-        ((v298)["fname"] = "CLEAR-UNDECLARED-GLOBAL-BINDINGS");
-        return v298;
-    })((function (){
-        if (arguments.length > 0) throw 'too many arguments';
+    (l147).function = (function(v304){
+        ((v304)["fname"] = "LOOKUP-IN-LEXENV");
+        return v304;
+    })((function (v300,v301,v302){
+        if (arguments.length < 3) throw 'too few arguments';
+        if (arguments.length > 3) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (l147).value = (function(){
-                        var symbol = l71;
+                    return (function(){
+                        var symbol = l93;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()((function (v297){
-                        if (arguments.length < 1) throw 'too few arguments';
-                        if (arguments.length > 1) throw 'too many arguments';
-                        return (function(){
-                            var symbol = l87;
+                    })()(v300, (function(v303){
+                        return ((function(){
+                            var symbol = l30;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()((function(){
-                            var symbol = l136;
+                        })()(v303, l100) !== (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })() ? (function(){
+                            return (function(){
+                                var symbol = l43;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v301);
+                        })() : ((function(){
+                            var symbol = l30;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })(), v297);
-                    
-                    }), (function(){
-                        var symbol = l147;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })());
+                        })()(v303, l99) !== (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })() ? (function(){
+                            return (function(){
+                                var symbol = l44;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v301);
+                        })() : ((function(){
+                            var symbol = l30;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(v303, l144) !== (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })() ? (function(){
+                            return (function(){
+                                var symbol = l45;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v301);
+                        })() : ((function(){
+                            var symbol = l30;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(v303, l145) !== (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })() ? (function(){
+                            return (function(){
+                                var symbol = l46;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v301);
+                        })() : (function(){
+                            return (function(){
+                                throw "ECASE expression failed.";
+                            })();
+                        })()))));
+                    })(v302));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 124)
+                if (cf.type == 'block' && cf.id == 125)
                     return cf.value;
                 else
                     throw cf;
@@ -7707,9 +7764,41 @@ var l148 = {name: "CLEAR-UNDECLARED-GLOBAL-BINDINGS"};
         })();
     
     }));
+    return l147;
+})();
+var l148 = {name: "*GLOBAL-ENVIRONMENT*"};
+(function(){
+    (((l148.value !== undefined)?(function(){
+        var symbol = l3;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })(): (function(){
+        var symbol = l2;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()) !== (function(){
+        var symbol = l2;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })() ? (function(){
+        var symbol = l2;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })() : (function(){
+        return (l148).value = (function(){
+            var symbol = l141;
+            var func = symbol.function;
+            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+            return func;
+        })()();
+    })());
     return l148;
 })();
-var l149 = {name: "*VARIABLE-COUNTER*"};
+var l149 = {name: "*ENVIRONMENT*"};
 (function(){
     (((l149.value !== undefined)?(function(){
         var symbol = l3;
@@ -7732,23 +7821,104 @@ var l149 = {name: "*VARIABLE-COUNTER*"};
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })() : (function(){
-        return (l149).value = 0;
+        return (l149).value = (function(){
+            var symbol = l141;
+            var func = symbol.function;
+            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+            return func;
+        })()();
     })());
     return l149;
 })();
-var l150 = {name: "GVARNAME"};
+var l150 = {name: "CLEAR-UNDECLARED-GLOBAL-BINDINGS"};
 (function(){
-    (l150).function = (function(v300){
-        ((v300)["fname"] = "GVARNAME");
-        return v300;
-    })((function (v299){
+    (l150).function = (function(v306){
+        ((v306)["fname"] = "CLEAR-UNDECLARED-GLOBAL-BINDINGS");
+        return v306;
+    })((function (){
+        if (arguments.length > 0) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (l149).value = (function(){
+                        var symbol = l71;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()((function (v305){
+                        if (arguments.length < 1) throw 'too few arguments';
+                        if (arguments.length > 1) throw 'too many arguments';
+                        return (function(){
+                            var symbol = l87;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()((function(){
+                            var symbol = l139;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })(), v305);
+                    
+                    }), (function(){
+                        var symbol = l149;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })());
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 126)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    }));
+    return l150;
+})();
+var l151 = {name: "*VARIABLE-COUNTER*"};
+(function(){
+    (((l151.value !== undefined)?(function(){
+        var symbol = l3;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })(): (function(){
+        var symbol = l2;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()) !== (function(){
+        var symbol = l2;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })() ? (function(){
+        var symbol = l2;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })() : (function(){
+        return (l151).value = 0;
+    })());
+    return l151;
+})();
+var l152 = {name: "GVARNAME"};
+(function(){
+    (l152).function = (function(v308){
+        ((v308)["fname"] = "GVARNAME");
+        return v308;
+    })((function (v307){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (function(){
-                        var symbol = l99;
+                        var symbol = l102;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -7757,9 +7927,9 @@ var l150 = {name: "GVARNAME"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()((l149).value = (function(){
+                    })()((l151).value = (function(){
                         var x = (function(){
-                            var symbol = l149;
+                            var symbol = l151;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
@@ -7774,7 +7944,7 @@ var l150 = {name: "GVARNAME"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 125)
+                if (cf.type == 'block' && cf.id == 127)
                     return cf.value;
                 else
                     throw cf;
@@ -7782,39 +7952,39 @@ var l150 = {name: "GVARNAME"};
         })();
     
     }));
-    return l150;
+    return l152;
 })();
-var l151 = {name: "TRANSLATE-VARIABLE"};
+var l153 = {name: "TRANSLATE-VARIABLE"};
 (function(){
-    (l151).function = (function(v302){
-        ((v302)["fname"] = "TRANSLATE-VARIABLE");
-        return v302;
-    })((function (v301){
+    (l153).function = (function(v310){
+        ((v310)["fname"] = "TRANSLATE-VARIABLE");
+        return v310;
+    })((function (v309){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (function(){
-                        var symbol = l135;
+                        var symbol = l137;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l145;
+                        var symbol = l147;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v301, (function(){
-                        var symbol = l147;
+                    })()(v309, (function(){
+                        var symbol = l149;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
-                    })(), l141));
+                    })(), l100));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 126)
+                if (cf.type == 'block' && cf.id == 128)
                     return cf.value;
                 else
                     throw cf;
@@ -7822,34 +7992,34 @@ var l151 = {name: "TRANSLATE-VARIABLE"};
         })();
     
     }));
-    return l151;
+    return l153;
 })();
-var l152 = {name: "EXTEND-LOCAL-ENV"};
-var l153 = {name: "LEXICAL-VARIABLE"};
+var l154 = {name: "EXTEND-LOCAL-ENV"};
+var l155 = {name: "LEXICAL-VARIABLE"};
 (function(){
-    (l152).function = (function(v308){
-        ((v308)["fname"] = "EXTEND-LOCAL-ENV");
-        return v308;
-    })((function (v303){
+    (l154).function = (function(v316){
+        ((v316)["fname"] = "EXTEND-LOCAL-ENV");
+        return v316;
+    })((function (v311){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v304){
+                    return (function(v312){
                         return (function(){
                             try {
                                 return (function(){
-                                    return (function(v305,v306){
+                                    return (function(v313,v314){
                                         (function(){
-                                            while(v305 !== (function(){
+                                            while(v313 !== (function(){
                                                 var symbol = l2;
                                                 var value = symbol.value;
                                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                 return value;
                                             })()){
-                                                v306 = (function(){
-                                                    var tmp = v305;
+                                                v314 = (function(){
+                                                    var tmp = v313;
                                                     return tmp === (function(){
                                                         var symbol = l2;
                                                         var value = symbol.value;
@@ -7863,24 +8033,24 @@ var l153 = {name: "LEXICAL-VARIABLE"};
                                                     })(): tmp.car;
                                                 })();
                                                 (function(){
-                                                    (function(v307){
+                                                    (function(v315){
                                                         return (function(){
-                                                            var symbol = l140;
+                                                            var symbol = l143;
                                                             var func = symbol.function;
                                                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                             return func;
-                                                        })()(v307, v304, l141);
+                                                        })()(v315, v312, l100);
                                                     })((function(){
-                                                        var symbol = l132;
+                                                        var symbol = l134;
                                                         var func = symbol.function;
                                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                         return func;
-                                                    })()(v306, l153, (function(){
-                                                        var symbol = l150;
+                                                    })()(v314, l155, (function(){
+                                                        var symbol = l152;
                                                         var func = symbol.function;
                                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                         return func;
-                                                    })()(v306), (function(){
+                                                    })()(v314), (function(){
                                                         var symbol = l3;
                                                         var value = symbol.value;
                                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -7893,8 +8063,8 @@ var l153 = {name: "LEXICAL-VARIABLE"};
                                                         return value;
                                                     })();
                                                 })();
-                                                v305 = (function(){
-                                                    var tmp = v305;
+                                                v313 = (function(){
+                                                    var tmp = v313;
                                                     return tmp === (function(){
                                                         var symbol = l2;
                                                         var value = symbol.value;
@@ -7914,8 +8084,8 @@ var l153 = {name: "LEXICAL-VARIABLE"};
                                                 return value;
                                             })();
                                         })();
-                                        return v304;
-                                    })(v303,(function(){
+                                        return v312;
+                                    })(v311,(function(){
                                         var symbol = l2;
                                         var value = symbol.value;
                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -7924,19 +8094,19 @@ var l153 = {name: "LEXICAL-VARIABLE"};
                                 })();
                             }
                             catch (cf){
-                                if (cf.type == 'block' && cf.id == 128)
+                                if (cf.type == 'block' && cf.id == 130)
                                     return cf.value;
                                 else
                                     throw cf;
                             }
                         })();
                     })((function(){
-                        var symbol = l139;
+                        var symbol = l142;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l147;
+                        var symbol = l149;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
@@ -7944,7 +8114,7 @@ var l153 = {name: "LEXICAL-VARIABLE"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 127)
+                if (cf.type == 'block' && cf.id == 129)
                     return cf.value;
                 else
                     throw cf;
@@ -7952,11 +8122,11 @@ var l153 = {name: "LEXICAL-VARIABLE"};
         })();
     
     }));
-    return l152;
+    return l154;
 })();
-var l154 = {name: "*TOPLEVEL-COMPILATIONS*"};
+var l156 = {name: "*TOPLEVEL-COMPILATIONS*"};
 (function(){
-    (((l154.value !== undefined)?(function(){
+    (((l156.value !== undefined)?(function(){
         var symbol = l3;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -7977,28 +8147,28 @@ var l154 = {name: "*TOPLEVEL-COMPILATIONS*"};
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })() : (function(){
-        return (l154).value = (function(){
+        return (l156).value = (function(){
             var symbol = l2;
             var value = symbol.value;
             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
             return value;
         })();
     })());
-    return l154;
+    return l156;
 })();
-var l155 = {name: "TOPLEVEL-COMPILATION"};
+var l157 = {name: "TOPLEVEL-COMPILATION"};
 (function(){
-    (l155).function = (function(v310){
-        ((v310)["fname"] = "TOPLEVEL-COMPILATION");
-        return v310;
-    })((function (v309){
+    (l157).function = (function(v318){
+        ((v318)["fname"] = "TOPLEVEL-COMPILATION");
+        return v318;
+    })((function (v317){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (l154).value = ({car: v309, cdr: (function(){
-                        var symbol = l154;
+                    return (l156).value = ({car: v317, cdr: (function(){
+                        var symbol = l156;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
@@ -8006,7 +8176,7 @@ var l155 = {name: "TOPLEVEL-COMPILATION"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 129)
+                if (cf.type == 'block' && cf.id == 131)
                     return cf.value;
                 else
                     throw cf;
@@ -8014,14 +8184,14 @@ var l155 = {name: "TOPLEVEL-COMPILATION"};
         })();
     
     }));
-    return l155;
+    return l157;
 })();
-var l156 = {name: "NULL-OR-EMPTY-P"};
+var l158 = {name: "NULL-OR-EMPTY-P"};
 (function(){
-    (l156).function = (function(v312){
-        ((v312)["fname"] = "NULL-OR-EMPTY-P");
-        return v312;
-    })((function (v311){
+    (l158).function = (function(v320){
+        ((v320)["fname"] = "NULL-OR-EMPTY-P");
+        return v320;
+    })((function (v319){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
@@ -8037,11 +8207,11 @@ var l156 = {name: "NULL-OR-EMPTY-P"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v311));
+                    })()(v319));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 130)
+                if (cf.type == 'block' && cf.id == 132)
                     return cf.value;
                 else
                     throw cf;
@@ -8049,13 +8219,13 @@ var l156 = {name: "NULL-OR-EMPTY-P"};
         })();
     
     }));
-    return l156;
+    return l158;
 })();
-var l157 = {name: "GET-TOPLEVEL-COMPILATIONS"};
+var l159 = {name: "GET-TOPLEVEL-COMPILATIONS"};
 (function(){
-    (l157).function = (function(v313){
-        ((v313)["fname"] = "GET-TOPLEVEL-COMPILATIONS");
-        return v313;
+    (l159).function = (function(v321){
+        ((v321)["fname"] = "GET-TOPLEVEL-COMPILATIONS");
+        return v321;
     })((function (){
         if (arguments.length > 0) throw 'too many arguments';
         return (function(){
@@ -8072,12 +8242,12 @@ var l157 = {name: "GET-TOPLEVEL-COMPILATIONS"};
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l156;
+                        var symbol = l158;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })(), (function(){
-                        var symbol = l154;
+                        var symbol = l156;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
@@ -8085,7 +8255,7 @@ var l157 = {name: "GET-TOPLEVEL-COMPILATIONS"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 131)
+                if (cf.type == 'block' && cf.id == 133)
                     return cf.value;
                 else
                     throw cf;
@@ -8093,27 +8263,27 @@ var l157 = {name: "GET-TOPLEVEL-COMPILATIONS"};
         })();
     
     }));
-    return l157;
+    return l159;
 })();
-var l158 = {name: "%COMPILE-DEFMACRO"};
-var l159 = {name: "MACRO"};
+var l160 = {name: "%COMPILE-DEFMACRO"};
+var l161 = {name: "MACRO"};
 (function(){
-    (l158).function = (function(v316){
-        ((v316)["fname"] = "%COMPILE-DEFMACRO");
-        return v316;
-    })((function (v314,v315){
+    (l160).function = (function(v324){
+        ((v324)["fname"] = "%COMPILE-DEFMACRO");
+        return v324;
+    })((function (v322,v323){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     (function(){
-                        var symbol = l155;
+                        var symbol = l157;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -8127,37 +8297,37 @@ var l159 = {name: "MACRO"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(l126), (function(){
+                    })()(l128), (function(){
                         var symbol = l47;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v314))));
+                    })()(v322))));
                     return (function(){
-                        var symbol = l140;
+                        var symbol = l143;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l132;
+                        var symbol = l134;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v314, l159, v315, (function(){
+                    })()(v322, l161, v323, (function(){
                         var symbol = l3;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })()), (function(){
-                        var symbol = l147;
+                        var symbol = l149;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
-                    })(), l124);
+                    })(), l99);
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 132)
+                if (cf.type == 'block' && cf.id == 134)
                     return cf.value;
                 else
                     throw cf;
@@ -8165,11 +8335,11 @@ var l159 = {name: "MACRO"};
         })();
     
     }));
-    return l158;
+    return l160;
 })();
-var l160 = {name: "*COMPILATIONS*"};
+var l162 = {name: "*COMPILATIONS*"};
 (function(){
-    (((l160.value !== undefined)?(function(){
+    (((l162.value !== undefined)?(function(){
         var symbol = l3;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -8190,26 +8360,26 @@ var l160 = {name: "*COMPILATIONS*"};
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })() : (function(){
-        return (l160).value = (function(){
+        return (l162).value = (function(){
             var symbol = l2;
             var value = symbol.value;
             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
             return value;
         })();
     })());
-    return l160;
+    return l162;
 })();
-var l161 = {name: "LS-COMPILE-BLOCK"};
+var l163 = {name: "LS-COMPILE-BLOCK"};
 (function(){
-    (l161).function = (function(v319){
-        ((v319)["fname"] = "LS-COMPILE-BLOCK");
-        return v319;
-    })((function (v317,v318){
+    (l163).function = (function(v327){
+        ((v327)["fname"] = "LS-COMPILE-BLOCK");
+        return v327;
+    })((function (v325,v326){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         switch(arguments.length){
         case 1:
-        v318=(function(){
+        v326=(function(){
             var symbol = l2;
             var value = symbol.value;
             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -8220,18 +8390,18 @@ var l161 = {name: "LS-COMPILE-BLOCK"};
         return (function(){
             try {
                 return (function(){
-                    return (v318 !== (function(){
+                    return (v326 !== (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })() ? (function(){
-                        var symbol = l99;
+                        var symbol = l102;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l161;
+                        var symbol = l163;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -8240,8 +8410,8 @@ var l161 = {name: "LS-COMPILE-BLOCK"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v317)), "return ", (function(){
-                        var symbol = l106;
+                    })()(v325)), "return ", (function(){
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -8251,7 +8421,7 @@ var l161 = {name: "LS-COMPILE-BLOCK"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v317);
+                        })()(v325);
                         return tmp === (function(){
                             var symbol = l2;
                             var value = symbol.value;
@@ -8264,7 +8434,7 @@ var l161 = {name: "LS-COMPILE-BLOCK"};
                             return value;
                         })(): tmp.car;
                     })()), ";") : (function(){
-                        var symbol = l102;
+                        var symbol = l105;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -8274,7 +8444,7 @@ var l161 = {name: "LS-COMPILE-BLOCK"};
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l156;
+                        var symbol = l158;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -8284,17 +8454,17 @@ var l161 = {name: "LS-COMPILE-BLOCK"};
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v317)), (function(){
-                        var symbol = l99;
+                    })(), v325)), (function(){
+                        var symbol = l102;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()(";", (function(){
-                        var symbol = l98;
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
@@ -8302,7 +8472,7 @@ var l161 = {name: "LS-COMPILE-BLOCK"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 133)
+                if (cf.type == 'block' && cf.id == 135)
                     return cf.value;
                 else
                     throw cf;
@@ -8310,34 +8480,34 @@ var l161 = {name: "LS-COMPILE-BLOCK"};
         })();
     
     }));
-    return l161;
+    return l163;
 })();
-var l162 = {name: "DEFINE-COMPILATION"};
-l162;
-var l163 = {name: "IF"};
-(l160).value = ({car: (function(){
+var l164 = {name: "DEFINE-COMPILATION"};
+l164;
+var l165 = {name: "IF"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l163, (function (v320,v321,v322){
+})()(l165, (function (v328,v329,v330){
     if (arguments.length < 3) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
                 return (function(){
-                    var symbol = l99;
+                    var symbol = l102;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()("(", (function(){
-                    var symbol = l106;
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v320), " !== ", (function(){
-                    var symbol = l106;
+                })()(v328), " !== ", (function(){
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
@@ -8347,20 +8517,20 @@ var l163 = {name: "IF"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), " ? ", (function(){
-                    var symbol = l106;
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v321), " : ", (function(){
-                    var symbol = l106;
+                })()(v329), " : ", (function(){
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v322), ")");
+                })()(v330), ")");
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 134)
+            if (cf.type == 'block' && cf.id == 136)
                 return cf.value;
             else
                 throw cf;
@@ -8368,17 +8538,17 @@ var l163 = {name: "IF"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l164 = {name: "*LAMBDA-LIST-KEYWORDS*"};
-var l165 = {name: "&OPTIONAL"};
-var l166 = {name: "&REST"};
-var l167 = {car: l165, cdr: {car: l166, cdr: l2}};
+var l166 = {name: "*LAMBDA-LIST-KEYWORDS*"};
+var l167 = {name: "&OPTIONAL"};
+var l168 = {name: "&REST"};
+var l169 = {car: l167, cdr: {car: l168, cdr: l2}};
 (function(){
-    (((l164.value !== undefined)?(function(){
+    (((l166.value !== undefined)?(function(){
         var symbol = l3;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -8399,34 +8569,34 @@ var l167 = {car: l165, cdr: {car: l166, cdr: l2}};
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })() : (function(){
-        return (l164).value = l167;
+        return (l166).value = l169;
     })());
-    return l164;
+    return l166;
 })();
-var l168 = {name: "LIST-UNTIL-KEYWORD"};
+var l170 = {name: "LIST-UNTIL-KEYWORD"};
 (function(){
-    (l168).function = (function(v325){
-        ((v325)["fname"] = "LIST-UNTIL-KEYWORD");
-        return v325;
-    })((function (v323){
+    (l170).function = (function(v333){
+        ((v333)["fname"] = "LIST-UNTIL-KEYWORD");
+        return v333;
+    })((function (v331){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return ((function(v324){
-                        return (v324 !== (function(){
+                    return ((function(v332){
+                        return (v332 !== (function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })() ? v324 : (function(){
+                        })() ? v332 : (function(){
                             var symbol = l84;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var tmp = v323;
+                            var tmp = v331;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -8439,7 +8609,7 @@ var l168 = {name: "LIST-UNTIL-KEYWORD"};
                                 return value;
                             })(): tmp.car;
                         })(), (function(){
-                            var symbol = l164;
+                            var symbol = l166;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
@@ -8449,7 +8619,7 @@ var l168 = {name: "LIST-UNTIL-KEYWORD"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v323)) !== (function(){
+                    })()(v331)) !== (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -8460,7 +8630,7 @@ var l168 = {name: "LIST-UNTIL-KEYWORD"};
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })() : ({car: (function(){
-                        var tmp = v323;
+                        var tmp = v331;
                         return tmp === (function(){
                             var symbol = l2;
                             var value = symbol.value;
@@ -8473,12 +8643,12 @@ var l168 = {name: "LIST-UNTIL-KEYWORD"};
                             return value;
                         })(): tmp.car;
                     })(), cdr: (function(){
-                        var symbol = l168;
+                        var symbol = l170;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var tmp = v323;
+                        var tmp = v331;
                         return tmp === (function(){
                             var symbol = l2;
                             var value = symbol.value;
@@ -8494,7 +8664,7 @@ var l168 = {name: "LIST-UNTIL-KEYWORD"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 135)
+                if (cf.type == 'block' && cf.id == 137)
                     return cf.value;
                 else
                     throw cf;
@@ -8502,29 +8672,29 @@ var l168 = {name: "LIST-UNTIL-KEYWORD"};
         })();
     
     }));
-    return l168;
+    return l170;
 })();
-var l169 = {name: "LAMBDA-LIST-REQUIRED-ARGUMENTS"};
+var l171 = {name: "LAMBDA-LIST-REQUIRED-ARGUMENTS"};
 (function(){
-    (l169).function = (function(v327){
-        ((v327)["fname"] = "LAMBDA-LIST-REQUIRED-ARGUMENTS");
-        return v327;
-    })((function (v326){
+    (l171).function = (function(v335){
+        ((v335)["fname"] = "LAMBDA-LIST-REQUIRED-ARGUMENTS");
+        return v335;
+    })((function (v334){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (function(){
-                        var symbol = l168;
+                        var symbol = l170;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v326);
+                    })()(v334);
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 136)
+                if (cf.type == 'block' && cf.id == 138)
                     return cf.value;
                 else
                     throw cf;
@@ -8532,14 +8702,14 @@ var l169 = {name: "LAMBDA-LIST-REQUIRED-ARGUMENTS"};
         })();
     
     }));
-    return l169;
+    return l171;
 })();
-var l170 = {name: "LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT"};
+var l172 = {name: "LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT"};
 (function(){
-    (l170).function = (function(v329){
-        ((v329)["fname"] = "LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT");
-        return v329;
-    })((function (v328){
+    (l172).function = (function(v337){
+        ((v337)["fname"] = "LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT");
+        return v337;
+    })((function (v336){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
@@ -8556,7 +8726,7 @@ var l170 = {name: "LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT"};
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })(), (function(){
-                        var symbol = l168;
+                        var symbol = l170;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -8566,7 +8736,7 @@ var l170 = {name: "LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(l165, v328);
+                        })()(l167, v336);
                         return tmp === (function(){
                             var symbol = l2;
                             var value = symbol.value;
@@ -8582,7 +8752,7 @@ var l170 = {name: "LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 137)
+                if (cf.type == 'block' && cf.id == 139)
                     return cf.value;
                 else
                     throw cf;
@@ -8590,14 +8760,14 @@ var l170 = {name: "LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT"};
         })();
     
     }));
-    return l170;
+    return l172;
 })();
-var l171 = {name: "LAMBDA-LIST-OPTIONAL-ARGUMENTS"};
+var l173 = {name: "LAMBDA-LIST-OPTIONAL-ARGUMENTS"};
 (function(){
-    (l171).function = (function(v331){
-        ((v331)["fname"] = "LAMBDA-LIST-OPTIONAL-ARGUMENTS");
-        return v331;
-    })((function (v330){
+    (l173).function = (function(v339){
+        ((v339)["fname"] = "LAMBDA-LIST-OPTIONAL-ARGUMENTS");
+        return v339;
+    })((function (v338){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
@@ -8614,15 +8784,15 @@ var l171 = {name: "LAMBDA-LIST-OPTIONAL-ARGUMENTS"};
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })(), (function(){
-                        var symbol = l170;
+                        var symbol = l172;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v330));
+                    })()(v338));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 138)
+                if (cf.type == 'block' && cf.id == 140)
                     return cf.value;
                 else
                     throw cf;
@@ -8630,22 +8800,22 @@ var l171 = {name: "LAMBDA-LIST-OPTIONAL-ARGUMENTS"};
         })();
     
     }));
-    return l171;
+    return l173;
 })();
-var l172 = {name: "LAMBDA-LIST-REST-ARGUMENT"};
+var l174 = {name: "LAMBDA-LIST-REST-ARGUMENT"};
 (function(){
-    (l172).function = (function(v334){
-        ((v334)["fname"] = "LAMBDA-LIST-REST-ARGUMENT");
-        return v334;
-    })((function (v332){
+    (l174).function = (function(v342){
+        ((v342)["fname"] = "LAMBDA-LIST-REST-ARGUMENT");
+        return v342;
+    })((function (v340){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v333){
+                    return (function(v341){
                         ((function(){
-                            var tmp = v333;
+                            var tmp = v341;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -8673,7 +8843,7 @@ var l172 = {name: "LAMBDA-LIST-REST-ARGUMENT"};
                             return value;
                         })());
                         return (function(){
-                            var tmp = v333;
+                            var tmp = v341;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -8687,7 +8857,7 @@ var l172 = {name: "LAMBDA-LIST-REST-ARGUMENT"};
                             })(): tmp.car;
                         })();
                     })((function(){
-                        var symbol = l168;
+                        var symbol = l170;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -8697,7 +8867,7 @@ var l172 = {name: "LAMBDA-LIST-REST-ARGUMENT"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(l166, v332);
+                        })()(l168, v340);
                         return tmp === (function(){
                             var symbol = l2;
                             var value = symbol.value;
@@ -8713,7 +8883,7 @@ var l172 = {name: "LAMBDA-LIST-REST-ARGUMENT"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 139)
+                if (cf.type == 'block' && cf.id == 141)
                     return cf.value;
                 else
                     throw cf;
@@ -8721,42 +8891,216 @@ var l172 = {name: "LAMBDA-LIST-REST-ARGUMENT"};
         })();
     
     }));
-    return l172;
+    return l174;
 })();
-var l173 = {name: "LAMBDA"};
-(l160).value = ({car: (function(){
+var l175 = {name: "LAMBDA-DOCSTRING-WRAPPER"};
+(function(){
+    (l175).function = (function(v345){
+        ((v345)["fname"] = "LAMBDA-DOCSTRING-WRAPPER");
+        return v345;
+    })((function (v344){
+        if (arguments.length < 1) throw 'too few arguments';
+        var v343= (function(){
+            var symbol = l2;
+            var value = symbol.value;
+            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+            return value;
+        })();
+        for (var i = arguments.length-1; i>=1; i--)
+            v343 = {car: arguments[i], cdr: 
+        v343};
+        return (function(){
+            try {
+                return (function(){
+                    return (v344 !== (function(){
+                        var symbol = l2;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })() ? (function(){
+                        var symbol = l102;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()("(function(){", (function(){
+                        var symbol = l101;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })(), (function(){
+                        var symbol = l107;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()("var func = ", (function(){
+                        var symbol = l104;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v343), ";", (function(){
+                        var symbol = l101;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })(), "func.docstring = '", v344, "';", (function(){
+                        var symbol = l101;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })(), "return func;", (function(){
+                        var symbol = l101;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })()), "})()") : (function(){
+                        var symbol = l104;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v343));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 142)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    }));
+    return l175;
+})();
+var l176 = {name: "LAMBDA"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l173, (function (v336){
+})()(l176, (function (v347){
     if (arguments.length < 1) throw 'too few arguments';
-    var v335= (function(){
+    var v346= (function(){
         var symbol = l2;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })();
     for (var i = arguments.length-1; i>=1; i--)
-        v335 = {car: arguments[i], cdr: 
-    v335};
+        v346 = {car: arguments[i], cdr: 
+    v346};
     return (function(){
         try {
             return (function(){
-                return (function(v337,v338,v339){
-                    return (function(v340,v341,v342){
+                return (function(v348,v349,v350,v351){
+                    ((((typeof((function(){
+                        var tmp = v346;
+                        return tmp === (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()? (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(): tmp.car;
+                    })()) == "string")?(function(){
+                        var symbol = l3;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })(): (function(){
+                        var symbol = l2;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })()) !== (function(){
+                        var symbol = l2;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })() ? (function(){
+                        var symbol = l31;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()((function(){
+                        var symbol = l11;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()((function(){
+                        var tmp = v346;
+                        return tmp === (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()? (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(): tmp.cdr;
+                    })())) : (function(){
+                        var symbol = l2;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })()) !== (function(){
+                        var symbol = l2;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })() ? (function(){
+                        v351 = (function(){
+                            var tmp = v346;
+                            return tmp === (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })()? (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })(): tmp.car;
+                        })();
+                        return v346 = (function(){
+                            var tmp = v346;
+                            return tmp === (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })()? (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })(): tmp.cdr;
+                        })();
+                    })() : (function(){
+                        var symbol = l2;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })());
+                    return (function(v352,v353,v354){
                         try {
                             var tmp;
-                            tmp = l147.value;
-                            l147.value = v342;
-                            v342 = tmp;
+                            tmp = l149.value;
+                            l149.value = v354;
+                            v354 = tmp;
                             return (function(){
-                                var symbol = l99;
+                                var symbol = l175;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()("(function (", (function(){
-                                var symbol = l101;
+                            })()(v351, "(function (", (function(){
+                                var symbol = l104;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
@@ -8766,7 +9110,7 @@ var l173 = {name: "LAMBDA"};
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
                             })()((function(){
-                                var symbol = l151;
+                                var symbol = l153;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
@@ -8775,23 +9119,23 @@ var l173 = {name: "LAMBDA"};
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v337, v338)), ","), "){", (function(){
-                                var symbol = l98;
+                            })()(v348, v349)), ","), "){", (function(){
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(), (function(){
-                                var symbol = l104;
+                                var symbol = l107;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()((v337 !== (function(){
+                            })()((v348 !== (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })() ? (function(){
-                                var symbol = l99;
+                                var symbol = l102;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
@@ -8800,8 +9144,8 @@ var l173 = {name: "LAMBDA"};
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v340), ") throw 'too few arguments';", (function(){
-                                var symbol = l98;
+                            })()(v352), ") throw 'too few arguments';", (function(){
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
@@ -8810,13 +9154,13 @@ var l173 = {name: "LAMBDA"};
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v339) !== (function(){
+                            })()(v350) !== (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })() ? (function(){
-                                var symbol = l99;
+                                var symbol = l102;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
@@ -8826,42 +9170,42 @@ var l173 = {name: "LAMBDA"};
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
                             })()((function(){
-                                var x = v340;
-                                var y = v341;
+                                var x = v352;
+                                var y = v353;
                                 if (typeof x != 'number')
                                     throw 'The value ' + x + ' is not a type number.';
                                 if (typeof y != 'number')
                                     throw 'The value ' + y + ' is not a type number.';
                                 return x+y;
                             })()), ") throw 'too many arguments';", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })()) : ""), (v338 !== (function(){
+                            })()) : ""), (v349 !== (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })() ? (function(){
-                                var symbol = l99;
+                                var symbol = l102;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
                             })()("switch(arguments.length){", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })(), (function(v343,v344,v345){
+                            })(), (function(v355,v356,v357){
                                 return (function(){
                                     (function(){
                                         try {
                                             return (function(){
                                                 return (function(){
                                                     while(((function(){
-                                                        var x = v345;
-                                                        var y = v341;
+                                                        var x = v357;
+                                                        var y = v353;
                                                         if (typeof x != 'number')
                                                             throw 'The value ' + x + ' is not a type number.';
                                                         if (typeof y != 'number')
@@ -8883,9 +9227,9 @@ var l173 = {name: "LAMBDA"};
                                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                         return value;
                                                     })()){
-                                                        (function(v346){
-                                                            v344 = ({car: (function(){
-                                                                var symbol = l99;
+                                                        (function(v358){
+                                                            v356 = ({car: (function(){
+                                                                var symbol = l102;
                                                                 var func = symbol.function;
                                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                                 return func;
@@ -8895,25 +9239,25 @@ var l173 = {name: "LAMBDA"};
                                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                                 return func;
                                                             })()((function(){
-                                                                var x = v345;
-                                                                var y = v340;
+                                                                var x = v357;
+                                                                var y = v352;
                                                                 if (typeof x != 'number')
                                                                     throw 'The value ' + x + ' is not a type number.';
                                                                 if (typeof y != 'number')
                                                                     throw 'The value ' + y + ' is not a type number.';
                                                                 return x+y;
                                                             })()), ":", (function(){
-                                                                var symbol = l98;
+                                                                var symbol = l101;
                                                                 var value = symbol.value;
                                                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                                 return value;
                                                             })(), (function(){
-                                                                var symbol = l151;
+                                                                var symbol = l153;
                                                                 var func = symbol.function;
                                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                                 return func;
                                                             })()((function(){
-                                                                var tmp = v346;
+                                                                var tmp = v358;
                                                                 return tmp === (function(){
                                                                     var symbol = l2;
                                                                     var value = symbol.value;
@@ -8926,7 +9270,7 @@ var l173 = {name: "LAMBDA"};
                                                                     return value;
                                                                 })(): tmp.car;
                                                             })()), "=", (function(){
-                                                                var symbol = l106;
+                                                                var symbol = l109;
                                                                 var func = symbol.function;
                                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                                 return func;
@@ -8935,14 +9279,14 @@ var l173 = {name: "LAMBDA"};
                                                                 var func = symbol.function;
                                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                                 return func;
-                                                            })()(v346)), ";", (function(){
-                                                                var symbol = l98;
+                                                            })()(v358)), ";", (function(){
+                                                                var symbol = l101;
                                                                 var value = symbol.value;
                                                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                                 return value;
-                                                            })()), cdr: v344});
-                                                            return v345 = (function(){
-                                                                var x = v345;
+                                                            })()), cdr: v356});
+                                                            return v357 = (function(){
+                                                                var x = v357;
                                                                 var y = 1;
                                                                 if (typeof x != 'number')
                                                                     throw 'The value ' + x + ' is not a type number.';
@@ -8955,7 +9299,7 @@ var l173 = {name: "LAMBDA"};
                                                             var func = symbol.function;
                                                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                             return func;
-                                                        })()(v345, v343));
+                                                        })()(v357, v355));
                                                     }return (function(){
                                                         var symbol = l2;
                                                         var value = symbol.value;
@@ -8966,25 +9310,25 @@ var l173 = {name: "LAMBDA"};
                                             })();
                                         }
                                         catch (cf){
-                                            if (cf.type == 'block' && cf.id == 141)
+                                            if (cf.type == 'block' && cf.id == 144)
                                                 return cf.value;
                                             else
                                                 throw cf;
                                         }
                                     })();
-                                    v344 = ({car: (function(){
-                                        var symbol = l99;
+                                    v356 = ({car: (function(){
+                                        var symbol = l102;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
                                     })()("default: break;", (function(){
-                                        var symbol = l98;
+                                        var symbol = l101;
                                         var value = symbol.value;
                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                         return value;
-                                    })()), cdr: v344});
+                                    })()), cdr: v356});
                                     return (function(){
-                                        var symbol = l101;
+                                        var symbol = l104;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
@@ -8993,36 +9337,36 @@ var l173 = {name: "LAMBDA"};
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
-                                    })()(v344));
+                                    })()(v356));
                                 })();
                             })((function(){
-                                var symbol = l170;
+                                var symbol = l172;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v336),(function(){
+                            })()(v347),(function(){
                                 var symbol = l2;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(),0), "}", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })()) : ""), (v339 !== (function(){
+                            })()) : ""), (v350 !== (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })() ? (function(v347){
+                            })() ? (function(v359){
                                 return (function(){
-                                    var symbol = l99;
+                                    var symbol = l102;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()("var ", v347, "= ", (function(){
-                                    var symbol = l106;
+                                })()("var ", v359, "= ", (function(){
+                                    var symbol = l109;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
@@ -9032,7 +9376,7 @@ var l173 = {name: "LAMBDA"};
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
                                 })()), ";", (function(){
-                                    var symbol = l98;
+                                    var symbol = l101;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
@@ -9042,66 +9386,66 @@ var l173 = {name: "LAMBDA"};
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
                                 })()((function(){
-                                    var x = v340;
-                                    var y = v341;
+                                    var x = v352;
+                                    var y = v353;
                                     if (typeof x != 'number')
                                         throw 'The value ' + x + ' is not a type number.';
                                     if (typeof y != 'number')
                                         throw 'The value ' + y + ' is not a type number.';
                                     return x+y;
                                 })()), "; i--)", (function(){
-                                    var symbol = l98;
+                                    var symbol = l101;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
                                 })(), (function(){
-                                    var symbol = l104;
+                                    var symbol = l107;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v347, " = ", "{car: arguments[i], cdr: "), v347, "};", (function(){
-                                    var symbol = l98;
+                                })()(v359, " = ", "{car: arguments[i], cdr: "), v359, "};", (function(){
+                                    var symbol = l101;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
                                 })());
                             })((function(){
-                                var symbol = l151;
+                                var symbol = l153;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v339)) : ""), (function(){
-                                var symbol = l161;
+                            })()(v350)) : ""), (function(){
+                                var symbol = l163;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v335, (function(){
+                            })()(v346, (function(){
                                 var symbol = l3;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })())), (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(), "})");
                         }
                         finally {
-                            l147.value = v342;
+                            l149.value = v354;
                         }
                     })((function(){
                         var symbol = l69;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v337),(function(){
+                    })()(v348),(function(){
                         var symbol = l69;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v338),(function(){
-                        var symbol = l152;
+                    })()(v349),(function(){
+                        var symbol = l154;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -9115,27 +9459,32 @@ var l173 = {name: "LAMBDA"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v339), v337, v338)));
+                    })()(v350), v348, v349)));
                 })((function(){
-                    var symbol = l169;
-                    var func = symbol.function;
-                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                    return func;
-                })()(v336),(function(){
                     var symbol = l171;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v336),(function(){
-                    var symbol = l172;
+                })()(v347),(function(){
+                    var symbol = l173;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v336));
+                })()(v347),(function(){
+                    var symbol = l174;
+                    var func = symbol.function;
+                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                    return func;
+                })()(v347),(function(){
+                    var symbol = l2;
+                    var value = symbol.value;
+                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                    return value;
+                })());
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 140)
+            if (cf.type == 'block' && cf.id == 143)
                 return cf.value;
             else
                 throw cf;
@@ -9143,31 +9492,31 @@ var l173 = {name: "LAMBDA"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l174 = {name: "SETQ"};
-var l175 = {name: "SET"};
-(l160).value = ({car: (function(){
+var l177 = {name: "SETQ"};
+var l178 = {name: "SET"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l174, (function (v348,v349){
+})()(l177, (function (v360,v361){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v350){
+                return (function(v362){
                     return ((((function(){
-                        var symbol = l134;
+                        var symbol = l136;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v350) === l153)?(function(){
+                    })()(v362) === l155)?(function(){
                         var symbol = l3;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9183,37 +9532,22 @@ var l175 = {name: "SET"};
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })() ? (function(){
-                        var symbol = l99;
+                        var symbol = l102;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l135;
+                        var symbol = l137;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v350), " = ", (function(){
-                        var symbol = l106;
+                    })()(v362), " = ", (function(){
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v349)) : (function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()((function(){
-                        var symbol = l65;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()((function(){
-                        var symbol = l47;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(l175), (function(){
-                        var symbol = l47;
+                    })()(v361)) : (function(){
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -9227,32 +9561,47 @@ var l175 = {name: "SET"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(l126), (function(){
+                    })()(l178), (function(){
                         var symbol = l47;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v348))), (function(){
+                    })()((function(){
+                        var symbol = l65;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()((function(){
                         var symbol = l47;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v349))));
+                    })()(l128), (function(){
+                        var symbol = l47;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v360))), (function(){
+                        var symbol = l47;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v361))));
                 })((function(){
-                    var symbol = l145;
+                    var symbol = l147;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v348, (function(){
-                    var symbol = l147;
+                })()(v360, (function(){
+                    var symbol = l149;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l141));
+                })(), l100));
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 142)
+            if (cf.type == 'block' && cf.id == 145)
                 return cf.value;
             else
                 throw cf;
@@ -9260,28 +9609,28 @@ var l175 = {name: "SET"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l176 = {name: "JS-VREF"};
-(l160).value = ({car: (function(){
+var l179 = {name: "JS-VREF"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l176, (function (v351){
+})()(l179, (function (v363){
     if (arguments.length < 1) throw 'too few arguments';
     if (arguments.length > 1) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return v351;
+                return v363;
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 143)
+            if (cf.type == 'block' && cf.id == 146)
                 return cf.value;
             else
                 throw cf;
@@ -9289,38 +9638,38 @@ var l176 = {name: "JS-VREF"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l177 = {name: "JS-VSET"};
-(l160).value = ({car: (function(){
+var l180 = {name: "JS-VSET"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l177, (function (v352,v353){
+})()(l180, (function (v364,v365){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
                 return (function(){
-                    var symbol = l99;
+                    var symbol = l102;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()("(", v352, " = ", (function(){
-                    var symbol = l106;
+                })()("(", v364, " = ", (function(){
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v353), ")");
+                })()(v365), ")");
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 144)
+            if (cf.type == 'block' && cf.id == 147)
                 return cf.value;
             else
                 throw cf;
@@ -9328,29 +9677,29 @@ var l177 = {name: "JS-VSET"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
 (function(){
-    (l109).function = (function(v360){
-        ((v360)["fname"] = "ESCAPE-STRING");
-        return v360;
-    })((function (v354){
+    (l112).function = (function(v372){
+        ((v372)["fname"] = "ESCAPE-STRING");
+        return v372;
+    })((function (v366){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v355,v356,v357){
+                    return (function(v367,v368,v369){
                         (function(){
                             try {
                                 return (function(){
                                     return (function(){
                                         while(((function(){
-                                            var x = v356;
-                                            var y = v357;
+                                            var x = v368;
+                                            var y = v369;
                                             if (typeof x != 'number')
                                                 throw 'The value ' + x + ' is not a type number.';
                                             if (typeof y != 'number')
@@ -9372,36 +9721,36 @@ var l177 = {name: "JS-VSET"};
                                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                             return value;
                                         })()){
-                                            (function(v358){
-                                                ((function(v359){
-                                                    return (v359 !== (function(){
+                                            (function(v370){
+                                                ((function(v371){
+                                                    return (v371 !== (function(){
                                                         var symbol = l2;
                                                         var value = symbol.value;
                                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                         return value;
-                                                    })() ? v359 : (function(){
+                                                    })() ? v371 : (function(){
                                                         var symbol = l76;
                                                         var func = symbol.function;
                                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                         return func;
-                                                    })()(v358, 92));
+                                                    })()(v370, 92));
                                                 })((function(){
                                                     var symbol = l76;
                                                     var func = symbol.function;
                                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                     return func;
-                                                })()(v358, 34)) !== (function(){
+                                                })()(v370, 34)) !== (function(){
                                                     var symbol = l2;
                                                     var value = symbol.value;
                                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                     return value;
                                                 })() ? (function(){
-                                                    return v355 = (function(){
-                                                        var symbol = l99;
+                                                    return v367 = (function(){
+                                                        var symbol = l102;
                                                         var func = symbol.function;
                                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                         return func;
-                                                    })()(v355, "\\");
+                                                    })()(v367, "\\");
                                                 })() : (function(){
                                                     var symbol = l2;
                                                     var value = symbol.value;
@@ -9413,47 +9762,47 @@ var l177 = {name: "JS-VSET"};
                                                     var func = symbol.function;
                                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                     return func;
-                                                })()(v358, 10) !== (function(){
+                                                })()(v370, 10) !== (function(){
                                                     var symbol = l2;
                                                     var value = symbol.value;
                                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                     return value;
                                                 })() ? (function(){
-                                                    v355 = (function(){
-                                                        var symbol = l99;
+                                                    v367 = (function(){
+                                                        var symbol = l102;
                                                         var func = symbol.function;
                                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                         return func;
-                                                    })()(v355, "\\");
-                                                    return v358 = 110;
+                                                    })()(v367, "\\");
+                                                    return v370 = 110;
                                                 })() : (function(){
                                                     var symbol = l2;
                                                     var value = symbol.value;
                                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                     return value;
                                                 })());
-                                                return v355 = (function(){
-                                                    var symbol = l99;
+                                                return v367 = (function(){
+                                                    var symbol = l102;
                                                     var func = symbol.function;
                                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                     return func;
-                                                })()(v355, (function(){
-                                                    var x = v358;
+                                                })()(v367, (function(){
+                                                    var x = v370;
                                                     if (typeof x != 'number')
                                                         throw 'The value ' + x + ' is not a type number.';
                                                     return String.fromCharCode(x);
                                                 })());
                                             })((function(){
-                                                var string = v354;
-                                                var index = v356;
+                                                var string = v366;
+                                                var index = v368;
                                                 if (typeof string != 'string')
                                                     throw 'The value ' + string + ' is not a type string.';
                                                 if (typeof index != 'number')
                                                     throw 'The value ' + index + ' is not a type number.';
                                                 return string.charCodeAt(index);
                                             })());
-                                            v356 = (function(){
-                                                var x = v356;
+                                            v368 = (function(){
+                                                var x = v368;
                                                 var y = 1;
                                                 if (typeof x != 'number')
                                                     throw 'The value ' + x + ' is not a type number.';
@@ -9471,23 +9820,23 @@ var l177 = {name: "JS-VSET"};
                                 })();
                             }
                             catch (cf){
-                                if (cf.type == 'block' && cf.id == 146)
+                                if (cf.type == 'block' && cf.id == 149)
                                     return cf.value;
                                 else
                                     throw cf;
                             }
                         })();
-                        return v355;
+                        return v367;
                     })("",0,(function(){
                         var symbol = l69;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v354));
+                    })()(v366));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 145)
+                if (cf.type == 'block' && cf.id == 148)
                     return cf.value;
                 else
                     throw cf;
@@ -9495,11 +9844,11 @@ var l177 = {name: "JS-VSET"};
         })();
     
     }));
-    return l109;
+    return l112;
 })();
-var l178 = {name: "*LITERAL-SYMBOLS*"};
+var l181 = {name: "*LITERAL-SYMBOLS*"};
 (function(){
-    (((l178.value !== undefined)?(function(){
+    (((l181.value !== undefined)?(function(){
         var symbol = l3;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9520,18 +9869,18 @@ var l178 = {name: "*LITERAL-SYMBOLS*"};
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })() : (function(){
-        return (l178).value = (function(){
+        return (l181).value = (function(){
             var symbol = l2;
             var value = symbol.value;
             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
             return value;
         })();
     })());
-    return l178;
+    return l181;
 })();
-var l179 = {name: "*LITERAL-COUNTER*"};
+var l182 = {name: "*LITERAL-COUNTER*"};
 (function(){
-    (((l179.value !== undefined)?(function(){
+    (((l182.value !== undefined)?(function(){
         var symbol = l3;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9552,22 +9901,22 @@ var l179 = {name: "*LITERAL-COUNTER*"};
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })() : (function(){
-        return (l179).value = 0;
+        return (l182).value = 0;
     })());
-    return l179;
+    return l182;
 })();
-var l180 = {name: "GENLIT"};
+var l183 = {name: "GENLIT"};
 (function(){
-    (l180).function = (function(v361){
-        ((v361)["fname"] = "GENLIT");
-        return v361;
+    (l183).function = (function(v373){
+        ((v373)["fname"] = "GENLIT");
+        return v373;
     })((function (){
         if (arguments.length > 0) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (function(){
-                        var symbol = l99;
+                        var symbol = l102;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -9576,9 +9925,9 @@ var l180 = {name: "GENLIT"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()((l179).value = (function(){
+                    })()((l182).value = (function(){
                         var x = (function(){
-                            var symbol = l179;
+                            var symbol = l182;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
@@ -9593,7 +9942,7 @@ var l180 = {name: "GENLIT"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 147)
+                if (cf.type == 'block' && cf.id == 150)
                     return cf.value;
                 else
                     throw cf;
@@ -9601,19 +9950,19 @@ var l180 = {name: "GENLIT"};
         })();
     
     }));
-    return l180;
+    return l183;
 })();
-var l181 = {name: "LITERAL"};
+var l184 = {name: "LITERAL"};
 (function(){
-    (l181).function = (function(v369){
-        ((v369)["fname"] = "LITERAL");
-        return v369;
-    })((function (v362,v363){
+    (l184).function = (function(v381){
+        ((v381)["fname"] = "LITERAL");
+        return v381;
+    })((function (v374,v375){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         switch(arguments.length){
         case 1:
-        v363=(function(){
+        v375=(function(){
             var symbol = l2;
             var value = symbol.value;
             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9629,7 +9978,7 @@ var l181 = {name: "LITERAL"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v362) !== (function(){
+                    })()(v374) !== (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9640,8 +9989,8 @@ var l181 = {name: "LITERAL"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v362);
-                    })() : (((typeof(v362) == "string")?(function(){
+                        })()(v374);
+                    })() : (((typeof(v374) == "string")?(function(){
                         var symbol = l3;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9658,18 +10007,18 @@ var l181 = {name: "LITERAL"};
                         return value;
                     })() ? (function(){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("\"", (function(){
-                            var symbol = l109;
+                            var symbol = l112;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v362), "\"");
+                        })()(v374), "\"");
                     })() : (((function(){
-                        var tmp = v362;
+                        var tmp = v374;
                         return (typeof tmp == 'object' && 'name' in tmp);
                     })()?(function(){
                         var symbol = l3;
@@ -9687,38 +10036,38 @@ var l181 = {name: "LITERAL"};
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })() ? (function(){
-                        return (function(v364){
-                            return (v364 !== (function(){
+                        return (function(v376){
+                            return (v376 !== (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })() ? v364 : (function(v365,v366){
-                                (l178).value = ({car: ({car: v362, cdr: v365}), cdr: (function(){
-                                    var symbol = l178;
+                            })() ? v376 : (function(v377,v378){
+                                (l181).value = ({car: ({car: v374, cdr: v377}), cdr: (function(){
+                                    var symbol = l181;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
                                 })()});
                                 (function(){
-                                    var symbol = l155;
+                                    var symbol = l157;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
                                 })()((function(){
-                                    var symbol = l99;
+                                    var symbol = l102;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()("var ", v365, " = ", v366));
-                                return v365;
+                                })()("var ", v377, " = ", v378));
+                                return v377;
                             })((function(){
-                                var symbol = l180;
+                                var symbol = l183;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
                             })()(),(function(){
-                                var symbol = l106;
+                                var symbol = l109;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
@@ -9737,15 +10086,15 @@ var l181 = {name: "LITERAL"};
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()((v362).name)))));
+                            })()((v374).name)))));
                         })((function(){
                             var tmp = (function(){
                                 var symbol = l93;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v362, (function(){
-                                var symbol = l178;
+                            })()(v374, (function(){
+                                var symbol = l181;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
@@ -9763,7 +10112,7 @@ var l181 = {name: "LITERAL"};
                             })(): tmp.cdr;
                         })());
                     })() : (((function(){
-                        var tmp = v362;
+                        var tmp = v374;
                         return (typeof tmp == 'object' && 'car' in tmp);
                     })()?(function(){
                         var symbol = l3;
@@ -9781,43 +10130,43 @@ var l181 = {name: "LITERAL"};
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })() ? (function(){
-                        return (function(v367){
-                            return (v363 !== (function(){
+                        return (function(v379){
+                            return (v375 !== (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })() ? v367 : (function(v368){
+                            })() ? v379 : (function(v380){
                                 (function(){
-                                    var symbol = l155;
+                                    var symbol = l157;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
                                 })()((function(){
-                                    var symbol = l99;
+                                    var symbol = l102;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()("var ", v368, " = ", v367));
-                                return v368;
+                                })()("var ", v380, " = ", v379));
+                                return v380;
                             })((function(){
-                                var symbol = l180;
+                                var symbol = l183;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
                             })()()));
                         })((function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("{car: ", (function(){
-                            var symbol = l181;
+                            var symbol = l184;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var tmp = v362;
+                            var tmp = v374;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -9835,12 +10184,12 @@ var l181 = {name: "LITERAL"};
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })()), ", ", "cdr: ", (function(){
-                            var symbol = l181;
+                            var symbol = l184;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var tmp = v362;
+                            var tmp = v374;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -9867,7 +10216,7 @@ var l181 = {name: "LITERAL"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 148)
+                if (cf.type == 'block' && cf.id == 151)
                     return cf.value;
                 else
                     throw cf;
@@ -9875,29 +10224,29 @@ var l181 = {name: "LITERAL"};
         })();
     
     }));
-    return l181;
+    return l184;
 })();
-(l160).value = ({car: (function(){
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l126, (function (v370){
+})()(l128, (function (v382){
     if (arguments.length < 1) throw 'too few arguments';
     if (arguments.length > 1) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
                 return (function(){
-                    var symbol = l181;
+                    var symbol = l184;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v370);
+                })()(v382);
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 149)
+            if (cf.type == 'block' && cf.id == 152)
                 return cf.value;
             else
                 throw cf;
@@ -9905,53 +10254,53 @@ var l181 = {name: "LITERAL"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l182 = {name: "%WHILE"};
-(l160).value = ({car: (function(){
+var l185 = {name: "%WHILE"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l182, (function (v372){
+})()(l185, (function (v384){
     if (arguments.length < 1) throw 'too few arguments';
-    var v371= (function(){
+    var v383= (function(){
         var symbol = l2;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })();
     for (var i = arguments.length-1; i>=1; i--)
-        v371 = {car: arguments[i], cdr: 
-    v371};
+        v383 = {car: arguments[i], cdr: 
+    v383};
     return (function(){
         try {
             return (function(){
                 return (function(){
-                    var symbol = l99;
+                    var symbol = l102;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()("(function(){", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), (function(){
-                    var symbol = l104;
+                    var symbol = l107;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()("while(", (function(){
-                    var symbol = l106;
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v372), " !== ", (function(){
-                    var symbol = l106;
+                })()(v384), " !== ", (function(){
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
@@ -9961,22 +10310,22 @@ var l182 = {name: "%WHILE"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "){", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), (function(){
-                    var symbol = l104;
+                    var symbol = l107;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()((function(){
-                    var symbol = l161;
+                    var symbol = l163;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v371)), "}", "return ", (function(){
-                    var symbol = l106;
+                })()(v383)), "}", "return ", (function(){
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
@@ -9986,7 +10335,7 @@ var l182 = {name: "%WHILE"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), ";", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
@@ -9994,7 +10343,7 @@ var l182 = {name: "%WHILE"};
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 150)
+            if (cf.type == 'block' && cf.id == 153)
                 return cf.value;
             else
                 throw cf;
@@ -10002,18 +10351,18 @@ var l182 = {name: "%WHILE"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l183 = {name: "SYMBOL-FUNCTION"};
-(l160).value = ({car: (function(){
+var l186 = {name: "SYMBOL-FUNCTION"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l124, (function (v373){
+})()(l99, (function (v385){
     if (arguments.length < 1) throw 'too few arguments';
     if (arguments.length > 1) throw 'too many arguments';
     return (function(){
@@ -10024,13 +10373,13 @@ var l183 = {name: "SYMBOL-FUNCTION"};
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v373) !== (function(){
+                })()(v385) !== (function(){
                     var symbol = l2;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })() ? (((function(){
-                    var tmp = v373;
+                    var tmp = v385;
                     return tmp === (function(){
                         var symbol = l2;
                         var value = symbol.value;
@@ -10042,7 +10391,7 @@ var l183 = {name: "SYMBOL-FUNCTION"};
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(): tmp.car;
-                })() === l173)?(function(){
+                })() === l176)?(function(){
                     var symbol = l3;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -10064,13 +10413,13 @@ var l183 = {name: "SYMBOL-FUNCTION"};
                     return value;
                 })() ? (function(){
                     return (function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v373);
+                    })()(v385);
                 })() : (((function(){
-                    var tmp = v373;
+                    var tmp = v385;
                     return (typeof tmp == 'object' && 'name' in tmp);
                 })()?(function(){
                     var symbol = l3;
@@ -10089,7 +10438,7 @@ var l183 = {name: "SYMBOL-FUNCTION"};
                     return value;
                 })() ? (function(){
                     return (function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -10103,7 +10452,7 @@ var l183 = {name: "SYMBOL-FUNCTION"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(l183), (function(){
+                    })()(l186), (function(){
                         var symbol = l47;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
@@ -10118,12 +10467,12 @@ var l183 = {name: "SYMBOL-FUNCTION"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(l126), (function(){
+                    })()(l128), (function(){
                         var symbol = l47;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v373)))));
+                    })()(v385)))));
                 })() : (function(){
                     var symbol = l2;
                     var value = symbol.value;
@@ -10133,7 +10482,7 @@ var l183 = {name: "SYMBOL-FUNCTION"};
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 151)
+            if (cf.type == 'block' && cf.id == 154)
                 return cf.value;
             else
                 throw cf;
@@ -10141,38 +10490,38 @@ var l183 = {name: "SYMBOL-FUNCTION"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l184 = {name: "EVAL-WHEN-COMPILE"};
-var l185 = {name: "EVAL"};
-var l186 = {name: "PROGN"};
-(l160).value = ({car: (function(){
+var l187 = {name: "EVAL-WHEN-COMPILE"};
+var l188 = {name: "EVAL"};
+var l189 = {name: "PROGN"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l184, (function (){
-    var v374= (function(){
+})()(l187, (function (){
+    var v386= (function(){
         var symbol = l2;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })();
     for (var i = arguments.length-1; i>=0; i--)
-        v374 = {car: arguments[i], cdr: 
-    v374};
+        v386 = {car: arguments[i], cdr: 
+    v386};
     return (function(){
         try {
             return (function(){
                 (function(){
-                    var symbol = l185;
+                    var symbol = l188;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(({car: l186, cdr: v374}));
+                })()(({car: l189, cdr: v386}));
                 return (function(){
                     var symbol = l2;
                     var value = symbol.value;
@@ -10182,7 +10531,7 @@ var l186 = {name: "PROGN"};
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 152)
+            if (cf.type == 'block' && cf.id == 155)
                 return cf.value;
             else
                 throw cf;
@@ -10190,52 +10539,52 @@ var l186 = {name: "PROGN"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l187 = {name: "DEFINE-TRANSFORMATION"};
-l187;
-(l160).value = ({car: (function(){
+var l190 = {name: "DEFINE-TRANSFORMATION"};
+l190;
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l186, (function (){
-    var v375= (function(){
+})()(l189, (function (){
+    var v387= (function(){
         var symbol = l2;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })();
     for (var i = arguments.length-1; i>=0; i--)
-        v375 = {car: arguments[i], cdr: 
-    v375};
+        v387 = {car: arguments[i], cdr: 
+    v387};
     return (function(){
         try {
             return (function(){
                 return (function(){
-                    var symbol = l99;
+                    var symbol = l102;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()("(function(){", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), (function(){
-                    var symbol = l104;
+                    var symbol = l107;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()((function(){
-                    var symbol = l161;
+                    var symbol = l163;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v375, (function(){
+                })()(v387, (function(){
                     var symbol = l3;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -10244,7 +10593,7 @@ l187;
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 153)
+            if (cf.type == 'block' && cf.id == 156)
                 return cf.value;
             else
                 throw cf;
@@ -10252,17 +10601,17 @@ l187;
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l188 = {name: "DYNAMIC-BINDING-WRAPPER"};
+var l191 = {name: "DYNAMIC-BINDING-WRAPPER"};
 (function(){
-    (l188).function = (function(v382){
-        ((v382)["fname"] = "DYNAMIC-BINDING-WRAPPER");
-        return v382;
-    })((function (v376,v377){
+    (l191).function = (function(v394){
+        ((v394)["fname"] = "DYNAMIC-BINDING-WRAPPER");
+        return v394;
+    })((function (v388,v389){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
@@ -10273,18 +10622,28 @@ var l188 = {name: "DYNAMIC-BINDING-WRAPPER"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v376) !== (function(){
+                    })()(v388) !== (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
-                    })() ? v377 : (function(){
-                        var symbol = l99;
+                    })() ? v389 : (function(){
+                        var symbol = l102;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()("try {", (function(){
-                        var symbol = l98;
+                        var symbol = l101;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })(), (function(){
+                        var symbol = l107;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()("var tmp;", (function(){
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
@@ -10293,37 +10652,27 @@ var l188 = {name: "DYNAMIC-BINDING-WRAPPER"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()("var tmp;", (function(){
-                        var symbol = l98;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })(), (function(){
-                        var symbol = l101;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
                     })()((function(){
                         var symbol = l71;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()((function (v378){
+                    })()((function (v390){
                         if (arguments.length < 1) throw 'too few arguments';
                         if (arguments.length > 1) throw 'too many arguments';
-                        return (function(v379){
+                        return (function(v391){
                             return (function(){
-                                var symbol = l99;
+                                var symbol = l102;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()("tmp = ", v379, ".value;", (function(){
-                                var symbol = l98;
+                            })()("tmp = ", v391, ".value;", (function(){
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })(), v379, ".value = ", (function(){
-                                var tmp = v378;
+                            })(), v391, ".value = ", (function(){
+                                var tmp = v390;
                                 return tmp === (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
@@ -10336,12 +10685,12 @@ var l188 = {name: "DYNAMIC-BINDING-WRAPPER"};
                                     return value;
                                 })(): tmp.cdr;
                             })(), ";", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(), (function(){
-                                var tmp = v378;
+                                var tmp = v390;
                                 return tmp === (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
@@ -10354,13 +10703,13 @@ var l188 = {name: "DYNAMIC-BINDING-WRAPPER"};
                                     return value;
                                 })(): tmp.cdr;
                             })(), " = tmp;", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })());
                         })((function(){
-                            var symbol = l106;
+                            var symbol = l109;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
@@ -10374,13 +10723,13 @@ var l188 = {name: "DYNAMIC-BINDING-WRAPPER"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(l126), (function(){
+                        })()(l128), (function(){
                             var symbol = l47;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var tmp = v378;
+                            var tmp = v390;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -10394,23 +10743,23 @@ var l188 = {name: "DYNAMIC-BINDING-WRAPPER"};
                             })(): tmp.car;
                         })()))));
                     
-                    }), v376)), v377), "}", (function(){
-                        var symbol = l98;
+                    }), v388)), v389), "}", (function(){
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(), "finally {", (function(){
-                        var symbol = l98;
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(), (function(){
-                        var symbol = l104;
+                        var symbol = l107;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l102;
+                        var symbol = l105;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -10419,17 +10768,17 @@ var l188 = {name: "DYNAMIC-BINDING-WRAPPER"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()((function (v380){
+                    })()((function (v392){
                         if (arguments.length < 1) throw 'too few arguments';
                         if (arguments.length > 1) throw 'too many arguments';
-                        return (function(v381){
+                        return (function(v393){
                             return (function(){
-                                var symbol = l99;
+                                var symbol = l102;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v381, ".value", " = ", (function(){
-                                var tmp = v380;
+                            })()(v393, ".value", " = ", (function(){
+                                var tmp = v392;
                                 return tmp === (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
@@ -10443,7 +10792,7 @@ var l188 = {name: "DYNAMIC-BINDING-WRAPPER"};
                                 })(): tmp.cdr;
                             })());
                         })((function(){
-                            var symbol = l106;
+                            var symbol = l109;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
@@ -10457,13 +10806,13 @@ var l188 = {name: "DYNAMIC-BINDING-WRAPPER"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(l126), (function(){
+                        })()(l128), (function(){
                             var symbol = l47;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var tmp = v380;
+                            var tmp = v392;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -10477,18 +10826,18 @@ var l188 = {name: "DYNAMIC-BINDING-WRAPPER"};
                             })(): tmp.car;
                         })()))));
                     
-                    }), v376), (function(){
-                        var symbol = l99;
+                    }), v388), (function(){
+                        var symbol = l102;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()(";", (function(){
-                        var symbol = l98;
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })()))), "}", (function(){
-                        var symbol = l98;
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
@@ -10496,7 +10845,7 @@ var l188 = {name: "DYNAMIC-BINDING-WRAPPER"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 154)
+                if (cf.type == 'block' && cf.id == 157)
                     return cf.value;
                 else
                     throw cf;
@@ -10504,43 +10853,43 @@ var l188 = {name: "DYNAMIC-BINDING-WRAPPER"};
         })();
     
     }));
-    return l188;
+    return l191;
 })();
-var l189 = {name: "LET"};
-(l160).value = ({car: (function(){
+var l192 = {name: "LET"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l189, (function (v384){
+})()(l192, (function (v396){
     if (arguments.length < 1) throw 'too few arguments';
-    var v383= (function(){
+    var v395= (function(){
         var symbol = l2;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })();
     for (var i = arguments.length-1; i>=1; i--)
-        v383 = {car: arguments[i], cdr: 
-    v383};
+        v395 = {car: arguments[i], cdr: 
+    v395};
     return (function(){
         try {
             return (function(){
-                return (function(v385){
-                    return (function(v386,v387){
-                        return (function(v388,v390,v389){
+                return (function(v397){
+                    return (function(v398,v399){
+                        return (function(v400,v402,v401){
                             try {
                                 var tmp;
-                                tmp = l147.value;
-                                l147.value = v390;
-                                v390 = tmp;
+                                tmp = l149.value;
+                                l149.value = v402;
+                                v402 = tmp;
                                 return (function(){
-                                    var symbol = l99;
+                                    var symbol = l102;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
                                 })()("(function(", (function(){
-                                    var symbol = l101;
+                                    var symbol = l104;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
@@ -10549,10 +10898,10 @@ var l189 = {name: "LET"};
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()((function (v391){
+                                })()((function (v403){
                                     if (arguments.length < 1) throw 'too few arguments';
                                     if (arguments.length > 1) throw 'too many arguments';
-                                    return (((v391.value !== undefined)?(function(){
+                                    return (((v403.value !== undefined)?(function(){
                                         var symbol = l3;
                                         var value = symbol.value;
                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -10567,57 +10916,57 @@ var l189 = {name: "LET"};
                                         var value = symbol.value;
                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                         return value;
-                                    })() ? (function(v392){
-                                        v389 = ({car: ({car: v391, cdr: v392}), cdr: v389});
-                                        return v392;
+                                    })() ? (function(v404){
+                                        v401 = ({car: ({car: v403, cdr: v404}), cdr: v401});
+                                        return v404;
                                     })((function(){
-                                        var symbol = l150;
+                                        var symbol = l152;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
-                                    })()(v391)) : (function(){
-                                        var symbol = l151;
+                                    })()(v403)) : (function(){
+                                        var symbol = l153;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
-                                    })()(v391));
+                                    })()(v403));
                                 
-                                }), v386), ","), "){", (function(){
-                                    var symbol = l98;
+                                }), v398), ","), "){", (function(){
+                                    var symbol = l101;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
-                                })(), (function(v393){
+                                })(), (function(v405){
                                     return (function(){
-                                        var symbol = l104;
+                                        var symbol = l107;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
                                     })()((function(){
-                                        var symbol = l188;
+                                        var symbol = l191;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
-                                    })()(v389, v393));
+                                    })()(v401, v405));
                                 })((function(){
-                                    var symbol = l161;
+                                    var symbol = l163;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v383, (function(){
+                                })()(v395, (function(){
                                     var symbol = l3;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
                                 })())), "})(", (function(){
-                                    var symbol = l101;
+                                    var symbol = l104;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v388, ","), ")");
+                                })()(v400, ","), ")");
                             }
                             finally {
-                                l147.value = v390;
+                                l149.value = v402;
                             }
                         })((function(){
                             var symbol = l71;
@@ -10625,12 +10974,12 @@ var l189 = {name: "LET"};
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l106;
+                            var symbol = l109;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })(), v387),(function(){
-                            var symbol = l152;
+                        })(), v399),(function(){
+                            var symbol = l154;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
@@ -10644,7 +10993,7 @@ var l189 = {name: "LET"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })(), v386)),(function(){
+                        })(), v398)),(function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -10660,7 +11009,7 @@ var l189 = {name: "LET"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v385),(function(){
+                    })(), v397),(function(){
                         var symbol = l71;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
@@ -10670,7 +11019,7 @@ var l189 = {name: "LET"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v385));
+                    })(), v397));
                 })((function(){
                     var symbol = l71;
                     var func = symbol.function;
@@ -10681,11 +11030,11 @@ var l189 = {name: "LET"};
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })(), v384));
+                })(), v396));
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 155)
+            if (cf.type == 'block' && cf.id == 158)
                 return cf.value;
             else
                 throw cf;
@@ -10693,14 +11042,14 @@ var l189 = {name: "LET"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l190 = {name: "*BLOCK-COUNTER*"};
+var l193 = {name: "*BLOCK-COUNTER*"};
 (function(){
-    (((l190.value !== undefined)?(function(){
+    (((l193.value !== undefined)?(function(){
         var symbol = l3;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -10721,64 +11070,64 @@ var l190 = {name: "*BLOCK-COUNTER*"};
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })() : (function(){
-        return (l190).value = 0;
+        return (l193).value = 0;
     })());
-    return l190;
+    return l193;
 })();
-(l160).value = ({car: (function(){
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l142, (function (v395){
+})()(l144, (function (v407){
     if (arguments.length < 1) throw 'too few arguments';
-    var v394= (function(){
+    var v406= (function(){
         var symbol = l2;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })();
     for (var i = arguments.length-1; i>=1; i--)
-        v394 = {car: arguments[i], cdr: 
-    v394};
+        v406 = {car: arguments[i], cdr: 
+    v406};
     return (function(){
         try {
             return (function(){
-                return (function(v396){
-                    return (function(v397){
+                return (function(v408){
+                    return (function(v409){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("(function(){", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var symbol = l104;
+                            var symbol = l107;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("try {", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), (function(v398){
+                        })(), (function(v410){
                             try {
                                 var tmp;
-                                tmp = l147.value;
-                                l147.value = v398;
-                                v398 = tmp;
+                                tmp = l149.value;
+                                l149.value = v410;
+                                v410 = tmp;
                                 return (function(){
-                                    var symbol = l104;
+                                    var symbol = l107;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
                                 })()("return ", (function(){
-                                    var symbol = l106;
+                                    var symbol = l109;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
@@ -10792,18 +11141,18 @@ var l190 = {name: "*BLOCK-COUNTER*"};
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(l186), v394)), ";", (function(){
-                                    var symbol = l98;
+                                })()(l189), v406)), ";", (function(){
+                                    var symbol = l101;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
                                 })());
                             }
                             finally {
-                                l147.value = v398;
+                                l149.value = v410;
                             }
                         })((function(){
-                            var symbol = l144;
+                            var symbol = l146;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
@@ -10812,53 +11161,53 @@ var l190 = {name: "*BLOCK-COUNTER*"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v397), (function(){
-                            var symbol = l147;
+                        })()(v409), (function(){
+                            var symbol = l149;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l142)), "}", (function(){
-                            var symbol = l98;
+                        })(), l144)), "}", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), "catch (cf){", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), "    if (cf.type == 'block' && cf.id == ", v396, ")", (function(){
-                            var symbol = l98;
+                        })(), "    if (cf.type == 'block' && cf.id == ", v408, ")", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), "        return cf.value;", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), "    else", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), "        throw cf;", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), "}", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })()), "})()");
                     })((function(){
-                        var symbol = l132;
+                        var symbol = l134;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v395, l142, v396, (function(){
+                    })()(v407, l144, v408, (function(){
                         var symbol = l3;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -10869,9 +11218,9 @@ var l190 = {name: "*BLOCK-COUNTER*"};
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()((l190).value = (function(){
+                })()((l193).value = (function(){
                     var x = (function(){
-                        var symbol = l190;
+                        var symbol = l193;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
@@ -10886,7 +11235,7 @@ var l190 = {name: "*BLOCK-COUNTER*"};
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 156)
+            if (cf.type == 'block' && cf.id == 159)
                 return cf.value;
             else
                 throw cf;
@@ -10894,23 +11243,23 @@ var l190 = {name: "*BLOCK-COUNTER*"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l191 = {name: "RETURN-FROM"};
-(l160).value = ({car: (function(){
+var l194 = {name: "RETURN-FROM"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l191, (function (v399,v400){
+})()(l194, (function (v411,v412){
     if (arguments.length < 1) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
     switch(arguments.length){
     case 1:
-    v400=(function(){
+    v412=(function(){
         var symbol = l2;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -10921,60 +11270,60 @@ var l191 = {name: "RETURN-FROM"};
     return (function(){
         try {
             return (function(){
-                return (function(v401){
-                    return (v401 !== (function(){
+                return (function(v413){
+                    return (v413 !== (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })() ? (function(){
-                        var symbol = l99;
+                        var symbol = l102;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()("(function(){", (function(){
-                        var symbol = l98;
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(), (function(){
-                        var symbol = l104;
+                        var symbol = l107;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()("throw ({", "type: 'block', ", "id: ", (function(){
-                        var symbol = l135;
+                        var symbol = l137;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v401), ", ", "value: ", (function(){
-                        var symbol = l106;
+                    })()(v413), ", ", "value: ", (function(){
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v400), ", ", "message: 'Return from unknown block ", (v399).name, ".'", "})"), "})()") : (function(){
+                    })()(v412), ", ", "message: 'Return from unknown block ", (v411).name, ".'", "})"), "})()") : (function(){
                         throw (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("Unknown block `", (v399).name, "'.");
+                        })()("Unknown block `", (v411).name, "'.");
                     })());
                 })((function(){
-                    var symbol = l145;
+                    var symbol = l147;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v399, (function(){
-                    var symbol = l147;
+                })()(v411, (function(){
+                    var symbol = l149;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l142));
+                })(), l144));
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 157)
+            if (cf.type == 'block' && cf.id == 160)
                 return cf.value;
             else
                 throw cf;
@@ -10982,68 +11331,68 @@ var l191 = {name: "RETURN-FROM"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l192 = {name: "CATCH"};
-(l160).value = ({car: (function(){
+var l195 = {name: "CATCH"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l192, (function (v403){
+})()(l195, (function (v415){
     if (arguments.length < 1) throw 'too few arguments';
-    var v402= (function(){
+    var v414= (function(){
         var symbol = l2;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })();
     for (var i = arguments.length-1; i>=1; i--)
-        v402 = {car: arguments[i], cdr: 
-    v402};
+        v414 = {car: arguments[i], cdr: 
+    v414};
     return (function(){
         try {
             return (function(){
                 return (function(){
-                    var symbol = l99;
+                    var symbol = l102;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()("(function(){", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), (function(){
-                    var symbol = l104;
+                    var symbol = l107;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()("var id = ", (function(){
-                    var symbol = l106;
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v403), ";", (function(){
-                    var symbol = l98;
+                })()(v415), ";", (function(){
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), "try {", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), (function(){
-                    var symbol = l104;
+                    var symbol = l107;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()("return ", (function(){
-                    var symbol = l106;
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
@@ -11057,43 +11406,43 @@ var l192 = {name: "CATCH"};
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(l186), v402)), ";", (function(){
-                    var symbol = l98;
+                })()(l189), v414)), ";", (function(){
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "}", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), "catch (cf){", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), "    if (cf.type == 'catch' && cf.id == id)", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), "        return cf.value;", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), "    else", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), "        throw cf;", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), "}", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
@@ -11101,7 +11450,7 @@ var l192 = {name: "CATCH"};
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 158)
+            if (cf.type == 'block' && cf.id == 161)
                 return cf.value;
             else
                 throw cf;
@@ -11109,23 +11458,23 @@ var l192 = {name: "CATCH"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l193 = {name: "THROW"};
-(l160).value = ({car: (function(){
+var l196 = {name: "THROW"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l193, (function (v404,v405){
+})()(l196, (function (v416,v417){
     if (arguments.length < 1) throw 'too few arguments';
     if (arguments.length > 2) throw 'too many arguments';
     switch(arguments.length){
     case 1:
-    v405=(function(){
+    v417=(function(){
         var symbol = l2;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -11137,35 +11486,35 @@ var l193 = {name: "THROW"};
         try {
             return (function(){
                 return (function(){
-                    var symbol = l99;
+                    var symbol = l102;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()("(function(){", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), (function(){
-                    var symbol = l104;
+                    var symbol = l107;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()("throw ({", "type: 'catch', ", "id: ", (function(){
-                    var symbol = l106;
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v404), ", ", "value: ", (function(){
-                    var symbol = l106;
+                })()(v416), ", ", "value: ", (function(){
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v405), ", ", "message: 'Throw uncatched.'", "})"), "})()");
+                })()(v417), ", ", "message: 'Throw uncatched.'", "})"), "})()");
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 159)
+            if (cf.type == 'block' && cf.id == 162)
                 return cf.value;
             else
                 throw cf;
@@ -11173,14 +11522,14 @@ var l193 = {name: "THROW"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l194 = {name: "*TAGBODY-COUNTER*"};
+var l197 = {name: "*TAGBODY-COUNTER*"};
 (function(){
-    (((l194.value !== undefined)?(function(){
+    (((l197.value !== undefined)?(function(){
         var symbol = l3;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -11201,13 +11550,13 @@ var l194 = {name: "*TAGBODY-COUNTER*"};
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })() : (function(){
-        return (l194).value = 0;
+        return (l197).value = 0;
     })());
-    return l194;
+    return l197;
 })();
-var l195 = {name: "*GO-TAG-COUNTER*"};
+var l198 = {name: "*GO-TAG-COUNTER*"};
 (function(){
-    (((l195.value !== undefined)?(function(){
+    (((l198.value !== undefined)?(function(){
         var symbol = l3;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -11228,29 +11577,29 @@ var l195 = {name: "*GO-TAG-COUNTER*"};
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })() : (function(){
-        return (l195).value = 0;
+        return (l198).value = 0;
     })());
-    return l195;
+    return l198;
 })();
-var l196 = {name: "GO-TAG-P"};
+var l199 = {name: "GO-TAG-P"};
 (function(){
-    (l196).function = (function(v408){
-        ((v408)["fname"] = "GO-TAG-P");
-        return v408;
-    })((function (v406){
+    (l199).function = (function(v420){
+        ((v420)["fname"] = "GO-TAG-P");
+        return v420;
+    })((function (v418){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v407){
-                        return (v407 !== (function(){
+                    return (function(v419){
+                        return (v419 !== (function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })() ? v407 : ((function(){
-                            var tmp = v406;
+                        })() ? v419 : ((function(){
+                            var tmp = v418;
                             return (typeof tmp == 'object' && 'name' in tmp);
                         })()?(function(){
                             var symbol = l3;
@@ -11268,11 +11617,11 @@ var l196 = {name: "GO-TAG-P"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v406));
+                    })()(v418));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 160)
+                if (cf.type == 'block' && cf.id == 163)
                     return cf.value;
                 else
                     throw cf;
@@ -11280,51 +11629,51 @@ var l196 = {name: "GO-TAG-P"};
         })();
     
     }));
-    return l196;
+    return l199;
 })();
-var l197 = {name: "DECLARE-TAGBODY-TAGS"};
+var l200 = {name: "DECLARE-TAGBODY-TAGS"};
 (function(){
-    (l197).function = (function(v414){
-        ((v414)["fname"] = "DECLARE-TAGBODY-TAGS");
-        return v414;
-    })((function (v409,v410){
+    (l200).function = (function(v426){
+        ((v426)["fname"] = "DECLARE-TAGBODY-TAGS");
+        return v426;
+    })((function (v421,v422){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v413){
+                    return (function(v425){
                         return (function(){
-                            var symbol = l144;
+                            var symbol = l146;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v413, (function(){
-                            var symbol = l147;
+                        })()(v425, (function(){
+                            var symbol = l149;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l143);
+                        })(), l145);
                     })((function(){
                         var symbol = l71;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()((function (v411){
+                    })()((function (v423){
                         if (arguments.length < 1) throw 'too few arguments';
                         if (arguments.length > 1) throw 'too many arguments';
-                        return (function(v412){
+                        return (function(v424){
                             return (function(){
-                                var symbol = l132;
+                                var symbol = l134;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v411, l143, (function(){
+                            })()(v423, l145, (function(){
                                 var symbol = l47;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v409, v412), (function(){
+                            })()(v421, v424), (function(){
                                 var symbol = l3;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -11335,9 +11684,9 @@ var l197 = {name: "DECLARE-TAGBODY-TAGS"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()((l195).value = (function(){
+                        })()((l198).value = (function(){
                             var x = (function(){
-                                var symbol = l195;
+                                var symbol = l198;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
@@ -11356,15 +11705,15 @@ var l197 = {name: "DECLARE-TAGBODY-TAGS"};
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l196;
+                        var symbol = l199;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v410)));
+                    })(), v422)));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 161)
+                if (cf.type == 'block' && cf.id == 164)
                     return cf.value;
                 else
                     throw cf;
@@ -11372,24 +11721,24 @@ var l197 = {name: "DECLARE-TAGBODY-TAGS"};
         })();
     
     }));
-    return l197;
+    return l200;
 })();
-var l198 = {name: "TAGBODY"};
-(l160).value = ({car: (function(){
+var l201 = {name: "TAGBODY"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l198, (function (){
-    var v415= (function(){
+})()(l201, (function (){
+    var v427= (function(){
         var symbol = l2;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })();
     for (var i = arguments.length-1; i>=0; i--)
-        v415 = {car: arguments[i], cdr: 
-    v415};
+        v427 = {car: arguments[i], cdr: 
+    v427};
     return (function(){
         try {
             return (function(){
@@ -11399,11 +11748,11 @@ var l198 = {name: "TAGBODY"};
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()((function(){
-                    var symbol = l196;
+                    var symbol = l199;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })(), v415) !== (function(){
+                })(), v427) !== (function(){
                     var symbol = l2;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -11415,8 +11764,8 @@ var l198 = {name: "TAGBODY"};
                     return value;
                 })() : (function(){
                     return (function(){
-                        throw ({type: 'block', id: 162, value: (function(){
-                            var symbol = l106;
+                        throw ({type: 'block', id: 165, value: (function(){
+                            var symbol = l109;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
@@ -11430,7 +11779,7 @@ var l198 = {name: "TAGBODY"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(l186), v415, (function(){
+                        })()(l189), v427, (function(){
                             var symbol = l47;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
@@ -11439,12 +11788,12 @@ var l198 = {name: "TAGBODY"};
                     })();
                 })());
                 ((function(){
-                    var symbol = l196;
+                    var symbol = l199;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()((function(){
-                    var tmp = v415;
+                    var tmp = v427;
                     return tmp === (function(){
                         var symbol = l2;
                         var value = symbol.value;
@@ -11467,34 +11816,34 @@ var l198 = {name: "TAGBODY"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })() : (function(){
-                    return v415 = ({car: (function(){
+                    return v427 = ({car: (function(){
                         var symbol = l18;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()("START"), cdr: v415});
+                    })()("START"), cdr: v427});
                 })());
-                return (function(v416){
-                    return (function(v418,v417){
+                return (function(v428){
+                    return (function(v430,v429){
                         try {
                             var tmp;
-                            tmp = l147.value;
-                            l147.value = v418;
-                            v418 = tmp;
-                            (function(v419){
-                                return v417 = (function(){
+                            tmp = l149.value;
+                            l149.value = v430;
+                            v430 = tmp;
+                            (function(v431){
+                                return v429 = (function(){
                                     var symbol = l44;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
                                 })()((function(){
-                                    var symbol = l135;
+                                    var symbol = l137;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v419));
+                                })()(v431));
                             })((function(){
-                                var symbol = l145;
+                                var symbol = l147;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
@@ -11503,86 +11852,86 @@ var l198 = {name: "TAGBODY"};
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v415), (function(){
-                                var symbol = l147;
+                            })()(v427), (function(){
+                                var symbol = l149;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })(), l143));
+                            })(), l145));
                             return (function(){
-                                var symbol = l99;
+                                var symbol = l102;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
                             })()("(function(){", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(), (function(){
-                                var symbol = l104;
+                                var symbol = l107;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()("var tagbody_", v416, " = ", v417, ";", (function(){
-                                var symbol = l98;
+                            })()("var tagbody_", v428, " = ", v429, ";", (function(){
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(), "tbloop:", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(), "while (true) {", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(), (function(){
-                                var symbol = l104;
+                                var symbol = l107;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
                             })()("try {", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(), (function(){
-                                var symbol = l104;
+                                var symbol = l107;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()((function(v420){
+                            })()((function(v432){
                                 return (function(){
-                                    var symbol = l99;
+                                    var symbol = l102;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()("switch(tagbody_", v416, "){", (function(){
-                                    var symbol = l98;
+                                })()("switch(tagbody_", v428, "){", (function(){
+                                    var symbol = l101;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
-                                })(), "case ", v417, ":", (function(){
-                                    var symbol = l98;
+                                })(), "case ", v429, ":", (function(){
+                                    var symbol = l101;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
                                 })(), (function(){
                                     try {
                                         return (function(){
-                                            return (function(v421,v422){
+                                            return (function(v433,v434){
                                                 (function(){
-                                                    while(v421 !== (function(){
+                                                    while(v433 !== (function(){
                                                         var symbol = l2;
                                                         var value = symbol.value;
                                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                         return value;
                                                     })()){
-                                                        v422 = (function(){
-                                                            var tmp = v421;
+                                                        v434 = (function(){
+                                                            var tmp = v433;
                                                             return tmp === (function(){
                                                                 var symbol = l2;
                                                                 var value = symbol.value;
@@ -11596,45 +11945,45 @@ var l198 = {name: "TAGBODY"};
                                                             })(): tmp.car;
                                                         })();
                                                         (function(){
-                                                            v420 = (function(){
-                                                                var symbol = l99;
+                                                            v432 = (function(){
+                                                                var symbol = l102;
                                                                 var func = symbol.function;
                                                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                                 return func;
-                                                            })()(v420, (function(){
+                                                            })()(v432, (function(){
                                                                 return ((function(){
                                                                     var symbol = l31;
                                                                     var func = symbol.function;
                                                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                                     return func;
                                                                 })()((function(){
-                                                                    var symbol = l196;
+                                                                    var symbol = l199;
                                                                     var func = symbol.function;
                                                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                                     return func;
-                                                                })()(v422)) !== (function(){
+                                                                })()(v434)) !== (function(){
                                                                     var symbol = l2;
                                                                     var value = symbol.value;
                                                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                                     return value;
                                                                 })() ? (function(){
-                                                                    var symbol = l104;
+                                                                    var symbol = l107;
                                                                     var func = symbol.function;
                                                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                                     return func;
                                                                 })()((function(){
-                                                                    var symbol = l106;
+                                                                    var symbol = l109;
                                                                     var func = symbol.function;
                                                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                                     return func;
-                                                                })()(v422), ";", (function(){
-                                                                    var symbol = l98;
+                                                                })()(v434), ";", (function(){
+                                                                    var symbol = l101;
                                                                     var value = symbol.value;
                                                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                                     return value;
-                                                                })()) : (function(v423){
+                                                                })()) : (function(v435){
                                                                     return (function(){
-                                                                        var symbol = l99;
+                                                                        var symbol = l102;
                                                                         var func = symbol.function;
                                                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                                         return func;
@@ -11644,27 +11993,27 @@ var l198 = {name: "TAGBODY"};
                                                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                                         return func;
                                                                     })()((function(){
-                                                                        var symbol = l135;
+                                                                        var symbol = l137;
                                                                         var func = symbol.function;
                                                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                                         return func;
-                                                                    })()(v423)), ":", (function(){
-                                                                        var symbol = l98;
+                                                                    })()(v435)), ":", (function(){
+                                                                        var symbol = l101;
                                                                         var value = symbol.value;
                                                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                                         return value;
                                                                     })());
                                                                 })((function(){
-                                                                    var symbol = l145;
+                                                                    var symbol = l147;
                                                                     var func = symbol.function;
                                                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                                                     return func;
-                                                                })()(v422, (function(){
-                                                                    var symbol = l147;
+                                                                })()(v434, (function(){
+                                                                    var symbol = l149;
                                                                     var value = symbol.value;
                                                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                                     return value;
-                                                                })(), l143)));
+                                                                })(), l145)));
                                                             })());
                                                             return (function(){
                                                                 var symbol = l2;
@@ -11673,8 +12022,8 @@ var l198 = {name: "TAGBODY"};
                                                                 return value;
                                                             })();
                                                         })();
-                                                        v421 = (function(){
-                                                            var tmp = v421;
+                                                        v433 = (function(){
+                                                            var tmp = v433;
                                                             return tmp === (function(){
                                                                 var symbol = l2;
                                                                 var value = symbol.value;
@@ -11694,9 +12043,9 @@ var l198 = {name: "TAGBODY"};
                                                         return value;
                                                     })();
                                                 })();
-                                                return v420;
+                                                return v432;
                                             })((function(){
-                                                var tmp = v415;
+                                                var tmp = v427;
                                                 return tmp === (function(){
                                                     var symbol = l2;
                                                     var value = symbol.value;
@@ -11717,69 +12066,69 @@ var l198 = {name: "TAGBODY"};
                                         })();
                                     }
                                     catch (cf){
-                                        if (cf.type == 'block' && cf.id == 163)
+                                        if (cf.type == 'block' && cf.id == 166)
                                             return cf.value;
                                         else
                                             throw cf;
                                     }
                                 })(), "default:", (function(){
-                                    var symbol = l98;
+                                    var symbol = l101;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
                                 })(), "    break tbloop;", (function(){
-                                    var symbol = l98;
+                                    var symbol = l101;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
                                 })(), "}", (function(){
-                                    var symbol = l98;
+                                    var symbol = l101;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
                                 })());
                             })("")), "}", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(), "catch (jump) {", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })(), "    if (jump.type == 'tagbody' && jump.id == ", v416, ")", (function(){
-                                var symbol = l98;
+                            })(), "    if (jump.type == 'tagbody' && jump.id == ", v428, ")", (function(){
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })(), "        tagbody_", v416, " = jump.label;", (function(){
-                                var symbol = l98;
+                            })(), "        tagbody_", v428, " = jump.label;", (function(){
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(), "    else", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(), "        throw(jump);", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(), "}", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })()), "}", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(), "return ", (function(){
-                                var symbol = l106;
+                                var symbol = l109;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
@@ -11789,21 +12138,21 @@ var l198 = {name: "TAGBODY"};
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })()), ";", (function(){
-                                var symbol = l98;
+                                var symbol = l101;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })()), "})()");
                         }
                         finally {
-                            l147.value = v418;
+                            l149.value = v430;
                         }
                     })((function(){
-                        var symbol = l197;
+                        var symbol = l200;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v416, v415),(function(){
+                    })()(v428, v427),(function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -11815,7 +12164,7 @@ var l198 = {name: "TAGBODY"};
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()((function(){
-                    var symbol = l194;
+                    var symbol = l197;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
@@ -11823,7 +12172,7 @@ var l198 = {name: "TAGBODY"};
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 162)
+            if (cf.type == 'block' && cf.id == 165)
                 return cf.value;
             else
                 throw cf;
@@ -11831,41 +12180,41 @@ var l198 = {name: "TAGBODY"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l199 = {name: "GO"};
-(l160).value = ({car: (function(){
+var l202 = {name: "GO"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l199, (function (v424){
+})()(l202, (function (v436){
     if (arguments.length < 1) throw 'too few arguments';
     if (arguments.length > 1) throw 'too many arguments';
     return (function(){
         try {
             return (function(){
-                return (function(v425,v426){
-                    return (v425 !== (function(){
+                return (function(v437,v438){
+                    return (v437 !== (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })() ? (function(){
-                        var symbol = l99;
+                        var symbol = l102;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()("(function(){", (function(){
-                        var symbol = l98;
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(), (function(){
-                        var symbol = l104;
+                        var symbol = l107;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -11875,45 +12224,45 @@ var l199 = {name: "GO"};
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l135;
+                        var symbol = l137;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v425)), ", ", "label: ", (function(){
+                    })()(v437)), ", ", "label: ", (function(){
                         var symbol = l44;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l135;
+                        var symbol = l137;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v425)), ", ", "message: 'Attempt to GO to non-existing tag ", v426, "'", "})", (function(){
-                        var symbol = l98;
+                    })()(v437)), ", ", "message: 'Attempt to GO to non-existing tag ", v438, "'", "})", (function(){
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })()), "})()") : (function(){
                         throw (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("Unknown tag `", v426, "'.");
+                        })()("Unknown tag `", v438, "'.");
                     })());
                 })((function(){
-                    var symbol = l145;
+                    var symbol = l147;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v424, (function(){
-                    var symbol = l147;
+                })()(v436, (function(){
+                    var symbol = l149;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l143),(((function(){
-                    var tmp = v424;
+                })(), l145),(((function(){
+                    var tmp = v436;
                     return (typeof tmp == 'object' && 'name' in tmp);
                 })()?(function(){
                     var symbol = l3;
@@ -11931,13 +12280,13 @@ var l199 = {name: "GO"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })() ? (function(){
-                    return (v424).name;
+                    return (v436).name;
                 })() : ((function(){
                     var symbol = l77;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v424) !== (function(){
+                })()(v436) !== (function(){
                     var symbol = l2;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -11948,7 +12297,7 @@ var l199 = {name: "GO"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v424);
+                    })()(v436);
                 })() : (function(){
                     var symbol = l2;
                     var value = symbol.value;
@@ -11958,7 +12307,7 @@ var l199 = {name: "GO"};
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 164)
+            if (cf.type == 'block' && cf.id == 167)
                 return cf.value;
             else
                 throw cf;
@@ -11966,48 +12315,48 @@ var l199 = {name: "GO"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l200 = {name: "UNWIND-PROTECT"};
-(l160).value = ({car: (function(){
+var l203 = {name: "UNWIND-PROTECT"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l200, (function (v428){
+})()(l203, (function (v440){
     if (arguments.length < 1) throw 'too few arguments';
-    var v427= (function(){
+    var v439= (function(){
         var symbol = l2;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })();
     for (var i = arguments.length-1; i>=1; i--)
-        v427 = {car: arguments[i], cdr: 
-    v427};
+        v439 = {car: arguments[i], cdr: 
+    v439};
     return (function(){
         try {
             return (function(){
                 return (function(){
-                    var symbol = l99;
+                    var symbol = l102;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()("(function(){", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), (function(){
-                    var symbol = l104;
+                    var symbol = l107;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()("var ret = ", (function(){
-                    var symbol = l106;
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
@@ -12017,52 +12366,52 @@ var l200 = {name: "UNWIND-PROTECT"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), ";", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), "try {", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), (function(){
-                    var symbol = l104;
+                    var symbol = l107;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()("ret = ", (function(){
-                    var symbol = l106;
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v428), ";", (function(){
-                    var symbol = l98;
+                })()(v440), ";", (function(){
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "} finally {", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), (function(){
-                    var symbol = l104;
+                    var symbol = l107;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()((function(){
-                    var symbol = l161;
+                    var symbol = l163;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v427)), "}", (function(){
-                    var symbol = l98;
+                })()(v439)), "}", (function(){
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), "return ret;", (function(){
-                    var symbol = l98;
+                    var symbol = l101;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
@@ -12070,7 +12419,7 @@ var l200 = {name: "UNWIND-PROTECT"};
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 165)
+            if (cf.type == 'block' && cf.id == 168)
                 return cf.value;
             else
                 throw cf;
@@ -12078,24 +12427,24 @@ var l200 = {name: "UNWIND-PROTECT"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l201 = {name: "BACKQUOTE-EXPAND-1"};
+var l204 = {name: "BACKQUOTE-EXPAND-1"};
 (function(){
-    (l201).function = (function(v431){
-        ((v431)["fname"] = "BACKQUOTE-EXPAND-1");
-        return v431;
-    })((function (v429){
+    (l204).function = (function(v443){
+        ((v443)["fname"] = "BACKQUOTE-EXPAND-1");
+        return v443;
+    })((function (v441){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (((function(){
-                        var tmp = v429;
+                        var tmp = v441;
                         return (typeof tmp == 'object' && 'name' in tmp);
                     })()?(function(){
                         var symbol = l3;
@@ -12118,21 +12467,64 @@ var l201 = {name: "BACKQUOTE-EXPAND-1"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(l126, v429);
+                        })()(l128, v441);
                     })() : ((function(){
                         var symbol = l48;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v429) !== (function(){
+                    })()(v441) !== (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })() ? (function(){
-                        return v429;
+                        return v441;
                     })() : ((((function(){
-                        var tmp = v429;
+                        var tmp = v441;
+                        return tmp === (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()? (function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(): tmp.car;
+                    })() === l131)?(function(){
+                        var symbol = l3;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })(): (function(){
+                        var symbol = l2;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })()) !== (function(){
+                        var symbol = l2;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })() ? (function(){
+                        return (function(){
+                            var tmp = v441;
+                            return tmp === (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })()? (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })(): tmp.car;
+                        })();
+                    })() : ((((function(){
+                        var tmp = v441;
                         return tmp === (function(){
                             var symbol = l2;
                             var value = symbol.value;
@@ -12161,55 +12553,12 @@ var l201 = {name: "BACKQUOTE-EXPAND-1"};
                         return value;
                     })() ? (function(){
                         return (function(){
-                            var tmp = v429;
-                            return tmp === (function(){
-                                var symbol = l2;
-                                var value = symbol.value;
-                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                return value;
-                            })()? (function(){
-                                var symbol = l2;
-                                var value = symbol.value;
-                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                return value;
-                            })(): tmp.car;
-                        })();
-                    })() : ((((function(){
-                        var tmp = v429;
-                        return tmp === (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()? (function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(): tmp.car;
-                    })() === l127)?(function(){
-                        var symbol = l3;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })(): (function(){
-                        var symbol = l2;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })()) !== (function(){
-                        var symbol = l2;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })() ? (function(){
-                        return (function(){
-                            var symbol = l201;
+                            var symbol = l204;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l201;
+                            var symbol = l204;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
@@ -12218,14 +12567,14 @@ var l201 = {name: "BACKQUOTE-EXPAND-1"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v429)));
+                        })()(v441)));
                     })() : (function(){
                         return ({car: l65, cdr: (function(){
                             var symbol = l71;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()((function (v430){
+                        })()((function (v442){
                             if (arguments.length < 1) throw 'too few arguments';
                             if (arguments.length > 1) throw 'too many arguments';
                             return (((function(){
@@ -12233,13 +12582,13 @@ var l201 = {name: "BACKQUOTE-EXPAND-1"};
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v430) !== (function(){
+                            })()(v442) !== (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })() ? (((function(){
-                                var tmp = v430;
+                                var tmp = v442;
                                 return tmp === (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
@@ -12251,7 +12600,7 @@ var l201 = {name: "BACKQUOTE-EXPAND-1"};
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
                                 })(): tmp.car;
-                            })() === l129)?(function(){
+                            })() === l131)?(function(){
                                 var symbol = l3;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -12282,19 +12631,19 @@ var l201 = {name: "BACKQUOTE-EXPAND-1"};
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v430));
+                                })()(v442));
                             })() : (((function(){
                                 var symbol = l62;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v430) !== (function(){
+                            })()(v442) !== (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })() ? (((function(){
-                                var tmp = v430;
+                                var tmp = v442;
                                 return tmp === (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
@@ -12306,7 +12655,7 @@ var l201 = {name: "BACKQUOTE-EXPAND-1"};
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
                                 })(): tmp.car;
-                            })() === l128)?(function(){
+                            })() === l130)?(function(){
                                 var symbol = l3;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -12332,7 +12681,7 @@ var l201 = {name: "BACKQUOTE-EXPAND-1"};
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v430);
+                                })()(v442);
                             })() : (function(){
                                 return (function(){
                                     var symbol = l47;
@@ -12340,19 +12689,19 @@ var l201 = {name: "BACKQUOTE-EXPAND-1"};
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
                                 })()(l47, (function(){
-                                    var symbol = l201;
+                                    var symbol = l204;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v430));
+                                })()(v442));
                             })()));
                         
-                        }), v429)});
+                        }), v441)});
                     })()))));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 166)
+                if (cf.type == 'block' && cf.id == 169)
                     return cf.value;
                 else
                     throw cf;
@@ -12360,14 +12709,14 @@ var l201 = {name: "BACKQUOTE-EXPAND-1"};
         })();
     
     }));
-    return l201;
+    return l204;
 })();
-var l202 = {name: "BACKQUOTE-EXPAND"};
+var l205 = {name: "BACKQUOTE-EXPAND"};
 (function(){
-    (l202).function = (function(v433){
-        ((v433)["fname"] = "BACKQUOTE-EXPAND");
-        return v433;
-    })((function (v432){
+    (l205).function = (function(v445){
+        ((v445)["fname"] = "BACKQUOTE-EXPAND");
+        return v445;
+    })((function (v444){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
@@ -12378,13 +12727,13 @@ var l202 = {name: "BACKQUOTE-EXPAND"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v432) !== (function(){
+                    })()(v444) !== (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })() ? (((function(){
-                        var tmp = v432;
+                        var tmp = v444;
                         return tmp === (function(){
                             var symbol = l2;
                             var value = symbol.value;
@@ -12396,7 +12745,7 @@ var l202 = {name: "BACKQUOTE-EXPAND"};
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(): tmp.car;
-                    })() === l127)?(function(){
+                    })() === l129)?(function(){
                         var symbol = l3;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -12417,7 +12766,7 @@ var l202 = {name: "BACKQUOTE-EXPAND"};
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })() ? (function(){
-                        var symbol = l201;
+                        var symbol = l204;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -12426,210 +12775,7 @@ var l202 = {name: "BACKQUOTE-EXPAND"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v432)) : v432);
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 167)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    }));
-    return l202;
-})();
-l127;
-(l160).value = ({car: (function(){
-    var symbol = l47;
-    var func = symbol.function;
-    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-    return func;
-})()(l127, (function (v434){
-    if (arguments.length < 1) throw 'too few arguments';
-    if (arguments.length > 1) throw 'too many arguments';
-    return (function(){
-        try {
-            return (function(){
-                return (function(){
-                    var symbol = l106;
-                    var func = symbol.function;
-                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                    return func;
-                })()((function(){
-                    var symbol = l201;
-                    var func = symbol.function;
-                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                    return func;
-                })()(v434));
-            })();
-        }
-        catch (cf){
-            if (cf.type == 'block' && cf.id == 168)
-                return cf.value;
-            else
-                throw cf;
-        }
-    })();
-
-})), cdr: (function(){
-    var symbol = l160;
-    var value = symbol.value;
-    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-    return value;
-})()});
-var l203 = {name: "DEFINE-BUILTIN"};
-l203;
-var l204 = {name: "TYPE-CHECK"};
-l204;
-var l205 = {name: "NUM-OP-NUM"};
-(function(){
-    (l205).function = (function(v438){
-        ((v438)["fname"] = "NUM-OP-NUM");
-        return v438;
-    })((function (v435,v436,v437){
-        if (arguments.length < 3) throw 'too few arguments';
-        if (arguments.length > 3) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(){
-                        var symbol = l99;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()("(function(){", (function(){
-                        var symbol = l98;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })(), (function(){
-                        var symbol = l104;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()((function(){
-                        var symbol = l99;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()("var ", "x", " = ", v435, ";", (function(){
-                        var symbol = l98;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })()), (function(){
-                        var symbol = l99;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()("var ", "y", " = ", v437, ";", (function(){
-                        var symbol = l98;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })()), (function(){
-                        var symbol = l99;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()("if (typeof ", "x", " != '", "number", "')", (function(){
-                        var symbol = l98;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })(), (function(){
-                        var symbol = l104;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", (function(){
-                        var symbol = l98;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })())), (function(){
-                        var symbol = l99;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()("if (typeof ", "y", " != '", "number", "')", (function(){
-                        var symbol = l98;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })(), (function(){
-                        var symbol = l104;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()("throw 'The value ' + ", "y", " + ' is not a type ", "number", ".';", (function(){
-                        var symbol = l98;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })())), (function(){
-                        var symbol = l99;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()("return ", (function(){
-                        return (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("x", v436, "y");
-                    })(), ";", (function(){
-                        var symbol = l98;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })())), "})()");
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 169)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    }));
-    return l205;
-})();
-(function(){
-    return (l160).value = ({car: (function(){
-        var symbol = l47;
-        var func = symbol.function;
-        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-        return func;
-    })()(l22, (function (v439,v440){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v441,v442){
-                        return (function(){
-                            var symbol = l205;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v441, "+", v442);
-                    })((function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v439),(function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v440));
+                    })()(v444)) : v444);
                 })();
             }
             catch (cf){
@@ -12640,90 +12786,156 @@ var l205 = {name: "NUM-OP-NUM"};
             }
         })();
     
-    })), cdr: (function(){
-        var symbol = l160;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
+    }));
+    return l205;
 })();
+l129;
+(l162).value = ({car: (function(){
+    var symbol = l47;
+    var func = symbol.function;
+    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+    return func;
+})()(l129, (function (v446){
+    if (arguments.length < 1) throw 'too few arguments';
+    if (arguments.length > 1) throw 'too many arguments';
+    return (function(){
+        try {
+            return (function(){
+                return (function(){
+                    var symbol = l109;
+                    var func = symbol.function;
+                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                    return func;
+                })()((function(){
+                    var symbol = l204;
+                    var func = symbol.function;
+                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                    return func;
+                })()(v446));
+            })();
+        }
+        catch (cf){
+            if (cf.type == 'block' && cf.id == 171)
+                return cf.value;
+            else
+                throw cf;
+        }
+    })();
+
+})), cdr: (function(){
+    var symbol = l162;
+    var value = symbol.value;
+    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+    return value;
+})()});
+var l206 = {name: "DEFINE-BUILTIN"};
+l206;
+var l207 = {name: "TYPE-CHECK"};
+l207;
+var l208 = {name: "NUM-OP-NUM"};
 (function(){
-    return (l160).value = ({car: (function(){
-        var symbol = l47;
-        var func = symbol.function;
-        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-        return func;
-    })()(l23, (function (v443,v444){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
+    (l208).function = (function(v450){
+        ((v450)["fname"] = "NUM-OP-NUM");
+        return v450;
+    })((function (v447,v448,v449){
+        if (arguments.length < 3) throw 'too few arguments';
+        if (arguments.length > 3) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v445,v446){
+                    return (function(){
+                        var symbol = l102;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()("(function(){", (function(){
+                        var symbol = l101;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })(), (function(){
+                        var symbol = l107;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()((function(){
+                        var symbol = l102;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()("var ", "x", " = ", v447, ";", (function(){
+                        var symbol = l101;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })()), (function(){
+                        var symbol = l102;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()("var ", "y", " = ", v449, ";", (function(){
+                        var symbol = l101;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })()), (function(){
+                        var symbol = l102;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()("if (typeof ", "x", " != '", "number", "')", (function(){
+                        var symbol = l101;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })(), (function(){
+                        var symbol = l107;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", (function(){
+                        var symbol = l101;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })())), (function(){
+                        var symbol = l102;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()("if (typeof ", "y", " != '", "number", "')", (function(){
+                        var symbol = l101;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })(), (function(){
+                        var symbol = l107;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()("throw 'The value ' + ", "y", " + ' is not a type ", "number", ".';", (function(){
+                        var symbol = l101;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })())), (function(){
+                        var symbol = l102;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()("return ", (function(){
                         return (function(){
-                            var symbol = l205;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v445, "-", v446);
-                    })((function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v443),(function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v444));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 171)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l160;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-(function(){
-    return (l160).value = ({car: (function(){
-        var symbol = l47;
-        var func = symbol.function;
-        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-        return func;
-    })()(l24, (function (v447,v448){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v449,v450){
-                        return (function(){
-                            var symbol = l205;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v449, "*", v450);
-                    })((function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v447),(function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v448));
+                        })()("x", v448, "y");
+                    })(), ";", (function(){
+                        var symbol = l101;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })())), "})()");
                 })();
             }
             catch (cf){
@@ -12734,20 +12946,16 @@ var l205 = {name: "NUM-OP-NUM"};
             }
         })();
     
-    })), cdr: (function(){
-        var symbol = l160;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
+    }));
+    return l208;
 })();
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l25, (function (v451,v452){
+    })()(l22, (function (v451,v452){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
@@ -12755,18 +12963,18 @@ var l205 = {name: "NUM-OP-NUM"};
                 return (function(){
                     return (function(v453,v454){
                         return (function(){
-                            var symbol = l205;
+                            var symbol = l208;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v453, "/", v454);
+                        })()(v453, "+", v454);
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()(v451),(function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -12782,20 +12990,19 @@ var l205 = {name: "NUM-OP-NUM"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l206 = {name: "MOD"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l206, (function (v455,v456){
+    })()(l23, (function (v455,v456){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
@@ -12803,18 +13010,18 @@ var l206 = {name: "MOD"};
                 return (function(){
                     return (function(v457,v458){
                         return (function(){
-                            var symbol = l205;
+                            var symbol = l208;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v457, "%", v458);
+                        })()(v457, "-", v458);
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()(v455),(function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -12830,20 +13037,19 @@ var l206 = {name: "MOD"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l207 = {name: "<"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l207, (function (v459,v460){
+    })()(l24, (function (v459,v460){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
@@ -12851,23 +13057,18 @@ var l207 = {name: "<"};
                 return (function(){
                     return (function(v461,v462){
                         return (function(){
-                            var symbol = l105;
+                            var symbol = l208;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()((function(){
-                            var symbol = l205;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v461, "<", v462));
+                        })()(v461, "*", v462);
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()(v459),(function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -12883,20 +13084,19 @@ var l207 = {name: "<"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l208 = {name: ">"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l208, (function (v463,v464){
+    })()(l25, (function (v463,v464){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
@@ -12904,23 +13104,18 @@ var l208 = {name: ">"};
                 return (function(){
                     return (function(v465,v466){
                         return (function(){
-                            var symbol = l105;
+                            var symbol = l208;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()((function(){
-                            var symbol = l205;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v465, ">", v466));
+                        })()(v465, "/", v466);
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()(v463),(function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -12936,19 +13131,20 @@ var l208 = {name: ">"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
+var l209 = {name: "MOD"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l21, (function (v467,v468){
+    })()(l209, (function (v467,v468){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
@@ -12956,23 +13152,18 @@ var l208 = {name: ">"};
                 return (function(){
                     return (function(v469,v470){
                         return (function(){
-                            var symbol = l105;
+                            var symbol = l208;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()((function(){
-                            var symbol = l205;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(v469, "==", v470));
+                        })()(v469, "%", v470);
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()(v467),(function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -12988,20 +13179,20 @@ var l208 = {name: ">"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l209 = {name: "<="};
+var l210 = {name: "<"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l209, (function (v471,v472){
+    })()(l210, (function (v471,v472){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
@@ -13009,23 +13200,23 @@ var l209 = {name: "<="};
                 return (function(){
                     return (function(v473,v474){
                         return (function(){
-                            var symbol = l105;
+                            var symbol = l108;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l205;
+                            var symbol = l208;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v473, "<=", v474));
+                        })()(v473, "<", v474));
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()(v471),(function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -13041,20 +13232,20 @@ var l209 = {name: "<="};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l210 = {name: ">="};
+var l211 = {name: ">"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l210, (function (v475,v476){
+    })()(l211, (function (v475,v476){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
@@ -13062,23 +13253,23 @@ var l210 = {name: ">="};
                 return (function(){
                     return (function(v477,v478){
                         return (function(){
-                            var symbol = l105;
+                            var symbol = l108;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l205;
+                            var symbol = l208;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v477, ">=", v478));
+                        })()(v477, ">", v478));
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()(v475),(function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -13094,43 +13285,47 @@ var l210 = {name: ">="};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l211 = {name: "NUMBERP"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l211, (function (v479){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    })()(l21, (function (v479,v480){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v480){
+                    return (function(v481,v482){
                         return (function(){
-                            var symbol = l105;
+                            var symbol = l108;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l99;
+                            var symbol = l208;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("(typeof (", v480, ") == \"number\")"));
+                        })()(v481, "==", v482));
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v479));
+                    })()(v479),(function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v480));
                 })();
             }
             catch (cf){
@@ -13142,90 +13337,48 @@ var l211 = {name: "NUMBERP"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l212 = {name: "FLOOR"};
+var l212 = {name: "<="};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l212, (function (v481){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    })()(l212, (function (v483,v484){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v482){
+                    return (function(v485,v486){
                         return (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("(function(){", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
+                            var symbol = l108;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l99;
+                            var symbol = l208;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("var ", "x", " = ", v482, ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("if (typeof ", "x", " != '", "number", "')", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })())), (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("return ", (function(){
-                            return "Math.floor(x)";
-                        })(), ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })())), "})()");
+                        })()(v485, "<=", v486));
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v481));
+                    })()(v483),(function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v484));
                 })();
             }
             catch (cf){
@@ -13237,42 +13390,48 @@ var l212 = {name: "FLOOR"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
+var l213 = {name: ">="};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l32, (function (v483,v484){
+    })()(l213, (function (v487,v488){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v485,v486){
+                    return (function(v489,v490){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l108;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("({car: ", v485, ", cdr: ", v486, "})");
+                        })()((function(){
+                            var symbol = l208;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(v489, ">=", v490));
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v483),(function(){
-                        var symbol = l106;
+                    })()(v487),(function(){
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v484));
+                    })()(v488));
                 })();
             }
             catch (cf){
@@ -13284,62 +13443,43 @@ var l212 = {name: "FLOOR"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
+var l214 = {name: "NUMBERP"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l33, (function (v487){
+    })()(l214, (function (v491){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v488){
+                    return (function(v492){
                         return (function(){
-                            var symbol = l105;
+                            var symbol = l108;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("(function(){", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("var tmp = ", v488, ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), "return (typeof tmp == 'object' && 'car' in tmp);", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), "})()"));
+                        })()("(typeof (", v492, ") == \"number\")"));
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v487));
+                    })()(v491));
                 })();
             }
             catch (cf){
@@ -13351,77 +13491,90 @@ var l212 = {name: "FLOOR"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
+var l215 = {name: "FLOOR"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l34, (function (v489){
+    })()(l215, (function (v493){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v490){
+                    return (function(v494){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("(function(){", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var symbol = l104;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("var tmp = ", v490, ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), "return tmp === ", (function(){
-                            var symbol = l106;
+                            var symbol = l107;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), "? ", (function(){
-                            var symbol = l106;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()((function(){
-                            var symbol = l2;
+                        })()("var ", "x", " = ", v494, ";", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })()), ": tmp.car;", (function(){
-                            var symbol = l98;
+                        })()), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("if (typeof ", "x", " != '", "number", "')", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })()), "})()");
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("return ", (function(){
+                            return "Math.floor(x)";
+                        })(), ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), "})()");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v489));
+                    })()(v493));
                 })();
             }
             catch (cf){
@@ -13433,77 +13586,42 @@ var l212 = {name: "FLOOR"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l35, (function (v491){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    })()(l32, (function (v495,v496){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v492){
+                    return (function(v497,v498){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("(function(){", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("var tmp = ", v492, ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), "return tmp === ", (function(){
-                            var symbol = l106;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()((function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), "? ", (function(){
-                            var symbol = l106;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()((function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), ": tmp.cdr;", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), "})()");
+                        })()("({car: ", v497, ", cdr: ", v498, "})");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v491));
+                    })()(v495),(function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v496));
                 })();
             }
             catch (cf){
@@ -13515,100 +13633,62 @@ var l212 = {name: "FLOOR"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l213 = {name: "SETCAR"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l213, (function (v493,v494){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
+    })()(l33, (function (v499){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v495,v496){
+                    return (function(v500){
                         return (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("(function(){", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
+                            var symbol = l108;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("var ", "x", " = ", v495, ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("if (typeof ", "x", " != '", "object", "')", (function(){
-                            var symbol = l98;
+                        })()("(function(){", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var symbol = l104;
+                            var symbol = l107;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("throw 'The value ' + ", "x", " + ' is not a type ", "object", ".';", (function(){
-                            var symbol = l98;
+                        })()("var tmp = ", v500, ";", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })())), (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("return ", (function(){
-                            return (function(){
-                                var symbol = l99;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()("(x.car = ", v496, ")");
-                        })(), ";", (function(){
-                            var symbol = l98;
+                        })(), "return (typeof tmp == 'object' && 'car' in tmp);", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })())), "})()");
+                        })()), "})()"));
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v493),(function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v494));
+                    })()(v499));
                 })();
             }
             catch (cf){
@@ -13620,100 +13700,77 @@ var l213 = {name: "SETCAR"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l214 = {name: "SETCDR"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l214, (function (v497,v498){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
+    })()(l34, (function (v501){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v499,v500){
+                    return (function(v502){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("(function(){", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var symbol = l104;
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("var tmp = ", v502, ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), "return tmp === ", (function(){
+                            var symbol = l109;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("var ", "x", " = ", v499, ";", (function(){
-                            var symbol = l98;
+                            var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })()), (function(){
-                            var symbol = l99;
+                        })()), "? ", (function(){
+                            var symbol = l109;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("if (typeof ", "x", " != '", "object", "')", (function(){
-                            var symbol = l98;
+                        })()((function(){
+                            var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), (function(){
-                            var symbol = l104;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("throw 'The value ' + ", "x", " + ' is not a type ", "object", ".';", (function(){
-                            var symbol = l98;
+                        })()), ": tmp.car;", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })())), (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("return ", (function(){
-                            return (function(){
-                                var symbol = l99;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()("(x.cdr = ", v500, ")");
-                        })(), ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })())), "})()");
+                        })()), "})()");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v497),(function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v498));
+                    })()(v501));
                 })();
             }
             catch (cf){
@@ -13725,63 +13782,77 @@ var l214 = {name: "SETCDR"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l215 = {name: "SYMBOLP"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l215, (function (v501){
+    })()(l35, (function (v503){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v502){
+                    return (function(v504){
                         return (function(){
-                            var symbol = l105;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()((function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("(function(){", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var symbol = l104;
+                            var symbol = l107;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("var tmp = ", v502, ";", (function(){
-                            var symbol = l98;
+                        })()("var tmp = ", v504, ";", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), "return (typeof tmp == 'object' && 'name' in tmp);", (function(){
-                            var symbol = l98;
+                        })(), "return tmp === ", (function(){
+                            var symbol = l109;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()((function(){
+                            var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })()), "})()"));
+                        })()), "? ", (function(){
+                            var symbol = l109;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()((function(){
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), ": tmp.cdr;", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), "})()");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v501));
+                    })()(v503));
                 })();
             }
             catch (cf){
@@ -13793,90 +13864,100 @@ var l215 = {name: "SYMBOLP"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l216 = {name: "MAKE-SYMBOL"};
+var l216 = {name: "SETCAR"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l216, (function (v503){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    })()(l216, (function (v505,v506){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v504){
+                    return (function(v507,v508){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("(function(){", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var symbol = l104;
+                            var symbol = l107;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("var ", "name", " = ", v504, ";", (function(){
-                            var symbol = l98;
+                        })()("var ", "x", " = ", v507, ";", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })()), (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("if (typeof ", "name", " != '", "string", "')", (function(){
-                            var symbol = l98;
+                        })()("if (typeof ", "x", " != '", "object", "')", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var symbol = l104;
+                            var symbol = l107;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("throw 'The value ' + ", "name", " + ' is not a type ", "string", ".';", (function(){
-                            var symbol = l98;
+                        })()("throw 'The value ' + ", "x", " + ' is not a type ", "object", ".';", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })())), (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("return ", (function(){
-                            return "({name: name})";
+                            return (function(){
+                                var symbol = l102;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()("(x.car = ", v508, ")");
                         })(), ";", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })())), "})()");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v503));
+                    })()(v505),(function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v506));
                 })();
             }
             catch (cf){
@@ -13888,38 +13969,100 @@ var l216 = {name: "MAKE-SYMBOL"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l217 = {name: "SYMBOL-NAME"};
+var l217 = {name: "SETCDR"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l217, (function (v505){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    })()(l217, (function (v509,v510){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v506){
+                    return (function(v511,v512){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("(", v506, ").name");
+                        })()("(function(){", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()((function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("var ", "x", " = ", v511, ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("if (typeof ", "x", " != '", "object", "')", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("throw 'The value ' + ", "x", " + ' is not a type ", "object", ".';", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("return ", (function(){
+                            return (function(){
+                                var symbol = l102;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()("(x.cdr = ", v512, ")");
+                        })(), ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), "})()");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v505));
+                    })()(v509),(function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v510));
                 })();
             }
             catch (cf){
@@ -13931,42 +14074,63 @@ var l217 = {name: "SYMBOL-NAME"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
+var l218 = {name: "SYMBOLP"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l175, (function (v507,v508){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
+    })()(l218, (function (v513){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v509,v510){
+                    return (function(v514){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l108;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("(", v509, ").value = ", v510);
+                        })()((function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("(function(){", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("var tmp = ", v514, ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), "return (typeof tmp == 'object' && 'name' in tmp);", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), "})()"));
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v507),(function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v508));
+                    })()(v513));
                 })();
             }
             catch (cf){
@@ -13978,43 +14142,90 @@ var l217 = {name: "SYMBOL-NAME"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l218 = {name: "FSET"};
+var l219 = {name: "MAKE-SYMBOL"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l218, (function (v511,v512){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
+    })()(l219, (function (v515){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v513,v514){
+                    return (function(v516){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("(", v513, ").function = ", v514);
+                        })()("(function(){", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()((function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("var ", "name", " = ", v516, ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("if (typeof ", "name", " != '", "string", "')", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("throw 'The value ' + ", "name", " + ' is not a type ", "string", ".';", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("return ", (function(){
+                            return "({name: name})";
+                        })(), ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), "})()");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v511),(function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v512));
+                    })()(v515));
                 })();
             }
             catch (cf){
@@ -14026,42 +14237,38 @@ var l218 = {name: "FSET"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
+var l220 = {name: "SYMBOL-NAME"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l20, (function (v515){
+    })()(l220, (function (v517){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v516){
+                    return (function(v518){
                         return (function(){
-                            var symbol = l105;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()((function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("(", v516, ".value !== undefined)"));
+                        })()("(", v518, ").name");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v515));
+                    })()(v517));
                 })();
             }
             catch (cf){
@@ -14073,68 +14280,42 @@ var l218 = {name: "FSET"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l219 = {name: "SYMBOL-VALUE"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l219, (function (v517){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    })()(l178, (function (v519,v520){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v518){
+                    return (function(v521,v522){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("(function(){", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("var symbol = ", v518, ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), "var value = symbol.value;", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), "if (value === undefined) throw \"Variable `\" + symbol.name + \"' is unbound.\";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), "return value;", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), "})()");
+                        })()("(", v521, ").value = ", v522);
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v517));
+                    })()(v519),(function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v520));
                 })();
             }
             catch (cf){
@@ -14146,67 +14327,43 @@ var l219 = {name: "SYMBOL-VALUE"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
+var l221 = {name: "FSET"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l183, (function (v519){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    })()(l221, (function (v523,v524){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v520){
+                    return (function(v525,v526){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("(function(){", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("var symbol = ", v520, ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), "var func = symbol.function;", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), "if (func === undefined) throw \"Function `\" + symbol.name + \"' is undefined.\";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), "return func;", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), "})()");
+                        })()("(", v525, ").function = ", v526);
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v519));
+                    })()(v523),(function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v524));
                 })();
             }
             catch (cf){
@@ -14218,48 +14375,42 @@ var l219 = {name: "SYMBOL-VALUE"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l220 = {name: "SYMBOL-PLIST"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l220, (function (v521){
+    })()(l20, (function (v527){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v522){
+                    return (function(v528){
                         return (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("((", v522, ").plist || ", (function(){
-                            var symbol = l106;
+                            var symbol = l108;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), ")");
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("(", v528, ".value !== undefined)"));
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v521));
+                    })()(v527));
                 })();
             }
             catch (cf){
@@ -14271,38 +14422,68 @@ var l220 = {name: "SYMBOL-PLIST"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l221 = {name: "LAMBDA-CODE"};
+var l222 = {name: "SYMBOL-VALUE"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l221, (function (v523){
+    })()(l222, (function (v529){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v524){
+                    return (function(v530){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("(", v524, ").toString()");
+                        })()("(function(){", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("var symbol = ", v530, ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), "var value = symbol.value;", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), "if (value === undefined) throw \"Variable `\" + symbol.name + \"' is unbound.\";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), "return value;", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), "})()");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v523));
+                    })()(v529));
                 })();
             }
             catch (cf){
@@ -14314,48 +14495,67 @@ var l221 = {name: "LAMBDA-CODE"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l222 = {name: "EQ"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l222, (function (v525,v526){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
+    })()(l186, (function (v531){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v527,v528){
+                    return (function(v532){
                         return (function(){
-                            var symbol = l105;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()((function(){
-                            var symbol = l99;
+                        })()("(function(){", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("(", v527, " === ", v528, ")"));
+                        })()("var symbol = ", v532, ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), "var func = symbol.function;", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), "if (func === undefined) throw \"Function `\" + symbol.name + \"' is undefined.\";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), "return func;", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), "})()");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v525),(function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v526));
+                    })()(v531));
                 })();
             }
             catch (cf){
@@ -14367,48 +14567,48 @@ var l222 = {name: "EQ"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l223 = {name: "EQUAL"};
+var l223 = {name: "SYMBOL-PLIST"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l223, (function (v529,v530){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
+    })()(l223, (function (v533){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v531,v532){
+                    return (function(v534){
                         return (function(){
-                            var symbol = l105;
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("((", v534, ").plist || ", (function(){
+                            var symbol = l109;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("(", v531, " == ", v532, ")"));
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), ")");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v529),(function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v530));
+                    })()(v533));
                 })();
             }
             catch (cf){
@@ -14420,90 +14620,38 @@ var l223 = {name: "EQUAL"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l224 = {name: "STRING"};
+var l224 = {name: "LAMBDA-CODE"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l224, (function (v533){
+    })()(l224, (function (v535){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v534){
+                    return (function(v536){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("(function(){", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()((function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("var ", "x", " = ", v534, ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("if (typeof ", "x", " != '", "number", "')", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })())), (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("return ", (function(){
-                            return "String.fromCharCode(x)";
-                        })(), ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })())), "})()");
+                        })()("(", v536, ").toString()");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v533));
+                    })()(v535));
                 })();
             }
             catch (cf){
@@ -14515,43 +14663,48 @@ var l224 = {name: "STRING"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l225 = {name: "STRINGP"};
+var l225 = {name: "EQ"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l225, (function (v535){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    })()(l225, (function (v537,v538){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v536){
+                    return (function(v539,v540){
                         return (function(){
-                            var symbol = l105;
+                            var symbol = l108;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("(typeof(", v536, ") == \"string\")"));
+                        })()("(", v539, " === ", v540, ")"));
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v535));
+                    })()(v537),(function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v538));
                 })();
             }
             catch (cf){
@@ -14563,90 +14716,48 @@ var l225 = {name: "STRINGP"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l226 = {name: "STRING-UPCASE"};
+var l226 = {name: "EQUAL"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l226, (function (v537){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    })()(l226, (function (v541,v542){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v538){
+                    return (function(v543,v544){
                         return (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("(function(){", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
+                            var symbol = l108;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("var ", "x", " = ", v538, ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("if (typeof ", "x", " != '", "string", "')", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })())), (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("return ", (function(){
-                            return "x.toUpperCase()";
-                        })(), ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })())), "})()");
+                        })()("(", v543, " == ", v544, ")"));
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v537));
+                    })()(v541),(function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v542));
                 })();
             }
             catch (cf){
@@ -14658,90 +14769,90 @@ var l226 = {name: "STRING-UPCASE"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l227 = {name: "STRING-LENGTH"};
+var l227 = {name: "STRING"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l227, (function (v539){
+    })()(l227, (function (v545){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v540){
+                    return (function(v546){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("(function(){", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var symbol = l104;
+                            var symbol = l107;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("var ", "x", " = ", v540, ";", (function(){
-                            var symbol = l98;
+                        })()("var ", "x", " = ", v546, ";", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })()), (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("if (typeof ", "x", " != '", "string", "')", (function(){
-                            var symbol = l98;
+                        })()("if (typeof ", "x", " != '", "number", "')", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var symbol = l104;
+                            var symbol = l107;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", (function(){
-                            var symbol = l98;
+                        })()("throw 'The value ' + ", "x", " + ' is not a type ", "number", ".';", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })())), (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("return ", (function(){
-                            return "x.length";
+                            return "String.fromCharCode(x)";
                         })(), ";", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })())), "})()");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v539));
+                    })()(v545));
                 })();
             }
             catch (cf){
@@ -14753,229 +14864,138 @@ var l227 = {name: "STRING-LENGTH"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l228 = {name: "SLICE"};
-(l160).value = ({car: (function(){
-    var symbol = l47;
-    var func = symbol.function;
-    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-    return func;
-})()(l228, (function (v541,v542,v543){
-    if (arguments.length < 2) throw 'too few arguments';
-    if (arguments.length > 3) throw 'too many arguments';
-    switch(arguments.length){
-    case 2:
-    v543=(function(){
-        var symbol = l2;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })();
-    default: break;
-    }
-    return (function(){
-        try {
-            return (function(){
-                return (function(){
-                    var symbol = l99;
-                    var func = symbol.function;
-                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                    return func;
-                })()("(function(){", (function(){
-                    var symbol = l98;
-                    var value = symbol.value;
-                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                    return value;
-                })(), (function(){
-                    var symbol = l104;
-                    var func = symbol.function;
-                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                    return func;
-                })()("var str = ", (function(){
-                    var symbol = l106;
-                    var func = symbol.function;
-                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                    return func;
-                })()(v541), ";", (function(){
-                    var symbol = l98;
-                    var value = symbol.value;
-                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                    return value;
-                })(), "var a = ", (function(){
-                    var symbol = l106;
-                    var func = symbol.function;
-                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                    return func;
-                })()(v542), ";", (function(){
-                    var symbol = l98;
-                    var value = symbol.value;
-                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                    return value;
-                })(), "var b;", (function(){
-                    var symbol = l98;
-                    var value = symbol.value;
-                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                    return value;
-                })(), (v543 !== (function(){
-                    var symbol = l2;
-                    var value = symbol.value;
-                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                    return value;
-                })() ? (function(){
-                    var symbol = l99;
-                    var func = symbol.function;
-                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                    return func;
-                })()("b = ", (function(){
-                    var symbol = l106;
-                    var func = symbol.function;
-                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                    return func;
-                })()(v543), ";", (function(){
-                    var symbol = l98;
-                    var value = symbol.value;
-                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                    return value;
-                })()) : ""), "return str.slice(a,b);", (function(){
-                    var symbol = l98;
-                    var value = symbol.value;
-                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                    return value;
-                })()), "})()");
-            })();
-        }
-        catch (cf){
-            if (cf.type == 'block' && cf.id == 204)
-                return cf.value;
-            else
-                throw cf;
-        }
-    })();
-
-})), cdr: (function(){
-    var symbol = l160;
-    var value = symbol.value;
-    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-    return value;
-})()});
-var l229 = {name: "CHAR"};
+var l228 = {name: "STRINGP"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l229, (function (v544,v545){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
+    })()(l228, (function (v547){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v546,v547){
+                    return (function(v548){
                         return (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("(function(){", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
+                            var symbol = l108;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("var ", "string", " = ", v546, ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), (function(){
-                            var symbol = l99;
+                        })()("(typeof(", v548, ") == \"string\")"));
+                    })((function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v547));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 204)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    })), cdr: (function(){
+        var symbol = l162;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()});
+})();
+var l229 = {name: "STRING-UPCASE"};
+(function(){
+    return (l162).value = ({car: (function(){
+        var symbol = l47;
+        var func = symbol.function;
+        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+        return func;
+    })()(l229, (function (v549){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v550){
+                        return (function(){
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("var ", "index", " = ", v547, ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("if (typeof ", "string", " != '", "string", "')", (function(){
-                            var symbol = l98;
+                        })()("(function(){", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var symbol = l104;
+                            var symbol = l107;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("throw 'The value ' + ", "string", " + ' is not a type ", "string", ".';", (function(){
-                            var symbol = l98;
+                        })()((function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("var ", "x", " = ", v550, ";", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })())), (function(){
-                            var symbol = l99;
+                        })()), (function(){
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("if (typeof ", "index", " != '", "number", "')", (function(){
-                            var symbol = l98;
+                        })()("if (typeof ", "x", " != '", "string", "')", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var symbol = l104;
+                            var symbol = l107;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("throw 'The value ' + ", "index", " + ' is not a type ", "number", ".';", (function(){
-                            var symbol = l98;
+                        })()("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })())), (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("return ", (function(){
-                            return "string.charCodeAt(index)";
+                            return "x.toUpperCase()";
                         })(), ";", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })())), "})()");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v544),(function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v545));
+                    })()(v549));
                 })();
             }
             catch (cf){
@@ -14987,124 +15007,90 @@ var l229 = {name: "CHAR"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
+var l230 = {name: "STRING-LENGTH"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l70, (function (v548,v549){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
+    })()(l230, (function (v551){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v550,v551){
+                    return (function(v552){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("(function(){", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var symbol = l104;
+                            var symbol = l107;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("var ", "string1", " = ", v550, ";", (function(){
-                            var symbol = l98;
+                        })()("var ", "x", " = ", v552, ";", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })()), (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("var ", "string2", " = ", v551, ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("if (typeof ", "string1", " != '", "string", "')", (function(){
-                            var symbol = l98;
+                        })()("if (typeof ", "x", " != '", "string", "')", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var symbol = l104;
+                            var symbol = l107;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("throw 'The value ' + ", "string1", " + ' is not a type ", "string", ".';", (function(){
-                            var symbol = l98;
+                        })()("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })())), (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("if (typeof ", "string2", " != '", "string", "')", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("throw 'The value ' + ", "string2", " + ' is not a type ", "string", ".';", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })())), (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("return ", (function(){
-                            return "string1.concat(string2)";
+                            return "x.length";
                         })(), ";", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })())), "})()");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v548),(function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v549));
+                    })()(v551));
                 })();
             }
             catch (cf){
@@ -15116,58 +15102,100 @@ var l229 = {name: "CHAR"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l230 = {name: "FUNCALL"};
-(l160).value = ({car: (function(){
+var l231 = {name: "SLICE"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l230, (function (v553){
-    if (arguments.length < 1) throw 'too few arguments';
-    var v552= (function(){
+})()(l231, (function (v553,v554,v555){
+    if (arguments.length < 2) throw 'too few arguments';
+    if (arguments.length > 3) throw 'too many arguments';
+    switch(arguments.length){
+    case 2:
+    v555=(function(){
         var symbol = l2;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })();
-    for (var i = arguments.length-1; i>=1; i--)
-        v552 = {car: arguments[i], cdr: 
-    v552};
+    default: break;
+    }
     return (function(){
         try {
             return (function(){
                 return (function(){
-                    var symbol = l99;
+                    var symbol = l102;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()("(", (function(){
-                    var symbol = l106;
-                    var func = symbol.function;
-                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                    return func;
-                })()(v553), ")(", (function(){
+                })()("(function(){", (function(){
                     var symbol = l101;
+                    var value = symbol.value;
+                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                    return value;
+                })(), (function(){
+                    var symbol = l107;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()((function(){
-                    var symbol = l71;
+                })()("var str = ", (function(){
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()((function(){
-                    var symbol = l106;
+                })()(v553), ";", (function(){
+                    var symbol = l101;
+                    var value = symbol.value;
+                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                    return value;
+                })(), "var a = ", (function(){
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })(), v552), ", "), ")");
+                })()(v554), ";", (function(){
+                    var symbol = l101;
+                    var value = symbol.value;
+                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                    return value;
+                })(), "var b;", (function(){
+                    var symbol = l101;
+                    var value = symbol.value;
+                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                    return value;
+                })(), (v555 !== (function(){
+                    var symbol = l2;
+                    var value = symbol.value;
+                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                    return value;
+                })() ? (function(){
+                    var symbol = l102;
+                    var func = symbol.function;
+                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                    return func;
+                })()("b = ", (function(){
+                    var symbol = l109;
+                    var func = symbol.function;
+                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                    return func;
+                })()(v555), ";", (function(){
+                    var symbol = l101;
+                    var value = symbol.value;
+                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                    return value;
+                })()) : ""), "return str.slice(a,b);", (function(){
+                    var symbol = l101;
+                    var value = symbol.value;
+                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                    return value;
+                })()), "})()");
             })();
         }
         catch (cf){
@@ -15179,28 +15207,349 @@ var l230 = {name: "FUNCALL"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l231 = {name: "APPLY"};
-(l160).value = ({car: (function(){
+var l232 = {name: "CHAR"};
+(function(){
+    return (l162).value = ({car: (function(){
+        var symbol = l47;
+        var func = symbol.function;
+        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+        return func;
+    })()(l232, (function (v556,v557){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v558,v559){
+                        return (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("(function(){", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()((function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("var ", "string", " = ", v558, ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("var ", "index", " = ", v559, ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("if (typeof ", "string", " != '", "string", "')", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("throw 'The value ' + ", "string", " + ' is not a type ", "string", ".';", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("if (typeof ", "index", " != '", "number", "')", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("throw 'The value ' + ", "index", " + ' is not a type ", "number", ".';", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("return ", (function(){
+                            return "string.charCodeAt(index)";
+                        })(), ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), "})()");
+                    })((function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v556),(function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v557));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 208)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    })), cdr: (function(){
+        var symbol = l162;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()});
+})();
+(function(){
+    return (l162).value = ({car: (function(){
+        var symbol = l47;
+        var func = symbol.function;
+        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+        return func;
+    })()(l70, (function (v560,v561){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v562,v563){
+                        return (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("(function(){", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()((function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("var ", "string1", " = ", v562, ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("var ", "string2", " = ", v563, ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("if (typeof ", "string1", " != '", "string", "')", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("throw 'The value ' + ", "string1", " + ' is not a type ", "string", ".';", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("if (typeof ", "string2", " != '", "string", "')", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("throw 'The value ' + ", "string2", " + ' is not a type ", "string", ".';", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("return ", (function(){
+                            return "string1.concat(string2)";
+                        })(), ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), "})()");
+                    })((function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v560),(function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v561));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 209)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    })), cdr: (function(){
+        var symbol = l162;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()});
+})();
+var l233 = {name: "FUNCALL"};
+(l162).value = ({car: (function(){
     var symbol = l47;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
-})()(l231, (function (v555){
+})()(l233, (function (v565){
     if (arguments.length < 1) throw 'too few arguments';
-    var v554= (function(){
+    var v564= (function(){
         var symbol = l2;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })();
     for (var i = arguments.length-1; i>=1; i--)
-        v554 = {car: arguments[i], cdr: 
-    v554};
+        v564 = {car: arguments[i], cdr: 
+    v564};
+    return (function(){
+        try {
+            return (function(){
+                return (function(){
+                    var symbol = l102;
+                    var func = symbol.function;
+                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                    return func;
+                })()("(", (function(){
+                    var symbol = l109;
+                    var func = symbol.function;
+                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                    return func;
+                })()(v565), ")(", (function(){
+                    var symbol = l104;
+                    var func = symbol.function;
+                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                    return func;
+                })()((function(){
+                    var symbol = l71;
+                    var func = symbol.function;
+                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                    return func;
+                })()((function(){
+                    var symbol = l109;
+                    var func = symbol.function;
+                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                    return func;
+                })(), v564), ", "), ")");
+            })();
+        }
+        catch (cf){
+            if (cf.type == 'block' && cf.id == 210)
+                return cf.value;
+            else
+                throw cf;
+        }
+    })();
+
+})), cdr: (function(){
+    var symbol = l162;
+    var value = symbol.value;
+    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+    return value;
+})()});
+var l234 = {name: "APPLY"};
+(l162).value = ({car: (function(){
+    var symbol = l47;
+    var func = symbol.function;
+    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+    return func;
+})()(l234, (function (v567){
+    if (arguments.length < 1) throw 'too few arguments';
+    var v566= (function(){
+        var symbol = l2;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })();
+    for (var i = arguments.length-1; i>=1; i--)
+        v566 = {car: arguments[i], cdr: 
+    v566};
     return (function(){
         try {
             return (function(){
@@ -15209,49 +15558,49 @@ var l231 = {name: "APPLY"};
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v554) !== (function(){
+                })()(v566) !== (function(){
                     var symbol = l2;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })() ? (function(){
-                    var symbol = l99;
+                    var symbol = l102;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
                 })()("(", (function(){
-                    var symbol = l106;
+                    var symbol = l109;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v555), ")()") : (function(v556,v557){
+                })()(v567), ")()") : (function(v568,v569){
                     return (function(){
-                        var symbol = l99;
+                        var symbol = l102;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()("(function(){", (function(){
-                        var symbol = l98;
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(), (function(){
-                        var symbol = l104;
+                        var symbol = l107;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()("var f = ", (function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v555), ";", (function(){
-                        var symbol = l98;
+                    })()(v567), ";", (function(){
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(), "var args = [", (function(){
-                        var symbol = l101;
+                        var symbol = l104;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -15261,27 +15610,27 @@ var l231 = {name: "APPLY"};
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v556), ", "), "];", (function(){
-                        var symbol = l98;
+                    })(), v568), ", "), "];", (function(){
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(), "var tail = (", (function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v557), ");", (function(){
-                        var symbol = l98;
+                    })()(v569), ");", (function(){
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(), "while (tail != ", (function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -15291,27 +15640,27 @@ var l231 = {name: "APPLY"};
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })()), "){", (function(){
-                        var symbol = l98;
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(), "    args.push(tail.car);", (function(){
-                        var symbol = l98;
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(), "    tail = tail.cdr;", (function(){
-                        var symbol = l98;
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(), "}", (function(){
-                        var symbol = l98;
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(), "return f.apply(this, args);", (function(){
-                        var symbol = l98;
+                        var symbol = l101;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
@@ -15321,13 +15670,13 @@ var l231 = {name: "APPLY"};
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v554),(function(){
+                })()(v566),(function(){
                     var tmp = (function(){
                         var symbol = l82;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v554);
+                    })()(v566);
                     return tmp === (function(){
                         var symbol = l2;
                         var value = symbol.value;
@@ -15343,7 +15692,7 @@ var l231 = {name: "APPLY"};
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 208)
+            if (cf.type == 'block' && cf.id == 211)
                 return cf.value;
             else
                 throw cf;
@@ -15351,257 +15700,89 @@ var l231 = {name: "APPLY"};
     })();
 
 })), cdr: (function(){
-    var symbol = l160;
+    var symbol = l162;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l232 = {name: "JS-EVAL"};
+var l235 = {name: "JS-EVAL"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l232, (function (v558){
+    })()(l235, (function (v570){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v559){
+                    return (function(v571){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("(function(){", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var symbol = l104;
+                            var symbol = l107;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("var ", "string", " = ", v559, ";", (function(){
-                            var symbol = l98;
+                        })()("var ", "string", " = ", v571, ";", (function(){
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })()), (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("if (typeof ", "string", " != '", "string", "')", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var symbol = l104;
+                            var symbol = l107;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("throw 'The value ' + ", "string", " + ' is not a type ", "string", ".';", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })())), (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("return ", (function(){
                             return "eval.apply(window, [string])";
                         })(), ";", (function(){
-                            var symbol = l98;
+                            var symbol = l101;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })())), "})()");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v558));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 209)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l160;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-var l233 = {name: "ERROR"};
-(function(){
-    return (l160).value = ({car: (function(){
-        var symbol = l47;
-        var func = symbol.function;
-        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-        return func;
-    })()(l233, (function (v560){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v561){
-                        return (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("(function(){", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("throw ", v561, ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), "})()");
-                    })((function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v560));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 210)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l160;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-var l234 = {name: "NEW"};
-(function(){
-    return (l160).value = ({car: (function(){
-        var symbol = l47;
-        var func = symbol.function;
-        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-        return func;
-    })()(l234, (function (){
-        if (arguments.length > 0) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(){
-                        return "{}";
-                    })();
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 211)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l160;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-var l235 = {name: "OGET"};
-(function(){
-    return (l160).value = ({car: (function(){
-        var symbol = l47;
-        var func = symbol.function;
-        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-        return func;
-    })()(l235, (function (v562,v563){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v564,v565){
-                        return (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("(function(){", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("var tmp = ", "(", v564, ")[", v565, "];", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), "return tmp == undefined? ", (function(){
-                            var symbol = l106;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()((function(){
-                            var symbol = l2;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), ": tmp ;", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), "})()");
-                    })((function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v562),(function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v563));
+                    })()(v570));
                 })();
             }
             catch (cf){
@@ -15613,48 +15794,53 @@ var l235 = {name: "OGET"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l236 = {name: "OSET"};
+var l236 = {name: "ERROR"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l236, (function (v566,v567,v568){
-        if (arguments.length < 3) throw 'too few arguments';
-        if (arguments.length > 3) throw 'too many arguments';
+    })()(l236, (function (v572){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v569,v570,v571){
+                    return (function(v573){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("((", v569, ")[", v570, "] = ", v571, ")");
+                        })()("(function(){", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("throw ", v573, ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), "})()");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v566),(function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v567),(function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v568));
+                    })()(v572));
                 })();
             }
             catch (cf){
@@ -15666,48 +15852,27 @@ var l236 = {name: "OSET"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l237 = {name: "IN"};
+var l237 = {name: "NEW"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l237, (function (v572,v573){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
+    })()(l237, (function (){
+        if (arguments.length > 0) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v574,v575){
-                        return (function(){
-                            var symbol = l105;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()((function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("((", v574, ") in (", v575, "))"));
-                    })((function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v572),(function(){
-                        var symbol = l106;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v573));
+                    return (function(){
+                        return "{}";
+                    })();
                 })();
             }
             catch (cf){
@@ -15719,43 +15884,73 @@ var l237 = {name: "IN"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l238 = {name: "FUNCTIONP"};
+var l238 = {name: "OGET"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l238, (function (v576){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    })()(l238, (function (v574,v575){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v577){
+                    return (function(v576,v577){
                         return (function(){
-                            var symbol = l105;
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("(function(){", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("var tmp = ", "(", v576, ")[", v577, "];", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), "return tmp == undefined? ", (function(){
+                            var symbol = l109;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("(typeof ", v577, " == 'function')"));
+                            var symbol = l2;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), ": tmp ;", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), "})()");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v576));
+                    })()(v574),(function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v575));
                 })();
             }
             catch (cf){
@@ -15767,90 +15962,48 @@ var l238 = {name: "FUNCTIONP"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
-var l239 = {name: "WRITE-STRING"};
+var l239 = {name: "OSET"};
 (function(){
-    return (l160).value = ({car: (function(){
+    return (l162).value = ({car: (function(){
         var symbol = l47;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(l239, (function (v578){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    })()(l239, (function (v578,v579,v580){
+        if (arguments.length < 3) throw 'too few arguments';
+        if (arguments.length > 3) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v579){
+                    return (function(v581,v582,v583){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()("(function(){", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()((function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("var ", "x", " = ", v579, ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("if (typeof ", "x", " != '", "string", "')", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), (function(){
-                            var symbol = l104;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })())), (function(){
-                            var symbol = l99;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()("return ", (function(){
-                            return "lisp.write(x)";
-                        })(), ";", (function(){
-                            var symbol = l98;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })())), "})()");
+                        })()("((", v581, ")[", v582, "] = ", v583, ")");
                     })((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v578));
+                    })()(v578),(function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v579),(function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v580));
                 })();
             }
             catch (cf){
@@ -15862,24 +16015,220 @@ var l239 = {name: "WRITE-STRING"};
         })();
     
     })), cdr: (function(){
-        var symbol = l160;
+        var symbol = l162;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()});
+})();
+var l240 = {name: "IN"};
+(function(){
+    return (l162).value = ({car: (function(){
+        var symbol = l47;
+        var func = symbol.function;
+        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+        return func;
+    })()(l240, (function (v584,v585){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v586,v587){
+                        return (function(){
+                            var symbol = l108;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()((function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("((", v586, ") in (", v587, "))"));
+                    })((function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v584),(function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v585));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 217)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    })), cdr: (function(){
+        var symbol = l162;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()});
+})();
+var l241 = {name: "FUNCTIONP"};
+(function(){
+    return (l162).value = ({car: (function(){
+        var symbol = l47;
+        var func = symbol.function;
+        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+        return func;
+    })()(l241, (function (v588){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v589){
+                        return (function(){
+                            var symbol = l108;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()((function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("(typeof ", v589, " == 'function')"));
+                    })((function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v588));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 218)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    })), cdr: (function(){
+        var symbol = l162;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()});
+})();
+var l242 = {name: "WRITE-STRING"};
+(function(){
+    return (l162).value = ({car: (function(){
+        var symbol = l47;
+        var func = symbol.function;
+        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+        return func;
+    })()(l242, (function (v590){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v591){
+                        return (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("(function(){", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()((function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("var ", "x", " = ", v591, ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("if (typeof ", "x", " != '", "string", "')", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), (function(){
+                            var symbol = l107;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("throw 'The value ' + ", "x", " + ' is not a type ", "string", ".';", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), (function(){
+                            var symbol = l102;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()("return ", (function(){
+                            return "lisp.write(x)";
+                        })(), ";", (function(){
+                            var symbol = l101;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), "})()");
+                    })((function(){
+                        var symbol = l109;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v590));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 219)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    })), cdr: (function(){
+        var symbol = l162;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })()});
 })();
 (function(){
-    (l159).function = (function(v582){
-        ((v582)["fname"] = "MACRO");
-        return v582;
-    })((function (v580){
+    (l161).function = (function(v594){
+        ((v594)["fname"] = "MACRO");
+        return v594;
+    })((function (v592){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (((function(){
-                        var tmp = v580;
+                        var tmp = v592;
                         return (typeof tmp == 'object' && 'name' in tmp);
                     })()?(function(){
                         var symbol = l3;
@@ -15896,13 +16245,13 @@ var l239 = {name: "WRITE-STRING"};
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
-                    })() ? (function(v581){
+                    })() ? (function(v593){
                         return ((((function(){
-                            var symbol = l134;
+                            var symbol = l136;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v581) === l159)?(function(){
+                        })()(v593) === l161)?(function(){
                             var symbol = l3;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -15917,23 +16266,23 @@ var l239 = {name: "WRITE-STRING"};
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })() ? v581 : (function(){
+                        })() ? v593 : (function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })());
                     })((function(){
-                        var symbol = l145;
+                        var symbol = l147;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v580, (function(){
-                        var symbol = l147;
+                    })()(v592, (function(){
+                        var symbol = l149;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
-                    })(), l124)) : (function(){
+                    })(), l99)) : (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -15942,7 +16291,7 @@ var l239 = {name: "WRITE-STRING"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 217)
+                if (cf.type == 'block' && cf.id == 220)
                     return cf.value;
                 else
                     throw cf;
@@ -15950,70 +16299,98 @@ var l239 = {name: "WRITE-STRING"};
         })();
     
     }));
-    return l159;
+    return l161;
 })();
-var l240 = {name: "LS-MACROEXPAND-1"};
+var l243 = {name: "LS-MACROEXPAND-1"};
 (function(){
-    (l240).function = (function(v585){
-        ((v585)["fname"] = "LS-MACROEXPAND-1");
-        return v585;
-    })((function (v583){
+    (l243).function = (function(v599){
+        ((v599)["fname"] = "LS-MACROEXPAND-1");
+        return v599;
+    })((function (v595){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v584){
-                        return (v584 !== (function(){
+                    return (function(v596){
+                        return (v596 !== (function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })() ? (function(){
-                            var f = (function(){
-                                var symbol = l185;
+                        })() ? (function(v597){
+                            ((function(){
+                                var symbol = l62;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()((function(){
-                                var symbol = l135;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(v584));
-                            var args = [];
-                            var tail = ((function(){
-                                var tmp = v583;
-                                return tmp === (function(){
-                                    var symbol = l2;
-                                    var value = symbol.value;
-                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                    return value;
-                                })()? (function(){
-                                    var symbol = l2;
-                                    var value = symbol.value;
-                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                    return value;
-                                })(): tmp.cdr;
-                            })());
-                            while (tail != (function(){
+                            })()(v597) !== (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })()){
-                                args.push(tail.car);
-                                tail = tail.cdr;
-                            }
-                            return f.apply(this, args);
-                        })() : v583);
+                            })() ? (function(){
+                                return (function(v598){
+                                    (function(){
+                                        var symbol = l138;
+                                        var func = symbol.function;
+                                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                        return func;
+                                    })()(v596, v598);
+                                    return v597 = v598;
+                                })((function(){
+                                    var symbol = l188;
+                                    var func = symbol.function;
+                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                    return func;
+                                })()(v597));
+                            })() : (function(){
+                                var symbol = l2;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })());
+                            return (function(){
+                                var f = v597;
+                                var args = [];
+                                var tail = ((function(){
+                                    var tmp = v595;
+                                    return tmp === (function(){
+                                        var symbol = l2;
+                                        var value = symbol.value;
+                                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                        return value;
+                                    })()? (function(){
+                                        var symbol = l2;
+                                        var value = symbol.value;
+                                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                        return value;
+                                    })(): tmp.cdr;
+                                })());
+                                while (tail != (function(){
+                                    var symbol = l2;
+                                    var value = symbol.value;
+                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                    return value;
+                                })()){
+                                    args.push(tail.car);
+                                    tail = tail.cdr;
+                                }
+                                return f.apply(this, args);
+                            })();
+                        })((function(){
+                            var symbol = l137;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(v596)) : v595);
                     })((function(){
-                        var symbol = l159;
+                        var symbol = l161;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var tmp = v583;
+                        var tmp = v595;
                         return tmp === (function(){
                             var symbol = l2;
                             var value = symbol.value;
@@ -16029,7 +16406,7 @@ var l240 = {name: "LS-MACROEXPAND-1"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 218)
+                if (cf.type == 'block' && cf.id == 221)
                     return cf.value;
                 else
                     throw cf;
@@ -16037,26 +16414,26 @@ var l240 = {name: "LS-MACROEXPAND-1"};
         })();
     
     }));
-    return l240;
+    return l243;
 })();
-var l241 = {name: "COMPILE-FUNCALL"};
+var l244 = {name: "COMPILE-FUNCALL"};
 (function(){
-    (l241).function = (function(v588){
-        ((v588)["fname"] = "COMPILE-FUNCALL");
-        return v588;
-    })((function (v586,v587){
+    (l244).function = (function(v602){
+        ((v602)["fname"] = "COMPILE-FUNCALL");
+        return v602;
+    })((function (v600,v601){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (function(){
-                        var symbol = l99;
+                        var symbol = l102;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -16070,13 +16447,13 @@ var l241 = {name: "COMPILE-FUNCALL"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(l124), (function(){
+                    })()(l99), (function(){
                         var symbol = l47;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v586))), "(", (function(){
-                        var symbol = l101;
+                    })()(v600))), "(", (function(){
+                        var symbol = l104;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -16086,15 +16463,15 @@ var l241 = {name: "COMPILE-FUNCALL"};
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
                     })()((function(){
-                        var symbol = l106;
+                        var symbol = l109;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v587), ", "), ")");
+                    })(), v601), ", "), ")");
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 219)
+                if (cf.type == 'block' && cf.id == 222)
                     return cf.value;
                 else
                     throw cf;
@@ -16102,20 +16479,20 @@ var l241 = {name: "COMPILE-FUNCALL"};
         })();
     
     }));
-    return l241;
+    return l244;
 })();
 (function(){
-    (l106).function = (function(v592){
-        ((v592)["fname"] = "LS-COMPILE");
-        return v592;
-    })((function (v589){
+    (l109).function = (function(v606){
+        ((v606)["fname"] = "LS-COMPILE");
+        return v606;
+    })((function (v603){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (((function(){
-                        var tmp = v589;
+                        var tmp = v603;
                         return (typeof tmp == 'object' && 'name' in tmp);
                     })()?(function(){
                         var symbol = l3;
@@ -16133,13 +16510,13 @@ var l241 = {name: "COMPILE-FUNCALL"};
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })() ? (function(){
-                        return (function(v590){
+                        return (function(v604){
                             return ((((function(){
-                                var symbol = l134;
+                                var symbol = l136;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v590) === l153)?(function(){
+                            })()(v604) === l155)?(function(){
                                 var symbol = l3;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -16155,27 +16532,12 @@ var l241 = {name: "COMPILE-FUNCALL"};
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })() ? (function(){
-                                var symbol = l135;
+                                var symbol = l137;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v590) : (function(){
-                                var symbol = l106;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()((function(){
-                                var symbol = l65;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()((function(){
-                                var symbol = l47;
-                                var func = symbol.function;
-                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                return func;
-                            })()(l219), (function(){
-                                var symbol = l47;
+                            })()(v604) : (function(){
+                                var symbol = l109;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
@@ -16189,29 +16551,44 @@ var l241 = {name: "COMPILE-FUNCALL"};
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(l126), (function(){
+                            })()(l222), (function(){
                                 var symbol = l47;
                                 var func = symbol.function;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })()(v589))))));
+                            })()((function(){
+                                var symbol = l65;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()((function(){
+                                var symbol = l47;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(l128), (function(){
+                                var symbol = l47;
+                                var func = symbol.function;
+                                if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                return func;
+                            })()(v603))))));
                         })((function(){
-                            var symbol = l145;
+                            var symbol = l147;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v589, (function(){
-                            var symbol = l147;
+                        })()(v603, (function(){
+                            var symbol = l149;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l141));
+                        })(), l100));
                     })() : ((function(){
                         var symbol = l77;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v589) !== (function(){
+                    })()(v603) !== (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -16222,8 +16599,8 @@ var l241 = {name: "COMPILE-FUNCALL"};
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v589);
-                    })() : (((typeof(v589) == "string")?(function(){
+                        })()(v603);
+                    })() : (((typeof(v603) == "string")?(function(){
                         var symbol = l3;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -16240,22 +16617,22 @@ var l241 = {name: "COMPILE-FUNCALL"};
                         return value;
                     })() ? (function(){
                         return (function(){
-                            var symbol = l99;
+                            var symbol = l102;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()("\"", (function(){
-                            var symbol = l109;
+                            var symbol = l112;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v589), "\"");
+                        })()(v603), "\"");
                     })() : ((function(){
                         var symbol = l62;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v589) !== (function(){
+                    })()(v603) !== (function(){
                         var symbol = l2;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -16267,7 +16644,7 @@ var l241 = {name: "COMPILE-FUNCALL"};
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var tmp = v589;
+                            var tmp = v603;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -16280,7 +16657,7 @@ var l241 = {name: "COMPILE-FUNCALL"};
                                 return value;
                             })(): tmp.car;
                         })(), (function(){
-                            var symbol = l160;
+                            var symbol = l162;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
@@ -16289,12 +16666,12 @@ var l241 = {name: "COMPILE-FUNCALL"};
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })() ? (function(v591){
+                        })() ? (function(v605){
                             return (function(){
-                                var f = v591;
+                                var f = v605;
                                 var args = [];
                                 var tail = ((function(){
-                                    var tmp = v589;
+                                    var tmp = v603;
                                     return tmp === (function(){
                                         var symbol = l2;
                                         var value = symbol.value;
@@ -16329,7 +16706,7 @@ var l241 = {name: "COMPILE-FUNCALL"};
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var tmp = v589;
+                            var tmp = v603;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -16342,17 +16719,17 @@ var l241 = {name: "COMPILE-FUNCALL"};
                                 return value;
                             })(): tmp.car;
                         })(), (function(){
-                            var symbol = l160;
+                            var symbol = l162;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })()))) : ((function(){
-                            var symbol = l159;
+                            var symbol = l161;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var tmp = v589;
+                            var tmp = v603;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -16370,22 +16747,22 @@ var l241 = {name: "COMPILE-FUNCALL"};
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })() ? (function(){
-                            var symbol = l106;
+                            var symbol = l109;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var symbol = l240;
+                            var symbol = l243;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v589)) : (function(){
-                            var symbol = l241;
+                        })()(v603)) : (function(){
+                            var symbol = l244;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()((function(){
-                            var tmp = v589;
+                            var tmp = v603;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -16398,7 +16775,7 @@ var l241 = {name: "COMPILE-FUNCALL"};
                                 return value;
                             })(): tmp.car;
                         })(), (function(){
-                            var tmp = v589;
+                            var tmp = v603;
                             return tmp === (function(){
                                 var symbol = l2;
                                 var value = symbol.value;
@@ -16420,7 +16797,7 @@ var l241 = {name: "COMPILE-FUNCALL"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 220)
+                if (cf.type == 'block' && cf.id == 223)
                     return cf.value;
                 else
                     throw cf;
@@ -16428,27 +16805,27 @@ var l241 = {name: "COMPILE-FUNCALL"};
         })();
     
     }));
-    return l106;
+    return l109;
 })();
-var l242 = {name: "LS-COMPILE-TOPLEVEL"};
+var l245 = {name: "LS-COMPILE-TOPLEVEL"};
 (function(){
-    (l242).function = (function(v597){
-        ((v597)["fname"] = "LS-COMPILE-TOPLEVEL");
-        return v597;
-    })((function (v593){
+    (l245).function = (function(v611){
+        ((v611)["fname"] = "LS-COMPILE-TOPLEVEL");
+        return v611;
+    })((function (v607){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v594){
+                    return (function(v608){
                         try {
                             var tmp;
-                            tmp = l154.value;
-                            l154.value = v594;
-                            v594 = tmp;
+                            tmp = l156.value;
+                            l156.value = v608;
+                            v608 = tmp;
                             return ((((function(){
-                                var tmp = v593;
+                                var tmp = v607;
                                 return (typeof tmp == 'object' && 'car' in tmp);
                             })()?(function(){
                                 var symbol = l3;
@@ -16466,7 +16843,7 @@ var l242 = {name: "LS-COMPILE-TOPLEVEL"};
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })() ? (((function(){
-                                var tmp = v593;
+                                var tmp = v607;
                                 return tmp === (function(){
                                     var symbol = l2;
                                     var value = symbol.value;
@@ -16478,7 +16855,7 @@ var l242 = {name: "LS-COMPILE-TOPLEVEL"};
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
                                 })(): tmp.car;
-                            })() === l186)?(function(){
+                            })() === l189)?(function(){
                                 var symbol = l3;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -16499,9 +16876,9 @@ var l242 = {name: "LS-COMPILE-TOPLEVEL"};
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })() ? (function(){
-                                return (function(v595){
+                                return (function(v609){
                                     return (function(){
-                                        var symbol = l101;
+                                        var symbol = l104;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
@@ -16511,23 +16888,23 @@ var l242 = {name: "LS-COMPILE-TOPLEVEL"};
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
                                     })()((function(){
-                                        var symbol = l156;
+                                        var symbol = l158;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
-                                    })(), v595));
+                                    })(), v609));
                                 })((function(){
                                     var symbol = l71;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
                                 })()((function(){
-                                    var symbol = l242;
+                                    var symbol = l245;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
                                 })(), (function(){
-                                    var tmp = v593;
+                                    var tmp = v607;
                                     return tmp === (function(){
                                         var symbol = l2;
                                         var value = symbol.value;
@@ -16541,58 +16918,58 @@ var l242 = {name: "LS-COMPILE-TOPLEVEL"};
                                     })(): tmp.cdr;
                                 })()));
                             })() : (function(){
-                                return (function(v596){
+                                return (function(v610){
                                     return (function(){
-                                        var symbol = l99;
-                                        var func = symbol.function;
-                                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                        return func;
-                                    })()((function(){
                                         var symbol = l102;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
                                     })()((function(){
-                                        var symbol = l157;
+                                        var symbol = l105;
+                                        var func = symbol.function;
+                                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                        return func;
+                                    })()((function(){
+                                        var symbol = l159;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
                                     })()(), (function(){
-                                        var symbol = l99;
+                                        var symbol = l102;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
                                     })()(";", (function(){
-                                        var symbol = l98;
+                                        var symbol = l101;
                                         var value = symbol.value;
                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                         return value;
-                                    })())), (v596 !== (function(){
+                                    })())), (v610 !== (function(){
                                         var symbol = l2;
                                         var value = symbol.value;
                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                         return value;
                                     })() ? (function(){
-                                        var symbol = l99;
+                                        var symbol = l102;
                                         var func = symbol.function;
                                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                         return func;
-                                    })()(v596, ";", (function(){
-                                        var symbol = l98;
+                                    })()(v610, ";", (function(){
+                                        var symbol = l101;
                                         var value = symbol.value;
                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                         return value;
                                     })()) : ""));
                                 })((function(){
-                                    var symbol = l106;
+                                    var symbol = l109;
                                     var func = symbol.function;
                                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                     return func;
-                                })()(v593));
+                                })()(v607));
                             })());
                         }
                         finally {
-                            l154.value = v594;
+                            l156.value = v608;
                         }
                     })((function(){
                         var symbol = l2;
@@ -16603,7 +16980,7 @@ var l242 = {name: "LS-COMPILE-TOPLEVEL"};
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 221)
+                if (cf.type == 'block' && cf.id == 224)
                     return cf.value;
                 else
                     throw cf;
@@ -16611,41 +16988,41 @@ var l242 = {name: "LS-COMPILE-TOPLEVEL"};
         })();
     
     }));
-    return l242;
+    return l245;
 })();
-var l243 = {name: "WITH-COMPILATION-UNIT"};
-l243;
+var l246 = {name: "WITH-COMPILATION-UNIT"};
+l246;
 (function(){
-    (l185).function = (function(v603){
-        ((v603)["fname"] = "EVAL");
-        return v603;
-    })((function (v598){
+    (l188).function = (function(v617){
+        ((v617)["fname"] = "EVAL");
+        return v617;
+    })((function (v612){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v602){
+                    return (function(v616){
                         return (function(){
-                            var string = v602;
+                            var string = v616;
                             if (typeof string != 'string')
                                 throw 'The value ' + string + ' is not a type string.';
                             return eval.apply(window, [string]);
                         })();
-                    })((function(v599){
+                    })((function(v613){
                         (function(){
                             try {
                                 return (function(){
-                                    return (function(v600,v601){
+                                    return (function(v614,v615){
                                         (function(){
-                                            while(v600 !== (function(){
+                                            while(v614 !== (function(){
                                                 var symbol = l2;
                                                 var value = symbol.value;
                                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                 return value;
                                             })()){
-                                                v601 = (function(){
-                                                    var tmp = v600;
+                                                v615 = (function(){
+                                                    var tmp = v614;
                                                     return tmp === (function(){
                                                         var symbol = l2;
                                                         var value = symbol.value;
@@ -16659,7 +17036,7 @@ l243;
                                                     })(): tmp.car;
                                                 })();
                                                 (function(){
-                                                    (v601)();
+                                                    (v615)();
                                                     return (function(){
                                                         var symbol = l2;
                                                         var value = symbol.value;
@@ -16667,8 +17044,8 @@ l243;
                                                         return value;
                                                     })();
                                                 })();
-                                                v600 = (function(){
-                                                    var tmp = v600;
+                                                v614 = (function(){
+                                                    var tmp = v614;
                                                     return tmp === (function(){
                                                         var symbol = l2;
                                                         var value = symbol.value;
@@ -16695,7 +17072,7 @@ l243;
                                             return value;
                                         })();
                                     })((function(){
-                                        var symbol = l131;
+                                        var symbol = l133;
                                         var value = symbol.value;
                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                         return value;
@@ -16708,37 +17085,37 @@ l243;
                                 })();
                             }
                             catch (cf){
-                                if (cf.type == 'block' && cf.id == 223)
+                                if (cf.type == 'block' && cf.id == 226)
                                     return cf.value;
                                 else
                                     throw cf;
                             }
                         })();
-                        return v599;
+                        return v613;
                     })((function(){
-                        (l131).value = (function(){
+                        (l133).value = (function(){
                             var symbol = l2;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })();
                         (function(){
-                            var symbol = l148;
+                            var symbol = l150;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
                         })()();
                         return (function(){
-                            var symbol = l242;
+                            var symbol = l245;
                             var func = symbol.function;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })()(v598);
+                        })()(v612);
                     })()));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 222)
+                if (cf.type == 'block' && cf.id == 225)
                     return cf.value;
                 else
                     throw cf;
@@ -16746,7 +17123,7 @@ l243;
         })();
     
     }));
-    return l185;
+    return l188;
 })();
 (function(){
     var string = "var lisp";
@@ -16756,960 +17133,979 @@ l243;
 })();
 (lisp = {});
 (lisp.read = (function(){
-    var symbol = l130;
+    var symbol = l132;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
 })());
 (lisp.print = (function(){
-    var symbol = l108;
+    var symbol = l111;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
 })());
 (lisp.eval = (function(){
-    var symbol = l185;
+    var symbol = l188;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
 })());
 (lisp.compile = (function(){
-    var symbol = l242;
+    var symbol = l245;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
 })());
-(lisp.evalString = (function (v604){
+(lisp.evalString = (function (v618){
     if (arguments.length < 1) throw 'too few arguments';
     if (arguments.length > 1) throw 'too many arguments';
     return (function(){
-        var symbol = l185;
+        var symbol = l188;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
     })()((function(){
-        var symbol = l130;
+        var symbol = l132;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(v604));
+    })()(v618));
 
 }));
-(lisp.compileString = (function (v605){
+(lisp.compileString = (function (v619){
     if (arguments.length < 1) throw 'too few arguments';
     if (arguments.length > 1) throw 'too many arguments';
     return (function(){
-        var symbol = l242;
+        var symbol = l245;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
     })()((function(){
-        var symbol = l130;
+        var symbol = l132;
         var func = symbol.function;
         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
         return func;
-    })()(v605));
+    })()(v619));
 
 }));
-var l244 = {car: {car: l243, cdr: "l243"}, cdr: {car: {car: l242, cdr: "l242"}, cdr: {car: {car: l241, cdr: "l241"}, cdr: {car: {car: l240, cdr: "l240"}, cdr: {car: {car: l239, cdr: "l239"}, cdr: {car: {car: l238, cdr: "l238"}, cdr: {car: {car: l237, cdr: "l237"}, cdr: {car: {car: l236, cdr: "l236"}, cdr: {car: {car: l235, cdr: "l235"}, cdr: {car: {car: l234, cdr: "l234"}, cdr: {car: {car: l233, cdr: "l233"}, cdr: {car: {car: l232, cdr: "l232"}, cdr: {car: {car: l231, cdr: "l231"}, cdr: {car: {car: l230, cdr: "l230"}, cdr: {car: {car: l229, cdr: "l229"}, cdr: {car: {car: l228, cdr: "l228"}, cdr: {car: {car: l227, cdr: "l227"}, cdr: {car: {car: l226, cdr: "l226"}, cdr: {car: {car: l225, cdr: "l225"}, cdr: {car: {car: l224, cdr: "l224"}, cdr: {car: {car: l223, cdr: "l223"}, cdr: {car: {car: l222, cdr: "l222"}, cdr: {car: {car: l221, cdr: "l221"}, cdr: {car: {car: l220, cdr: "l220"}, cdr: {car: {car: l219, cdr: "l219"}, cdr: {car: {car: l218, cdr: "l218"}, cdr: {car: {car: l217, cdr: "l217"}, cdr: {car: {car: l216, cdr: "l216"}, cdr: {car: {car: l215, cdr: "l215"}, cdr: {car: {car: l214, cdr: "l214"}, cdr: {car: {car: l213, cdr: "l213"}, cdr: {car: {car: l212, cdr: "l212"}, cdr: {car: {car: l211, cdr: "l211"}, cdr: {car: {car: l210, cdr: "l210"}, cdr: {car: {car: l209, cdr: "l209"}, cdr: {car: {car: l208, cdr: "l208"}, cdr: {car: {car: l207, cdr: "l207"}, cdr: {car: {car: l206, cdr: "l206"}, cdr: {car: {car: l205, cdr: "l205"}, cdr: {car: {car: l204, cdr: "l204"}, cdr: {car: {car: l203, cdr: "l203"}, cdr: {car: {car: l202, cdr: "l202"}, cdr: {car: {car: l201, cdr: "l201"}, cdr: {car: {car: l200, cdr: "l200"}, cdr: {car: {car: l199, cdr: "l199"}, cdr: {car: {car: l198, cdr: "l198"}, cdr: {car: {car: l197, cdr: "l197"}, cdr: {car: {car: l196, cdr: "l196"}, cdr: {car: {car: l195, cdr: "l195"}, cdr: {car: {car: l194, cdr: "l194"}, cdr: {car: {car: l193, cdr: "l193"}, cdr: {car: {car: l192, cdr: "l192"}, cdr: {car: {car: l191, cdr: "l191"}, cdr: {car: {car: l190, cdr: "l190"}, cdr: {car: {car: l189, cdr: "l189"}, cdr: {car: {car: l188, cdr: "l188"}, cdr: {car: {car: l187, cdr: "l187"}, cdr: {car: {car: l186, cdr: "l186"}, cdr: {car: {car: l185, cdr: "l185"}, cdr: {car: {car: l184, cdr: "l184"}, cdr: {car: {car: l183, cdr: "l183"}, cdr: {car: {car: l182, cdr: "l182"}, cdr: {car: {car: l181, cdr: "l181"}, cdr: {car: {car: l180, cdr: "l180"}, cdr: {car: {car: l179, cdr: "l179"}, cdr: {car: {car: l178, cdr: "l178"}, cdr: {car: {car: l177, cdr: "l177"}, cdr: {car: {car: l176, cdr: "l176"}, cdr: {car: {car: l175, cdr: "l175"}, cdr: {car: {car: l174, cdr: "l174"}, cdr: {car: {car: l173, cdr: "l173"}, cdr: {car: {car: l172, cdr: "l172"}, cdr: {car: {car: l171, cdr: "l171"}, cdr: {car: {car: l170, cdr: "l170"}, cdr: {car: {car: l169, cdr: "l169"}, cdr: {car: {car: l168, cdr: "l168"}, cdr: {car: {car: l166, cdr: "l166"}, cdr: {car: {car: l165, cdr: "l165"}, cdr: {car: {car: l164, cdr: "l164"}, cdr: {car: {car: l163, cdr: "l163"}, cdr: {car: {car: l162, cdr: "l162"}, cdr: {car: {car: l161, cdr: "l161"}, cdr: {car: {car: l160, cdr: "l160"}, cdr: {car: {car: l159, cdr: "l159"}, cdr: {car: {car: l158, cdr: "l158"}, cdr: {car: {car: l157, cdr: "l157"}, cdr: {car: {car: l156, cdr: "l156"}, cdr: {car: {car: l155, cdr: "l155"}, cdr: {car: {car: l154, cdr: "l154"}, cdr: {car: {car: l153, cdr: "l153"}, cdr: {car: {car: l152, cdr: "l152"}, cdr: {car: {car: l151, cdr: "l151"}, cdr: {car: {car: l150, cdr: "l150"}, cdr: {car: {car: l149, cdr: "l149"}, cdr: {car: {car: l148, cdr: "l148"}, cdr: {car: {car: l147, cdr: "l147"}, cdr: {car: {car: l146, cdr: "l146"}, cdr: {car: {car: l145, cdr: "l145"}, cdr: {car: {car: l144, cdr: "l144"}, cdr: {car: {car: l143, cdr: "l143"}, cdr: {car: {car: l142, cdr: "l142"}, cdr: {car: {car: l141, cdr: "l141"}, cdr: {car: {car: l140, cdr: "l140"}, cdr: {car: {car: l139, cdr: "l139"}, cdr: {car: {car: l138, cdr: "l138"}, cdr: {car: {car: l137, cdr: "l137"}, cdr: {car: {car: l136, cdr: "l136"}, cdr: {car: {car: l135, cdr: "l135"}, cdr: {car: {car: l134, cdr: "l134"}, cdr: {car: {car: l133, cdr: "l133"}, cdr: {car: {car: l132, cdr: "l132"}, cdr: {car: {car: l131, cdr: "l131"}, cdr: {car: {car: l130, cdr: "l130"}, cdr: {car: {car: l129, cdr: "l129"}, cdr: {car: {car: l128, cdr: "l128"}, cdr: {car: {car: l127, cdr: "l127"}, cdr: {car: {car: l126, cdr: "l126"}, cdr: {car: {car: l125, cdr: "l125"}, cdr: {car: {car: l124, cdr: "l124"}, cdr: {car: {car: l123, cdr: "l123"}, cdr: {car: {car: l122, cdr: "l122"}, cdr: {car: {car: l121, cdr: "l121"}, cdr: {car: {car: l120, cdr: "l120"}, cdr: {car: {car: l119, cdr: "l119"}, cdr: {car: {car: l118, cdr: "l118"}, cdr: {car: {car: l117, cdr: "l117"}, cdr: {car: {car: l116, cdr: "l116"}, cdr: {car: {car: l115, cdr: "l115"}, cdr: {car: {car: l114, cdr: "l114"}, cdr: {car: {car: l113, cdr: "l113"}, cdr: {car: {car: l112, cdr: "l112"}, cdr: {car: {car: l111, cdr: "l111"}, cdr: {car: {car: l110, cdr: "l110"}, cdr: {car: {car: l109, cdr: "l109"}, cdr: {car: {car: l108, cdr: "l108"}, cdr: {car: {car: l107, cdr: "l107"}, cdr: {car: {car: l106, cdr: "l106"}, cdr: {car: {car: l105, cdr: "l105"}, cdr: {car: {car: l104, cdr: "l104"}, cdr: {car: {car: l103, cdr: "l103"}, cdr: {car: {car: l102, cdr: "l102"}, cdr: {car: {car: l101, cdr: "l101"}, cdr: {car: {car: l100, cdr: "l100"}, cdr: {car: {car: l99, cdr: "l99"}, cdr: {car: {car: l98, cdr: "l98"}, cdr: {car: {car: l97, cdr: "l97"}, cdr: {car: {car: l96, cdr: "l96"}, cdr: {car: {car: l95, cdr: "l95"}, cdr: {car: {car: l94, cdr: "l94"}, cdr: {car: {car: l93, cdr: "l93"}, cdr: {car: {car: l92, cdr: "l92"}, cdr: {car: {car: l91, cdr: "l91"}, cdr: {car: {car: l90, cdr: "l90"}, cdr: {car: {car: l89, cdr: "l89"}, cdr: {car: {car: l88, cdr: "l88"}, cdr: {car: {car: l87, cdr: "l87"}, cdr: {car: {car: l86, cdr: "l86"}, cdr: {car: {car: l85, cdr: "l85"}, cdr: {car: {car: l84, cdr: "l84"}, cdr: {car: {car: l83, cdr: "l83"}, cdr: {car: {car: l82, cdr: "l82"}, cdr: {car: {car: l81, cdr: "l81"}, cdr: {car: {car: l80, cdr: "l80"}, cdr: {car: {car: l79, cdr: "l79"}, cdr: {car: {car: l78, cdr: "l78"}, cdr: {car: {car: l77, cdr: "l77"}, cdr: {car: {car: l76, cdr: "l76"}, cdr: {car: {car: l75, cdr: "l75"}, cdr: {car: {car: l74, cdr: "l74"}, cdr: {car: {car: l73, cdr: "l73"}, cdr: {car: {car: l72, cdr: "l72"}, cdr: {car: {car: l71, cdr: "l71"}, cdr: {car: {car: l70, cdr: "l70"}, cdr: {car: {car: l69, cdr: "l69"}, cdr: {car: {car: l68, cdr: "l68"}, cdr: {car: {car: l67, cdr: "l67"}, cdr: {car: {car: l66, cdr: "l66"}, cdr: {car: {car: l65, cdr: "l65"}, cdr: {car: {car: l64, cdr: "l64"}, cdr: {car: {car: l63, cdr: "l63"}, cdr: {car: {car: l62, cdr: "l62"}, cdr: {car: {car: l61, cdr: "l61"}, cdr: {car: {car: l60, cdr: "l60"}, cdr: {car: {car: l59, cdr: "l59"}, cdr: {car: {car: l58, cdr: "l58"}, cdr: {car: {car: l57, cdr: "l57"}, cdr: {car: {car: l56, cdr: "l56"}, cdr: {car: {car: l55, cdr: "l55"}, cdr: {car: {car: l54, cdr: "l54"}, cdr: {car: {car: l53, cdr: "l53"}, cdr: {car: {car: l52, cdr: "l52"}, cdr: {car: {car: l51, cdr: "l51"}, cdr: {car: {car: l50, cdr: "l50"}, cdr: {car: {car: l49, cdr: "l49"}, cdr: {car: {car: l48, cdr: "l48"}, cdr: {car: {car: l47, cdr: "l47"}, cdr: {car: {car: l46, cdr: "l46"}, cdr: {car: {car: l45, cdr: "l45"}, cdr: {car: {car: l44, cdr: "l44"}, cdr: {car: {car: l43, cdr: "l43"}, cdr: {car: {car: l42, cdr: "l42"}, cdr: {car: {car: l41, cdr: "l41"}, cdr: {car: {car: l40, cdr: "l40"}, cdr: {car: {car: l39, cdr: "l39"}, cdr: {car: {car: l38, cdr: "l38"}, cdr: {car: {car: l37, cdr: "l37"}, cdr: {car: {car: l36, cdr: "l36"}, cdr: {car: {car: l35, cdr: "l35"}, cdr: {car: {car: l34, cdr: "l34"}, cdr: {car: {car: l33, cdr: "l33"}, cdr: {car: {car: l32, cdr: "l32"}, cdr: {car: {car: l31, cdr: "l31"}, cdr: {car: {car: l30, cdr: "l30"}, cdr: {car: {car: l29, cdr: "l29"}, cdr: {car: {car: l28, cdr: "l28"}, cdr: {car: {car: l27, cdr: "l27"}, cdr: {car: {car: l26, cdr: "l26"}, cdr: {car: {car: l25, cdr: "l25"}, cdr: {car: {car: l24, cdr: "l24"}, cdr: {car: {car: l23, cdr: "l23"}, cdr: {car: {car: l22, cdr: "l22"}, cdr: {car: {car: l21, cdr: "l21"}, cdr: {car: {car: l20, cdr: "l20"}, cdr: {car: {car: l19, cdr: "l19"}, cdr: {car: {car: l18, cdr: "l18"}, cdr: {car: {car: l17, cdr: "l17"}, cdr: {car: {car: l16, cdr: "l16"}, cdr: {car: {car: l15, cdr: "l15"}, cdr: {car: {car: l14, cdr: "l14"}, cdr: {car: {car: l13, cdr: "l13"}, cdr: {car: {car: l12, cdr: "l12"}, cdr: {car: {car: l11, cdr: "l11"}, cdr: {car: {car: l10, cdr: "l10"}, cdr: {car: {car: l9, cdr: "l9"}, cdr: {car: {car: l8, cdr: "l8"}, cdr: {car: {car: l7, cdr: "l7"}, cdr: {car: {car: l6, cdr: "l6"}, cdr: {car: {car: l5, cdr: "l5"}, cdr: {car: {car: l4, cdr: "l4"}, cdr: {car: {car: l3, cdr: "l3"}, cdr: {car: {car: l2, cdr: "l2"}, cdr: {car: {car: l1, cdr: "l1"}, cdr: l2}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}};
-var l245 = {name: "BODY"};
-var l246 = {name: "CHECK"};
-var l247 = {name: "DECLS"};
-var l248 = {name: "DECL"};
-var l249 = {name: "NAME"};
-var l250 = {name: "ARGS"};
-var l251 = {name: "ARG"};
-var l252 = {name: "FORM"};
-var l253 = {name: "FORM1"};
-var l254 = {name: "RESULT"};
-var l255 = {name: "VALUE"};
-var l256 = {name: "FORMS"};
-var l257 = {name: "G"};
-var l258 = {name: "CLAUSULES"};
-var l259 = {name: "!FORM"};
-var l260 = {name: "CLAUSULE"};
-var l261 = {name: "ITER"};
-var l262 = {name: "G!TO"};
-var l263 = {name: "VAR"};
-var l264 = {name: "TO"};
-var l265 = {name: "G!LIST"};
-var l266 = {name: "X"};
-var l267 = {name: "PLACE"};
-var l268 = {name: "DELTA"};
-var l269 = {name: "CONDITION"};
-var l270 = {name: "&BODY"};
-var l271 = {car: l2, cdr: {car: {car: {car: l243, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l166, cdr: {car: l245, cdr: l2}}, cdr: {car: {car: l127, cdr: {car: {car: l59, cdr: {car: {car: l186, cdr: {car: {car: l174, cdr: {car: l131, cdr: {car: l2, cdr: l2}}}, cdr: {car: {car: l148, cdr: l2}, cdr: {car: {car: l128, cdr: {car: l245, cdr: l2}}, cdr: l2}}}}, cdr: {car: {car: l52, cdr: {car: {car: l246, cdr: {car: l131, cdr: l2}}, cdr: {car: {car: l230, cdr: {car: l246, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l204, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l247, cdr: {car: l166, cdr: {car: l245, cdr: l2}}}, cdr: {car: {car: l127, cdr: {car: {car: l107, cdr: {car: {car: l128, cdr: {car: {car: l71, cdr: {car: {car: l173, cdr: {car: {car: l248, cdr: l2}, cdr: {car: {car: l127, cdr: {car: {car: l99, cdr: {car: "var ", cdr: {car: {car: l129, cdr: {car: {car: l43, cdr: {car: l248, cdr: l2}}, cdr: l2}}, cdr: {car: " = ", cdr: {car: {car: l129, cdr: {car: {car: l45, cdr: {car: l248, cdr: l2}}, cdr: l2}}, cdr: {car: ";", cdr: {car: l98, cdr: l2}}}}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l247, cdr: l2}}}, cdr: l2}}, cdr: {car: {car: l128, cdr: {car: {car: l71, cdr: {car: {car: l173, cdr: {car: {car: l248, cdr: l2}, cdr: {car: {car: l127, cdr: {car: {car: l99, cdr: {car: "if (typeof ", cdr: {car: {car: l129, cdr: {car: {car: l43, cdr: {car: l248, cdr: l2}}, cdr: l2}}, cdr: {car: " != '", cdr: {car: {car: l129, cdr: {car: {car: l44, cdr: {car: l248, cdr: l2}}, cdr: l2}}, cdr: {car: "')", cdr: {car: l98, cdr: {car: {car: l104, cdr: {car: "throw 'The value ' + ", cdr: {car: {car: l129, cdr: {car: {car: l43, cdr: {car: l248, cdr: l2}}, cdr: l2}}, cdr: {car: " + ' is not a type ", cdr: {car: {car: l129, cdr: {car: {car: l44, cdr: {car: l248, cdr: l2}}, cdr: l2}}, cdr: {car: ".';", cdr: {car: l98, cdr: l2}}}}}}}, cdr: l2}}}}}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l247, cdr: l2}}}, cdr: l2}}, cdr: {car: {car: l99, cdr: {car: "return ", cdr: {car: {car: l186, cdr: {car: {car: l128, cdr: {car: l245, cdr: l2}}, cdr: l2}}, cdr: {car: ";", cdr: {car: l98, cdr: l2}}}}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l203, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l249, cdr: {car: l250, cdr: {car: l166, cdr: {car: l245, cdr: l2}}}}, cdr: {car: {car: l127, cdr: {car: {car: l186, cdr: {car: {car: l162, cdr: {car: {car: l129, cdr: {car: l249, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: l250, cdr: l2}}, cdr: {car: {car: l189, cdr: {car: {car: l129, cdr: {car: {car: l71, cdr: {car: {car: l173, cdr: {car: {car: l251, cdr: l2}, cdr: {car: {car: l127, cdr: {car: {car: {car: l129, cdr: {car: l251, cdr: l2}}, cdr: {car: {car: l106, cdr: {car: {car: l129, cdr: {car: l251, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l250, cdr: l2}}}, cdr: l2}}, cdr: {car: {car: l128, cdr: {car: l245, cdr: l2}}, cdr: l2}}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l127, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l252, cdr: l2}, cdr: {car: {car: l201, cdr: {car: l252, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l187, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l249, cdr: {car: l250, cdr: {car: l252, cdr: l2}}}, cdr: {car: {car: l127, cdr: {car: {car: l162, cdr: {car: {car: l129, cdr: {car: l249, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: l250, cdr: l2}}, cdr: {car: {car: l106, cdr: {car: {car: l129, cdr: {car: l252, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l162, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l249, cdr: {car: l250, cdr: {car: l166, cdr: {car: l245, cdr: l2}}}}, cdr: {car: {car: l127, cdr: {car: {car: l51, cdr: {car: {car: l47, cdr: {car: {car: l126, cdr: {car: {car: l129, cdr: {car: l249, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l173, cdr: {car: {car: l129, cdr: {car: l250, cdr: l2}}, cdr: {car: {car: l142, cdr: {car: {car: l129, cdr: {car: l249, cdr: l2}}, cdr: {car: {car: l128, cdr: {car: l245, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: l2}}}, cdr: {car: l160, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l107, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l166, cdr: {car: l245, cdr: l2}}, cdr: {car: {car: l127, cdr: {car: {car: l99, cdr: {car: "(function(){", cdr: {car: l98, cdr: {car: {car: l104, cdr: {car: {car: l128, cdr: {car: l245, cdr: l2}}, cdr: l2}}, cdr: {car: "})()", cdr: l2}}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l100, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l141, cdr: {car: l166, cdr: {car: l252, cdr: l2}}}, cdr: {car: {car: l127, cdr: {car: {car: l174, cdr: {car: {car: l129, cdr: {car: l141, cdr: l2}}, cdr: {car: {car: l99, cdr: {car: {car: l129, cdr: {car: l141, cdr: l2}}, cdr: {car: {car: l186, cdr: {car: {car: l128, cdr: {car: l252, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l60, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l253, cdr: {car: l254, cdr: {car: l166, cdr: {car: l245, cdr: l2}}}}, cdr: {car: {car: l127, cdr: {car: {car: l59, cdr: {car: {car: l186, cdr: {car: {car: l129, cdr: {car: l253, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: l254, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l128, cdr: {car: l245, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l59, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l252, cdr: {car: l166, cdr: {car: l245, cdr: l2}}}, cdr: {car: {car: l189, cdr: {car: {car: {car: l255, cdr: {car: {car: l18, cdr: l2}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l127, cdr: {car: {car: l189, cdr: {car: {car: {car: {car: l129, cdr: {car: l255, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: l252, cdr: l2}}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l128, cdr: {car: l245, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: l255, cdr: l2}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l58, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l166, cdr: {car: l256, cdr: l2}}, cdr: {car: {car: l54, cdr: {car: {car: {car: l11, cdr: {car: l256, cdr: l2}}, cdr: {car: l2, cdr: l2}}, cdr: {car: {car: {car: l11, cdr: {car: {car: l35, cdr: {car: l256, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l34, cdr: {car: l256, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l3, cdr: {car: {car: l189, cdr: {car: {car: {car: l257, cdr: {car: {car: l18, cdr: l2}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l127, cdr: {car: {car: l189, cdr: {car: {car: {car: {car: l129, cdr: {car: l257, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: {car: l34, cdr: {car: l256, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l163, cdr: {car: {car: l129, cdr: {car: l257, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: l257, cdr: l2}}, cdr: {car: {car: l58, cdr: {car: {car: l128, cdr: {car: {car: l35, cdr: {car: l256, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l57, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l166, cdr: {car: l256, cdr: l2}}, cdr: {car: {car: l54, cdr: {car: {car: {car: l11, cdr: {car: l256, cdr: l2}}, cdr: {car: l3, cdr: l2}}, cdr: {car: {car: {car: l11, cdr: {car: {car: l35, cdr: {car: l256, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l34, cdr: {car: l256, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l3, cdr: {car: {car: l127, cdr: {car: {car: l163, cdr: {car: {car: l129, cdr: {car: {car: l34, cdr: {car: l256, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l57, cdr: {car: {car: l128, cdr: {car: {car: l35, cdr: {car: l256, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: {car: l2, cdr: l2}}}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l56, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l252, cdr: {car: l166, cdr: {car: l258, cdr: l2}}}, cdr: {car: {car: l127, cdr: {car: {car: l55, cdr: {car: {car: l129, cdr: {car: l252, cdr: l2}}, cdr: {car: {car: l128, cdr: {car: {car: l65, cdr: {car: l258, cdr: {car: {car: l127, cdr: {car: {car: {car: l3, cdr: {car: {car: l233, cdr: {car: "ECASE expression failed.", cdr: l2}}, cdr: l2}}, cdr: l2}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l55, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l252, cdr: {car: l166, cdr: {car: l258, cdr: l2}}}, cdr: {car: {car: l189, cdr: {car: {car: {car: l259, cdr: {car: {car: l18, cdr: l2}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l127, cdr: {car: {car: l189, cdr: {car: {car: {car: {car: l129, cdr: {car: l259, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: l252, cdr: l2}}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l54, cdr: {car: {car: l128, cdr: {car: {car: l71, cdr: {car: {car: l173, cdr: {car: {car: l260, cdr: l2}, cdr: {car: {car: l163, cdr: {car: {car: l222, cdr: {car: {car: l34, cdr: {car: l260, cdr: l2}}, cdr: {car: l3, cdr: l2}}}, cdr: {car: l260, cdr: {car: {car: l127, cdr: {car: {car: {car: l30, cdr: {car: {car: l129, cdr: {car: l259, cdr: l2}}, cdr: {car: {car: l126, cdr: {car: {car: l129, cdr: {car: {car: l34, cdr: {car: l260, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l128, cdr: {car: {car: l35, cdr: {car: l260, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}}, cdr: {car: l258, cdr: l2}}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l54, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l166, cdr: {car: l258, cdr: l2}}, cdr: {car: {car: l163, cdr: {car: {car: l11, cdr: {car: l258, cdr: l2}}, cdr: {car: l2, cdr: {car: {car: l163, cdr: {car: {car: l222, cdr: {car: {car: l36, cdr: {car: l258, cdr: l2}}, cdr: {car: l3, cdr: l2}}}, cdr: {car: {car: l127, cdr: {car: {car: l186, cdr: {car: {car: l128, cdr: {car: {car: l38, cdr: {car: l258, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l127, cdr: {car: {car: l163, cdr: {car: {car: l129, cdr: {car: {car: l36, cdr: {car: l258, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l186, cdr: {car: {car: l128, cdr: {car: {car: l38, cdr: {car: l258, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l54, cdr: {car: {car: l128, cdr: {car: {car: l35, cdr: {car: l258, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l53, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l261, cdr: {car: l166, cdr: {car: l245, cdr: l2}}}, cdr: {car: {car: l189, cdr: {car: {car: {car: l262, cdr: {car: {car: l18, cdr: l2}, cdr: l2}}, cdr: {car: {car: l263, cdr: {car: {car: l43, cdr: {car: l261, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l264, cdr: {car: {car: l44, cdr: {car: l261, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l254, cdr: {car: {car: l45, cdr: {car: l261, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: {car: {car: l127, cdr: {car: {car: l142, cdr: {car: l2, cdr: {car: {car: l189, cdr: {car: {car: {car: {car: l129, cdr: {car: l263, cdr: l2}}, cdr: {car: 0, cdr: l2}}, cdr: {car: {car: {car: l129, cdr: {car: l262, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: l264, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l182, cdr: {car: {car: l207, cdr: {car: {car: l129, cdr: {car: l263, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: l262, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l198, cdr: {car: {car: l128, cdr: {car: l245, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l49, cdr: {car: {car: l129, cdr: {car: l263, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: {car: {car: l129, cdr: {car: l254, cdr: l2}}, cdr: l2}}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l52, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l261, cdr: {car: l166, cdr: {car: l245, cdr: l2}}}, cdr: {car: {car: l189, cdr: {car: {car: {car: l263, cdr: {car: {car: l43, cdr: {car: l261, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l265, cdr: {car: {car: l18, cdr: l2}, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l127, cdr: {car: {car: l142, cdr: {car: l2, cdr: {car: {car: l189, cdr: {car: {car: {car: {car: l129, cdr: {car: l265, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: {car: l44, cdr: {car: l261, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: {car: {car: {car: l129, cdr: {car: l263, cdr: l2}}, cdr: {car: l2, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l182, cdr: {car: {car: l129, cdr: {car: l265, cdr: l2}}, cdr: {car: {car: l174, cdr: {car: {car: l129, cdr: {car: l263, cdr: l2}}, cdr: {car: {car: l34, cdr: {car: {car: l129, cdr: {car: l265, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l198, cdr: {car: {car: l128, cdr: {car: l245, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l174, cdr: {car: {car: l129, cdr: {car: l265, cdr: l2}}, cdr: {car: {car: l35, cdr: {car: {car: l129, cdr: {car: l265, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}}}}, cdr: {car: {car: l129, cdr: {car: {car: l45, cdr: {car: l261, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l51, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l266, cdr: {car: l267, cdr: l2}}, cdr: {car: {car: l127, cdr: {car: {car: l174, cdr: {car: {car: l129, cdr: {car: l267, cdr: l2}}, cdr: {car: {car: l32, cdr: {car: {car: l129, cdr: {car: l266, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: l267, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l50, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l266, cdr: {car: l165, cdr: {car: {car: l268, cdr: {car: 1, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l127, cdr: {car: {car: l174, cdr: {car: {car: l129, cdr: {car: l266, cdr: l2}}, cdr: {car: {car: l23, cdr: {car: {car: l129, cdr: {car: l266, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: l268, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l49, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l266, cdr: {car: l165, cdr: {car: {car: l268, cdr: {car: 1, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l127, cdr: {car: {car: l174, cdr: {car: {car: l129, cdr: {car: l266, cdr: l2}}, cdr: {car: {car: l22, cdr: {car: {car: l129, cdr: {car: l266, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: l268, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l13, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l269, cdr: {car: l166, cdr: {car: l245, cdr: l2}}}, cdr: {car: {car: l127, cdr: {car: {car: l142, cdr: {car: l2, cdr: {car: {car: l182, cdr: {car: {car: l129, cdr: {car: l269, cdr: l2}}, cdr: {car: {car: l128, cdr: {car: l245, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l12, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l165, cdr: {car: l255, cdr: l2}}, cdr: {car: {car: l127, cdr: {car: {car: l191, cdr: {car: l2, cdr: {car: {car: l129, cdr: {car: l255, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l9, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l249, cdr: {car: l250, cdr: {car: l166, cdr: {car: l245, cdr: l2}}}}, cdr: {car: {car: l127, cdr: {car: {car: l186, cdr: {car: {car: l218, cdr: {car: {car: l126, cdr: {car: {car: l129, cdr: {car: l249, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l8, cdr: {car: {car: l129, cdr: {car: {car: l217, cdr: {car: l249, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: l250, cdr: l2}}, cdr: {car: {car: l142, cdr: {car: {car: l129, cdr: {car: l249, cdr: l2}}, cdr: {car: {car: l128, cdr: {car: l245, cdr: l2}}, cdr: l2}}}, cdr: l2}}}}, cdr: l2}}}, cdr: {car: {car: l126, cdr: {car: {car: l129, cdr: {car: l249, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l8, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l249, cdr: {car: l250, cdr: {car: l166, cdr: {car: l245, cdr: l2}}}}, cdr: {car: {car: l189, cdr: {car: {car: {car: l266, cdr: {car: {car: l18, cdr: {car: "FN", cdr: l2}}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l127, cdr: {car: {car: l189, cdr: {car: {car: {car: {car: l129, cdr: {car: l266, cdr: l2}}, cdr: {car: {car: l173, cdr: {car: {car: l129, cdr: {car: l250, cdr: l2}}, cdr: {car: {car: l128, cdr: {car: l245, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l236, cdr: {car: {car: l129, cdr: {car: l266, cdr: l2}}, cdr: {car: "fname", cdr: {car: {car: l129, cdr: {car: l249, cdr: l2}}, cdr: l2}}}}, cdr: {car: {car: l129, cdr: {car: l266, cdr: l2}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l7, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l249, cdr: {car: l255, cdr: l2}}, cdr: {car: {car: l127, cdr: {car: {car: l186, cdr: {car: {car: l174, cdr: {car: {car: l129, cdr: {car: l249, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: l255, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l126, cdr: {car: {car: l129, cdr: {car: l249, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l6, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l249, cdr: {car: l255, cdr: l2}}, cdr: {car: {car: l127, cdr: {car: {car: l186, cdr: {car: {car: l5, cdr: {car: {car: l20, cdr: {car: {car: l126, cdr: {car: {car: l129, cdr: {car: l249, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l174, cdr: {car: {car: l129, cdr: {car: l249, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: l255, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: {car: {car: l126, cdr: {car: {car: l129, cdr: {car: l249, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l5, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l269, cdr: {car: l166, cdr: {car: l245, cdr: l2}}}, cdr: {car: {car: l127, cdr: {car: {car: l163, cdr: {car: {car: l129, cdr: {car: l269, cdr: l2}}, cdr: {car: l2, cdr: {car: {car: l186, cdr: {car: {car: l128, cdr: {car: l245, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l4, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l269, cdr: {car: l166, cdr: {car: l245, cdr: l2}}}, cdr: {car: {car: l127, cdr: {car: {car: l163, cdr: {car: {car: l129, cdr: {car: l269, cdr: l2}}, cdr: {car: {car: l186, cdr: {car: {car: l128, cdr: {car: l245, cdr: l2}}, cdr: l2}}, cdr: {car: l2, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l1, cdr: {car: l159, cdr: {car: {car: l173, cdr: {car: {car: l249, cdr: {car: l250, cdr: {car: l166, cdr: {car: l245, cdr: l2}}}}, cdr: {car: {car: l127, cdr: {car: {car: l184, cdr: {car: {car: l158, cdr: {car: {car: l126, cdr: {car: {car: l129, cdr: {car: l249, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l126, cdr: {car: {car: l173, cdr: {car: {car: l129, cdr: {car: {car: l71, cdr: {car: {car: l173, cdr: {car: {car: l266, cdr: l2}, cdr: {car: {car: l163, cdr: {car: {car: l222, cdr: {car: l266, cdr: {car: {car: l126, cdr: {car: l270, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l126, cdr: {car: l166, cdr: l2}}, cdr: {car: l266, cdr: l2}}}}, cdr: l2}}}, cdr: {car: l250, cdr: l2}}}, cdr: l2}}, cdr: {car: {car: l128, cdr: {car: l245, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: l2}}}}}}}}}}}}}}}}}}}}}}}}}}}}}, cdr: {car: l2, cdr: {car: l2, cdr: l2}}}};
+var l247 = {car: {car: l246, cdr: "l246"}, cdr: {car: {car: l245, cdr: "l245"}, cdr: {car: {car: l244, cdr: "l244"}, cdr: {car: {car: l243, cdr: "l243"}, cdr: {car: {car: l242, cdr: "l242"}, cdr: {car: {car: l241, cdr: "l241"}, cdr: {car: {car: l240, cdr: "l240"}, cdr: {car: {car: l239, cdr: "l239"}, cdr: {car: {car: l238, cdr: "l238"}, cdr: {car: {car: l237, cdr: "l237"}, cdr: {car: {car: l236, cdr: "l236"}, cdr: {car: {car: l235, cdr: "l235"}, cdr: {car: {car: l234, cdr: "l234"}, cdr: {car: {car: l233, cdr: "l233"}, cdr: {car: {car: l232, cdr: "l232"}, cdr: {car: {car: l231, cdr: "l231"}, cdr: {car: {car: l230, cdr: "l230"}, cdr: {car: {car: l229, cdr: "l229"}, cdr: {car: {car: l228, cdr: "l228"}, cdr: {car: {car: l227, cdr: "l227"}, cdr: {car: {car: l226, cdr: "l226"}, cdr: {car: {car: l225, cdr: "l225"}, cdr: {car: {car: l224, cdr: "l224"}, cdr: {car: {car: l223, cdr: "l223"}, cdr: {car: {car: l222, cdr: "l222"}, cdr: {car: {car: l221, cdr: "l221"}, cdr: {car: {car: l220, cdr: "l220"}, cdr: {car: {car: l219, cdr: "l219"}, cdr: {car: {car: l218, cdr: "l218"}, cdr: {car: {car: l217, cdr: "l217"}, cdr: {car: {car: l216, cdr: "l216"}, cdr: {car: {car: l215, cdr: "l215"}, cdr: {car: {car: l214, cdr: "l214"}, cdr: {car: {car: l213, cdr: "l213"}, cdr: {car: {car: l212, cdr: "l212"}, cdr: {car: {car: l211, cdr: "l211"}, cdr: {car: {car: l210, cdr: "l210"}, cdr: {car: {car: l209, cdr: "l209"}, cdr: {car: {car: l208, cdr: "l208"}, cdr: {car: {car: l207, cdr: "l207"}, cdr: {car: {car: l206, cdr: "l206"}, cdr: {car: {car: l205, cdr: "l205"}, cdr: {car: {car: l204, cdr: "l204"}, cdr: {car: {car: l203, cdr: "l203"}, cdr: {car: {car: l202, cdr: "l202"}, cdr: {car: {car: l201, cdr: "l201"}, cdr: {car: {car: l200, cdr: "l200"}, cdr: {car: {car: l199, cdr: "l199"}, cdr: {car: {car: l198, cdr: "l198"}, cdr: {car: {car: l197, cdr: "l197"}, cdr: {car: {car: l196, cdr: "l196"}, cdr: {car: {car: l195, cdr: "l195"}, cdr: {car: {car: l194, cdr: "l194"}, cdr: {car: {car: l193, cdr: "l193"}, cdr: {car: {car: l192, cdr: "l192"}, cdr: {car: {car: l191, cdr: "l191"}, cdr: {car: {car: l190, cdr: "l190"}, cdr: {car: {car: l189, cdr: "l189"}, cdr: {car: {car: l188, cdr: "l188"}, cdr: {car: {car: l187, cdr: "l187"}, cdr: {car: {car: l186, cdr: "l186"}, cdr: {car: {car: l185, cdr: "l185"}, cdr: {car: {car: l184, cdr: "l184"}, cdr: {car: {car: l183, cdr: "l183"}, cdr: {car: {car: l182, cdr: "l182"}, cdr: {car: {car: l181, cdr: "l181"}, cdr: {car: {car: l180, cdr: "l180"}, cdr: {car: {car: l179, cdr: "l179"}, cdr: {car: {car: l178, cdr: "l178"}, cdr: {car: {car: l177, cdr: "l177"}, cdr: {car: {car: l176, cdr: "l176"}, cdr: {car: {car: l175, cdr: "l175"}, cdr: {car: {car: l174, cdr: "l174"}, cdr: {car: {car: l173, cdr: "l173"}, cdr: {car: {car: l172, cdr: "l172"}, cdr: {car: {car: l171, cdr: "l171"}, cdr: {car: {car: l170, cdr: "l170"}, cdr: {car: {car: l168, cdr: "l168"}, cdr: {car: {car: l167, cdr: "l167"}, cdr: {car: {car: l166, cdr: "l166"}, cdr: {car: {car: l165, cdr: "l165"}, cdr: {car: {car: l164, cdr: "l164"}, cdr: {car: {car: l163, cdr: "l163"}, cdr: {car: {car: l162, cdr: "l162"}, cdr: {car: {car: l161, cdr: "l161"}, cdr: {car: {car: l160, cdr: "l160"}, cdr: {car: {car: l159, cdr: "l159"}, cdr: {car: {car: l158, cdr: "l158"}, cdr: {car: {car: l157, cdr: "l157"}, cdr: {car: {car: l156, cdr: "l156"}, cdr: {car: {car: l155, cdr: "l155"}, cdr: {car: {car: l154, cdr: "l154"}, cdr: {car: {car: l153, cdr: "l153"}, cdr: {car: {car: l152, cdr: "l152"}, cdr: {car: {car: l151, cdr: "l151"}, cdr: {car: {car: l150, cdr: "l150"}, cdr: {car: {car: l149, cdr: "l149"}, cdr: {car: {car: l148, cdr: "l148"}, cdr: {car: {car: l147, cdr: "l147"}, cdr: {car: {car: l146, cdr: "l146"}, cdr: {car: {car: l145, cdr: "l145"}, cdr: {car: {car: l144, cdr: "l144"}, cdr: {car: {car: l143, cdr: "l143"}, cdr: {car: {car: l142, cdr: "l142"}, cdr: {car: {car: l141, cdr: "l141"}, cdr: {car: {car: l140, cdr: "l140"}, cdr: {car: {car: l139, cdr: "l139"}, cdr: {car: {car: l138, cdr: "l138"}, cdr: {car: {car: l137, cdr: "l137"}, cdr: {car: {car: l136, cdr: "l136"}, cdr: {car: {car: l135, cdr: "l135"}, cdr: {car: {car: l134, cdr: "l134"}, cdr: {car: {car: l133, cdr: "l133"}, cdr: {car: {car: l132, cdr: "l132"}, cdr: {car: {car: l131, cdr: "l131"}, cdr: {car: {car: l130, cdr: "l130"}, cdr: {car: {car: l129, cdr: "l129"}, cdr: {car: {car: l128, cdr: "l128"}, cdr: {car: {car: l127, cdr: "l127"}, cdr: {car: {car: l126, cdr: "l126"}, cdr: {car: {car: l125, cdr: "l125"}, cdr: {car: {car: l124, cdr: "l124"}, cdr: {car: {car: l123, cdr: "l123"}, cdr: {car: {car: l122, cdr: "l122"}, cdr: {car: {car: l121, cdr: "l121"}, cdr: {car: {car: l120, cdr: "l120"}, cdr: {car: {car: l119, cdr: "l119"}, cdr: {car: {car: l118, cdr: "l118"}, cdr: {car: {car: l117, cdr: "l117"}, cdr: {car: {car: l116, cdr: "l116"}, cdr: {car: {car: l115, cdr: "l115"}, cdr: {car: {car: l114, cdr: "l114"}, cdr: {car: {car: l113, cdr: "l113"}, cdr: {car: {car: l112, cdr: "l112"}, cdr: {car: {car: l111, cdr: "l111"}, cdr: {car: {car: l110, cdr: "l110"}, cdr: {car: {car: l109, cdr: "l109"}, cdr: {car: {car: l108, cdr: "l108"}, cdr: {car: {car: l107, cdr: "l107"}, cdr: {car: {car: l106, cdr: "l106"}, cdr: {car: {car: l105, cdr: "l105"}, cdr: {car: {car: l104, cdr: "l104"}, cdr: {car: {car: l103, cdr: "l103"}, cdr: {car: {car: l102, cdr: "l102"}, cdr: {car: {car: l101, cdr: "l101"}, cdr: {car: {car: l100, cdr: "l100"}, cdr: {car: {car: l99, cdr: "l99"}, cdr: {car: {car: l98, cdr: "l98"}, cdr: {car: {car: l97, cdr: "l97"}, cdr: {car: {car: l96, cdr: "l96"}, cdr: {car: {car: l95, cdr: "l95"}, cdr: {car: {car: l94, cdr: "l94"}, cdr: {car: {car: l93, cdr: "l93"}, cdr: {car: {car: l92, cdr: "l92"}, cdr: {car: {car: l91, cdr: "l91"}, cdr: {car: {car: l90, cdr: "l90"}, cdr: {car: {car: l89, cdr: "l89"}, cdr: {car: {car: l88, cdr: "l88"}, cdr: {car: {car: l87, cdr: "l87"}, cdr: {car: {car: l86, cdr: "l86"}, cdr: {car: {car: l85, cdr: "l85"}, cdr: {car: {car: l84, cdr: "l84"}, cdr: {car: {car: l83, cdr: "l83"}, cdr: {car: {car: l82, cdr: "l82"}, cdr: {car: {car: l81, cdr: "l81"}, cdr: {car: {car: l80, cdr: "l80"}, cdr: {car: {car: l79, cdr: "l79"}, cdr: {car: {car: l78, cdr: "l78"}, cdr: {car: {car: l77, cdr: "l77"}, cdr: {car: {car: l76, cdr: "l76"}, cdr: {car: {car: l75, cdr: "l75"}, cdr: {car: {car: l74, cdr: "l74"}, cdr: {car: {car: l73, cdr: "l73"}, cdr: {car: {car: l72, cdr: "l72"}, cdr: {car: {car: l71, cdr: "l71"}, cdr: {car: {car: l70, cdr: "l70"}, cdr: {car: {car: l69, cdr: "l69"}, cdr: {car: {car: l68, cdr: "l68"}, cdr: {car: {car: l67, cdr: "l67"}, cdr: {car: {car: l66, cdr: "l66"}, cdr: {car: {car: l65, cdr: "l65"}, cdr: {car: {car: l64, cdr: "l64"}, cdr: {car: {car: l63, cdr: "l63"}, cdr: {car: {car: l62, cdr: "l62"}, cdr: {car: {car: l61, cdr: "l61"}, cdr: {car: {car: l60, cdr: "l60"}, cdr: {car: {car: l59, cdr: "l59"}, cdr: {car: {car: l58, cdr: "l58"}, cdr: {car: {car: l57, cdr: "l57"}, cdr: {car: {car: l56, cdr: "l56"}, cdr: {car: {car: l55, cdr: "l55"}, cdr: {car: {car: l54, cdr: "l54"}, cdr: {car: {car: l53, cdr: "l53"}, cdr: {car: {car: l52, cdr: "l52"}, cdr: {car: {car: l51, cdr: "l51"}, cdr: {car: {car: l50, cdr: "l50"}, cdr: {car: {car: l49, cdr: "l49"}, cdr: {car: {car: l48, cdr: "l48"}, cdr: {car: {car: l47, cdr: "l47"}, cdr: {car: {car: l46, cdr: "l46"}, cdr: {car: {car: l45, cdr: "l45"}, cdr: {car: {car: l44, cdr: "l44"}, cdr: {car: {car: l43, cdr: "l43"}, cdr: {car: {car: l42, cdr: "l42"}, cdr: {car: {car: l41, cdr: "l41"}, cdr: {car: {car: l40, cdr: "l40"}, cdr: {car: {car: l39, cdr: "l39"}, cdr: {car: {car: l38, cdr: "l38"}, cdr: {car: {car: l37, cdr: "l37"}, cdr: {car: {car: l36, cdr: "l36"}, cdr: {car: {car: l35, cdr: "l35"}, cdr: {car: {car: l34, cdr: "l34"}, cdr: {car: {car: l33, cdr: "l33"}, cdr: {car: {car: l32, cdr: "l32"}, cdr: {car: {car: l31, cdr: "l31"}, cdr: {car: {car: l30, cdr: "l30"}, cdr: {car: {car: l29, cdr: "l29"}, cdr: {car: {car: l28, cdr: "l28"}, cdr: {car: {car: l27, cdr: "l27"}, cdr: {car: {car: l26, cdr: "l26"}, cdr: {car: {car: l25, cdr: "l25"}, cdr: {car: {car: l24, cdr: "l24"}, cdr: {car: {car: l23, cdr: "l23"}, cdr: {car: {car: l22, cdr: "l22"}, cdr: {car: {car: l21, cdr: "l21"}, cdr: {car: {car: l20, cdr: "l20"}, cdr: {car: {car: l19, cdr: "l19"}, cdr: {car: {car: l18, cdr: "l18"}, cdr: {car: {car: l17, cdr: "l17"}, cdr: {car: {car: l16, cdr: "l16"}, cdr: {car: {car: l15, cdr: "l15"}, cdr: {car: {car: l14, cdr: "l14"}, cdr: {car: {car: l13, cdr: "l13"}, cdr: {car: {car: l12, cdr: "l12"}, cdr: {car: {car: l11, cdr: "l11"}, cdr: {car: {car: l10, cdr: "l10"}, cdr: {car: {car: l9, cdr: "l9"}, cdr: {car: {car: l8, cdr: "l8"}, cdr: {car: {car: l7, cdr: "l7"}, cdr: {car: {car: l6, cdr: "l6"}, cdr: {car: {car: l5, cdr: "l5"}, cdr: {car: {car: l4, cdr: "l4"}, cdr: {car: {car: l3, cdr: "l3"}, cdr: {car: {car: l2, cdr: "l2"}, cdr: {car: {car: l1, cdr: "l1"}, cdr: l2}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}};
+var l248 = {name: "BODY"};
+var l249 = {name: "CHECK"};
+var l250 = {name: "DECLS"};
+var l251 = {name: "DECL"};
+var l252 = {name: "NAME"};
+var l253 = {name: "ARGS"};
+var l254 = {name: "ARG"};
+var l255 = {name: "FORM"};
+var l256 = {name: "FORM1"};
+var l257 = {name: "RESULT"};
+var l258 = {name: "VALUE"};
+var l259 = {name: "FORMS"};
+var l260 = {name: "G"};
+var l261 = {name: "CLAUSULES"};
+var l262 = {name: "!FORM"};
+var l263 = {name: "CLAUSULE"};
+var l264 = {name: "ITER"};
+var l265 = {name: "G!TO"};
+var l266 = {name: "VAR"};
+var l267 = {name: "TO"};
+var l268 = {name: "G!LIST"};
+var l269 = {name: "X"};
+var l270 = {name: "PLACE"};
+var l271 = {name: "DELTA"};
+var l272 = {name: "CONDITION"};
+var l273 = {name: "DOCSTRING"};
+var l274 = {name: "&BODY"};
+var l275 = {car: l2, cdr: {car: {car: {car: l246, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l168, cdr: {car: l248, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: {car: l59, cdr: {car: {car: l189, cdr: {car: {car: l177, cdr: {car: l133, cdr: {car: l2, cdr: l2}}}, cdr: {car: {car: l150, cdr: l2}, cdr: {car: {car: l130, cdr: {car: l248, cdr: l2}}, cdr: l2}}}}, cdr: {car: {car: l52, cdr: {car: {car: l249, cdr: {car: l133, cdr: l2}}, cdr: {car: {car: l233, cdr: {car: l249, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l207, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l250, cdr: {car: l168, cdr: {car: l248, cdr: l2}}}, cdr: {car: {car: l129, cdr: {car: {car: l110, cdr: {car: {car: l130, cdr: {car: {car: l71, cdr: {car: {car: l176, cdr: {car: {car: l251, cdr: l2}, cdr: {car: {car: l129, cdr: {car: {car: l102, cdr: {car: "var ", cdr: {car: {car: l131, cdr: {car: {car: l43, cdr: {car: l251, cdr: l2}}, cdr: l2}}, cdr: {car: " = ", cdr: {car: {car: l131, cdr: {car: {car: l45, cdr: {car: l251, cdr: l2}}, cdr: l2}}, cdr: {car: ";", cdr: {car: l101, cdr: l2}}}}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l250, cdr: l2}}}, cdr: l2}}, cdr: {car: {car: l130, cdr: {car: {car: l71, cdr: {car: {car: l176, cdr: {car: {car: l251, cdr: l2}, cdr: {car: {car: l129, cdr: {car: {car: l102, cdr: {car: "if (typeof ", cdr: {car: {car: l131, cdr: {car: {car: l43, cdr: {car: l251, cdr: l2}}, cdr: l2}}, cdr: {car: " != '", cdr: {car: {car: l131, cdr: {car: {car: l44, cdr: {car: l251, cdr: l2}}, cdr: l2}}, cdr: {car: "')", cdr: {car: l101, cdr: {car: {car: l107, cdr: {car: "throw 'The value ' + ", cdr: {car: {car: l131, cdr: {car: {car: l43, cdr: {car: l251, cdr: l2}}, cdr: l2}}, cdr: {car: " + ' is not a type ", cdr: {car: {car: l131, cdr: {car: {car: l44, cdr: {car: l251, cdr: l2}}, cdr: l2}}, cdr: {car: ".';", cdr: {car: l101, cdr: l2}}}}}}}, cdr: l2}}}}}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l250, cdr: l2}}}, cdr: l2}}, cdr: {car: {car: l102, cdr: {car: "return ", cdr: {car: {car: l189, cdr: {car: {car: l130, cdr: {car: l248, cdr: l2}}, cdr: l2}}, cdr: {car: ";", cdr: {car: l101, cdr: l2}}}}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l206, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l252, cdr: {car: l253, cdr: {car: l168, cdr: {car: l248, cdr: l2}}}}, cdr: {car: {car: l129, cdr: {car: {car: l189, cdr: {car: {car: l164, cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: l253, cdr: l2}}, cdr: {car: {car: l192, cdr: {car: {car: l131, cdr: {car: {car: l71, cdr: {car: {car: l176, cdr: {car: {car: l254, cdr: l2}, cdr: {car: {car: l129, cdr: {car: {car: {car: l131, cdr: {car: l254, cdr: l2}}, cdr: {car: {car: l109, cdr: {car: {car: l131, cdr: {car: l254, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l253, cdr: l2}}}, cdr: l2}}, cdr: {car: {car: l130, cdr: {car: l248, cdr: l2}}, cdr: l2}}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l129, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l255, cdr: l2}, cdr: {car: {car: l204, cdr: {car: l255, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l190, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l252, cdr: {car: l253, cdr: {car: l255, cdr: l2}}}, cdr: {car: {car: l129, cdr: {car: {car: l164, cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: l253, cdr: l2}}, cdr: {car: {car: l109, cdr: {car: {car: l131, cdr: {car: l255, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l164, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l252, cdr: {car: l253, cdr: {car: l168, cdr: {car: l248, cdr: l2}}}}, cdr: {car: {car: l129, cdr: {car: {car: l51, cdr: {car: {car: l47, cdr: {car: {car: l128, cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l176, cdr: {car: {car: l131, cdr: {car: l253, cdr: l2}}, cdr: {car: {car: l144, cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: {car: {car: l130, cdr: {car: l248, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: l2}}}, cdr: {car: l162, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l110, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l168, cdr: {car: l248, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: {car: l102, cdr: {car: "(function(){", cdr: {car: l101, cdr: {car: {car: l107, cdr: {car: {car: l130, cdr: {car: l248, cdr: l2}}, cdr: l2}}, cdr: {car: "})()", cdr: l2}}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l103, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l100, cdr: {car: l168, cdr: {car: l255, cdr: l2}}}, cdr: {car: {car: l129, cdr: {car: {car: l177, cdr: {car: {car: l131, cdr: {car: l100, cdr: l2}}, cdr: {car: {car: l102, cdr: {car: {car: l131, cdr: {car: l100, cdr: l2}}, cdr: {car: {car: l189, cdr: {car: {car: l130, cdr: {car: l255, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l60, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l256, cdr: {car: l257, cdr: {car: l168, cdr: {car: l248, cdr: l2}}}}, cdr: {car: {car: l129, cdr: {car: {car: l59, cdr: {car: {car: l189, cdr: {car: {car: l131, cdr: {car: l256, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: l257, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l130, cdr: {car: l248, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l59, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l255, cdr: {car: l168, cdr: {car: l248, cdr: l2}}}, cdr: {car: {car: l192, cdr: {car: {car: {car: l258, cdr: {car: {car: l18, cdr: l2}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l129, cdr: {car: {car: l192, cdr: {car: {car: {car: {car: l131, cdr: {car: l258, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: l255, cdr: l2}}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l130, cdr: {car: l248, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: l258, cdr: l2}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l58, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l168, cdr: {car: l259, cdr: l2}}, cdr: {car: {car: l54, cdr: {car: {car: {car: l11, cdr: {car: l259, cdr: l2}}, cdr: {car: l2, cdr: l2}}, cdr: {car: {car: {car: l11, cdr: {car: {car: l35, cdr: {car: l259, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l34, cdr: {car: l259, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l3, cdr: {car: {car: l192, cdr: {car: {car: {car: l260, cdr: {car: {car: l18, cdr: l2}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l129, cdr: {car: {car: l192, cdr: {car: {car: {car: {car: l131, cdr: {car: l260, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: {car: l34, cdr: {car: l259, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l165, cdr: {car: {car: l131, cdr: {car: l260, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: l260, cdr: l2}}, cdr: {car: {car: l58, cdr: {car: {car: l130, cdr: {car: {car: l35, cdr: {car: l259, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l57, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l168, cdr: {car: l259, cdr: l2}}, cdr: {car: {car: l54, cdr: {car: {car: {car: l11, cdr: {car: l259, cdr: l2}}, cdr: {car: l3, cdr: l2}}, cdr: {car: {car: {car: l11, cdr: {car: {car: l35, cdr: {car: l259, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l34, cdr: {car: l259, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l3, cdr: {car: {car: l129, cdr: {car: {car: l165, cdr: {car: {car: l131, cdr: {car: {car: l34, cdr: {car: l259, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l57, cdr: {car: {car: l130, cdr: {car: {car: l35, cdr: {car: l259, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: {car: l2, cdr: l2}}}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l56, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l255, cdr: {car: l168, cdr: {car: l261, cdr: l2}}}, cdr: {car: {car: l129, cdr: {car: {car: l55, cdr: {car: {car: l131, cdr: {car: l255, cdr: l2}}, cdr: {car: {car: l130, cdr: {car: {car: l65, cdr: {car: l261, cdr: {car: {car: l129, cdr: {car: {car: {car: l3, cdr: {car: {car: l236, cdr: {car: "ECASE expression failed.", cdr: l2}}, cdr: l2}}, cdr: l2}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l55, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l255, cdr: {car: l168, cdr: {car: l261, cdr: l2}}}, cdr: {car: {car: l192, cdr: {car: {car: {car: l262, cdr: {car: {car: l18, cdr: l2}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l129, cdr: {car: {car: l192, cdr: {car: {car: {car: {car: l131, cdr: {car: l262, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: l255, cdr: l2}}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l54, cdr: {car: {car: l130, cdr: {car: {car: l71, cdr: {car: {car: l176, cdr: {car: {car: l263, cdr: l2}, cdr: {car: {car: l165, cdr: {car: {car: l225, cdr: {car: {car: l34, cdr: {car: l263, cdr: l2}}, cdr: {car: l3, cdr: l2}}}, cdr: {car: l263, cdr: {car: {car: l129, cdr: {car: {car: {car: l30, cdr: {car: {car: l131, cdr: {car: l262, cdr: l2}}, cdr: {car: {car: l128, cdr: {car: {car: l131, cdr: {car: {car: l34, cdr: {car: l263, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l130, cdr: {car: {car: l35, cdr: {car: l263, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}}, cdr: {car: l261, cdr: l2}}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l54, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l168, cdr: {car: l261, cdr: l2}}, cdr: {car: {car: l165, cdr: {car: {car: l11, cdr: {car: l261, cdr: l2}}, cdr: {car: l2, cdr: {car: {car: l165, cdr: {car: {car: l225, cdr: {car: {car: l36, cdr: {car: l261, cdr: l2}}, cdr: {car: l3, cdr: l2}}}, cdr: {car: {car: l129, cdr: {car: {car: l189, cdr: {car: {car: l130, cdr: {car: {car: l38, cdr: {car: l261, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: {car: l165, cdr: {car: {car: l131, cdr: {car: {car: l36, cdr: {car: l261, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l189, cdr: {car: {car: l130, cdr: {car: {car: l38, cdr: {car: l261, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l54, cdr: {car: {car: l130, cdr: {car: {car: l35, cdr: {car: l261, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l53, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l264, cdr: {car: l168, cdr: {car: l248, cdr: l2}}}, cdr: {car: {car: l192, cdr: {car: {car: {car: l265, cdr: {car: {car: l18, cdr: l2}, cdr: l2}}, cdr: {car: {car: l266, cdr: {car: {car: l43, cdr: {car: l264, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l267, cdr: {car: {car: l44, cdr: {car: l264, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l257, cdr: {car: {car: l45, cdr: {car: l264, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: {car: {car: l129, cdr: {car: {car: l144, cdr: {car: l2, cdr: {car: {car: l192, cdr: {car: {car: {car: {car: l131, cdr: {car: l266, cdr: l2}}, cdr: {car: 0, cdr: l2}}, cdr: {car: {car: {car: l131, cdr: {car: l265, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: l267, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l185, cdr: {car: {car: l210, cdr: {car: {car: l131, cdr: {car: l266, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: l265, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l201, cdr: {car: {car: l130, cdr: {car: l248, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l49, cdr: {car: {car: l131, cdr: {car: l266, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: {car: {car: l131, cdr: {car: l257, cdr: l2}}, cdr: l2}}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l52, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l264, cdr: {car: l168, cdr: {car: l248, cdr: l2}}}, cdr: {car: {car: l192, cdr: {car: {car: {car: l266, cdr: {car: {car: l43, cdr: {car: l264, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l268, cdr: {car: {car: l18, cdr: l2}, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: {car: l144, cdr: {car: l2, cdr: {car: {car: l192, cdr: {car: {car: {car: {car: l131, cdr: {car: l268, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: {car: l44, cdr: {car: l264, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: {car: {car: {car: l131, cdr: {car: l266, cdr: l2}}, cdr: {car: l2, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l185, cdr: {car: {car: l131, cdr: {car: l268, cdr: l2}}, cdr: {car: {car: l177, cdr: {car: {car: l131, cdr: {car: l266, cdr: l2}}, cdr: {car: {car: l34, cdr: {car: {car: l131, cdr: {car: l268, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l201, cdr: {car: {car: l130, cdr: {car: l248, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l177, cdr: {car: {car: l131, cdr: {car: l268, cdr: l2}}, cdr: {car: {car: l35, cdr: {car: {car: l131, cdr: {car: l268, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}}}}, cdr: {car: {car: l131, cdr: {car: {car: l45, cdr: {car: l264, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l51, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l269, cdr: {car: l270, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: {car: l177, cdr: {car: {car: l131, cdr: {car: l270, cdr: l2}}, cdr: {car: {car: l32, cdr: {car: {car: l131, cdr: {car: l269, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: l270, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l50, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l269, cdr: {car: l167, cdr: {car: {car: l271, cdr: {car: 1, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l129, cdr: {car: {car: l177, cdr: {car: {car: l131, cdr: {car: l269, cdr: l2}}, cdr: {car: {car: l23, cdr: {car: {car: l131, cdr: {car: l269, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: l271, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l49, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l269, cdr: {car: l167, cdr: {car: {car: l271, cdr: {car: 1, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l129, cdr: {car: {car: l177, cdr: {car: {car: l131, cdr: {car: l269, cdr: l2}}, cdr: {car: {car: l22, cdr: {car: {car: l131, cdr: {car: l269, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: l271, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l13, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l272, cdr: {car: l168, cdr: {car: l248, cdr: l2}}}, cdr: {car: {car: l129, cdr: {car: {car: l144, cdr: {car: l2, cdr: {car: {car: l185, cdr: {car: {car: l131, cdr: {car: l272, cdr: l2}}, cdr: {car: {car: l130, cdr: {car: l248, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l12, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l167, cdr: {car: l258, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: {car: l194, cdr: {car: l2, cdr: {car: {car: l131, cdr: {car: l258, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l9, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l252, cdr: {car: l253, cdr: {car: l168, cdr: {car: l248, cdr: l2}}}}, cdr: {car: {car: l129, cdr: {car: {car: l189, cdr: {car: {car: l221, cdr: {car: {car: l128, cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l8, cdr: {car: {car: l131, cdr: {car: {car: l220, cdr: {car: l252, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: l253, cdr: l2}}, cdr: {car: {car: l130, cdr: {car: {car: l4, cdr: {car: {car: l228, cdr: {car: {car: l34, cdr: {car: l248, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: {car: {car: l131, cdr: {car: {car: l34, cdr: {car: l248, cdr: l2}}, cdr: l2}}, cdr: l2}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: {car: {car: l144, cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: {car: {car: l130, cdr: {car: {car: l165, cdr: {car: {car: l228, cdr: {car: {car: l34, cdr: {car: l248, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l35, cdr: {car: l248, cdr: l2}}, cdr: {car: l248, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}}}}, cdr: l2}}}, cdr: {car: {car: l128, cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l8, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l252, cdr: {car: l253, cdr: {car: l168, cdr: {car: l248, cdr: l2}}}}, cdr: {car: {car: l192, cdr: {car: {car: {car: l269, cdr: {car: {car: l18, cdr: {car: "FN", cdr: l2}}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l129, cdr: {car: {car: l192, cdr: {car: {car: {car: {car: l131, cdr: {car: l269, cdr: l2}}, cdr: {car: {car: l176, cdr: {car: {car: l131, cdr: {car: l253, cdr: l2}}, cdr: {car: {car: l130, cdr: {car: l248, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}, cdr: {car: {car: l239, cdr: {car: {car: l131, cdr: {car: l269, cdr: l2}}, cdr: {car: "fname", cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: l2}}}}, cdr: {car: {car: l131, cdr: {car: l269, cdr: l2}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l7, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l252, cdr: {car: l258, cdr: {car: l167, cdr: {car: l273, cdr: l2}}}}, cdr: {car: {car: l129, cdr: {car: {car: l189, cdr: {car: {car: l177, cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: l258, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l130, cdr: {car: {car: l4, cdr: {car: {car: l228, cdr: {car: l273, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: {car: {car: l239, cdr: {car: {car: l128, cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: l2}}, cdr: {car: "vardoc", cdr: {car: {car: l131, cdr: {car: l273, cdr: l2}}, cdr: l2}}}}, cdr: l2}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: {car: {car: l128, cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l6, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l252, cdr: {car: l258, cdr: {car: l167, cdr: {car: l273, cdr: l2}}}}, cdr: {car: {car: l129, cdr: {car: {car: l189, cdr: {car: {car: l5, cdr: {car: {car: l20, cdr: {car: {car: l128, cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l177, cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: {car: {car: l131, cdr: {car: l258, cdr: l2}}, cdr: l2}}}, cdr: l2}}}, cdr: {car: {car: l130, cdr: {car: {car: l4, cdr: {car: {car: l228, cdr: {car: l273, cdr: l2}}, cdr: {car: {car: l129, cdr: {car: {car: {car: l239, cdr: {car: {car: l128, cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: l2}}, cdr: {car: "vardoc", cdr: {car: {car: l131, cdr: {car: l273, cdr: l2}}, cdr: l2}}}}, cdr: l2}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: {car: {car: l128, cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l5, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l272, cdr: {car: l168, cdr: {car: l248, cdr: l2}}}, cdr: {car: {car: l129, cdr: {car: {car: l165, cdr: {car: {car: l131, cdr: {car: l272, cdr: l2}}, cdr: {car: l2, cdr: {car: {car: l189, cdr: {car: {car: l130, cdr: {car: l248, cdr: l2}}, cdr: l2}}, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l4, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l272, cdr: {car: l168, cdr: {car: l248, cdr: l2}}}, cdr: {car: {car: l129, cdr: {car: {car: l165, cdr: {car: {car: l131, cdr: {car: l272, cdr: l2}}, cdr: {car: {car: l189, cdr: {car: {car: l130, cdr: {car: l248, cdr: l2}}, cdr: l2}}, cdr: {car: l2, cdr: l2}}}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: {car: {car: l1, cdr: {car: l161, cdr: {car: {car: l176, cdr: {car: {car: l252, cdr: {car: l253, cdr: {car: l168, cdr: {car: l248, cdr: l2}}}}, cdr: {car: {car: l129, cdr: {car: {car: l187, cdr: {car: {car: l160, cdr: {car: {car: l128, cdr: {car: {car: l131, cdr: {car: l252, cdr: l2}}, cdr: l2}}, cdr: {car: {car: l128, cdr: {car: {car: l176, cdr: {car: {car: l131, cdr: {car: {car: l71, cdr: {car: {car: l176, cdr: {car: {car: l269, cdr: l2}, cdr: {car: {car: l165, cdr: {car: {car: l225, cdr: {car: l269, cdr: {car: {car: l128, cdr: {car: l274, cdr: l2}}, cdr: l2}}}, cdr: {car: {car: l128, cdr: {car: l168, cdr: l2}}, cdr: {car: l269, cdr: l2}}}}, cdr: l2}}}, cdr: {car: l253, cdr: l2}}}, cdr: l2}}, cdr: {car: {car: l130, cdr: {car: l248, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}}, cdr: l2}}, cdr: l2}}, cdr: l2}}}, cdr: {car: l3, cdr: l2}}}}, cdr: l2}}}}}}}}}}}}}}}}}}}}}}}}}}}}}, cdr: {car: l2, cdr: {car: l2, cdr: l2}}}};
 (function(){
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["WITH-COMPILATION-UNIT"] = l243);
+    })())["WITH-COMPILATION-UNIT"] = l246);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LS-COMPILE-TOPLEVEL"] = l242);
+    })())["LS-COMPILE-TOPLEVEL"] = l245);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["COMPILE-FUNCALL"] = l241);
+    })())["COMPILE-FUNCALL"] = l244);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LS-MACROEXPAND-1"] = l240);
+    })())["LS-MACROEXPAND-1"] = l243);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["WRITE-STRING"] = l239);
+    })())["WRITE-STRING"] = l242);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["FUNCTIONP"] = l238);
+    })())["FUNCTIONP"] = l241);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["IN"] = l237);
+    })())["IN"] = l240);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["OSET"] = l236);
+    })())["OSET"] = l239);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["OGET"] = l235);
+    })())["OGET"] = l238);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["NEW"] = l234);
+    })())["NEW"] = l237);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["ERROR"] = l233);
+    })())["ERROR"] = l236);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["JS-EVAL"] = l232);
+    })())["JS-EVAL"] = l235);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["APPLY"] = l231);
+    })())["APPLY"] = l234);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["FUNCALL"] = l230);
+    })())["FUNCALL"] = l233);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["CHAR"] = l229);
+    })())["CHAR"] = l232);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["SLICE"] = l228);
+    })())["SLICE"] = l231);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["STRING-LENGTH"] = l227);
+    })())["STRING-LENGTH"] = l230);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["STRING-UPCASE"] = l226);
+    })())["STRING-UPCASE"] = l229);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["STRINGP"] = l225);
+    })())["STRINGP"] = l228);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["STRING"] = l224);
+    })())["STRING"] = l227);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["EQUAL"] = l223);
+    })())["EQUAL"] = l226);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["EQ"] = l222);
+    })())["EQ"] = l225);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LAMBDA-CODE"] = l221);
+    })())["LAMBDA-CODE"] = l224);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["SYMBOL-PLIST"] = l220);
+    })())["SYMBOL-PLIST"] = l223);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["SYMBOL-VALUE"] = l219);
+    })())["SYMBOL-VALUE"] = l222);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["FSET"] = l218);
+    })())["FSET"] = l221);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["SYMBOL-NAME"] = l217);
+    })())["SYMBOL-NAME"] = l220);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["MAKE-SYMBOL"] = l216);
+    })())["MAKE-SYMBOL"] = l219);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["SYMBOLP"] = l215);
+    })())["SYMBOLP"] = l218);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["SETCDR"] = l214);
+    })())["SETCDR"] = l217);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["SETCAR"] = l213);
+    })())["SETCAR"] = l216);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["FLOOR"] = l212);
+    })())["FLOOR"] = l215);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["NUMBERP"] = l211);
+    })())["NUMBERP"] = l214);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())[">="] = l210);
+    })())[">="] = l213);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["<="] = l209);
+    })())["<="] = l212);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())[">"] = l208);
+    })())[">"] = l211);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["<"] = l207);
+    })())["<"] = l210);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["MOD"] = l206);
+    })())["MOD"] = l209);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["NUM-OP-NUM"] = l205);
+    })())["NUM-OP-NUM"] = l208);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["TYPE-CHECK"] = l204);
+    })())["TYPE-CHECK"] = l207);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["DEFINE-BUILTIN"] = l203);
+    })())["DEFINE-BUILTIN"] = l206);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["BACKQUOTE-EXPAND"] = l202);
+    })())["BACKQUOTE-EXPAND"] = l205);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["BACKQUOTE-EXPAND-1"] = l201);
+    })())["BACKQUOTE-EXPAND-1"] = l204);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["UNWIND-PROTECT"] = l200);
+    })())["UNWIND-PROTECT"] = l203);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["GO"] = l199);
+    })())["GO"] = l202);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["TAGBODY"] = l198);
+    })())["TAGBODY"] = l201);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["DECLARE-TAGBODY-TAGS"] = l197);
+    })())["DECLARE-TAGBODY-TAGS"] = l200);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["GO-TAG-P"] = l196);
+    })())["GO-TAG-P"] = l199);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["*GO-TAG-COUNTER*"] = l195);
+    })())["*GO-TAG-COUNTER*"] = l198);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["*TAGBODY-COUNTER*"] = l194);
+    })())["*TAGBODY-COUNTER*"] = l197);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["THROW"] = l193);
+    })())["THROW"] = l196);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["CATCH"] = l192);
+    })())["CATCH"] = l195);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["RETURN-FROM"] = l191);
+    })())["RETURN-FROM"] = l194);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["*BLOCK-COUNTER*"] = l190);
+    })())["*BLOCK-COUNTER*"] = l193);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LET"] = l189);
+    })())["LET"] = l192);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["DYNAMIC-BINDING-WRAPPER"] = l188);
+    })())["DYNAMIC-BINDING-WRAPPER"] = l191);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["DEFINE-TRANSFORMATION"] = l187);
+    })())["DEFINE-TRANSFORMATION"] = l190);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["PROGN"] = l186);
+    })())["PROGN"] = l189);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["EVAL"] = l185);
+    })())["EVAL"] = l188);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["EVAL-WHEN-COMPILE"] = l184);
+    })())["EVAL-WHEN-COMPILE"] = l187);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["SYMBOL-FUNCTION"] = l183);
+    })())["SYMBOL-FUNCTION"] = l186);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["%WHILE"] = l182);
+    })())["%WHILE"] = l185);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LITERAL"] = l181);
+    })())["LITERAL"] = l184);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["GENLIT"] = l180);
+    })())["GENLIT"] = l183);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["*LITERAL-COUNTER*"] = l179);
+    })())["*LITERAL-COUNTER*"] = l182);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["*LITERAL-SYMBOLS*"] = l178);
+    })())["*LITERAL-SYMBOLS*"] = l181);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["JS-VSET"] = l177);
+    })())["JS-VSET"] = l180);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["JS-VREF"] = l176);
+    })())["JS-VREF"] = l179);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["SET"] = l175);
+    })())["SET"] = l178);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["SETQ"] = l174);
+    })())["SETQ"] = l177);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LAMBDA"] = l173);
+    })())["LAMBDA"] = l176);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LAMBDA-LIST-REST-ARGUMENT"] = l172);
+    })())["LAMBDA-DOCSTRING-WRAPPER"] = l175);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LAMBDA-LIST-OPTIONAL-ARGUMENTS"] = l171);
+    })())["LAMBDA-LIST-REST-ARGUMENT"] = l174);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT"] = l170);
+    })())["LAMBDA-LIST-OPTIONAL-ARGUMENTS"] = l173);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LAMBDA-LIST-REQUIRED-ARGUMENTS"] = l169);
+    })())["LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT"] = l172);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LIST-UNTIL-KEYWORD"] = l168);
+    })())["LAMBDA-LIST-REQUIRED-ARGUMENTS"] = l171);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["&REST"] = l166);
+    })())["LIST-UNTIL-KEYWORD"] = l170);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["&OPTIONAL"] = l165);
+    })())["&REST"] = l168);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["*LAMBDA-LIST-KEYWORDS*"] = l164);
+    })())["&OPTIONAL"] = l167);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["IF"] = l163);
+    })())["*LAMBDA-LIST-KEYWORDS*"] = l166);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["DEFINE-COMPILATION"] = l162);
+    })())["IF"] = l165);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LS-COMPILE-BLOCK"] = l161);
+    })())["DEFINE-COMPILATION"] = l164);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["*COMPILATIONS*"] = l160);
+    })())["LS-COMPILE-BLOCK"] = l163);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["MACRO"] = l159);
+    })())["*COMPILATIONS*"] = l162);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["%COMPILE-DEFMACRO"] = l158);
+    })())["MACRO"] = l161);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["GET-TOPLEVEL-COMPILATIONS"] = l157);
+    })())["%COMPILE-DEFMACRO"] = l160);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["NULL-OR-EMPTY-P"] = l156);
+    })())["GET-TOPLEVEL-COMPILATIONS"] = l159);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["TOPLEVEL-COMPILATION"] = l155);
+    })())["NULL-OR-EMPTY-P"] = l158);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["*TOPLEVEL-COMPILATIONS*"] = l154);
+    })())["TOPLEVEL-COMPILATION"] = l157);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LEXICAL-VARIABLE"] = l153);
+    })())["*TOPLEVEL-COMPILATIONS*"] = l156);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["EXTEND-LOCAL-ENV"] = l152);
+    })())["LEXICAL-VARIABLE"] = l155);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["TRANSLATE-VARIABLE"] = l151);
+    })())["EXTEND-LOCAL-ENV"] = l154);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["GVARNAME"] = l150);
+    })())["TRANSLATE-VARIABLE"] = l153);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["*VARIABLE-COUNTER*"] = l149);
+    })())["GVARNAME"] = l152);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["CLEAR-UNDECLARED-GLOBAL-BINDINGS"] = l148);
+    })())["*VARIABLE-COUNTER*"] = l151);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["*ENVIRONMENT*"] = l147);
+    })())["CLEAR-UNDECLARED-GLOBAL-BINDINGS"] = l150);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["*GLOBAL-ENVIRONMENT*"] = l146);
+    })())["*ENVIRONMENT*"] = l149);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LOOKUP-IN-LEXENV"] = l145);
+    })())["*GLOBAL-ENVIRONMENT*"] = l148);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["EXTEND-LEXENV"] = l144);
+    })())["LOOKUP-IN-LEXENV"] = l147);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["GOTAG"] = l143);
+    })())["EXTEND-LEXENV"] = l146);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["BLOCK"] = l142);
+    })())["GOTAG"] = l145);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["VARIABLE"] = l141);
+    })())["BLOCK"] = l144);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["PUSH-TO-LEXENV"] = l140);
+    })())["PUSH-TO-LEXENV"] = l143);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["COPY-LEXENV"] = l139);
+    })())["COPY-LEXENV"] = l142);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["MAKE-LEXENV"] = l138);
+    })())["MAKE-LEXENV"] = l141);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["MARK-BINDING-AS-DECLARED"] = l137);
+    })())["MARK-BINDING-AS-DECLARED"] = l140);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["BINDING-DECLARED"] = l136);
+    })())["BINDING-DECLARED"] = l139);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["BINDING-VALUE"] = l135);
+    })())["SET-BINDING-VALUE"] = l138);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["BINDING-TYPE"] = l134);
+    })())["BINDING-VALUE"] = l137);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["BINDING-NAME"] = l133);
+    })())["BINDING-TYPE"] = l136);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["MAKE-BINDING"] = l132);
+    })())["BINDING-NAME"] = l135);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["*COMPILATION-UNIT-CHECKS*"] = l131);
+    })())["MAKE-BINDING"] = l134);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LS-READ-FROM-STRING"] = l130);
+    })())["*COMPILATION-UNIT-CHECKS*"] = l133);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["UNQUOTE"] = l129);
+    })())["LS-READ-FROM-STRING"] = l132);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["UNQUOTE-SPLICING"] = l128);
+    })())["UNQUOTE"] = l131);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["BACKQUOTE"] = l127);
+    })())["UNQUOTE-SPLICING"] = l130);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["QUOTE"] = l126);
+    })())["BACKQUOTE"] = l129);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["*EOF*"] = l125);
+    })())["QUOTE"] = l128);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["FUNCTION"] = l124);
+    })())["*EOF*"] = l127);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["READ-SHARP"] = l123);
+    })())["READ-SHARP"] = l126);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["READ-STRING"] = l122);
+    })())["READ-STRING"] = l125);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LS-READ"] = l121);
+    })())["LS-READ"] = l124);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["%READ-LIST"] = l120);
+    })())["%READ-LIST"] = l123);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["SKIP-WHITESPACES-AND-COMMENTS"] = l119);
+    })())["SKIP-WHITESPACES-AND-COMMENTS"] = l122);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["READ-UNTIL"] = l118);
+    })())["READ-UNTIL"] = l121);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["TERMINALP"] = l117);
+    })())["TERMINALP"] = l120);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["SKIP-WHITESPACES"] = l116);
+    })())["SKIP-WHITESPACES"] = l119);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["WHITESPACEP"] = l115);
+    })())["WHITESPACEP"] = l118);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["%READ-CHAR"] = l114);
+    })())["%READ-CHAR"] = l117);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["%PEEK-CHAR"] = l113);
+    })())["%PEEK-CHAR"] = l116);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["MAKE-STRING-STREAM"] = l112);
+    })())["MAKE-STRING-STREAM"] = l115);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["PRINT"] = l111);
+    })())["PRINT"] = l114);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["WARN"] = l110);
+    })())["WARN"] = l113);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["ESCAPE-STRING"] = l109);
+    })())["ESCAPE-STRING"] = l112);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["PRIN1-TO-STRING"] = l108);
+    })())["PRIN1-TO-STRING"] = l111);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["JS!SELFCALL"] = l107);
+    })())["JS!SELFCALL"] = l110);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["LS-COMPILE"] = l106);
+    })())["LS-COMPILE"] = l109);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["JS!BOOL"] = l105);
+    })())["JS!BOOL"] = l108);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["INDENT"] = l104);
+    })())["INDENT"] = l107);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["MAPCONCAT"] = l103);
+    })())["MAPCONCAT"] = l106);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["JOIN-TRAILING"] = l102);
+    })())["JOIN-TRAILING"] = l105);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["JOIN"] = l101);
+    })())["JOIN"] = l104);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["CONCATF"] = l100);
+    })())["CONCATF"] = l103);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["CONCAT"] = l99);
+    })())["CONCAT"] = l102);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
-    })())["*NEWLINE*"] = l98);
+    })())["*NEWLINE*"] = l101);
+    (((function(){
+        var symbol = l10;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })())["VARIABLE"] = l100);
+    (((function(){
+        var symbol = l10;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })())["FUNCTION"] = l99);
+    (((function(){
+        var symbol = l10;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })())["DOCUMENTATION"] = l98);
     (((function(){
         var symbol = l10;
         var value = symbol.value;
@@ -18292,10 +18688,10 @@ var l271 = {car: l2, cdr: {car: {car: {car: l243, cdr: {car: l159, cdr: {car: {c
         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
         return value;
     })())["DEFMACRO"] = l1);
-    (l178).value = l244;
-    (l147).value = l271;
-    (l149).value = 605;
-    (l17).value = 156;
-    return (l190).value = 223;
+    (l181).value = l247;
+    (l149).value = l275;
+    (l151).value = 619;
+    (l17).value = 160;
+    return (l193).value = 226;
 })();
-(l179).value = 271;
+(l182).value = 275;
