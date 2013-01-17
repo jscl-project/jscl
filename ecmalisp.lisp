@@ -750,7 +750,7 @@
 
 (defun binding-name (b) (first b))
 (defun binding-type (b) (second b))
-(defun binding-translation (b) (third b))
+(defun binding-value (b) (third b))
 (defun binding-declared (b)
   (and b (fourth b)))
 (defun mark-binding-as-declared (b)
@@ -796,7 +796,7 @@
   (concat "v" (integer-to-string (incf *variable-counter*))))
 
 (defun translate-variable (symbol)
-  (binding-translation (lookup-in-lexenv symbol *environment* 'variable)))
+  (binding-value (lookup-in-lexenv symbol *environment* 'variable)))
 
 (defun extend-local-env (args)
   (let ((new (copy-lexenv *environment*)))
@@ -931,7 +931,7 @@
 (define-compilation setq (var val)
   (let ((b (lookup-in-lexenv var *environment* 'variable)))
     (if (eq (binding-type b) 'lexical-variable)
-        (concat (binding-translation b) " = " (ls-compile val))
+        (concat (binding-value b) " = " (ls-compile val))
         (ls-compile `(set ',var ,val)))))
 
 ;;; FFI Variable accessors
@@ -1086,7 +1086,7 @@
         (js!selfcall
           "throw ({"
           "type: 'block', "
-          "id: " (binding-translation b) ", "
+          "id: " (binding-value b) ", "
           "value: " (ls-compile value) ", "
           "message: 'Return from unknown block " (symbol-name name) ".'"
           "})")
@@ -1145,7 +1145,7 @@
     (let ((*environment* (declare-tagbody-tags tbidx body))
           initag)
       (let ((b (lookup-in-lexenv (first body) *environment* 'gotag)))
-        (setq initag (second (binding-translation b))))
+        (setq initag (second (binding-value b))))
       (js!selfcall
         "var tagbody_" tbidx " = " initag ";" *newline*
         "tbloop:" *newline*
@@ -1159,7 +1159,7 @@
                                       (if (not (go-tag-p form))
                                           (indent (ls-compile form) ";" *newline*)
                                           (let ((b (lookup-in-lexenv form *environment* 'gotag)))
-                                            (concat "case " (second (binding-translation b)) ":" *newline*)))))
+                                            (concat "case " (second (binding-value b)) ":" *newline*)))))
                                   "default:" *newline*
                                   "    break tbloop;" *newline*
                                   "}" *newline*)))
@@ -1182,8 +1182,8 @@
         (js!selfcall
           "throw ({"
           "type: 'tagbody', "
-          "id: " (first (binding-translation b)) ", "
-          "label: " (second (binding-translation b)) ", "
+          "id: " (first (binding-value b)) ", "
+          "label: " (second (binding-value b)) ", "
           "message: 'Attempt to GO to non-existing tag " n "'"
           "})" *newline*)
         (error (concat "Unknown tag `" n "'.")))))
@@ -1455,7 +1455,7 @@
 (defun ls-macroexpand-1 (form)
   (let ((macro-binding (macro (car form))))
     (if macro-binding
-        (apply (eval (binding-translation macro-binding)) (cdr form))
+        (apply (eval (binding-value macro-binding)) (cdr form))
         form)))
 
 (defun compile-funcall (function args)
@@ -1469,7 +1469,7 @@
     ((symbolp sexp)
      (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
        (if (eq (binding-type b) 'lexical-variable)
-           (binding-translation b)
+           (binding-value b)
            (ls-compile `(symbol-value ',sexp)))))
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
