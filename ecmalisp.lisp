@@ -822,10 +822,13 @@
 
 (defvar *compilations* nil)
 
-(defun ls-compile-block (sexps)
-  (join-trailing
-   (remove-if #'null-or-empty-p  (mapcar #'ls-compile sexps))
-   (concat ";" *newline*)))
+(defun ls-compile-block (sexps &optional return-last-p)
+  (if return-last-p
+      (concat (ls-compile-block (butlast sexps))
+              "return " (ls-compile (car (last sexps))) ";")
+      (join-trailing
+       (remove-if #'null-or-empty-p (mapcar #'ls-compile sexps))
+       (concat ";" *newline*))))
 
 (defmacro define-compilation (name args &body body)
   ;; Creates a new primitive `name' with parameters args and
@@ -922,8 +925,7 @@
                              *newline*))
                    "")
                ;; Body
-               (concat (ls-compile-block (butlast body))
-                       "return " (ls-compile (car (last body))) ";")) *newline*
+               (ls-compile-block body t)) *newline*
               "})"))))
 
 (define-compilation setq (var val)
@@ -1010,10 +1012,7 @@
      (ls-compile ,form)))
 
 (define-compilation progn (&rest body)
-  (js!selfcall
-    (ls-compile-block (butlast body))
-    "return " (ls-compile (car (last body))) ";" *newline*))
-
+  (js!selfcall (ls-compile-block body t)))
 
 (defun dynamic-binding-wrapper (bindings body)
   (if (null bindings)
@@ -1059,10 +1058,7 @@
                               variables)
                       ",")
                 "){" *newline*
-                (let ((body
-                       (concat (ls-compile-block (butlast body))
-                               "return " (ls-compile (car (last body)))
-                               ";" *newline*)))
+                (let ((body (ls-compile-block body t)))
                   (indent (dynamic-binding-wrapper dynamic-bindings body)))
                 "})(" (join cvalues ",") ")")))))
 
