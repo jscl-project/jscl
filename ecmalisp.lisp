@@ -68,11 +68,9 @@
     `(progn
        (fset ',name
              (named-lambda ,(symbol-name name) ,args
-               ,@(when (stringp (car body)) `(,(car body)))
-               (block ,name
-                 ,@(if (stringp (car body))
-                       (cdr body)
-                       body))))
+               ,@(if (and (stringp (car body)) (not (null (cdr body))))
+                     `(,(car body) (block ,name ,@(cdr body)))
+                     `((block ,name ,@body)))))
        ',name))
 
   (defvar *package* (new))
