@@ -26,14 +26,14 @@
 (progn
   (eval-when-compile
     (%compile-defmacro 'defmacro
-                       '(lambda (name args &rest body)
+                       '(%lambda (name args &rest body)
                          `(eval-when-compile
                             (%compile-defmacro ',name
-                                               '(lambda ,(mapcar (lambda (x)
-                                                                   (if (eq x '&body)
-                                                                       '&rest
-                                                                       x))
-                                                                 args)
+                                               '(%lambda ,(mapcar (lambda (x)
+                                                                    (if (eq x '&body)
+                                                                        '&rest
+                                                                        x))
+                                                                  args)
                                                  ,@body))))))
 
   (setq nil 'nil)
@@ -45,16 +45,25 @@
   (defmacro unless (condition &body body)
     `(if ,condition nil (progn ,@body)))
 
-  (defmacro defvar (name value)
+  (defmacro defvar (name value &optional docstring)
     `(progn
        (unless (boundp ',name)
 	 (setq ,name ,value))
+       ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
        ',name))
 
-  (defmacro defparameter (name value)
+  (defmacro defparameter (name value &optional docstring)
     `(progn
        (setq ,name ,value)
+       ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
        ',name))
+
+  (defmacro lambda (args &rest body)
+    (if (stringp (car body))
+        `(let ((func (%lambda ,args ,@(cdr body))))
+           (oset func "docstring" ,(car body))
+           func)
+        `(%lambda ,args ,@body)))
 
   (defmacro named-lambda (name args &rest body)
     (let ((x (gensym "FN")))
@@ -65,9 +74,12 @@
   (defmacro defun (name args &rest body)
     `(progn
        (fset ',name
-             (named-lambda ,(symbol-name name)
-                 ,args
-               (block ,name ,@body)))
+             (named-lambda ,(symbol-name name) ,args
+               ,@(when (stringp (car body)) `(,(car body)))
+               (block ,name
+                 ,@(if (stringp (car body))
+                       (cdr body)
+                       body))))
        ',name))
 
   (defvar *package* (new))
@@ -117,7 +129,11 @@
 
   (defun cons (x y ) (cons x y))
   (defun consp (x) (consp x))
-  (defun car (x) (car x))
+
+  (defun car (x)
+    "Return the CAR part of a cons, or NIL if X is null."
+    (car x))
+
   (defun cdr (x) (cdr x))
   (defun caar (x) (car (car x)))
   (defun cadr (x) (car (cdr x)))
@@ -436,8 +452,19 @@
 
   (defun disassemble (function)
     (write-line (lambda-code (fdefinition function)))
-    nil))
+    nil)
 
+  (defun documentation (x type)
+    "Return the documentation of X. TYPE must be the symbol VARIABLE or FUNCTION."
+    (ecase type
+      (function
+       (let ((func (fdefinition x)))
+         (oget func "docstring")))
+      (variable
+       (unless (symbolp x)
+         (error "Wrong argument type! it should be a symbol"))
+       (oget x "vardoc"))))
+  )
 
 ;;; The compiler offers some primitives and special forms which are
 ;;; not found in Common Lisp, for instance, while. So, we grow Common
@@ -459,7 +486,10 @@
   (defun setcar (cons new)
     (setf (car cons) new))
   (defun setcdr (cons new)
-    (setf (cdr cons) new)))
+    (setf (cdr cons) new))
+
+  (defmacro %lambda (lambda-list &rest body)
+    `(lambda ,lambda-list ,@body)))
 
 ;;; At this point, no matter if Common Lisp or ecmalisp is compiling
 ;;; from here, this code will compile on both. We define some helper
@@ -863,7 +893,7 @@
       (error "Bad lambda-list"))
     (car rest)))
 
-(define-compilation lambda (lambda-list &rest body)
+(define-compilation %lambda (lambda-list &rest body)
   (let ((required-arguments (lambda-list-required-arguments lambda-list))
         (optional-arguments (lambda-list-optional-arguments lambda-list))
         (rest-argument (lambda-list-rest-argument lambda-list)))
