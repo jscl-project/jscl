@@ -36,6 +36,11 @@
                                                                  args)
                                                  ,@body))))))
 
+  (defmacro declaim (&rest decls)
+    `(eval-when-compile
+       ,@(mapcar (lambda (decl) `(!proclaim ',decl)) decls)))
+
+  (declaim (constant nil t))
   (setq nil 'nil)
   (setq t 't)
 
@@ -66,6 +71,7 @@
 
   (defmacro defun (name args &rest body)
     `(progn
+       (declaim (non-overridable ,name))
        (fset ',name
              (named-lambda ,(symbol-name name) ,args
                ,@(if (and (stringp (car body)) (not (null (cdr body))))
@@ -235,7 +241,6 @@
 
   (defmacro prog2 (form1 result &body body)
     `(prog1 (progn ,form1 ,result) ,@body)))
-
 
 
 ;;; This couple of helper functions will be defined in both Common
@@ -842,16 +847,23 @@
         b)))
 
 (defun claims (symbol namespace)
-  (lookup-in-lexenv symbol *environment* namespace))
+  (let ((b (lookup-in-lexenv symbol *environment* namespace)))
+    (and b (binding-declarations b))))
 
 (defun !proclaim (decl)
-  (unless (consp decl)
-    (error "Declaration must be a list"))
   (case (car decl)
     (notinline
-     (dolist (fname (cdr decl))
-       (let ((b (global-binding fname 'function 'function)))
-         (push-binding-declaration 'notinline b))))))
+     (dolist (name (cdr decl))
+       (let ((b (global-binding name 'function 'function)))
+         (push-binding-declaration 'notinline b))))
+    (constant
+     (dolist (name (cdr decl))
+       (let ((b (global-binding name 'variable 'variable)))
+         (push-binding-declaration 'constant b))))
+    (non-overridable
+     (dolist (name (cdr decl))
+       (let ((b (global-binding name 'function 'function)))
+         (push-binding-declaration 'non-overridable b))))))
 
 
 ;;; Special forms
@@ -1525,10 +1537,16 @@
         form)))
 
 (defun compile-funcall (function args)
-  (concat (ls-compile `#',function) "("
-          (join (mapcar #'ls-compile args)
-                ", ")
-          ")"))
+  (if (and (symbolp function)
+           (member 'non-overridable (claims function 'function)))
+      (concat (ls-compile `',function) ".function("
+              (join (mapcar #'ls-compile args)
+                    ", ")
+              ")")
+      (concat (ls-compile `#',function) "("
+              (join (mapcar #'ls-compile args)
+                    ", ")
+              ")")))
 
 (defun ls-compile-block (sexps &optional return-last-p)
   (if return-last-p
@@ -1542,9 +1560,13 @@
   (cond
     ((symbolp sexp)
      (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
-       (if (eq (binding-type b) 'lexical-variable)
-           (binding-value b)
-           (ls-compile `(symbol-value ',sexp)))))
+       (cond
+         ((eq (binding-type b) 'lexical-variable)
+          (binding-value b))
+         ((member 'constant (binding-declarations b))
+          (concat (ls-compile `',sexp) ".value"))
+         (t
+          (ls-compile `(symbol-value ',sexp))))))
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
     ((listp sexp)
