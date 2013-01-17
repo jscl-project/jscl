@@ -27,16 +27,14 @@
   (eval-when-compile
     (%compile-defmacro 'defmacro
                        '(lambda (name args &rest body)
-                         `(progn
-                            (eval-when-compile
-                              (%compile-defmacro ',name
-                                                 '(lambda ,(mapcar (lambda (x)
-                                                                     (if (eq x '&body)
-                                                                         '&rest
-                                                                         x))
-                                                                   args)
-                                                   ,@body)))
-                            ',name))))
+                         `(eval-when-compile
+                            (%compile-defmacro ',name
+                                               '(lambda ,(mapcar (lambda (x)
+                                                                   (if (eq x '&body)
+                                                                       '&rest
+                                                                       x))
+                                                                 args)
+                                                 ,@body))))))
 
   (setq nil 'nil)
   (setq t 't)
