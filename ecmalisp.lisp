@@ -779,6 +779,9 @@
 (defun binding-name (b) (first b))
 (defun binding-type (b) (second b))
 (defun binding-value (b) (third b))
+(defun set-binding-value (b value)
+  (setcar (cdr (cdr b)) value))
+
 (defun binding-declared (b)
   (and b (fourth b)))
 (defun mark-binding-as-declared (b)
@@ -1483,7 +1486,19 @@
 (defun ls-macroexpand-1 (form)
   (let ((macro-binding (macro (car form))))
     (if macro-binding
-        (apply (eval (binding-value macro-binding)) (cdr form))
+        (let ((expander (binding-value macro-binding)))
+          (when (listp expander)
+            (let ((compiled (eval expander)))
+              ;; The list representation are useful while
+              ;; bootstrapping, as we can dump the definition of the
+              ;; macros easily, but they are slow because we have to
+              ;; evaluate them and compile them now and again. So, let
+              ;; us replace the list representation version of the
+              ;; function with the compiled one.
+              ;;
+              #+ecmalisp (set-binding-value macro-binding compiled)
+              (setq expander compiled)))
+          (apply expander (cdr form)))
         form)))
 
 (defun compile-funcall (function args)
