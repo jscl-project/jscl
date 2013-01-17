@@ -764,14 +764,10 @@
 
 (defun push-to-lexenv (binding lexenv namespace)
   (ecase namespace
-    (variable
-     (setcar lexenv (cons binding (car lexenv))))
-    (function
-     (setcar (cdr lexenv) (cons binding (cadr lexenv))))
-    (block
-     (setcar (cddr lexenv) (cons binding (caddr lexenv))))
-    (gotag
-     (setcar (cdddr lexenv) (cons binding (cadddr lexenv))))))
+    (variable   (setcar        lexenv  (cons binding (car lexenv))))
+    (function   (setcar   (cdr lexenv) (cons binding (cadr lexenv))))
+    (block      (setcar  (cddr lexenv) (cons binding (caddr lexenv))))
+    (gotag      (setcar (cdddr lexenv) (cons binding (cadddr lexenv))))))
 
 (defun extend-lexenv (bindings lexenv namespace)
   (let ((env (copy-lexenv lexenv)))
@@ -785,6 +781,7 @@
                 (block (third lexenv))
                 (gotag (fourth lexenv)))))
 
+(defvar *global-environment* (make-lexenv))
 (defvar *environment* (make-lexenv))
 
 (defun clear-undeclared-global-bindings ()
@@ -798,11 +795,11 @@
 (defun gvarname (symbol)
   (concat "v" (integer-to-string (incf *variable-counter*))))
 
-(defun translate-variable (symbol env)
-  (binding-translation (lookup-in-lexenv symbol env 'variable)))
+(defun translate-variable (symbol)
+  (binding-translation (lookup-in-lexenv symbol *environment* 'variable)))
 
-(defun extend-local-env (args env)
-  (let ((new (copy-lexenv env)))
+(defun extend-local-env (args)
+  (let ((new (copy-lexenv *environment*)))
     (dolist (symbol args new)
       (let ((b (make-binding symbol 'lexical-variable (gvarname symbol) t)))
         (push-to-lexenv b new 'variable)))))
@@ -825,28 +822,23 @@
 
 (defvar *compilations* nil)
 
-(defun ls-compile-block (sexps env)
+(defun ls-compile-block (sexps)
   (join-trailing
-   (remove-if #'null-or-empty-p
-              (mapcar (lambda (x) (ls-compile x env)) sexps))
+   (remove-if #'null-or-empty-p  (mapcar #'ls-compile sexps))
    (concat ";" *newline*)))
 
 (defmacro define-compilation (name args &body body)
   ;; Creates a new primitive `name' with parameters args and
   ;; @body. The body can access to the local environment through the
-  ;; variable ENV.
-  `(push (list ',name (lambda (env ,@args) (block ,name ,@body)))
+  ;; variable *ENVIRONMENT*.
+  `(push (list ',name (lambda ,args (block ,name ,@body)))
          *compilations*))
 
 (define-compilation if (condition true false)
-  (concat "("
-          (ls-compile condition env) " !== " (ls-compile nil)
-          " ? "
-          (ls-compile true env)
-          " : "
-          (ls-compile false env)
+  (concat "(" (ls-compile condition) " !== " (ls-compile nil)
+          " ? " (ls-compile true)
+          " : " (ls-compile false)
           ")"))
-
 
 (defvar *lambda-list-keywords* '(&optional &rest))
 
@@ -876,14 +868,12 @@
         (rest-argument (lambda-list-rest-argument lambda-list)))
     (let ((n-required-arguments (length required-arguments))
           (n-optional-arguments (length optional-arguments))
-          (new-env (extend-local-env
-                    (append (ensure-list rest-argument)
-                            required-arguments
-                            optional-arguments)
-                    env)))
+          (*environment* (extend-local-env
+                          (append (ensure-list rest-argument)
+                                  required-arguments
+                                  optional-arguments))))
       (concat "(function ("
-              (join (mapcar (lambda (x)
-                              (translate-variable x new-env))
+              (join (mapcar #'translate-variable
                             (append required-arguments optional-arguments))
                     ",")
               "){" *newline*
@@ -910,44 +900,44 @@
                                  (let ((arg (nth idx optional-and-defaults)))
                                    (push (concat "case "
                                                  (integer-to-string (+ idx n-required-arguments)) ":" *newline*
-                                                 (translate-variable (car arg) new-env)
+                                                 (translate-variable (car arg))
                                                  "="
-                                                 (ls-compile (cadr arg) new-env)
+                                                 (ls-compile (cadr arg))
                                                  ";" *newline*)
                                          cases)
                                    (incf idx)))
-                                    (push (concat "default: break;" *newline*) cases)
-                                    (join (reverse cases))))
+                               (push (concat "default: break;" *newline*) cases)
+                               (join (reverse cases))))
                            "}" *newline*)
                    "")
                ;; &rest/&body argument
                (if rest-argument
-                   (let ((js!rest (translate-variable rest-argument new-env)))
+                   (let ((js!rest (translate-variable rest-argument)))
                      (concat "var " js!rest "= " (ls-compile nil) ";" *newline*
                              "for (var i = arguments.length-1; i>="
                              (integer-to-string (+ n-required-arguments n-optional-arguments))
                              "; i--)" *newline*
                              (indent js!rest " = "
                                      "{car: arguments[i], cdr: ") js!rest "};"
-                                     *newline*))
+                             *newline*))
                    "")
                ;; Body
-               (concat (ls-compile-block (butlast body) new-env)
-                       "return " (ls-compile (car (last body)) new-env) ";")) *newline*
+               (concat (ls-compile-block (butlast body))
+                       "return " (ls-compile (car (last body))) ";")) *newline*
               "})"))))
 
 (define-compilation setq (var val)
-  (let ((b (lookup-in-lexenv var env 'variable)))
+  (let ((b (lookup-in-lexenv var *environment* 'variable)))
     (if (eq (binding-type b) 'lexical-variable)
-        (concat (binding-translation b) " = " (ls-compile val env))
-        (ls-compile `(set ',var ,val) env))))
+        (concat (binding-translation b) " = " (ls-compile val))
+        (ls-compile `(set ',var ,val)))))
 
 ;;; FFI Variable accessors
 (define-compilation js-vref (var)
   var)
 
 (define-compilation js-vset (var val)
-  (concat "(" var " = " (ls-compile val env) ")"))
+  (concat "(" var " = " (ls-compile val) ")"))
 
 
 ;;; Literals
@@ -997,23 +987,19 @@
 (define-compilation quote (sexp)
   (literal sexp))
 
-
 (define-compilation %while (pred &rest body)
   (js!selfcall
-    "while(" (ls-compile pred env) " !== " (ls-compile nil) "){" *newline*
-    (indent (ls-compile-block body env))
+    "while(" (ls-compile pred) " !== " (ls-compile nil) "){" *newline*
+    (indent (ls-compile-block body))
     "}"
     "return " (ls-compile nil) ";" *newline*))
 
 (define-compilation function (x)
   (cond
     ((and (listp x) (eq (car x) 'lambda))
-     (ls-compile x env))
+     (ls-compile x))
     ((symbolp x)
-     (ls-compile `(symbol-function ',x))
-     ;; TODO: Add lexical functions
-     ;;(lookup-function-translation x env)
-     )))
+     (ls-compile `(symbol-function ',x)))))
 
 (define-compilation eval-when-compile (&rest body)
   (eval (cons 'progn body))
@@ -1021,12 +1007,12 @@
 
 (defmacro define-transformation (name args form)
   `(define-compilation ,name ,args
-     (ls-compile ,form env)))
+     (ls-compile ,form)))
 
 (define-compilation progn (&rest body)
   (js!selfcall
-    (ls-compile-block (butlast body) env)
-    "return " (ls-compile (car (last body)) env) ";" *newline*))
+    (ls-compile-block (butlast body))
+    "return " (ls-compile (car (last body))) ";" *newline*))
 
 
 (defun dynamic-binding-wrapper (bindings body)
@@ -1060,7 +1046,8 @@
   (let ((bindings (mapcar #'ensure-list bindings)))
     (let ((variables (mapcar #'first bindings))
           (values    (mapcar #'second bindings)))
-      (let ((new-env (extend-local-env (remove-if #'boundp variables) env))
+      (let ((cvalues (mapcar #'ls-compile values))
+            (*environment* (extend-local-env (remove-if #'boundp variables)))
             (dynamic-bindings))
         (concat "(function("
                 (join (mapcar (lambda (x)
@@ -1068,19 +1055,16 @@
                                     (let ((v (gvarname x)))
                                       (push (cons x v) dynamic-bindings)
                                       v)
-                                    (translate-variable x new-env)))
+                                    (translate-variable x)))
                               variables)
                       ",")
                 "){" *newline*
                 (let ((body
-                       (concat (ls-compile-block (butlast body) new-env)
-                               "return " (ls-compile (car (last body)) new-env)
+                       (concat (ls-compile-block (butlast body))
+                               "return " (ls-compile (car (last body)))
                                ";" *newline*)))
                   (indent (dynamic-binding-wrapper dynamic-bindings body)))
-                "})(" (join (mapcar (lambda (x) (ls-compile x env))
-                                    values)
-                            ",")
-                ")")))))
+                "})(" (join cvalues ",") ")")))))
 
 
 (defvar *block-counter* 0)
@@ -1090,9 +1074,8 @@
     (let ((b (make-binding name 'block tr t)))
       (js!selfcall
         "try {" *newline*
-        (indent "return " (ls-compile `(progn ,@body)
-                                      (extend-lexenv (list b) env 'block))
-                ";" *newline*)
+        (let ((*environment* (extend-lexenv (list b) *environment* 'block)))
+          (indent "return " (ls-compile `(progn ,@body)) ";" *newline*))
         "}" *newline*
         "catch (cf){" *newline*
         "    if (cf.type == 'block' && cf.id == " tr ")" *newline*
@@ -1102,13 +1085,13 @@
         "}" *newline*))))
 
 (define-compilation return-from (name &optional value)
-  (let ((b (lookup-in-lexenv name env 'block)))
+  (let ((b (lookup-in-lexenv name *environment* 'block)))
     (if b
         (js!selfcall
           "throw ({"
           "type: 'block', "
           "id: " (binding-translation b) ", "
-          "value: " (ls-compile value env) ", "
+          "value: " (ls-compile value) ", "
           "message: 'Return from unknown block " (symbol-name name) ".'"
           "})")
         (error (concat "Unknown block `" (symbol-name name) "'.")))))
@@ -1116,7 +1099,7 @@
 
 (define-compilation catch (id &rest body)
   (js!selfcall
-    "var id = " (ls-compile id env) ";" *newline*
+    "var id = " (ls-compile id) ";" *newline*
     "try {" *newline*
     (indent "return " (ls-compile `(progn ,@body))
             ";" *newline*)
@@ -1132,8 +1115,8 @@
   (js!selfcall
     "throw ({"
     "type: 'catch', "
-    "id: " (ls-compile id env) ", "
-    "value: " (ls-compile value env) ", "
+    "id: " (ls-compile id) ", "
+    "value: " (ls-compile value) ", "
     "message: 'Throw uncatched.'"
     "})"))
 
@@ -1144,28 +1127,28 @@
 (defun go-tag-p (x)
   (or (integerp x) (symbolp x)))
 
-(defun declare-tagbody-tags (env tbidx body)
+(defun declare-tagbody-tags (tbidx body)
   (let ((bindings
          (mapcar (lambda (label)
                    (let ((tagidx (integer-to-string (incf *go-tag-counter*))))
                      (make-binding label 'gotag (list tbidx tagidx) t)))
                  (remove-if-not #'go-tag-p body))))
-    (extend-lexenv bindings env 'gotag)))
+    (extend-lexenv bindings *environment* 'gotag)))
 
 (define-compilation tagbody (&rest body)
   ;; Ignore the tagbody if it does not contain any go-tag. We do this
   ;; because 1) it is easy and 2) many built-in forms expand to a
   ;; implicit tagbody, so we save some space.
   (unless (some #'go-tag-p body)
-    (return-from tagbody (ls-compile `(progn ,@body nil) env)))
+    (return-from tagbody (ls-compile `(progn ,@body nil))))
   ;; The translation assumes the first form in BODY is a label
   (unless (go-tag-p (car body))
     (push (gensym "START") body))
   ;; Tagbody compilation
   (let ((tbidx (integer-to-string *tagbody-counter*)))
-    (let ((env (declare-tagbody-tags env tbidx body))
+    (let ((*environment* (declare-tagbody-tags tbidx body))
           initag)
-      (let ((b (lookup-in-lexenv (first body) env 'gotag)))
+      (let ((b (lookup-in-lexenv (first body) *environment* 'gotag)))
         (setq initag (second (binding-translation b))))
       (js!selfcall
         "var tagbody_" tbidx " = " initag ";" *newline*
@@ -1178,8 +1161,8 @@
                                   (dolist (form (cdr body) content)
                                     (concatf content
                                       (if (not (go-tag-p form))
-                                          (indent (ls-compile form env) ";" *newline*)
-                                          (let ((b (lookup-in-lexenv form env 'gotag)))
+                                          (indent (ls-compile form) ";" *newline*)
+                                          (let ((b (lookup-in-lexenv form *environment* 'gotag)))
                                             (concat "case " (second (binding-translation b)) ":" *newline*)))))
                                   "default:" *newline*
                                   "    break tbloop;" *newline*
@@ -1195,7 +1178,7 @@
         "return " (ls-compile nil) ";" *newline*))))
 
 (define-compilation go (label)
-  (let ((b (lookup-in-lexenv label env 'gotag))
+  (let ((b (lookup-in-lexenv label *environment* 'gotag))
         (n (cond
              ((symbolp label) (symbol-name label))
              ((integerp label) (integer-to-string label)))))
@@ -1214,9 +1197,9 @@
   (js!selfcall
     "var ret = " (ls-compile nil) ";" *newline*
     "try {" *newline*
-    (indent "ret = " (ls-compile form env) ";" *newline*)
+    (indent "ret = " (ls-compile form) ";" *newline*)
     "} finally {" *newline*
-    (indent (ls-compile-block clean-up env))
+    (indent (ls-compile-block clean-up))
     "}" *newline*
     "return ret;" *newline*))
 
@@ -1261,7 +1244,7 @@
 (defmacro define-builtin (name args &body body)
   `(progn
      (define-compilation ,name ,args
-       (let ,(mapcar (lambda (arg) `(,arg (ls-compile ,arg env))) args)
+       (let ,(mapcar (lambda (arg) `(,arg (ls-compile ,arg))) args)
          ,@body))))
 
 ;;; DECLS is a list of (JSVARNAME TYPE LISPFORM) declarations.
@@ -1399,11 +1382,11 @@
 
 (define-compilation slice (string a &optional b)
   (js!selfcall
-    "var str = " (ls-compile string env) ";" *newline*
-    "var a = " (ls-compile a env) ";" *newline*
+    "var str = " (ls-compile string) ";" *newline*
+    "var a = " (ls-compile a) ";" *newline*
     "var b;" *newline*
     (if b
-        (concat "b = " (ls-compile b env) ";" *newline*)
+        (concat "b = " (ls-compile b) ";" *newline*)
         "")
     "return str.slice(a,b);" *newline*))
 
@@ -1418,26 +1401,22 @@
     "string1.concat(string2)"))
 
 (define-compilation funcall (func &rest args)
-  (concat "(" (ls-compile func env) ")("
-          (join (mapcar (lambda (x)
-                          (ls-compile x env))
-                        args)
+  (concat "(" (ls-compile func) ")("
+          (join (mapcar #'ls-compile args)
                 ", ")
           ")"))
 
 (define-compilation apply (func &rest args)
   (if (null args)
-      (concat "(" (ls-compile func env) ")()")
+      (concat "(" (ls-compile func) ")()")
       (let ((args (butlast args))
             (last (car (last args))))
         (js!selfcall
-          "var f = " (ls-compile func env) ";" *newline*
-          "var args = [" (join (mapcar (lambda (x)
-                                         (ls-compile x env))
-                                       args)
+          "var f = " (ls-compile func) ";" *newline*
+          "var args = [" (join (mapcar #'ls-compile args)
                                ", ")
           "];" *newline*
-          "var tail = (" (ls-compile last env) ");" *newline*
+          "var tail = (" (ls-compile last) ");" *newline*
           "while (tail != " (ls-compile nil) "){" *newline*
           "    args.push(tail.car);" *newline*
           "    tail = tail.cdr;" *newline*
@@ -1483,28 +1462,28 @@
         (apply (eval (binding-translation macro-binding)) (cdr form))
         form)))
 
-(defun compile-funcall (function args env)
+(defun compile-funcall (function args)
   (concat (ls-compile `#',function) "("
-          (join (mapcar (lambda (x) (ls-compile x env)) args)
+          (join (mapcar #'ls-compile args)
                 ", ")
           ")"))
 
-(defun ls-compile (sexp &optional (env (make-lexenv)))
+(defun ls-compile (sexp)
   (cond
     ((symbolp sexp)
-     (let ((b (lookup-in-lexenv sexp env 'variable)))
+     (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
        (if (eq (binding-type b) 'lexical-variable)
            (binding-translation b)
-           (ls-compile `(symbol-value ',sexp) env))))
+           (ls-compile `(symbol-value ',sexp)))))
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
     ((listp sexp)
      (if (assoc (car sexp) *compilations*)
          (let ((comp (second (assoc (car sexp) *compilations*))))
-           (apply comp env (cdr sexp)))
+           (apply comp (cdr sexp)))
          (if (macro (car sexp))
-             (ls-compile (ls-macroexpand-1 sexp) env)
-             (compile-funcall (car sexp) (cdr sexp) env))))))
+             (ls-compile (ls-macroexpand-1 sexp))
+             (compile-funcall (car sexp) (cdr sexp)))))))
 
 (defun ls-compile-toplevel (sexp)
   (let ((*toplevel-compilations* nil))
