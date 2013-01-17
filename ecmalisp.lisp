@@ -52,8 +52,7 @@
 
   (defmacro defvar (name value &optional docstring)
     `(progn
-       (unless (boundp ',name)
-	 (setq ,name ,value))
+       (unless (boundp ',name) (setq ,name ,value))
        ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
        ',name))
 
@@ -846,9 +845,9 @@
         (push-to-lexenv b *environment* namespace)
         b)))
 
-(defun claims (symbol namespace)
+(defun claimp (symbol namespace claim)
   (let ((b (lookup-in-lexenv symbol *environment* namespace)))
-    (and b (binding-declarations b))))
+    (and b (member claim (binding-declarations b)))))
 
 (defun !proclaim (decl)
   (case (car decl)
@@ -1538,7 +1537,7 @@
 
 (defun compile-funcall (function args)
   (if (and (symbolp function)
-           (member 'non-overridable (claims function 'function)))
+           (claimp function 'function 'non-overridable))
       (concat (ls-compile `',function) ".function("
               (join (mapcar #'ls-compile args)
                     ", ")
@@ -1563,7 +1562,7 @@
        (cond
          ((eq (binding-type b) 'lexical-variable)
           (binding-value b))
-         ((member 'constant (binding-declarations b))
+         ((claimp sexp 'variable 'constant)
           (concat (ls-compile `',sexp) ".value"))
          (t
           (ls-compile `(symbol-value ',sexp))))))
@@ -1579,8 +1578,7 @@
             (apply comp args)))
          ;; Built-in functions
          ((and (assoc name *builtins*)
-               (or (not (lookup-in-lexenv name *environment* 'function))
-                   (member 'notinline (claims name 'function))))
+               (not (claimp name 'function 'notinline)))
           (let ((comp (second (assoc name *builtins*))))
             (apply comp args)))
          (t
