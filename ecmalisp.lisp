@@ -761,19 +761,23 @@
 
 (defvar *compilation-unit-checks* '())
 
-(defun make-binding (name type translation declared)
-  (list name type translation declared))
+(defun make-binding (name type value &optional declarations)
+  (list name type value declarations))
 
 (defun binding-name (b) (first b))
 (defun binding-type (b) (second b))
 (defun binding-value (b) (third b))
-(defun set-binding-value (b value)
-  (setcar (cdr (cdr b)) value))
+(defun binding-declarations (b) (fourth b))
 
-(defun binding-declared (b)
-  (and b (fourth b)))
-(defun mark-binding-as-declared (b)
-  (setcar (cdddr b) t))
+(defun set-binding-value (b value)
+  (setcar (cddr b) value))
+
+(defun set-binding-declarations (b value)
+  (setcar (cdddr b) value))
+
+(defun push-binding-declaration (decl b)
+  (set-binding-declarations b (cons decl (binding-declarations b))))
+
 
 (defun make-lexenv ()
   (list nil nil nil nil))
@@ -800,15 +804,7 @@
                 (block (third lexenv))
                 (gotag (fourth lexenv)))))
 
-(defvar *global-environment* (make-lexenv))
 (defvar *environment* (make-lexenv))
-
-(defun clear-undeclared-global-bindings ()
-  (setq *environment*
-	(mapcar (lambda (namespace)
-		  (remove-if-not #'binding-declared namespace))
-		*environment*)))
-
 
 (defvar *variable-counter* 0)
 (defun gvarname (symbol)
@@ -820,7 +816,7 @@
 (defun extend-local-env (args)
   (let ((new (copy-lexenv *environment*)))
     (dolist (symbol args new)
-      (let ((b (make-binding symbol 'lexical-variable (gvarname symbol) t)))
+      (let ((b (make-binding symbol 'lexical-variable (gvarname symbol))))
         (push-to-lexenv b new 'variable)))))
 
 ;;; Toplevel compilations
@@ -837,17 +833,30 @@
 
 (defun %compile-defmacro (name lambda)
   (toplevel-compilation (ls-compile `',name))
-  (push-to-lexenv (make-binding name 'macro lambda t) *environment* 'function))
+  (push-to-lexenv (make-binding name 'macro lambda) *environment* 'function))
+
+(defun global-binding (name type namespace)
+  (or (lookup-in-lexenv name *environment* namespace)
+      (let ((b (make-binding name type nil)))
+        (push-to-lexenv b *environment* namespace)
+        b)))
+
+(defun claims (symbol namespace)
+  (lookup-in-lexenv symbol *environment* namespace))
+
+(defun !proclaim (decl)
+  (unless (consp decl)
+    (error "Declaration must be a list"))
+  (case (car decl)
+    (notinline
+     (dolist (fname (cdr decl))
+       (let ((b (global-binding fname 'function 'function)))
+         (push-binding-declaration 'notinline b))))))
+
+
+;;; Special forms
 
 (defvar *compilations* nil)
-
-(defun ls-compile-block (sexps &optional return-last-p)
-  (if return-last-p
-      (concat (ls-compile-block (butlast sexps))
-              "return " (ls-compile (car (last sexps))) ";")
-      (join-trailing
-       (remove-if #'null-or-empty-p (mapcar #'ls-compile sexps))
-       (concat ";" *newline*))))
 
 (defmacro define-compilation (name args &body body)
   ;; Creates a new primitive `name' with parameters args and
@@ -1103,7 +1112,7 @@
 
 (define-compilation block (name &rest body)
   (let ((tr (integer-to-string (incf *block-counter*))))
-    (let ((b (make-binding name 'block tr t)))
+    (let ((b (make-binding name 'block tr)))
       (js!selfcall
         "try {" *newline*
         (let ((*environment* (extend-lexenv (list b) *environment* 'block)))
@@ -1163,7 +1172,7 @@
   (let ((bindings
          (mapcar (lambda (label)
                    (let ((tagidx (integer-to-string (incf *go-tag-counter*))))
-                     (make-binding label 'gotag (list tbidx tagidx) t)))
+                     (make-binding label 'gotag (list tbidx tagidx))))
                  (remove-if-not #'go-tag-p body))))
     (extend-lexenv bindings *environment* 'gotag)))
 
@@ -1273,9 +1282,18 @@
 
 ;;; Primitives
 
+(defvar *builtins* nil)
+
+(defmacro define-raw-builtin (name args &body body)
+  ;; Creates a new primitive function `name' with parameters args and
+  ;; @body. The body can access to the local environment through the
+  ;; variable *ENVIRONMENT*.
+  `(push (list ',name (lambda ,args (block ,name ,@body)))
+         *builtins*))
+
 (defmacro define-builtin (name args &body body)
   `(progn
-     (define-compilation ,name ,args
+     (define-raw-builtin ,name ,args
        (let ,(mapcar (lambda (arg) `(,arg (ls-compile ,arg))) args)
          ,@body))))
 
@@ -1412,7 +1430,7 @@
   (type-check (("x" "string" x))
     "x.length"))
 
-(define-compilation slice (string a &optional b)
+(define-raw-builtin slice (string a &optional b)
   (js!selfcall
     "var str = " (ls-compile string) ";" *newline*
     "var a = " (ls-compile a) ";" *newline*
@@ -1432,13 +1450,13 @@
                ("string2" "string" string2))
     "string1.concat(string2)"))
 
-(define-compilation funcall (func &rest args)
+(define-raw-builtin funcall (func &rest args)
   (concat "(" (ls-compile func) ")("
           (join (mapcar #'ls-compile args)
                 ", ")
           ")"))
 
-(define-compilation apply (func &rest args)
+(define-raw-builtin apply (func &rest args)
   (if (null args)
       (concat "(" (ls-compile func) ")()")
       (let ((args (butlast args))
@@ -1512,6 +1530,14 @@
                 ", ")
           ")"))
 
+(defun ls-compile-block (sexps &optional return-last-p)
+  (if return-last-p
+      (concat (ls-compile-block (butlast sexps))
+              "return " (ls-compile (car (last sexps))) ";")
+      (join-trailing
+       (remove-if #'null-or-empty-p (mapcar #'ls-compile sexps))
+       (concat ";" *newline*))))
+
 (defun ls-compile (sexp)
   (cond
     ((symbolp sexp)
@@ -1522,12 +1548,23 @@
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
     ((listp sexp)
-     (if (assoc (car sexp) *compilations*)
-         (let ((comp (second (assoc (car sexp) *compilations*))))
-           (apply comp (cdr sexp)))
-         (if (macro (car sexp))
-             (ls-compile (ls-macroexpand-1 sexp))
-             (compile-funcall (car sexp) (cdr sexp)))))))
+     (let ((name (car sexp))
+           (args (cdr sexp)))
+       (cond
+         ;; Special forms
+         ((assoc name *compilations*)
+          (let ((comp (second (assoc name *compilations*))))
+            (apply comp args)))
+         ;; Built-in functions
+         ((and (assoc name *builtins*)
+               (or (not (lookup-in-lexenv name *environment* 'function))
+                   (member 'notinline (claims name 'function))))
+          (let ((comp (second (assoc name *builtins*))))
+            (apply comp args)))
+         (t
+          (if (macro name)
+              (ls-compile (ls-macroexpand-1 sexp))
+              (compile-funcall name args))))))))
 
 (defun ls-compile-toplevel (sexp)
   (let ((*toplevel-compilations* nil))
@@ -1554,7 +1591,6 @@
     `(prog1
          (progn
            (setq *compilation-unit-checks* nil)
-           (clear-undeclared-global-bindings)
            ,@body)
        (dolist (check *compilation-unit-checks*)
          (funcall check))))
