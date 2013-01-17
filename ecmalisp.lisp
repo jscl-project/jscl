@@ -26,14 +26,14 @@
 (progn
   (eval-when-compile
     (%compile-defmacro 'defmacro
-                       '(%lambda (name args &rest body)
+                       '(lambda (name args &rest body)
                          `(eval-when-compile
                             (%compile-defmacro ',name
-                                               '(%lambda ,(mapcar (lambda (x)
-                                                                    (if (eq x '&body)
-                                                                        '&rest
-                                                                        x))
-                                                                  args)
+                                               '(lambda ,(mapcar (lambda (x)
+                                                                   (if (eq x '&body)
+                                                                       '&rest
+                                                                       x))
+                                                                 args)
                                                  ,@body))))))
 
   (setq nil 'nil)
@@ -57,13 +57,6 @@
        (setq ,name ,value)
        ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
        ',name))
-
-  (defmacro lambda (args &rest body)
-    (if (stringp (car body))
-        `(let ((func (%lambda ,args ,@(cdr body))))
-           (oset func "docstring" ,(car body))
-           func)
-        `(%lambda ,args ,@body)))
 
   (defmacro named-lambda (name args &rest body)
     (let ((x (gensym "FN")))
@@ -486,10 +479,7 @@
   (defun setcar (cons new)
     (setf (car cons) new))
   (defun setcdr (cons new)
-    (setf (cdr cons) new))
-
-  (defmacro %lambda (lambda-list &rest body)
-    `(lambda ,lambda-list ,@body)))
+    (setf (cdr cons) new)))
 
 ;;; At this point, no matter if Common Lisp or ecmalisp is compiling
 ;;; from here, this code will compile on both. We define some helper
@@ -896,68 +886,85 @@
       (error "Bad lambda-list"))
     (car rest)))
 
-(define-compilation %lambda (lambda-list &rest body)
+
+(defun lambda-docstring-wrapper (docstring &rest strs)
+  (if docstring
+      (js!selfcall
+        "var func = " (reduce #'concat strs) ";" *newline*
+        "func.docstring = '" docstring "';" *newline*
+        "return func;" *newline*)
+      (reduce #'concat strs)))
+
+(define-compilation lambda (lambda-list &rest body)
   (let ((required-arguments (lambda-list-required-arguments lambda-list))
         (optional-arguments (lambda-list-optional-arguments lambda-list))
-        (rest-argument (lambda-list-rest-argument lambda-list)))
+        (rest-argument (lambda-list-rest-argument lambda-list))
+        documentation)
+    ;; Get the documentation string for the lambda function
+    (when (and (stringp (car body))
+               (not (null (cdr body))))
+      (setq documentation (car body))
+      (setq body (cdr body)))
     (let ((n-required-arguments (length required-arguments))
           (n-optional-arguments (length optional-arguments))
           (*environment* (extend-local-env
                           (append (ensure-list rest-argument)
                                   required-arguments
                                   optional-arguments))))
-      (concat "(function ("
-              (join (mapcar #'translate-variable
-                            (append required-arguments optional-arguments))
-                    ",")
-              "){" *newline*
-              ;; Check number of arguments
-              (indent
-               (if required-arguments
-                   (concat "if (arguments.length < " (integer-to-string n-required-arguments)
-                           ") throw 'too few arguments';" *newline*)
-                   "")
-               (if (not rest-argument)
-                   (concat "if (arguments.length > "
-                           (integer-to-string (+ n-required-arguments n-optional-arguments))
-                           ") throw 'too many arguments';" *newline*)
-                   "")
-               ;; Optional arguments
-               (if optional-arguments
-                   (concat "switch(arguments.length){" *newline*
-                           (let ((optional-and-defaults
-                                  (lambda-list-optional-arguments-with-default lambda-list))
-                                 (cases nil)
-                                 (idx 0))
-                             (progn
-                               (while (< idx n-optional-arguments)
-                                 (let ((arg (nth idx optional-and-defaults)))
-                                   (push (concat "case "
-                                                 (integer-to-string (+ idx n-required-arguments)) ":" *newline*
-                                                 (translate-variable (car arg))
-                                                 "="
-                                                 (ls-compile (cadr arg))
-                                                 ";" *newline*)
-                                         cases)
-                                   (incf idx)))
-                               (push (concat "default: break;" *newline*) cases)
-                               (join (reverse cases))))
-                           "}" *newline*)
-                   "")
-               ;; &rest/&body argument
-               (if rest-argument
-                   (let ((js!rest (translate-variable rest-argument)))
-                     (concat "var " js!rest "= " (ls-compile nil) ";" *newline*
-                             "for (var i = arguments.length-1; i>="
-                             (integer-to-string (+ n-required-arguments n-optional-arguments))
-                             "; i--)" *newline*
-                             (indent js!rest " = "
-                                     "{car: arguments[i], cdr: ") js!rest "};"
-                             *newline*))
-                   "")
-               ;; Body
-               (ls-compile-block body t)) *newline*
-              "})"))))
+      (lambda-docstring-wrapper
+       documentation
+       "(function ("
+       (join (mapcar #'translate-variable
+                     (append required-arguments optional-arguments))
+             ",")
+       "){" *newline*
+       ;; Check number of arguments
+       (indent
+        (if required-arguments
+            (concat "if (arguments.length < " (integer-to-string n-required-arguments)
+                    ") throw 'too few arguments';" *newline*)
+            "")
+        (if (not rest-argument)
+            (concat "if (arguments.length > "
+                    (integer-to-string (+ n-required-arguments n-optional-arguments))
+                    ") throw 'too many arguments';" *newline*)
+            "")
+        ;; Optional arguments
+        (if optional-arguments
+            (concat "switch(arguments.length){" *newline*
+                    (let ((optional-and-defaults
+                           (lambda-list-optional-arguments-with-default lambda-list))
+                          (cases nil)
+                          (idx 0))
+                      (progn
+                        (while (< idx n-optional-arguments)
+                          (let ((arg (nth idx optional-and-defaults)))
+                            (push (concat "case "
+                                          (integer-to-string (+ idx n-required-arguments)) ":" *newline*
+                                          (translate-variable (car arg))
+                                          "="
+                                          (ls-compile (cadr arg))
+                                          ";" *newline*)
+                                  cases)
+                            (incf idx)))
+                        (push (concat "default: break;" *newline*) cases)
+                        (join (reverse cases))))
+                    "}" *newline*)
+            "")
+        ;; &rest/&body argument
+        (if rest-argument
+            (let ((js!rest (translate-variable rest-argument)))
+              (concat "var " js!rest "= " (ls-compile nil) ";" *newline*
+                      "for (var i = arguments.length-1; i>="
+                      (integer-to-string (+ n-required-arguments n-optional-arguments))
+                      "; i--)" *newline*
+                      (indent js!rest " = "
+                              "{car: arguments[i], cdr: ") js!rest "};"
+                      *newline*))
+            "")
+        ;; Body
+        (ls-compile-block body t)) *newline*
+       "})"))))
 
 (define-compilation setq (var val)
   (let ((b (lookup-in-lexenv var *environment* 'variable)))
