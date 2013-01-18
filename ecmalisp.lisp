@@ -912,6 +912,8 @@
        (let ((b (global-binding name 'function 'function)))
          (push-binding-declaration 'non-overridable b))))))
 
+#+ecmalisp
+(fset 'proclaim #'!proclaim)
 
 ;;; Special forms
 
