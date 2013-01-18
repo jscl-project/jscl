@@ -78,8 +78,6 @@
                      `((block ,name ,@body)))))
        ',name))
 
-  (defvar *package* (new))
-
   (defun null (x)
     (eq x nil))
 
@@ -88,17 +86,6 @@
 
   (defmacro while (condition &body body)
     `(block nil (%while ,condition ,@body)))
-
-  (defun internp (name)
-    (in name *package*))
-
-  (defun intern (name)
-    (if (internp name)
-        (oget *package* name)
-        (oset *package* name (make-symbol name))))
-
-  (defun find-symbol (name)
-    (oget *package* name))
 
   (defvar *gensym-counter* 0)
   (defun gensym (&optional (prefix "G"))
@@ -433,6 +420,11 @@
           (setq alist (cdr alist))))
     (car alist))
 
+  (defun string (x)
+    (cond ((stringp x) x)
+          ((symbolp x) (symbol-name x))
+          (t (char-to-string x))))
+
   (defun string= (s1 s2)
     (equal s1 s2))
 
@@ -459,7 +451,61 @@
        (unless (symbolp x)
          (error "Wrong argument type! it should be a symbol"))
        (oget x "vardoc"))))
-  )
+
+  ;; Packages
+
+  (defvar *package-list* nil)
+
+  (defun make-package (name)
+    (let ((package (new)))
+      (oset package "packageName" name)
+      (oset package "symbols" (new))
+      (push package *package-list*)
+      package))
+
+  (defun packagep (x)
+    (and (objectp x) (in "symbols" x)))
+
+  (defun find-package (package-designator)
+    (when (packagep package-designator)
+      (return-from find-package package-designator))
+    (let ((name (string package-designator)))
+      (dolist (package *package-list*)
+        (when (string= (package-name package) name)
+          (return package)))))
+
+  (defun find-package-or-fail (package-designator)
+    (or (find-package package-designator)
+        (error "Package unknown.")))
+
+  (defun package-name (package-designator)
+    (let ((package (find-package-or-fail package-designator)))
+      (oget package "packageName")))
+
+  (defun %package-symbols (package-designator)
+    (let ((package (find-package-or-fail package-designator)))
+      (oget package "symbols")))
+
+  (defvar *package*
+    (make-package "CL"))
+
+  ;; This function is used internally to initialize the CL package
+  ;; with the symbols built during bootstrap.
+  (defun %intern-symbol (symbol)
+    (let ((symbols (%package-symbols *package*)))
+      (oset symbols (symbol-name symbol) symbol)))
+
+  (defun intern (name &optional (package *package*))
+    (let ((symbols (%package-symbols package)))
+      (if (in name symbols)
+          (oget symbols name)
+          (oset symbols name (make-symbol name)))))
+
+  (defun find-symbol (name &optional (package *package*))
+    (let ((symbols (%package-symbols package)))
+      (oget *package* name))))
+
+
 
 ;;; The compiler offers some primitives and special forms which are
 ;;; not found in Common Lisp, for instance, while. So, we grow Common
@@ -599,7 +645,9 @@
                  (if (null (cdr last))
                      (prin1-to-string (car last))
                      (concat (prin1-to-string (car last)) " . " (prin1-to-string (cdr last)))))
-               ")"))))
+               ")"))
+      ((packagep form)
+       (concat "#<PACKAGE " (package-name form) ">"))))
 
   (defun write-line (x)
     (write-string x)
@@ -1426,7 +1474,7 @@
 (define-builtin eq    (x y) (js!bool (concat "(" x " === " y ")")))
 (define-builtin equal (x y) (js!bool (concat "(" x  " == " y ")")))
 
-(define-builtin string (x)
+(define-builtin char-to-string (x)
   (type-check (("x" "number" x))
     "String.fromCharCode(x)"))
 
@@ -1492,6 +1540,9 @@
   (js!selfcall "throw " string ";" *newline*))
 
 (define-builtin new () "{}")
+
+(define-builtin objectp (x)
+  (js!bool (concat "(typeof (" x ") === 'object')")))
 
 (define-builtin oget (object key)
   (js!selfcall
@@ -1636,9 +1687,7 @@
     (toplevel-compilation
      (ls-compile
       `(progn
-         ,@(mapcar (lambda (s)
-                     `(oset *package* ,(symbol-name (car s))
-                            (js-vref ,(cdr s))))
+         ,@(mapcar (lambda (s) `(%intern-symbol (js-vref ,(cdr s))))
                    *literal-symbols*)
          (setq *literal-symbols* ',*literal-symbols*)
          (setq *environment* ',*environment*)
