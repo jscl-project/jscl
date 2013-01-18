@@ -493,17 +493,25 @@
   ;; with the symbols built during bootstrap.
   (defun %intern-symbol (symbol)
     (let ((symbols (%package-symbols *package*)))
+      (oset symbol "package" *package*)
       (oset symbols (symbol-name symbol) symbol)))
 
   (defun intern (name &optional (package *package*))
     (let ((symbols (%package-symbols package)))
       (if (in name symbols)
           (oget symbols name)
-          (oset symbols name (make-symbol name)))))
+          (let ((symbol (make-symbol name)))
+            (oset symbol "package" package)
+            (oset symbols name symbol)))))
 
   (defun find-symbol (name &optional (package *package*))
     (let ((symbols (%package-symbols package)))
-      (oget *package* name))))
+      (oget *package* name)))
+
+  (defun symbol-package (symbol)
+    (unless (symbolp symbol)
+      (error "it is not a symbol"))
+    (oget symbol "package")))
 
 
 
