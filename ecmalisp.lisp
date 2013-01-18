@@ -1737,7 +1737,7 @@
             third throw truncate unless unwind-protect variable warn
             when write-line write-string zerop))
 
-  ;; (setq *package* *user-package*)
+  (setq *package* *user-package*)
 
   (js-eval "var lisp")
   (js-vset "lisp" (new))
