@@ -456,10 +456,13 @@
 
   (defvar *package-list* nil)
 
-  (defun make-package (name)
-    (let ((package (new)))
+  (defun make-package (name &optional use)
+    (let ((package (new))
+          (use (mapcar #'find-package-or-fail use)))
       (oset package "packageName" name)
       (oset package "symbols" (new))
+      (oset package "exports" (new))
+      (oset package "use" use)
       (push package *package-list*)
       package))
 
@@ -486,33 +489,65 @@
     (let ((package (find-package-or-fail package-designator)))
       (oget package "symbols")))
 
-  (defvar *package*
+  (defun package-use-list (package-designator)
+    (let ((package (find-package-or-fail package-designator)))
+      (oget package "use")))
+
+  (defun %package-external-symbols (package-designator)
+    (let ((package (find-package-or-fail package-designator)))
+      (oget package "exports")))
+
+  (defvar *common-lisp-package*
     (make-package "CL"))
+
+  (defvar *user-package*
+    (make-package "CL-USER" (list *common-lisp-package*)))
+
+  (defvar *package* *common-lisp-package*)
+
+  (defmacro in-package (package-designator)
+    `(eval-when-compile
+       (setq *package* (find-package-or-fail ,package-designator))))
 
   ;; This function is used internally to initialize the CL package
   ;; with the symbols built during bootstrap.
   (defun %intern-symbol (symbol)
-    (let ((symbols (%package-symbols *package*)))
-      (oset symbol "package" *package*)
+    (let ((symbols (%package-symbols *common-lisp-package*)))
+      (oset symbol "package" *common-lisp-package*)
       (oset symbols (symbol-name symbol) symbol)))
 
-  (defun intern (name &optional (package *package*))
-    (let ((symbols (%package-symbols package)))
-      (if (in name symbols)
-          (oget symbols name)
-          (let ((symbol (make-symbol name)))
-            (oset symbol "package" package)
-            (oset symbols name symbol)))))
+  (defun %find-symbol (name package)
+    (let ((package (find-package-or-fail package)))
+      (let ((symbols (%package-symbols package)))
+        (if (in name symbols)
+            (cons (oget symbols name) t)
+            (dolist (used (package-use-list package) (cons nil nil))
+              (let ((exports (%package-external-symbols used)))
+                (when (in name exports)
+                  (return (cons (oget exports name) t)))))))))
 
   (defun find-symbol (name &optional (package *package*))
-    (let ((symbols (%package-symbols package)))
-      (oget *package* name)))
+    (car (%find-symbol name package)))
+
+  (defun intern (name &optional (package *package*))
+    (let ((result (%find-symbol name package)))
+      (if (cdr result)
+          (car result)
+          (let ((symbols (%package-symbols package)))
+            (oget symbols name)
+            (let ((symbol (make-symbol name)))
+              (oset symbol "package" package)
+              (oset symbols name symbol))))))
 
   (defun symbol-package (symbol)
     (unless (symbolp symbol)
       (error "it is not a symbol"))
-    (oget symbol "package")))
+    (oget symbol "package"))
 
+  (defun export (symbols &optional (package *package*))
+    (let ((exports (%package-external-symbols package)))
+      (dolist (symb symbols t)
+        (oset exports (symbol-name symb) symb)))))
 
 
 ;;; The compiler offers some primitives and special forms which are
@@ -1681,6 +1716,28 @@
            (with-compilation-unit
                (ls-compile-toplevel x))))
       (js-eval code)))
+
+  (export '(* *gensym-counter* *package* + - / 1+ 1- < <= = = > >= and append
+            apply assoc atom block boundp boundp butlast caar cadddr
+            caddr cadr car car case catch cdar cdddr cddr cdr cdr char
+            char-code char= code-char cond cons consp copy-list decf
+            declaim defparameter defun defvar digit-char-p disassemble
+            documentation dolist dotimes ecase eq eql equal error eval
+            every export fdefinition find-package find-symbol first
+            fourth fset funcall function functionp gensym go identity
+            in-package incf integerp integerp intern lambda-code last
+            length let list listp make-package make-symbol mapcar
+            member minusp mod nil not nth nthcdr null numberp or
+            package-name package-use-list packagep plusp
+            prin1-to-string print proclaim prog1 prog2 pron push quote
+            remove remove-if remove-if-not return return-from
+            revappend reverse second set setq some string-upcase
+            string string= stringp subseq symbol-function symbol-name
+            symbol-package symbol-plist symbol-value symbolp t tagbody
+            third throw truncate unless unwind-protect variable warn
+            when write-line write-string zerop))
+
+  (setq *package* *user-package*)
 
   (js-eval "var lisp")
   (js-vset "lisp" (new))
