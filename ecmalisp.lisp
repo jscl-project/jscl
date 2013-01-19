@@ -1554,11 +1554,24 @@
 
 (define-builtin mod (x y) (num-op-num x "%" y))
 
-(define-builtin < (x y)  (js!bool (num-op-num x "<" y)))
-(define-builtin > (x y)  (js!bool (num-op-num x ">" y)))
-(define-builtin = (x y)  (js!bool (num-op-num x "==" y)))
-(define-builtin <= (x y) (js!bool (num-op-num x "<=" y)))
-(define-builtin >= (x y) (js!bool (num-op-num x ">=" y)))
+(defmacro define-builtin-comparison (op sym)
+  `(define-raw-builtin ,op (&rest args)
+     (js!bool
+      (let ((x (car args))
+	    (res "true"))
+	(dolist (y (cdr args))
+	  (setq res (concat "("
+		     (ls-compile x) " " ,sym " " (ls-compile y) ")" " && " res))
+	  (setq x y))
+	res))))
+
+(define-builtin-comparison > ">")
+(define-builtin-comparison < "<")
+(define-builtin-comparison >= ">=")
+(define-builtin-comparison <= "<=")
+(define-builtin-comparison = "==")
+(define-builtin-comparison equal "==")
+(define-builtin-comparison eq "===")
 
 (define-builtin numberp (x)
   (js!bool (concat "(typeof (" x ") == \"number\")")))
@@ -1639,10 +1652,6 @@
 
 (define-builtin lambda-code (x)
   (concat "(" x ").toString()"))
-
-
-(define-builtin eq    (x y) (js!bool (concat "(" x " === " y ")")))
-(define-builtin equal (x y) (js!bool (concat "(" x  " == " y ")")))
 
 (define-builtin char-to-string (x)
   (type-check (("x" "number" x))
