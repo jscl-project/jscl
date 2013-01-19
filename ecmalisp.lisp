@@ -40,7 +40,7 @@
     `(eval-when-compile
        ,@(mapcar (lambda (decl) `(!proclaim ',decl)) decls)))
 
-  (declaim (constant nil t))
+  (declaim (constant nil t) (special t nil))
   (setq nil 'nil)
   (setq t 't)
 
@@ -52,6 +52,7 @@
 
   (defmacro defvar (name value &optional docstring)
     `(progn
+       (declaim (special ,name))
        (unless (boundp ',name) (setq ,name ,value))
        ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
        ',name))
@@ -1000,6 +1001,10 @@
 
 (defun !proclaim (decl)
   (case (car decl)
+    (special
+     (dolist (name (cdr decl))
+       (let ((b (global-binding name 'variable 'variable)))
+         (push-binding-declaration 'special b))))
     (notinline
      (dolist (name (cdr decl))
        (let ((b (global-binding name 'function 'function)))
@@ -1223,43 +1228,46 @@
 (define-compilation progn (&rest body)
   (js!selfcall (ls-compile-block body t)))
 
-(defun dynamic-binding-wrapper (bindings body)
-  (if (null bindings)
-      body
-      (concat
-       "try {" *newline*
-       (indent
-        "var tmp;" *newline*
-        (join
-         (mapcar (lambda (b)
-                   (let ((s (ls-compile `(quote ,(car b)))))
-                     (concat "tmp = " s ".value;" *newline*
-                             s ".value = " (cdr b) ";" *newline*
-                             (cdr b) " = tmp;" *newline*)))
-                 bindings))
-        body)
-       "}" *newline*
-       "finally {"  *newline*
-       (indent
-        (join-trailing
-         (mapcar (lambda (b)
-                   (let ((s (ls-compile `(quote ,(car b)))))
-                     (concat s ".value" " = " (cdr b))))
-                 bindings)
-         (concat ";" *newline*)))
-       "}" *newline*)))
+(defun special-variable-p (x)
+  (claimp x 'variable 'special))
 
+;;; Wrap CODE to restore the symbol values of the dynamic
+;;; bindings. BINDINGS is a list of pairs of the form
+;;; (SYMBOL . PLACE),  where PLACE is a Javascript variable
+;;; name to initialize the symbol value and where to stored
+;;; the old value.
+(defun let-binding-wrapper (bindings body)
+  (when (null bindings)
+    (return-from let-binding-wrapper body))
+  (concat
+   "try {" *newline*
+   (indent "var tmp;" *newline*
+           (mapconcat
+            (lambda (b)
+              (let ((s (ls-compile `(quote ,(car b)))))
+                (concat "tmp = " s ".value;" *newline*
+                        s ".value = " (cdr b) ";" *newline*
+                        (cdr b) " = tmp;" *newline*)))
+            bindings)
+           body *newline*)
+   "}" *newline*
+   "finally {"  *newline*
+   (indent
+    (mapconcat (lambda (b)
+                 (let ((s (ls-compile `(quote ,(car b)))))
+                   (concat s ".value" " = " (cdr b) ";" *newline*)))
+               bindings))
+   "}" *newline*))
 
 (define-compilation let (bindings &rest body)
   (let ((bindings (mapcar #'ensure-list bindings)))
-    (let ((variables (mapcar #'first bindings))
-          (values    (mapcar #'second bindings)))
-      (let ((cvalues (mapcar #'ls-compile values))
-            (*environment* (extend-local-env (remove-if #'boundp variables)))
+    (let ((variables (mapcar #'first bindings)))
+      (let ((cvalues (mapcar #'ls-compile (mapcar #'second bindings)))
+            (*environment* (extend-local-env (remove-if #'special-variable-p variables)))
             (dynamic-bindings))
         (concat "(function("
                 (join (mapcar (lambda (x)
-                                (if (boundp x)
+                                (if (special-variable-p x)
                                     (let ((v (gvarname x)))
                                       (push (cons x v) dynamic-bindings)
                                       v)
@@ -1268,8 +1276,56 @@
                       ",")
                 "){" *newline*
                 (let ((body (ls-compile-block body t)))
-                  (indent (dynamic-binding-wrapper dynamic-bindings body)))
+                  (indent (let-binding-wrapper dynamic-bindings body)))
                 "})(" (join cvalues ",") ")")))))
+
+
+;;; Return the code to initialize BINDING, and push it extending the
+;;; current lexical environment if the variable is special.
+(defun let*-initialize-value (binding)
+  (let ((var (first binding))
+        (value (second binding)))
+    (if (special-variable-p var)
+        (concat (ls-compile `(setq ,var ,value)) ";" *newline*)
+        (let ((v (gvarname var)))
+          (let ((b (make-binding var 'variable v)))
+            (prog1 (concat "var " v " = " (ls-compile value) ";" *newline*)
+              (push-to-lexenv b *environment* 'variable)))))))
+
+;;; Wrap BODY to restore the symbol values of SYMBOLS after body. It
+;;; DOES NOT generate code to initialize the value of the symbols,
+;;; unlike let-binding-wrapper.
+(defun let*-binding-wrapper (symbols body)
+  (when (null symbols)
+    (return-from let*-binding-wrapper body))
+  (let ((store (mapcar (lambda (s) (cons s (gvarname s)))
+                       (remove-if-not #'special-variable-p symbols))))
+    (concat
+     "try {" *newline*
+     (indent
+      (mapconcat (lambda (b)
+                   (let ((s (ls-compile `(quote ,(car b)))))
+                     (concat "var " (cdr b) " = " s ".value;" *newline*)))
+                 store)
+      body)
+     "}" *newline*
+     "finally {" *newline*
+     (indent
+      (mapconcat (lambda (b)
+                   (let ((s (ls-compile `(quote ,(car b)))))
+                     (concat s ".value" " = " (cdr b) ";" *newline*)))
+                 store))
+     "}" *newline*)))
+
+
+(define-compilation let* (bindings &rest body)
+  (let ((bindings (mapcar #'ensure-list bindings))
+        (*environment* (copy-lexenv *environment*)))
+    (js!selfcall
+      (let ((specials (remove-if-not #'special-variable-p (mapcar #'first bindings)))
+            (body (concat (mapconcat #'let*-initialize-value bindings)
+                          (ls-compile-block body t))))
+        (let*-binding-wrapper specials body)))))
 
 
 (defvar *block-counter* 0)
@@ -1725,9 +1781,10 @@
     ((symbolp sexp)
      (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
        (cond
-         ((eq (binding-type b) 'lexical-variable)
+         ((and b (not (member 'special (binding-declarations b))))
           (binding-value b))
-         ((or (keywordp sexp) (claimp sexp 'variable 'constant))
+         ((or (keywordp sexp)
+              (member 'constant (binding-declarations b)))
           (concat (ls-compile `',sexp) ".value"))
          (t
           (ls-compile `(symbol-value ',sexp))))))
@@ -1786,26 +1843,23 @@
                (ls-compile-toplevel x))))
       (js-eval code)))
 
-  (export '(* *gensym-counter* *package* + - / 1+ 1- < <= = = > >= and append
-            apply assoc atom block boundp boundp butlast caar cadddr
-            caddr cadr car car case catch cdar cdddr cddr cdr cdr char
-            char-code char= code-char cond cons consp copy-list decf
-            declaim defparameter defun defvar digit-char-p disassemble
-            documentation dolist dotimes ecase eq eql equal error eval
-            every export fdefinition find-package find-symbol first
-            fourth fset funcall function functionp gensym go identity
-            if in-package incf integerp integerp intern keywordp
-            lambda-code last length let list-all-packages list listp
-            make-package make-symbol mapcar member minusp mod nil not
-            nth nthcdr null numberp or package-name package-use-list
-            packagep plusp prin1-to-string print proclaim prog1 prog2
-            pron push quote remove remove-if remove-if-not return
-            return-from revappend reverse second set setq some
-            string-upcase string string= stringp subseq
-            symbol-function symbol-name symbol-package symbol-plist
-            symbol-value symbolp t tagbody third throw truncate unless
-            unwind-protect variable warn when write-line write-string
-            zerop))
+  (export '(&rest &optional &body * *gensym-counter* *package* + - / 1+ 1- < <= =
+= > >= and append apply assoc atom block boundp boundp butlast caar
+cadddr caddr cadr car car case catch cdar cdddr cddr cdr cdr char
+char-code char= code-char cond cons consp copy-list decf declaim
+defparameter defun defvar digit-char-p disassemble documentation
+dolist dotimes ecase eq eql equal error eval every export fdefinition
+find-package find-symbol first fourth fset funcall function functionp
+gensym go identity if in-package incf integerp integerp intern
+keywordp lambda last length let let* list-all-packages list listp
+make-package make-symbol mapcar member minusp mod nil not nth nthcdr
+null numberp or package-name package-use-list packagep plusp
+prin1-to-string print proclaim prog1 prog2 pron push quote remove
+remove-if remove-if-not return return-from revappend reverse second
+set setq some string-upcase string string= stringp subseq
+symbol-function symbol-name symbol-package symbol-plist symbol-value
+symbolp t tagbody third throw truncate unless unwind-protect variable
+warn when write-line write-string zerop))
 
   (setq *package* *user-package*)
 
