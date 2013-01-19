@@ -40,7 +40,7 @@
     `(eval-when-compile
        ,@(mapcar (lambda (decl) `(!proclaim ',decl)) decls)))
 
-  (declaim (constant nil t))
+  (declaim (constant nil t) (special t nil))
   (setq nil 'nil)
   (setq t 't)
 
@@ -52,6 +52,7 @@
 
   (defmacro defvar (name value &optional docstring)
     `(progn
+       (declaim (special ,name))
        (unless (boundp ',name) (setq ,name ,value))
        ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
        ',name))
@@ -1000,6 +1001,10 @@
 
 (defun !proclaim (decl)
   (case (car decl)
+    (special
+     (dolist (name (cdr decl))
+       (let ((b (global-binding name 'variable 'variable)))
+         (push-binding-declaration 'special b))))
     (notinline
      (dolist (name (cdr decl))
        (let ((b (global-binding name 'function 'function)))
@@ -1255,11 +1260,13 @@
     (let ((variables (mapcar #'first bindings))
           (values    (mapcar #'second bindings)))
       (let ((cvalues (mapcar #'ls-compile values))
-            (*environment* (extend-local-env (remove-if #'boundp variables)))
+            (*environment*
+             (extend-local-env (remove-if (lambda (v)(claimp v 'variable 'special))
+                                          variables)))
             (dynamic-bindings))
         (concat "(function("
                 (join (mapcar (lambda (x)
-                                (if (boundp x)
+                                (if (claimp x 'variable 'special)
                                     (let ((v (gvarname x)))
                                       (push (cons x v) dynamic-bindings)
                                       v)
