@@ -1228,32 +1228,35 @@
 (define-compilation progn (&rest body)
   (js!selfcall (ls-compile-block body t)))
 
+
+(defun restoring-dynamic-binding (bindings body)
+  (concat
+   "try {" *newline*
+   (indent body)
+   "}" *newline*
+   "finally {"  *newline*
+   (indent
+    (join-trailing (mapcar (lambda (b)
+                             (let ((s (ls-compile `(quote ,(car b)))))
+                               (concat s ".value" " = " (cdr b))))
+                           bindings)
+                   (concat ";" *newline*)))
+   "}" *newline*))
+
 (defun dynamic-binding-wrapper (bindings body)
   (if (null bindings)
       body
-      (concat
-       "try {" *newline*
-       (indent
-        "var tmp;" *newline*
-        (join
-         (mapcar (lambda (b)
-                   (let ((s (ls-compile `(quote ,(car b)))))
-                     (concat "tmp = " s ".value;" *newline*
-                             s ".value = " (cdr b) ";" *newline*
-                             (cdr b) " = tmp;" *newline*)))
-                 bindings))
-        body)
-       "}" *newline*
-       "finally {"  *newline*
-       (indent
-        (join-trailing
-         (mapcar (lambda (b)
-                   (let ((s (ls-compile `(quote ,(car b)))))
-                     (concat s ".value" " = " (cdr b))))
-                 bindings)
-         (concat ";" *newline*)))
-       "}" *newline*)))
-
+      (restoring-dynamic-binding
+       bindings
+       (concat "var tmp;" *newline*
+               (join (mapcar (lambda (b)
+                               (let ((s (ls-compile `(quote ,(car b)))))
+                                 (concat "tmp = " s ".value;" *newline*
+                                         s ".value = " (cdr b) ";" *newline*
+                                         (cdr b) " = tmp;" *newline*)))
+                             bindings))
+               body
+               *newline*))))
 
 (define-compilation let (bindings &rest body)
   (let ((bindings (mapcar #'ensure-list bindings)))
@@ -1277,6 +1280,29 @@
                 (let ((body (ls-compile-block body t)))
                   (indent (dynamic-binding-wrapper dynamic-bindings body)))
                 "})(" (join cvalues ",") ")")))))
+
+
+(defun let*-initialize (x)
+  (let ((var (first x))
+        (value (second x)))
+    (if (claimp var 'variable 'special)
+        (ls-compile `(setq ,var ,value))
+        (let ((v (gvarname var)))
+          (let ((b (make-binding var 'variable v)))
+            (prog1 (concat "var " v " = " (ls-compile value) ";" *newline*)
+              (push-to-lexenv b *environment* 'variable)))))))
+
+(define-compilation let* (bindings &rest body)
+  (let ((bindings (mapcar #'ensure-list bindings))
+        (*environment* (copy-lexenv *environment*)))
+    (js!selfcall
+      (let ((body
+             (concat (mapconcat #'let*-initialize bindings)
+                     (ls-compile-block body t))))
+        (if (some (lambda (b) (claimp (car b) 'variable 'special)) bindings)
+            (restoring-dynamic-binding bindings body)
+            body)))))
+
 
 
 (defvar *block-counter* 0)
@@ -1723,9 +1749,10 @@
     ((symbolp sexp)
      (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
        (cond
-         ((eq (binding-type b) 'lexical-variable)
+         ((and b (not (member 'special (binding-declarations b))))
           (binding-value b))
-         ((or (keywordp sexp) (claimp sexp 'variable 'constant))
+         ((or (keywordp sexp)
+              (member 'constant (binding-declarations b)))
           (concat (ls-compile `',sexp) ".value"))
          (t
           (ls-compile `(symbol-value ',sexp))))))
@@ -1793,7 +1820,7 @@
             every export fdefinition find-package find-symbol first
             fourth fset funcall function functionp gensym go identity
             in-package incf integerp integerp intern keywordp
-            lambda-code last length let list-all-packages list listp
+            lambda-code last length let let* list-all-packages list listp
             make-package make-symbol mapcar member minusp mod nil not
             nth nthcdr null numberp or package-name package-use-list
             packagep plusp prin1-to-string print proclaim prog1 prog2
