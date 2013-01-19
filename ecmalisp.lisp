@@ -1785,7 +1785,7 @@
             documentation dolist dotimes ecase eq eql equal error eval
             every export fdefinition find-package find-symbol first
             fourth fset funcall function functionp gensym go identity
-            in-package incf integerp integerp intern keywordp
+            if in-package incf integerp integerp intern keywordp
             lambda-code last length let list-all-packages list listp
             make-package make-symbol mapcar member minusp mod nil not
             nth nthcdr null numberp or package-name package-use-list
