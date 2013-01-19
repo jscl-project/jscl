@@ -521,10 +521,7 @@
       (let ((symbols (%package-symbols package)))
         (if (in name symbols)
             (cons (oget symbols name) t)
-            (dolist (used (package-use-list package) (cons nil nil))
-              (let ((exports (%package-external-symbols used)))
-                (when (in name exports)
-                  (return (cons (oget exports name) t)))))))))
+            (dolist (used (package-use-list package) (cons nil nil)))))))
 
   (defun find-symbol (name &optional (package *package*))
     (car (%find-symbol name package)))
@@ -811,12 +808,46 @@
          (t
           (error "Unknown reader form.")))))))
 
-(defvar *eof* (make-symbol "EOF"))
+;;; Parse a string of the form NAME, PACKAGE:NAME or
+;;; PACKAGE::NAME and return the name. If the string is of the
+;;; form 1) or 3), but the symbol does not exist, it will be created
+;;; and interned in that package.
+(defun read-symbol (string)
+  (let ((size (length string))
+        package name internalp index)
+    (setq index 0)
+    (while (and (< index size)
+                (not (char= (char string index) #\:)))
+      (incf index))
+    (cond
+      ;; No package prefix
+      ((= index size)
+       (setq name string)
+       (setq package *package*)
+       (setq internalp t))
+      (t
+       ;; Package prefix
+       (if (zerop index)
+           (setq package "KEYWORD")
+           (setq package (string-upcase (subseq string 0 index))))
+       (incf index)
+       (when (char= (char string index) #\:)
+         (setq internalp t)
+         (incf index))
+       (setq name (subseq string index))))
+    ;; Canonalize symbol name and package
+    (setq name (string-upcase name))
+    (setq package (find-package package))
+    ;; TODO: PACKAGE:SYMBOL should signal error if SYMBOL is not an
+    ;; external symbol from PACKAGE.
+    (intern name package)))
+
+(defvar *eof* (gensym))
 (defun ls-read (stream)
   (skip-whitespaces-and-comments stream)
   (let ((ch (%peek-char stream)))
     (cond
-      ((null ch)
+      ((or (null ch) (char= ch #\)))
        *eof*)
       ((char= ch #\()
        (%read-char stream)
@@ -841,7 +872,7 @@
        (let ((string (read-until stream #'terminalp)))
          (if (every #'digit-char-p string)
              (parse-integer string)
-             (intern (string-upcase string))))))))
+             (read-symbol string)))))))
 
 (defun ls-read-from-string (string)
   (ls-read (make-string-stream string)))
@@ -1256,7 +1287,7 @@
     "        throw cf;" *newline*
     "}" *newline*))
 
-(define-compilation throw (id &optional value)
+(define-compilation throw (id value)
   (js!selfcall
     "throw ({"
     "type: 'catch', "
