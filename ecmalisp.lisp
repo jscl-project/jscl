@@ -456,6 +456,9 @@
 
   (defvar *package-list* nil)
 
+  (defun list-all-packages ()
+    *package-list*)
+
   (defun make-package (name &optional use)
     (let ((package (new))
           (use (mapcar #'find-package-or-fail use)))
@@ -503,6 +506,12 @@
   (defvar *user-package*
     (make-package "CL-USER" (list *common-lisp-package*)))
 
+  (defvar *keyword-package*
+    (make-package "KEYWORD"))
+
+  (defun keywordp (x)
+    (and (symbolp x) (eq (symbol-package x) *keyword-package*)))
+
   (defvar *package* *common-lisp-package*)
 
   (defmacro in-package (package-designator)
@@ -531,14 +540,18 @@
     (car (%find-symbol name package)))
 
   (defun intern (name &optional (package *package*))
-    (let ((result (%find-symbol name package)))
-      (if (cdr result)
-          (car result)
-          (let ((symbols (%package-symbols package)))
-            (oget symbols name)
-            (let ((symbol (make-symbol name)))
-              (oset symbol "package" package)
-              (oset symbols name symbol))))))
+    (let ((package (find-package-or-fail package)))
+      (let ((result (%find-symbol name package)))
+        (if (cdr result)
+            (car result)
+            (let ((symbols (%package-symbols package)))
+              (oget symbols name)
+              (let ((symbol (make-symbol name)))
+                (oset symbol "package" package)
+                (when (eq package *keyword-package*)
+                  (oset symbol "value" symbol)
+                  (export (list symbol) package))
+                (oset symbols name symbol)))))))
 
   (defun symbol-package (symbol)
     (unless (symbolp symbol)
@@ -674,7 +687,15 @@
 (progn
   (defun prin1-to-string (form)
     (cond
-      ((symbolp form) (symbol-name form))
+      ((symbolp form)
+       (if (cdr (%find-symbol (symbol-name form) *package*))
+           (symbol-name form)
+           (let ((package (symbol-package form))
+                 (name (symbol-name form)))
+             (concat (if (eq package (find-package "KEYWORD"))
+                         ""
+                         (package-name package))
+                     ":" name))))
       ((integerp form) (integer-to-string form))
       ((stringp form) (concat "\"" (escape-string form) "\""))
       ((functionp form)
@@ -844,7 +865,7 @@
     (setq package (find-package package))
     ;; TODO: PACKAGE:SYMBOL should signal error if SYMBOL is not an
     ;; external symbol from PACKAGE.
-    (if internalp
+    (if (or internalp (eq package (find-package "KEYWORD")))
         (intern name package)
         (find-symbol name package))))
 
@@ -1159,7 +1180,9 @@
      (or (cdr (assoc sexp *literal-symbols*))
 	 (let ((v (genlit))
 	       (s #+common-lisp (concat "{name: \"" (escape-string (symbol-name sexp)) "\"}")
-		  #+ecmalisp (ls-compile `(intern ,(symbol-name sexp)))))
+		  #+ecmalisp (ls-compile
+                              `(intern ,(symbol-name sexp)
+                                       ,(package-name (symbol-package sexp))))))
 	   (push (cons sexp v) *literal-symbols*)
 	   (toplevel-compilation (concat "var " v " = " s))
 	   v)))
@@ -1695,7 +1718,7 @@
        (cond
          ((eq (binding-type b) 'lexical-variable)
           (binding-value b))
-         ((claimp sexp 'variable 'constant)
+         ((or (keywordp sexp) (claimp sexp 'variable 'constant))
           (concat (ls-compile `',sexp) ".value"))
          (t
           (ls-compile `(symbol-value ',sexp))))))
@@ -1762,17 +1785,18 @@
             documentation dolist dotimes ecase eq eql equal error eval
             every export fdefinition find-package find-symbol first
             fourth fset funcall function functionp gensym go identity
-            in-package incf integerp integerp intern lambda-code last
-            length let list listp make-package make-symbol mapcar
-            member minusp mod nil not nth nthcdr null numberp or
-            package-name package-use-list packagep plusp
-            prin1-to-string print proclaim prog1 prog2 pron push quote
-            remove remove-if remove-if-not return return-from
-            revappend reverse second set setq some string-upcase
-            string string= stringp subseq symbol-function symbol-name
-            symbol-package symbol-plist symbol-value symbolp t tagbody
-            third throw truncate unless unwind-protect variable warn
-            when write-line write-string zerop))
+            in-package incf integerp integerp intern keywordp
+            lambda-code last length let list-all-packages list listp
+            make-package make-symbol mapcar member minusp mod nil not
+            nth nthcdr null numberp or package-name package-use-list
+            packagep plusp prin1-to-string print proclaim prog1 prog2
+            pron push quote remove remove-if remove-if-not return
+            return-from revappend reverse second set setq some
+            string-upcase string string= stringp subseq
+            symbol-function symbol-name symbol-package symbol-plist
+            symbol-value symbolp t tagbody third throw truncate unless
+            unwind-protect variable warn when write-line write-string
+            zerop))
 
   (setq *package* *user-package*)
 
