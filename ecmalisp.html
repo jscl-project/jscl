@@ -67,7 +67,7 @@
     <script src="jqconsole.min.js" type="text/javascript" charset="utf-8"></script>
     <script>
       $(function () {
-        var jqconsole = $('#console').jqconsole('Welcome to Ecmalisp!\n\n', '> ');
+        var jqconsole = $('#console').jqconsole('Welcome to Ecmalisp!\n\n', '');
         jqconsole.RegisterMatching('(', ')', 'parents');
 
         lisp.write = function(str){
@@ -77,6 +77,7 @@
 
         var startPrompt = function () {
           // Start the prompt with history enabled.
+          jqconsole.Write(lisp.evalString('(CL:PACKAGE-NAME CL:*PACKAGE*)') + '> ', 'jqconsole-prompt');
           jqconsole.Prompt(true, function (input) {
             // Output input with the class jqconsole-return.
             if (input[0] != ','){
