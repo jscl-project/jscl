@@ -521,7 +521,11 @@
       (let ((symbols (%package-symbols package)))
         (if (in name symbols)
             (cons (oget symbols name) t)
-            (dolist (used (package-use-list package) (cons nil nil)))))))
+            (dolist (used (package-use-list package) (cons nil nil))
+              (let ((exports (%package-external-symbols used)))
+                (when (in name exports)
+                  (return-from %find-symbol
+                    (cons (oget exports name) t)))))))))
 
   (defun find-symbol (name &optional (package *package*))
     (car (%find-symbol name package)))
@@ -840,7 +844,9 @@
     (setq package (find-package package))
     ;; TODO: PACKAGE:SYMBOL should signal error if SYMBOL is not an
     ;; external symbol from PACKAGE.
-    (intern name package)))
+    (if internalp
+        (intern name package)
+        (find-symbol name package))))
 
 (defvar *eof* (gensym))
 (defun ls-read (stream)
