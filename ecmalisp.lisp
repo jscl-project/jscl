@@ -1482,10 +1482,19 @@
   (type-check (("x" "number" x) ("y" "number" y))
     (concat "x" op "y")))
 
-(define-builtin + (x y) (num-op-num x "+" y))
-(define-builtin - (x y) (num-op-num x "-" y))
-(define-builtin * (x y) (num-op-num x "*" y))
-(define-builtin / (x y) (num-op-num x "/" y))
+(defmacro define-builtin-arithmetic (op)
+`(define-raw-builtin ,op (&rest args)
+  (if args
+      (let ((res (ls-compile (car args))))
+	(dolist (x (cdr args))
+	  (setq res (num-op-num res ,(symbol-name op) (ls-compile x))))
+	res)
+       "0")))
+
+(define-builtin-arithmetic +)
+(define-builtin-arithmetic -)
+(define-builtin-arithmetic *)
+(define-builtin-arithmetic /)
 
 (define-builtin mod (x y) (num-op-num x "%" y))
 
