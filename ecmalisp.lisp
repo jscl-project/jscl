@@ -1335,24 +1335,24 @@
    "}" *newline*))
 
 (define-compilation let (bindings &rest body)
-  (let ((bindings (mapcar #'ensure-list bindings)))
-    (let ((variables (mapcar #'first bindings)))
-      (let ((cvalues (mapcar #'ls-compile (mapcar #'second bindings)))
-            (*environment* (extend-local-env (remove-if #'special-variable-p variables)))
-            (dynamic-bindings))
-        (concat "(function("
-                (join (mapcar (lambda (x)
-                                (if (special-variable-p x)
-                                    (let ((v (gvarname x)))
-                                      (push (cons x v) dynamic-bindings)
-                                      v)
-                                    (translate-variable x)))
-                              variables)
-                      ",")
-                "){" *newline*
-                (let ((body (ls-compile-block body t)))
-                  (indent (let-binding-wrapper dynamic-bindings body)))
-                "})(" (join cvalues ",") ")")))))
+  (let* ((bindings (mapcar #'ensure-list bindings))
+         (variables (mapcar #'first bindings))
+         (cvalues (mapcar #'ls-compile (mapcar #'second bindings)))
+         (*environment* (extend-local-env (remove-if #'special-variable-p variables)))
+         (dynamic-bindings))
+    (concat "(function("
+            (join (mapcar (lambda (x)
+                            (if (special-variable-p x)
+                                (let ((v (gvarname x)))
+                                  (push (cons x v) dynamic-bindings)
+                                  v)
+                                (translate-variable x)))
+                          variables)
+                  ",")
+            "){" *newline*
+            (let ((body (ls-compile-block body t)))
+              (indent (let-binding-wrapper dynamic-bindings body)))
+            "})(" (join cvalues ",") ")")))
 
 
 ;;; Return the code to initialize BINDING, and push it extending the
@@ -1362,10 +1362,10 @@
         (value (second binding)))
     (if (special-variable-p var)
         (concat (ls-compile `(setq ,var ,value)) ";" *newline*)
-        (let ((v (gvarname var)))
-          (let ((b (make-binding var 'variable v)))
-            (prog1 (concat "var " v " = " (ls-compile value) ";" *newline*)
-              (push-to-lexenv b *environment* 'variable)))))))
+        (let* ((v (gvarname var))
+               (b (make-binding var 'variable v)))
+          (prog1 (concat "var " v " = " (ls-compile value) ";" *newline*)
+            (push-to-lexenv b *environment* 'variable))))))
 
 ;;; Wrap BODY to restore the symbol values of SYMBOLS after body. It
 ;;; DOES NOT generate code to initialize the value of the symbols,
