@@ -1775,6 +1775,26 @@
   (type-check (("x" "string" x))
     "lisp.write(x)"))
 
+(define-builtin make-array (n)
+  (js!selfcall
+    "var r = [];" *newline*
+    "for (var i = 0; i < " n "; i++)" *newline*
+    (indent "r.push(" (ls-compile nil) ");" *newline*)
+    "return r;" *newline*))
+
+(define-builtin arrayp (x)
+  (js!bool
+   (js!selfcall
+     "var x = " x ";" *newline*
+     "return typeof x === 'object' && 'length' in x;")))
+
+(define-builtin aref (array n)
+  (concat "(" array ")[" n "]"))
+
+(define-builtin aset (array n value)
+  (concat "(" array ")[" n "] = " value))
+
+
 (defun macro (x)
   (and (symbolp x)
        (let ((b (lookup-in-lexenv x *environment* 'function)))
