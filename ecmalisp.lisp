@@ -1534,7 +1534,7 @@
                decls)
      (concat "return " (progn ,@body) ";" *newline*)))
 
-;;; VARIABLE-ARITY compiles variable arity operations. ARGS stand for
+;;; VARIABLE-ARITY compiles variable arity operations. ARGS stands for
 ;;; a variable which holds a list of forms. It will compile them and
 ;;; store the result in some Javascript variables. BODY is evaluated
 ;;; with ARGS bound to the list of these variables to generate the
@@ -1545,13 +1545,13 @@
     (error "ARGS must be a non-empty list"))
   (let ((counter 0)
         (variables '())
-        (prelude))
+        (prelude ""))
     (dolist (x args)
       (let ((v (concat "x" (integer-to-string (incf counter)))))
         (push v variables)
         (concatf prelude
                  (concat "var " v " = " (ls-compile x) ";" *newline*
-                         "if (typeof " v " !=== 'number') throw 'Not a number!';"
+                         "if (typeof " v " !== 'number') throw 'Not a number!';"
                          *newline*))))
     (js!selfcall prelude (funcall function (reverse variables)))))
 
@@ -1568,8 +1568,20 @@
   (type-check (("x" "number" x) ("y" "number" y))
     (concat "x" op "y")))
 
-(define-builtin + (x y) (num-op-num x "+" y))
-(define-builtin - (x y) (num-op-num x "-" y))
+(define-raw-builtin + (&rest numbers)
+  (if (null numbers)
+      "0"
+      (variable-arity numbers
+	(join numbers "+"))))
+
+(define-raw-builtin - (x &rest others)
+  (let ((args (cons x others)))
+    (variable-arity args
+      (if (null others)
+	  (concat "-" (car args))
+	  (join args "-")))))
+
+
 (define-builtin * (x y) (num-op-num x "*" y))
 (define-builtin / (x y) (num-op-num x "/" y))
 
