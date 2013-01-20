@@ -98,8 +98,6 @@
 
   ;; Basic functions
   (defun = (x y) (= x y))
-  (defun + (x y) (+ x y))
-  (defun - (x y) (- x y))
   (defun * (x y) (* x y))
   (defun / (x y) (/ x y))
   (defun 1+ (x) (+ x 1))
@@ -249,6 +247,18 @@
 ;;; constructions.
 #+ecmalisp
 (progn
+  (defun + (&rest args)
+    (let ((r 0))
+      (dolist (x args r)
+	(incf r x))))
+
+  (defun - (x &rest others)
+    (if (null others)
+	(- x)
+	(let ((r x))
+	  (dolist (y others r)
+	    (decf r y)))))
+
   (defun append-two (list1 list2)
     (if (null list1)
         list2
