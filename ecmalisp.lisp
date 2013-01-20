@@ -1573,19 +1573,6 @@
                         (lambda (,args)
                           (concat "return " ,@body ";" *newline*))))
 
-
-(define-raw-builtin plus (&rest numbers)
-  (variable-arity numbers
-    (join numbers "+")))
-
-(define-raw-builtin minus (x &rest others)
-  (let ((args (cons x others)))
-	      (variable-arity args
-		(if (null others)
-		    (concat "-" (car args))
-		    (join args "+")))))
-  
-
 (defun num-op-num (x op y)
   (type-check (("x" "number" x) ("y" "number" y))
     (concat "x" op "y")))
@@ -1603,9 +1590,18 @@
 	  (concat "-" (car args))
 	  (join args "-")))))
 
+(define-raw-builtin * (&rest numbers)
+  (if (null numbers)
+      "1"
+      (variable-arity numbers
+	(join numbers "*"))))
 
-(define-builtin * (x y) (num-op-num x "*" y))
-(define-builtin / (x y) (num-op-num x "/" y))
+(define-raw-builtin / (x &rest others)
+  (let ((args (cons x others)))
+    (variable-arity args
+      (if (null others)
+	  (concat "/" (car args))
+	  (join args "/")))))
 
 (define-builtin mod (x y) (num-op-num x "%" y))
 
@@ -1924,9 +1920,7 @@ remove-if remove-if-not return return-from revappend reverse second
 set setq some string-upcase string string= stringp subseq
 symbol-function symbol-name symbol-package symbol-plist symbol-value
 symbolp t tagbody third throw truncate unless unwind-protect variable
-warn when write-line write-string zerop
-arithmetic plus minus
-))
+warn when write-line write-string zerop))
 
   (setq *package* *user-package*)
 
