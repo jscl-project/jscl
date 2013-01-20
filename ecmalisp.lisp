@@ -1547,6 +1547,22 @@
 	res)
        "0")))
 
+(defmacro arithmetic (op &rest args)
+  (let ((counter 0)
+	(checks ()))
+    (dolist (x args)
+      (push (list (concat "v" (ls-compile counter))
+		  "number"
+		  (ls-compile x))
+	    checks)
+      (incf counter))
+    `(js-eval
+     (type-check ,checks
+		  ,(let ((res ""))
+			(dolist (x checks)
+			  (setq res (concat (car x) (symbol-name op) res)))
+			(subseq res 0 (1- (length res))))))))
+
 (define-builtin-arithmetic +)
 (define-builtin-arithmetic -)
 (define-builtin-arithmetic *)
@@ -1570,8 +1586,6 @@
 (define-builtin-comparison >= ">=")
 (define-builtin-comparison <= "<=")
 (define-builtin-comparison = "==")
-(define-builtin-comparison equal "==")
-(define-builtin-comparison eq "===")
 
 (define-builtin numberp (x)
   (js!bool (concat "(typeof (" x ") == \"number\")")))
@@ -1652,6 +1666,9 @@
 
 (define-builtin lambda-code (x)
   (concat "(" x ").toString()"))
+
+(define-builtin eq    (x y) (js!bool (concat "(" x " === " y ")")))
+(define-builtin equal (x y) (js!bool (concat "(" x  " == " y ")")))
 
 (define-builtin char-to-string (x)
   (type-check (("x" "number" x))
@@ -1868,7 +1885,9 @@ remove-if remove-if-not return return-from revappend reverse second
 set setq some string-upcase string string= stringp subseq
 symbol-function symbol-name symbol-package symbol-plist symbol-value
 symbolp t tagbody third throw truncate unless unwind-protect variable
-warn when write-line write-string zerop))
+warn when write-line write-string zerop
+arithmetic
+))
 
   (setq *package* *user-package*)
 
