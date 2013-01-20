@@ -1600,7 +1600,7 @@
   (let ((args (cons x others)))
     (variable-arity args
       (if (null others)
-	  (concat "/" (car args))
+	  (concat "1 /" (car args))
 	  (join args "/")))))
 
 (define-builtin mod (x y) (num-op-num x "%" y))
