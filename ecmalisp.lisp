@@ -289,7 +289,7 @@
       ((stringp seq)
        (string-length seq))
       ((arrayp seq)
-       (get "length" seq))
+       (oget seq "length"))
       ((listp seq)
        (list-length seq))))
 
@@ -634,6 +634,12 @@
 (defun mapconcat (func list)
   (join (mapcar func list)))
 
+(defun vector-to-list (vector)
+  (let ((list nil)
+	(size (length vector)))
+    (dotimes (i size (reverse list))
+      (push (aref vector i) list))))
+
 ;;; Like CONCAT, but prefix each line with four spaces. Two versions
 ;;; of this function are available, because the Ecmalisp version is
 ;;; very slow and bootstraping was annoying.
@@ -726,6 +732,8 @@
                      (prin1-to-string (car last))
                      (concat (prin1-to-string (car last)) " . " (prin1-to-string (cdr last)))))
                ")"))
+      ((arrayp form)
+       (concat "#" (prin1-to-string (vector-to-list form))))
       ((packagep form)
        (concat "#<PACKAGE " (package-name form) ">"))))
 
