@@ -285,9 +285,13 @@
       l))
 
   (defun length (seq)
-    (if (stringp seq)
-        (string-length seq)
-        (list-length seq)))
+    (cond
+      ((stringp seq)
+       (string-length seq))
+      ((arrayp seq)
+       (oget seq "length"))
+      ((listp seq)
+       (list-length seq))))
 
   (defun concat-two (s1 s2)
     (concat-two s1 s2))
@@ -595,7 +599,10 @@
   (defun setcar (cons new)
     (setf (car cons) new))
   (defun setcdr (cons new)
-    (setf (cdr cons) new)))
+    (setf (cdr cons) new))
+
+  (defun aset (array idx value)
+    (setf (aref array idx) value)))
 
 ;;; At this point, no matter if Common Lisp or ecmalisp is compiling
 ;;; from here, this code will compile on both. We define some helper
@@ -629,6 +636,19 @@
 
 (defun mapconcat (func list)
   (join (mapcar func list)))
+
+(defun vector-to-list (vector)
+  (let ((list nil)
+	(size (length vector)))
+    (dotimes (i size (reverse list))
+      (push (aref vector i) list))))
+
+(defun list-to-vector (list)
+  (let ((v (make-array (length list)))
+	(i 0))
+    (dolist (x list v)
+      (aset v i x)
+      (incf i))))
 
 ;;; Like CONCAT, but prefix each line with four spaces. Two versions
 ;;; of this function are available, because the Ecmalisp version is
@@ -722,6 +742,8 @@
                      (prin1-to-string (car last))
                      (concat (prin1-to-string (car last)) " . " (prin1-to-string (cdr last)))))
                ")"))
+      ((arrayp form)
+       (concat "#" (prin1-to-string (vector-to-list form))))
       ((packagep form)
        (concat "#<PACKAGE " (package-name form) ">"))))
 
@@ -824,6 +846,7 @@
   (ecase (%read-char stream)
     (#\'
      (list 'function (ls-read stream)))
+    (#\( (list-to-vector (%read-list stream)))
     (#\\
      (let ((cname
             (concat (string (%read-char stream))
@@ -1208,7 +1231,15 @@
 	   c
 	   (let ((v (genlit)))
 	     (toplevel-compilation (concat "var " v " = " c))
-	     v))))))
+	     v))))
+    ((arrayp sexp)
+     (let ((elements (vector-to-list sexp)))
+       (let ((c (concat "[" (join (mapcar #'literal elements) ", ") "]")))
+	 (if recursive
+	     c
+	     (let ((v (genlit)))
+	       (toplevel-compilation (concat "var " v " = " c))
+	       v)))))))
 
 (define-compilation quote (sexp)
   (literal sexp))
@@ -1800,6 +1831,33 @@
   (type-check (("x" "string" x))
     "lisp.write(x)"))
 
+(define-builtin make-array (n)
+  (js!selfcall
+    "var r = [];" *newline*
+    "for (var i = 0; i < " n "; i++)" *newline*
+    (indent "r.push(" (ls-compile nil) ");" *newline*)
+    "return r;" *newline*))
+
+(define-builtin arrayp (x)
+  (js!bool
+   (js!selfcall
+     "var x = " x ";" *newline*
+     "return typeof x === 'object' && 'length' in x;")))
+
+(define-builtin aref (array n)
+  (js!selfcall
+    "var x = " "(" array ")[" n "];" *newline*
+    "if (x === undefined) throw 'Out of range';" *newline*
+    "return x;" *newline*))
+
+(define-builtin aset (array n value)
+  (js!selfcall
+    "var x = " array ";" *newline*
+    "var i = " n ";" *newline*
+    "if (i < 0 || i >= x.length) throw 'Out of range';" *newline*
+    "return x[i] = " value ";" *newline*))
+
+
 (defun macro (x)
   (and (symbolp x)
        (let ((b (lookup-in-lexenv x *environment* 'function)))
@@ -1858,6 +1916,7 @@
           (ls-compile `(symbol-value ',sexp))))))
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
+    ((arrayp sexp) (literal sexp))
     ((listp sexp)
      (let ((name (car sexp))
            (args (cdr sexp)))
@@ -1874,7 +1933,9 @@
          (t
           (if (macro name)
               (ls-compile (ls-macroexpand-1 sexp))
-              (compile-funcall name args))))))))
+              (compile-funcall name args))))))
+    (t
+     (error "How should I compile this?"))))
 
 (defun ls-compile-toplevel (sexp)
   (let ((*toplevel-compilations* nil))
@@ -1911,23 +1972,27 @@
                (ls-compile-toplevel x))))
       (js-eval code)))
 
-  (export '(&rest &optional &body * *gensym-counter* *package* + - / 1+ 1- < <= =
-	    = > >= and append apply assoc atom block boundp boundp butlast caar
-	    cadddr caddr cadr car car case catch cdar cdddr cddr cdr cdr char
-	    char-code char= code-char cond cons consp copy-list decf declaim
-	    defparameter defun defvar digit-char-p disassemble documentation
-	    dolist dotimes ecase eq eql equal error eval every export fdefinition
-	    find-package find-symbol first fourth fset funcall function functionp
-	    gensym go identity if in-package incf integerp integerp intern
-	    keywordp lambda last length let let* list-all-packages list listp
-	    make-package make-symbol mapcar member minusp mod nil not nth nthcdr
-	    null numberp or package-name package-use-list packagep plusp
-	    prin1-to-string print proclaim prog1 prog2 pron push quote remove
-	    remove-if remove-if-not return return-from revappend reverse second
+  (export '(&rest &optional &body * *gensym-counter* *package* + - /
+	    1+ 1- < <= = = > >= and append apply aref arrayp aset
+	    assoc atom block boundp boundp butlast caar cadddr caddr
+	    cadr car car case catch cdar cdddr cddr cdr cdr char
+	    char-code char= code-char cond cons consp copy-list decf
+	    declaim defparameter defun defvar digit-char-p disassemble
+	    documentation dolist dotimes ecase eq eql equal error eval
+	    every export fdefinition find-package find-symbol first
+	    fourth fset funcall function functionp gensym go identity
+	    if in-package incf integerp integerp intern keywordp
+	    lambda last length let let* list-all-packages list listp
+	    make-array make-package make-symbol mapcar member minusp
+	    mod nil not nth nthcdr null numberp or package-name
+	    package-use-list packagep plusp prin1-to-string print
+	    proclaim prog1 prog2 pron push quote remove remove-if
+	    remove-if-not return return-from revappend reverse second
 	    set setq some string-upcase string string= stringp subseq
-	    symbol-function symbol-name symbol-package symbol-plist symbol-value
-	    symbolp t tagbody third throw truncate unless unwind-protect variable
-	    warn when write-line write-string zerop))
+	    symbol-function symbol-name symbol-package symbol-plist
+	    symbol-value symbolp t tagbody third throw truncate unless
+	    unwind-protect variable warn when write-line write-string
+	    zerop))
 
   (setq *package* *user-package*)
 
