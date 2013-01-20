@@ -285,9 +285,13 @@
       l))
 
   (defun length (seq)
-    (if (stringp seq)
-        (string-length seq)
-        (list-length seq)))
+    (cond
+      ((stringp seq)
+       (string-length seq))
+      ((arrayp seq)
+       (get "length" seq))
+      ((listp seq)
+       (list-length seq))))
 
   (defun concat-two (s1 s2)
     (concat-two s1 s2))
