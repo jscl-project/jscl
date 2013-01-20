@@ -277,6 +277,25 @@
   (defun reverse (list)
     (revappend list '()))
 
+  (defmacro psetq (&rest pairs)
+    (let (;; For each pair, we store here a list of the form
+	  ;; (VARIABLE GENSYM VALUE).
+	  (assignments '()))
+      (while t
+	(cond
+	  ((null pairs) (return))
+	  ((null (cdr pairs))
+	   (error "Odd paris in PSETQ"))
+	  (t
+	   (let ((variable (car pairs))
+		 (value (cadr pairs)))
+	     (push `(,variable ,(gensym) ,value)  assignments)
+	     (setq pairs (cddr pairs))))))
+      (setq assignments (reverse assignments))
+      ;; 
+      `(let ,(mapcar #'cdr assignments)
+	 (setq ,@(!reduce #'append (mapcar #'butlast assignments) '())))))
+
   (defun list-length (list)
     (let ((l 0))
       (while (not (null list))
@@ -1173,11 +1192,26 @@
         (ls-compile-block body t)) *newline*
        "})"))))
 
-(define-compilation setq (var val)
+
+(defun setq-pair (var val)
   (let ((b (lookup-in-lexenv var *environment* 'variable)))
     (if (eq (binding-type b) 'lexical-variable)
         (concat (binding-value b) " = " (ls-compile val))
         (ls-compile `(set ',var ,val)))))
+
+(define-compilation setq (&rest pairs)
+  (let ((result ""))
+    (while t
+      (cond
+	((null pairs) (return))
+	((null (cdr pairs))
+	 (error "Odd paris in SETQ"))
+	(t
+	 (concatf result
+	   (concat (setq-pair (car pairs) (cadr pairs))
+		   (if (null (cddr pairs)) "" ", ")))
+	 (setq pairs (cddr pairs)))))
+    (concat "(" result ")")))
 
 ;;; FFI Variable accessors
 (define-compilation js-vref (var)
