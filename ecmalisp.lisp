@@ -1605,16 +1605,23 @@
 
 (define-builtin mod (x y) (num-op-num x "%" y))
 
+
+(defun comparison-conjuntion (vars op)
+  (cond
+    ((null (cdr vars))
+     "true")
+    ((null (cddr vars))
+     (concat (car vars) op (cadr vars)))
+    (t
+     (concat (car vars) op (cadr vars)
+	     " && "
+	     (comparison-conjuntion (cdr vars) op)))))
+
 (defmacro define-builtin-comparison (op sym)
-  `(define-raw-builtin ,op (&rest args)
-     (js!bool
-      (let ((x (car args))
-	    (res "true"))
-	(dolist (y (cdr args))
-	  (setq res (concat "("
-		     (ls-compile x) " " ,sym " " (ls-compile y) ")" " && " res))
-	  (setq x y))
-	res))))
+  `(define-raw-builtin ,op (x &rest args)
+     (let ((args (cons x args)))
+       (variable-arity args
+	 (js!bool (comparison-conjuntion args ,sym))))))
 
 (define-builtin-comparison > ">")
 (define-builtin-comparison < "<")
