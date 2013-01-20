@@ -1534,39 +1534,54 @@
                decls)
      (concat "return " (progn ,@body) ";" *newline*)))
 
+;;; VARIABLE-ARITY compiles variable arity operations. ARGS stands for
+;;; a variable which holds a list of forms. It will compile them and
+;;; store the result in some Javascript variables. BODY is evaluated
+;;; with ARGS bound to the list of these variables to generate the
+;;; code which performs the transformation on these variables.
+
+(defun variable-arity-call (args function)
+  (unless (consp args)
+    (error "ARGS must be a non-empty list"))
+  (let ((counter 0)
+        (variables '())
+        (prelude))
+    (dolist (x args)
+      (let ((v (concat "x" (integer-to-string (incf counter)))))
+        (push v variables)
+        (concatf prelude
+                 (concat "var " v " = " (ls-compile x) ";" *newline*
+                         "if (typeof " v " !=== 'number') throw 'Not a number!';"
+                         *newline*))))
+    (js!selfcall prelude (funcall function (reverse variables)))))
+
+
+(defmacro variable-arity (args &body body)
+  (unless (symbolp args)
+    (error "Bad usage of VARIABLE-ARITY, yo must pass a symbol"))
+  `(variable-arity-call ,args
+                        (lambda (,args)
+                          (concat "return " ,@body ";" *newline*))))
+
+
+(define-raw-builtin + (&rest numbers)
+  (variable-arity numbers
+    (join numbers "+")))
+
+(define-raw-builtin - (x &rest others)
+  (let ((args (cons x others)))
+    (variable-arity args
+      (if (null others)
+	  (concat "-" (car args))
+	  (join args "+")))))
+
+
 (defun num-op-num (x op y)
   (type-check (("x" "number" x) ("y" "number" y))
     (concat "x" op "y")))
 
-(defmacro define-builtin-arithmetic (op)
-`(define-raw-builtin ,op (&rest args)
-  (if args
-      (let ((res (ls-compile (car args))))
-	(dolist (x (cdr args))
-	  (setq res (num-op-num res ,(symbol-name op) (ls-compile x))))
-	res)
-       "0")))
-
-(defmacro arithmetic (op &rest args)
-  (let ((counter 0)
-	(checks ()))
-    (dolist (x args)
-      (push (list (concat "v" (ls-compile counter))
-		  "number"
-		  (ls-compile x))
-	    checks)
-      (incf counter))
-    `(js-eval
-     (type-check ,checks
-		  ,(let ((res ""))
-			(dolist (x checks)
-			  (setq res (concat (car x) (symbol-name op) res)))
-			(subseq res 0 (1- (length res))))))))
-
-(define-builtin-arithmetic +)
-(define-builtin-arithmetic -)
-(define-builtin-arithmetic *)
-(define-builtin-arithmetic /)
+(define-builtin * (x y) (num-op-num x "*" y))
+(define-builtin / (x y) (num-op-num x "/" y))
 
 (define-builtin mod (x y) (num-op-num x "%" y))
 
