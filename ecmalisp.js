@@ -155,15 +155,13 @@ var l18 = {name: "="};
         return (function(){
             try {
                 return (function(){
-                    return ((function(){
-                        var x = v7;
-                        var y = v8;
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        if (typeof y != 'number')
-                            throw 'The value ' + y + ' is not a type number.';
-                        return x==y;
-                    })()?l4.value: l3.value);
+                    return (function(){
+                        var x1 = v7;
+                        if (typeof x1 !== 'number') throw 'Not a number!';
+                        var x2 = v8;
+                        if (typeof x2 !== 'number') throw 'Not a number!';
+                        return (x1==x2?l4.value: l3.value);
+                    })();
                 })();
             }
             catch (cf){
@@ -189,13 +187,11 @@ var l19 = {name: "*"};
             try {
                 return (function(){
                     return (function(){
-                        var x = v10;
-                        var y = v11;
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        if (typeof y != 'number')
-                            throw 'The value ' + y + ' is not a type number.';
-                        return x*y;
+                        var x1 = v10;
+                        if (typeof x1 !== 'number') throw 'Not a number!';
+                        var x2 = v11;
+                        if (typeof x2 !== 'number') throw 'Not a number!';
+                        return x1*x2;
                     })();
                 })();
             }
@@ -222,13 +218,11 @@ var l20 = {name: "/"};
             try {
                 return (function(){
                     return (function(){
-                        var x = v13;
-                        var y = v14;
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        if (typeof y != 'number')
-                            throw 'The value ' + y + ' is not a type number.';
-                        return x/y;
+                        var x1 = v13;
+                        if (typeof x1 !== 'number') throw 'Not a number!';
+                        var x2 = v14;
+                        if (typeof x2 !== 'number') throw 'Not a number!';
+                        return x1/x2;
                     })();
                 })();
             }
@@ -316,15 +310,13 @@ var l23 = {name: "ZEROP"};
         return (function(){
             try {
                 return (function(){
-                    return ((function(){
-                        var x = v20;
-                        var y = 0;
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        if (typeof y != 'number')
-                            throw 'The value ' + y + ' is not a type number.';
-                        return x==y;
-                    })()?l4.value: l3.value);
+                    return (function(){
+                        var x1 = v20;
+                        if (typeof x1 !== 'number') throw 'Not a number!';
+                        var x2 = 0;
+                        if (typeof x2 !== 'number') throw 'Not a number!';
+                        return (x1==x2?l4.value: l3.value);
+                    })();
                 })();
             }
             catch (cf){
@@ -351,13 +343,11 @@ var l24 = {name: "TRUNCATE"};
                 return (function(){
                     return (function(){
                         var x = (function(){
-                            var x = v22;
-                            var y = v23;
-                            if (typeof x != 'number')
-                                throw 'The value ' + x + ' is not a type number.';
-                            if (typeof y != 'number')
-                                throw 'The value ' + y + ' is not a type number.';
-                            return x/y;
+                            var x1 = v22;
+                            if (typeof x1 !== 'number') throw 'Not a number!';
+                            var x2 = v23;
+                            if (typeof x2 !== 'number') throw 'Not a number!';
+                            return x1/x2;
                         })();
                         if (typeof x != 'number')
                             throw 'The value ' + x + ' is not a type number.';
@@ -1553,15 +1543,13 @@ var l73 = {name: "CHAR="};
         return (function(){
             try {
                 return (function(){
-                    return ((function(){
-                        var x = v111;
-                        var y = v112;
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        if (typeof y != 'number')
-                            throw 'The value ' + y + ' is not a type number.';
-                        return x==y;
-                    })()?l4.value: l3.value);
+                    return (function(){
+                        var x1 = v111;
+                        if (typeof x1 !== 'number') throw 'Not a number!';
+                        var x2 = v112;
+                        if (typeof x2 !== 'number') throw 'Not a number!';
+                        return (x1==x2?l4.value: l3.value);
+                    })();
                 })();
             }
             catch (cf){
@@ -1586,20 +1574,18 @@ var l74 = {name: "INTEGERP"};
         return (function(){
             try {
                 return (function(){
-                    return (((typeof (v114) == "number")?l4.value: l3.value) !== l3.value ? ((function(){
-                        var x = (function(){
+                    return (((typeof (v114) == "number")?l4.value: l3.value) !== l3.value ? (function(){
+                        var x1 = (function(){
                             var x = v114;
                             if (typeof x != 'number')
                                 throw 'The value ' + x + ' is not a type number.';
                             return Math.floor(x);
                         })();
-                        var y = v114;
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        if (typeof y != 'number')
-                            throw 'The value ' + y + ' is not a type number.';
-                        return x==y;
-                    })()?l4.value: l3.value) : l3.value);
+                        if (typeof x1 !== 'number') throw 'Not a number!';
+                        var x2 = v114;
+                        if (typeof x2 !== 'number') throw 'Not a number!';
+                        return (x1==x2?l4.value: l3.value);
+                    })() : l3.value);
                 })();
             }
             catch (cf){
@@ -1624,15 +1610,13 @@ var l75 = {name: "PLUSP"};
         return (function(){
             try {
                 return (function(){
-                    return ((function(){
-                        var x = 0;
-                        var y = v116;
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        if (typeof y != 'number')
-                            throw 'The value ' + y + ' is not a type number.';
-                        return x<y;
-                    })()?l4.value: l3.value);
+                    return (function(){
+                        var x1 = 0;
+                        if (typeof x1 !== 'number') throw 'Not a number!';
+                        var x2 = v116;
+                        if (typeof x2 !== 'number') throw 'Not a number!';
+                        return (x1<x2?l4.value: l3.value);
+                    })();
                 })();
             }
             catch (cf){
@@ -1657,15 +1641,13 @@ var l76 = {name: "MINUSP"};
         return (function(){
             try {
                 return (function(){
-                    return ((function(){
-                        var x = v118;
-                        var y = 0;
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        if (typeof y != 'number')
-                            throw 'The value ' + y + ' is not a type number.';
-                        return x<y;
-                    })()?l4.value: l3.value);
+                    return (function(){
+                        var x1 = v118;
+                        if (typeof x1 !== 'number') throw 'Not a number!';
+                        var x2 = 0;
+                        if (typeof x2 !== 'number') throw 'Not a number!';
+                        return (x1<x2?l4.value: l3.value);
+                    })();
                 })();
             }
             catch (cf){
@@ -2062,23 +2044,19 @@ var l85 = {name: "DIGIT-CHAR-P"};
         return (function(){
             try {
                 return (function(){
-                    return ((((function(){
-                        var x = 48;
-                        var y = v145;
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        if (typeof y != 'number')
-                            throw 'The value ' + y + ' is not a type number.';
-                        return x<=y;
-                    })()?l4.value: l3.value) !== l3.value ? ((function(){
-                        var x = v145;
-                        var y = 57;
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        if (typeof y != 'number')
-                            throw 'The value ' + y + ' is not a type number.';
-                        return x<=y;
-                    })()?l4.value: l3.value) : l3.value) !== l3.value ? (function(){
+                    return (((function(){
+                        var x1 = 48;
+                        if (typeof x1 !== 'number') throw 'Not a number!';
+                        var x2 = v145;
+                        if (typeof x2 !== 'number') throw 'Not a number!';
+                        return (x1<=x2?l4.value: l3.value);
+                    })() !== l3.value ? (function(){
+                        var x1 = v145;
+                        if (typeof x1 !== 'number') throw 'Not a number!';
+                        var x2 = 57;
+                        if (typeof x2 !== 'number') throw 'Not a number!';
+                        return (x1<=x2?l4.value: l3.value);
+                    })() : l3.value) !== l3.value ? (function(){
                         var x1 = v145;
                         if (typeof x1 !== 'number') throw 'Not a number!';
                         var x2 = 48;
@@ -2161,24 +2139,20 @@ var l87 = {name: "PARSE-INTEGER"};
                             try {
                                 return (function(){
                                     return (function(){
-                                        while(((function(){
-                                            var x = v153;
-                                            var y = v154;
-                                            if (typeof x != 'number')
-                                                throw 'The value ' + x + ' is not a type number.';
-                                            if (typeof y != 'number')
-                                                throw 'The value ' + y + ' is not a type number.';
-                                            return x<y;
-                                        })()?l4.value: l3.value) !== l3.value){
+                                        while((function(){
+                                            var x1 = v153;
+                                            if (typeof x1 !== 'number') throw 'Not a number!';
+                                            var x2 = v154;
+                                            if (typeof x2 !== 'number') throw 'Not a number!';
+                                            return (x1<x2?l4.value: l3.value);
+                                        })() !== l3.value){
                                             v152 = (function(){
                                                 var x1 = (function(){
-                                                    var x = v152;
-                                                    var y = 10;
-                                                    if (typeof x != 'number')
-                                                        throw 'The value ' + x + ' is not a type number.';
-                                                    if (typeof y != 'number')
-                                                        throw 'The value ' + y + ' is not a type number.';
-                                                    return x*y;
+                                                    var x1 = v152;
+                                                    if (typeof x1 !== 'number') throw 'Not a number!';
+                                                    var x2 = 10;
+                                                    if (typeof x2 !== 'number') throw 'Not a number!';
+                                                    return x1*x2;
                                                 })();
                                                 if (typeof x1 !== 'number') throw 'Not a number!';
                                                 var x2 = l85.function((function(){
@@ -2243,15 +2217,13 @@ var l88 = {name: "SOME"};
                                 try {
                                     return (function(){
                                         return (function(){
-                                            while(((function(){
-                                                var x = v158;
-                                                var y = v159;
-                                                if (typeof x != 'number')
-                                                    throw 'The value ' + x + ' is not a type number.';
-                                                if (typeof y != 'number')
-                                                    throw 'The value ' + y + ' is not a type number.';
-                                                return x<y;
-                                            })()?l4.value: l3.value) !== l3.value){
+                                            while((function(){
+                                                var x1 = v158;
+                                                if (typeof x1 !== 'number') throw 'Not a number!';
+                                                var x2 = v159;
+                                                if (typeof x2 !== 'number') throw 'Not a number!';
+                                                return (x1<x2?l4.value: l3.value);
+                                            })() !== l3.value){
                                                 ((v156)((function(){
                                                     var string = v157;
                                                     var index = v158;
@@ -2356,15 +2328,13 @@ var l89 = {name: "EVERY"};
                                 try {
                                     return (function(){
                                         return (function(){
-                                            while(((function(){
-                                                var x = v165;
-                                                var y = v166;
-                                                if (typeof x != 'number')
-                                                    throw 'The value ' + x + ' is not a type number.';
-                                                if (typeof y != 'number')
-                                                    throw 'The value ' + y + ' is not a type number.';
-                                                return x<y;
-                                            })()?l4.value: l3.value) !== l3.value){
+                                            while((function(){
+                                                var x1 = v165;
+                                                if (typeof x1 !== 'number') throw 'Not a number!';
+                                                var x2 = v166;
+                                                if (typeof x2 !== 'number') throw 'Not a number!';
+                                                return (x1<x2?l4.value: l3.value);
+                                            })() !== l3.value){
                                                 ((v163)((function(){
                                                     var string = v164;
                                                     var index = v165;
@@ -3604,15 +3574,13 @@ var l127 = {name: "INDENT"};
                                 try {
                                     return (function(){
                                         return (function(){
-                                            while(((function(){
-                                                var x = v260;
-                                                var y = v261;
-                                                if (typeof x != 'number')
-                                                    throw 'The value ' + x + ' is not a type number.';
-                                                if (typeof y != 'number')
-                                                    throw 'The value ' + y + ' is not a type number.';
-                                                return x<y;
-                                            })()?l4.value: l3.value) !== l3.value){
+                                            while((function(){
+                                                var x1 = v260;
+                                                if (typeof x1 !== 'number') throw 'Not a number!';
+                                                var x2 = v261;
+                                                if (typeof x2 !== 'number') throw 'Not a number!';
+                                                return (x1<x2?l4.value: l3.value);
+                                            })() !== l3.value){
                                                 (function(v262){
                                                     return v259 = l122.function(v259, (function(){
                                                         return v262;
@@ -3625,15 +3593,13 @@ var l127 = {name: "INDENT"};
                                                     if (typeof index != 'number')
                                                         throw 'The value ' + index + ' is not a type number.';
                                                     return string.charCodeAt(index);
-                                                })(), 10) !== l3.value ? (((function(){
-                                                    var x = v260;
-                                                    var y = l22.function(v261);
-                                                    if (typeof x != 'number')
-                                                        throw 'The value ' + x + ' is not a type number.';
-                                                    if (typeof y != 'number')
-                                                        throw 'The value ' + y + ' is not a type number.';
-                                                    return x<y;
-                                                })()?l4.value: l3.value) !== l3.value ? l26.function(l73.function((function(){
+                                                })(), 10) !== l3.value ? ((function(){
+                                                    var x1 = v260;
+                                                    if (typeof x1 !== 'number') throw 'Not a number!';
+                                                    var x2 = l22.function(v261);
+                                                    if (typeof x2 !== 'number') throw 'Not a number!';
+                                                    return (x1<x2?l4.value: l3.value);
+                                                })() !== l3.value ? l26.function(l73.function((function(){
                                                     var string = v258;
                                                     var index = l21.function(v260);
                                                     if (typeof string != 'string')
@@ -4013,21 +3979,19 @@ var l136 = {name: "%PEEK-CHAR"};
         return (function(){
             try {
                 return (function(){
-                    return (((function(){
-                        var x = (function(){
+                    return ((function(){
+                        var x1 = (function(){
                             var tmp = v284;
                             return tmp === l3.value? l3.value: tmp.cdr;
                         })();
-                        var y = l66.function((function(){
+                        if (typeof x1 !== 'number') throw 'Not a number!';
+                        var x2 = l66.function((function(){
                             var tmp = v284;
                             return tmp === l3.value? l3.value: tmp.car;
                         })());
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        if (typeof y != 'number')
-                            throw 'The value ' + y + ' is not a type number.';
-                        return x<y;
-                    })()?l4.value: l3.value) !== l3.value ? (function(){
+                        if (typeof x2 !== 'number') throw 'Not a number!';
+                        return (x1<x2?l4.value: l3.value);
+                    })() !== l3.value ? (function(){
                         var string = (function(){
                             var tmp = v284;
                             return tmp === l3.value? l3.value: tmp.car;
@@ -4066,21 +4030,19 @@ var l137 = {name: "%READ-CHAR"};
         return (function(){
             try {
                 return (function(){
-                    return (((function(){
-                        var x = (function(){
+                    return ((function(){
+                        var x1 = (function(){
                             var tmp = v286;
                             return tmp === l3.value? l3.value: tmp.cdr;
                         })();
-                        var y = l66.function((function(){
+                        if (typeof x1 !== 'number') throw 'Not a number!';
+                        var x2 = l66.function((function(){
                             var tmp = v286;
                             return tmp === l3.value? l3.value: tmp.car;
                         })());
-                        if (typeof x != 'number')
-                            throw 'The value ' + x + ' is not a type number.';
-                        if (typeof y != 'number')
-                            throw 'The value ' + y + ' is not a type number.';
-                        return x<y;
-                    })()?l4.value: l3.value) !== l3.value ? (function(v287){
+                        if (typeof x2 !== 'number') throw 'Not a number!';
+                        return (x1<x2?l4.value: l3.value);
+                    })() !== l3.value ? (function(v287){
                         (function(){
                             var x = v286;
                             if (typeof x != 'object')
@@ -4550,15 +4512,13 @@ var l147 = {name: "READ-SYMBOL"};
                             try {
                                 return (function(){
                                     return (function(){
-                                        while((((function(){
-                                            var x = v328;
-                                            var y = v324;
-                                            if (typeof x != 'number')
-                                                throw 'The value ' + x + ' is not a type number.';
-                                            if (typeof y != 'number')
-                                                throw 'The value ' + y + ' is not a type number.';
-                                            return x<y;
-                                        })()?l4.value: l3.value) !== l3.value ? l26.function(l73.function((function(){
+                                        while(((function(){
+                                            var x1 = v328;
+                                            if (typeof x1 !== 'number') throw 'Not a number!';
+                                            var x2 = v324;
+                                            if (typeof x2 !== 'number') throw 'Not a number!';
+                                            return (x1<x2?l4.value: l3.value);
+                                        })() !== l3.value ? l26.function(l73.function((function(){
                                             var string = v323;
                                             var index = v328;
                                             if (typeof string != 'string')
@@ -4585,15 +4545,13 @@ var l147 = {name: "READ-SYMBOL"};
                                     throw cf;
                             }
                         })();
-                        (((function(){
-                            var x = v328;
-                            var y = v324;
-                            if (typeof x != 'number')
-                                throw 'The value ' + x + ' is not a type number.';
-                            if (typeof y != 'number')
-                                throw 'The value ' + y + ' is not a type number.';
-                            return x==y;
-                        })()?l4.value: l3.value) !== l3.value ? (function(){
+                        ((function(){
+                            var x1 = v328;
+                            if (typeof x1 !== 'number') throw 'Not a number!';
+                            var x2 = v324;
+                            if (typeof x2 !== 'number') throw 'Not a number!';
+                            return (x1==x2?l4.value: l3.value);
+                        })() !== l3.value ? (function(){
                             v326 = v323;
                             v325 = (function(){
                                 var symbol = l114;
@@ -6091,15 +6049,13 @@ var l204 = {name: "LS-COMPILE-BLOCK"};
                                         try {
                                             return (function(){
                                                 return (function(){
-                                                    while(((function(){
-                                                        var x = v453;
-                                                        var y = v449;
-                                                        if (typeof x != 'number')
-                                                            throw 'The value ' + x + ' is not a type number.';
-                                                        if (typeof y != 'number')
-                                                            throw 'The value ' + y + ' is not a type number.';
-                                                        return x<y;
-                                                    })()?l4.value: l3.value) !== l3.value){
+                                                    while((function(){
+                                                        var x1 = v453;
+                                                        if (typeof x1 !== 'number') throw 'Not a number!';
+                                                        var x2 = v449;
+                                                        if (typeof x2 !== 'number') throw 'Not a number!';
+                                                        return (x1<x2?l4.value: l3.value);
+                                                    })() !== l3.value){
                                                         (function(v454){
                                                             v452 = ({car: l122.function("case ", l16.function((function(){
                                                                 var x1 = v453;
@@ -6329,15 +6285,13 @@ var l208 = {name: "JS-VSET"};
                             try {
                                 return (function(){
                                     return (function(){
-                                        while(((function(){
-                                            var x = v464;
-                                            var y = v465;
-                                            if (typeof x != 'number')
-                                                throw 'The value ' + x + ' is not a type number.';
-                                            if (typeof y != 'number')
-                                                throw 'The value ' + y + ' is not a type number.';
-                                            return x<y;
-                                        })()?l4.value: l3.value) !== l3.value){
+                                        while((function(){
+                                            var x1 = v464;
+                                            if (typeof x1 !== 'number') throw 'Not a number!';
+                                            var x2 = v465;
+                                            if (typeof x2 !== 'number') throw 'Not a number!';
+                                            return (x1<x2?l4.value: l3.value);
+                                        })() !== l3.value){
                                             (function(v466){
                                                 ((function(v467){
                                                     return (v467 !== l3.value ? v467 : l73.function(v466, 92));
@@ -8324,101 +8278,103 @@ var l244 = {name: "NUM-OP-NUM"};
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-(function(){
-    return (l238).value = ({car: l42.function(l19, (function (v585,v586){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v587,v588){
-                        return l244.function(v587, "*", v588);
-                    })((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v585),(function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v586));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 208)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l238;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-(function(){
-    return (l238).value = ({car: l42.function(l20, (function (v589,v590){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v591,v592){
-                        return l244.function(v591, "/", v592);
-                    })((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v589),(function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v590));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 209)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l238;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
+(l238).value = ({car: l42.function(l19, (function (){
+    var v585= l3.value;
+    for (var i = arguments.length-1; i>=0; i--)
+        v585 = {car: arguments[i], cdr: 
+    v585};
+    return (function(){
+        try {
+            return (function(){
+                return (l11.function(v585) !== l3.value ? "1" : l242.function(v585, (function (v586){
+                    if (arguments.length < 1) throw 'too few arguments';
+                    if (arguments.length > 1) throw 'too many arguments';
+                    return l122.function("return ", l124.function(v586, "*"), ";", (function(){
+                        var symbol = l121;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })());
+                
+                })));
+            })();
+        }
+        catch (cf){
+            if (cf.type == 'block' && cf.id == 208)
+                return cf.value;
+            else
+                throw cf;
+        }
+    })();
+
+})), cdr: (function(){
+    var symbol = l238;
+    var value = symbol.value;
+    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+    return value;
+})()});
+(l238).value = ({car: l42.function(l20, (function (v588){
+    if (arguments.length < 1) throw 'too few arguments';
+    var v587= l3.value;
+    for (var i = arguments.length-1; i>=1; i--)
+        v587 = {car: arguments[i], cdr: 
+    v587};
+    return (function(){
+        try {
+            return (function(){
+                return (function(v589){
+                    return l242.function(v589, (function (v590){
+                        if (arguments.length < 1) throw 'too few arguments';
+                        if (arguments.length > 1) throw 'too many arguments';
+                        return l122.function("return ", (l11.function(v587) !== l3.value ? l122.function("1 /", (function(){
+                            var tmp = v590;
+                            return tmp === l3.value? l3.value: tmp.car;
+                        })()) : l124.function(v590, "/")), ";", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })());
+                    
+                    }));
+                })(({car: v588, cdr: v587}));
+            })();
+        }
+        catch (cf){
+            if (cf.type == 'block' && cf.id == 209)
+                return cf.value;
+            else
+                throw cf;
+        }
+    })();
+
+})), cdr: (function(){
+    var symbol = l238;
+    var value = symbol.value;
+    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+    return value;
+})()});
 var l245 = {name: "MOD"};
 (function(){
-    return (l238).value = ({car: l42.function(l245, (function (v593,v594){
+    return (l238).value = ({car: l42.function(l245, (function (v591,v592){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v595,v596){
-                        return l244.function(v595, "%", v596);
+                    return (function(v593,v594){
+                        return l244.function(v593, "%", v594);
                     })((function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v593),(function(){
+                    })()(v591),(function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v594));
+                    })()(v592));
                 })();
             }
             catch (cf){
@@ -8436,27 +8392,36 @@ var l245 = {name: "MOD"};
         return value;
     })()});
 })();
-var l246 = {name: "<"};
+var l246 = {name: "COMPARISON-CONJUNTION"};
 (function(){
-    return (l238).value = ({car: l42.function(l246, (function (v597,v598){
+    (l246).function = (function(v597){
+        ((v597)["fname"] = "COMPARISON-CONJUNTION");
+        return v597;
+    })((function (v595,v596){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v599,v600){
-                        return l128.function(l244.function(v599, "<", v600));
-                    })((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v597),(function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v598));
+                    return (l11.function((function(){
+                        var tmp = v595;
+                        return tmp === l3.value? l3.value: tmp.cdr;
+                    })()) !== l3.value ? (function(){
+                        return "true";
+                    })() : (l11.function(l34.function(v595)) !== l3.value ? (function(){
+                        return l122.function((function(){
+                            var tmp = v595;
+                            return tmp === l3.value? l3.value: tmp.car;
+                        })(), v596, l32.function(v595));
+                    })() : (function(){
+                        return l122.function((function(){
+                            var tmp = v595;
+                            return tmp === l3.value? l3.value: tmp.car;
+                        })(), v596, l32.function(v595), " && ", l246.function((function(){
+                            var tmp = v595;
+                            return tmp === l3.value? l3.value: tmp.cdr;
+                        })(), v596));
+                    })()));
                 })();
             }
             catch (cf){
@@ -8467,184 +8432,225 @@ var l246 = {name: "<"};
             }
         })();
     
-    })), cdr: (function(){
-        var symbol = l238;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
+    }));
+    return l246;
 })();
-var l247 = {name: ">"};
+var l247 = {name: "DEFINE-BUILTIN-COMPARISON"};
+l247;
+var l248 = {name: ">"};
+(l238).value = ({car: l42.function(l248, (function (v599){
+    if (arguments.length < 1) throw 'too few arguments';
+    var v598= l3.value;
+    for (var i = arguments.length-1; i>=1; i--)
+        v598 = {car: arguments[i], cdr: 
+    v598};
+    return (function(){
+        try {
+            return (function(){
+                return (function(v600){
+                    return l242.function(v600, (function (v601){
+                        if (arguments.length < 1) throw 'too few arguments';
+                        if (arguments.length > 1) throw 'too many arguments';
+                        return l122.function("return ", l128.function(l246.function(v601, ">")), ";", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })());
+                    
+                    }));
+                })(({car: v599, cdr: v598}));
+            })();
+        }
+        catch (cf){
+            if (cf.type == 'block' && cf.id == 212)
+                return cf.value;
+            else
+                throw cf;
+        }
+    })();
+
+})), cdr: (function(){
+    var symbol = l238;
+    var value = symbol.value;
+    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+    return value;
+})()});
+var l249 = {name: "<"};
+(l238).value = ({car: l42.function(l249, (function (v603){
+    if (arguments.length < 1) throw 'too few arguments';
+    var v602= l3.value;
+    for (var i = arguments.length-1; i>=1; i--)
+        v602 = {car: arguments[i], cdr: 
+    v602};
+    return (function(){
+        try {
+            return (function(){
+                return (function(v604){
+                    return l242.function(v604, (function (v605){
+                        if (arguments.length < 1) throw 'too few arguments';
+                        if (arguments.length > 1) throw 'too many arguments';
+                        return l122.function("return ", l128.function(l246.function(v605, "<")), ";", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })());
+                    
+                    }));
+                })(({car: v603, cdr: v602}));
+            })();
+        }
+        catch (cf){
+            if (cf.type == 'block' && cf.id == 213)
+                return cf.value;
+            else
+                throw cf;
+        }
+    })();
+
+})), cdr: (function(){
+    var symbol = l238;
+    var value = symbol.value;
+    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+    return value;
+})()});
+var l250 = {name: ">="};
+(l238).value = ({car: l42.function(l250, (function (v607){
+    if (arguments.length < 1) throw 'too few arguments';
+    var v606= l3.value;
+    for (var i = arguments.length-1; i>=1; i--)
+        v606 = {car: arguments[i], cdr: 
+    v606};
+    return (function(){
+        try {
+            return (function(){
+                return (function(v608){
+                    return l242.function(v608, (function (v609){
+                        if (arguments.length < 1) throw 'too few arguments';
+                        if (arguments.length > 1) throw 'too many arguments';
+                        return l122.function("return ", l128.function(l246.function(v609, ">=")), ";", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })());
+                    
+                    }));
+                })(({car: v607, cdr: v606}));
+            })();
+        }
+        catch (cf){
+            if (cf.type == 'block' && cf.id == 214)
+                return cf.value;
+            else
+                throw cf;
+        }
+    })();
+
+})), cdr: (function(){
+    var symbol = l238;
+    var value = symbol.value;
+    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+    return value;
+})()});
+var l251 = {name: "<="};
+(l238).value = ({car: l42.function(l251, (function (v611){
+    if (arguments.length < 1) throw 'too few arguments';
+    var v610= l3.value;
+    for (var i = arguments.length-1; i>=1; i--)
+        v610 = {car: arguments[i], cdr: 
+    v610};
+    return (function(){
+        try {
+            return (function(){
+                return (function(v612){
+                    return l242.function(v612, (function (v613){
+                        if (arguments.length < 1) throw 'too few arguments';
+                        if (arguments.length > 1) throw 'too many arguments';
+                        return l122.function("return ", l128.function(l246.function(v613, "<=")), ";", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })());
+                    
+                    }));
+                })(({car: v611, cdr: v610}));
+            })();
+        }
+        catch (cf){
+            if (cf.type == 'block' && cf.id == 215)
+                return cf.value;
+            else
+                throw cf;
+        }
+    })();
+
+})), cdr: (function(){
+    var symbol = l238;
+    var value = symbol.value;
+    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+    return value;
+})()});
+(l238).value = ({car: l42.function(l18, (function (v615){
+    if (arguments.length < 1) throw 'too few arguments';
+    var v614= l3.value;
+    for (var i = arguments.length-1; i>=1; i--)
+        v614 = {car: arguments[i], cdr: 
+    v614};
+    return (function(){
+        try {
+            return (function(){
+                return (function(v616){
+                    return l242.function(v616, (function (v617){
+                        if (arguments.length < 1) throw 'too few arguments';
+                        if (arguments.length > 1) throw 'too many arguments';
+                        return l122.function("return ", l128.function(l246.function(v617, "==")), ";", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })());
+                    
+                    }));
+                })(({car: v615, cdr: v614}));
+            })();
+        }
+        catch (cf){
+            if (cf.type == 'block' && cf.id == 216)
+                return cf.value;
+            else
+                throw cf;
+        }
+    })();
+
+})), cdr: (function(){
+    var symbol = l238;
+    var value = symbol.value;
+    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+    return value;
+})()});
+var l252 = {name: "NUMBERP"};
 (function(){
-    return (l238).value = ({car: l42.function(l247, (function (v601,v602){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v603,v604){
-                        return l128.function(l244.function(v603, ">", v604));
-                    })((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v601),(function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v602));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 212)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l238;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-(function(){
-    return (l238).value = ({car: l42.function(l18, (function (v605,v606){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v607,v608){
-                        return l128.function(l244.function(v607, "==", v608));
-                    })((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v605),(function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v606));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 213)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l238;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-var l248 = {name: "<="};
-(function(){
-    return (l238).value = ({car: l42.function(l248, (function (v609,v610){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v611,v612){
-                        return l128.function(l244.function(v611, "<=", v612));
-                    })((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v609),(function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v610));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 214)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l238;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-var l249 = {name: ">="};
-(function(){
-    return (l238).value = ({car: l42.function(l249, (function (v613,v614){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v615,v616){
-                        return l128.function(l244.function(v615, ">=", v616));
-                    })((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v613),(function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v614));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 215)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l238;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-var l250 = {name: "NUMBERP"};
-(function(){
-    return (l238).value = ({car: l42.function(l250, (function (v617){
+    return (l238).value = ({car: l42.function(l252, (function (v618){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v618){
-                        return l128.function(l122.function("(typeof (", v618, ") == \"number\")"));
+                    return (function(v619){
+                        return l128.function(l122.function("(typeof (", v619, ") == \"number\")"));
                     })((function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v617));
+                    })()(v618));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 216)
+                if (cf.type == 'block' && cf.id == 217)
                     return cf.value;
                 else
                     throw cf;
@@ -8658,21 +8664,21 @@ var l250 = {name: "NUMBERP"};
         return value;
     })()});
 })();
-var l251 = {name: "FLOOR"};
+var l253 = {name: "FLOOR"};
 (function(){
-    return (l238).value = ({car: l42.function(l251, (function (v619){
+    return (l238).value = ({car: l42.function(l253, (function (v620){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v620){
+                    return (function(v621){
                         return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function(l122.function("var ", "x", " = ", v620, ";", (function(){
+                        })(), l127.function(l122.function("var ", "x", " = ", v621, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -8700,44 +8706,7 @@ var l251 = {name: "FLOOR"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v619));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 217)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l238;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-(function(){
-    return (l238).value = ({car: l42.function(l27, (function (v621,v622){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v623,v624){
-                        return l122.function("({car: ", v623, ", cdr: ", v624, "})");
-                    })((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v621),(function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v622));
+                    })()(v620));
                 })();
             }
             catch (cf){
@@ -8756,35 +8725,25 @@ var l251 = {name: "FLOOR"};
     })()});
 })();
 (function(){
-    return (l238).value = ({car: l42.function(l28, (function (v625){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    return (l238).value = ({car: l42.function(l27, (function (v622,v623){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v626){
-                        return l128.function(l122.function("(function(){", (function(){
-                            var symbol = l121;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), l127.function("var tmp = ", v626, ";", (function(){
-                            var symbol = l121;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), "return (typeof tmp == 'object' && 'car' in tmp);", (function(){
-                            var symbol = l121;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), "})()"));
+                    return (function(v624,v625){
+                        return l122.function("({car: ", v624, ", cdr: ", v625, "})");
                     })((function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v625));
+                    })()(v622),(function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v623));
                 })();
             }
             catch (cf){
@@ -8803,19 +8762,66 @@ var l251 = {name: "FLOOR"};
     })()});
 })();
 (function(){
-    return (l238).value = ({car: l42.function(l29, (function (v627){
+    return (l238).value = ({car: l42.function(l28, (function (v626){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v628){
+                    return (function(v627){
+                        return l128.function(l122.function("(function(){", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), l127.function("var tmp = ", v627, ";", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), "return (typeof tmp == 'object' && 'car' in tmp);", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), "})()"));
+                    })((function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v626));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 220)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    })), cdr: (function(){
+        var symbol = l238;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()});
+})();
+(function(){
+    return (l238).value = ({car: l42.function(l29, (function (v628){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v629){
                         return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function("var tmp = ", v628, ";", (function(){
+                        })(), l127.function("var tmp = ", v629, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -8841,11 +8847,11 @@ var l251 = {name: "FLOOR"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v627));
+                    })()(v628));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 220)
+                if (cf.type == 'block' && cf.id == 221)
                     return cf.value;
                 else
                     throw cf;
@@ -8860,19 +8866,19 @@ var l251 = {name: "FLOOR"};
     })()});
 })();
 (function(){
-    return (l238).value = ({car: l42.function(l30, (function (v629){
+    return (l238).value = ({car: l42.function(l30, (function (v630){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v630){
+                    return (function(v631){
                         return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function("var tmp = ", v630, ";", (function(){
+                        })(), l127.function("var tmp = ", v631, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -8898,72 +8904,7 @@ var l251 = {name: "FLOOR"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v629));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 221)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l238;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-var l252 = {name: "SETCAR"};
-(function(){
-    return (l238).value = ({car: l42.function(l252, (function (v631,v632){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v633,v634){
-                        return l122.function("(function(){", (function(){
-                            var symbol = l121;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), l127.function(l122.function("var ", "x", " = ", v633, ";", (function(){
-                            var symbol = l121;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), l122.function("if (typeof ", "x", " != '", "object", "')", (function(){
-                            var symbol = l121;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), l127.function("throw 'The value ' + ", "x", " + ' is not a type ", "object", ".';", (function(){
-                            var symbol = l121;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })())), l122.function("return ", (function(){
-                            return l122.function("(x.car = ", v634, ")");
-                        })(), ";", (function(){
-                            var symbol = l121;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })())), "})()");
-                    })((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v631),(function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v632));
+                    })()(v630));
                 })();
             }
             catch (cf){
@@ -8981,21 +8922,21 @@ var l252 = {name: "SETCAR"};
         return value;
     })()});
 })();
-var l253 = {name: "SETCDR"};
+var l254 = {name: "SETCAR"};
 (function(){
-    return (l238).value = ({car: l42.function(l253, (function (v635,v636){
+    return (l238).value = ({car: l42.function(l254, (function (v632,v633){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v637,v638){
+                    return (function(v634,v635){
                         return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function(l122.function("var ", "x", " = ", v637, ";", (function(){
+                        })(), l127.function(l122.function("var ", "x", " = ", v634, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9011,7 +8952,7 @@ var l253 = {name: "SETCDR"};
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })())), l122.function("return ", (function(){
-                            return l122.function("(x.cdr = ", v638, ")");
+                            return l122.function("(x.car = ", v635, ")");
                         })(), ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
@@ -9023,12 +8964,12 @@ var l253 = {name: "SETCDR"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v635),(function(){
+                    })()(v632),(function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v636));
+                    })()(v633));
                 })();
             }
             catch (cf){
@@ -9046,37 +8987,54 @@ var l253 = {name: "SETCDR"};
         return value;
     })()});
 })();
-var l254 = {name: "SYMBOLP"};
+var l255 = {name: "SETCDR"};
 (function(){
-    return (l238).value = ({car: l42.function(l254, (function (v639){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    return (l238).value = ({car: l42.function(l255, (function (v636,v637){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v640){
-                        return l128.function(l122.function("(function(){", (function(){
+                    return (function(v638,v639){
+                        return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function("var tmp = ", v640, ";", (function(){
+                        })(), l127.function(l122.function("var ", "x", " = ", v638, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), "return (typeof tmp == 'object' && 'name' in tmp);", (function(){
+                        })()), l122.function("if (typeof ", "x", " != '", "object", "')", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })()), "})()"));
+                        })(), l127.function("throw 'The value ' + ", "x", " + ' is not a type ", "object", ".';", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), l122.function("return ", (function(){
+                            return l122.function("(x.cdr = ", v639, ")");
+                        })(), ";", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })())), "})()");
                     })((function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v639));
+                    })()(v636),(function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v637));
                 })();
             }
             catch (cf){
@@ -9094,21 +9052,69 @@ var l254 = {name: "SYMBOLP"};
         return value;
     })()});
 })();
-var l255 = {name: "MAKE-SYMBOL"};
+var l256 = {name: "SYMBOLP"};
 (function(){
-    return (l238).value = ({car: l42.function(l255, (function (v641){
+    return (l238).value = ({car: l42.function(l256, (function (v640){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v642){
+                    return (function(v641){
+                        return l128.function(l122.function("(function(){", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), l127.function("var tmp = ", v641, ";", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), "return (typeof tmp == 'object' && 'name' in tmp);", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), "})()"));
+                    })((function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v640));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 225)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    })), cdr: (function(){
+        var symbol = l238;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()});
+})();
+var l257 = {name: "MAKE-SYMBOL"};
+(function(){
+    return (l238).value = ({car: l42.function(l257, (function (v642){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v643){
                         return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function(l122.function("var ", "name", " = ", v642, ";", (function(){
+                        })(), l127.function(l122.function("var ", "name", " = ", v643, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9136,40 +9142,7 @@ var l255 = {name: "MAKE-SYMBOL"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v641));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 225)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l238;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-var l256 = {name: "SYMBOL-NAME"};
-(function(){
-    return (l238).value = ({car: l42.function(l256, (function (v643){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v644){
-                        return l122.function("(", v644, ").name");
-                    })((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v643));
+                    })()(v642));
                 })();
             }
             catch (cf){
@@ -9187,26 +9160,22 @@ var l256 = {name: "SYMBOL-NAME"};
         return value;
     })()});
 })();
+var l258 = {name: "SYMBOL-NAME"};
 (function(){
-    return (l238).value = ({car: l42.function(l206, (function (v645,v646){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
+    return (l238).value = ({car: l42.function(l258, (function (v644){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v647,v648){
-                        return l122.function("(", v647, ").value = ", v648);
+                    return (function(v645){
+                        return l122.function("(", v645, ").name");
                     })((function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v645),(function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v646));
+                    })()(v644));
                 })();
             }
             catch (cf){
@@ -9224,27 +9193,26 @@ var l256 = {name: "SYMBOL-NAME"};
         return value;
     })()});
 })();
-var l257 = {name: "FSET"};
 (function(){
-    return (l238).value = ({car: l42.function(l257, (function (v649,v650){
+    return (l238).value = ({car: l42.function(l206, (function (v646,v647){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v651,v652){
-                        return l122.function("(", v651, ").function = ", v652);
+                    return (function(v648,v649){
+                        return l122.function("(", v648, ").value = ", v649);
                     })((function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v649),(function(){
+                    })()(v646),(function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v650));
+                    })()(v647));
                 })();
             }
             catch (cf){
@@ -9262,21 +9230,27 @@ var l257 = {name: "FSET"};
         return value;
     })()});
 })();
+var l259 = {name: "FSET"};
 (function(){
-    return (l238).value = ({car: l42.function(l17, (function (v653){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    return (l238).value = ({car: l42.function(l259, (function (v650,v651){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v654){
-                        return l128.function(l122.function("(", v654, ".value !== undefined)"));
+                    return (function(v652,v653){
+                        return l122.function("(", v652, ").function = ", v653);
                     })((function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v653));
+                    })()(v650),(function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v651));
                 })();
             }
             catch (cf){
@@ -9294,21 +9268,53 @@ var l257 = {name: "FSET"};
         return value;
     })()});
 })();
-var l258 = {name: "SYMBOL-VALUE"};
 (function(){
-    return (l238).value = ({car: l42.function(l258, (function (v655){
+    return (l238).value = ({car: l42.function(l17, (function (v654){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v656){
+                    return (function(v655){
+                        return l128.function(l122.function("(", v655, ".value !== undefined)"));
+                    })((function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v654));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 230)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    })), cdr: (function(){
+        var symbol = l238;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()});
+})();
+var l260 = {name: "SYMBOL-VALUE"};
+(function(){
+    return (l238).value = ({car: l42.function(l260, (function (v656){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v657){
                         return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function("var symbol = ", v656, ";", (function(){
+                        })(), l127.function("var symbol = ", v657, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9334,11 +9340,11 @@ var l258 = {name: "SYMBOL-VALUE"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v655));
+                    })()(v656));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 230)
+                if (cf.type == 'block' && cf.id == 231)
                     return cf.value;
                 else
                     throw cf;
@@ -9353,19 +9359,19 @@ var l258 = {name: "SYMBOL-VALUE"};
     })()});
 })();
 (function(){
-    return (l238).value = ({car: l42.function(l214, (function (v657){
+    return (l238).value = ({car: l42.function(l214, (function (v658){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v658){
+                    return (function(v659){
                         return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function("var symbol = ", v658, ";", (function(){
+                        })(), l127.function("var symbol = ", v659, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9391,45 +9397,7 @@ var l258 = {name: "SYMBOL-VALUE"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v657));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 231)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l238;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-var l259 = {name: "SYMBOL-PLIST"};
-(function(){
-    return (l238).value = ({car: l42.function(l259, (function (v659){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v660){
-                        return l122.function("((", v660, ").plist || ", (function(){
-                            var symbol = l129;
-                            var func = symbol.function;
-                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                            return func;
-                        })()(l3.value), ")");
-                    })((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v659));
+                    })()(v658));
                 })();
             }
             catch (cf){
@@ -9447,22 +9415,27 @@ var l259 = {name: "SYMBOL-PLIST"};
         return value;
     })()});
 })();
-var l260 = {name: "LAMBDA-CODE"};
+var l261 = {name: "SYMBOL-PLIST"};
 (function(){
-    return (l238).value = ({car: l42.function(l260, (function (v661){
+    return (l238).value = ({car: l42.function(l261, (function (v660){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v662){
-                        return l122.function("(", v662, ").toString()");
+                    return (function(v661){
+                        return l122.function("((", v661, ").plist || ", (function(){
+                            var symbol = l129;
+                            var func = symbol.function;
+                            if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                            return func;
+                        })()(l3.value), ")");
                     })((function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v661));
+                    })()(v660));
                 })();
             }
             catch (cf){
@@ -9480,27 +9453,22 @@ var l260 = {name: "LAMBDA-CODE"};
         return value;
     })()});
 })();
-var l261 = {name: "EQ"};
+var l262 = {name: "LAMBDA-CODE"};
 (function(){
-    return (l238).value = ({car: l42.function(l261, (function (v663,v664){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
+    return (l238).value = ({car: l42.function(l262, (function (v662){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v665,v666){
-                        return l128.function(l122.function("(", v665, " === ", v666, ")"));
+                    return (function(v663){
+                        return l122.function("(", v663, ").toString()");
                     })((function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v663),(function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v664));
+                    })()(v662));
                 })();
             }
             catch (cf){
@@ -9518,27 +9486,27 @@ var l261 = {name: "EQ"};
         return value;
     })()});
 })();
-var l262 = {name: "EQUAL"};
+var l263 = {name: "EQ"};
 (function(){
-    return (l238).value = ({car: l42.function(l262, (function (v667,v668){
+    return (l238).value = ({car: l42.function(l263, (function (v664,v665){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v669,v670){
-                        return l128.function(l122.function("(", v669, " == ", v670, ")"));
+                    return (function(v666,v667){
+                        return l128.function(l122.function("(", v666, " === ", v667, ")"));
                     })((function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v667),(function(){
+                    })()(v664),(function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v668));
+                    })()(v665));
                 })();
             }
             catch (cf){
@@ -9556,21 +9524,59 @@ var l262 = {name: "EQUAL"};
         return value;
     })()});
 })();
-var l263 = {name: "CHAR-TO-STRING"};
+var l264 = {name: "EQUAL"};
 (function(){
-    return (l238).value = ({car: l42.function(l263, (function (v671){
+    return (l238).value = ({car: l42.function(l264, (function (v668,v669){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v670,v671){
+                        return l128.function(l122.function("(", v670, " == ", v671, ")"));
+                    })((function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v668),(function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v669));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 236)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    })), cdr: (function(){
+        var symbol = l238;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()});
+})();
+var l265 = {name: "CHAR-TO-STRING"};
+(function(){
+    return (l238).value = ({car: l42.function(l265, (function (v672){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v672){
+                    return (function(v673){
                         return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function(l122.function("var ", "x", " = ", v672, ";", (function(){
+                        })(), l127.function(l122.function("var ", "x", " = ", v673, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9598,40 +9604,7 @@ var l263 = {name: "CHAR-TO-STRING"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v671));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 236)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l238;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-var l264 = {name: "STRINGP"};
-(function(){
-    return (l238).value = ({car: l42.function(l264, (function (v673){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v674){
-                        return l128.function(l122.function("(typeof(", v674, ") == \"string\")"));
-                    })((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v673));
+                    })()(v672));
                 })();
             }
             catch (cf){
@@ -9649,21 +9622,54 @@ var l264 = {name: "STRINGP"};
         return value;
     })()});
 })();
-var l265 = {name: "STRING-UPCASE"};
+var l266 = {name: "STRINGP"};
 (function(){
-    return (l238).value = ({car: l42.function(l265, (function (v675){
+    return (l238).value = ({car: l42.function(l266, (function (v674){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v676){
+                    return (function(v675){
+                        return l128.function(l122.function("(typeof(", v675, ") == \"string\")"));
+                    })((function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v674));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 238)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    })), cdr: (function(){
+        var symbol = l238;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()});
+})();
+var l267 = {name: "STRING-UPCASE"};
+(function(){
+    return (l238).value = ({car: l42.function(l267, (function (v676){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v677){
                         return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function(l122.function("var ", "x", " = ", v676, ";", (function(){
+                        })(), l127.function(l122.function("var ", "x", " = ", v677, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9691,11 +9697,11 @@ var l265 = {name: "STRING-UPCASE"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v675));
+                    })()(v676));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 238)
+                if (cf.type == 'block' && cf.id == 239)
                     return cf.value;
                 else
                     throw cf;
@@ -9709,21 +9715,21 @@ var l265 = {name: "STRING-UPCASE"};
         return value;
     })()});
 })();
-var l266 = {name: "STRING-LENGTH"};
+var l268 = {name: "STRING-LENGTH"};
 (function(){
-    return (l238).value = ({car: l42.function(l266, (function (v677){
+    return (l238).value = ({car: l42.function(l268, (function (v678){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v678){
+                    return (function(v679){
                         return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function(l122.function("var ", "x", " = ", v678, ";", (function(){
+                        })(), l127.function(l122.function("var ", "x", " = ", v679, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9751,11 +9757,11 @@ var l266 = {name: "STRING-LENGTH"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v677));
+                    })()(v678));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 239)
+                if (cf.type == 'block' && cf.id == 240)
                     return cf.value;
                 else
                     throw cf;
@@ -9769,13 +9775,13 @@ var l266 = {name: "STRING-LENGTH"};
         return value;
     })()});
 })();
-var l267 = {name: "SLICE"};
-(l238).value = ({car: l42.function(l267, (function (v679,v680,v681){
+var l269 = {name: "SLICE"};
+(l238).value = ({car: l42.function(l269, (function (v680,v681,v682){
     if (arguments.length < 2) throw 'too few arguments';
     if (arguments.length > 3) throw 'too many arguments';
     switch(arguments.length){
     case 2:
-    v681=l3.value;
+    v682=l3.value;
     default: break;
     }
     return (function(){
@@ -9791,7 +9797,7 @@ var l267 = {name: "SLICE"};
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v679), ";", (function(){
+                })()(v680), ";", (function(){
                     var symbol = l121;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9801,7 +9807,7 @@ var l267 = {name: "SLICE"};
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v680), ";", (function(){
+                })()(v681), ";", (function(){
                     var symbol = l121;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9811,12 +9817,12 @@ var l267 = {name: "SLICE"};
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), (v681 !== l3.value ? l122.function("b = ", (function(){
+                })(), (v682 !== l3.value ? l122.function("b = ", (function(){
                     var symbol = l129;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v681), ";", (function(){
+                })()(v682), ";", (function(){
                     var symbol = l121;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9830,7 +9836,7 @@ var l267 = {name: "SLICE"};
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 240)
+            if (cf.type == 'block' && cf.id == 241)
                 return cf.value;
             else
                 throw cf;
@@ -9843,26 +9849,26 @@ var l267 = {name: "SLICE"};
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l268 = {name: "CHAR"};
+var l270 = {name: "CHAR"};
 (function(){
-    return (l238).value = ({car: l42.function(l268, (function (v682,v683){
+    return (l238).value = ({car: l42.function(l270, (function (v683,v684){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v684,v685){
+                    return (function(v685,v686){
                         return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function(l122.function("var ", "string", " = ", v684, ";", (function(){
+                        })(), l127.function(l122.function("var ", "string", " = ", v685, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })()), l122.function("var ", "index", " = ", v685, ";", (function(){
+                        })()), l122.function("var ", "index", " = ", v686, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9900,16 +9906,16 @@ var l268 = {name: "CHAR"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v682),(function(){
+                    })()(v683),(function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v683));
+                    })()(v684));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 241)
+                if (cf.type == 'block' && cf.id == 242)
                     return cf.value;
                 else
                     throw cf;
@@ -9924,24 +9930,24 @@ var l268 = {name: "CHAR"};
     })()});
 })();
 (function(){
-    return (l238).value = ({car: l42.function(l67, (function (v686,v687){
+    return (l238).value = ({car: l42.function(l67, (function (v687,v688){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v688,v689){
+                    return (function(v689,v690){
                         return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function(l122.function("var ", "string1", " = ", v688, ";", (function(){
+                        })(), l127.function(l122.function("var ", "string1", " = ", v689, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })()), l122.function("var ", "string2", " = ", v689, ";", (function(){
+                        })()), l122.function("var ", "string2", " = ", v690, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -9979,16 +9985,16 @@ var l268 = {name: "CHAR"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v686),(function(){
+                    })()(v687),(function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v687));
+                    })()(v688));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 242)
+                if (cf.type == 'block' && cf.id == 243)
                     return cf.value;
                 else
                     throw cf;
@@ -10002,13 +10008,13 @@ var l268 = {name: "CHAR"};
         return value;
     })()});
 })();
-var l269 = {name: "FUNCALL"};
-(l238).value = ({car: l42.function(l269, (function (v691){
+var l271 = {name: "FUNCALL"};
+(l238).value = ({car: l42.function(l271, (function (v692){
     if (arguments.length < 1) throw 'too few arguments';
-    var v690= l3.value;
+    var v691= l3.value;
     for (var i = arguments.length-1; i>=1; i--)
-        v690 = {car: arguments[i], cdr: 
-    v690};
+        v691 = {car: arguments[i], cdr: 
+    v691};
     return (function(){
         try {
             return (function(){
@@ -10017,16 +10023,16 @@ var l269 = {name: "FUNCALL"};
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v691), ")(", l124.function(l68.function((function(){
+                })()(v692), ")(", l124.function(l68.function((function(){
                     var symbol = l129;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })(), v690), ", "), ")");
+                })(), v691), ", "), ")");
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 243)
+            if (cf.type == 'block' && cf.id == 244)
                 return cf.value;
             else
                 throw cf;
@@ -10039,22 +10045,22 @@ var l269 = {name: "FUNCALL"};
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l270 = {name: "APPLY"};
-(l238).value = ({car: l42.function(l270, (function (v693){
+var l272 = {name: "APPLY"};
+(l238).value = ({car: l42.function(l272, (function (v694){
     if (arguments.length < 1) throw 'too few arguments';
-    var v692= l3.value;
+    var v693= l3.value;
     for (var i = arguments.length-1; i>=1; i--)
-        v692 = {car: arguments[i], cdr: 
-    v692};
+        v693 = {car: arguments[i], cdr: 
+    v693};
     return (function(){
         try {
             return (function(){
-                return (l11.function(v692) !== l3.value ? l122.function("(", (function(){
+                return (l11.function(v693) !== l3.value ? l122.function("(", (function(){
                     var symbol = l129;
                     var func = symbol.function;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })()(v693), ")()") : (function(v694,v695){
+                })()(v694), ")()") : (function(v695,v696){
                     return l122.function("(function(){", (function(){
                         var symbol = l121;
                         var value = symbol.value;
@@ -10065,7 +10071,7 @@ var l270 = {name: "APPLY"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v693), ";", (function(){
+                    })()(v694), ";", (function(){
                         var symbol = l121;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -10075,7 +10081,7 @@ var l270 = {name: "APPLY"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v694), ", "), "];", (function(){
+                    })(), v695), ", "), "];", (function(){
                         var symbol = l121;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -10085,7 +10091,7 @@ var l270 = {name: "APPLY"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v695), ");", (function(){
+                    })()(v696), ");", (function(){
                         var symbol = l121;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -10121,14 +10127,14 @@ var l270 = {name: "APPLY"};
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })()), "})()");
-                })(l80.function(v692),(function(){
-                    var tmp = l79.function(v692);
+                })(l80.function(v693),(function(){
+                    var tmp = l79.function(v693);
                     return tmp === l3.value? l3.value: tmp.car;
                 })()));
             })();
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 244)
+            if (cf.type == 'block' && cf.id == 245)
                 return cf.value;
             else
                 throw cf;
@@ -10141,21 +10147,21 @@ var l270 = {name: "APPLY"};
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()});
-var l271 = {name: "JS-EVAL"};
+var l273 = {name: "JS-EVAL"};
 (function(){
-    return (l238).value = ({car: l42.function(l271, (function (v696){
+    return (l238).value = ({car: l42.function(l273, (function (v697){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v697){
+                    return (function(v698){
                         return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function(l122.function("var ", "string", " = ", v697, ";", (function(){
+                        })(), l127.function(l122.function("var ", "string", " = ", v698, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -10183,50 +10189,7 @@ var l271 = {name: "JS-EVAL"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v696));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 245)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l238;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-var l272 = {name: "ERROR"};
-(function(){
-    return (l238).value = ({car: l42.function(l272, (function (v698){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v699){
-                        return l122.function("(function(){", (function(){
-                            var symbol = l121;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), l127.function("throw ", v699, ";", (function(){
-                            var symbol = l121;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })()), "})()");
-                    })((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v698));
+                    })()(v697));
                 })();
             }
             catch (cf){
@@ -10244,16 +10207,32 @@ var l272 = {name: "ERROR"};
         return value;
     })()});
 })();
-var l273 = {name: "NEW"};
+var l274 = {name: "ERROR"};
 (function(){
-    return (l238).value = ({car: l42.function(l273, (function (){
-        if (arguments.length > 0) throw 'too many arguments';
+    return (l238).value = ({car: l42.function(l274, (function (v699){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(){
-                        return "{}";
-                    })();
+                    return (function(v700){
+                        return l122.function("(function(){", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), l127.function("throw ", v700, ";", (function(){
+                            var symbol = l121;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })()), "})()");
+                    })((function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v699));
                 })();
             }
             catch (cf){
@@ -10271,22 +10250,16 @@ var l273 = {name: "NEW"};
         return value;
     })()});
 })();
-var l274 = {name: "OBJECTP"};
+var l275 = {name: "NEW"};
 (function(){
-    return (l238).value = ({car: l42.function(l274, (function (v700){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    return (l238).value = ({car: l42.function(l275, (function (){
+        if (arguments.length > 0) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v701){
-                        return l128.function(l122.function("(typeof (", v701, ") === 'object')"));
-                    })((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v700));
+                    return (function(){
+                        return "{}";
+                    })();
                 })();
             }
             catch (cf){
@@ -10304,21 +10277,54 @@ var l274 = {name: "OBJECTP"};
         return value;
     })()});
 })();
-var l275 = {name: "OGET"};
+var l276 = {name: "OBJECTP"};
 (function(){
-    return (l238).value = ({car: l42.function(l275, (function (v702,v703){
+    return (l238).value = ({car: l42.function(l276, (function (v701){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v702){
+                        return l128.function(l122.function("(typeof (", v702, ") === 'object')"));
+                    })((function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v701));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 249)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    })), cdr: (function(){
+        var symbol = l238;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()});
+})();
+var l277 = {name: "OGET"};
+(function(){
+    return (l238).value = ({car: l42.function(l277, (function (v703,v704){
         if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v704,v705){
+                    return (function(v705,v706){
                         return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function("var tmp = ", "(", v704, ")[", v705, "];", (function(){
+                        })(), l127.function("var tmp = ", "(", v705, ")[", v706, "];", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -10339,55 +10345,12 @@ var l275 = {name: "OGET"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v702),(function(){
+                    })()(v703),(function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v703));
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 249)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    })), cdr: (function(){
-        var symbol = l238;
-        var value = symbol.value;
-        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-        return value;
-    })()});
-})();
-var l276 = {name: "OSET"};
-(function(){
-    return (l238).value = ({car: l42.function(l276, (function (v706,v707,v708){
-        if (arguments.length < 3) throw 'too few arguments';
-        if (arguments.length > 3) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v709,v710,v711){
-                        return l122.function("((", v709, ")[", v710, "] = ", v711, ")");
-                    })((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v706),(function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v707),(function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(v708));
+                    })()(v704));
                 })();
             }
             catch (cf){
@@ -10405,27 +10368,32 @@ var l276 = {name: "OSET"};
         return value;
     })()});
 })();
-var l277 = {name: "IN"};
+var l278 = {name: "OSET"};
 (function(){
-    return (l238).value = ({car: l42.function(l277, (function (v712,v713){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
+    return (l238).value = ({car: l42.function(l278, (function (v707,v708,v709){
+        if (arguments.length < 3) throw 'too few arguments';
+        if (arguments.length > 3) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v714,v715){
-                        return l128.function(l122.function("((", v714, ") in (", v715, "))"));
+                    return (function(v710,v711,v712){
+                        return l122.function("((", v710, ")[", v711, "] = ", v712, ")");
                     })((function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v712),(function(){
+                    })()(v707),(function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v713));
+                    })()(v708),(function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v709));
                 })();
             }
             catch (cf){
@@ -10443,22 +10411,27 @@ var l277 = {name: "IN"};
         return value;
     })()});
 })();
-var l278 = {name: "FUNCTIONP"};
+var l279 = {name: "IN"};
 (function(){
-    return (l238).value = ({car: l42.function(l278, (function (v716){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+    return (l238).value = ({car: l42.function(l279, (function (v713,v714){
+        if (arguments.length < 2) throw 'too few arguments';
+        if (arguments.length > 2) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v717){
-                        return l128.function(l122.function("(typeof ", v717, " == 'function')"));
+                    return (function(v715,v716){
+                        return l128.function(l122.function("((", v715, ") in (", v716, "))"));
                     })((function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v716));
+                    })()(v713),(function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v714));
                 })();
             }
             catch (cf){
@@ -10476,21 +10449,54 @@ var l278 = {name: "FUNCTIONP"};
         return value;
     })()});
 })();
-var l279 = {name: "WRITE-STRING"};
+var l280 = {name: "FUNCTIONP"};
 (function(){
-    return (l238).value = ({car: l42.function(l279, (function (v718){
+    return (l238).value = ({car: l42.function(l280, (function (v717){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v719){
+                    return (function(v718){
+                        return l128.function(l122.function("(typeof ", v718, " == 'function')"));
+                    })((function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(v717));
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 253)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    })), cdr: (function(){
+        var symbol = l238;
+        var value = symbol.value;
+        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+        return value;
+    })()});
+})();
+var l281 = {name: "WRITE-STRING"};
+(function(){
+    return (l238).value = ({car: l42.function(l281, (function (v719){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v720){
                         return l122.function("(function(){", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l127.function(l122.function("var ", "x", " = ", v719, ";", (function(){
+                        })(), l127.function(l122.function("var ", "x", " = ", v720, ";", (function(){
                             var symbol = l121;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -10518,11 +10524,11 @@ var l279 = {name: "WRITE-STRING"};
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()(v718));
+                    })()(v719));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 253)
+                if (cf.type == 'block' && cf.id == 254)
                     return cf.value;
                 else
                     throw cf;
@@ -10537,81 +10543,26 @@ var l279 = {name: "WRITE-STRING"};
     })()});
 })();
 (function(){
-    (l181).function = (function(v722){
-        ((v722)["fname"] = "MACRO");
-        return v722;
-    })((function (v720){
+    (l181).function = (function(v723){
+        ((v723)["fname"] = "MACRO");
+        return v723;
+    })((function (v721){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
                     return (((function(){
-                        var tmp = v720;
+                        var tmp = v721;
                         return (typeof tmp == 'object' && 'name' in tmp);
-                    })()?l4.value: l3.value) !== l3.value ? (function(v721){
-                        return (((l157.function(v721) === l181)?l4.value: l3.value) !== l3.value ? v721 : l3.value);
-                    })(l169.function(v720, (function(){
+                    })()?l4.value: l3.value) !== l3.value ? (function(v722){
+                        return (((l157.function(v722) === l181)?l4.value: l3.value) !== l3.value ? v722 : l3.value);
+                    })(l169.function(v721, (function(){
                         var symbol = l170;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(), l97)) : l3.value);
-                })();
-            }
-            catch (cf){
-                if (cf.type == 'block' && cf.id == 254)
-                    return cf.value;
-                else
-                    throw cf;
-            }
-        })();
-    
-    }));
-    return l181;
-})();
-var l280 = {name: "LS-MACROEXPAND-1"};
-(function(){
-    (l280).function = (function(v727){
-        ((v727)["fname"] = "LS-MACROEXPAND-1");
-        return v727;
-    })((function (v723){
-        if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
-        return (function(){
-            try {
-                return (function(){
-                    return (function(v724){
-                        return (v724 !== l3.value ? (function(v725){
-                            (l57.function(v725) !== l3.value ? (function(){
-                                return (function(v726){
-                                    l160.function(v724, v726);
-                                    return v725 = v726;
-                                })((function(){
-                                    var symbol = l216;
-                                    var func = symbol.function;
-                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                    return func;
-                                })()(v725));
-                            })() : l3.value);
-                            return (function(){
-                                var f = v725;
-                                var args = [];
-                                var tail = ((function(){
-                                    var tmp = v723;
-                                    return tmp === l3.value? l3.value: tmp.cdr;
-                                })());
-                                while (tail != l3.value){
-                                    args.push(tail.car);
-                                    tail = tail.cdr;
-                                }
-                                return f.apply(this, args);
-                            })();
-                        })(l158.function(v724)) : v723);
-                    })(l181.function((function(){
-                        var tmp = v723;
-                        return tmp === l3.value? l3.value: tmp.car;
-                    })()));
                 })();
             }
             catch (cf){
@@ -10623,43 +10574,50 @@ var l280 = {name: "LS-MACROEXPAND-1"};
         })();
     
     }));
-    return l280;
+    return l181;
 })();
-var l281 = {name: "COMPILE-FUNCALL"};
+var l282 = {name: "LS-MACROEXPAND-1"};
 (function(){
-    (l281).function = (function(v730){
-        ((v730)["fname"] = "COMPILE-FUNCALL");
-        return v730;
-    })((function (v728,v729){
-        if (arguments.length < 2) throw 'too few arguments';
-        if (arguments.length > 2) throw 'too many arguments';
+    (l282).function = (function(v728){
+        ((v728)["fname"] = "LS-MACROEXPAND-1");
+        return v728;
+    })((function (v724){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return ((((function(){
-                        var tmp = v728;
-                        return (typeof tmp == 'object' && 'name' in tmp);
-                    })()?l4.value: l3.value) !== l3.value ? l183.function(v728, l97, l188) : l3.value) !== l3.value ? l122.function((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(l62.function(l42.function(l149), l42.function(v728))), ".function(", l124.function(l68.function((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })(), v729), ", "), ")") : l122.function((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })()(l62.function(l42.function(l97), l42.function(v728))), "(", l124.function(l68.function((function(){
-                        var symbol = l129;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })(), v729), ", "), ")"));
+                    return (function(v725){
+                        return (v725 !== l3.value ? (function(v726){
+                            (l57.function(v726) !== l3.value ? (function(){
+                                return (function(v727){
+                                    l160.function(v725, v727);
+                                    return v726 = v727;
+                                })((function(){
+                                    var symbol = l216;
+                                    var func = symbol.function;
+                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                    return func;
+                                })()(v726));
+                            })() : l3.value);
+                            return (function(){
+                                var f = v726;
+                                var args = [];
+                                var tail = ((function(){
+                                    var tmp = v724;
+                                    return tmp === l3.value? l3.value: tmp.cdr;
+                                })());
+                                while (tail != l3.value){
+                                    args.push(tail.car);
+                                    tail = tail.cdr;
+                                }
+                                return f.apply(this, args);
+                            })();
+                        })(l158.function(v725)) : v724);
+                    })(l181.function((function(){
+                        var tmp = v724;
+                        return tmp === l3.value? l3.value: tmp.car;
+                    })()));
                 })();
             }
             catch (cf){
@@ -10671,47 +10629,43 @@ var l281 = {name: "COMPILE-FUNCALL"};
         })();
     
     }));
-    return l281;
+    return l282;
 })();
+var l283 = {name: "COMPILE-FUNCALL"};
 (function(){
-    (l204).function = (function(v733){
-        ((v733)["fname"] = "LS-COMPILE-BLOCK");
-        return v733;
-    })((function (v731,v732){
-        if (arguments.length < 1) throw 'too few arguments';
+    (l283).function = (function(v731){
+        ((v731)["fname"] = "COMPILE-FUNCALL");
+        return v731;
+    })((function (v729,v730){
+        if (arguments.length < 2) throw 'too few arguments';
         if (arguments.length > 2) throw 'too many arguments';
-        switch(arguments.length){
-        case 1:
-        v732=l3.value;
-        default: break;
-        }
         return (function(){
             try {
                 return (function(){
-                    return (v732 !== l3.value ? l122.function(l204.function(l80.function(v731)), "return ", (function(){
+                    return ((((function(){
+                        var tmp = v729;
+                        return (typeof tmp == 'object' && 'name' in tmp);
+                    })()?l4.value: l3.value) !== l3.value ? l183.function(v729, l97, l188) : l3.value) !== l3.value ? l122.function((function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })()((function(){
-                        var tmp = l79.function(v731);
-                        return tmp === l3.value? l3.value: tmp.car;
-                    })()), ";") : l125.function(l83.function((function(){
-                        var symbol = l178;
-                        var func = symbol.function;
-                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                        return func;
-                    })(), l68.function((function(){
+                    })()(l62.function(l42.function(l149), l42.function(v729))), ".function(", l124.function(l68.function((function(){
                         var symbol = l129;
                         var func = symbol.function;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v731)), l122.function(";", (function(){
-                        var symbol = l121;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })())));
+                    })(), v730), ", "), ")") : l122.function((function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()(l62.function(l42.function(l97), l42.function(v729))), "(", l124.function(l68.function((function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })(), v730), ", "), ")"));
                 })();
             }
             catch (cf){
@@ -10723,101 +10677,47 @@ var l281 = {name: "COMPILE-FUNCALL"};
         })();
     
     }));
-    return l204;
+    return l283;
 })();
 (function(){
-    (l129).function = (function(v741){
-        ((v741)["fname"] = "LS-COMPILE");
-        return v741;
-    })((function (v734){
+    (l204).function = (function(v734){
+        ((v734)["fname"] = "LS-COMPILE-BLOCK");
+        return v734;
+    })((function (v732,v733){
         if (arguments.length < 1) throw 'too few arguments';
-        if (arguments.length > 1) throw 'too many arguments';
+        if (arguments.length > 2) throw 'too many arguments';
+        switch(arguments.length){
+        case 1:
+        v733=l3.value;
+        default: break;
+        }
         return (function(){
             try {
                 return (function(){
-                    return (((function(){
-                        var tmp = v734;
-                        return (typeof tmp == 'object' && 'name' in tmp);
-                    })()?l4.value: l3.value) !== l3.value ? (function(){
-                        return (function(v735){
-                            return ((v735 !== l3.value ? l26.function(l81.function(l185, l159.function(v735))) : l3.value) !== l3.value ? (function(){
-                                return l158.function(v735);
-                            })() : ((function(v736){
-                                return (v736 !== l3.value ? v736 : l81.function(l187, l159.function(v735)));
-                            })(l112.function(v734)) !== l3.value ? (function(){
-                                return l122.function(l129.function(l62.function(l42.function(l149), l42.function(v734))), ".value");
-                            })() : (function(){
-                                return l129.function(l62.function(l42.function(l258), l42.function(l62.function(l42.function(l149), l42.function(v734)))));
-                            })()));
-                        })(l169.function(v734, (function(){
-                            var symbol = l170;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), l98));
-                    })() : (l74.function(v734) !== l3.value ? (function(){
-                        return l16.function(v734);
-                    })() : (((typeof(v734) == "string")?l4.value: l3.value) !== l3.value ? (function(){
-                        return l122.function("\"", l132.function(v734), "\"");
-                    })() : (l57.function(v734) !== l3.value ? (function(){
-                        return (function(v737,v738){
-                            return (l90.function(v737, (function(){
-                                var symbol = l190;
-                                var value = symbol.value;
-                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                return value;
-                            })()) !== l3.value ? (function(){
-                                return (function(v739){
-                                    return (function(){
-                                        var f = v739;
-                                        var args = [];
-                                        var tail = (v738);
-                                        while (tail != l3.value){
-                                            args.push(tail.car);
-                                            tail = tail.cdr;
-                                        }
-                                        return f.apply(this, args);
-                                    })();
-                                })(l39.function(l90.function(v737, (function(){
-                                    var symbol = l190;
-                                    var value = symbol.value;
-                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                    return value;
-                                })())));
-                            })() : ((l90.function(v737, (function(){
-                                var symbol = l238;
-                                var value = symbol.value;
-                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                return value;
-                            })()) !== l3.value ? l26.function(l183.function(v737, l97, l186)) : l3.value) !== l3.value ? (function(){
-                                return (function(v740){
-                                    return (function(){
-                                        var f = v740;
-                                        var args = [];
-                                        var tail = (v738);
-                                        while (tail != l3.value){
-                                            args.push(tail.car);
-                                            tail = tail.cdr;
-                                        }
-                                        return f.apply(this, args);
-                                    })();
-                                })(l39.function(l90.function(v737, (function(){
-                                    var symbol = l238;
-                                    var value = symbol.value;
-                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                    return value;
-                                })())));
-                            })() : (function(){
-                                return (l181.function(v737) !== l3.value ? l129.function(l280.function(v734)) : l281.function(v737, v738));
-                            })()));
-                        })((function(){
-                            var tmp = v734;
-                            return tmp === l3.value? l3.value: tmp.car;
-                        })(),(function(){
-                            var tmp = v734;
-                            return tmp === l3.value? l3.value: tmp.cdr;
-                        })());
-                    })() : l3.value))));
+                    return (v733 !== l3.value ? l122.function(l204.function(l80.function(v732)), "return ", (function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })()((function(){
+                        var tmp = l79.function(v732);
+                        return tmp === l3.value? l3.value: tmp.car;
+                    })()), ";") : l125.function(l83.function((function(){
+                        var symbol = l178;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })(), l68.function((function(){
+                        var symbol = l129;
+                        var func = symbol.function;
+                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                        return func;
+                    })(), v732)), l122.function(";", (function(){
+                        var symbol = l121;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })())));
                 })();
             }
             catch (cf){
@@ -10829,68 +10729,101 @@ var l281 = {name: "COMPILE-FUNCALL"};
         })();
     
     }));
-    return l129;
+    return l204;
 })();
-var l282 = {name: "LS-COMPILE-TOPLEVEL"};
 (function(){
-    (l282).function = (function(v746){
-        ((v746)["fname"] = "LS-COMPILE-TOPLEVEL");
-        return v746;
-    })((function (v742){
+    (l129).function = (function(v742){
+        ((v742)["fname"] = "LS-COMPILE");
+        return v742;
+    })((function (v735){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v743){
-                        try {
-                            var tmp;
-                            tmp = l176.value;
-                            l176.value = v743;
-                            v743 = tmp;
-                            return ((((function(){
-                                var tmp = v742;
-                                return (typeof tmp == 'object' && 'car' in tmp);
-                            })()?l4.value: l3.value) !== l3.value ? (((function(){
-                                var tmp = v742;
-                                return tmp === l3.value? l3.value: tmp.car;
-                            })() === l217)?l4.value: l3.value) : l3.value) !== l3.value ? (function(){
-                                return (function(v744){
-                                    return l124.function(l83.function((function(){
-                                        var symbol = l178;
-                                        var func = symbol.function;
-                                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                        return func;
-                                    })(), v744));
-                                })(l68.function((function(){
-                                    var symbol = l282;
-                                    var func = symbol.function;
-                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
-                                    return func;
-                                })(), (function(){
-                                    var tmp = v742;
-                                    return tmp === l3.value? l3.value: tmp.cdr;
-                                })()));
+                    return (((function(){
+                        var tmp = v735;
+                        return (typeof tmp == 'object' && 'name' in tmp);
+                    })()?l4.value: l3.value) !== l3.value ? (function(){
+                        return (function(v736){
+                            return ((v736 !== l3.value ? l26.function(l81.function(l185, l159.function(v736))) : l3.value) !== l3.value ? (function(){
+                                return l158.function(v736);
+                            })() : ((function(v737){
+                                return (v737 !== l3.value ? v737 : l81.function(l187, l159.function(v736)));
+                            })(l112.function(v735)) !== l3.value ? (function(){
+                                return l122.function(l129.function(l62.function(l42.function(l149), l42.function(v735))), ".value");
                             })() : (function(){
-                                return (function(v745){
-                                    return l122.function(l125.function(l179.function(), l122.function(";", (function(){
-                                        var symbol = l121;
-                                        var value = symbol.value;
-                                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                        return value;
-                                    })())), (v745 !== l3.value ? l122.function(v745, ";", (function(){
-                                        var symbol = l121;
-                                        var value = symbol.value;
-                                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                                        return value;
-                                    })()) : ""));
-                                })(l129.function(v742));
-                            })());
-                        }
-                        finally {
-                            l176.value = v743;
-                        }
-                    })(l3.value);
+                                return l129.function(l62.function(l42.function(l260), l42.function(l62.function(l42.function(l149), l42.function(v735)))));
+                            })()));
+                        })(l169.function(v735, (function(){
+                            var symbol = l170;
+                            var value = symbol.value;
+                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                            return value;
+                        })(), l98));
+                    })() : (l74.function(v735) !== l3.value ? (function(){
+                        return l16.function(v735);
+                    })() : (((typeof(v735) == "string")?l4.value: l3.value) !== l3.value ? (function(){
+                        return l122.function("\"", l132.function(v735), "\"");
+                    })() : (l57.function(v735) !== l3.value ? (function(){
+                        return (function(v738,v739){
+                            return (l90.function(v738, (function(){
+                                var symbol = l190;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })()) !== l3.value ? (function(){
+                                return (function(v740){
+                                    return (function(){
+                                        var f = v740;
+                                        var args = [];
+                                        var tail = (v739);
+                                        while (tail != l3.value){
+                                            args.push(tail.car);
+                                            tail = tail.cdr;
+                                        }
+                                        return f.apply(this, args);
+                                    })();
+                                })(l39.function(l90.function(v738, (function(){
+                                    var symbol = l190;
+                                    var value = symbol.value;
+                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                    return value;
+                                })())));
+                            })() : ((l90.function(v738, (function(){
+                                var symbol = l238;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })()) !== l3.value ? l26.function(l183.function(v738, l97, l186)) : l3.value) !== l3.value ? (function(){
+                                return (function(v741){
+                                    return (function(){
+                                        var f = v741;
+                                        var args = [];
+                                        var tail = (v739);
+                                        while (tail != l3.value){
+                                            args.push(tail.car);
+                                            tail = tail.cdr;
+                                        }
+                                        return f.apply(this, args);
+                                    })();
+                                })(l39.function(l90.function(v738, (function(){
+                                    var symbol = l238;
+                                    var value = symbol.value;
+                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                    return value;
+                                })())));
+                            })() : (function(){
+                                return (l181.function(v738) !== l3.value ? l129.function(l282.function(v735)) : l283.function(v738, v739));
+                            })()));
+                        })((function(){
+                            var tmp = v735;
+                            return tmp === l3.value? l3.value: tmp.car;
+                        })(),(function(){
+                            var tmp = v735;
+                            return tmp === l3.value? l3.value: tmp.cdr;
+                        })());
+                    })() : l3.value))));
                 })();
             }
             catch (cf){
@@ -10902,44 +10835,117 @@ var l282 = {name: "LS-COMPILE-TOPLEVEL"};
         })();
     
     }));
-    return l282;
+    return l129;
 })();
-var l283 = {name: "WITH-COMPILATION-UNIT"};
-l283;
+var l284 = {name: "LS-COMPILE-TOPLEVEL"};
 (function(){
-    (l216).function = (function(v752){
-        ((v752)["fname"] = "EVAL");
-        return v752;
-    })((function (v747){
+    (l284).function = (function(v747){
+        ((v747)["fname"] = "LS-COMPILE-TOPLEVEL");
+        return v747;
+    })((function (v743){
         if (arguments.length < 1) throw 'too few arguments';
         if (arguments.length > 1) throw 'too many arguments';
         return (function(){
             try {
                 return (function(){
-                    return (function(v751){
+                    return (function(v744){
+                        try {
+                            var tmp;
+                            tmp = l176.value;
+                            l176.value = v744;
+                            v744 = tmp;
+                            return ((((function(){
+                                var tmp = v743;
+                                return (typeof tmp == 'object' && 'car' in tmp);
+                            })()?l4.value: l3.value) !== l3.value ? (((function(){
+                                var tmp = v743;
+                                return tmp === l3.value? l3.value: tmp.car;
+                            })() === l217)?l4.value: l3.value) : l3.value) !== l3.value ? (function(){
+                                return (function(v745){
+                                    return l124.function(l83.function((function(){
+                                        var symbol = l178;
+                                        var func = symbol.function;
+                                        if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                        return func;
+                                    })(), v745));
+                                })(l68.function((function(){
+                                    var symbol = l284;
+                                    var func = symbol.function;
+                                    if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
+                                    return func;
+                                })(), (function(){
+                                    var tmp = v743;
+                                    return tmp === l3.value? l3.value: tmp.cdr;
+                                })()));
+                            })() : (function(){
+                                return (function(v746){
+                                    return l122.function(l125.function(l179.function(), l122.function(";", (function(){
+                                        var symbol = l121;
+                                        var value = symbol.value;
+                                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                        return value;
+                                    })())), (v746 !== l3.value ? l122.function(v746, ";", (function(){
+                                        var symbol = l121;
+                                        var value = symbol.value;
+                                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                        return value;
+                                    })()) : ""));
+                                })(l129.function(v743));
+                            })());
+                        }
+                        finally {
+                            l176.value = v744;
+                        }
+                    })(l3.value);
+                })();
+            }
+            catch (cf){
+                if (cf.type == 'block' && cf.id == 260)
+                    return cf.value;
+                else
+                    throw cf;
+            }
+        })();
+    
+    }));
+    return l284;
+})();
+var l285 = {name: "WITH-COMPILATION-UNIT"};
+l285;
+(function(){
+    (l216).function = (function(v753){
+        ((v753)["fname"] = "EVAL");
+        return v753;
+    })((function (v748){
+        if (arguments.length < 1) throw 'too few arguments';
+        if (arguments.length > 1) throw 'too many arguments';
+        return (function(){
+            try {
+                return (function(){
+                    return (function(v752){
                         return (function(){
-                            var string = v751;
+                            var string = v752;
                             if (typeof string != 'string')
                                 throw 'The value ' + string + ' is not a type string.';
                             return eval.apply(window, [string]);
                         })();
-                    })((function(v748){
+                    })((function(v749){
                         (function(){
                             try {
                                 return (function(){
-                                    return (function(v749,v750){
+                                    return (function(v750,v751){
                                         (function(){
-                                            while(v749 !== l3.value){
-                                                v750 = (function(){
-                                                    var tmp = v749;
+                                            while(v750 !== l3.value){
+                                                v751 = (function(){
+                                                    var tmp = v750;
                                                     return tmp === l3.value? l3.value: tmp.car;
                                                 })();
                                                 (function(){
-                                                    (v750)();
+                                                    (v751)();
                                                     return l3.value;
                                                 })();
-                                                v749 = (function(){
-                                                    var tmp = v749;
+                                                v750 = (function(){
+                                                    var tmp = v750;
                                                     return tmp === l3.value? l3.value: tmp.cdr;
                                                 })();
                                             }return l3.value;
@@ -10954,21 +10960,21 @@ l283;
                                 })();
                             }
                             catch (cf){
-                                if (cf.type == 'block' && cf.id == 261)
+                                if (cf.type == 'block' && cf.id == 262)
                                     return cf.value;
                                 else
                                     throw cf;
                             }
                         })();
-                        return v748;
+                        return v749;
                     })((function(){
                         (l154).value = l3.value;
-                        return l282.function(v747);
+                        return l284.function(v748);
                     })()));
                 })();
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 260)
+                if (cf.type == 'block' && cf.id == 261)
                     return cf.value;
                 else
                     throw cf;
@@ -10978,10 +10984,10 @@ l283;
     }));
     return l216;
 })();
-var l284 = {name: "&BODY"};
-var l285 = {name: "PRON"};
-var l286 = {car: l195, cdr: {car: l194, cdr: {car: l284, cdr: {car: l19, cdr: {car: l14, cdr: {car: l114, cdr: {car: l59, cdr: {car: l60, cdr: {car: l20, cdr: {car: l21, cdr: {car: l22, cdr: {car: l246, cdr: {car: l248, cdr: {car: l18, cdr: {car: l18, cdr: {car: l247, cdr: {car: l249, cdr: {car: l52, cdr: {car: l62, cdr: {car: l270, cdr: {car: l90, cdr: {car: l43, cdr: {car: l166, cdr: {car: l17, cdr: {car: l17, cdr: {car: l80, cdr: {car: l31, cdr: {car: l37, cdr: {car: l35, cdr: {car: l32, cdr: {car: l29, cdr: {car: l29, cdr: {car: l50, cdr: {car: l227, cdr: {car: l33, cdr: {car: l36, cdr: {car: l34, cdr: {car: l30, cdr: {car: l30, cdr: {car: l268, cdr: {car: l72, cdr: {car: l73, cdr: {car: l71, cdr: {car: l49, cdr: {car: l27, cdr: {car: l28, cdr: {car: l70, cdr: {car: l45, cdr: {car: l2, cdr: {car: l8, cdr: {car: l10, cdr: {car: l7, cdr: {car: l85, cdr: {car: l94, cdr: {car: l96, cdr: {car: l47, cdr: {car: l48, cdr: {car: l51, cdr: {car: l261, cdr: {car: l25, cdr: {car: l262, cdr: {car: l272, cdr: {car: l216, cdr: {car: l89, cdr: {car: l120, cdr: {car: l93, cdr: {car: l104, cdr: {car: l118, cdr: {car: l38, cdr: {car: l41, cdr: {car: l257, cdr: {car: l269, cdr: {car: l97, cdr: {car: l278, cdr: {car: l15, cdr: {car: l234, cdr: {car: l69, cdr: {car: l192, cdr: {car: l115, cdr: {car: l44, cdr: {car: l74, cdr: {car: l74, cdr: {car: l119, cdr: {car: l112, cdr: {car: l203, cdr: {car: l79, cdr: {car: l66, cdr: {car: l221, cdr: {car: l224, cdr: {car: l100, cdr: {car: l42, cdr: {car: l57, cdr: {car: l101, cdr: {car: l255, cdr: {car: l68, cdr: {car: l81, cdr: {car: l76, cdr: {car: l245, cdr: {car: l3, cdr: {car: l26, cdr: {car: l78, cdr: {car: l77, cdr: {car: l11, cdr: {car: l250, cdr: {car: l53, cdr: {car: l105, cdr: {car: l107, cdr: {car: l103, cdr: {car: l75, cdr: {car: l131, cdr: {car: l134, cdr: {car: l189, cdr: {car: l54, cdr: {car: l55, cdr: {car: l285, cdr: {car: l46, cdr: {car: l149, cdr: {car: l82, cdr: {car: l83, cdr: {car: l84, cdr: {car: l12, cdr: {car: l226, cdr: {car: l63, cdr: {car: l64, cdr: {car: l39, cdr: {car: l206, cdr: {car: l205, cdr: {car: l88, cdr: {car: l265, cdr: {car: l91, cdr: {car: l92, cdr: {car: l264, cdr: {car: l86, cdr: {car: l214, cdr: {car: l256, cdr: {car: l113, cdr: {car: l259, cdr: {car: l258, cdr: {car: l254, cdr: {car: l4, cdr: {car: l233, cdr: {car: l40, cdr: {car: l228, cdr: {car: l24, cdr: {car: l6, cdr: {car: l235, cdr: {car: l98, cdr: {car: l133, cdr: {car: l5, cdr: {car: l95, cdr: {car: l279, cdr: {car: l23, cdr: l3}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}};
-l120.function(l286);
+var l286 = {name: "&BODY"};
+var l287 = {name: "PRON"};
+var l288 = {car: l195, cdr: {car: l194, cdr: {car: l286, cdr: {car: l19, cdr: {car: l14, cdr: {car: l114, cdr: {car: l59, cdr: {car: l60, cdr: {car: l20, cdr: {car: l21, cdr: {car: l22, cdr: {car: l249, cdr: {car: l251, cdr: {car: l18, cdr: {car: l18, cdr: {car: l248, cdr: {car: l250, cdr: {car: l52, cdr: {car: l62, cdr: {car: l272, cdr: {car: l90, cdr: {car: l43, cdr: {car: l166, cdr: {car: l17, cdr: {car: l17, cdr: {car: l80, cdr: {car: l31, cdr: {car: l37, cdr: {car: l35, cdr: {car: l32, cdr: {car: l29, cdr: {car: l29, cdr: {car: l50, cdr: {car: l227, cdr: {car: l33, cdr: {car: l36, cdr: {car: l34, cdr: {car: l30, cdr: {car: l30, cdr: {car: l270, cdr: {car: l72, cdr: {car: l73, cdr: {car: l71, cdr: {car: l49, cdr: {car: l27, cdr: {car: l28, cdr: {car: l70, cdr: {car: l45, cdr: {car: l2, cdr: {car: l8, cdr: {car: l10, cdr: {car: l7, cdr: {car: l85, cdr: {car: l94, cdr: {car: l96, cdr: {car: l47, cdr: {car: l48, cdr: {car: l51, cdr: {car: l263, cdr: {car: l25, cdr: {car: l264, cdr: {car: l274, cdr: {car: l216, cdr: {car: l89, cdr: {car: l120, cdr: {car: l93, cdr: {car: l104, cdr: {car: l118, cdr: {car: l38, cdr: {car: l41, cdr: {car: l259, cdr: {car: l271, cdr: {car: l97, cdr: {car: l280, cdr: {car: l15, cdr: {car: l234, cdr: {car: l69, cdr: {car: l192, cdr: {car: l115, cdr: {car: l44, cdr: {car: l74, cdr: {car: l74, cdr: {car: l119, cdr: {car: l112, cdr: {car: l203, cdr: {car: l79, cdr: {car: l66, cdr: {car: l221, cdr: {car: l224, cdr: {car: l100, cdr: {car: l42, cdr: {car: l57, cdr: {car: l101, cdr: {car: l257, cdr: {car: l68, cdr: {car: l81, cdr: {car: l76, cdr: {car: l245, cdr: {car: l3, cdr: {car: l26, cdr: {car: l78, cdr: {car: l77, cdr: {car: l11, cdr: {car: l252, cdr: {car: l53, cdr: {car: l105, cdr: {car: l107, cdr: {car: l103, cdr: {car: l75, cdr: {car: l131, cdr: {car: l134, cdr: {car: l189, cdr: {car: l54, cdr: {car: l55, cdr: {car: l287, cdr: {car: l46, cdr: {car: l149, cdr: {car: l82, cdr: {car: l83, cdr: {car: l84, cdr: {car: l12, cdr: {car: l226, cdr: {car: l63, cdr: {car: l64, cdr: {car: l39, cdr: {car: l206, cdr: {car: l205, cdr: {car: l88, cdr: {car: l267, cdr: {car: l91, cdr: {car: l92, cdr: {car: l266, cdr: {car: l86, cdr: {car: l214, cdr: {car: l258, cdr: {car: l113, cdr: {car: l261, cdr: {car: l260, cdr: {car: l256, cdr: {car: l4, cdr: {car: l233, cdr: {car: l40, cdr: {car: l228, cdr: {car: l24, cdr: {car: l6, cdr: {car: l235, cdr: {car: l98, cdr: {car: l133, cdr: {car: l5, cdr: {car: l95, cdr: {car: l281, cdr: {car: l23, cdr: l3}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}};
+l120.function(l288);
 (l114).value = (function(){
     var symbol = l110;
     var value = symbol.value;
@@ -11014,53 +11020,57 @@ l120.function(l286);
     return func;
 })());
 (lisp.compile = (function(){
-    var symbol = l282;
+    var symbol = l284;
     var func = symbol.function;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
 })());
-(lisp.evalString = (function (v753){
+(lisp.evalString = (function (v754){
     if (arguments.length < 1) throw 'too few arguments';
     if (arguments.length > 1) throw 'too many arguments';
-    return l216.function(l153.function(v753));
+    return l216.function(l153.function(v754));
 
 }));
-(lisp.compileString = (function (v754){
+(lisp.compileString = (function (v755){
     if (arguments.length < 1) throw 'too few arguments';
     if (arguments.length > 1) throw 'too many arguments';
-    return l282.function(l153.function(v754));
+    return l284.function(l153.function(v755));
 
 }));
-var l287 = {car: {car: l285, cdr: "l285"}, cdr: {car: {car: l284, cdr: "l284"}, cdr: {car: {car: l283, cdr: "l283"}, cdr: {car: {car: l282, cdr: "l282"}, cdr: {car: {car: l281, cdr: "l281"}, cdr: {car: {car: l280, cdr: "l280"}, cdr: {car: {car: l279, cdr: "l279"}, cdr: {car: {car: l278, cdr: "l278"}, cdr: {car: {car: l277, cdr: "l277"}, cdr: {car: {car: l276, cdr: "l276"}, cdr: {car: {car: l275, cdr: "l275"}, cdr: {car: {car: l274, cdr: "l274"}, cdr: {car: {car: l273, cdr: "l273"}, cdr: {car: {car: l272, cdr: "l272"}, cdr: {car: {car: l271, cdr: "l271"}, cdr: {car: {car: l270, cdr: "l270"}, cdr: {car: {car: l269, cdr: "l269"}, cdr: {car: {car: l268, cdr: "l268"}, cdr: {car: {car: l267, cdr: "l267"}, cdr: {car: {car: l266, cdr: "l266"}, cdr: {car: {car: l265, cdr: "l265"}, cdr: {car: {car: l264, cdr: "l264"}, cdr: {car: {car: l263, cdr: "l263"}, cdr: {car: {car: l262, cdr: "l262"}, cdr: {car: {car: l261, cdr: "l261"}, cdr: {car: {car: l260, cdr: "l260"}, cdr: {car: {car: l259, cdr: "l259"}, cdr: {car: {car: l258, cdr: "l258"}, cdr: {car: {car: l257, cdr: "l257"}, cdr: {car: {car: l256, cdr: "l256"}, cdr: {car: {car: l255, cdr: "l255"}, cdr: {car: {car: l254, cdr: "l254"}, cdr: {car: {car: l253, cdr: "l253"}, cdr: {car: {car: l252, cdr: "l252"}, cdr: {car: {car: l251, cdr: "l251"}, cdr: {car: {car: l250, cdr: "l250"}, cdr: {car: {car: l249, cdr: "l249"}, cdr: {car: {car: l248, cdr: "l248"}, cdr: {car: {car: l247, cdr: "l247"}, cdr: {car: {car: l246, cdr: "l246"}, cdr: {car: {car: l245, cdr: "l245"}, cdr: {car: {car: l244, cdr: "l244"}, cdr: {car: {car: l243, cdr: "l243"}, cdr: {car: {car: l242, cdr: "l242"}, cdr: {car: {car: l241, cdr: "l241"}, cdr: {car: {car: l240, cdr: "l240"}, cdr: {car: {car: l239, cdr: "l239"}, cdr: {car: {car: l238, cdr: "l238"}, cdr: {car: {car: l237, cdr: "l237"}, cdr: {car: {car: l236, cdr: "l236"}, cdr: {car: {car: l235, cdr: "l235"}, cdr: {car: {car: l234, cdr: "l234"}, cdr: {car: {car: l233, cdr: "l233"}, cdr: {car: {car: l232, cdr: "l232"}, cdr: {car: {car: l231, cdr: "l231"}, cdr: {car: {car: l230, cdr: "l230"}, cdr: {car: {car: l229, cdr: "l229"}, cdr: {car: {car: l228, cdr: "l228"}, cdr: {car: {car: l227, cdr: "l227"}, cdr: {car: {car: l226, cdr: "l226"}, cdr: {car: {car: l225, cdr: "l225"}, cdr: {car: {car: l224, cdr: "l224"}, cdr: {car: {car: l223, cdr: "l223"}, cdr: {car: {car: l222, cdr: "l222"}, cdr: {car: {car: l221, cdr: "l221"}, cdr: {car: {car: l220, cdr: "l220"}, cdr: {car: {car: l219, cdr: "l219"}, cdr: {car: {car: l218, cdr: "l218"}, cdr: {car: {car: l217, cdr: "l217"}, cdr: {car: {car: l216, cdr: "l216"}, cdr: {car: {car: l215, cdr: "l215"}, cdr: {car: {car: l214, cdr: "l214"}, cdr: {car: {car: l213, cdr: "l213"}, cdr: {car: {car: l212, cdr: "l212"}, cdr: {car: {car: l211, cdr: "l211"}, cdr: {car: {car: l210, cdr: "l210"}, cdr: {car: {car: l209, cdr: "l209"}, cdr: {car: {car: l208, cdr: "l208"}, cdr: {car: {car: l207, cdr: "l207"}, cdr: {car: {car: l206, cdr: "l206"}, cdr: {car: {car: l205, cdr: "l205"}, cdr: {car: {car: l204, cdr: "l204"}, cdr: {car: {car: l203, cdr: "l203"}, cdr: {car: {car: l202, cdr: "l202"}, cdr: {car: {car: l201, cdr: "l201"}, cdr: {car: {car: l200, cdr: "l200"}, cdr: {car: {car: l199, cdr: "l199"}, cdr: {car: {car: l198, cdr: "l198"}, cdr: {car: {car: l197, cdr: "l197"}, cdr: {car: {car: l195, cdr: "l195"}, cdr: {car: {car: l194, cdr: "l194"}, cdr: {car: {car: l193, cdr: "l193"}, cdr: {car: {car: l192, cdr: "l192"}, cdr: {car: {car: l191, cdr: "l191"}, cdr: {car: {car: l190, cdr: "l190"}, cdr: {car: {car: l189, cdr: "l189"}, cdr: {car: {car: l188, cdr: "l188"}, cdr: {car: {car: l187, cdr: "l187"}, cdr: {car: {car: l186, cdr: "l186"}, cdr: {car: {car: l185, cdr: "l185"}, cdr: {car: {car: l184, cdr: "l184"}, cdr: {car: {car: l183, cdr: "l183"}, cdr: {car: {car: l182, cdr: "l182"}, cdr: {car: {car: l181, cdr: "l181"}, cdr: {car: {car: l180, cdr: "l180"}, cdr: {car: {car: l179, cdr: "l179"}, cdr: {car: {car: l178, cdr: "l178"}, cdr: {car: {car: l177, cdr: "l177"}, cdr: {car: {car: l176, cdr: "l176"}, cdr: {car: {car: l175, cdr: "l175"}, cdr: {car: {car: l174, cdr: "l174"}, cdr: {car: {car: l173, cdr: "l173"}, cdr: {car: {car: l172, cdr: "l172"}, cdr: {car: {car: l171, cdr: "l171"}, cdr: {car: {car: l170, cdr: "l170"}, cdr: {car: {car: l169, cdr: "l169"}, cdr: {car: {car: l168, cdr: "l168"}, cdr: {car: {car: l167, cdr: "l167"}, cdr: {car: {car: l166, cdr: "l166"}, cdr: {car: {car: l165, cdr: "l165"}, cdr: {car: {car: l164, cdr: "l164"}, cdr: {car: {car: l163, cdr: "l163"}, cdr: {car: {car: l162, cdr: "l162"}, cdr: {car: {car: l161, cdr: "l161"}, cdr: {car: {car: l160, cdr: "l160"}, cdr: {car: {car: l159, cdr: "l159"}, cdr: {car: {car: l158, cdr: "l158"}, cdr: {car: {car: l157, cdr: "l157"}, cdr: {car: {car: l156, cdr: "l156"}, cdr: {car: {car: l155, cdr: "l155"}, cdr: {car: {car: l154, cdr: "l154"}, cdr: {car: {car: l153, cdr: "l153"}, cdr: {car: {car: l152, cdr: "l152"}, cdr: {car: {car: l151, cdr: "l151"}, cdr: {car: {car: l150, cdr: "l150"}, cdr: {car: {car: l149, cdr: "l149"}, cdr: {car: {car: l148, cdr: "l148"}, cdr: {car: {car: l147, cdr: "l147"}, cdr: {car: {car: l146, cdr: "l146"}, cdr: {car: {car: l145, cdr: "l145"}, cdr: {car: {car: l144, cdr: "l144"}, cdr: {car: {car: l143, cdr: "l143"}, cdr: {car: {car: l142, cdr: "l142"}, cdr: {car: {car: l141, cdr: "l141"}, cdr: {car: {car: l140, cdr: "l140"}, cdr: {car: {car: l139, cdr: "l139"}, cdr: {car: {car: l138, cdr: "l138"}, cdr: {car: {car: l137, cdr: "l137"}, cdr: {car: {car: l136, cdr: "l136"}, cdr: {car: {car: l135, cdr: "l135"}, cdr: {car: {car: l134, cdr: "l134"}, cdr: {car: {car: l133, cdr: "l133"}, cdr: {car: {car: l132, cdr: "l132"}, cdr: {car: {car: l131, cdr: "l131"}, cdr: {car: {car: l130, cdr: "l130"}, cdr: {car: {car: l129, cdr: "l129"}, cdr: {car: {car: l128, cdr: "l128"}, cdr: {car: {car: l127, cdr: "l127"}, cdr: {car: {car: l126, cdr: "l126"}, cdr: {car: {car: l125, cdr: "l125"}, cdr: {car: {car: l124, cdr: "l124"}, cdr: {car: {car: l123, cdr: "l123"}, cdr: {car: {car: l122, cdr: "l122"}, cdr: {car: {car: l121, cdr: "l121"}, cdr: {car: {car: l120, cdr: "l120"}, cdr: {car: {car: l119, cdr: "l119"}, cdr: {car: {car: l118, cdr: "l118"}, cdr: {car: {car: l117, cdr: "l117"}, cdr: {car: {car: l116, cdr: "l116"}, cdr: {car: {car: l115, cdr: "l115"}, cdr: {car: {car: l114, cdr: "l114"}, cdr: {car: {car: l113, cdr: "l113"}, cdr: {car: {car: l112, cdr: "l112"}, cdr: {car: {car: l111, cdr: "l111"}, cdr: {car: {car: l110, cdr: "l110"}, cdr: {car: {car: l109, cdr: "l109"}, cdr: {car: {car: l108, cdr: "l108"}, cdr: {car: {car: l107, cdr: "l107"}, cdr: {car: {car: l106, cdr: "l106"}, cdr: {car: {car: l105, cdr: "l105"}, cdr: {car: {car: l104, cdr: "l104"}, cdr: {car: {car: l103, cdr: "l103"}, cdr: {car: {car: l102, cdr: "l102"}, cdr: {car: {car: l101, cdr: "l101"}, cdr: {car: {car: l100, cdr: "l100"}, cdr: {car: {car: l99, cdr: "l99"}, cdr: {car: {car: l98, cdr: "l98"}, cdr: {car: {car: l97, cdr: "l97"}, cdr: {car: {car: l96, cdr: "l96"}, cdr: {car: {car: l95, cdr: "l95"}, cdr: {car: {car: l94, cdr: "l94"}, cdr: {car: {car: l93, cdr: "l93"}, cdr: {car: {car: l92, cdr: "l92"}, cdr: {car: {car: l91, cdr: "l91"}, cdr: {car: {car: l90, cdr: "l90"}, cdr: {car: {car: l89, cdr: "l89"}, cdr: {car: {car: l88, cdr: "l88"}, cdr: {car: {car: l87, cdr: "l87"}, cdr: {car: {car: l86, cdr: "l86"}, cdr: {car: {car: l85, cdr: "l85"}, cdr: {car: {car: l84, cdr: "l84"}, cdr: {car: {car: l83, cdr: "l83"}, cdr: {car: {car: l82, cdr: "l82"}, cdr: {car: {car: l81, cdr: "l81"}, cdr: {car: {car: l80, cdr: "l80"}, cdr: {car: {car: l79, cdr: "l79"}, cdr: {car: {car: l78, cdr: "l78"}, cdr: {car: {car: l77, cdr: "l77"}, cdr: {car: {car: l76, cdr: "l76"}, cdr: {car: {car: l75, cdr: "l75"}, cdr: {car: {car: l74, cdr: "l74"}, cdr: {car: {car: l73, cdr: "l73"}, cdr: {car: {car: l72, cdr: "l72"}, cdr: {car: {car: l71, cdr: "l71"}, cdr: {car: {car: l70, cdr: "l70"}, cdr: {car: {car: l69, cdr: "l69"}, cdr: {car: {car: l68, cdr: "l68"}, cdr: {car: {car: l67, cdr: "l67"}, cdr: {car: {car: l66, cdr: "l66"}, cdr: {car: {car: l65, cdr: "l65"}, cdr: {car: {car: l64, cdr: "l64"}, cdr: {car: {car: l63, cdr: "l63"}, cdr: {car: {car: l62, cdr: "l62"}, cdr: {car: {car: l61, cdr: "l61"}, cdr: {car: {car: l60, cdr: "l60"}, cdr: {car: {car: l59, cdr: "l59"}, cdr: {car: {car: l58, cdr: "l58"}, cdr: {car: {car: l57, cdr: "l57"}, cdr: {car: {car: l56, cdr: "l56"}, cdr: {car: {car: l55, cdr: "l55"}, cdr: {car: {car: l54, cdr: "l54"}, cdr: {car: {car: l53, cdr: "l53"}, cdr: {car: {car: l52, cdr: "l52"}, cdr: {car: {car: l51, cdr: "l51"}, cdr: {car: {car: l50, cdr: "l50"}, cdr: {car: {car: l49, cdr: "l49"}, cdr: {car: {car: l48, cdr: "l48"}, cdr: {car: {car: l47, cdr: "l47"}, cdr: {car: {car: l46, cdr: "l46"}, cdr: {car: {car: l45, cdr: "l45"}, cdr: {car: {car: l44, cdr: "l44"}, cdr: {car: {car: l43, cdr: "l43"}, cdr: {car: {car: l42, cdr: "l42"}, cdr: {car: {car: l41, cdr: "l41"}, cdr: {car: {car: l40, cdr: "l40"}, cdr: {car: {car: l39, cdr: "l39"}, cdr: {car: {car: l38, cdr: "l38"}, cdr: {car: {car: l37, cdr: "l37"}, cdr: {car: {car: l36, cdr: "l36"}, cdr: {car: {car: l35, cdr: "l35"}, cdr: {car: {car: l34, cdr: "l34"}, cdr: {car: {car: l33, cdr: "l33"}, cdr: {car: {car: l32, cdr: "l32"}, cdr: {car: {car: l31, cdr: "l31"}, cdr: {car: {car: l30, cdr: "l30"}, cdr: {car: {car: l29, cdr: "l29"}, cdr: {car: {car: l28, cdr: "l28"}, cdr: {car: {car: l27, cdr: "l27"}, cdr: {car: {car: l26, cdr: "l26"}, cdr: {car: {car: l25, cdr: "l25"}, cdr: {car: {car: l24, cdr: "l24"}, cdr: {car: {car: l23, cdr: "l23"}, cdr: {car: {car: l22, cdr: "l22"}, cdr: {car: {car: l21, cdr: "l21"}, cdr: {car: {car: l20, cdr: "l20"}, cdr: {car: {car: l19, cdr: "l19"}, cdr: {car: {car: l18, cdr: "l18"}, cdr: {car: {car: l17, cdr: "l17"}, cdr: {car: {car: l16, cdr: "l16"}, cdr: {car: {car: l15, cdr: "l15"}, cdr: {car: {car: l14, cdr: "l14"}, cdr: {car: {car: l13, cdr: "l13"}, cdr: {car: {car: l12, cdr: "l12"}, cdr: {car: {car: l11, cdr: "l11"}, cdr: {car: {car: l10, cdr: "l10"}, cdr: {car: {car: l9, cdr: "l9"}, cdr: {car: {car: l8, cdr: "l8"}, cdr: {car: {car: l7, cdr: "l7"}, cdr: {car: {car: l6, cdr: "l6"}, cdr: {car: {car: l5, cdr: "l5"}, cdr: {car: {car: l4, cdr: "l4"}, cdr: {car: {car: l3, cdr: "l3"}, cdr: {car: {car: l2, cdr: "l2"}, cdr: {car: {car: l1, cdr: "l1"}, cdr: l3}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}};
-var l288 = {name: "BODY"};
-var l289 = {name: "CHECK"};
-var l290 = {name: "ARGS"};
-var l291 = {name: "DECLS"};
-var l292 = {name: "DECL"};
-var l293 = {name: "NAME"};
-var l294 = {name: "ARG"};
-var l295 = {name: "FORM"};
-var l296 = {name: "PACKAGE-DESIGNATOR"};
-var l297 = {name: "FORM1"};
-var l298 = {name: "RESULT"};
-var l299 = {name: "VALUE"};
-var l300 = {name: "FORMS"};
-var l301 = {name: "G"};
-var l302 = {name: "CLAUSULES"};
-var l303 = {name: "!FORM"};
-var l304 = {name: "CLAUSULE"};
-var l305 = {name: "ITER"};
-var l306 = {name: "G!TO"};
-var l307 = {name: "VAR"};
-var l308 = {name: "TO"};
-var l309 = {name: "G!LIST"};
-var l310 = {name: "X"};
-var l311 = {name: "PLACE"};
-var l312 = {name: "DELTA"};
-var l313 = {name: "CONDITION"};
-var l314 = {name: "DOCSTRING"};
-var l315 = {car: {car: {car: l238, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l230, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l229, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l225, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l210, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l209, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l193, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l190, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l176, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l171, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l170, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l154, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l148, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l121, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l114, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l111, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l110, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l109, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l99, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l14, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l4, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: {car: l187, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l3, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: {car: l187, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}}}}}}}}}}}}}}}}}}}}, cdr: {car: {car: {car: l216, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l283, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l195, cdr: {car: l288, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: l54, cdr: {car: {car: l217, cdr: {car: {car: l205, cdr: {car: l154, cdr: {car: l3, cdr: l3}}}, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l47, cdr: {car: {car: l289, cdr: {car: l154, cdr: l3}}, cdr: {car: {car: l269, cdr: {car: l289, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l282, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l129, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l204, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l281, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l280, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l181, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l244, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l243, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l290, cdr: {car: l195, cdr: {car: l288, cdr: l3}}}, cdr: {car: {car: l6, cdr: {car: {car: l254, cdr: {car: l290, cdr: l3}}, cdr: {car: {car: l272, cdr: {car: "Bad usage of VARIABLE-ARITY, yo must pass a symbol", cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l242, cdr: {car: {car: l152, cdr: {car: l290, cdr: l3}}, cdr: {car: {car: l203, cdr: {car: {car: {car: l152, cdr: {car: l290, cdr: l3}}, cdr: l3}, cdr: {car: {car: l122, cdr: {car: "return ", cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: {car: ";", cdr: {car: l121, cdr: l3}}}}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l242, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l241, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l291, cdr: {car: l195, cdr: {car: l288, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l130, cdr: {car: {car: l151, cdr: {car: {car: l68, cdr: {car: {car: l203, cdr: {car: {car: l292, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l122, cdr: {car: "var ", cdr: {car: {car: l152, cdr: {car: {car: l38, cdr: {car: l292, cdr: l3}}, cdr: l3}}, cdr: {car: " = ", cdr: {car: {car: l152, cdr: {car: {car: l40, cdr: {car: l292, cdr: l3}}, cdr: l3}}, cdr: {car: ";", cdr: {car: l121, cdr: l3}}}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l291, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: {car: l68, cdr: {car: {car: l203, cdr: {car: {car: l292, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l122, cdr: {car: "if (typeof ", cdr: {car: {car: l152, cdr: {car: {car: l38, cdr: {car: l292, cdr: l3}}, cdr: l3}}, cdr: {car: " != '", cdr: {car: {car: l152, cdr: {car: {car: l39, cdr: {car: l292, cdr: l3}}, cdr: l3}}, cdr: {car: "')", cdr: {car: l121, cdr: {car: {car: l127, cdr: {car: "throw 'The value ' + ", cdr: {car: {car: l152, cdr: {car: {car: l38, cdr: {car: l292, cdr: l3}}, cdr: l3}}, cdr: {car: " + ' is not a type ", cdr: {car: {car: l152, cdr: {car: {car: l39, cdr: {car: l292, cdr: l3}}, cdr: l3}}, cdr: {car: ".';", cdr: {car: l121, cdr: l3}}}}}}}, cdr: l3}}}}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l291, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l122, cdr: {car: "return ", cdr: {car: {car: l217, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: l3}}, cdr: {car: ";", cdr: {car: l121, cdr: l3}}}}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l240, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l293, cdr: {car: l290, cdr: {car: l195, cdr: {car: l288, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l217, cdr: {car: {car: l239, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l290, cdr: l3}}, cdr: {car: {car: l221, cdr: {car: {car: l152, cdr: {car: {car: l68, cdr: {car: {car: l203, cdr: {car: {car: l294, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: {car: l152, cdr: {car: l294, cdr: l3}}, cdr: {car: {car: l129, cdr: {car: {car: l152, cdr: {car: l294, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l290, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: l3}}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l239, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l293, cdr: {car: l290, cdr: {car: l195, cdr: {car: l288, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l46, cdr: {car: {car: l42, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l203, cdr: {car: {car: l152, cdr: {car: l290, cdr: l3}}, cdr: {car: {car: l166, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l238, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l295, cdr: l3}, cdr: {car: {car: l236, cdr: {car: l295, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l237, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l236, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l232, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l231, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l223, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l222, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l220, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l219, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l218, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l293, cdr: {car: l290, cdr: {car: l295, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l191, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l290, cdr: l3}}, cdr: {car: {car: l129, cdr: {car: {car: l152, cdr: {car: l295, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l212, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l211, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l132, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l202, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l201, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l200, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l199, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l198, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l197, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l191, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l293, cdr: {car: l290, cdr: {car: l195, cdr: {car: l288, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l46, cdr: {car: {car: l42, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l203, cdr: {car: {car: l152, cdr: {car: l290, cdr: l3}}, cdr: {car: {car: l166, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l190, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l184, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l183, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l182, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l180, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l179, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l178, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l177, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l174, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l173, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l172, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l169, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l168, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l165, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l164, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l163, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l162, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l161, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l160, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l159, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l157, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l156, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l155, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l153, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l144, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l147, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l146, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l145, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l143, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l142, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l141, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l140, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l139, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l138, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l137, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l136, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l135, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l134, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l133, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l95, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l131, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l130, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l195, cdr: {car: l288, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: l122, cdr: {car: "(function(){", cdr: {car: l121, cdr: {car: {car: l127, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: l3}}, cdr: {car: "})()", cdr: l3}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l128, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l16, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l127, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l126, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l125, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l124, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l123, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l98, cdr: {car: l195, cdr: {car: l295, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l98, cdr: l3}}, cdr: {car: {car: l122, cdr: {car: {car: l152, cdr: {car: l98, cdr: l3}}, cdr: {car: {car: l217, cdr: {car: {car: l151, cdr: {car: l295, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l122, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l120, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l113, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l119, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l118, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l117, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l116, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l115, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l296, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l215, cdr: {car: {car: l205, cdr: {car: l114, cdr: {car: {car: l102, cdr: {car: {car: l152, cdr: {car: l296, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l112, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l108, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l107, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l106, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l105, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l102, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l104, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l103, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l101, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l100, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l96, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l94, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l93, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l92, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l91, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l90, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l89, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l88, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l87, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l86, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l85, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l84, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l83, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l82, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l81, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l80, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l79, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l78, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l77, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l57, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l76, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l75, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l74, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l73, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l72, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l71, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l70, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l69, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l68, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l67, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l66, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l65, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l64, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l63, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l62, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l61, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l60, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l59, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l58, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l56, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l55, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l297, cdr: {car: l298, cdr: {car: l195, cdr: {car: l288, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l54, cdr: {car: {car: l217, cdr: {car: {car: l152, cdr: {car: l297, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l54, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l295, cdr: {car: l195, cdr: {car: l288, cdr: l3}}}, cdr: {car: {car: l221, cdr: {car: {car: {car: l299, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l221, cdr: {car: {car: {car: {car: l152, cdr: {car: l299, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l295, cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l299, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l53, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l195, cdr: {car: l300, cdr: l3}}, cdr: {car: {car: l49, cdr: {car: {car: {car: l11, cdr: {car: l300, cdr: l3}}, cdr: {car: l3, cdr: l3}}, cdr: {car: {car: {car: l11, cdr: {car: {car: l30, cdr: {car: l300, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l29, cdr: {car: l300, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l4, cdr: {car: {car: l221, cdr: {car: {car: {car: l301, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l221, cdr: {car: {car: {car: {car: l152, cdr: {car: l301, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: {car: l29, cdr: {car: l300, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l192, cdr: {car: {car: l152, cdr: {car: l301, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l301, cdr: l3}}, cdr: {car: {car: l53, cdr: {car: {car: l151, cdr: {car: {car: l30, cdr: {car: l300, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l52, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l195, cdr: {car: l300, cdr: l3}}, cdr: {car: {car: l49, cdr: {car: {car: {car: l11, cdr: {car: l300, cdr: l3}}, cdr: {car: l4, cdr: l3}}, cdr: {car: {car: {car: l11, cdr: {car: {car: l30, cdr: {car: l300, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l29, cdr: {car: l300, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l4, cdr: {car: {car: l150, cdr: {car: {car: l192, cdr: {car: {car: l152, cdr: {car: {car: l29, cdr: {car: l300, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l52, cdr: {car: {car: l151, cdr: {car: {car: l30, cdr: {car: l300, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: l3, cdr: l3}}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l51, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l295, cdr: {car: l195, cdr: {car: l302, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l50, cdr: {car: {car: l152, cdr: {car: l295, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: {car: l62, cdr: {car: l302, cdr: {car: {car: l150, cdr: {car: {car: {car: l4, cdr: {car: {car: l272, cdr: {car: "ECASE expression failed.", cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l50, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l295, cdr: {car: l195, cdr: {car: l302, cdr: l3}}}, cdr: {car: {car: l221, cdr: {car: {car: {car: l303, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l221, cdr: {car: {car: {car: {car: l152, cdr: {car: l303, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l295, cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l49, cdr: {car: {car: l151, cdr: {car: {car: l68, cdr: {car: {car: l203, cdr: {car: {car: l304, cdr: l3}, cdr: {car: {car: l192, cdr: {car: {car: l261, cdr: {car: {car: l29, cdr: {car: l304, cdr: l3}}, cdr: {car: l4, cdr: l3}}}, cdr: {car: l304, cdr: {car: {car: l150, cdr: {car: {car: {car: l25, cdr: {car: {car: l152, cdr: {car: l303, cdr: l3}}, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: {car: l29, cdr: {car: l304, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l151, cdr: {car: {car: l30, cdr: {car: l304, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l302, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l49, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l195, cdr: {car: l302, cdr: l3}}, cdr: {car: {car: l192, cdr: {car: {car: l11, cdr: {car: l302, cdr: l3}}, cdr: {car: l3, cdr: {car: {car: l192, cdr: {car: {car: l261, cdr: {car: {car: l31, cdr: {car: l302, cdr: l3}}, cdr: {car: l4, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l217, cdr: {car: {car: l151, cdr: {car: {car: l33, cdr: {car: l302, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: l192, cdr: {car: {car: l152, cdr: {car: {car: l31, cdr: {car: l302, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l217, cdr: {car: {car: l151, cdr: {car: {car: l33, cdr: {car: l302, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l49, cdr: {car: {car: l151, cdr: {car: {car: l30, cdr: {car: l302, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l48, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l305, cdr: {car: l195, cdr: {car: l288, cdr: l3}}}, cdr: {car: {car: l221, cdr: {car: {car: {car: l306, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: {car: {car: l307, cdr: {car: {car: l38, cdr: {car: l305, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l308, cdr: {car: {car: l39, cdr: {car: l305, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l298, cdr: {car: {car: l40, cdr: {car: l305, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l166, cdr: {car: l3, cdr: {car: {car: l221, cdr: {car: {car: {car: {car: l152, cdr: {car: l307, cdr: l3}}, cdr: {car: 0, cdr: l3}}, cdr: {car: {car: {car: l152, cdr: {car: l306, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l308, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l213, cdr: {car: {car: l246, cdr: {car: {car: l152, cdr: {car: l307, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l306, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l233, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l44, cdr: {car: {car: l152, cdr: {car: l307, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l47, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l305, cdr: {car: l195, cdr: {car: l288, cdr: l3}}}, cdr: {car: {car: l221, cdr: {car: {car: {car: l307, cdr: {car: {car: l38, cdr: {car: l305, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l309, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: l166, cdr: {car: l3, cdr: {car: {car: l221, cdr: {car: {car: {car: {car: l152, cdr: {car: l309, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: {car: l39, cdr: {car: l305, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: {car: l152, cdr: {car: l307, cdr: l3}}, cdr: {car: l3, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l213, cdr: {car: {car: l152, cdr: {car: l309, cdr: l3}}, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l307, cdr: l3}}, cdr: {car: {car: l29, cdr: {car: {car: l152, cdr: {car: l309, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l233, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l309, cdr: l3}}, cdr: {car: {car: l30, cdr: {car: {car: l152, cdr: {car: l309, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}}}, cdr: {car: {car: l152, cdr: {car: {car: l40, cdr: {car: l305, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l46, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l310, cdr: {car: l311, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l311, cdr: l3}}, cdr: {car: {car: l27, cdr: {car: {car: l152, cdr: {car: l310, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l311, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l45, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l310, cdr: {car: l194, cdr: {car: {car: l312, cdr: {car: 1, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l310, cdr: l3}}, cdr: {car: {car: l60, cdr: {car: {car: l152, cdr: {car: l310, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l312, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l44, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l310, cdr: {car: l194, cdr: {car: {car: l312, cdr: {car: 1, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l310, cdr: l3}}, cdr: {car: {car: l59, cdr: {car: {car: l152, cdr: {car: l310, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l312, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l43, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l42, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l41, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l40, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l39, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l38, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l37, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l36, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l35, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l34, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l33, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l32, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l31, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l30, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l29, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l28, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l27, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l26, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l25, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l24, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l23, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l22, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l21, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l20, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l19, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l18, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l17, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l15, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l13, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l313, cdr: {car: l195, cdr: {car: l288, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l166, cdr: {car: l3, cdr: {car: {car: l213, cdr: {car: {car: l152, cdr: {car: l313, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l12, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l194, cdr: {car: l299, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: l226, cdr: {car: l3, cdr: {car: {car: l152, cdr: {car: l299, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l11, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l10, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l293, cdr: {car: l290, cdr: {car: l195, cdr: {car: l288, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l217, cdr: {car: {car: l2, cdr: {car: {car: l188, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l257, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l9, cdr: {car: {car: l152, cdr: {car: {car: l256, cdr: {car: l293, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l290, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: {car: l192, cdr: {car: {car: l52, cdr: {car: {car: l264, cdr: {car: {car: l29, cdr: {car: l288, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l26, cdr: {car: {car: l11, cdr: {car: {car: l30, cdr: {car: l288, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: {car: l152, cdr: {car: {car: l29, cdr: {car: l288, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l166, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: {car: l30, cdr: {car: l288, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: {car: l166, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: l3}}}, cdr: l3}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l9, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l293, cdr: {car: l290, cdr: {car: l195, cdr: {car: l288, cdr: l3}}}}, cdr: {car: {car: l221, cdr: {car: {car: {car: l310, cdr: {car: {car: l15, cdr: {car: "FN", cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l221, cdr: {car: {car: {car: {car: l152, cdr: {car: l310, cdr: l3}}, cdr: {car: {car: l203, cdr: {car: {car: l152, cdr: {car: l290, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l276, cdr: {car: {car: l152, cdr: {car: l310, cdr: l3}}, cdr: {car: "fname", cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l152, cdr: {car: l310, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l8, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l293, cdr: {car: l299, cdr: {car: l194, cdr: {car: l314, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l217, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l299, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l151, cdr: {car: {car: l5, cdr: {car: {car: l264, cdr: {car: l314, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: {car: l276, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: l3}}, cdr: {car: "vardoc", cdr: {car: {car: l152, cdr: {car: l314, cdr: l3}}, cdr: l3}}}}, cdr: l3}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l7, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l293, cdr: {car: l299, cdr: {car: l194, cdr: {car: l314, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l217, cdr: {car: {car: l2, cdr: {car: {car: l185, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l6, cdr: {car: {car: l17, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l299, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: {car: l151, cdr: {car: {car: l5, cdr: {car: {car: l264, cdr: {car: l314, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: {car: l276, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: l3}}, cdr: {car: "vardoc", cdr: {car: {car: l152, cdr: {car: l314, cdr: l3}}, cdr: l3}}}}, cdr: l3}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: l3}}, cdr: l3}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l6, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l313, cdr: {car: l195, cdr: {car: l288, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l192, cdr: {car: {car: l152, cdr: {car: l313, cdr: l3}}, cdr: {car: l3, cdr: {car: {car: l217, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l5, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l313, cdr: {car: l195, cdr: {car: l288, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l192, cdr: {car: {car: l152, cdr: {car: l313, cdr: l3}}, cdr: {car: {car: l217, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: l3}}, cdr: {car: l3, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l2, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l195, cdr: {car: l291, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: l215, cdr: {car: {car: l151, cdr: {car: {car: l68, cdr: {car: {car: l203, cdr: {car: {car: l292, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l184, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l292, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l291, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l1, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l293, cdr: {car: l290, cdr: {car: l195, cdr: {car: l288, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l215, cdr: {car: {car: l180, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l149, cdr: {car: {car: l203, cdr: {car: {car: l152, cdr: {car: {car: l68, cdr: {car: {car: l203, cdr: {car: {car: l310, cdr: l3}, cdr: {car: {car: l192, cdr: {car: {car: l261, cdr: {car: l310, cdr: {car: {car: l149, cdr: {car: l284, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l149, cdr: {car: l195, cdr: l3}}, cdr: {car: l310, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l290, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: l288, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: l3}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}, cdr: {car: l3, cdr: {car: l3, cdr: l3}}}};
+var l289 = {car: {car: l287, cdr: "l287"}, cdr: {car: {car: l286, cdr: "l286"}, cdr: {car: {car: l285, cdr: "l285"}, cdr: {car: {car: l284, cdr: "l284"}, cdr: {car: {car: l283, cdr: "l283"}, cdr: {car: {car: l282, cdr: "l282"}, cdr: {car: {car: l281, cdr: "l281"}, cdr: {car: {car: l280, cdr: "l280"}, cdr: {car: {car: l279, cdr: "l279"}, cdr: {car: {car: l278, cdr: "l278"}, cdr: {car: {car: l277, cdr: "l277"}, cdr: {car: {car: l276, cdr: "l276"}, cdr: {car: {car: l275, cdr: "l275"}, cdr: {car: {car: l274, cdr: "l274"}, cdr: {car: {car: l273, cdr: "l273"}, cdr: {car: {car: l272, cdr: "l272"}, cdr: {car: {car: l271, cdr: "l271"}, cdr: {car: {car: l270, cdr: "l270"}, cdr: {car: {car: l269, cdr: "l269"}, cdr: {car: {car: l268, cdr: "l268"}, cdr: {car: {car: l267, cdr: "l267"}, cdr: {car: {car: l266, cdr: "l266"}, cdr: {car: {car: l265, cdr: "l265"}, cdr: {car: {car: l264, cdr: "l264"}, cdr: {car: {car: l263, cdr: "l263"}, cdr: {car: {car: l262, cdr: "l262"}, cdr: {car: {car: l261, cdr: "l261"}, cdr: {car: {car: l260, cdr: "l260"}, cdr: {car: {car: l259, cdr: "l259"}, cdr: {car: {car: l258, cdr: "l258"}, cdr: {car: {car: l257, cdr: "l257"}, cdr: {car: {car: l256, cdr: "l256"}, cdr: {car: {car: l255, cdr: "l255"}, cdr: {car: {car: l254, cdr: "l254"}, cdr: {car: {car: l253, cdr: "l253"}, cdr: {car: {car: l252, cdr: "l252"}, cdr: {car: {car: l251, cdr: "l251"}, cdr: {car: {car: l250, cdr: "l250"}, cdr: {car: {car: l249, cdr: "l249"}, cdr: {car: {car: l248, cdr: "l248"}, cdr: {car: {car: l247, cdr: "l247"}, cdr: {car: {car: l246, cdr: "l246"}, cdr: {car: {car: l245, cdr: "l245"}, cdr: {car: {car: l244, cdr: "l244"}, cdr: {car: {car: l243, cdr: "l243"}, cdr: {car: {car: l242, cdr: "l242"}, cdr: {car: {car: l241, cdr: "l241"}, cdr: {car: {car: l240, cdr: "l240"}, cdr: {car: {car: l239, cdr: "l239"}, cdr: {car: {car: l238, cdr: "l238"}, cdr: {car: {car: l237, cdr: "l237"}, cdr: {car: {car: l236, cdr: "l236"}, cdr: {car: {car: l235, cdr: "l235"}, cdr: {car: {car: l234, cdr: "l234"}, cdr: {car: {car: l233, cdr: "l233"}, cdr: {car: {car: l232, cdr: "l232"}, cdr: {car: {car: l231, cdr: "l231"}, cdr: {car: {car: l230, cdr: "l230"}, cdr: {car: {car: l229, cdr: "l229"}, cdr: {car: {car: l228, cdr: "l228"}, cdr: {car: {car: l227, cdr: "l227"}, cdr: {car: {car: l226, cdr: "l226"}, cdr: {car: {car: l225, cdr: "l225"}, cdr: {car: {car: l224, cdr: "l224"}, cdr: {car: {car: l223, cdr: "l223"}, cdr: {car: {car: l222, cdr: "l222"}, cdr: {car: {car: l221, cdr: "l221"}, cdr: {car: {car: l220, cdr: "l220"}, cdr: {car: {car: l219, cdr: "l219"}, cdr: {car: {car: l218, cdr: "l218"}, cdr: {car: {car: l217, cdr: "l217"}, cdr: {car: {car: l216, cdr: "l216"}, cdr: {car: {car: l215, cdr: "l215"}, cdr: {car: {car: l214, cdr: "l214"}, cdr: {car: {car: l213, cdr: "l213"}, cdr: {car: {car: l212, cdr: "l212"}, cdr: {car: {car: l211, cdr: "l211"}, cdr: {car: {car: l210, cdr: "l210"}, cdr: {car: {car: l209, cdr: "l209"}, cdr: {car: {car: l208, cdr: "l208"}, cdr: {car: {car: l207, cdr: "l207"}, cdr: {car: {car: l206, cdr: "l206"}, cdr: {car: {car: l205, cdr: "l205"}, cdr: {car: {car: l204, cdr: "l204"}, cdr: {car: {car: l203, cdr: "l203"}, cdr: {car: {car: l202, cdr: "l202"}, cdr: {car: {car: l201, cdr: "l201"}, cdr: {car: {car: l200, cdr: "l200"}, cdr: {car: {car: l199, cdr: "l199"}, cdr: {car: {car: l198, cdr: "l198"}, cdr: {car: {car: l197, cdr: "l197"}, cdr: {car: {car: l195, cdr: "l195"}, cdr: {car: {car: l194, cdr: "l194"}, cdr: {car: {car: l193, cdr: "l193"}, cdr: {car: {car: l192, cdr: "l192"}, cdr: {car: {car: l191, cdr: "l191"}, cdr: {car: {car: l190, cdr: "l190"}, cdr: {car: {car: l189, cdr: "l189"}, cdr: {car: {car: l188, cdr: "l188"}, cdr: {car: {car: l187, cdr: "l187"}, cdr: {car: {car: l186, cdr: "l186"}, cdr: {car: {car: l185, cdr: "l185"}, cdr: {car: {car: l184, cdr: "l184"}, cdr: {car: {car: l183, cdr: "l183"}, cdr: {car: {car: l182, cdr: "l182"}, cdr: {car: {car: l181, cdr: "l181"}, cdr: {car: {car: l180, cdr: "l180"}, cdr: {car: {car: l179, cdr: "l179"}, cdr: {car: {car: l178, cdr: "l178"}, cdr: {car: {car: l177, cdr: "l177"}, cdr: {car: {car: l176, cdr: "l176"}, cdr: {car: {car: l175, cdr: "l175"}, cdr: {car: {car: l174, cdr: "l174"}, cdr: {car: {car: l173, cdr: "l173"}, cdr: {car: {car: l172, cdr: "l172"}, cdr: {car: {car: l171, cdr: "l171"}, cdr: {car: {car: l170, cdr: "l170"}, cdr: {car: {car: l169, cdr: "l169"}, cdr: {car: {car: l168, cdr: "l168"}, cdr: {car: {car: l167, cdr: "l167"}, cdr: {car: {car: l166, cdr: "l166"}, cdr: {car: {car: l165, cdr: "l165"}, cdr: {car: {car: l164, cdr: "l164"}, cdr: {car: {car: l163, cdr: "l163"}, cdr: {car: {car: l162, cdr: "l162"}, cdr: {car: {car: l161, cdr: "l161"}, cdr: {car: {car: l160, cdr: "l160"}, cdr: {car: {car: l159, cdr: "l159"}, cdr: {car: {car: l158, cdr: "l158"}, cdr: {car: {car: l157, cdr: "l157"}, cdr: {car: {car: l156, cdr: "l156"}, cdr: {car: {car: l155, cdr: "l155"}, cdr: {car: {car: l154, cdr: "l154"}, cdr: {car: {car: l153, cdr: "l153"}, cdr: {car: {car: l152, cdr: "l152"}, cdr: {car: {car: l151, cdr: "l151"}, cdr: {car: {car: l150, cdr: "l150"}, cdr: {car: {car: l149, cdr: "l149"}, cdr: {car: {car: l148, cdr: "l148"}, cdr: {car: {car: l147, cdr: "l147"}, cdr: {car: {car: l146, cdr: "l146"}, cdr: {car: {car: l145, cdr: "l145"}, cdr: {car: {car: l144, cdr: "l144"}, cdr: {car: {car: l143, cdr: "l143"}, cdr: {car: {car: l142, cdr: "l142"}, cdr: {car: {car: l141, cdr: "l141"}, cdr: {car: {car: l140, cdr: "l140"}, cdr: {car: {car: l139, cdr: "l139"}, cdr: {car: {car: l138, cdr: "l138"}, cdr: {car: {car: l137, cdr: "l137"}, cdr: {car: {car: l136, cdr: "l136"}, cdr: {car: {car: l135, cdr: "l135"}, cdr: {car: {car: l134, cdr: "l134"}, cdr: {car: {car: l133, cdr: "l133"}, cdr: {car: {car: l132, cdr: "l132"}, cdr: {car: {car: l131, cdr: "l131"}, cdr: {car: {car: l130, cdr: "l130"}, cdr: {car: {car: l129, cdr: "l129"}, cdr: {car: {car: l128, cdr: "l128"}, cdr: {car: {car: l127, cdr: "l127"}, cdr: {car: {car: l126, cdr: "l126"}, cdr: {car: {car: l125, cdr: "l125"}, cdr: {car: {car: l124, cdr: "l124"}, cdr: {car: {car: l123, cdr: "l123"}, cdr: {car: {car: l122, cdr: "l122"}, cdr: {car: {car: l121, cdr: "l121"}, cdr: {car: {car: l120, cdr: "l120"}, cdr: {car: {car: l119, cdr: "l119"}, cdr: {car: {car: l118, cdr: "l118"}, cdr: {car: {car: l117, cdr: "l117"}, cdr: {car: {car: l116, cdr: "l116"}, cdr: {car: {car: l115, cdr: "l115"}, cdr: {car: {car: l114, cdr: "l114"}, cdr: {car: {car: l113, cdr: "l113"}, cdr: {car: {car: l112, cdr: "l112"}, cdr: {car: {car: l111, cdr: "l111"}, cdr: {car: {car: l110, cdr: "l110"}, cdr: {car: {car: l109, cdr: "l109"}, cdr: {car: {car: l108, cdr: "l108"}, cdr: {car: {car: l107, cdr: "l107"}, cdr: {car: {car: l106, cdr: "l106"}, cdr: {car: {car: l105, cdr: "l105"}, cdr: {car: {car: l104, cdr: "l104"}, cdr: {car: {car: l103, cdr: "l103"}, cdr: {car: {car: l102, cdr: "l102"}, cdr: {car: {car: l101, cdr: "l101"}, cdr: {car: {car: l100, cdr: "l100"}, cdr: {car: {car: l99, cdr: "l99"}, cdr: {car: {car: l98, cdr: "l98"}, cdr: {car: {car: l97, cdr: "l97"}, cdr: {car: {car: l96, cdr: "l96"}, cdr: {car: {car: l95, cdr: "l95"}, cdr: {car: {car: l94, cdr: "l94"}, cdr: {car: {car: l93, cdr: "l93"}, cdr: {car: {car: l92, cdr: "l92"}, cdr: {car: {car: l91, cdr: "l91"}, cdr: {car: {car: l90, cdr: "l90"}, cdr: {car: {car: l89, cdr: "l89"}, cdr: {car: {car: l88, cdr: "l88"}, cdr: {car: {car: l87, cdr: "l87"}, cdr: {car: {car: l86, cdr: "l86"}, cdr: {car: {car: l85, cdr: "l85"}, cdr: {car: {car: l84, cdr: "l84"}, cdr: {car: {car: l83, cdr: "l83"}, cdr: {car: {car: l82, cdr: "l82"}, cdr: {car: {car: l81, cdr: "l81"}, cdr: {car: {car: l80, cdr: "l80"}, cdr: {car: {car: l79, cdr: "l79"}, cdr: {car: {car: l78, cdr: "l78"}, cdr: {car: {car: l77, cdr: "l77"}, cdr: {car: {car: l76, cdr: "l76"}, cdr: {car: {car: l75, cdr: "l75"}, cdr: {car: {car: l74, cdr: "l74"}, cdr: {car: {car: l73, cdr: "l73"}, cdr: {car: {car: l72, cdr: "l72"}, cdr: {car: {car: l71, cdr: "l71"}, cdr: {car: {car: l70, cdr: "l70"}, cdr: {car: {car: l69, cdr: "l69"}, cdr: {car: {car: l68, cdr: "l68"}, cdr: {car: {car: l67, cdr: "l67"}, cdr: {car: {car: l66, cdr: "l66"}, cdr: {car: {car: l65, cdr: "l65"}, cdr: {car: {car: l64, cdr: "l64"}, cdr: {car: {car: l63, cdr: "l63"}, cdr: {car: {car: l62, cdr: "l62"}, cdr: {car: {car: l61, cdr: "l61"}, cdr: {car: {car: l60, cdr: "l60"}, cdr: {car: {car: l59, cdr: "l59"}, cdr: {car: {car: l58, cdr: "l58"}, cdr: {car: {car: l57, cdr: "l57"}, cdr: {car: {car: l56, cdr: "l56"}, cdr: {car: {car: l55, cdr: "l55"}, cdr: {car: {car: l54, cdr: "l54"}, cdr: {car: {car: l53, cdr: "l53"}, cdr: {car: {car: l52, cdr: "l52"}, cdr: {car: {car: l51, cdr: "l51"}, cdr: {car: {car: l50, cdr: "l50"}, cdr: {car: {car: l49, cdr: "l49"}, cdr: {car: {car: l48, cdr: "l48"}, cdr: {car: {car: l47, cdr: "l47"}, cdr: {car: {car: l46, cdr: "l46"}, cdr: {car: {car: l45, cdr: "l45"}, cdr: {car: {car: l44, cdr: "l44"}, cdr: {car: {car: l43, cdr: "l43"}, cdr: {car: {car: l42, cdr: "l42"}, cdr: {car: {car: l41, cdr: "l41"}, cdr: {car: {car: l40, cdr: "l40"}, cdr: {car: {car: l39, cdr: "l39"}, cdr: {car: {car: l38, cdr: "l38"}, cdr: {car: {car: l37, cdr: "l37"}, cdr: {car: {car: l36, cdr: "l36"}, cdr: {car: {car: l35, cdr: "l35"}, cdr: {car: {car: l34, cdr: "l34"}, cdr: {car: {car: l33, cdr: "l33"}, cdr: {car: {car: l32, cdr: "l32"}, cdr: {car: {car: l31, cdr: "l31"}, cdr: {car: {car: l30, cdr: "l30"}, cdr: {car: {car: l29, cdr: "l29"}, cdr: {car: {car: l28, cdr: "l28"}, cdr: {car: {car: l27, cdr: "l27"}, cdr: {car: {car: l26, cdr: "l26"}, cdr: {car: {car: l25, cdr: "l25"}, cdr: {car: {car: l24, cdr: "l24"}, cdr: {car: {car: l23, cdr: "l23"}, cdr: {car: {car: l22, cdr: "l22"}, cdr: {car: {car: l21, cdr: "l21"}, cdr: {car: {car: l20, cdr: "l20"}, cdr: {car: {car: l19, cdr: "l19"}, cdr: {car: {car: l18, cdr: "l18"}, cdr: {car: {car: l17, cdr: "l17"}, cdr: {car: {car: l16, cdr: "l16"}, cdr: {car: {car: l15, cdr: "l15"}, cdr: {car: {car: l14, cdr: "l14"}, cdr: {car: {car: l13, cdr: "l13"}, cdr: {car: {car: l12, cdr: "l12"}, cdr: {car: {car: l11, cdr: "l11"}, cdr: {car: {car: l10, cdr: "l10"}, cdr: {car: {car: l9, cdr: "l9"}, cdr: {car: {car: l8, cdr: "l8"}, cdr: {car: {car: l7, cdr: "l7"}, cdr: {car: {car: l6, cdr: "l6"}, cdr: {car: {car: l5, cdr: "l5"}, cdr: {car: {car: l4, cdr: "l4"}, cdr: {car: {car: l3, cdr: "l3"}, cdr: {car: {car: l2, cdr: "l2"}, cdr: {car: {car: l1, cdr: "l1"}, cdr: l3}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}};
+var l290 = {name: "BODY"};
+var l291 = {name: "CHECK"};
+var l292 = {name: "OP"};
+var l293 = {name: "SYM"};
+var l294 = {name: "X"};
+var l295 = {name: "ARGS"};
+var l296 = {name: "DECLS"};
+var l297 = {name: "DECL"};
+var l298 = {name: "NAME"};
+var l299 = {name: "ARG"};
+var l300 = {name: "FORM"};
+var l301 = {name: "PACKAGE-DESIGNATOR"};
+var l302 = {name: "FORM1"};
+var l303 = {name: "RESULT"};
+var l304 = {name: "VALUE"};
+var l305 = {name: "FORMS"};
+var l306 = {name: "G"};
+var l307 = {name: "CLAUSULES"};
+var l308 = {name: "!FORM"};
+var l309 = {name: "CLAUSULE"};
+var l310 = {name: "ITER"};
+var l311 = {name: "G!TO"};
+var l312 = {name: "VAR"};
+var l313 = {name: "TO"};
+var l314 = {name: "G!LIST"};
+var l315 = {name: "PLACE"};
+var l316 = {name: "DELTA"};
+var l317 = {name: "CONDITION"};
+var l318 = {name: "DOCSTRING"};
+var l319 = {car: {car: {car: l238, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l230, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l229, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l225, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l210, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l209, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l193, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l190, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l176, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l171, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l170, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l154, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l148, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l121, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l114, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l111, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l110, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l109, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l99, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l14, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l4, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: {car: l187, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l3, cdr: {car: l98, cdr: {car: l3, cdr: {car: {car: l185, cdr: {car: l187, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}}}}}}}}}}}}}}}}}}}}, cdr: {car: {car: {car: l216, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l285, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l195, cdr: {car: l290, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: l54, cdr: {car: {car: l217, cdr: {car: {car: l205, cdr: {car: l154, cdr: {car: l3, cdr: l3}}}, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l47, cdr: {car: {car: l291, cdr: {car: l154, cdr: l3}}, cdr: {car: {car: l271, cdr: {car: l291, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l284, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l129, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l204, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l283, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l282, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l181, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l247, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l292, cdr: {car: l293, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: l239, cdr: {car: {car: l152, cdr: {car: l292, cdr: l3}}, cdr: {car: {car: l294, cdr: {car: l195, cdr: {car: l295, cdr: l3}}}, cdr: {car: {car: l221, cdr: {car: {car: {car: l295, cdr: {car: {car: l27, cdr: {car: l294, cdr: {car: l295, cdr: l3}}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l243, cdr: {car: l295, cdr: {car: {car: l128, cdr: {car: {car: l246, cdr: {car: l295, cdr: {car: {car: l152, cdr: {car: l293, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l246, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l244, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l243, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l295, cdr: {car: l195, cdr: {car: l290, cdr: l3}}}, cdr: {car: {car: l6, cdr: {car: {car: l256, cdr: {car: l295, cdr: l3}}, cdr: {car: {car: l274, cdr: {car: "Bad usage of VARIABLE-ARITY, you must pass a symbol", cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l242, cdr: {car: {car: l152, cdr: {car: l295, cdr: l3}}, cdr: {car: {car: l203, cdr: {car: {car: {car: l152, cdr: {car: l295, cdr: l3}}, cdr: l3}, cdr: {car: {car: l122, cdr: {car: "return ", cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: {car: ";", cdr: {car: l121, cdr: l3}}}}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l242, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l241, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l296, cdr: {car: l195, cdr: {car: l290, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l130, cdr: {car: {car: l151, cdr: {car: {car: l68, cdr: {car: {car: l203, cdr: {car: {car: l297, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l122, cdr: {car: "var ", cdr: {car: {car: l152, cdr: {car: {car: l38, cdr: {car: l297, cdr: l3}}, cdr: l3}}, cdr: {car: " = ", cdr: {car: {car: l152, cdr: {car: {car: l40, cdr: {car: l297, cdr: l3}}, cdr: l3}}, cdr: {car: ";", cdr: {car: l121, cdr: l3}}}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l296, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: {car: l68, cdr: {car: {car: l203, cdr: {car: {car: l297, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l122, cdr: {car: "if (typeof ", cdr: {car: {car: l152, cdr: {car: {car: l38, cdr: {car: l297, cdr: l3}}, cdr: l3}}, cdr: {car: " != '", cdr: {car: {car: l152, cdr: {car: {car: l39, cdr: {car: l297, cdr: l3}}, cdr: l3}}, cdr: {car: "')", cdr: {car: l121, cdr: {car: {car: l127, cdr: {car: "throw 'The value ' + ", cdr: {car: {car: l152, cdr: {car: {car: l38, cdr: {car: l297, cdr: l3}}, cdr: l3}}, cdr: {car: " + ' is not a type ", cdr: {car: {car: l152, cdr: {car: {car: l39, cdr: {car: l297, cdr: l3}}, cdr: l3}}, cdr: {car: ".';", cdr: {car: l121, cdr: l3}}}}}}}, cdr: l3}}}}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l296, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l122, cdr: {car: "return ", cdr: {car: {car: l217, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: l3}}, cdr: {car: ";", cdr: {car: l121, cdr: l3}}}}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l240, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l298, cdr: {car: l295, cdr: {car: l195, cdr: {car: l290, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l217, cdr: {car: {car: l239, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l295, cdr: l3}}, cdr: {car: {car: l221, cdr: {car: {car: l152, cdr: {car: {car: l68, cdr: {car: {car: l203, cdr: {car: {car: l299, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: {car: l152, cdr: {car: l299, cdr: l3}}, cdr: {car: {car: l129, cdr: {car: {car: l152, cdr: {car: l299, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l295, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: l3}}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l239, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l298, cdr: {car: l295, cdr: {car: l195, cdr: {car: l290, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l46, cdr: {car: {car: l42, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l203, cdr: {car: {car: l152, cdr: {car: l295, cdr: l3}}, cdr: {car: {car: l166, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l238, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l300, cdr: l3}, cdr: {car: {car: l236, cdr: {car: l300, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l237, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l236, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l232, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l231, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l223, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l222, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l220, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l219, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l218, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l298, cdr: {car: l295, cdr: {car: l300, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l191, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l295, cdr: l3}}, cdr: {car: {car: l129, cdr: {car: {car: l152, cdr: {car: l300, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l212, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l211, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l132, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l202, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l201, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l200, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l199, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l198, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l197, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l191, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l298, cdr: {car: l295, cdr: {car: l195, cdr: {car: l290, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l46, cdr: {car: {car: l42, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l203, cdr: {car: {car: l152, cdr: {car: l295, cdr: l3}}, cdr: {car: {car: l166, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l190, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l184, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l183, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l182, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l180, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l179, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l178, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l177, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l174, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l173, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l172, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l169, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l168, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l165, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l164, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l163, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l162, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l161, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l160, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l159, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l157, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l156, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l155, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l153, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l144, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l147, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l146, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l145, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l143, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l142, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l141, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l140, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l139, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l138, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l137, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l136, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l135, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l134, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l133, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l95, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l131, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l130, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l195, cdr: {car: l290, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: l122, cdr: {car: "(function(){", cdr: {car: l121, cdr: {car: {car: l127, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: l3}}, cdr: {car: "})()", cdr: l3}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l128, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l16, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l127, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l126, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l125, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l124, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l123, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l98, cdr: {car: l195, cdr: {car: l300, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l98, cdr: l3}}, cdr: {car: {car: l122, cdr: {car: {car: l152, cdr: {car: l98, cdr: l3}}, cdr: {car: {car: l217, cdr: {car: {car: l151, cdr: {car: l300, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l122, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l120, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l113, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l119, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l118, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l117, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l116, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l115, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l301, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l215, cdr: {car: {car: l205, cdr: {car: l114, cdr: {car: {car: l102, cdr: {car: {car: l152, cdr: {car: l301, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l112, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l108, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l107, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l106, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l105, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l102, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l104, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l103, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l101, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l100, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l96, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l94, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l93, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l92, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l91, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l90, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l89, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l88, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l87, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l86, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l85, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l84, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l83, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l82, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l81, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l80, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l79, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l78, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l77, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l57, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l76, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l75, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l74, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l73, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l72, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l71, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l70, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l69, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l68, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l67, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l66, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l65, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l64, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l63, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l62, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l61, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l60, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l59, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l58, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l56, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l55, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l302, cdr: {car: l303, cdr: {car: l195, cdr: {car: l290, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l54, cdr: {car: {car: l217, cdr: {car: {car: l152, cdr: {car: l302, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l303, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l54, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l300, cdr: {car: l195, cdr: {car: l290, cdr: l3}}}, cdr: {car: {car: l221, cdr: {car: {car: {car: l304, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l221, cdr: {car: {car: {car: {car: l152, cdr: {car: l304, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l300, cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l304, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l53, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l195, cdr: {car: l305, cdr: l3}}, cdr: {car: {car: l49, cdr: {car: {car: {car: l11, cdr: {car: l305, cdr: l3}}, cdr: {car: l3, cdr: l3}}, cdr: {car: {car: {car: l11, cdr: {car: {car: l30, cdr: {car: l305, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l29, cdr: {car: l305, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l4, cdr: {car: {car: l221, cdr: {car: {car: {car: l306, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l221, cdr: {car: {car: {car: {car: l152, cdr: {car: l306, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: {car: l29, cdr: {car: l305, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l192, cdr: {car: {car: l152, cdr: {car: l306, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l306, cdr: l3}}, cdr: {car: {car: l53, cdr: {car: {car: l151, cdr: {car: {car: l30, cdr: {car: l305, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l52, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l195, cdr: {car: l305, cdr: l3}}, cdr: {car: {car: l49, cdr: {car: {car: {car: l11, cdr: {car: l305, cdr: l3}}, cdr: {car: l4, cdr: l3}}, cdr: {car: {car: {car: l11, cdr: {car: {car: l30, cdr: {car: l305, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l29, cdr: {car: l305, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l4, cdr: {car: {car: l150, cdr: {car: {car: l192, cdr: {car: {car: l152, cdr: {car: {car: l29, cdr: {car: l305, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l52, cdr: {car: {car: l151, cdr: {car: {car: l30, cdr: {car: l305, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: l3, cdr: l3}}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l51, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l300, cdr: {car: l195, cdr: {car: l307, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l50, cdr: {car: {car: l152, cdr: {car: l300, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: {car: l62, cdr: {car: l307, cdr: {car: {car: l150, cdr: {car: {car: {car: l4, cdr: {car: {car: l274, cdr: {car: "ECASE expression failed.", cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l50, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l300, cdr: {car: l195, cdr: {car: l307, cdr: l3}}}, cdr: {car: {car: l221, cdr: {car: {car: {car: l308, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l221, cdr: {car: {car: {car: {car: l152, cdr: {car: l308, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l300, cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l49, cdr: {car: {car: l151, cdr: {car: {car: l68, cdr: {car: {car: l203, cdr: {car: {car: l309, cdr: l3}, cdr: {car: {car: l192, cdr: {car: {car: l263, cdr: {car: {car: l29, cdr: {car: l309, cdr: l3}}, cdr: {car: l4, cdr: l3}}}, cdr: {car: l309, cdr: {car: {car: l150, cdr: {car: {car: {car: l25, cdr: {car: {car: l152, cdr: {car: l308, cdr: l3}}, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: {car: l29, cdr: {car: l309, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l151, cdr: {car: {car: l30, cdr: {car: l309, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l307, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l49, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l195, cdr: {car: l307, cdr: l3}}, cdr: {car: {car: l192, cdr: {car: {car: l11, cdr: {car: l307, cdr: l3}}, cdr: {car: l3, cdr: {car: {car: l192, cdr: {car: {car: l263, cdr: {car: {car: l31, cdr: {car: l307, cdr: l3}}, cdr: {car: l4, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l217, cdr: {car: {car: l151, cdr: {car: {car: l33, cdr: {car: l307, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: l192, cdr: {car: {car: l152, cdr: {car: {car: l31, cdr: {car: l307, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l217, cdr: {car: {car: l151, cdr: {car: {car: l33, cdr: {car: l307, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l49, cdr: {car: {car: l151, cdr: {car: {car: l30, cdr: {car: l307, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l48, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l310, cdr: {car: l195, cdr: {car: l290, cdr: l3}}}, cdr: {car: {car: l221, cdr: {car: {car: {car: l311, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: {car: {car: l312, cdr: {car: {car: l38, cdr: {car: l310, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l313, cdr: {car: {car: l39, cdr: {car: l310, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l303, cdr: {car: {car: l40, cdr: {car: l310, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l166, cdr: {car: l3, cdr: {car: {car: l221, cdr: {car: {car: {car: {car: l152, cdr: {car: l312, cdr: l3}}, cdr: {car: 0, cdr: l3}}, cdr: {car: {car: {car: l152, cdr: {car: l311, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l313, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l213, cdr: {car: {car: l249, cdr: {car: {car: l152, cdr: {car: l312, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l311, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l233, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l44, cdr: {car: {car: l152, cdr: {car: l312, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l152, cdr: {car: l303, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l47, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l310, cdr: {car: l195, cdr: {car: l290, cdr: l3}}}, cdr: {car: {car: l221, cdr: {car: {car: {car: l312, cdr: {car: {car: l38, cdr: {car: l310, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l314, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: l166, cdr: {car: l3, cdr: {car: {car: l221, cdr: {car: {car: {car: {car: l152, cdr: {car: l314, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: {car: l39, cdr: {car: l310, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: {car: l152, cdr: {car: l312, cdr: l3}}, cdr: {car: l3, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l213, cdr: {car: {car: l152, cdr: {car: l314, cdr: l3}}, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l312, cdr: l3}}, cdr: {car: {car: l29, cdr: {car: {car: l152, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l233, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l314, cdr: l3}}, cdr: {car: {car: l30, cdr: {car: {car: l152, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}}}, cdr: {car: {car: l152, cdr: {car: {car: l40, cdr: {car: l310, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l46, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l294, cdr: {car: l315, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l315, cdr: l3}}, cdr: {car: {car: l27, cdr: {car: {car: l152, cdr: {car: l294, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l315, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l45, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l294, cdr: {car: l194, cdr: {car: {car: l316, cdr: {car: 1, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l294, cdr: l3}}, cdr: {car: {car: l60, cdr: {car: {car: l152, cdr: {car: l294, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l316, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l44, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l294, cdr: {car: l194, cdr: {car: {car: l316, cdr: {car: 1, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l294, cdr: l3}}, cdr: {car: {car: l59, cdr: {car: {car: l152, cdr: {car: l294, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l316, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l43, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l42, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l41, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l40, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l39, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l38, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l37, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l36, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l35, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l34, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l33, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l32, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l31, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l30, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l29, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l28, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l27, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l26, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l25, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l24, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l23, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l22, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l21, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l20, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l19, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l18, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l17, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l15, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l13, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l317, cdr: {car: l195, cdr: {car: l290, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l166, cdr: {car: l3, cdr: {car: {car: l213, cdr: {car: {car: l152, cdr: {car: l317, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l12, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l194, cdr: {car: l304, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: l226, cdr: {car: l3, cdr: {car: {car: l152, cdr: {car: l304, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l11, cdr: {car: l97, cdr: {car: l3, cdr: {car: {car: l188, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l10, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l298, cdr: {car: l295, cdr: {car: l195, cdr: {car: l290, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l217, cdr: {car: {car: l2, cdr: {car: {car: l188, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l259, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l9, cdr: {car: {car: l152, cdr: {car: {car: l258, cdr: {car: l298, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l295, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: {car: l192, cdr: {car: {car: l52, cdr: {car: {car: l266, cdr: {car: {car: l29, cdr: {car: l290, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l26, cdr: {car: {car: l11, cdr: {car: {car: l30, cdr: {car: l290, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: {car: l152, cdr: {car: {car: l29, cdr: {car: l290, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l166, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: {car: l30, cdr: {car: l290, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: {car: l166, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: l3}}}, cdr: l3}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l9, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l298, cdr: {car: l295, cdr: {car: l195, cdr: {car: l290, cdr: l3}}}}, cdr: {car: {car: l221, cdr: {car: {car: {car: l294, cdr: {car: {car: l15, cdr: {car: "FN", cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l221, cdr: {car: {car: {car: {car: l152, cdr: {car: l294, cdr: l3}}, cdr: {car: {car: l203, cdr: {car: {car: l152, cdr: {car: l295, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l278, cdr: {car: {car: l152, cdr: {car: l294, cdr: l3}}, cdr: {car: "fname", cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l152, cdr: {car: l294, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l8, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l298, cdr: {car: l304, cdr: {car: l194, cdr: {car: l318, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l217, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l304, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l151, cdr: {car: {car: l5, cdr: {car: {car: l266, cdr: {car: l318, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: {car: l278, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: l3}}, cdr: {car: "vardoc", cdr: {car: {car: l152, cdr: {car: l318, cdr: l3}}, cdr: l3}}}}, cdr: l3}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l7, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l298, cdr: {car: l304, cdr: {car: l194, cdr: {car: l318, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l217, cdr: {car: {car: l2, cdr: {car: {car: l185, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l6, cdr: {car: {car: l17, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l205, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: {car: {car: l152, cdr: {car: l304, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: {car: l151, cdr: {car: {car: l5, cdr: {car: {car: l266, cdr: {car: l318, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: {car: l278, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: l3}}, cdr: {car: "vardoc", cdr: {car: {car: l152, cdr: {car: l318, cdr: l3}}, cdr: l3}}}}, cdr: l3}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: l3}}, cdr: l3}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l6, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l317, cdr: {car: l195, cdr: {car: l290, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l192, cdr: {car: {car: l152, cdr: {car: l317, cdr: l3}}, cdr: {car: l3, cdr: {car: {car: l217, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l5, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l317, cdr: {car: l195, cdr: {car: l290, cdr: l3}}}, cdr: {car: {car: l150, cdr: {car: {car: l192, cdr: {car: {car: l152, cdr: {car: l317, cdr: l3}}, cdr: {car: {car: l217, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: l3}}, cdr: {car: l3, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l2, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l195, cdr: {car: l296, cdr: l3}}, cdr: {car: {car: l150, cdr: {car: {car: l215, cdr: {car: {car: l151, cdr: {car: {car: l68, cdr: {car: {car: l203, cdr: {car: {car: l297, cdr: l3}, cdr: {car: {car: l150, cdr: {car: {car: l184, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l297, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l296, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l1, cdr: {car: l181, cdr: {car: {car: l203, cdr: {car: {car: l298, cdr: {car: l295, cdr: {car: l195, cdr: {car: l290, cdr: l3}}}}, cdr: {car: {car: l150, cdr: {car: {car: l215, cdr: {car: {car: l180, cdr: {car: {car: l149, cdr: {car: {car: l152, cdr: {car: l298, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l149, cdr: {car: {car: l203, cdr: {car: {car: l152, cdr: {car: {car: l68, cdr: {car: {car: l203, cdr: {car: {car: l294, cdr: l3}, cdr: {car: {car: l192, cdr: {car: {car: l263, cdr: {car: l294, cdr: {car: {car: l149, cdr: {car: l286, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l149, cdr: {car: l195, cdr: l3}}, cdr: {car: l294, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l295, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l151, cdr: {car: l290, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: l3}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}, cdr: {car: l3, cdr: {car: l3, cdr: l3}}}};
 (function(){
+    l116.function(l287);
+    l116.function(l286);
     l116.function(l285);
     l116.function(l284);
     l116.function(l283);
@@ -11345,10 +11355,10 @@ var l315 = {car: {car: {car: l238, cdr: {car: l98, cdr: {car: l3, cdr: {car: {ca
     l116.function(l3);
     l116.function(l2);
     l116.function(l1);
-    (l209).value = l287;
-    (l170).value = l315;
-    (l171).value = 754;
-    (l14).value = 199;
-    return (l225).value = 261;
+    (l209).value = l289;
+    (l170).value = l319;
+    (l171).value = 755;
+    (l14).value = 200;
+    return (l225).value = 262;
 })();
-(l210).value = 315;
+(l210).value = 319;
