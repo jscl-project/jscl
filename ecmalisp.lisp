@@ -2020,7 +2020,7 @@
 	    make-array make-package make-symbol mapcar member minusp
 	    mod nil not nth nthcdr null numberp or package-name
 	    package-use-list packagep plusp prin1-to-string print
-	    proclaim prog1 prog2 pron push quote remove remove-if
+	    proclaim prog1 prog2 progn psetq push quote remove remove-if
 	    remove-if-not return return-from revappend reverse second
 	    set setq some string-upcase string string= stringp subseq
 	    symbol-function symbol-name symbol-package symbol-plist
