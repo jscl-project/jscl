@@ -1558,28 +1558,30 @@
 
 (defmacro variable-arity (args &body body)
   (unless (symbolp args)
-    (error "Bad usage of VARIABLE-ARITY, yo must pass a symbol"))
+    (error "Bad usage of VARIABLE-ARITY, you must pass a symbol"))
   `(variable-arity-call ,args
                         (lambda (,args)
                           (concat "return " ,@body ";" *newline*))))
 
 
-(define-raw-builtin + (&rest numbers)
+(define-raw-builtin plus (&rest numbers)
   (variable-arity numbers
     (join numbers "+")))
 
-(define-raw-builtin - (x &rest others)
+(define-raw-builtin minus (x &rest others)
   (let ((args (cons x others)))
-    (variable-arity args
-      (if (null others)
-	  (concat "-" (car args))
-	  (join args "+")))))
-
+	      (variable-arity args
+		(if (null others)
+		    (concat "-" (car args))
+		    (join args "+")))))
+  
 
 (defun num-op-num (x op y)
   (type-check (("x" "number" x) ("y" "number" y))
     (concat "x" op "y")))
 
+(define-builtin + (x y) (num-op-num x "+" y))
+(define-builtin - (x y) (num-op-num x "-" y))
 (define-builtin * (x y) (num-op-num x "*" y))
 (define-builtin / (x y) (num-op-num x "/" y))
 
@@ -1901,7 +1903,7 @@ set setq some string-upcase string string= stringp subseq
 symbol-function symbol-name symbol-package symbol-plist symbol-value
 symbolp t tagbody third throw truncate unless unwind-protect variable
 warn when write-line write-string zerop
-arithmetic
+arithmetic plus minus
 ))
 
   (setq *package* *user-package*)
