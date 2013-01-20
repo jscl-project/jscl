@@ -1568,11 +1568,10 @@
 
 (defmacro variable-arity (args &body body)
   (unless (symbolp args)
-    (error "Bad usage of VARIABLE-ARITY, yo must pass a symbol"))
+    (error "Bad usage of VARIABLE-ARITY, you must pass a symbol"))
   `(variable-arity-call ,args
                         (lambda (,args)
                           (concat "return " ,@body ";" *newline*))))
-
 
 (defun num-op-num (x op y)
   (type-check (("x" "number" x) ("y" "number" y))
@@ -1591,17 +1590,37 @@
 	  (concat "-" (car args))
 	  (join args "-")))))
 
+(define-raw-builtin * (&rest numbers)
+  (if (null numbers)
+      "1"
+      (variable-arity numbers
+	(join numbers "*"))))
 
-(define-builtin * (x y) (num-op-num x "*" y))
-(define-builtin / (x y) (num-op-num x "/" y))
+(define-raw-builtin / (x &rest others)
+  (let ((args (cons x others)))
+    (variable-arity args
+      (if (null others)
+	  (concat "/" (car args))
+	  (join args "/")))))
 
 (define-builtin mod (x y) (num-op-num x "%" y))
 
-(define-builtin < (x y)  (js!bool (num-op-num x "<" y)))
-(define-builtin > (x y)  (js!bool (num-op-num x ">" y)))
-(define-builtin = (x y)  (js!bool (num-op-num x "==" y)))
-(define-builtin <= (x y) (js!bool (num-op-num x "<=" y)))
-(define-builtin >= (x y) (js!bool (num-op-num x ">=" y)))
+(defmacro define-builtin-comparison (op sym)
+  `(define-raw-builtin ,op (&rest args)
+     (js!bool
+      (let ((x (car args))
+	    (res "true"))
+	(dolist (y (cdr args))
+	  (setq res (concat "("
+		     (ls-compile x) " " ,sym " " (ls-compile y) ")" " && " res))
+	  (setq x y))
+	res))))
+
+(define-builtin-comparison > ">")
+(define-builtin-comparison < "<")
+(define-builtin-comparison >= ">=")
+(define-builtin-comparison <= "<=")
+(define-builtin-comparison = "==")
 
 (define-builtin numberp (x)
   (js!bool (concat "(typeof (" x ") == \"number\")")))
@@ -1682,7 +1701,6 @@
 
 (define-builtin lambda-code (x)
   (concat "(" x ").toString()"))
-
 
 (define-builtin eq    (x y) (js!bool (concat "(" x " === " y ")")))
 (define-builtin equal (x y) (js!bool (concat "(" x  " == " y ")")))
