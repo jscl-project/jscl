@@ -599,7 +599,10 @@
   (defun setcar (cons new)
     (setf (car cons) new))
   (defun setcdr (cons new)
-    (setf (cdr cons) new)))
+    (setf (cdr cons) new))
+
+  (defun aset (array idx value)
+    (setf (aref array idx) value)))
 
 ;;; At this point, no matter if Common Lisp or ecmalisp is compiling
 ;;; from here, this code will compile on both. We define some helper
@@ -639,6 +642,13 @@
 	(size (length vector)))
     (dotimes (i size (reverse list))
       (push (aref vector i) list))))
+
+(defun list-to-vector (list)
+  (let ((v (make-array (length list)))
+	(i 0))
+    (dolist (x list v)
+      (aset v i x)
+      (incf i))))
 
 ;;; Like CONCAT, but prefix each line with four spaces. Two versions
 ;;; of this function are available, because the Ecmalisp version is
@@ -1220,7 +1230,15 @@
 	   c
 	   (let ((v (genlit)))
 	     (toplevel-compilation (concat "var " v " = " c))
-	     v))))))
+	     v))))
+    ((arrayp sexp)
+     (let ((elements (vector-to-list sexp)))
+       (let ((c (concat "[" (join (mapcar #'literal elements) ", ") "]")))
+	 (if recursive
+	     c
+	     (let ((v (genlit)))
+	       (toplevel-compilation (concat "var " v " = " c))
+	       v)))))))
 
 (define-compilation quote (sexp)
   (literal sexp))
@@ -1865,6 +1883,7 @@
           (ls-compile `(symbol-value ',sexp))))))
     ((integerp sexp) (integer-to-string sexp))
     ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
+    ((arrayp sexp) (literal sexp))
     ((listp sexp)
      (let ((name (car sexp))
            (args (cdr sexp)))
@@ -1881,7 +1900,9 @@
          (t
           (if (macro name)
               (ls-compile (ls-macroexpand-1 sexp))
-              (compile-funcall name args))))))))
+              (compile-funcall name args))))))
+    (t
+     (error "How should I compile this?"))))
 
 (defun ls-compile-toplevel (sexp)
   (let ((*toplevel-compilations* nil))
