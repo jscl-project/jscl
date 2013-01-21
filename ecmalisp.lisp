@@ -292,7 +292,7 @@
 	     (push `(,variable ,(gensym) ,value)  assignments)
 	     (setq pairs (cddr pairs))))))
       (setq assignments (reverse assignments))
-      ;; 
+      ;;
       `(let ,(mapcar #'cdr assignments)
 	 (setq ,@(!reduce #'append (mapcar #'butlast assignments) '())))))
 
@@ -595,7 +595,10 @@
   (defun export (symbols &optional (package *package*))
     (let ((exports (%package-external-symbols package)))
       (dolist (symb symbols t)
-        (oset exports (symbol-name symb) symb)))))
+        (oset exports (symbol-name symb) symb))))
+
+  (defun get-universal-time ()
+    (+ (get-unix-time) 2208988800)))
 
 
 ;;; The compiler offers some primitives and special forms which are
@@ -1891,6 +1894,9 @@
     "if (i < 0 || i >= x.length) throw 'Out of range';" *newline*
     "return x[i] = " value ";" *newline*))
 
+(define-builtin get-unix-time ()
+  (concat "(Math.round(new Date() / 1000))"))
+
 
 (defun macro (x)
   (and (symbolp x)
@@ -2006,27 +2012,24 @@
                (ls-compile-toplevel x))))
       (js-eval code)))
 
-  (export '(&rest &optional &body * *gensym-counter* *package* + - /
-	    1+ 1- < <= = = > >= and append apply aref arrayp aset
-	    assoc atom block boundp boundp butlast caar cadddr caddr
-	    cadr car car case catch cdar cdddr cddr cdr cdr char
-	    char-code char= code-char cond cons consp copy-list decf
-	    declaim defparameter defun defvar digit-char-p disassemble
-	    documentation dolist dotimes ecase eq eql equal error eval
-	    every export fdefinition find-package find-symbol first
-	    fourth fset funcall function functionp gensym go identity
-	    if in-package incf integerp integerp intern keywordp
-	    lambda last length let let* list-all-packages list listp
-	    make-array make-package make-symbol mapcar member minusp
-	    mod nil not nth nthcdr null numberp or package-name
-	    package-use-list packagep plusp prin1-to-string print
-	    proclaim prog1 prog2 progn psetq push quote remove remove-if
-	    remove-if-not return return-from revappend reverse second
-	    set setq some string-upcase string string= stringp subseq
-	    symbol-function symbol-name symbol-package symbol-plist
-	    symbol-value symbolp t tagbody third throw truncate unless
-	    unwind-protect variable warn when write-line write-string
-	    zerop))
+  (export '(&rest &optional &body * *gensym-counter* *package* + - / 1+ 1- < <= =
+            = > >= and append apply aref arrayp aset assoc atom block boundp
+            boundp butlast caar cadddr caddr cadr car car case catch cdar cdddr
+            cddr cdr cdr char char-code char= code-char cond cons consp copy-list
+            decf declaim defparameter defun defvar digit-char-p disassemble
+            documentation dolist dotimes ecase eq eql equal error eval every
+            export fdefinition find-package find-symbol first fourth fset funcall
+            function functionp gensym get-universal-time go identity if in-package
+            incf integerp integerp intern keywordp lambda last length let let*
+            list-all-packages list listp make-array make-package make-symbol
+            mapcar member minusp mod nil not nth nthcdr null numberp or
+            package-name package-use-list packagep plusp prin1-to-string print
+            proclaim prog1 prog2 progn psetq push quote remove remove-if
+            remove-if-not return return-from revappend reverse second set setq
+            some string-upcase string string= stringp subseq symbol-function
+            symbol-name symbol-package symbol-plist symbol-value symbolp t tagbody
+            third throw truncate unless unwind-protect variable warn when
+            write-line write-string zerop))
 
   (setq *package* *user-package*)
 
