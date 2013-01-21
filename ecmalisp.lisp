@@ -2016,7 +2016,7 @@
             = > >= and append apply aref arrayp aset assoc atom block boundp
             boundp butlast caar cadddr caddr cadr car car case catch cdar cdddr
             cddr cdr cdr char char-code char= code-char cond cons consp copy-list
-            decf declaim defparameter defun defvar digit-char-p disassemble
+            decf declaim defparameter defun defmacro defvar digit-char-p disassemble
             documentation dolist dotimes ecase eq eql equal error eval every
             export fdefinition find-package find-symbol first fourth fset funcall
             function functionp gensym get-universal-time go identity if in-package
