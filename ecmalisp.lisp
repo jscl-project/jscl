@@ -745,9 +745,10 @@
            (symbol-name form)
            (let ((package (symbol-package form))
                  (name (symbol-name form)))
-             (concat (if (eq package (find-package "KEYWORD"))
-                         ""
-                         (package-name package))
+             (concat (cond
+                       ((null package) "#")
+                       ((eq package (find-package "KEYWORD")) "")
+                       (t (package-name package)))
                      ":" name))))
       ((integerp form) (integer-to-string form))
       ((stringp form) (concat "\"" (escape-string form) "\""))
@@ -869,6 +870,7 @@
     (#\'
      (list 'function (ls-read stream)))
     (#\( (list-to-vector (%read-list stream)))
+    (#\: (make-symbol (string-upcase (read-until stream #'terminalp))))
     (#\\
      (let ((cname
             (concat (string (%read-char stream))
@@ -1255,9 +1257,11 @@
      (or (cdr (assoc sexp *literal-symbols*))
 	 (let ((v (genlit))
 	       (s #+common-lisp (concat "{name: \"" (escape-string (symbol-name sexp)) "\"}")
-		  #+ecmalisp (ls-compile
-                              `(intern ,(symbol-name sexp)
-                                       ,(package-name (symbol-package sexp))))))
+		  #+ecmalisp
+                  (let ((package (symbol-package sexp)))
+                    (if (null package)
+                        (concat "{name: \"" (escape-string (symbol-name sexp)) "\"}")
+                        (ls-compile `(intern ,(symbol-name sexp) ,(package-name package)))))))
 	   (push (cons sexp v) *literal-symbols*)
 	   (toplevel-compilation (concat "var " v " = " s))
 	   v)))
@@ -1307,7 +1311,7 @@
   (js!selfcall (ls-compile-block body t)))
 
 (defun special-variable-p (x)
-  (claimp x 'variable 'special))
+  (and (claimp x 'variable 'special) t))
 
 ;;; Wrap CODE to restore the symbol values of the dynamic
 ;;; bindings. BINDINGS is a list of pairs of the form
