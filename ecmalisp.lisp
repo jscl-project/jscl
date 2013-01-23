@@ -1756,7 +1756,7 @@
   (concat "(" symbol ").value = " value))
 
 (define-builtin fset (symbol value)
-  (concat "(" symbol ").function = " value))
+  (concat "(" symbol ").fvalue = " value))
 
 (define-builtin boundp (x)
   (js!bool (concat "(" x ".value !== undefined)")))
@@ -1771,7 +1771,7 @@
 (define-builtin symbol-function (x)
   (js!selfcall
     "var symbol = " x ";" *newline*
-    "var func = symbol.function;" *newline*
+    "var func = symbol.fvalue;" *newline*
     "if (func === undefined) throw \"Function `\" + symbol.name + \"' is undefined.\";" *newline*
     "return func;" *newline*))
 
@@ -1929,7 +1929,7 @@
 (defun compile-funcall (function args)
   (if (and (symbolp function)
            (claimp function 'function 'non-overridable))
-      (concat (ls-compile `',function) ".function("
+      (concat (ls-compile `',function) ".fvalue("
               (join (mapcar #'ls-compile args)
                     ", ")
               ")")
