@@ -1148,24 +1148,25 @@
       (lambda-docstring-wrapper
        documentation
        "(function ("
-       (join (mapcar #'translate-variable
-                     (append required-arguments optional-arguments))
+       (join (cons "values"
+                   (mapcar #'translate-variable
+                           (append required-arguments optional-arguments)))
              ",")
        "){" *newline*
        ;; Check number of arguments
        (indent
         (if required-arguments
-            (concat "if (arguments.length < " (integer-to-string n-required-arguments)
+            (concat "if (arguments.length < " (integer-to-string (1+ n-required-arguments))
                     ") throw 'too few arguments';" *newline*)
             "")
         (if (not rest-argument)
             (concat "if (arguments.length > "
-                    (integer-to-string (+ n-required-arguments n-optional-arguments))
+                    (integer-to-string (+ 1 n-required-arguments n-optional-arguments))
                     ") throw 'too many arguments';" *newline*)
             "")
         ;; Optional arguments
         (if optional-arguments
-            (concat "switch(arguments.length){" *newline*
+            (concat "switch(arguments.length-1){" *newline*
                     (let ((optional-and-defaults
                            (lambda-list-optional-arguments-with-default lambda-list))
                           (cases nil)
@@ -1190,7 +1191,7 @@
             (let ((js!rest (translate-variable rest-argument)))
               (concat "var " js!rest "= " (ls-compile nil) ";" *newline*
                       "for (var i = arguments.length-1; i>="
-                      (integer-to-string (+ n-required-arguments n-optional-arguments))
+                      (integer-to-string (+ 1 n-required-arguments n-optional-arguments))
                       "; i--)" *newline*
                       (indent js!rest " = "
                               "{car: arguments[i], cdr: ") js!rest "};"
@@ -1824,7 +1825,7 @@
 
 (define-raw-builtin funcall (func &rest args)
   (concat "(" (ls-compile func) ")("
-          (join (mapcar #'ls-compile args)
+          (join (cons "id" (mapcar #'ls-compile args))
                 ", ")
           ")"))
 
@@ -1835,7 +1836,7 @@
             (last (car (last args))))
         (js!selfcall
           "var f = " (ls-compile func) ";" *newline*
-          "var args = [" (join (mapcar #'ls-compile args)
+          "var args = [" (join (cons "id" (mapcar #'ls-compile args))
                                ", ")
           "];" *newline*
           "var tail = (" (ls-compile last) ");" *newline*
@@ -1933,11 +1934,11 @@
   (if (and (symbolp function)
            (claimp function 'function 'non-overridable))
       (concat (ls-compile `',function) ".fvalue("
-              (join (mapcar #'ls-compile args)
+              (join (cons "id" (mapcar #'ls-compile args))
                     ", ")
               ")")
       (concat (ls-compile `#',function) "("
-              (join (mapcar #'ls-compile args)
+              (join (cons "id" (mapcar #'ls-compile args))
                     ", ")
               ")")))
 
