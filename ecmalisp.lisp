@@ -23,6 +23,9 @@
 ;;; language to the compiler to be able to run.
 
 #+ecmalisp
+(js-eval "function id (x) { return x; }")
+
+#+ecmalisp
 (progn
   (eval-when-compile
     (%compile-defmacro 'defmacro
