@@ -23,7 +23,7 @@
 ;;; language to the compiler to be able to run.
 
 #+ecmalisp
-(js-eval "function pv (x) { return typeof x === 'object' && 'car' in x ? x.car : x; }")
+(js-eval "function pv (x) { return x; }")
 
 #+ecmalisp
 (progn
@@ -2066,14 +2066,14 @@
             function functionp gensym get-universal-time go identity if in-package
             incf integerp integerp intern keywordp lambda last length let let*
             list-all-packages list listp make-array make-package make-symbol
-            mapcar member minusp mod nil not nth nthcdr null numberp or
-            package-name package-use-list packagep plusp prin1-to-string print
-            proclaim prog1 prog2 progn psetq push quote remove remove-if
+            mapcar member minusp mod multiple-value-call  nil not nth nthcdr null
+            numberp or package-name package-use-list packagep plusp prin1-to-string
+            print proclaim prog1 prog2 progn psetq push quote remove remove-if
             remove-if-not return return-from revappend reverse second set setq
             some string-upcase string string= stringp subseq symbol-function
             symbol-name symbol-package symbol-plist symbol-value symbolp t tagbody
-            third throw truncate unless unwind-protect variable warn when
-            write-line write-string zerop))
+            third throw truncate unless unwind-protect values values-list variable
+            warn when write-line write-string zerop))
 
   (setq *package* *user-package*)
 
