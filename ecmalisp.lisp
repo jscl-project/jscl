@@ -603,12 +603,8 @@
   (defun get-universal-time ()
     (+ (get-unix-time) 2208988800))
 
-  ;; The `values-list' primitive cannot be inlined out of functions as
-  ;; the VALUES argument is not available there. We declare it
-  ;; NOTINLINE to avoid it.
   (defun values-list (list)
     (values-list list))
-  (declaim (notinline values-list))
 
   (defun values (&rest args)
     (values-list args)))
@@ -1139,10 +1135,14 @@
         "return func;" *newline*)
       (join strs)))
 
+
+(defvar *compiling-lambda-p* nil)
+
 (define-compilation lambda (lambda-list &rest body)
   (let ((required-arguments (lambda-list-required-arguments lambda-list))
         (optional-arguments (lambda-list-optional-arguments lambda-list))
         (rest-argument (lambda-list-rest-argument lambda-list))
+        (*compiling-lambda-p* t)
         documentation)
     ;; Get the documentation string for the lambda function
     (when (and (stringp (car body))
@@ -2002,7 +2002,8 @@
             (apply comp args)))
          ;; Built-in functions
          ((and (assoc name *builtins*)
-               (not (claimp name 'function 'notinline)))
+               (not (claimp name 'function 'notinline))
+               *compiling-lambda-p*)
           (let ((comp (second (assoc name *builtins*))))
             (apply comp args)))
          (t
