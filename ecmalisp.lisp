@@ -2019,7 +2019,7 @@
   (export '(&rest &optional &body * *gensym-counter* *package* + - / 1+ 1- < <= =
             = > >= and append apply aref arrayp aset assoc atom block boundp
             boundp butlast caar cadddr caddr cadr car car case catch cdar cdddr
-            cddr cdr cdr char char-code char= code-char cond cons consp copy-list
+            cddr cdr cdr char char-code char= code-char concat cond cons consp copy-list
             decf declaim defparameter defun defmacro defvar digit-char-p disassemble
             documentation dolist dotimes ecase eq eql equal error eval every
             export fdefinition find-package find-symbol first fourth fset funcall
