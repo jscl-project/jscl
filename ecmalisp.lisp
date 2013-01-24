@@ -601,13 +601,7 @@
         (oset exports (symbol-name symb) symb))))
 
   (defun get-universal-time ()
-    (+ (get-unix-time) 2208988800))
-
-  (defun values-list (list)
-    (values-list list))
-
-  (defun values (&rest args)
-    (values-list args)))
+    (+ (get-unix-time) 2208988800)))
 
 
 ;;; The compiler offers some primitives and special forms which are
@@ -680,6 +674,15 @@
     (dolist (x list v)
       (aset v i x)
       (incf i))))
+
+#+ecmalisp
+(progn
+  (defun values-list (list)
+    (values-array (list-to-vector list)))
+
+  (defun values (&rest args)
+    (values-list args)))
+
 
 ;;; Like CONCAT, but prefix each line with four spaces. Two versions
 ;;; of this function are available, because the Ecmalisp version is
@@ -1930,8 +1933,14 @@
 (define-builtin get-unix-time ()
   (concat "(Math.round(new Date() / 1000))"))
 
-(define-builtin values-list (list)
-  (concat "values(" list ")"))
+(define-builtin values-array (array)
+  (concat "values.apply(this, " array ")"))
+
+(define-raw-builtin values (&rest args)
+  (if *compiling-lambda-p*
+      (concat "values(" (join (mapcar #'ls-compile args) ", ") ")")
+      (compile-funcall 'values args)))
+
 
 (defun macro (x)
   (and (symbolp x)
@@ -2002,8 +2011,7 @@
             (apply comp args)))
          ;; Built-in functions
          ((and (assoc name *builtins*)
-               (not (claimp name 'function 'notinline))
-               *compiling-lambda-p*)
+               (not (claimp name 'function 'notinline)))
           (let ((comp (second (assoc name *builtins*))))
             (apply comp args)))
          (t
