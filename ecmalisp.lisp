@@ -23,7 +23,7 @@
 ;;; language to the compiler to be able to run.
 
 #+ecmalisp
-(js-eval "function id (x) { return x; }")
+(js-eval "function id (x) { return 'car' in x ? x.car : x; }")
 
 #+ecmalisp
 (progn
@@ -281,7 +281,7 @@
     (revappend list '()))
 
   (defmacro psetq (&rest pairs)
-    (let (;; For each pair, we store here a list of the form
+    (let ( ;; For each pair, we store here a list of the form
 	  ;; (VARIABLE GENSYM VALUE).
 	  (assignments '()))
       (while t
@@ -601,7 +601,17 @@
         (oset exports (symbol-name symb) symb))))
 
   (defun get-universal-time ()
-    (+ (get-unix-time) 2208988800)))
+    (+ (get-unix-time) 2208988800))
+
+  ;; The `values-list' primitive cannot be inlined out of functions as
+  ;; the VALUES argument is not available there. We declare it
+  ;; NOTINLINE to avoid it.
+  (declaim (notinline values-list))
+  (defun values-list (list)
+    (values-list list))
+
+  (defun values (&rest args)
+    (values-list args)))
 
 
 ;;; The compiler offers some primitives and special forms which are
@@ -1230,6 +1240,7 @@
   (concat "(" var " = " (ls-compile val) ")"))
 
 
+
 ;;; Literals
 (defun escape-string (string)
   (let ((output "")
@@ -1539,7 +1550,6 @@
           "})" *newline*)
         (error (concat "Unknown tag `" n "'.")))))
 
-
 (define-compilation unwind-protect (form &rest clean-up)
   (js!selfcall
     "var ret = " (ls-compile nil) ";" *newline*
@@ -1549,6 +1559,21 @@
     (indent (ls-compile-block clean-up))
     "}" *newline*
     "return ret;" *newline*))
+
+(define-compilation multiple-value-call (func-form &rest forms)
+  (let ((func (ls-compile func-form)))
+    (js!selfcall
+      "var args = [values];" *newline*
+      "function values(){" *newline*
+      (indent "var result = [];" *newline*
+              "for (var i=0; i<arguments.length; i++)" *newline*
+              (indent "result.push(arguments[i]);"))
+      "}" *newline*
+      (mapconcat (lambda (form)
+                   (ls-compile form))
+                 forms)
+      "return (" func ").apply(window, [args]);")))
+
 
 
 ;;; A little backquote implementation without optimizations of any
@@ -1905,6 +1930,8 @@
 (define-builtin get-unix-time ()
   (concat "(Math.round(new Date() / 1000))"))
 
+(define-raw-builtin values-list (list)
+  (concat "values(" list ")"))
 
 (defun macro (x)
   (and (symbolp x)
