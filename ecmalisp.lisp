@@ -23,7 +23,7 @@
 ;;; language to the compiler to be able to run.
 
 #+ecmalisp
-(js-eval "function id (x) { return 'car' in x ? x.car : x; }")
+(js-eval "function pv (x) { return typeof x === 'object' && 'car' in x ? x.car : x; }")
 
 #+ecmalisp
 (progn
@@ -606,9 +606,9 @@
   ;; The `values-list' primitive cannot be inlined out of functions as
   ;; the VALUES argument is not available there. We declare it
   ;; NOTINLINE to avoid it.
-  (declaim (notinline values-list))
   (defun values-list (list)
     (values-list list))
+  (declaim (notinline values-list))
 
   (defun values (&rest args)
     (values-list args)))
@@ -1850,7 +1850,7 @@
 
 (define-raw-builtin funcall (func &rest args)
   (concat "(" (ls-compile func) ")("
-          (join (cons "id" (mapcar #'ls-compile args))
+          (join (cons "pv" (mapcar #'ls-compile args))
                 ", ")
           ")"))
 
@@ -1861,7 +1861,7 @@
             (last (car (last args))))
         (js!selfcall
           "var f = " (ls-compile func) ";" *newline*
-          "var args = [" (join (cons "id" (mapcar #'ls-compile args))
+          "var args = [" (join (cons "pv" (mapcar #'ls-compile args))
                                ", ")
           "];" *newline*
           "var tail = (" (ls-compile last) ");" *newline*
@@ -1930,7 +1930,7 @@
 (define-builtin get-unix-time ()
   (concat "(Math.round(new Date() / 1000))"))
 
-(define-raw-builtin values-list (list)
+(define-builtin values-list (list)
   (concat "values(" list ")"))
 
 (defun macro (x)
@@ -1961,11 +1961,11 @@
   (if (and (symbolp function)
            (claimp function 'function 'non-overridable))
       (concat (ls-compile `',function) ".fvalue("
-              (join (cons "id" (mapcar #'ls-compile args))
+              (join (cons "pv" (mapcar #'ls-compile args))
                     ", ")
               ")")
       (concat (ls-compile `#',function) "("
-              (join (cons "id" (mapcar #'ls-compile args))
+              (join (cons "pv" (mapcar #'ls-compile args))
                     ", ")
               ")")))
 
