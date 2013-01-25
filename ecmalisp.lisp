@@ -1568,15 +1568,22 @@
   (let ((func (ls-compile func-form)))
     (js!selfcall
       "var args = [values];" *newline*
-      "function values(){" *newline*
+      "values = function(){" *newline*
       (indent "var result = [];" *newline*
+              "result['multiple-value'] = true;" *newline*
               "for (var i=0; i<arguments.length; i++)" *newline*
-              (indent "result.push(arguments[i]);"))
+              (indent "result.push(arguments[i]);" *newline*)
+              "return result;" *newline*)
       "}" *newline*
+      "var vs;" *newline*
       (mapconcat (lambda (form)
-                   (ls-compile form))
+                   (concat "vs = " (ls-compile form t) ";" *newline*
+                           "if (typeof vs === 'object' && 'multiple-value' in vs)" *newline*
+                           (indent "args = args.concat(vs);" *newline*)
+                           "else" *newline*
+                           (indent "args.push(vs);" *newline*)))
                  forms)
-      "return (" func ").apply(window, [args]);")))
+      "return (" func ").apply(window, args);" *newline*)))
 
 
 
