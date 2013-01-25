@@ -26,7 +26,14 @@
 (js-eval "function pv (x) { return x ; }")
 
 #+ecmalisp
-(js-eval "function mv(){ var r = []; r['multiple-value'] = true; for (var i=0; i<arguments.length; i++) r.push(arguments[i]); return r; }")
+(js-eval "
+function mv(){
+     var r = [];
+     r['multiple-value'] = true;
+     for (var i=0; i<arguments.length; i++)
+         r.push(arguments[i]);
+     return r;
+}")
 
 ;;; NOTE: Define VALUES to be MV for toplevel forms. It is because
 ;;; `eval' compiles the forms and execute the Javascript code at
