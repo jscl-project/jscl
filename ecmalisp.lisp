@@ -24,6 +24,8 @@
 
 #+ecmalisp
 (js-eval "function pv (x) { return x; }")
+#+ecmalisp
+(js-eval "var values = pv;")
 
 #+ecmalisp
 (progn
@@ -982,6 +984,8 @@
 ;;; too. The respective real functions are defined in the target (see
 ;;; the beginning of this file) as well as some primitive functions.
 
+(defvar *multiple-value-p* nil)
+
 (defvar *compilation-unit-checks* '())
 
 (defun make-binding (name type value &optional declarations)
@@ -1139,13 +1143,10 @@
       (join strs)))
 
 
-(defvar *compiling-lambda-p* nil)
-
 (define-compilation lambda (lambda-list &rest body)
   (let ((required-arguments (lambda-list-required-arguments lambda-list))
         (optional-arguments (lambda-list-optional-arguments lambda-list))
         (rest-argument (lambda-list-rest-argument lambda-list))
-        (*compiling-lambda-p* t)
         documentation)
     ;; Get the documentation string for the lambda function
     (when (and (stringp (car body))
@@ -1937,9 +1938,7 @@
   (concat "values.apply(this, " array ")"))
 
 (define-raw-builtin values (&rest args)
-  (if *compiling-lambda-p*
-      (concat "values(" (join (mapcar #'ls-compile args) ", ") ")")
-      (compile-funcall 'values args)))
+  (concat "values(" (join (mapcar #'ls-compile args) ", ") ")"))
 
 
 (defun macro (x)
@@ -1967,16 +1966,17 @@
         form)))
 
 (defun compile-funcall (function args)
-  (if (and (symbolp function)
-           (claimp function 'function 'non-overridable))
-      (concat (ls-compile `',function) ".fvalue("
-              (join (cons "pv" (mapcar #'ls-compile args))
-                    ", ")
-              ")")
-      (concat (ls-compile `#',function) "("
-              (join (cons "pv" (mapcar #'ls-compile args))
-                    ", ")
-              ")")))
+  (let ((values-funcs (if *multiple-value-p* "values" "pv")))
+    (if (and (symbolp function)
+             (claimp function 'function 'non-overridable))
+        (concat (ls-compile `',function) ".fvalue("
+                (join (cons values-funcs (mapcar #'ls-compile args))
+                      ", ")
+                ")")
+        (concat (ls-compile `#',function) "("
+                (join (cons values-funcs (mapcar #'ls-compile args))
+                      ", ")
+                ")"))))
 
 (defun ls-compile-block (sexps &optional return-last-p)
   (if return-last-p
@@ -1986,40 +1986,41 @@
        (remove-if #'null-or-empty-p (mapcar #'ls-compile sexps))
        (concat ";" *newline*))))
 
-(defun ls-compile (sexp)
-  (cond
-    ((symbolp sexp)
-     (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
-       (cond
-         ((and b (not (member 'special (binding-declarations b))))
-          (binding-value b))
-         ((or (keywordp sexp)
-              (member 'constant (binding-declarations b)))
-          (concat (ls-compile `',sexp) ".value"))
-         (t
-          (ls-compile `(symbol-value ',sexp))))))
-    ((integerp sexp) (integer-to-string sexp))
-    ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
-    ((arrayp sexp) (literal sexp))
-    ((listp sexp)
-     (let ((name (car sexp))
-           (args (cdr sexp)))
-       (cond
-         ;; Special forms
-         ((assoc name *compilations*)
-          (let ((comp (second (assoc name *compilations*))))
-            (apply comp args)))
-         ;; Built-in functions
-         ((and (assoc name *builtins*)
-               (not (claimp name 'function 'notinline)))
-          (let ((comp (second (assoc name *builtins*))))
-            (apply comp args)))
-         (t
-          (if (macro name)
-              (ls-compile (ls-macroexpand-1 sexp))
-              (compile-funcall name args))))))
-    (t
-     (error "How should I compile this?"))))
+(defun ls-compile (sexp &optional multiple-value-p)
+  (let ((*multiple-value-p* multiple-value-p))
+    (cond
+      ((symbolp sexp)
+       (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
+         (cond
+           ((and b (not (member 'special (binding-declarations b))))
+            (binding-value b))
+           ((or (keywordp sexp)
+                (member 'constant (binding-declarations b)))
+            (concat (ls-compile `',sexp) ".value"))
+           (t
+            (ls-compile `(symbol-value ',sexp))))))
+      ((integerp sexp) (integer-to-string sexp))
+      ((stringp sexp) (concat "\"" (escape-string sexp) "\""))
+      ((arrayp sexp) (literal sexp))
+      ((listp sexp)
+       (let ((name (car sexp))
+             (args (cdr sexp)))
+         (cond
+           ;; Special forms
+           ((assoc name *compilations*)
+            (let ((comp (second (assoc name *compilations*))))
+              (apply comp args)))
+           ;; Built-in functions
+           ((and (assoc name *builtins*)
+                 (not (claimp name 'function 'notinline)))
+            (let ((comp (second (assoc name *builtins*))))
+              (apply comp args)))
+           (t
+            (if (macro name)
+                (ls-compile (ls-macroexpand-1 sexp))
+                (compile-funcall name args))))))
+      (t
+       (error "How should I compile this?")))))
 
 (defun ls-compile-toplevel (sexp)
   (let ((*toplevel-compilations* nil))
