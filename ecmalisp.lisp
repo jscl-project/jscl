@@ -28,6 +28,10 @@
 #+ecmalisp
 (js-eval "function mv(){ var r = []; r['multiple-value'] = true; for (var i=0; i<arguments.length; i++) r.push(arguments[i]); return r; }")
 
+;;; NOTE: Define VALUES to be MV for toplevel forms. It is because
+;;; `eval' compiles the forms and execute the Javascript code at
+;;; toplevel with `js-eval', so it is necessary to return multiple
+;;; values from the eval function.
 #+ecmalisp
 (js-eval "var values = mv;")
 
@@ -988,6 +992,9 @@
 ;;; too. The respective real functions are defined in the target (see
 ;;; the beginning of this file) as well as some primitive functions.
 
+;;; If the special variable `*multiple-value-p*' is NON-NIL, then the
+;;; compilation of the current form is allowed to return multiple
+;;; values, using the VALUES variable.
 (defvar *multiple-value-p* nil)
 
 (defvar *compilation-unit-checks* '())
@@ -1881,7 +1888,7 @@
   (type-check (("string" "string" string))
     (if *multiple-value-p*
         (js!selfcall
-          "var v = eval.apply(window, [string]));"
+          "var v = eval.apply(window, [string]);" *newline*
           "if (typeof v !== 'object' || !('multiple-value' in v)){" *newline*
           (indent "v = [v];" *newline*
                   "v['multiple-value'] = true;" *newline*)

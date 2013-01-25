@@ -11,7 +11,7 @@
     return eval.apply(window, [string]);
 })();
 (function(){
-    var string = "var values = mv;";
+    var string = "var values = pv;";
     if (typeof string != 'string')
         throw 'The value ' + string + ' is not a type string.';
     return eval.apply(window, [string]);
@@ -10690,7 +10690,12 @@ var l283 = {name: "JS-EVAL"};
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })(), l133.fvalue(pv, "var v = eval.apply(window, [string]));", "if (typeof v !== 'object' || !('multiple-value' in v)){", (function(){
+                            })(), l133.fvalue(pv, "var v = eval.apply(window, [string]);", (function(){
+                                var symbol = l123;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })(), "if (typeof v !== 'object' || !('multiple-value' in v)){", (function(){
                                 var symbol = l123;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
