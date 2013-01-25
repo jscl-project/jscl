@@ -1863,7 +1863,8 @@
 
 (define-raw-builtin funcall (func &rest args)
   (concat "(" (ls-compile func) ")("
-          (join (cons "pv" (mapcar #'ls-compile args))
+          (join (cons (if *multiple-value-p* "values" "pv")
+                      (mapcar #'ls-compile args))
                 ", ")
           ")"))
 
@@ -1874,7 +1875,8 @@
             (last (car (last args))))
         (js!selfcall
           "var f = " (ls-compile func) ";" *newline*
-          "var args = [" (join (cons "pv" (mapcar #'ls-compile args))
+          "var args = [" (join (cons (if *multiple-value-p* "values" "pv")
+                                     (mapcar #'ls-compile args))
                                ", ")
           "];" *newline*
           "var tail = (" (ls-compile last) ");" *newline*
