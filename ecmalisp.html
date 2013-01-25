@@ -75,14 +75,6 @@
            return str;
         }
 
-        function mv () {
-           var result = [];
-           result["multiple-values"] = true;
-           for (var i=0; i<arguments.length; i++)
-              result.push(arguments[i]);
-           return result;
-        }
-
         var startPrompt = function () {
           // Start the prompt with history enabled.
           jqconsole.Write(lisp.evalString(pv, '(CL:PACKAGE-NAME CL:*PACKAGE*)') + '> ', 'jqconsole-prompt');
@@ -90,11 +82,9 @@
             // Output input with the class jqconsole-return.
             if (input[0] != ','){
                 try {
-                    var values = lisp.evalString(pv, input);
-                    if (values !== 'object' || !('multiple-values' in values))
-                       values = [values];
-                    for (var i in values){
-                       jqconsole.Write(lisp.print(pv, values[i]) + '\n', 'jqconsole-return');
+                    var vs = lisp.evalString(mv, input);
+                    for (var i=0; i<vs.length; i++){
+                       jqconsole.Write(lisp.print(pv, vs[i]) + '\n', 'jqconsole-return');
                     }
                 } catch(error) {
                     jqconsole.Write('ERROR: ' + (error.message || error) + '\n', 'jqconsole-error');

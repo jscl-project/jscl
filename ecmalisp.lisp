@@ -24,8 +24,12 @@
 
 #+ecmalisp
 (js-eval "function pv (x) { return x; }")
+
 #+ecmalisp
-(js-eval "var values = pv;")
+(js-eval "function mv(){ var r = []; r['multiple-value'] = true; for (var i=0; i<arguments.length; i++) r.push(arguments[i]); return r; }")
+
+#+ecmalisp
+(js-eval "var values = mv;")
 
 #+ecmalisp
 (progn
@@ -1133,7 +1137,6 @@
       (error "Bad lambda-list"))
     (car rest)))
 
-
 (defun lambda-docstring-wrapper (docstring &rest strs)
   (if docstring
       (js!selfcall
@@ -1141,7 +1144,6 @@
         "func.docstring = '" docstring "';" *newline*
         "return func;" *newline*)
       (join strs)))
-
 
 (define-compilation lambda (lambda-list &rest body)
   (let ((required-arguments (lambda-list-required-arguments lambda-list))
@@ -1212,7 +1214,8 @@
                       *newline*))
             "")
         ;; Body
-        (ls-compile-block body t)) *newline*
+        (let ((*multiple-value-p* t)) (ls-compile-block body t)))
+       *newline*
        "})"))))
 
 
@@ -1418,7 +1421,6 @@
                  store))
      "}" *newline*)))
 
-
 (define-compilation let* (bindings &rest body)
   (let ((bindings (mapcar #'ensure-list bindings))
         (*environment* (copy-lexenv *environment*)))
@@ -1437,7 +1439,7 @@
       (js!selfcall
         "try {" *newline*
         (let ((*environment* (extend-lexenv (list b) *environment* 'block)))
-          (indent "return " (ls-compile `(progn ,@body)) ";" *newline*))
+          (indent "return " (ls-compile `(progn ,@body) *multiple-value-p*) ";" *newline*))
         "}" *newline*
         "catch (cf){" *newline*
         "    if (cf.type == 'block' && cf.id == " tr ")" *newline*
@@ -1457,7 +1459,6 @@
           "message: 'Return from unknown block " (symbol-name name) ".'"
           "})")
         (error (concat "Unknown block `" (symbol-name name) "'.")))))
-
 
 (define-compilation catch (id &rest body)
   (js!selfcall
@@ -1568,13 +1569,7 @@
   (let ((func (ls-compile func-form)))
     (js!selfcall
       "var args = [values];" *newline*
-      "values = function(){" *newline*
-      (indent "var result = [];" *newline*
-              "result['multiple-value'] = true;" *newline*
-              "for (var i=0; i<arguments.length; i++)" *newline*
-              (indent "result.push(arguments[i]);" *newline*)
-              "return result;" *newline*)
-      "}" *newline*
+      "var values = mv;" *newline*
       "var vs;" *newline*
       (mapconcat (lambda (form)
                    (concat "vs = " (ls-compile form t) ";" *newline*
@@ -1884,7 +1879,15 @@
 
 (define-builtin js-eval (string)
   (type-check (("string" "string" string))
-    "eval.apply(window, [string])"))
+    (if *multiple-value-p*
+        (js!selfcall
+          "var v = eval.apply(window, [string]));"
+          "if (typeof v !== 'object' || !('multiple-value' in v)){" *newline*
+          (indent "v = [v];" *newline*
+                  "v['multiple-value'] = true;" *newline*)
+          "}" *newline*
+          "return values.apply(this, v);" *newline*)
+        "eval.apply(window, [string])")))
 
 (define-builtin error (string)
   (js!selfcall "throw " string ";" *newline*))
@@ -1942,11 +1945,14 @@
   (concat "(Math.round(new Date() / 1000))"))
 
 (define-builtin values-array (array)
-  (concat "values.apply(this, " array ")"))
+  (if *multiple-value-p*
+      (concat "values.apply(this, " array ")")
+      (concat "pv.apply(this, " array ")")))
 
 (define-raw-builtin values (&rest args)
-  (concat "values(" (join (mapcar #'ls-compile args) ", ") ")"))
-
+  (if *multiple-value-p*
+      (concat "values(" (join (mapcar #'ls-compile args) ", ") ")")
+      (concat "pv(" (join (mapcar #'ls-compile args) ", ") ")")))
 
 (defun macro (x)
   (and (symbolp x)
@@ -1988,7 +1994,7 @@
 (defun ls-compile-block (sexps &optional return-last-p)
   (if return-last-p
       (concat (ls-compile-block (butlast sexps))
-              "return " (ls-compile (car (last sexps))) ";")
+              "return "(ls-compile (car (last sexps)) *multiple-value-p*) ";")
       (join-trailing
        (remove-if #'null-or-empty-p (mapcar #'ls-compile sexps))
        (concat ";" *newline*))))
@@ -2029,14 +2035,14 @@
       (t
        (error "How should I compile this?")))))
 
-(defun ls-compile-toplevel (sexp)
+(defun ls-compile-toplevel (sexp &optional multiple-value-p)
   (let ((*toplevel-compilations* nil))
     (cond
       ((and (consp sexp) (eq (car sexp) 'progn))
        (let ((subs (mapcar #'ls-compile-toplevel (cdr sexp))))
          (join (remove-if #'null-or-empty-p subs))))
       (t
-       (let ((code (ls-compile sexp)))
+       (let ((code (ls-compile sexp multiple-value-p)))
          (concat (join-trailing (get-toplevel-compilations)
                                 (concat ";" *newline*))
                  (if code
@@ -2050,19 +2056,8 @@
 
 #+ecmalisp
 (progn
-  (defmacro with-compilation-unit (&body body)
-    `(prog1
-         (progn
-           (setq *compilation-unit-checks* nil)
-           ,@body)
-       (dolist (check *compilation-unit-checks*)
-         (funcall check))))
-
   (defun eval (x)
-    (let ((code
-           (with-compilation-unit
-               (ls-compile-toplevel x))))
-      (js-eval code)))
+    (js-eval (ls-compile-toplevel x t)))
 
   (export '(&rest &optional &body * *gensym-counter* *package* + - / 1+ 1- < <= =
             = > >= and append apply aref arrayp aset assoc atom block boundp
