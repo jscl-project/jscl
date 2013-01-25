@@ -77,23 +77,26 @@
 
         var startPrompt = function () {
           // Start the prompt with history enabled.
-          jqconsole.Write(lisp.evalString('(CL:PACKAGE-NAME CL:*PACKAGE*)') + '> ', 'jqconsole-prompt');
+          jqconsole.Write(lisp.evalString(pv, '(CL:PACKAGE-NAME CL:*PACKAGE*)') + '> ', 'jqconsole-prompt');
           jqconsole.Prompt(true, function (input) {
             // Output input with the class jqconsole-return.
             if (input[0] != ','){
                 try {
-                    jqconsole.Write(lisp.print(lisp.evalString(input)) + '\n', 'jqconsole-return');
+                    var vs = lisp.evalString(mv, input);
+                    for (var i=0; i<vs.length; i++){
+                       jqconsole.Write(lisp.print(pv, vs[i]) + '\n', 'jqconsole-return');
+                    }
                 } catch(error) {
                     jqconsole.Write('ERROR: ' + (error.message || error) + '\n', 'jqconsole-error');
                 }
             } else {
-                jqconsole.Write(lisp.compileString(input.slice(1)) + '\n', 'jqconsole-return');
+                jqconsole.Write(lisp.compileString(pv, input.slice(1)) + '\n', 'jqconsole-return');
             }
             // Restart the prompt.
             startPrompt();
           }, function(input){
             try {
-                lisp.read(input[0]==','? input.slice(1): input);
+                lisp.read(pv, input[0]==','? input.slice(1): input);
             } catch(error) {
                 return 0;
             }
