@@ -1107,8 +1107,8 @@
 
 (define-compilation if (condition true false)
   (concat "(" (ls-compile condition) " !== " (ls-compile nil)
-          " ? " (ls-compile true)
-          " : " (ls-compile false)
+          " ? " (ls-compile true *multiple-value-p*)
+          " : " (ls-compile false *multiple-value-p*)
           ")"))
 
 (defvar *lambda-list-keywords* '(&optional &rest))
