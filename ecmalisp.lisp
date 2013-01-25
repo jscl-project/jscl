@@ -23,7 +23,7 @@
 ;;; language to the compiler to be able to run.
 
 #+ecmalisp
-(js-eval "function pv (x) { return x; }")
+(js-eval "function pv (x) { return x ; }")
 
 #+ecmalisp
 (js-eval "function mv(){ var r = []; r['multiple-value'] = true; for (var i=0; i<arguments.length; i++) r.push(arguments[i]); return r; }")
@@ -691,7 +691,15 @@
     (values-array (list-to-vector list)))
 
   (defun values (&rest args)
-    (values-list args)))
+    (values-list args))
+
+  (defmacro multiple-value-bind (variables value-from &body body)
+    `(multiple-value-call (lambda (,@variables &rest ,(gensym))
+                            ,@body)
+       ,value-from))
+
+  (defmacro multiple-value-list (value-from)
+    `(multiple-value-call #'list ,value-from)))
 
 
 ;;; Like CONCAT, but prefix each line with four spaces. Two versions
@@ -2048,7 +2056,9 @@
   (let ((*toplevel-compilations* nil))
     (cond
       ((and (consp sexp) (eq (car sexp) 'progn))
-       (let ((subs (mapcar #'ls-compile-toplevel (cdr sexp))))
+       (let ((subs (mapcar (lambda (s)
+                             (ls-compile-toplevel s t))
+                           (cdr sexp))))
          (join (remove-if #'null-or-empty-p subs))))
       (t
        (let ((code (ls-compile sexp multiple-value-p)))
@@ -2069,23 +2079,28 @@
     (js-eval (ls-compile-toplevel x t)))
 
   (export '(&rest &optional &body * *gensym-counter* *package* + - / 1+ 1- < <= =
-            = > >= and append apply aref arrayp aset assoc atom block boundp
-            boundp butlast caar cadddr caddr cadr car car case catch cdar cdddr
-            cddr cdr cdr char char-code char= code-char cond cons consp copy-list
-            decf declaim defparameter defun defmacro defvar digit-char-p disassemble
-            documentation dolist dotimes ecase eq eql equal error eval every
-            export fdefinition find-package find-symbol first fourth fset funcall
-            function functionp gensym get-universal-time go identity if in-package
-            incf integerp integerp intern keywordp lambda last length let let*
-            list-all-packages list listp make-array make-package make-symbol
-            mapcar member minusp mod multiple-value-call  nil not nth nthcdr null
-            numberp or package-name package-use-list packagep plusp prin1-to-string
-            print proclaim prog1 prog2 progn psetq push quote remove remove-if
-            remove-if-not return return-from revappend reverse second set setq
-            some string-upcase string string= stringp subseq symbol-function
-            symbol-name symbol-package symbol-plist symbol-value symbolp t tagbody
-            third throw truncate unless unwind-protect values values-list variable
-            warn when write-line write-string zerop))
+            = > >= and append apply aref arrayp aset assoc atom block
+            boundp boundp butlast caar cadddr caddr cadr car car case
+            catch cdar cdddr cddr cdr cdr char char-code char=
+            code-char cond cons consp copy-list decf declaim
+            defparameter defun defmacro defvar digit-char-p
+            disassemble documentation dolist dotimes ecase eq eql
+            equal error eval every export fdefinition find-package
+            find-symbol first fourth fset funcall function functionp
+            gensym get-universal-time go identity if in-package incf
+            integerp integerp intern keywordp lambda last length let
+            let* list-all-packages list listp make-array make-package
+            make-symbol mapcar member minusp mod multiple-value-bind
+            multiple-value-call multiple-value-list nil not nth nthcdr
+            null numberp or package-name package-use-list packagep
+            plusp prin1-to-string print proclaim prog1 prog2 progn
+            psetq push quote remove remove-if remove-if-not return
+            return-from revappend reverse second set setq some
+            string-upcase string string= stringp subseq
+            symbol-function symbol-name symbol-package symbol-plist
+            symbol-value symbolp t tagbody third throw truncate unless
+            unwind-protect values values-list variable warn when
+            write-line write-string zerop))
 
   (setq *package* *user-package*)
 
@@ -2094,9 +2109,9 @@
   (js-vset "lisp.read" #'ls-read-from-string)
   (js-vset "lisp.print" #'prin1-to-string)
   (js-vset "lisp.eval" #'eval)
-  (js-vset "lisp.compile" #'ls-compile-toplevel)
+  (js-vset "lisp.compile" (lambda (s) (ls-compile-toplevel s t)))
   (js-vset "lisp.evalString" (lambda (str) (eval (ls-read-from-string str))))
-  (js-vset "lisp.compileString" (lambda (str) (ls-compile-toplevel (ls-read-from-string str))))
+  (js-vset "lisp.compileString" (lambda (str) (ls-compile-toplevel (ls-read-from-string str) t)))
 
   ;; Set the initial global environment to be equal to the host global
   ;; environment at this point of the compilation.
