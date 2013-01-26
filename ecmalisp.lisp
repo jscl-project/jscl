@@ -701,7 +701,7 @@ function mv(){
     (values-list args))
 
   (defmacro multiple-value-bind (variables value-from &body body)
-    `(multiple-value-call (lambda (,@variables &rest ,(gensym))
+    `(multiple-value-call (lambda (&optional ,@variables &rest ,(gensym))
                             ,@body)
        ,value-from))
 
