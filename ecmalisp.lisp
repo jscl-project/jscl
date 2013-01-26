@@ -2054,7 +2054,7 @@ function mv(){
               (apply comp args)))
            (t
             (if (macro name)
-                (ls-compile (ls-macroexpand-1 sexp))
+                (ls-compile (ls-macroexpand-1 sexp) multiple-value-p)
                 (compile-funcall name args))))))
       (t
        (error "How should I compile this?")))))
