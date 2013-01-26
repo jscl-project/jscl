@@ -1588,9 +1588,11 @@ function mv(){
     "return ret;" *newline*))
 
 (define-compilation multiple-value-call (func-form &rest forms)
-  (let ((func (ls-compile func-form)))
+  (js!selfcall
+    "var func = " (ls-compile func-form) ";" *newline*
+    "var args = [" (if *multiple-value-p* "values" "pv") "];" *newline*
+    "return "
     (js!selfcall
-      "var args = [values];" *newline*
       "var values = mv;" *newline*
       "var vs;" *newline*
       (mapconcat (lambda (form)
@@ -1600,8 +1602,13 @@ function mv(){
                            "else" *newline*
                            (indent "args.push(vs);" *newline*)))
                  forms)
-      "return (" func ").apply(window, args);" *newline*)))
+      "return func.apply(window, args);" *newline*) ";" *newline*))
 
+(define-compilation multiple-value-prog1 (first-form &rest forms)
+  (js!selfcall
+    "var args = " (ls-compile first-form *multiple-value-p*) ";" *newline*
+    (ls-compile-block forms)
+    "return args;" *newline*))
 
 
 ;;; A little backquote implementation without optimizations of any
@@ -2086,28 +2093,25 @@ function mv(){
     (js-eval (ls-compile-toplevel x t)))
 
   (export '(&rest &optional &body * *gensym-counter* *package* + - / 1+ 1- < <= =
-            = > >= and append apply aref arrayp aset assoc atom block
-            boundp boundp butlast caar cadddr caddr cadr car car case
-            catch cdar cdddr cddr cdr cdr char char-code char=
-            code-char cond cons consp copy-list decf declaim
-            defparameter defun defmacro defvar digit-char-p
-            disassemble documentation dolist dotimes ecase eq eql
-            equal error eval every export fdefinition find-package
-            find-symbol first fourth fset funcall function functionp
-            gensym get-universal-time go identity if in-package incf
-            integerp integerp intern keywordp lambda last length let
-            let* list-all-packages list listp make-array make-package
+            = > >= and append apply aref arrayp aset assoc atom block boundp
+            boundp butlast caar cadddr caddr cadr car car case catch cdar cdddr
+            cddr cdr cdr char char-code char= code-char cond cons consp copy-list
+            decf declaim defparameter defun defmacro defvar digit-char-p
+            disassemble documentation dolist dotimes ecase eq eql equal error eval
+            every export fdefinition find-package find-symbol first fourth fset
+            funcall function functionp gensym get-universal-time go identity if
+            in-package incf integerp integerp intern keywordp lambda last length
+            let let* list-all-packages list listp make-array make-package
             make-symbol mapcar member minusp mod multiple-value-bind
-            multiple-value-call multiple-value-list nil not nth nthcdr
-            null numberp or package-name package-use-list packagep
-            plusp prin1-to-string print proclaim prog1 prog2 progn
-            psetq push quote remove remove-if remove-if-not return
-            return-from revappend reverse second set setq some
-            string-upcase string string= stringp subseq
-            symbol-function symbol-name symbol-package symbol-plist
+            multiple-value-call multiple-value-list multiple-value-prog1 nil not
+            nth nthcdr null numberp or package-name package-use-list packagep
+            plusp prin1-to-string print proclaim prog1 prog2 progn psetq push
+            quote remove remove-if remove-if-not return return-from revappend
+            reverse second set setq some string-upcase string string= stringp
+            subseq symbol-function symbol-name symbol-package symbol-plist
             symbol-value symbolp t tagbody third throw truncate unless
-            unwind-protect values values-list variable warn when
-            write-line write-string zerop))
+            unwind-protect values values-list variable warn when write-line
+            write-string zerop))
 
   (setq *package* *user-package*)
 
