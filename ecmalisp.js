@@ -21,7 +21,11 @@ function checkArgsAtLeast(args, n){
 function checkArgsAtMost(args, n){
     if (args.length > n) throw 'too many arguments';
 }
-var l1 = {name: "DEFMACRO"};
+
+function checkArgs(args, n){
+    checkArgsAtLeast(args, n);
+    checkArgsAtMost(args, n);
+}var l1 = {name: "DEFMACRO"};
 l1;
 var l2 = {name: "DECLAIM"};
 l2;
@@ -47,10 +51,10 @@ var l11 = {name: "NULL"};
         ((v2)["fname"] = "NULL");
         return v2;
     })((function (values,v1){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return ((v1 === l3.value)?l4.value: l3.value);
         })();
-    
     }));
     return l11;
 })();
@@ -70,7 +74,8 @@ var l16 = {name: "INTEGER-TO-STRING"};
         ((v4)["fname"] = "GENSYM");
         return v4;
     })((function (values,v3){
-        checkArgsAtLeast(2);switch(arguments.length-1){
+        checkArgsAtMost(arguments, 2);
+        switch(arguments.length-1){
         case 0:
         v3="G";
         default: break;
@@ -108,7 +113,6 @@ var l16 = {name: "INTEGER-TO-STRING"};
                     return ({name: name});
                 })();
         })();
-    
     }));
     return l15;
 })();
@@ -118,10 +122,10 @@ var l17 = {name: "BOUNDP"};
         ((v6)["fname"] = "BOUNDP");
         return v6;
     })((function (values,v5){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return ((v5.value !== undefined)?l4.value: l3.value);
         })();
-    
     }));
     return l17;
 })();
@@ -131,7 +135,8 @@ var l18 = {name: "="};
         ((v9)["fname"] = "=");
         return v9;
     })((function (values,v7,v8){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (function(){
                     var x1 = v7;
                     if (typeof x1 !== 'number') throw 'Not a number!';
@@ -140,7 +145,6 @@ var l18 = {name: "="};
                     return (x1==x2?l4.value: l3.value);
                 })();
         })();
-    
     }));
     return l18;
 })();
@@ -150,7 +154,8 @@ var l19 = {name: "*"};
         ((v12)["fname"] = "*");
         return v12;
     })((function (values,v10,v11){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (function(){
                     var x1 = v10;
                     if (typeof x1 !== 'number') throw 'Not a number!';
@@ -159,7 +164,6 @@ var l19 = {name: "*"};
                     return x1*x2;
                 })();
         })();
-    
     }));
     return l19;
 })();
@@ -169,7 +173,8 @@ var l20 = {name: "/"};
         ((v15)["fname"] = "/");
         return v15;
     })((function (values,v13,v14){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (function(){
                     var x1 = v13;
                     if (typeof x1 !== 'number') throw 'Not a number!';
@@ -178,7 +183,6 @@ var l20 = {name: "/"};
                     return x1/x2;
                 })();
         })();
-    
     }));
     return l20;
 })();
@@ -188,7 +192,8 @@ var l21 = {name: "1+"};
         ((v17)["fname"] = "1+");
         return v17;
     })((function (values,v16){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(){
                     var x1 = v16;
                     if (typeof x1 !== 'number') throw 'Not a number!';
@@ -197,7 +202,6 @@ var l21 = {name: "1+"};
                     return x1+x2;
                 })();
         })();
-    
     }));
     return l21;
 })();
@@ -207,7 +211,8 @@ var l22 = {name: "1-"};
         ((v19)["fname"] = "1-");
         return v19;
     })((function (values,v18){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(){
                     var x1 = v18;
                     if (typeof x1 !== 'number') throw 'Not a number!';
@@ -216,7 +221,6 @@ var l22 = {name: "1-"};
                     return x1-x2;
                 })();
         })();
-    
     }));
     return l22;
 })();
@@ -226,7 +230,8 @@ var l23 = {name: "ZEROP"};
         ((v21)["fname"] = "ZEROP");
         return v21;
     })((function (values,v20){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(){
                     var x1 = v20;
                     if (typeof x1 !== 'number') throw 'Not a number!';
@@ -235,7 +240,6 @@ var l23 = {name: "ZEROP"};
                     return (x1==x2?l4.value: l3.value);
                 })();
         })();
-    
     }));
     return l23;
 })();
@@ -245,7 +249,8 @@ var l24 = {name: "TRUNCATE"};
         ((v24)["fname"] = "TRUNCATE");
         return v24;
     })((function (values,v22,v23){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (function(){
                     var x = (function(){
                         var x1 = v22;
@@ -259,7 +264,6 @@ var l24 = {name: "TRUNCATE"};
                     return Math.floor(x);
                 })();
         })();
-    
     }));
     return l24;
 })();
@@ -269,10 +273,10 @@ var l25 = {name: "EQL"};
         ((v27)["fname"] = "EQL");
         return v27;
     })((function (values,v25,v26){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return ((v25 === v26)?l4.value: l3.value);
         })();
-    
     }));
     return l25;
 })();
@@ -282,10 +286,10 @@ var l26 = {name: "NOT"};
         ((v29)["fname"] = "NOT");
         return v29;
     })((function (values,v28){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (v28 !== l3.value ? l3.value : l4.value);
         })();
-    
     }));
     return l26;
 })();
@@ -295,10 +299,10 @@ var l27 = {name: "CONS"};
         ((v32)["fname"] = "CONS");
         return v32;
     })((function (values,v30,v31){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return ({car: v30, cdr: v31});
         })();
-    
     }));
     return l27;
 })();
@@ -308,13 +312,13 @@ var l28 = {name: "CONSP"};
         ((v34)["fname"] = "CONSP");
         return v34;
     })((function (values,v33){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return ((function(){
                     var tmp = v33;
                     return (typeof tmp == 'object' && 'car' in tmp);
                 })()?l4.value: l3.value);
         })();
-    
     }));
     return l28;
 })();
@@ -325,13 +329,13 @@ var l29 = {name: "CAR"};
         return v36;
     })((function(){
         var func = (function (values,v35){
-            checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+            checkArgs(arguments, 2);
+            return (function(){
                     return (function(){
                         var tmp = v35;
                         return tmp === l3.value? l3.value: tmp.car;
                     })();
             })();
-        
         });
         func.docstring = 'Return the CAR part of a cons, or NIL if X is null.';
         return func;
@@ -344,13 +348,13 @@ var l30 = {name: "CDR"};
         ((v38)["fname"] = "CDR");
         return v38;
     })((function (values,v37){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(){
                     var tmp = v37;
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })();
         })();
-    
     }));
     return l30;
 })();
@@ -360,7 +364,8 @@ var l31 = {name: "CAAR"};
         ((v40)["fname"] = "CAAR");
         return v40;
     })((function (values,v39){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(){
                     var tmp = (function(){
                         var tmp = v39;
@@ -369,7 +374,6 @@ var l31 = {name: "CAAR"};
                     return tmp === l3.value? l3.value: tmp.car;
                 })();
         })();
-    
     }));
     return l31;
 })();
@@ -379,7 +383,8 @@ var l32 = {name: "CADR"};
         ((v42)["fname"] = "CADR");
         return v42;
     })((function (values,v41){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(){
                     var tmp = (function(){
                         var tmp = v41;
@@ -388,7 +393,6 @@ var l32 = {name: "CADR"};
                     return tmp === l3.value? l3.value: tmp.car;
                 })();
         })();
-    
     }));
     return l32;
 })();
@@ -398,7 +402,8 @@ var l33 = {name: "CDAR"};
         ((v44)["fname"] = "CDAR");
         return v44;
     })((function (values,v43){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(){
                     var tmp = (function(){
                         var tmp = v43;
@@ -407,7 +412,6 @@ var l33 = {name: "CDAR"};
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })();
         })();
-    
     }));
     return l33;
 })();
@@ -417,7 +421,8 @@ var l34 = {name: "CDDR"};
         ((v46)["fname"] = "CDDR");
         return v46;
     })((function (values,v45){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(){
                     var tmp = (function(){
                         var tmp = v45;
@@ -426,7 +431,6 @@ var l34 = {name: "CDDR"};
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })();
         })();
-    
     }));
     return l34;
 })();
@@ -436,7 +440,8 @@ var l35 = {name: "CADDR"};
         ((v48)["fname"] = "CADDR");
         return v48;
     })((function (values,v47){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(){
                     var tmp = (function(){
                         var tmp = (function(){
@@ -448,7 +453,6 @@ var l35 = {name: "CADDR"};
                     return tmp === l3.value? l3.value: tmp.car;
                 })();
         })();
-    
     }));
     return l35;
 })();
@@ -458,7 +462,8 @@ var l36 = {name: "CDDDR"};
         ((v50)["fname"] = "CDDDR");
         return v50;
     })((function (values,v49){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(){
                     var tmp = (function(){
                         var tmp = (function(){
@@ -470,7 +475,6 @@ var l36 = {name: "CDDDR"};
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })();
         })();
-    
     }));
     return l36;
 })();
@@ -480,7 +484,8 @@ var l37 = {name: "CADDDR"};
         ((v52)["fname"] = "CADDDR");
         return v52;
     })((function (values,v51){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(){
                     var tmp = (function(){
                         var tmp = (function(){
@@ -495,7 +500,6 @@ var l37 = {name: "CADDDR"};
                     return tmp === l3.value? l3.value: tmp.car;
                 })();
         })();
-    
     }));
     return l37;
 })();
@@ -505,13 +509,13 @@ var l38 = {name: "FIRST"};
         ((v54)["fname"] = "FIRST");
         return v54;
     })((function (values,v53){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(){
                     var tmp = v53;
                     return tmp === l3.value? l3.value: tmp.car;
                 })();
         })();
-    
     }));
     return l38;
 })();
@@ -521,10 +525,10 @@ var l39 = {name: "SECOND"};
         ((v56)["fname"] = "SECOND");
         return v56;
     })((function (values,v55){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l32.fvalue(values, v55);
         })();
-    
     }));
     return l39;
 })();
@@ -534,10 +538,10 @@ var l40 = {name: "THIRD"};
         ((v58)["fname"] = "THIRD");
         return v58;
     })((function (values,v57){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l35.fvalue(values, v57);
         })();
-    
     }));
     return l40;
 })();
@@ -547,10 +551,10 @@ var l41 = {name: "FOURTH"};
         ((v60)["fname"] = "FOURTH");
         return v60;
     })((function (values,v59){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l37.fvalue(values, v59);
         })();
-    
     }));
     return l41;
 })();
@@ -567,7 +571,6 @@ var l42 = {name: "LIST"};
         return (function(){
                 return v61;
         })();
-    
     }));
     return l42;
 })();
@@ -577,13 +580,13 @@ var l43 = {name: "ATOM"};
         ((v64)["fname"] = "ATOM");
         return v64;
     })((function (values,v63){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l26.fvalue(values, ((function(){
                     var tmp = v63;
                     return (typeof tmp == 'object' && 'car' in tmp);
                 })()?l4.value: l3.value));
         })();
-    
     }));
     return l43;
 })();
@@ -618,10 +621,10 @@ var l57 = {name: "LISTP"};
         ((v66)["fname"] = "ENSURE-LIST");
         return v66;
     })((function (values,v65){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (l57.fvalue(pv, v65) !== l3.value ? v65 : l42.fvalue(values, v65));
         })();
-    
     }));
     return l56;
 })();
@@ -631,7 +634,8 @@ var l58 = {name: "!REDUCE"};
         ((v70)["fname"] = "!REDUCE");
         return v70;
     })((function (values,v67,v68,v69){
-        checkArgsAtLeast(4);checkArgsAtLeast(4);return (function(){
+        checkArgs(arguments, 4);
+        return (function(){
                 return (l11.fvalue(pv, v68) !== l3.value ? v69 : l58.fvalue(values, v67, (function(){
                     var tmp = v68;
                     return tmp === l3.value? l3.value: tmp.cdr;
@@ -640,7 +644,6 @@ var l58 = {name: "!REDUCE"};
                     return tmp === l3.value? l3.value: tmp.car;
                 })())));
         })();
-    
     }));
     return l58;
 })();
@@ -685,7 +688,6 @@ var l59 = {name: "+"};
                     })();
                 })(0);
         })();
-    
     }));
     return l59;
 })();
@@ -695,7 +697,8 @@ var l60 = {name: "-"};
         ((v81)["fname"] = "-");
         return v81;
     })((function (values,v77){
-        checkArgsAtLeast(2);var v76= l3.value;
+        checkArgsAtLeast(arguments, 2);
+        var v76= l3.value;
         for (var i = arguments.length-1; i>=2; i--)
             v76 = {car: arguments[i], cdr: 
         v76};
@@ -734,7 +737,6 @@ var l60 = {name: "-"};
                     })();
                 })(v77));
         })();
-    
     }));
     return l60;
 })();
@@ -745,7 +747,8 @@ var l62 = {name: "APPEND"};
         ((v84)["fname"] = "APPEND-TWO");
         return v84;
     })((function (values,v82,v83){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (l11.fvalue(pv, v82) !== l3.value ? v83 : ({car: (function(){
                     var tmp = v82;
                     return tmp === l3.value? l3.value: tmp.car;
@@ -754,7 +757,6 @@ var l62 = {name: "APPEND"};
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })(), v83)}));
         })();
-    
     }));
     return l61;
 })();
@@ -775,7 +777,6 @@ var l62 = {name: "APPEND"};
                     return func;
                 })(), v85, l3);
         })();
-    
     }));
     return l62;
 })();
@@ -785,7 +786,8 @@ var l63 = {name: "REVAPPEND"};
         ((v89)["fname"] = "REVAPPEND");
         return v89;
     })((function (values,v87,v88){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 (function(){
                         return (function(){
                             while(v87 !== l3.value){
@@ -802,7 +804,6 @@ var l63 = {name: "REVAPPEND"};
                 })();
                 return v88;
         })();
-    
     }));
     return l63;
 })();
@@ -812,10 +813,10 @@ var l64 = {name: "REVERSE"};
         ((v91)["fname"] = "REVERSE");
         return v91;
     })((function (values,v90){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l63.fvalue(values, v90, l3);
         })();
-    
     }));
     return l64;
 })();
@@ -827,7 +828,8 @@ var l66 = {name: "LIST-LENGTH"};
         ((v94)["fname"] = "LIST-LENGTH");
         return v94;
     })((function (values,v92){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v93){
                     (function(){
                             return (function(){
@@ -849,7 +851,6 @@ var l66 = {name: "LIST-LENGTH"};
                     return v93;
                 })(0);
         })();
-    
     }));
     return l66;
 })();
@@ -859,7 +860,8 @@ var l67 = {name: "LENGTH"};
         ((v96)["fname"] = "LENGTH");
         return v96;
     })((function (values,v95){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (((typeof(v95) == "string")?l4.value: l3.value) !== l3.value ? (function(){
                     var x = v95;
                     if (typeof x != 'string')
@@ -873,7 +875,6 @@ var l67 = {name: "LENGTH"};
                     return tmp == undefined? l3.value: tmp ;
                 })() : (l57.fvalue(pv, v95) !== l3.value ? l66.fvalue(values, v95) : l3.value)));
         })();
-    
     }));
     return l67;
 })();
@@ -883,7 +884,8 @@ var l68 = {name: "CONCAT-TWO"};
         ((v99)["fname"] = "CONCAT-TWO");
         return v99;
     })((function (values,v97,v98){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (function(){
                     var string1 = v97;
                     var string2 = v98;
@@ -894,7 +896,6 @@ var l68 = {name: "CONCAT-TWO"};
                     return string1.concat(string2);
                 })();
         })();
-    
     }));
     return l68;
 })();
@@ -904,7 +905,8 @@ var l69 = {name: "MAPCAR"};
         ((v102)["fname"] = "MAPCAR");
         return v102;
     })((function (values,v100,v101){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (l11.fvalue(pv, v101) !== l3.value ? l3 : ({car: (v100)(pv, (function(){
                     var tmp = v101;
                     return tmp === l3.value? l3.value: tmp.car;
@@ -913,7 +915,6 @@ var l69 = {name: "MAPCAR"};
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })())}));
         })();
-    
     }));
     return l69;
 })();
@@ -923,10 +924,10 @@ var l70 = {name: "IDENTITY"};
         ((v104)["fname"] = "IDENTITY");
         return v104;
     })((function (values,v103){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return v103;
         })();
-    
     }));
     return l70;
 })();
@@ -936,7 +937,8 @@ var l71 = {name: "COPY-LIST"};
         ((v106)["fname"] = "COPY-LIST");
         return v106;
     })((function (values,v105){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l69.fvalue(values, (function(){
                     var symbol = l70;
                     var func = symbol.fvalue;
@@ -944,7 +946,6 @@ var l71 = {name: "COPY-LIST"};
                     return func;
                 })(), v105);
         })();
-    
     }));
     return l71;
 })();
@@ -954,10 +955,10 @@ var l72 = {name: "CODE-CHAR"};
         ((v108)["fname"] = "CODE-CHAR");
         return v108;
     })((function (values,v107){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return v107;
         })();
-    
     }));
     return l72;
 })();
@@ -967,10 +968,10 @@ var l73 = {name: "CHAR-CODE"};
         ((v110)["fname"] = "CHAR-CODE");
         return v110;
     })((function (values,v109){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return v109;
         })();
-    
     }));
     return l73;
 })();
@@ -980,7 +981,8 @@ var l74 = {name: "CHAR="};
         ((v113)["fname"] = "CHAR=");
         return v113;
     })((function (values,v111,v112){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (function(){
                     var x1 = v111;
                     if (typeof x1 !== 'number') throw 'Not a number!';
@@ -989,7 +991,6 @@ var l74 = {name: "CHAR="};
                     return (x1==x2?l4.value: l3.value);
                 })();
         })();
-    
     }));
     return l74;
 })();
@@ -999,7 +1000,8 @@ var l75 = {name: "INTEGERP"};
         ((v115)["fname"] = "INTEGERP");
         return v115;
     })((function (values,v114){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (((typeof (v114) == "number")?l4.value: l3.value) !== l3.value ? (function(){
                     var x1 = (function(){
                         var x = v114;
@@ -1013,7 +1015,6 @@ var l75 = {name: "INTEGERP"};
                     return (x1==x2?l4.value: l3.value);
                 })() : l3.value);
         })();
-    
     }));
     return l75;
 })();
@@ -1023,7 +1024,8 @@ var l76 = {name: "PLUSP"};
         ((v117)["fname"] = "PLUSP");
         return v117;
     })((function (values,v116){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(){
                     var x1 = 0;
                     if (typeof x1 !== 'number') throw 'Not a number!';
@@ -1032,7 +1034,6 @@ var l76 = {name: "PLUSP"};
                     return (x1<x2?l4.value: l3.value);
                 })();
         })();
-    
     }));
     return l76;
 })();
@@ -1042,7 +1043,8 @@ var l77 = {name: "MINUSP"};
         ((v119)["fname"] = "MINUSP");
         return v119;
     })((function (values,v118){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(){
                     var x1 = v118;
                     if (typeof x1 !== 'number') throw 'Not a number!';
@@ -1051,7 +1053,6 @@ var l77 = {name: "MINUSP"};
                     return (x1<x2?l4.value: l3.value);
                 })();
         })();
-    
     }));
     return l77;
 })();
@@ -1060,7 +1061,8 @@ var l77 = {name: "MINUSP"};
         ((v122)["fname"] = "LISTP");
         return v122;
     })((function (values,v120){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v121){
                     return (v121 !== l3.value ? v121 : l11.fvalue(values, v120));
                 })(((function(){
@@ -1068,7 +1070,6 @@ var l77 = {name: "MINUSP"};
                     return (typeof tmp == 'object' && 'car' in tmp);
                 })()?l4.value: l3.value));
         })();
-    
     }));
     return l57;
 })();
@@ -1078,7 +1079,8 @@ var l78 = {name: "NTHCDR"};
         ((v125)["fname"] = "NTHCDR");
         return v125;
     })((function (values,v123,v124){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 (function(){
                         return (function(){
                             while((l76.fvalue(pv, v123) !== l3.value ? v124 : l3.value) !== l3.value){
@@ -1092,7 +1094,6 @@ var l78 = {name: "NTHCDR"};
                 })();
                 return v124;
         })();
-    
     }));
     return l78;
 })();
@@ -1102,13 +1103,13 @@ var l79 = {name: "NTH"};
         ((v128)["fname"] = "NTH");
         return v128;
     })((function (values,v126,v127){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (function(){
                     var tmp = l78.fvalue(pv, v126, v127);
                     return tmp === l3.value? l3.value: tmp.car;
                 })();
         })();
-    
     }));
     return l79;
 })();
@@ -1118,7 +1119,8 @@ var l80 = {name: "LAST"};
         ((v130)["fname"] = "LAST");
         return v130;
     })((function (values,v129){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 (function(){
                         return (function(){
                             while(((function(){
@@ -1137,7 +1139,6 @@ var l80 = {name: "LAST"};
                 })();
                 return v129;
         })();
-    
     }));
     return l80;
 })();
@@ -1147,7 +1148,8 @@ var l81 = {name: "BUTLAST"};
         ((v132)["fname"] = "BUTLAST");
         return v132;
     })((function (values,v131){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (((function(){
                     var tmp = (function(){
                         var tmp = v131;
@@ -1162,7 +1164,6 @@ var l81 = {name: "BUTLAST"};
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })())}) : l3.value);
         })();
-    
     }));
     return l81;
 })();
@@ -1172,7 +1173,8 @@ var l82 = {name: "MEMBER"};
         ((v135)["fname"] = "MEMBER");
         return v135;
     })((function (values,v133,v134){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (function(){
                     try {
                         return (function(){
@@ -1198,7 +1200,6 @@ var l82 = {name: "MEMBER"};
                     }
                 })();
         })();
-    
     }));
     return l82;
 })();
@@ -1208,7 +1209,8 @@ var l83 = {name: "REMOVE"};
         ((v138)["fname"] = "REMOVE");
         return v138;
     })((function (values,v136,v137){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (l11.fvalue(pv, v137) !== l3.value ? l3.value : (l25.fvalue(pv, v136, (function(){
                     var tmp = v137;
                     return tmp === l3.value? l3.value: tmp.car;
@@ -1223,7 +1225,6 @@ var l83 = {name: "REMOVE"};
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })())})));
         })();
-    
     }));
     return l83;
 })();
@@ -1233,7 +1234,8 @@ var l84 = {name: "REMOVE-IF"};
         ((v141)["fname"] = "REMOVE-IF");
         return v141;
     })((function (values,v139,v140){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (l11.fvalue(pv, v140) !== l3.value ? l3.value : ((v139)(pv, (function(){
                     var tmp = v140;
                     return tmp === l3.value? l3.value: tmp.car;
@@ -1248,7 +1250,6 @@ var l84 = {name: "REMOVE-IF"};
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })())})));
         })();
-    
     }));
     return l84;
 })();
@@ -1258,7 +1259,8 @@ var l85 = {name: "REMOVE-IF-NOT"};
         ((v144)["fname"] = "REMOVE-IF-NOT");
         return v144;
     })((function (values,v142,v143){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (l11.fvalue(pv, v143) !== l3.value ? l3.value : ((v142)(pv, (function(){
                     var tmp = v143;
                     return tmp === l3.value? l3.value: tmp.car;
@@ -1273,7 +1275,6 @@ var l85 = {name: "REMOVE-IF-NOT"};
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })())));
         })();
-    
     }));
     return l85;
 })();
@@ -1283,7 +1284,8 @@ var l86 = {name: "DIGIT-CHAR-P"};
         ((v146)["fname"] = "DIGIT-CHAR-P");
         return v146;
     })((function (values,v145){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (((function(){
                     var x1 = 48;
                     if (typeof x1 !== 'number') throw 'Not a number!';
@@ -1304,7 +1306,6 @@ var l86 = {name: "DIGIT-CHAR-P"};
                     return x1-x2;
                 })() : l3.value);
         })();
-    
     }));
     return l86;
 })();
@@ -1314,7 +1315,9 @@ var l87 = {name: "SUBSEQ"};
         ((v150)["fname"] = "SUBSEQ");
         return v150;
     })((function (values,v147,v148,v149){
-        checkArgsAtLeast(3);checkArgsAtLeast(4);switch(arguments.length-1){
+        checkArgsAtLeast(arguments, 3);
+        checkArgsAtMost(arguments, 4);
+        switch(arguments.length-1){
         case 2:
         v149=l3.value;
         default: break;
@@ -1335,7 +1338,6 @@ var l87 = {name: "SUBSEQ"};
                     throw "Unsupported argument.";
                 })());
         })();
-    
     }));
     return l87;
 })();
@@ -1345,7 +1347,8 @@ var l88 = {name: "PARSE-INTEGER"};
         ((v155)["fname"] = "PARSE-INTEGER");
         return v155;
     })((function (values,v151){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v152,v153,v154){
                     (function(){
                             return (function(){
@@ -1390,7 +1393,6 @@ var l88 = {name: "PARSE-INTEGER"};
                     return v152;
                 })(0,0,l67.fvalue(pv, v151));
         })();
-    
     }));
     return l88;
 })();
@@ -1400,7 +1402,8 @@ var l89 = {name: "SOME"};
         ((v162)["fname"] = "SOME");
         return v162;
     })((function (values,v156,v157){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
             try {
                 return (((typeof(v157) == "string")?l4.value: l3.value) !== l3.value ? (function(v158,v159){
                     (function(){
@@ -1475,7 +1478,6 @@ var l89 = {name: "SOME"};
                     throw cf;
             }
         })();
-    
     }));
     return l89;
 })();
@@ -1485,7 +1487,8 @@ var l90 = {name: "EVERY"};
         ((v169)["fname"] = "EVERY");
         return v169;
     })((function (values,v163,v164){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
             try {
                 return (((typeof(v164) == "string")?l4.value: l3.value) !== l3.value ? (function(v165,v166){
                     (function(){
@@ -1560,7 +1563,6 @@ var l90 = {name: "EVERY"};
                     throw cf;
             }
         })();
-    
     }));
     return l90;
 })();
@@ -1570,7 +1572,8 @@ var l91 = {name: "ASSOC"};
         ((v172)["fname"] = "ASSOC");
         return v172;
     })((function (values,v170,v171){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 (function(){
                     try {
                         return (function(){
@@ -1596,7 +1599,6 @@ var l91 = {name: "ASSOC"};
                     return tmp === l3.value? l3.value: tmp.car;
                 })();
         })();
-    
     }));
     return l91;
 })();
@@ -1606,7 +1608,8 @@ var l92 = {name: "STRING"};
         ((v174)["fname"] = "STRING");
         return v174;
     })((function (values,v173){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (((typeof(v173) == "string")?l4.value: l3.value) !== l3.value ? v173 : (((function(){
                     var tmp = v173;
                     return (typeof tmp == 'object' && 'name' in tmp);
@@ -1617,7 +1620,6 @@ var l92 = {name: "STRING"};
                     return String.fromCharCode(x);
                 })()));
         })();
-    
     }));
     return l92;
 })();
@@ -1627,10 +1629,10 @@ var l93 = {name: "STRING="};
         ((v177)["fname"] = "STRING=");
         return v177;
     })((function (values,v175,v176){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return ((v175 == v176)?l4.value: l3.value);
         })();
-    
     }));
     return l93;
 })();
@@ -1640,7 +1642,8 @@ var l94 = {name: "FDEFINITION"};
         ((v179)["fname"] = "FDEFINITION");
         return v179;
     })((function (values,v178){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (((typeof v178 == 'function')?l4.value: l3.value) !== l3.value ? v178 : (((function(){
                     var tmp = v178;
                     return (typeof tmp == 'object' && 'name' in tmp);
@@ -1653,7 +1656,6 @@ var l94 = {name: "FDEFINITION"};
                     throw "Invalid function";
                 })()));
         })();
-    
     }));
     return l94;
 })();
@@ -1664,11 +1666,11 @@ var l96 = {name: "WRITE-LINE"};
         ((v181)["fname"] = "DISASSEMBLE");
         return v181;
     })((function (values,v180){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 l96.fvalue(pv, (l94.fvalue(pv, v180)).toString());
                 return l3.value;
         })();
-    
     }));
     return l95;
 })();
@@ -1681,7 +1683,8 @@ var l99 = {name: "VARIABLE"};
         return v186;
     })((function(){
         var func = (function (values,v182,v183){
-            checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+            checkArgs(arguments, 3);
+            return (function(){
                     return (function(v184){
                         return (l25.fvalue(pv, v184, l98) !== l3.value ? (function(v185){
                             return (function(){
@@ -1704,7 +1707,6 @@ var l99 = {name: "VARIABLE"};
                         })()));
                     })(v183);
             })();
-        
         });
         func.docstring = 'Return the documentation of X. TYPE must be the symbol VARIABLE or FUNCTION.';
         return func;
@@ -1722,7 +1724,8 @@ var l101 = {name: "LIST-ALL-PACKAGES"};
         ((v187)["fname"] = "LIST-ALL-PACKAGES");
         return v187;
     })((function (values){
-        checkArgsAtLeast(1);return (function(){
+        checkArgsAtMost(arguments, 1);
+        return (function(){
                 return (function(){
                     var symbol = l100;
                     var value = symbol.value;
@@ -1730,7 +1733,6 @@ var l101 = {name: "LIST-ALL-PACKAGES"};
                     return value;
                 })();
         })();
-    
     }));
     return l101;
 })();
@@ -1741,7 +1743,9 @@ var l103 = {name: "FIND-PACKAGE-OR-FAIL"};
         ((v192)["fname"] = "MAKE-PACKAGE");
         return v192;
     })((function (values,v188,v189){
-        checkArgsAtLeast(2);checkArgsAtLeast(3);switch(arguments.length-1){
+        checkArgsAtLeast(arguments, 2);
+        checkArgsAtMost(arguments, 3);
+        switch(arguments.length-1){
         case 1:
         v189=l3.value;
         default: break;
@@ -1766,7 +1770,6 @@ var l103 = {name: "FIND-PACKAGE-OR-FAIL"};
                     return func;
                 })(), v189));
         })();
-    
     }));
     return l102;
 })();
@@ -1776,10 +1779,10 @@ var l104 = {name: "PACKAGEP"};
         ((v194)["fname"] = "PACKAGEP");
         return v194;
     })((function (values,v193){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (((typeof (v193) === 'object')?l4.value: l3.value) !== l3.value ? ((("symbols") in (v193))?l4.value: l3.value) : l3.value);
         })();
-    
     }));
     return l104;
 })();
@@ -1790,7 +1793,8 @@ var l106 = {name: "PACKAGE-NAME"};
         ((v199)["fname"] = "FIND-PACKAGE");
         return v199;
     })((function (values,v195){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
             try {
                 (l104.fvalue(pv, v195) !== l3.value ? (function(){
                     throw ({type: 'block', id: 86, value: v195, message: 'Return from unknown block FIND-PACKAGE.'})
@@ -1841,7 +1845,6 @@ var l106 = {name: "PACKAGE-NAME"};
                     throw cf;
             }
         })();
-    
     }));
     return l105;
 })();
@@ -1850,14 +1853,14 @@ var l106 = {name: "PACKAGE-NAME"};
         ((v202)["fname"] = "FIND-PACKAGE-OR-FAIL");
         return v202;
     })((function (values,v200){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v201){
                     return (v201 !== l3.value ? v201 : (function(){
                         throw "Package unknown.";
                     })());
                 })(l105.fvalue(pv, v200));
         })();
-    
     }));
     return l103;
 })();
@@ -1866,7 +1869,8 @@ var l106 = {name: "PACKAGE-NAME"};
         ((v205)["fname"] = "PACKAGE-NAME");
         return v205;
     })((function (values,v203){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v204){
                     return (function(){
                         var tmp = (v204)["packageName"];
@@ -1874,7 +1878,6 @@ var l106 = {name: "PACKAGE-NAME"};
                     })();
                 })(l103.fvalue(pv, v203));
         })();
-    
     }));
     return l106;
 })();
@@ -1884,7 +1887,8 @@ var l107 = {name: "%PACKAGE-SYMBOLS"};
         ((v208)["fname"] = "%PACKAGE-SYMBOLS");
         return v208;
     })((function (values,v206){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v207){
                     return (function(){
                         var tmp = (v207)["symbols"];
@@ -1892,7 +1896,6 @@ var l107 = {name: "%PACKAGE-SYMBOLS"};
                     })();
                 })(l103.fvalue(pv, v206));
         })();
-    
     }));
     return l107;
 })();
@@ -1902,7 +1905,8 @@ var l108 = {name: "PACKAGE-USE-LIST"};
         ((v211)["fname"] = "PACKAGE-USE-LIST");
         return v211;
     })((function (values,v209){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v210){
                     return (function(){
                         var tmp = (v210)["use"];
@@ -1910,7 +1914,6 @@ var l108 = {name: "PACKAGE-USE-LIST"};
                     })();
                 })(l103.fvalue(pv, v209));
         })();
-    
     }));
     return l108;
 })();
@@ -1920,7 +1923,8 @@ var l109 = {name: "%PACKAGE-EXTERNAL-SYMBOLS"};
         ((v214)["fname"] = "%PACKAGE-EXTERNAL-SYMBOLS");
         return v214;
     })((function (values,v212){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v213){
                     return (function(){
                         var tmp = (v213)["exports"];
@@ -1928,7 +1932,6 @@ var l109 = {name: "%PACKAGE-EXTERNAL-SYMBOLS"};
                     })();
                 })(l103.fvalue(pv, v212));
         })();
-    
     }));
     return l109;
 })();
@@ -1959,7 +1962,8 @@ var l114 = {name: "SYMBOL-PACKAGE"};
         ((v216)["fname"] = "KEYWORDP");
         return v216;
     })((function (values,v215){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (((function(){
                     var tmp = v215;
                     return (typeof tmp == 'object' && 'name' in tmp);
@@ -1970,7 +1974,6 @@ var l114 = {name: "SYMBOL-PACKAGE"};
                     return value;
                 })())?l4.value: l3.value) : l3.value);
         })();
-    
     }));
     return l113;
 })();
@@ -1992,7 +1995,8 @@ var l117 = {name: "%INTERN-SYMBOL"};
         ((v219)["fname"] = "%INTERN-SYMBOL");
         return v219;
     })((function (values,v217){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v218){
                     ((v217)["package"] = (function(){
                         var symbol = l110;
@@ -2008,7 +2012,6 @@ var l117 = {name: "%INTERN-SYMBOL"};
                     return value;
                 })()));
         })();
-    
     }));
     return l117;
 })();
@@ -2018,7 +2021,8 @@ var l118 = {name: "%FIND-SYMBOL"};
         ((v227)["fname"] = "%FIND-SYMBOL");
         return v227;
     })((function (values,v220,v221){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
             try {
                 return (function(v222){
                     return (function(v223){
@@ -2063,7 +2067,6 @@ var l118 = {name: "%FIND-SYMBOL"};
                     throw cf;
             }
         })();
-    
     }));
     return l118;
 })();
@@ -2073,7 +2076,9 @@ var l119 = {name: "FIND-SYMBOL"};
         ((v230)["fname"] = "FIND-SYMBOL");
         return v230;
     })((function (values,v228,v229){
-        checkArgsAtLeast(2);checkArgsAtLeast(3);switch(arguments.length-1){
+        checkArgsAtLeast(arguments, 2);
+        checkArgsAtMost(arguments, 3);
+        switch(arguments.length-1){
         case 1:
         v229=(function(){
             var symbol = l115;
@@ -2089,7 +2094,6 @@ var l119 = {name: "FIND-SYMBOL"};
                     return tmp === l3.value? l3.value: tmp.car;
                 })();
         })();
-    
     }));
     return l119;
 })();
@@ -2100,7 +2104,9 @@ var l121 = {name: "EXPORT"};
         ((v237)["fname"] = "INTERN");
         return v237;
     })((function (values,v231,v232){
-        checkArgsAtLeast(2);checkArgsAtLeast(3);switch(arguments.length-1){
+        checkArgsAtLeast(arguments, 2);
+        checkArgsAtMost(arguments, 3);
+        switch(arguments.length-1){
         case 1:
         v232=(function(){
             var symbol = l115;
@@ -2146,7 +2152,6 @@ var l121 = {name: "EXPORT"};
                     })(l118.fvalue(pv, v231, v233));
                 })(l103.fvalue(pv, v232));
         })();
-    
     }));
     return l120;
 })();
@@ -2155,7 +2160,8 @@ var l121 = {name: "EXPORT"};
         ((v239)["fname"] = "SYMBOL-PACKAGE");
         return v239;
     })((function (values,v238){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 (((function(){
                     var tmp = v238;
                     return (typeof tmp == 'object' && 'name' in tmp);
@@ -2167,7 +2173,6 @@ var l121 = {name: "EXPORT"};
                     return tmp == undefined? l3.value: tmp ;
                 })();
         })();
-    
     }));
     return l114;
 })();
@@ -2176,7 +2181,9 @@ var l121 = {name: "EXPORT"};
         ((v245)["fname"] = "EXPORT");
         return v245;
     })((function (values,v240,v241){
-        checkArgsAtLeast(2);checkArgsAtLeast(3);switch(arguments.length-1){
+        checkArgsAtLeast(arguments, 2);
+        checkArgsAtMost(arguments, 3);
+        switch(arguments.length-1){
         case 1:
         v241=(function(){
             var symbol = l115;
@@ -2211,7 +2218,6 @@ var l121 = {name: "EXPORT"};
                     })();
                 })(l109.fvalue(pv, v241));
         })();
-    
     }));
     return l121;
 })();
@@ -2221,7 +2227,8 @@ var l122 = {name: "GET-UNIVERSAL-TIME"};
         ((v246)["fname"] = "GET-UNIVERSAL-TIME");
         return v246;
     })((function (values){
-        checkArgsAtLeast(1);return (function(){
+        checkArgsAtMost(arguments, 1);
+        return (function(){
                 return (function(){
                     var x1 = (Math.round(new Date() / 1000));
                     if (typeof x1 !== 'number') throw 'Not a number!';
@@ -2230,7 +2237,6 @@ var l122 = {name: "GET-UNIVERSAL-TIME"};
                     return x1+x2;
                 })();
         })();
-    
     }));
     return l122;
 })();
@@ -2257,7 +2263,6 @@ var l124 = {name: "CONCAT"};
                     return func;
                 })(), v247, "");
         })();
-    
     }));
     return l124;
 })();
@@ -2269,7 +2274,9 @@ var l126 = {name: "JOIN"};
         ((v251)["fname"] = "JOIN");
         return v251;
     })((function (values,v249,v250){
-        checkArgsAtLeast(2);checkArgsAtLeast(3);switch(arguments.length-1){
+        checkArgsAtLeast(arguments, 2);
+        checkArgsAtMost(arguments, 3);
+        switch(arguments.length-1){
         case 1:
         v250="";
         default: break;
@@ -2289,7 +2296,6 @@ var l126 = {name: "JOIN"};
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })(), v250))));
         })();
-    
     }));
     return l126;
 })();
@@ -2299,7 +2305,9 @@ var l127 = {name: "JOIN-TRAILING"};
         ((v254)["fname"] = "JOIN-TRAILING");
         return v254;
     })((function (values,v252,v253){
-        checkArgsAtLeast(2);checkArgsAtLeast(3);switch(arguments.length-1){
+        checkArgsAtLeast(arguments, 2);
+        checkArgsAtMost(arguments, 3);
+        switch(arguments.length-1){
         case 1:
         v253="";
         default: break;
@@ -2313,7 +2321,6 @@ var l127 = {name: "JOIN-TRAILING"};
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })(), v253)));
         })();
-    
     }));
     return l127;
 })();
@@ -2323,10 +2330,10 @@ var l128 = {name: "MAPCONCAT"};
         ((v257)["fname"] = "MAPCONCAT");
         return v257;
     })((function (values,v255,v256){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return l126.fvalue(values, l69.fvalue(pv, v255, v256));
         })();
-    
     }));
     return l128;
 })();
@@ -2336,7 +2343,8 @@ var l129 = {name: "VECTOR-TO-LIST"};
         ((v263)["fname"] = "VECTOR-TO-LIST");
         return v263;
     })((function (values,v258){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v259,v260){
                     return (function(){
                             return (function(v261,v262){
@@ -2370,7 +2378,6 @@ var l129 = {name: "VECTOR-TO-LIST"};
                     })();
                 })(l3.value,l67.fvalue(pv, v258));
         })();
-    
     }));
     return l129;
 })();
@@ -2380,7 +2387,8 @@ var l130 = {name: "LIST-TO-VECTOR"};
         ((v269)["fname"] = "LIST-TO-VECTOR");
         return v269;
     })((function (values,v264){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v265,v266){
                     return (function(){
                             return (function(v267,v268){
@@ -2422,7 +2430,6 @@ var l130 = {name: "LIST-TO-VECTOR"};
                     return r;
                 })(),0);
         })();
-    
     }));
     return l130;
 })();
@@ -2432,10 +2439,10 @@ var l131 = {name: "VALUES-LIST"};
         ((v271)["fname"] = "VALUES-LIST");
         return v271;
     })((function (values,v270){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return values.apply(this, l130.fvalue(pv, v270));
         })();
-    
     }));
     return l131;
 })();
@@ -2452,7 +2459,6 @@ var l132 = {name: "VALUES"};
         return (function(){
                 return l131.fvalue(values, v272);
         })();
-    
     }));
     return l132;
 })();
@@ -2530,7 +2536,6 @@ var l135 = {name: "INDENT"};
                     })("",0,l67.fvalue(pv, v275));
                 })(l126.fvalue(pv, v274));
         })();
-    
     }));
     return l135;
 })();
@@ -2539,7 +2544,8 @@ var l135 = {name: "INDENT"};
         ((v284)["fname"] = "INTEGER-TO-STRING");
         return v284;
     })((function (values,v281){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (l23.fvalue(pv, v281) !== l3.value ? "0" : (l77.fvalue(pv, v281) !== l3.value ? l124.fvalue(values, "-", l16.fvalue(pv, (function(){
                     var x1 = 0;
                     if (typeof x1 !== 'number') throw 'Not a number!';
@@ -2564,7 +2570,8 @@ var l135 = {name: "INDENT"};
                             })();
                     })();
                     return l126.fvalue(values, l69.fvalue(pv, (function (values,v283){
-                        checkArgsAtLeast(2);checkArgsAtLeast(2);return l92.fvalue(values, (function(){
+                        checkArgs(arguments, 2);
+                        return l92.fvalue(values, (function(){
                             var string = "0123456789";
                             var index = v283;
                             if (typeof string != 'string')
@@ -2573,11 +2580,9 @@ var l135 = {name: "INDENT"};
                                 throw 'The value ' + index + ' is not a type number.';
                             return string.charCodeAt(index);
                         })());
-                    
                     }), v282));
                 })(l3.value)));
         })();
-    
     }));
     return l16;
 })();
@@ -2588,10 +2593,10 @@ var l137 = {name: "LS-COMPILE"};
         ((v286)["fname"] = "JS!BOOL");
         return v286;
     })((function (values,v285){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l124.fvalue(values, "(", v285, "?", l137.fvalue(pv, l4.value), ": ", l137.fvalue(pv, l3.value), ")");
         })();
-    
     }));
     return l136;
 })();
@@ -2604,7 +2609,8 @@ var l140 = {name: "ESCAPE-STRING"};
         ((v292)["fname"] = "PRIN1-TO-STRING");
         return v292;
     })((function (values,v287){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (((function(){
                     var tmp = v287;
                     return (typeof tmp == 'object' && 'name' in tmp);
@@ -2647,7 +2653,6 @@ var l140 = {name: "ESCAPE-STRING"};
                     return typeof x === 'object' && 'length' in x;
                 })()?l4.value: l3.value) !== l3.value ? l124.fvalue(values, "#", l139.fvalue(pv, l129.fvalue(pv, v287))) : (l104.fvalue(pv, v287) !== l3.value ? l124.fvalue(values, "#<PACKAGE ", l106.fvalue(pv, v287), ">") : l3.value)))))));
         })();
-    
     }));
     return l139;
 })();
@@ -2656,7 +2661,8 @@ var l140 = {name: "ESCAPE-STRING"};
         ((v294)["fname"] = "WRITE-LINE");
         return v294;
     })((function (values,v293){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 (function(){
                     var x = v293;
                     if (typeof x != 'string')
@@ -2676,7 +2682,6 @@ var l140 = {name: "ESCAPE-STRING"};
                 })();
                 return v293;
         })();
-    
     }));
     return l96;
 })();
@@ -2686,7 +2691,8 @@ var l141 = {name: "WARN"};
         ((v296)["fname"] = "WARN");
         return v296;
     })((function (values,v295){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 (function(){
                     var x = "WARNING: ";
                     if (typeof x != 'string')
@@ -2695,7 +2701,6 @@ var l141 = {name: "WARN"};
                 })();
                 return l96.fvalue(values, v295);
         })();
-    
     }));
     return l141;
 })();
@@ -2705,11 +2710,11 @@ var l142 = {name: "PRINT"};
         ((v298)["fname"] = "PRINT");
         return v298;
     })((function (values,v297){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 l96.fvalue(pv, l139.fvalue(pv, v297));
                 return v297;
         })();
-    
     }));
     return l142;
 })();
@@ -2719,10 +2724,10 @@ var l143 = {name: "MAKE-STRING-STREAM"};
         ((v300)["fname"] = "MAKE-STRING-STREAM");
         return v300;
     })((function (values,v299){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return ({car: v299, cdr: 0});
         })();
-    
     }));
     return l143;
 })();
@@ -2732,7 +2737,8 @@ var l144 = {name: "%PEEK-CHAR"};
         ((v302)["fname"] = "%PEEK-CHAR");
         return v302;
     })((function (values,v301){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return ((function(){
                     var x1 = (function(){
                         var tmp = v301;
@@ -2761,7 +2767,6 @@ var l144 = {name: "%PEEK-CHAR"};
                     return string.charCodeAt(index);
                 })() : l3.value);
         })();
-    
     }));
     return l144;
 })();
@@ -2771,7 +2776,8 @@ var l145 = {name: "%READ-CHAR"};
         ((v305)["fname"] = "%READ-CHAR");
         return v305;
     })((function (values,v303){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return ((function(){
                     var x1 = (function(){
                         var tmp = v303;
@@ -2811,7 +2817,6 @@ var l145 = {name: "%READ-CHAR"};
                     return string.charCodeAt(index);
                 })()) : l3.value);
         })();
-    
     }));
     return l145;
 })();
@@ -2821,14 +2826,14 @@ var l146 = {name: "WHITESPACEP"};
         ((v309)["fname"] = "WHITESPACEP");
         return v309;
     })((function (values,v306){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v307){
                     return (v307 !== l3.value ? v307 : (function(v308){
                         return (v308 !== l3.value ? v308 : l74.fvalue(values, v306, 9));
                     })(l74.fvalue(pv, v306, 10)));
                 })(l74.fvalue(pv, v306, 32));
         })();
-    
     }));
     return l146;
 })();
@@ -2838,7 +2843,8 @@ var l147 = {name: "SKIP-WHITESPACES"};
         ((v312)["fname"] = "SKIP-WHITESPACES");
         return v312;
     })((function (values,v310){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v311){
                     (v311 = l144.fvalue(pv, v310));
                     return (function(){
@@ -2851,7 +2857,6 @@ var l147 = {name: "SKIP-WHITESPACES"};
                     })();
                 })(l3.value);
         })();
-    
     }));
     return l147;
 })();
@@ -2861,7 +2866,8 @@ var l148 = {name: "TERMINALP"};
         ((v317)["fname"] = "TERMINALP");
         return v317;
     })((function (values,v313){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v314){
                     return (v314 !== l3.value ? v314 : (function(v315){
                         return (v315 !== l3.value ? v315 : (function(v316){
@@ -2870,7 +2876,6 @@ var l148 = {name: "TERMINALP"};
                     })(l146.fvalue(pv, v313)));
                 })(l11.fvalue(pv, v313));
         })();
-    
     }));
     return l148;
 })();
@@ -2880,7 +2885,8 @@ var l149 = {name: "READ-UNTIL"};
         ((v322)["fname"] = "READ-UNTIL");
         return v322;
     })((function (values,v318,v319){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (function(v320,v321){
                     (v321 = l144.fvalue(pv, v318));
                     (function(){
@@ -2895,7 +2901,6 @@ var l149 = {name: "READ-UNTIL"};
                     return v320;
                 })("",l3.value);
         })();
-    
     }));
     return l149;
 })();
@@ -2905,7 +2910,8 @@ var l150 = {name: "SKIP-WHITESPACES-AND-COMMENTS"};
         ((v326)["fname"] = "SKIP-WHITESPACES-AND-COMMENTS");
         return v326;
     })((function (values,v323){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v324){
                     l147.fvalue(pv, v323);
                     (v324 = l144.fvalue(pv, v323));
@@ -2913,8 +2919,8 @@ var l150 = {name: "SKIP-WHITESPACES-AND-COMMENTS"};
                             return (function(){
                                 while((v324 !== l3.value ? l74.fvalue(pv, v324, 59) : l3.value) !== l3.value){
                                     l149.fvalue(pv, v323, (function (values,v325){
-                                        checkArgsAtLeast(2);checkArgsAtLeast(2);return l74.fvalue(values, v325, 10);
-                                    
+                                        checkArgs(arguments, 2);
+                                        return l74.fvalue(values, v325, 10);
                                     }));
                                     l147.fvalue(pv, v323);
                                     (v324 = l144.fvalue(pv, v323));
@@ -2923,7 +2929,6 @@ var l150 = {name: "SKIP-WHITESPACES-AND-COMMENTS"};
                     })();
                 })(l3.value);
         })();
-    
     }));
     return l150;
 })();
@@ -2934,7 +2939,8 @@ var l152 = {name: "LS-READ"};
         ((v330)["fname"] = "%READ-LIST");
         return v330;
     })((function (values,v327){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 l150.fvalue(pv, v327);
                 return (function(v328){
                     return (l11.fvalue(pv, v328) !== l3.value ? (function(){
@@ -2954,7 +2960,6 @@ var l152 = {name: "LS-READ"};
                     })() : ({car: l152.fvalue(pv, v327), cdr: l151.fvalue(pv, v327)}))));
                 })(l144.fvalue(pv, v327));
         })();
-    
     }));
     return l151;
 })();
@@ -2964,7 +2969,8 @@ var l153 = {name: "READ-STRING"};
         ((v334)["fname"] = "READ-STRING");
         return v334;
     })((function (values,v331){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v332,v333){
                     (v333 = l145.fvalue(pv, v331));
                     (function(){
@@ -2982,7 +2988,6 @@ var l153 = {name: "READ-STRING"};
                     return v332;
                 })("",l3.value);
         })();
-    
     }));
     return l153;
 })();
@@ -2992,7 +2997,8 @@ var l154 = {name: "READ-SHARP"};
         ((v339)["fname"] = "READ-SHARP");
         return v339;
     })((function (values,v335){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 l145.fvalue(pv, v335);
                 return (function(v336){
                     return (l25.fvalue(pv, v336, 39) !== l3.value ? l42.fvalue(values, l98, l152.fvalue(pv, v335)) : (l25.fvalue(pv, v336, 40) !== l3.value ? l130.fvalue(values, l151.fvalue(pv, v335)) : (l25.fvalue(pv, v336, 58) !== l3.value ? (function(){
@@ -3042,7 +3048,6 @@ var l154 = {name: "READ-SHARP"};
                     })())))));
                 })(l145.fvalue(pv, v335));
         })();
-    
     }));
     return l154;
 })();
@@ -3052,7 +3057,8 @@ var l155 = {name: "READ-SYMBOL"};
         ((v347)["fname"] = "READ-SYMBOL");
         return v347;
     })((function (values,v340){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v341,v342,v343,v344,v345){
                     (v345 = 0);
                     (function(){
@@ -3143,7 +3149,6 @@ var l155 = {name: "READ-SYMBOL"};
                     })(v344) !== l3.value ? l120.fvalue(values, v343, v342) : l119.fvalue(values, v343, v342));
                 })(l67.fvalue(pv, v340),l3.value,l3.value,l3.value,l3.value);
         })();
-    
     }));
     return l155;
 })();
@@ -3161,7 +3166,8 @@ var l160 = {name: "UNQUOTE"};
         ((v352)["fname"] = "LS-READ");
         return v352;
     })((function (values,v348){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 l150.fvalue(pv, v348);
                 return (function(v349){
                     return ((function(v350){
@@ -3204,7 +3210,6 @@ var l160 = {name: "UNQUOTE"};
                     })())))))))));
                 })(l144.fvalue(pv, v348));
         })();
-    
     }));
     return l152;
 })();
@@ -3214,10 +3219,10 @@ var l161 = {name: "LS-READ-FROM-STRING"};
         ((v354)["fname"] = "LS-READ-FROM-STRING");
         return v354;
     })((function (values,v353){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l152.fvalue(values, l143.fvalue(pv, v353));
         })();
-    
     }));
     return l161;
 })();
@@ -3237,7 +3242,9 @@ var l164 = {name: "MAKE-BINDING"};
         ((v359)["fname"] = "MAKE-BINDING");
         return v359;
     })((function (values,v355,v356,v357,v358){
-        checkArgsAtLeast(4);checkArgsAtLeast(5);switch(arguments.length-1){
+        checkArgsAtLeast(arguments, 4);
+        checkArgsAtMost(arguments, 5);
+        switch(arguments.length-1){
         case 3:
         v358=l3.value;
         default: break;
@@ -3245,7 +3252,6 @@ var l164 = {name: "MAKE-BINDING"};
         return (function(){
                 return l42.fvalue(values, v355, v356, v357, v358);
         })();
-    
     }));
     return l164;
 })();
@@ -3255,10 +3261,10 @@ var l165 = {name: "BINDING-NAME"};
         ((v361)["fname"] = "BINDING-NAME");
         return v361;
     })((function (values,v360){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l38.fvalue(values, v360);
         })();
-    
     }));
     return l165;
 })();
@@ -3268,10 +3274,10 @@ var l166 = {name: "BINDING-TYPE"};
         ((v363)["fname"] = "BINDING-TYPE");
         return v363;
     })((function (values,v362){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l39.fvalue(values, v362);
         })();
-    
     }));
     return l166;
 })();
@@ -3281,10 +3287,10 @@ var l167 = {name: "BINDING-VALUE"};
         ((v365)["fname"] = "BINDING-VALUE");
         return v365;
     })((function (values,v364){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l40.fvalue(values, v364);
         })();
-    
     }));
     return l167;
 })();
@@ -3294,10 +3300,10 @@ var l168 = {name: "BINDING-DECLARATIONS"};
         ((v367)["fname"] = "BINDING-DECLARATIONS");
         return v367;
     })((function (values,v366){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l41.fvalue(values, v366);
         })();
-    
     }));
     return l168;
 })();
@@ -3307,7 +3313,8 @@ var l169 = {name: "SET-BINDING-VALUE"};
         ((v370)["fname"] = "SET-BINDING-VALUE");
         return v370;
     })((function (values,v368,v369){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (function(){
                     var x = l34.fvalue(pv, v368);
                     if (typeof x != 'object')
@@ -3315,7 +3322,6 @@ var l169 = {name: "SET-BINDING-VALUE"};
                     return (x.car = v369);
                 })();
         })();
-    
     }));
     return l169;
 })();
@@ -3325,7 +3331,8 @@ var l170 = {name: "SET-BINDING-DECLARATIONS"};
         ((v373)["fname"] = "SET-BINDING-DECLARATIONS");
         return v373;
     })((function (values,v371,v372){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (function(){
                     var x = l36.fvalue(pv, v371);
                     if (typeof x != 'object')
@@ -3333,7 +3340,6 @@ var l170 = {name: "SET-BINDING-DECLARATIONS"};
                     return (x.car = v372);
                 })();
         })();
-    
     }));
     return l170;
 })();
@@ -3343,10 +3349,10 @@ var l171 = {name: "PUSH-BINDING-DECLARATION"};
         ((v376)["fname"] = "PUSH-BINDING-DECLARATION");
         return v376;
     })((function (values,v374,v375){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 return l170.fvalue(values, v375, ({car: v374, cdr: l168.fvalue(pv, v375)}));
         })();
-    
     }));
     return l171;
 })();
@@ -3356,10 +3362,10 @@ var l172 = {name: "MAKE-LEXENV"};
         ((v377)["fname"] = "MAKE-LEXENV");
         return v377;
     })((function (values){
-        checkArgsAtLeast(1);return (function(){
+        checkArgsAtMost(arguments, 1);
+        return (function(){
                 return l42.fvalue(values, l3.value, l3.value, l3.value, l3.value);
         })();
-    
     }));
     return l172;
 })();
@@ -3369,10 +3375,10 @@ var l173 = {name: "COPY-LEXENV"};
         ((v379)["fname"] = "COPY-LEXENV");
         return v379;
     })((function (values,v378){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l71.fvalue(values, v378);
         })();
-    
     }));
     return l173;
 })();
@@ -3384,7 +3390,8 @@ var l176 = {name: "GOTAG"};
         ((v384)["fname"] = "PUSH-TO-LEXENV");
         return v384;
     })((function (values,v380,v381,v382){
-        checkArgsAtLeast(4);checkArgsAtLeast(4);return (function(){
+        checkArgs(arguments, 4);
+        return (function(){
                 return (function(v383){
                     return (l25.fvalue(pv, v383, l99) !== l3.value ? (function(){
                         var x = v381;
@@ -3417,7 +3424,6 @@ var l176 = {name: "GOTAG"};
                     })()))));
                 })(v382);
         })();
-    
     }));
     return l174;
 })();
@@ -3427,7 +3433,8 @@ var l177 = {name: "EXTEND-LEXENV"};
         ((v391)["fname"] = "EXTEND-LEXENV");
         return v391;
     })((function (values,v385,v386,v387){
-        checkArgsAtLeast(4);checkArgsAtLeast(4);return (function(){
+        checkArgs(arguments, 4);
+        return (function(){
                 return (function(v388){
                     return (function(){
                             return (function(v389,v390){
@@ -3452,7 +3459,6 @@ var l177 = {name: "EXTEND-LEXENV"};
                     })();
                 })(l173.fvalue(pv, v386));
         })();
-    
     }));
     return l177;
 })();
@@ -3462,14 +3468,14 @@ var l178 = {name: "LOOKUP-IN-LEXENV"};
         ((v396)["fname"] = "LOOKUP-IN-LEXENV");
         return v396;
     })((function (values,v392,v393,v394){
-        checkArgsAtLeast(4);checkArgsAtLeast(4);return (function(){
+        checkArgs(arguments, 4);
+        return (function(){
                 return l91.fvalue(values, v392, (function(v395){
                     return (l25.fvalue(pv, v395, l99) !== l3.value ? l38.fvalue(pv, v393) : (l25.fvalue(pv, v395, l98) !== l3.value ? l39.fvalue(pv, v393) : (l25.fvalue(pv, v395, l175) !== l3.value ? l40.fvalue(pv, v393) : (l25.fvalue(pv, v395, l176) !== l3.value ? l41.fvalue(pv, v393) : (function(){
                         throw "ECASE expression failed.";
                     })()))));
                 })(v394));
         })();
-    
     }));
     return l178;
 })();
@@ -3489,7 +3495,8 @@ var l181 = {name: "GVARNAME"};
         ((v398)["fname"] = "GVARNAME");
         return v398;
     })((function (values,v397){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l124.fvalue(values, "v", l16.fvalue(pv, ((l180).value = (function(){
                     var x1 = (function(){
                         var symbol = l180;
@@ -3503,7 +3510,6 @@ var l181 = {name: "GVARNAME"};
                     return x1+x2;
                 })())));
         })();
-    
     }));
     return l181;
 })();
@@ -3513,7 +3519,8 @@ var l182 = {name: "TRANSLATE-VARIABLE"};
         ((v400)["fname"] = "TRANSLATE-VARIABLE");
         return v400;
     })((function (values,v399){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l167.fvalue(values, l178.fvalue(pv, v399, (function(){
                     var symbol = l179;
                     var value = symbol.value;
@@ -3521,7 +3528,6 @@ var l182 = {name: "TRANSLATE-VARIABLE"};
                     return value;
                 })(), l99));
         })();
-    
     }));
     return l182;
 })();
@@ -3532,7 +3538,8 @@ var l184 = {name: "LEXICAL-VARIABLE"};
         ((v406)["fname"] = "EXTEND-LOCAL-ENV");
         return v406;
     })((function (values,v401){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v402){
                     return (function(){
                             return (function(v403,v404){
@@ -3564,7 +3571,6 @@ var l184 = {name: "LEXICAL-VARIABLE"};
                     return value;
                 })()));
         })();
-    
     }));
     return l183;
 })();
@@ -3579,7 +3585,8 @@ var l186 = {name: "TOPLEVEL-COMPILATION"};
         ((v408)["fname"] = "TOPLEVEL-COMPILATION");
         return v408;
     })((function (values,v407){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return ((l185).value = ({car: v407, cdr: (function(){
                     var symbol = l185;
                     var value = symbol.value;
@@ -3587,7 +3594,6 @@ var l186 = {name: "TOPLEVEL-COMPILATION"};
                     return value;
                 })()}));
         })();
-    
     }));
     return l186;
 })();
@@ -3597,10 +3603,10 @@ var l187 = {name: "NULL-OR-EMPTY-P"};
         ((v410)["fname"] = "NULL-OR-EMPTY-P");
         return v410;
     })((function (values,v409){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l23.fvalue(values, l67.fvalue(pv, v409));
         })();
-    
     }));
     return l187;
 })();
@@ -3610,7 +3616,8 @@ var l188 = {name: "GET-TOPLEVEL-COMPILATIONS"};
         ((v411)["fname"] = "GET-TOPLEVEL-COMPILATIONS");
         return v411;
     })((function (values){
-        checkArgsAtLeast(1);return (function(){
+        checkArgsAtMost(arguments, 1);
+        return (function(){
                 return l64.fvalue(values, l84.fvalue(pv, (function(){
                     var symbol = l187;
                     var func = symbol.fvalue;
@@ -3623,7 +3630,6 @@ var l188 = {name: "GET-TOPLEVEL-COMPILATIONS"};
                     return value;
                 })()));
         })();
-    
     }));
     return l188;
 })();
@@ -3634,7 +3640,8 @@ var l190 = {name: "MACRO"};
         ((v414)["fname"] = "%COMPILE-DEFMACRO");
         return v414;
     })((function (values,v412,v413){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+        checkArgs(arguments, 3);
+        return (function(){
                 l186.fvalue(pv, l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l157), l42.fvalue(pv, v412))));
                 return l174.fvalue(values, l164.fvalue(pv, v412, l190, v413), (function(){
                     var symbol = l179;
@@ -3643,7 +3650,6 @@ var l190 = {name: "MACRO"};
                     return value;
                 })(), l98);
         })();
-    
     }));
     return l189;
 })();
@@ -3653,7 +3659,8 @@ var l191 = {name: "GLOBAL-BINDING"};
         ((v420)["fname"] = "GLOBAL-BINDING");
         return v420;
     })((function (values,v415,v416,v417){
-        checkArgsAtLeast(4);checkArgsAtLeast(4);return (function(){
+        checkArgs(arguments, 4);
+        return (function(){
                 return (function(v418){
                     return (v418 !== l3.value ? v418 : (function(v419){
                         l174.fvalue(pv, v419, (function(){
@@ -3671,7 +3678,6 @@ var l191 = {name: "GLOBAL-BINDING"};
                     return value;
                 })(), v417));
         })();
-    
     }));
     return l191;
 })();
@@ -3681,7 +3687,8 @@ var l192 = {name: "CLAIMP"};
         ((v425)["fname"] = "CLAIMP");
         return v425;
     })((function (values,v421,v422,v423){
-        checkArgsAtLeast(4);checkArgsAtLeast(4);return (function(){
+        checkArgs(arguments, 4);
+        return (function(){
                 return (function(v424){
                     return (v424 !== l3.value ? l82.fvalue(values, v423, l168.fvalue(pv, v424)) : l3.value);
                 })(l178.fvalue(pv, v421, (function(){
@@ -3691,7 +3698,6 @@ var l192 = {name: "CLAIMP"};
                     return value;
                 })(), v422));
         })();
-    
     }));
     return l192;
 })();
@@ -3704,7 +3710,8 @@ var l196 = {name: "CONSTANT"};
         ((v437)["fname"] = "!PROCLAIM");
         return v437;
     })((function (values,v426){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v427){
                     return (l25.fvalue(pv, v427, l194) !== l3.value ? (function(){
                             return (function(v428,v429){
@@ -3787,7 +3794,6 @@ var l196 = {name: "CONSTANT"};
                     return tmp === l3.value? l3.value: tmp.car;
                 })());
         })();
-    
     }));
     return l193;
 })();
@@ -3807,7 +3813,8 @@ var l199 = {name: "DEFINE-COMPILATION"};
 l199;
 var l200 = {name: "IF"};
 ((l198).value = ({car: l42.fvalue(pv, l200, (function (values,v438,v439,v440){
-    checkArgsAtLeast(4);checkArgsAtLeast(4);return (function(){
+    checkArgs(arguments, 4);
+    return (function(){
             return l124.fvalue(values, "(", l137.fvalue(pv, v438), " !== ", l137.fvalue(pv, l3.value), " ? ", l137.fvalue(pv, v439, (function(){
                 var symbol = l162;
                 var value = symbol.value;
@@ -3820,7 +3827,6 @@ var l200 = {name: "IF"};
                 return value;
             })()), ")");
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
@@ -3841,7 +3847,8 @@ var l205 = {name: "LIST-UNTIL-KEYWORD"};
         ((v443)["fname"] = "LIST-UNTIL-KEYWORD");
         return v443;
     })((function (values,v441){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return ((function(v442){
                     return (v442 !== l3.value ? v442 : l82.fvalue(pv, (function(){
                         var tmp = v441;
@@ -3860,7 +3867,6 @@ var l205 = {name: "LIST-UNTIL-KEYWORD"};
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })())}));
         })();
-    
     }));
     return l205;
 })();
@@ -3870,10 +3876,10 @@ var l206 = {name: "LAMBDA-LIST-REQUIRED-ARGUMENTS"};
         ((v445)["fname"] = "LAMBDA-LIST-REQUIRED-ARGUMENTS");
         return v445;
     })((function (values,v444){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l205.fvalue(values, v444);
         })();
-    
     }));
     return l206;
 })();
@@ -3883,7 +3889,8 @@ var l207 = {name: "LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT"};
         ((v447)["fname"] = "LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT");
         return v447;
     })((function (values,v446){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l69.fvalue(values, (function(){
                     var symbol = l56;
                     var func = symbol.fvalue;
@@ -3894,7 +3901,6 @@ var l207 = {name: "LAMBDA-LIST-OPTIONAL-ARGUMENTS-WITH-DEFAULT"};
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })()));
         })();
-    
     }));
     return l207;
 })();
@@ -3904,7 +3910,8 @@ var l208 = {name: "LAMBDA-LIST-OPTIONAL-ARGUMENTS"};
         ((v449)["fname"] = "LAMBDA-LIST-OPTIONAL-ARGUMENTS");
         return v449;
     })((function (values,v448){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return l69.fvalue(values, (function(){
                     var symbol = l29;
                     var func = symbol.fvalue;
@@ -3912,7 +3919,6 @@ var l208 = {name: "LAMBDA-LIST-OPTIONAL-ARGUMENTS"};
                     return func;
                 })(), l207.fvalue(pv, v448));
         })();
-    
     }));
     return l208;
 })();
@@ -3922,7 +3928,8 @@ var l209 = {name: "LAMBDA-LIST-REST-ARGUMENT"};
         ((v452)["fname"] = "LAMBDA-LIST-REST-ARGUMENT");
         return v452;
     })((function (values,v450){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v451){
                     ((function(){
                         var tmp = v451;
@@ -3939,7 +3946,6 @@ var l209 = {name: "LAMBDA-LIST-REST-ARGUMENT"};
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })()));
         })();
-    
     }));
     return l209;
 })();
@@ -3949,7 +3955,8 @@ var l210 = {name: "LAMBDA-DOCSTRING-WRAPPER"};
         ((v455)["fname"] = "LAMBDA-DOCSTRING-WRAPPER");
         return v455;
     })((function (values,v454){
-        checkArgsAtLeast(2);var v453= l3.value;
+        checkArgsAtLeast(arguments, 2);
+        var v453= l3.value;
         for (var i = arguments.length-1; i>=2; i--)
             v453 = {car: arguments[i], cdr: 
         v453};
@@ -3976,80 +3983,136 @@ var l210 = {name: "LAMBDA-DOCSTRING-WRAPPER"};
                     return value;
                 })()), "})()") : l126.fvalue(values, v453));
         })();
-    
     }));
     return l210;
 })();
-var l211 = {name: "LAMBDA"};
-var l212 = {name: "LS-COMPILE-BLOCK"};
-((l198).value = ({car: l42.fvalue(pv, l211, (function (values,v457){
-    checkArgsAtLeast(2);var v456= l3.value;
+var l211 = {name: "LAMBDA-CHECK-ARGUMENT-COUNT"};
+var l212 = {name: "N/A"};
+(function(){
+    (l211).fvalue = (function(v461){
+        ((v461)["fname"] = "LAMBDA-CHECK-ARGUMENT-COUNT");
+        return v461;
+    })((function (values,v456,v457,v458){
+        checkArgs(arguments, 4);
+        return (function(){
+                return (function(v459,v460){
+                    return (function(){
+                        try {
+                            (((function(){
+                                var x1 = 1;
+                                if (typeof x1 !== 'number') throw 'Not a number!';
+                                var x2 = v459;
+                                if (typeof x2 !== 'number') throw 'Not a number!';
+                                return (x1<x2?l4.value: l3.value);
+                            })() !== l3.value ? l25.fvalue(pv, v459, v460) : l3.value) !== l3.value ? (function(){
+                                throw ({type: 'block', id: 177, value: l124.fvalue(pv, "checkArgs(arguments, ", l16.fvalue(pv, v459), ");", (function(){
+                                    var symbol = l123;
+                                    var value = symbol.value;
+                                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                    return value;
+                                })()), message: 'Return from unknown block NIL.'})
+                            })() : l3.value);
+                            return l124.fvalue(values, ((function(){
+                                var x1 = 1;
+                                if (typeof x1 !== 'number') throw 'Not a number!';
+                                var x2 = v459;
+                                if (typeof x2 !== 'number') throw 'Not a number!';
+                                return (x1<x2?l4.value: l3.value);
+                            })() !== l3.value ? l124.fvalue(pv, "checkArgsAtLeast(arguments, ", l16.fvalue(pv, v459), ");", (function(){
+                                var symbol = l123;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })()) : ""), (((typeof (v460) == "number")?l4.value: l3.value) !== l3.value ? l124.fvalue(pv, "checkArgsAtMost(arguments, ", l16.fvalue(pv, v460), ");", (function(){
+                                var symbol = l123;
+                                var value = symbol.value;
+                                if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                                return value;
+                            })()) : ""));
+                        }
+                        catch (cf){
+                            if (cf.type == 'block' && cf.id == 177)
+                                return cf.value;
+                            else
+                                throw cf;
+                        }
+                    })();
+                })(l21.fvalue(pv, v456),(v458 !== l3.value ? l212 : (function(){
+                    var x1 = 1;
+                    if (typeof x1 !== 'number') throw 'Not a number!';
+                    var x2 = v456;
+                    if (typeof x2 !== 'number') throw 'Not a number!';
+                    var x3 = v457;
+                    if (typeof x3 !== 'number') throw 'Not a number!';
+                    return x1+x2+x3;
+                })()));
+        })();
+    }));
+    return l211;
+})();
+var l213 = {name: "LAMBDA"};
+var l214 = {name: "LS-COMPILE-BLOCK"};
+((l198).value = ({car: l42.fvalue(pv, l213, (function (values,v463){
+    checkArgsAtLeast(arguments, 2);
+    var v462= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v456 = {car: arguments[i], cdr: 
-    v456};
+        v462 = {car: arguments[i], cdr: 
+    v462};
     return (function(){
-            return (function(v458,v459,v460,v461){
+            return (function(v464,v465,v466,v467){
                 ((((typeof((function(){
-                    var tmp = v456;
+                    var tmp = v462;
                     return tmp === l3.value? l3.value: tmp.car;
                 })()) == "string")?l4.value: l3.value) !== l3.value ? l26.fvalue(pv, l11.fvalue(pv, (function(){
-                    var tmp = v456;
+                    var tmp = v462;
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })())) : l3.value) !== l3.value ? (function(){
-                    (v461 = (function(){
-                        var tmp = v456;
+                    (v467 = (function(){
+                        var tmp = v462;
                         return tmp === l3.value? l3.value: tmp.car;
                     })());
-                    return (v456 = (function(){
-                        var tmp = v456;
+                    return (v462 = (function(){
+                        var tmp = v462;
                         return tmp === l3.value? l3.value: tmp.cdr;
                     })());
                 })() : l3.value);
-                return (function(v462,v463,v464){
+                return (function(v468,v469,v470){
                     try {
                         var tmp;
                         tmp = l179.value;
-                        l179.value = v464;
-                        v464 = tmp;
-                        return l210.fvalue(values, v461, "(function (", l126.fvalue(pv, ({car: "values", cdr: l69.fvalue(pv, (function(){
+                        l179.value = v470;
+                        v470 = tmp;
+                        return l210.fvalue(values, v467, "(function (", l126.fvalue(pv, ({car: "values", cdr: l69.fvalue(pv, (function(){
                             var symbol = l182;
                             var func = symbol.fvalue;
                             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                             return func;
-                        })(), l62.fvalue(pv, v458, v459))}), ","), "){", (function(){
+                        })(), l62.fvalue(pv, v464, v465))}), ","), "){", (function(){
                             var symbol = l123;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l135.fvalue(pv, (v458 !== l3.value ? l124.fvalue(pv, "checkArgsAtLeast(", l16.fvalue(pv, l21.fvalue(pv, v462)), ");") : ""), (l26.fvalue(pv, v460) !== l3.value ? l124.fvalue(pv, "checkArgsAtLeast(", l16.fvalue(pv, (function(){
-                            var x1 = 1;
-                            if (typeof x1 !== 'number') throw 'Not a number!';
-                            var x2 = v462;
-                            if (typeof x2 !== 'number') throw 'Not a number!';
-                            var x3 = v463;
-                            if (typeof x3 !== 'number') throw 'Not a number!';
-                            return x1+x2+x3;
-                        })()), ");") : ""), (v459 !== l3.value ? l124.fvalue(pv, "switch(arguments.length-1){", (function(){
+                        })(), l135.fvalue(pv, l211.fvalue(pv, v468, v469, v466), (v465 !== l3.value ? l124.fvalue(pv, "switch(arguments.length-1){", (function(){
                             var symbol = l123;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), (function(v465,v466,v467){
+                        })(), (function(v471,v472,v473){
                             return (function(){
                                 (function(){
                                         return (function(){
                                             while((function(){
-                                                var x1 = v467;
+                                                var x1 = v473;
                                                 if (typeof x1 !== 'number') throw 'Not a number!';
-                                                var x2 = v463;
+                                                var x2 = v469;
                                                 if (typeof x2 !== 'number') throw 'Not a number!';
                                                 return (x1<x2?l4.value: l3.value);
                                             })() !== l3.value){
-                                                (function(v468){
-                                                    (v466 = ({car: l124.fvalue(pv, "case ", l16.fvalue(pv, (function(){
-                                                        var x1 = v467;
+                                                (function(v474){
+                                                    (v472 = ({car: l124.fvalue(pv, "case ", l16.fvalue(pv, (function(){
+                                                        var x1 = v473;
                                                         if (typeof x1 !== 'number') throw 'Not a number!';
-                                                        var x2 = v462;
+                                                        var x2 = v468;
                                                         if (typeof x2 !== 'number') throw 'Not a number!';
                                                         return x1+x2;
                                                     })()), ":", (function(){
@@ -4058,40 +4121,40 @@ var l212 = {name: "LS-COMPILE-BLOCK"};
                                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                         return value;
                                                     })(), l182.fvalue(pv, (function(){
-                                                        var tmp = v468;
+                                                        var tmp = v474;
                                                         return tmp === l3.value? l3.value: tmp.car;
-                                                    })()), "=", l137.fvalue(pv, l32.fvalue(pv, v468)), ";", (function(){
+                                                    })()), "=", l137.fvalue(pv, l32.fvalue(pv, v474)), ";", (function(){
                                                         var symbol = l123;
                                                         var value = symbol.value;
                                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                         return value;
-                                                    })()), cdr: v466}));
-                                                    return (v467 = (function(){
-                                                        var x1 = v467;
+                                                    })()), cdr: v472}));
+                                                    return (v473 = (function(){
+                                                        var x1 = v473;
                                                         if (typeof x1 !== 'number') throw 'Not a number!';
                                                         var x2 = 1;
                                                         if (typeof x2 !== 'number') throw 'Not a number!';
                                                         return x1+x2;
                                                     })());
-                                                })(l79.fvalue(pv, v467, v465));
+                                                })(l79.fvalue(pv, v473, v471));
                                             }return l3.value;
                                         })();
                                 })();
-                                (v466 = ({car: l124.fvalue(pv, "default: break;", (function(){
+                                (v472 = ({car: l124.fvalue(pv, "default: break;", (function(){
                                     var symbol = l123;
                                     var value = symbol.value;
                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                     return value;
-                                })()), cdr: v466}));
-                                return l126.fvalue(pv, l64.fvalue(pv, v466));
+                                })()), cdr: v472}));
+                                return l126.fvalue(pv, l64.fvalue(pv, v472));
                             })();
-                        })(l207.fvalue(pv, v457),l3.value,0), "}", (function(){
+                        })(l207.fvalue(pv, v463),l3.value,0), "}", (function(){
                             var symbol = l123;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })()) : ""), (v460 !== l3.value ? (function(v469){
-                            return l124.fvalue(pv, "var ", v469, "= ", l137.fvalue(pv, l3.value), ";", (function(){
+                        })()) : ""), (v466 !== l3.value ? (function(v475){
+                            return l124.fvalue(pv, "var ", v475, "= ", l137.fvalue(pv, l3.value), ";", (function(){
                                 var symbol = l123;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -4099,9 +4162,9 @@ var l212 = {name: "LS-COMPILE-BLOCK"};
                             })(), "for (var i = arguments.length-1; i>=", l16.fvalue(pv, (function(){
                                 var x1 = 1;
                                 if (typeof x1 !== 'number') throw 'Not a number!';
-                                var x2 = v462;
+                                var x2 = v468;
                                 if (typeof x2 !== 'number') throw 'Not a number!';
-                                var x3 = v463;
+                                var x3 = v469;
                                 if (typeof x3 !== 'number') throw 'Not a number!';
                                 return x1+x2+x3;
                             })()), "; i--)", (function(){
@@ -4109,128 +4172,121 @@ var l212 = {name: "LS-COMPILE-BLOCK"};
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })(), l135.fvalue(pv, v469, " = ", "{car: arguments[i], cdr: "), v469, "};", (function(){
+                            })(), l135.fvalue(pv, v475, " = ", "{car: arguments[i], cdr: "), v475, "};", (function(){
                                 var symbol = l123;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })());
-                        })(l182.fvalue(pv, v460)) : ""), (function(v470){
+                        })(l182.fvalue(pv, v466)) : ""), (function(v476){
                             try {
                                 var tmp;
                                 tmp = l162.value;
-                                l162.value = v470;
-                                v470 = tmp;
-                                return l212.fvalue(pv, v456, l4.value);
+                                l162.value = v476;
+                                v476 = tmp;
+                                return l214.fvalue(pv, v462, l4.value);
                             }
                             finally {
-                                l162.value = v470;
+                                l162.value = v476;
                             }
-                        })(l4.value)), (function(){
-                            var symbol = l123;
-                            var value = symbol.value;
-                            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                            return value;
-                        })(), "})");
+                        })(l4.value)), "})");
                     }
                     finally {
-                        l179.value = v464;
+                        l179.value = v470;
                     }
-                })(l67.fvalue(pv, v458),l67.fvalue(pv, v459),l183.fvalue(pv, l62.fvalue(pv, l56.fvalue(pv, v460), v458, v459)));
-            })(l206.fvalue(pv, v457),l208.fvalue(pv, v457),l209.fvalue(pv, v457),l3.value);
+                })(l67.fvalue(pv, v464),l67.fvalue(pv, v465),l183.fvalue(pv, l62.fvalue(pv, l56.fvalue(pv, v466), v464, v465)));
+            })(l206.fvalue(pv, v463),l208.fvalue(pv, v463),l209.fvalue(pv, v463),l3.value);
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l213 = {name: "SETQ-PAIR"};
-var l214 = {name: "SET"};
+var l215 = {name: "SETQ-PAIR"};
+var l216 = {name: "SET"};
 (function(){
-    (l213).fvalue = (function(v474){
-        ((v474)["fname"] = "SETQ-PAIR");
-        return v474;
-    })((function (values,v471,v472){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-                return (function(v473){
-                    return (((l166.fvalue(pv, v473) === l184)?l4.value: l3.value) !== l3.value ? l124.fvalue(values, l167.fvalue(pv, v473), " = ", l137.fvalue(pv, v472)) : l137.fvalue(values, l62.fvalue(pv, l42.fvalue(pv, l214), l42.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l157), l42.fvalue(pv, v471))), l42.fvalue(pv, v472))));
-                })(l178.fvalue(pv, v471, (function(){
+    (l215).fvalue = (function(v480){
+        ((v480)["fname"] = "SETQ-PAIR");
+        return v480;
+    })((function (values,v477,v478){
+        checkArgs(arguments, 3);
+        return (function(){
+                return (function(v479){
+                    return (((l166.fvalue(pv, v479) === l184)?l4.value: l3.value) !== l3.value ? l124.fvalue(values, l167.fvalue(pv, v479), " = ", l137.fvalue(pv, v478)) : l137.fvalue(values, l62.fvalue(pv, l42.fvalue(pv, l216), l42.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l157), l42.fvalue(pv, v477))), l42.fvalue(pv, v478))));
+                })(l178.fvalue(pv, v477, (function(){
                     var symbol = l179;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), l99));
         })();
-    
     }));
-    return l213;
+    return l215;
 })();
-var l215 = {name: "SETQ"};
-((l198).value = ({car: l42.fvalue(pv, l215, (function (values){
-    var v475= l3.value;
+var l217 = {name: "SETQ"};
+((l198).value = ({car: l42.fvalue(pv, l217, (function (values){
+    var v481= l3.value;
     for (var i = arguments.length-1; i>=1; i--)
-        v475 = {car: arguments[i], cdr: 
-    v475};
+        v481 = {car: arguments[i], cdr: 
+    v481};
     return (function(){
-            return (function(v476){
+            return (function(v482){
                 (function(){
                     try {
                         return (function(){
                             while(l4.value !== l3.value){
-                                (l11.fvalue(pv, v475) !== l3.value ? (function(){
-                                    throw ({type: 'block', id: 180, value: l3.value, message: 'Return from unknown block NIL.'})
+                                (l11.fvalue(pv, v481) !== l3.value ? (function(){
+                                    throw ({type: 'block', id: 182, value: l3.value, message: 'Return from unknown block NIL.'})
                                 })() : (l11.fvalue(pv, (function(){
-                                    var tmp = v475;
+                                    var tmp = v481;
                                     return tmp === l3.value? l3.value: tmp.cdr;
                                 })()) !== l3.value ? (function(){
                                     throw "Odd paris in SETQ";
                                 })() : (function(){
-                                    (v476 = l124.fvalue(pv, v476, l124.fvalue(pv, l213.fvalue(pv, (function(){
-                                        var tmp = v475;
+                                    (v482 = l124.fvalue(pv, v482, l124.fvalue(pv, l215.fvalue(pv, (function(){
+                                        var tmp = v481;
                                         return tmp === l3.value? l3.value: tmp.car;
-                                    })(), l32.fvalue(pv, v475)), (l11.fvalue(pv, l34.fvalue(pv, v475)) !== l3.value ? "" : ", "))));
-                                    return (v475 = l34.fvalue(pv, v475));
+                                    })(), l32.fvalue(pv, v481)), (l11.fvalue(pv, l34.fvalue(pv, v481)) !== l3.value ? "" : ", "))));
+                                    return (v481 = l34.fvalue(pv, v481));
                                 })()));
                             }return l3.value;
                         })();
                     }
                     catch (cf){
-                        if (cf.type == 'block' && cf.id == 180)
+                        if (cf.type == 'block' && cf.id == 182)
                             return cf.value;
                         else
                             throw cf;
                     }
                 })();
-                return l124.fvalue(values, "(", v476, ")");
+                return l124.fvalue(values, "(", v482, ")");
             })("");
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l216 = {name: "JS-VREF"};
-((l198).value = ({car: l42.fvalue(pv, l216, (function (values,v477){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return v477;
+var l218 = {name: "JS-VREF"};
+((l198).value = ({car: l42.fvalue(pv, l218, (function (values,v483){
+    checkArgs(arguments, 2);
+    return (function(){
+            return v483;
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l217 = {name: "JS-VSET"};
-((l198).value = ({car: l42.fvalue(pv, l217, (function (values,v478,v479){
-    checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-            return l124.fvalue(values, "(", v478, " = ", l137.fvalue(pv, v479), ")");
+var l219 = {name: "JS-VSET"};
+((l198).value = ({car: l42.fvalue(pv, l219, (function (values,v484,v485){
+    checkArgs(arguments, 3);
+    return (function(){
+            return l124.fvalue(values, "(", v484, " = ", l137.fvalue(pv, v485), ")");
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
@@ -4238,41 +4294,42 @@ var l217 = {name: "JS-VSET"};
     return value;
 })()}));
 (function(){
-    (l140).fvalue = (function(v486){
-        ((v486)["fname"] = "ESCAPE-STRING");
-        return v486;
-    })((function (values,v480){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-                return (function(v481,v482,v483){
+    (l140).fvalue = (function(v492){
+        ((v492)["fname"] = "ESCAPE-STRING");
+        return v492;
+    })((function (values,v486){
+        checkArgs(arguments, 2);
+        return (function(){
+                return (function(v487,v488,v489){
                     (function(){
                             return (function(){
                                 while((function(){
-                                    var x1 = v482;
+                                    var x1 = v488;
                                     if (typeof x1 !== 'number') throw 'Not a number!';
-                                    var x2 = v483;
+                                    var x2 = v489;
                                     if (typeof x2 !== 'number') throw 'Not a number!';
                                     return (x1<x2?l4.value: l3.value);
                                 })() !== l3.value){
-                                    (function(v484){
-                                        ((function(v485){
-                                            return (v485 !== l3.value ? v485 : l74.fvalue(pv, v484, 92));
-                                        })(l74.fvalue(pv, v484, 34)) !== l3.value ? (v481 = l124.fvalue(pv, v481, "\\")) : l3.value);
-                                        (l74.fvalue(pv, v484, 10) !== l3.value ? (function(){
-                                            (v481 = l124.fvalue(pv, v481, "\\"));
-                                            return (v484 = 110);
+                                    (function(v490){
+                                        ((function(v491){
+                                            return (v491 !== l3.value ? v491 : l74.fvalue(pv, v490, 92));
+                                        })(l74.fvalue(pv, v490, 34)) !== l3.value ? (v487 = l124.fvalue(pv, v487, "\\")) : l3.value);
+                                        (l74.fvalue(pv, v490, 10) !== l3.value ? (function(){
+                                            (v487 = l124.fvalue(pv, v487, "\\"));
+                                            return (v490 = 110);
                                         })() : l3.value);
-                                        return (v481 = l124.fvalue(pv, v481, l92.fvalue(pv, v484)));
+                                        return (v487 = l124.fvalue(pv, v487, l92.fvalue(pv, v490)));
                                     })((function(){
-                                        var string = v480;
-                                        var index = v482;
+                                        var string = v486;
+                                        var index = v488;
                                         if (typeof string != 'string')
                                             throw 'The value ' + string + ' is not a type string.';
                                         if (typeof index != 'number')
                                             throw 'The value ' + index + ' is not a type number.';
                                         return string.charCodeAt(index);
                                     })());
-                                    (v482 = (function(){
-                                        var x1 = v482;
+                                    (v488 = (function(){
+                                        var x1 = v488;
                                         if (typeof x1 !== 'number') throw 'Not a number!';
                                         var x2 = 1;
                                         if (typeof x2 !== 'number') throw 'Not a number!';
@@ -4281,33 +4338,33 @@ var l217 = {name: "JS-VSET"};
                                 }return l3.value;
                             })();
                     })();
-                    return v481;
-                })("",0,l67.fvalue(pv, v480));
+                    return v487;
+                })("",0,l67.fvalue(pv, v486));
         })();
-    
     }));
     return l140;
 })();
-var l218 = {name: "*LITERAL-SYMBOLS*"};
+var l220 = {name: "*LITERAL-SYMBOLS*"};
 (function(){
-    (((l218.value !== undefined)?l4.value: l3.value) !== l3.value ? l3.value : ((l218).value = l3.value));
-    return l218;
+    (((l220.value !== undefined)?l4.value: l3.value) !== l3.value ? l3.value : ((l220).value = l3.value));
+    return l220;
 })();
-var l219 = {name: "*LITERAL-COUNTER*"};
+var l221 = {name: "*LITERAL-COUNTER*"};
 (function(){
-    (((l219.value !== undefined)?l4.value: l3.value) !== l3.value ? l3.value : ((l219).value = 0));
-    return l219;
+    (((l221.value !== undefined)?l4.value: l3.value) !== l3.value ? l3.value : ((l221).value = 0));
+    return l221;
 })();
-var l220 = {name: "GENLIT"};
+var l222 = {name: "GENLIT"};
 (function(){
-    (l220).fvalue = (function(v487){
-        ((v487)["fname"] = "GENLIT");
-        return v487;
+    (l222).fvalue = (function(v493){
+        ((v493)["fname"] = "GENLIT");
+        return v493;
     })((function (values){
-        checkArgsAtLeast(1);return (function(){
-                return l124.fvalue(values, "l", l16.fvalue(pv, ((l219).value = (function(){
+        checkArgsAtMost(arguments, 1);
+        return (function(){
+                return l124.fvalue(values, "l", l16.fvalue(pv, ((l221).value = (function(){
                     var x1 = (function(){
-                        var symbol = l219;
+                        var symbol = l221;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
@@ -4318,173 +4375,172 @@ var l220 = {name: "GENLIT"};
                     return x1+x2;
                 })())));
         })();
-    
     }));
-    return l220;
+    return l222;
 })();
-var l221 = {name: "LITERAL"};
+var l223 = {name: "LITERAL"};
 (function(){
-    (l221).fvalue = (function(v499){
-        ((v499)["fname"] = "LITERAL");
-        return v499;
-    })((function (values,v488,v489){
-        checkArgsAtLeast(2);checkArgsAtLeast(3);switch(arguments.length-1){
+    (l223).fvalue = (function(v505){
+        ((v505)["fname"] = "LITERAL");
+        return v505;
+    })((function (values,v494,v495){
+        checkArgsAtLeast(arguments, 2);
+        checkArgsAtMost(arguments, 3);
+        switch(arguments.length-1){
         case 1:
-        v489=l3.value;
+        v495=l3.value;
         default: break;
         }
         return (function(){
-                return (l75.fvalue(pv, v488) !== l3.value ? l16.fvalue(values, v488) : (((typeof(v488) == "string")?l4.value: l3.value) !== l3.value ? l124.fvalue(values, "\"", l140.fvalue(pv, v488), "\"") : (((function(){
-                    var tmp = v488;
+                return (l75.fvalue(pv, v494) !== l3.value ? l16.fvalue(values, v494) : (((typeof(v494) == "string")?l4.value: l3.value) !== l3.value ? l124.fvalue(values, "\"", l140.fvalue(pv, v494), "\"") : (((function(){
+                    var tmp = v494;
                     return (typeof tmp == 'object' && 'name' in tmp);
-                })()?l4.value: l3.value) !== l3.value ? (function(v490){
-                    return (v490 !== l3.value ? v490 : (function(v492,v493){
-                        ((l218).value = ({car: ({car: v488, cdr: v492}), cdr: (function(){
-                            var symbol = l218;
+                })()?l4.value: l3.value) !== l3.value ? (function(v496){
+                    return (v496 !== l3.value ? v496 : (function(v498,v499){
+                        ((l220).value = ({car: ({car: v494, cdr: v498}), cdr: (function(){
+                            var symbol = l220;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })()}));
-                        l186.fvalue(pv, l124.fvalue(pv, "var ", v492, " = ", v493));
-                        return v492;
-                    })(l220.fvalue(pv),(function(v491){
-                        return (l11.fvalue(pv, v491) !== l3.value ? l124.fvalue(pv, "{name: \"", l140.fvalue(pv, (v488).name), "\"}") : l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l120), l42.fvalue(pv, (v488).name), l42.fvalue(pv, l106.fvalue(pv, v491)))));
-                    })(l114.fvalue(pv, v488))));
+                        l186.fvalue(pv, l124.fvalue(pv, "var ", v498, " = ", v499));
+                        return v498;
+                    })(l222.fvalue(pv),(function(v497){
+                        return (l11.fvalue(pv, v497) !== l3.value ? l124.fvalue(pv, "{name: \"", l140.fvalue(pv, (v494).name), "\"}") : l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l120), l42.fvalue(pv, (v494).name), l42.fvalue(pv, l106.fvalue(pv, v497)))));
+                    })(l114.fvalue(pv, v494))));
                 })((function(){
-                    var tmp = l91.fvalue(pv, v488, (function(){
-                        var symbol = l218;
+                    var tmp = l91.fvalue(pv, v494, (function(){
+                        var symbol = l220;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })());
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })()) : (((function(){
-                    var tmp = v488;
+                    var tmp = v494;
                     return (typeof tmp == 'object' && 'car' in tmp);
-                })()?l4.value: l3.value) !== l3.value ? (function(v494){
-                    return (v489 !== l3.value ? v494 : (function(v495){
-                        l186.fvalue(pv, l124.fvalue(pv, "var ", v495, " = ", v494));
-                        return v495;
-                    })(l220.fvalue(pv)));
-                })(l124.fvalue(pv, "{car: ", l221.fvalue(pv, (function(){
-                    var tmp = v488;
+                })()?l4.value: l3.value) !== l3.value ? (function(v500){
+                    return (v495 !== l3.value ? v500 : (function(v501){
+                        l186.fvalue(pv, l124.fvalue(pv, "var ", v501, " = ", v500));
+                        return v501;
+                    })(l222.fvalue(pv)));
+                })(l124.fvalue(pv, "{car: ", l223.fvalue(pv, (function(){
+                    var tmp = v494;
                     return tmp === l3.value? l3.value: tmp.car;
-                })(), l4.value), ", ", "cdr: ", l221.fvalue(pv, (function(){
-                    var tmp = v488;
+                })(), l4.value), ", ", "cdr: ", l223.fvalue(pv, (function(){
+                    var tmp = v494;
                     return tmp === l3.value? l3.value: tmp.cdr;
                 })(), l4.value), "}")) : (((function(){
-                    var x = v488;
+                    var x = v494;
                     return typeof x === 'object' && 'length' in x;
-                })()?l4.value: l3.value) !== l3.value ? (function(v496){
-                    return (function(v497){
-                        return (v489 !== l3.value ? v497 : (function(v498){
-                            l186.fvalue(pv, l124.fvalue(pv, "var ", v498, " = ", v497));
-                            return v498;
-                        })(l220.fvalue(pv)));
+                })()?l4.value: l3.value) !== l3.value ? (function(v502){
+                    return (function(v503){
+                        return (v495 !== l3.value ? v503 : (function(v504){
+                            l186.fvalue(pv, l124.fvalue(pv, "var ", v504, " = ", v503));
+                            return v504;
+                        })(l222.fvalue(pv)));
                     })(l124.fvalue(pv, "[", l126.fvalue(pv, l69.fvalue(pv, (function(){
-                        var symbol = l221;
+                        var symbol = l223;
                         var func = symbol.fvalue;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v496), ", "), "]"));
-                })(l129.fvalue(pv, v488)) : l3.value)))));
+                    })(), v502), ", "), "]"));
+                })(l129.fvalue(pv, v494)) : l3.value)))));
         })();
-    
     }));
-    return l221;
+    return l223;
 })();
-((l198).value = ({car: l42.fvalue(pv, l157, (function (values,v500){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return l221.fvalue(values, v500);
+((l198).value = ({car: l42.fvalue(pv, l157, (function (values,v506){
+    checkArgs(arguments, 2);
+    return (function(){
+            return l223.fvalue(values, v506);
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l222 = {name: "%WHILE"};
-((l198).value = ({car: l42.fvalue(pv, l222, (function (values,v502){
-    checkArgsAtLeast(2);var v501= l3.value;
+var l224 = {name: "%WHILE"};
+((l198).value = ({car: l42.fvalue(pv, l224, (function (values,v508){
+    checkArgsAtLeast(arguments, 2);
+    var v507= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v501 = {car: arguments[i], cdr: 
-    v501};
+        v507 = {car: arguments[i], cdr: 
+    v507};
     return (function(){
             return l124.fvalue(values, "(function(){", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), l135.fvalue(pv, "while(", l137.fvalue(pv, v502), " !== ", l137.fvalue(pv, l3.value), "){", (function(){
+            })(), l135.fvalue(pv, "while(", l137.fvalue(pv, v508), " !== ", l137.fvalue(pv, l3.value), "){", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), l135.fvalue(pv, l212.fvalue(pv, v501)), "}", "return ", l137.fvalue(pv, l3.value), ";", (function(){
+            })(), l135.fvalue(pv, l214.fvalue(pv, v507)), "}", "return ", l137.fvalue(pv, l3.value), ";", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
             })()), "})()");
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l223 = {name: "SYMBOL-FUNCTION"};
-((l198).value = ({car: l42.fvalue(pv, l98, (function (values,v503){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return ((l57.fvalue(pv, v503) !== l3.value ? (((function(){
-                var tmp = v503;
-                return tmp === l3.value? l3.value: tmp.car;
-            })() === l211)?l4.value: l3.value) : l3.value) !== l3.value ? l137.fvalue(values, v503) : (((function(){
-                var tmp = v503;
-                return (typeof tmp == 'object' && 'name' in tmp);
-            })()?l4.value: l3.value) !== l3.value ? l137.fvalue(values, l62.fvalue(pv, l42.fvalue(pv, l223), l42.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l157), l42.fvalue(pv, v503))))) : l3.value));
-    })();
-
-})), cdr: (function(){
-    var symbol = l198;
-    var value = symbol.value;
-    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-    return value;
-})()}));
-var l224 = {name: "EVAL-WHEN-COMPILE"};
-var l225 = {name: "EVAL"};
-var l226 = {name: "PROGN"};
-((l198).value = ({car: l42.fvalue(pv, l224, (function (values){
-    var v504= l3.value;
-    for (var i = arguments.length-1; i>=1; i--)
-        v504 = {car: arguments[i], cdr: 
-    v504};
+var l225 = {name: "SYMBOL-FUNCTION"};
+((l198).value = ({car: l42.fvalue(pv, l98, (function (values,v509){
+    checkArgs(arguments, 2);
     return (function(){
-            l225.fvalue(pv, ({car: l226, cdr: v504}));
+            return ((l57.fvalue(pv, v509) !== l3.value ? (((function(){
+                var tmp = v509;
+                return tmp === l3.value? l3.value: tmp.car;
+            })() === l213)?l4.value: l3.value) : l3.value) !== l3.value ? l137.fvalue(values, v509) : (((function(){
+                var tmp = v509;
+                return (typeof tmp == 'object' && 'name' in tmp);
+            })()?l4.value: l3.value) !== l3.value ? l137.fvalue(values, l62.fvalue(pv, l42.fvalue(pv, l225), l42.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l157), l42.fvalue(pv, v509))))) : l3.value));
+    })();
+})), cdr: (function(){
+    var symbol = l198;
+    var value = symbol.value;
+    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+    return value;
+})()}));
+var l226 = {name: "EVAL-WHEN-COMPILE"};
+var l227 = {name: "EVAL"};
+var l228 = {name: "PROGN"};
+((l198).value = ({car: l42.fvalue(pv, l226, (function (values){
+    var v510= l3.value;
+    for (var i = arguments.length-1; i>=1; i--)
+        v510 = {car: arguments[i], cdr: 
+    v510};
+    return (function(){
+            l227.fvalue(pv, ({car: l228, cdr: v510}));
             return l3.value;
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l227 = {name: "DEFINE-TRANSFORMATION"};
-l227;
-((l198).value = ({car: l42.fvalue(pv, l226, (function (values){
-    var v505= l3.value;
+var l229 = {name: "DEFINE-TRANSFORMATION"};
+l229;
+((l198).value = ({car: l42.fvalue(pv, l228, (function (values){
+    var v511= l3.value;
     for (var i = arguments.length-1; i>=1; i--)
-        v505 = {car: arguments[i], cdr: 
-    v505};
+        v511 = {car: arguments[i], cdr: 
+    v511};
     return (function(){
             return (l11.fvalue(pv, (function(){
-                var tmp = v505;
+                var tmp = v511;
                 return tmp === l3.value? l3.value: tmp.cdr;
             })()) !== l3.value ? l137.fvalue(values, (function(){
-                var tmp = v505;
+                var tmp = v511;
                 return tmp === l3.value? l3.value: tmp.car;
             })(), (function(){
                 var symbol = l162;
@@ -4496,38 +4552,38 @@ l227;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), l135.fvalue(pv, l212.fvalue(pv, v505, l4.value)), "})()"));
+            })(), l135.fvalue(pv, l214.fvalue(pv, v511, l4.value)), "})()"));
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l228 = {name: "SPECIAL-VARIABLE-P"};
+var l230 = {name: "SPECIAL-VARIABLE-P"};
 (function(){
-    (l228).fvalue = (function(v507){
-        ((v507)["fname"] = "SPECIAL-VARIABLE-P");
-        return v507;
-    })((function (values,v506){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-                return (l192.fvalue(pv, v506, l99, l194) !== l3.value ? l4.value : l3.value);
+    (l230).fvalue = (function(v513){
+        ((v513)["fname"] = "SPECIAL-VARIABLE-P");
+        return v513;
+    })((function (values,v512){
+        checkArgs(arguments, 2);
+        return (function(){
+                return (l192.fvalue(pv, v512, l99, l194) !== l3.value ? l4.value : l3.value);
         })();
-    
     }));
-    return l228;
+    return l230;
 })();
-var l229 = {name: "LET-BINDING-WRAPPER"};
+var l231 = {name: "LET-BINDING-WRAPPER"};
 (function(){
-    (l229).fvalue = (function(v514){
-        ((v514)["fname"] = "LET-BINDING-WRAPPER");
-        return v514;
-    })((function (values,v508,v509){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+    (l231).fvalue = (function(v520){
+        ((v520)["fname"] = "LET-BINDING-WRAPPER");
+        return v520;
+    })((function (values,v514,v515){
+        checkArgs(arguments, 3);
+        return (function(){
             try {
-                (l11.fvalue(pv, v508) !== l3.value ? (function(){
-                    throw ({type: 'block', id: 193, value: v509, message: 'Return from unknown block LET-BINDING-WRAPPER.'})
+                (l11.fvalue(pv, v514) !== l3.value ? (function(){
+                    throw ({type: 'block', id: 195, value: v515, message: 'Return from unknown block LET-BINDING-WRAPPER.'})
                 })() : l3.value);
                 return l124.fvalue(values, "try {", (function(){
                     var symbol = l123;
@@ -4539,15 +4595,16 @@ var l229 = {name: "LET-BINDING-WRAPPER"};
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l128.fvalue(pv, (function (values,v510){
-                    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(v511){
-                        return l124.fvalue(values, "tmp = ", v511, ".value;", (function(){
+                })(), l128.fvalue(pv, (function (values,v516){
+                    checkArgs(arguments, 2);
+                    return (function(v517){
+                        return l124.fvalue(values, "tmp = ", v517, ".value;", (function(){
                             var symbol = l123;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), v511, ".value = ", (function(){
-                            var tmp = v510;
+                        })(), v517, ".value = ", (function(){
+                            var tmp = v516;
                             return tmp === l3.value? l3.value: tmp.cdr;
                         })(), ";", (function(){
                             var symbol = l123;
@@ -4555,7 +4612,7 @@ var l229 = {name: "LET-BINDING-WRAPPER"};
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })(), (function(){
-                            var tmp = v510;
+                            var tmp = v516;
                             return tmp === l3.value? l3.value: tmp.cdr;
                         })(), " = tmp;", (function(){
                             var symbol = l123;
@@ -4564,11 +4621,10 @@ var l229 = {name: "LET-BINDING-WRAPPER"};
                             return value;
                         })());
                     })(l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l157), l42.fvalue(pv, (function(){
-                        var tmp = v510;
+                        var tmp = v516;
                         return tmp === l3.value? l3.value: tmp.car;
                     })()))));
-                
-                }), v508), v509, (function(){
+                }), v514), v515, (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -4583,10 +4639,11 @@ var l229 = {name: "LET-BINDING-WRAPPER"};
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, l128.fvalue(pv, (function (values,v512){
-                    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(v513){
-                        return l124.fvalue(values, v513, ".value", " = ", (function(){
-                            var tmp = v512;
+                })(), l135.fvalue(pv, l128.fvalue(pv, (function (values,v518){
+                    checkArgs(arguments, 2);
+                    return (function(v519){
+                        return l124.fvalue(values, v519, ".value", " = ", (function(){
+                            var tmp = v518;
                             return tmp === l3.value? l3.value: tmp.cdr;
                         })(), ";", (function(){
                             var symbol = l123;
@@ -4595,11 +4652,10 @@ var l229 = {name: "LET-BINDING-WRAPPER"};
                             return value;
                         })());
                     })(l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l157), l42.fvalue(pv, (function(){
-                        var tmp = v512;
+                        var tmp = v518;
                         return tmp === l3.value? l3.value: tmp.car;
                     })()))));
-                
-                }), v508)), "}", (function(){
+                }), v514)), "}", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -4607,40 +4663,40 @@ var l229 = {name: "LET-BINDING-WRAPPER"};
                 })());
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 193)
+                if (cf.type == 'block' && cf.id == 195)
                     return cf.value;
                 else
                     throw cf;
             }
         })();
-    
     }));
-    return l229;
+    return l231;
 })();
-var l230 = {name: "LET"};
-var l231 = {name: "DYNAMIC-BINDINGS"};
-((l198).value = ({car: l42.fvalue(pv, l230, (function (values,v516){
-    checkArgsAtLeast(2);var v515= l3.value;
+var l232 = {name: "LET"};
+var l233 = {name: "DYNAMIC-BINDINGS"};
+((l198).value = ({car: l42.fvalue(pv, l232, (function (values,v522){
+    checkArgsAtLeast(arguments, 2);
+    var v521= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v515 = {car: arguments[i], cdr: 
-    v515};
+        v521 = {car: arguments[i], cdr: 
+    v521};
     return (function(){
             return (function(){
                 try {
-                    var v524 = l179.value;
-                    var v517 = l69.fvalue(pv, (function(){
+                    var v530 = l179.value;
+                    var v523 = l69.fvalue(pv, (function(){
                         var symbol = l56;
                         var func = symbol.fvalue;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v516);
-                    var v518 = l69.fvalue(pv, (function(){
+                    })(), v522);
+                    var v524 = l69.fvalue(pv, (function(){
                         var symbol = l38;
                         var func = symbol.fvalue;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v517);
-                    var v519 = l69.fvalue(pv, (function(){
+                    })(), v523);
+                    var v525 = l69.fvalue(pv, (function(){
                         var symbol = l137;
                         var func = symbol.fvalue;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
@@ -4650,112 +4706,112 @@ var l231 = {name: "DYNAMIC-BINDINGS"};
                         var func = symbol.fvalue;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v517));
+                    })(), v523));
                     ((l179).value = l183.fvalue(pv, l84.fvalue(pv, (function(){
-                        var symbol = l228;
+                        var symbol = l230;
                         var func = symbol.fvalue;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v518)));
-                    var v520 = l3.value;
-                    return l124.fvalue(values, "(function(", l126.fvalue(pv, l69.fvalue(pv, (function (values,v521){
-                        checkArgsAtLeast(2);checkArgsAtLeast(2);return (l228.fvalue(pv, v521) !== l3.value ? (function(v522){
-                            ((l231).value = ({car: ({car: v521, cdr: v522}), cdr: v520}));
-                            return v522;
-                        })(l181.fvalue(pv, v521)) : l182.fvalue(values, v521));
-                    
-                    }), v518), ","), "){", (function(){
+                    })(), v524)));
+                    var v526 = l3.value;
+                    return l124.fvalue(values, "(function(", l126.fvalue(pv, l69.fvalue(pv, (function (values,v527){
+                        checkArgs(arguments, 2);
+                        return (l230.fvalue(pv, v527) !== l3.value ? (function(v528){
+                            ((l233).value = ({car: ({car: v527, cdr: v528}), cdr: v526}));
+                            return v528;
+                        })(l181.fvalue(pv, v527)) : l182.fvalue(values, v527));
+                    }), v524), ","), "){", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
-                    })(), (function(v523){
-                        return l135.fvalue(pv, l229.fvalue(pv, v520, v523));
-                    })(l212.fvalue(pv, v515, l4.value)), "})(", l126.fvalue(pv, v519, ","), ")");
+                    })(), (function(v529){
+                        return l135.fvalue(pv, l231.fvalue(pv, v526, v529));
+                    })(l214.fvalue(pv, v521, l4.value)), "})(", l126.fvalue(pv, v525, ","), ")");
                 }
                 finally {
-                    l179.value = v524;
+                    l179.value = v530;
                 }
             })();
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l232 = {name: "LET*-INITIALIZE-VALUE"};
+var l234 = {name: "LET*-INITIALIZE-VALUE"};
 (function(){
-    (l232).fvalue = (function(v531){
-        ((v531)["fname"] = "LET*-INITIALIZE-VALUE");
-        return v531;
-    })((function (values,v525){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-                return (function(v526,v527){
-                    return (l228.fvalue(pv, v526) !== l3.value ? l124.fvalue(values, l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l215), l42.fvalue(pv, v526), l42.fvalue(pv, v527))), ";", (function(){
+    (l234).fvalue = (function(v537){
+        ((v537)["fname"] = "LET*-INITIALIZE-VALUE");
+        return v537;
+    })((function (values,v531){
+        checkArgs(arguments, 2);
+        return (function(){
+                return (function(v532,v533){
+                    return (l230.fvalue(pv, v532) !== l3.value ? l124.fvalue(values, l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l217), l42.fvalue(pv, v532), l42.fvalue(pv, v533))), ";", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })()) : (function(){
-                        var v528 = l181.fvalue(pv, v526);
-                        var v529 = l164.fvalue(pv, v526, l99, v528);
-                        return (function(v530){
-                            l174.fvalue(pv, v529, (function(){
+                        var v534 = l181.fvalue(pv, v532);
+                        var v535 = l164.fvalue(pv, v532, l99, v534);
+                        return (function(v536){
+                            l174.fvalue(pv, v535, (function(){
                                 var symbol = l179;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(), l99);
-                            return v530;
-                        })(l124.fvalue(pv, "var ", v528, " = ", l137.fvalue(pv, v527), ";", (function(){
+                            return v536;
+                        })(l124.fvalue(pv, "var ", v534, " = ", l137.fvalue(pv, v533), ";", (function(){
                             var symbol = l123;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
                         })()));
                     })());
-                })(l38.fvalue(pv, v525),l39.fvalue(pv, v525));
+                })(l38.fvalue(pv, v531),l39.fvalue(pv, v531));
         })();
-    
     }));
-    return l232;
+    return l234;
 })();
-var l233 = {name: "LET*-BINDING-WRAPPER"};
+var l235 = {name: "LET*-BINDING-WRAPPER"};
 (function(){
-    (l233).fvalue = (function(v540){
-        ((v540)["fname"] = "LET*-BINDING-WRAPPER");
-        return v540;
-    })((function (values,v532,v533){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+    (l235).fvalue = (function(v546){
+        ((v546)["fname"] = "LET*-BINDING-WRAPPER");
+        return v546;
+    })((function (values,v538,v539){
+        checkArgs(arguments, 3);
+        return (function(){
             try {
-                (l11.fvalue(pv, v532) !== l3.value ? (function(){
-                    throw ({type: 'block', id: 196, value: v533, message: 'Return from unknown block LET*-BINDING-WRAPPER.'})
+                (l11.fvalue(pv, v538) !== l3.value ? (function(){
+                    throw ({type: 'block', id: 198, value: v539, message: 'Return from unknown block LET*-BINDING-WRAPPER.'})
                 })() : l3.value);
-                return (function(v535){
+                return (function(v541){
                     return l124.fvalue(values, "try {", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
-                    })(), l135.fvalue(pv, l128.fvalue(pv, (function (values,v536){
-                        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(v537){
+                    })(), l135.fvalue(pv, l128.fvalue(pv, (function (values,v542){
+                        checkArgs(arguments, 2);
+                        return (function(v543){
                             return l124.fvalue(values, "var ", (function(){
-                                var tmp = v536;
+                                var tmp = v542;
                                 return tmp === l3.value? l3.value: tmp.cdr;
-                            })(), " = ", v537, ".value;", (function(){
+                            })(), " = ", v543, ".value;", (function(){
                                 var symbol = l123;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })());
                         })(l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l157), l42.fvalue(pv, (function(){
-                            var tmp = v536;
+                            var tmp = v542;
                             return tmp === l3.value? l3.value: tmp.car;
                         })()))));
-                    
-                    }), v535), v533), "}", (function(){
+                    }), v541), v539), "}", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -4765,10 +4821,11 @@ var l233 = {name: "LET*-BINDING-WRAPPER"};
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
-                    })(), l135.fvalue(pv, l128.fvalue(pv, (function (values,v538){
-                        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(v539){
-                            return l124.fvalue(values, v539, ".value", " = ", (function(){
-                                var tmp = v538;
+                    })(), l135.fvalue(pv, l128.fvalue(pv, (function (values,v544){
+                        checkArgs(arguments, 2);
+                        return (function(v545){
+                            return l124.fvalue(values, v545, ".value", " = ", (function(){
+                                var tmp = v544;
                                 return tmp === l3.value? l3.value: tmp.cdr;
                             })(), ";", (function(){
                                 var symbol = l123;
@@ -4777,59 +4834,58 @@ var l233 = {name: "LET*-BINDING-WRAPPER"};
                                 return value;
                             })());
                         })(l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l157), l42.fvalue(pv, (function(){
-                            var tmp = v538;
+                            var tmp = v544;
                             return tmp === l3.value? l3.value: tmp.car;
                         })()))));
-                    
-                    }), v535)), "}", (function(){
+                    }), v541)), "}", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })());
-                })(l69.fvalue(pv, (function (values,v534){
-                    checkArgsAtLeast(2);checkArgsAtLeast(2);return ({car: v534, cdr: l181.fvalue(pv, v534)});
-                
+                })(l69.fvalue(pv, (function (values,v540){
+                    checkArgs(arguments, 2);
+                    return ({car: v540, cdr: l181.fvalue(pv, v540)});
                 }), l85.fvalue(pv, (function(){
-                    var symbol = l228;
+                    var symbol = l230;
                     var func = symbol.fvalue;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })(), v532)));
+                })(), v538)));
             }
             catch (cf){
-                if (cf.type == 'block' && cf.id == 196)
+                if (cf.type == 'block' && cf.id == 198)
                     return cf.value;
                 else
                     throw cf;
             }
         })();
-    
     }));
-    return l233;
+    return l235;
 })();
-var l234 = {name: "LET*"};
-((l198).value = ({car: l42.fvalue(pv, l234, (function (values,v542){
-    checkArgsAtLeast(2);var v541= l3.value;
+var l236 = {name: "LET*"};
+((l198).value = ({car: l42.fvalue(pv, l236, (function (values,v548){
+    checkArgsAtLeast(arguments, 2);
+    var v547= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v541 = {car: arguments[i], cdr: 
-    v541};
+        v547 = {car: arguments[i], cdr: 
+    v547};
     return (function(){
-            return (function(v543,v544){
+            return (function(v549,v550){
                 try {
                     var tmp;
                     tmp = l179.value;
-                    l179.value = v544;
-                    v544 = tmp;
+                    l179.value = v550;
+                    v550 = tmp;
                     return l124.fvalue(values, "(function(){", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
-                    })(), l135.fvalue(pv, (function(v545,v546){
-                        return l233.fvalue(pv, v545, v546);
+                    })(), l135.fvalue(pv, (function(v551,v552){
+                        return l235.fvalue(pv, v551, v552);
                     })(l85.fvalue(pv, (function(){
-                        var symbol = l228;
+                        var symbol = l230;
                         var func = symbol.fvalue;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
@@ -4838,53 +4894,53 @@ var l234 = {name: "LET*"};
                         var func = symbol.fvalue;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v543)),l124.fvalue(pv, l128.fvalue(pv, (function(){
-                        var symbol = l232;
+                    })(), v549)),l124.fvalue(pv, l128.fvalue(pv, (function(){
+                        var symbol = l234;
                         var func = symbol.fvalue;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v543), l212.fvalue(pv, v541, l4.value)))), "})()");
+                    })(), v549), l214.fvalue(pv, v547, l4.value)))), "})()");
                 }
                 finally {
-                    l179.value = v544;
+                    l179.value = v550;
                 }
             })(l69.fvalue(pv, (function(){
                 var symbol = l56;
                 var func = symbol.fvalue;
                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                 return func;
-            })(), v542),l173.fvalue(pv, (function(){
+            })(), v548),l173.fvalue(pv, (function(){
                 var symbol = l179;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
             })()));
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l235 = {name: "*BLOCK-COUNTER*"};
+var l237 = {name: "*BLOCK-COUNTER*"};
 (function(){
-    (((l235.value !== undefined)?l4.value: l3.value) !== l3.value ? l3.value : ((l235).value = 0));
-    return l235;
+    (((l237.value !== undefined)?l4.value: l3.value) !== l3.value ? l3.value : ((l237).value = 0));
+    return l237;
 })();
-var l236 = {name: "USED"};
-((l198).value = ({car: l42.fvalue(pv, l175, (function (values,v548){
-    checkArgsAtLeast(2);var v547= l3.value;
+var l238 = {name: "USED"};
+((l198).value = ({car: l42.fvalue(pv, l175, (function (values,v554){
+    checkArgsAtLeast(arguments, 2);
+    var v553= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v547 = {car: arguments[i], cdr: 
-    v547};
+        v553 = {car: arguments[i], cdr: 
+    v553};
     return (function(){
             return (function(){
                 try {
-                    var v552 = l179.value;
-                    var v549 = l16.fvalue(pv, ((l235).value = (function(){
+                    var v558 = l179.value;
+                    var v555 = l16.fvalue(pv, ((l237).value = (function(){
                         var x1 = (function(){
-                            var symbol = l235;
+                            var symbol = l237;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
@@ -4894,15 +4950,15 @@ var l236 = {name: "USED"};
                         if (typeof x2 !== 'number') throw 'Not a number!';
                         return x1+x2;
                     })()));
-                    var v550 = l164.fvalue(pv, v548, l175, v549);
-                    ((l179).value = l177.fvalue(pv, l42.fvalue(pv, v550), (function(){
+                    var v556 = l164.fvalue(pv, v554, l175, v555);
+                    ((l179).value = l177.fvalue(pv, l42.fvalue(pv, v556), (function(){
                         var symbol = l179;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(), l175));
-                    var v551 = l212.fvalue(pv, v547, l4.value);
-                    return (l82.fvalue(pv, l236, l168.fvalue(pv, v550)) !== l3.value ? l124.fvalue(values, "(function(){", (function(){
+                    var v557 = l214.fvalue(pv, v553, l4.value);
+                    return (l82.fvalue(pv, l238, l168.fvalue(pv, v556)) !== l3.value ? l124.fvalue(values, "(function(){", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -4912,7 +4968,7 @@ var l236 = {name: "USED"};
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
-                    })(), l135.fvalue(pv, v551), "}", (function(){
+                    })(), l135.fvalue(pv, v557), "}", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -4922,7 +4978,7 @@ var l236 = {name: "USED"};
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
-                    })(), "    if (cf.type == 'block' && cf.id == ", v549, ")", (function(){
+                    })(), "    if (cf.type == 'block' && cf.id == ", v555, ")", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -4952,66 +5008,67 @@ var l236 = {name: "USED"};
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
-                    })(), l135.fvalue(pv, l135.fvalue(pv, v551)), "})()"));
+                    })(), l135.fvalue(pv, l135.fvalue(pv, v557)), "})()"));
                 }
                 finally {
-                    l179.value = v552;
+                    l179.value = v558;
                 }
             })();
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l237 = {name: "RETURN-FROM"};
-((l198).value = ({car: l42.fvalue(pv, l237, (function (values,v553,v554){
-    checkArgsAtLeast(2);checkArgsAtLeast(3);switch(arguments.length-1){
+var l239 = {name: "RETURN-FROM"};
+((l198).value = ({car: l42.fvalue(pv, l239, (function (values,v559,v560){
+    checkArgsAtLeast(arguments, 2);
+    checkArgsAtMost(arguments, 3);
+    switch(arguments.length-1){
     case 1:
-    v554=l3.value;
+    v560=l3.value;
     default: break;
     }
     return (function(){
-            return (function(v555){
-                (l11.fvalue(pv, v555) !== l3.value ? (function(){
-                    throw l124.fvalue(pv, "Unknown block `", (v553).name, "'.");
+            return (function(v561){
+                (l11.fvalue(pv, v561) !== l3.value ? (function(){
+                    throw l124.fvalue(pv, "Unknown block `", (v559).name, "'.");
                 })() : l3.value);
-                l171.fvalue(pv, l236, v555);
+                l171.fvalue(pv, l238, v561);
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, "throw ({", "type: 'block', ", "id: ", l167.fvalue(pv, v555), ", ", "value: ", l137.fvalue(pv, v554), ", ", "message: 'Return from unknown block ", (v553).name, ".'", "})"), "})()");
-            })(l178.fvalue(pv, v553, (function(){
+                })(), l135.fvalue(pv, "throw ({", "type: 'block', ", "id: ", l167.fvalue(pv, v561), ", ", "value: ", l137.fvalue(pv, v560), ", ", "message: 'Return from unknown block ", (v559).name, ".'", "})"), "})()");
+            })(l178.fvalue(pv, v559, (function(){
                 var symbol = l179;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
             })(), l175));
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l238 = {name: "CATCH"};
-((l198).value = ({car: l42.fvalue(pv, l238, (function (values,v557){
-    checkArgsAtLeast(2);var v556= l3.value;
+var l240 = {name: "CATCH"};
+((l198).value = ({car: l42.fvalue(pv, l240, (function (values,v563){
+    checkArgsAtLeast(arguments, 2);
+    var v562= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v556 = {car: arguments[i], cdr: 
-    v556};
+        v562 = {car: arguments[i], cdr: 
+    v562};
     return (function(){
             return l124.fvalue(values, "(function(){", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), l135.fvalue(pv, "var id = ", l137.fvalue(pv, v557), ";", (function(){
+            })(), l135.fvalue(pv, "var id = ", l137.fvalue(pv, v563), ";", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5021,7 +5078,7 @@ var l238 = {name: "CATCH"};
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), l135.fvalue(pv, "return ", l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l226), v556)), ";", (function(){
+            })(), l135.fvalue(pv, "return ", l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l228), v562)), ";", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5063,78 +5120,79 @@ var l238 = {name: "CATCH"};
                 return value;
             })()), "})()");
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l239 = {name: "THROW"};
-((l198).value = ({car: l42.fvalue(pv, l239, (function (values,v558,v559){
-    checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+var l241 = {name: "THROW"};
+((l198).value = ({car: l42.fvalue(pv, l241, (function (values,v564,v565){
+    checkArgs(arguments, 3);
+    return (function(){
             return l124.fvalue(values, "(function(){", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), l135.fvalue(pv, "throw ({", "type: 'catch', ", "id: ", l137.fvalue(pv, v558), ", ", "value: ", l137.fvalue(pv, v559), ", ", "message: 'Throw uncatched.'", "})"), "})()");
+            })(), l135.fvalue(pv, "throw ({", "type: 'catch', ", "id: ", l137.fvalue(pv, v564), ", ", "value: ", l137.fvalue(pv, v565), ", ", "message: 'Throw uncatched.'", "})"), "})()");
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l240 = {name: "*TAGBODY-COUNTER*"};
+var l242 = {name: "*TAGBODY-COUNTER*"};
 (function(){
-    (((l240.value !== undefined)?l4.value: l3.value) !== l3.value ? l3.value : ((l240).value = 0));
-    return l240;
-})();
-var l241 = {name: "*GO-TAG-COUNTER*"};
-(function(){
-    (((l241.value !== undefined)?l4.value: l3.value) !== l3.value ? l3.value : ((l241).value = 0));
-    return l241;
-})();
-var l242 = {name: "GO-TAG-P"};
-(function(){
-    (l242).fvalue = (function(v562){
-        ((v562)["fname"] = "GO-TAG-P");
-        return v562;
-    })((function (values,v560){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-                return (function(v561){
-                    return (v561 !== l3.value ? v561 : ((function(){
-                        var tmp = v560;
-                        return (typeof tmp == 'object' && 'name' in tmp);
-                    })()?l4.value: l3.value));
-                })(l75.fvalue(pv, v560));
-        })();
-    
-    }));
+    (((l242.value !== undefined)?l4.value: l3.value) !== l3.value ? l3.value : ((l242).value = 0));
     return l242;
 })();
-var l243 = {name: "DECLARE-TAGBODY-TAGS"};
+var l243 = {name: "*GO-TAG-COUNTER*"};
 (function(){
-    (l243).fvalue = (function(v568){
-        ((v568)["fname"] = "DECLARE-TAGBODY-TAGS");
+    (((l243.value !== undefined)?l4.value: l3.value) !== l3.value ? l3.value : ((l243).value = 0));
+    return l243;
+})();
+var l244 = {name: "GO-TAG-P"};
+(function(){
+    (l244).fvalue = (function(v568){
+        ((v568)["fname"] = "GO-TAG-P");
         return v568;
-    })((function (values,v563,v564){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+    })((function (values,v566){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(v567){
-                    return l177.fvalue(values, v567, (function(){
+                    return (v567 !== l3.value ? v567 : ((function(){
+                        var tmp = v566;
+                        return (typeof tmp == 'object' && 'name' in tmp);
+                    })()?l4.value: l3.value));
+                })(l75.fvalue(pv, v566));
+        })();
+    }));
+    return l244;
+})();
+var l245 = {name: "DECLARE-TAGBODY-TAGS"};
+(function(){
+    (l245).fvalue = (function(v574){
+        ((v574)["fname"] = "DECLARE-TAGBODY-TAGS");
+        return v574;
+    })((function (values,v569,v570){
+        checkArgs(arguments, 3);
+        return (function(){
+                return (function(v573){
+                    return l177.fvalue(values, v573, (function(){
                         var symbol = l179;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })(), l176);
-                })(l69.fvalue(pv, (function (values,v565){
-                    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(v566){
-                        return l164.fvalue(values, v565, l176, l42.fvalue(pv, v563, v566));
-                    })(l16.fvalue(pv, ((l241).value = (function(){
+                })(l69.fvalue(pv, (function (values,v571){
+                    checkArgs(arguments, 2);
+                    return (function(v572){
+                        return l164.fvalue(values, v571, l176, l42.fvalue(pv, v569, v572));
+                    })(l16.fvalue(pv, ((l243).value = (function(){
                         var x1 = (function(){
-                            var symbol = l241;
+                            var symbol = l243;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
@@ -5144,48 +5202,46 @@ var l243 = {name: "DECLARE-TAGBODY-TAGS"};
                         if (typeof x2 !== 'number') throw 'Not a number!';
                         return x1+x2;
                     })())));
-                
                 }), l85.fvalue(pv, (function(){
-                    var symbol = l242;
+                    var symbol = l244;
                     var func = symbol.fvalue;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })(), v564)));
+                })(), v570)));
         })();
-    
     }));
-    return l243;
+    return l245;
 })();
-var l244 = {name: "TAGBODY"};
-((l198).value = ({car: l42.fvalue(pv, l244, (function (values){
-    var v569= l3.value;
+var l246 = {name: "TAGBODY"};
+((l198).value = ({car: l42.fvalue(pv, l246, (function (values){
+    var v575= l3.value;
     for (var i = arguments.length-1; i>=1; i--)
-        v569 = {car: arguments[i], cdr: 
-    v569};
+        v575 = {car: arguments[i], cdr: 
+    v575};
     return (function(){
         try {
             (l89.fvalue(pv, (function(){
-                var symbol = l242;
+                var symbol = l244;
                 var func = symbol.fvalue;
                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                 return func;
-            })(), v569) !== l3.value ? l3.value : (function(){
-                throw ({type: 'block', id: 204, value: l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l226), v569, l42.fvalue(pv, l3))), message: 'Return from unknown block TAGBODY.'})
+            })(), v575) !== l3.value ? l3.value : (function(){
+                throw ({type: 'block', id: 206, value: l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l228), v575, l42.fvalue(pv, l3))), message: 'Return from unknown block TAGBODY.'})
             })());
-            (l242.fvalue(pv, (function(){
-                var tmp = v569;
+            (l244.fvalue(pv, (function(){
+                var tmp = v575;
                 return tmp === l3.value? l3.value: tmp.car;
-            })()) !== l3.value ? l3.value : (v569 = ({car: l15.fvalue(pv, "START"), cdr: v569})));
-            return (function(v570){
-                return (function(v572,v571){
+            })()) !== l3.value ? l3.value : (v575 = ({car: l15.fvalue(pv, "START"), cdr: v575})));
+            return (function(v576){
+                return (function(v578,v577){
                     try {
                         var tmp;
                         tmp = l179.value;
-                        l179.value = v572;
-                        v572 = tmp;
-                        (function(v573){
-                            return (v571 = l39.fvalue(pv, l167.fvalue(pv, v573)));
-                        })(l178.fvalue(pv, l38.fvalue(pv, v569), (function(){
+                        l179.value = v578;
+                        v578 = tmp;
+                        (function(v579){
+                            return (v577 = l39.fvalue(pv, l167.fvalue(pv, v579)));
+                        })(l178.fvalue(pv, l38.fvalue(pv, v575), (function(){
                             var symbol = l179;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5196,7 +5252,7 @@ var l244 = {name: "TAGBODY"};
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l135.fvalue(pv, "var tagbody_", v570, " = ", v571, ";", (function(){
+                        })(), l135.fvalue(pv, "var tagbody_", v576, " = ", v577, ";", (function(){
                             var symbol = l123;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5216,39 +5272,39 @@ var l244 = {name: "TAGBODY"};
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l135.fvalue(pv, (function(v574){
-                            return l124.fvalue(pv, "switch(tagbody_", v570, "){", (function(){
+                        })(), l135.fvalue(pv, (function(v580){
+                            return l124.fvalue(pv, "switch(tagbody_", v576, "){", (function(){
                                 var symbol = l123;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })(), "case ", v571, ":", (function(){
+                            })(), "case ", v577, ":", (function(){
                                 var symbol = l123;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })(), (function(){
-                                    return (function(v575,v576){
+                                    return (function(v581,v582){
                                         (function(){
-                                            while(v575 !== l3.value){
-                                                (v576 = (function(){
-                                                    var tmp = v575;
+                                            while(v581 !== l3.value){
+                                                (v582 = (function(){
+                                                    var tmp = v581;
                                                     return tmp === l3.value? l3.value: tmp.car;
                                                 })());
                                                 (function(){
-                                                    (v574 = l124.fvalue(pv, v574, (l26.fvalue(pv, l242.fvalue(pv, v576)) !== l3.value ? l135.fvalue(pv, l137.fvalue(pv, v576), ";", (function(){
+                                                    (v580 = l124.fvalue(pv, v580, (l26.fvalue(pv, l244.fvalue(pv, v582)) !== l3.value ? l135.fvalue(pv, l137.fvalue(pv, v582), ";", (function(){
                                                         var symbol = l123;
                                                         var value = symbol.value;
                                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                         return value;
-                                                    })()) : (function(v577){
-                                                        return l124.fvalue(pv, "case ", l39.fvalue(pv, l167.fvalue(pv, v577)), ":", (function(){
+                                                    })()) : (function(v583){
+                                                        return l124.fvalue(pv, "case ", l39.fvalue(pv, l167.fvalue(pv, v583)), ":", (function(){
                                                             var symbol = l123;
                                                             var value = symbol.value;
                                                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                             return value;
                                                         })());
-                                                    })(l178.fvalue(pv, v576, (function(){
+                                                    })(l178.fvalue(pv, v582, (function(){
                                                         var symbol = l179;
                                                         var value = symbol.value;
                                                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5256,15 +5312,15 @@ var l244 = {name: "TAGBODY"};
                                                     })(), l176)))));
                                                     return l3.value;
                                                 })();
-                                                (v575 = (function(){
-                                                    var tmp = v575;
+                                                (v581 = (function(){
+                                                    var tmp = v581;
                                                     return tmp === l3.value? l3.value: tmp.cdr;
                                                 })());
                                             }return l3.value;
                                         })();
-                                        return v574;
+                                        return v580;
                                     })((function(){
-                                        var tmp = v569;
+                                        var tmp = v575;
                                         return tmp === l3.value? l3.value: tmp.cdr;
                                     })(),l3.value);
                             })(), "default:", (function(){
@@ -5293,12 +5349,12 @@ var l244 = {name: "TAGBODY"};
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), "    if (jump.type == 'tagbody' && jump.id == ", v570, ")", (function(){
+                        })(), "    if (jump.type == 'tagbody' && jump.id == ", v576, ")", (function(){
                             var symbol = l123;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), "        tagbody_", v570, " = jump.label;", (function(){
+                        })(), "        tagbody_", v576, " = jump.label;", (function(){
                             var symbol = l123;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5331,70 +5387,70 @@ var l244 = {name: "TAGBODY"};
                         })()), "})()");
                     }
                     finally {
-                        l179.value = v572;
+                        l179.value = v578;
                     }
-                })(l243.fvalue(pv, v570, v569),l3.value);
+                })(l245.fvalue(pv, v576, v575),l3.value);
             })(l16.fvalue(pv, (function(){
-                var symbol = l240;
+                var symbol = l242;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
             })()));
         }
         catch (cf){
-            if (cf.type == 'block' && cf.id == 204)
+            if (cf.type == 'block' && cf.id == 206)
                 return cf.value;
             else
                 throw cf;
         }
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l245 = {name: "GO"};
-((l198).value = ({car: l42.fvalue(pv, l245, (function (values,v578){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v579,v580){
-                return (v579 !== l3.value ? l124.fvalue(values, "(function(){", (function(){
+var l247 = {name: "GO"};
+((l198).value = ({car: l42.fvalue(pv, l247, (function (values,v584){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v585,v586){
+                return (v585 !== l3.value ? l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, "throw ({", "type: 'tagbody', ", "id: ", l38.fvalue(pv, l167.fvalue(pv, v579)), ", ", "label: ", l39.fvalue(pv, l167.fvalue(pv, v579)), ", ", "message: 'Attempt to GO to non-existing tag ", v580, "'", "})", (function(){
+                })(), l135.fvalue(pv, "throw ({", "type: 'tagbody', ", "id: ", l38.fvalue(pv, l167.fvalue(pv, v585)), ", ", "label: ", l39.fvalue(pv, l167.fvalue(pv, v585)), ", ", "message: 'Attempt to GO to non-existing tag ", v586, "'", "})", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "})()") : (function(){
-                    throw l124.fvalue(pv, "Unknown tag `", v580, "'.");
+                    throw l124.fvalue(pv, "Unknown tag `", v586, "'.");
                 })());
-            })(l178.fvalue(pv, v578, (function(){
+            })(l178.fvalue(pv, v584, (function(){
                 var symbol = l179;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
             })(), l176),(((function(){
-                var tmp = v578;
+                var tmp = v584;
                 return (typeof tmp == 'object' && 'name' in tmp);
-            })()?l4.value: l3.value) !== l3.value ? (v578).name : (l75.fvalue(pv, v578) !== l3.value ? l16.fvalue(pv, v578) : l3.value)));
+            })()?l4.value: l3.value) !== l3.value ? (v584).name : (l75.fvalue(pv, v584) !== l3.value ? l16.fvalue(pv, v584) : l3.value)));
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l246 = {name: "UNWIND-PROTECT"};
-((l198).value = ({car: l42.fvalue(pv, l246, (function (values,v582){
-    checkArgsAtLeast(2);var v581= l3.value;
+var l248 = {name: "UNWIND-PROTECT"};
+((l198).value = ({car: l42.fvalue(pv, l248, (function (values,v588){
+    checkArgsAtLeast(arguments, 2);
+    var v587= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v581 = {car: arguments[i], cdr: 
-    v581};
+        v587 = {car: arguments[i], cdr: 
+    v587};
     return (function(){
             return l124.fvalue(values, "(function(){", (function(){
                 var symbol = l123;
@@ -5411,7 +5467,7 @@ var l246 = {name: "UNWIND-PROTECT"};
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), l135.fvalue(pv, "ret = ", l137.fvalue(pv, v582), ";", (function(){
+            })(), l135.fvalue(pv, "ret = ", l137.fvalue(pv, v588), ";", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5421,7 +5477,7 @@ var l246 = {name: "UNWIND-PROTECT"};
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), l135.fvalue(pv, l212.fvalue(pv, v581)), "}", (function(){
+            })(), l135.fvalue(pv, l214.fvalue(pv, v587)), "}", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5433,26 +5489,26 @@ var l246 = {name: "UNWIND-PROTECT"};
                 return value;
             })()), "})()");
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l247 = {name: "MULTIPLE-VALUE-CALL"};
-((l198).value = ({car: l42.fvalue(pv, l247, (function (values,v584){
-    checkArgsAtLeast(2);var v583= l3.value;
+var l249 = {name: "MULTIPLE-VALUE-CALL"};
+((l198).value = ({car: l42.fvalue(pv, l249, (function (values,v590){
+    checkArgsAtLeast(arguments, 2);
+    var v589= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v583 = {car: arguments[i], cdr: 
-    v583};
+        v589 = {car: arguments[i], cdr: 
+    v589};
     return (function(){
             return l124.fvalue(values, "(function(){", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), l135.fvalue(pv, "var func = ", l137.fvalue(pv, v584), ";", (function(){
+            })(), l135.fvalue(pv, "var func = ", l137.fvalue(pv, v590), ";", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5482,8 +5538,9 @@ var l247 = {name: "MULTIPLE-VALUE-CALL"};
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), l128.fvalue(pv, (function (values,v585){
-                checkArgsAtLeast(2);checkArgsAtLeast(2);return l124.fvalue(values, "vs = ", l137.fvalue(pv, v585, l4.value), ";", (function(){
+            })(), l128.fvalue(pv, (function (values,v591){
+                checkArgs(arguments, 2);
+                return l124.fvalue(values, "vs = ", l137.fvalue(pv, v591, l4.value), ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5509,8 +5566,7 @@ var l247 = {name: "MULTIPLE-VALUE-CALL"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()));
-            
-            }), v583), "return func.apply(window, args);", (function(){
+            }), v589), "return func.apply(window, args);", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5522,26 +5578,26 @@ var l247 = {name: "MULTIPLE-VALUE-CALL"};
                 return value;
             })()), "})()");
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l248 = {name: "MULTIPLE-VALUE-PROG1"};
-((l198).value = ({car: l42.fvalue(pv, l248, (function (values,v587){
-    checkArgsAtLeast(2);var v586= l3.value;
+var l250 = {name: "MULTIPLE-VALUE-PROG1"};
+((l198).value = ({car: l42.fvalue(pv, l250, (function (values,v593){
+    checkArgsAtLeast(arguments, 2);
+    var v592= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v586 = {car: arguments[i], cdr: 
-    v586};
+        v592 = {car: arguments[i], cdr: 
+    v592};
     return (function(){
             return l124.fvalue(values, "(function(){", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), l135.fvalue(pv, "var args = ", l137.fvalue(pv, v587, (function(){
+            })(), l135.fvalue(pv, "var args = ", l137.fvalue(pv, v593, (function(){
                 var symbol = l162;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5551,131 +5607,131 @@ var l248 = {name: "MULTIPLE-VALUE-PROG1"};
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), l212.fvalue(pv, v586), "return args;", (function(){
+            })(), l214.fvalue(pv, v592), "return args;", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
             })()), "})()");
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l249 = {name: "BACKQUOTE-EXPAND-1"};
+var l251 = {name: "BACKQUOTE-EXPAND-1"};
 (function(){
-    (l249).fvalue = (function(v590){
-        ((v590)["fname"] = "BACKQUOTE-EXPAND-1");
-        return v590;
-    })((function (values,v588){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+    (l251).fvalue = (function(v596){
+        ((v596)["fname"] = "BACKQUOTE-EXPAND-1");
+        return v596;
+    })((function (values,v594){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (((function(){
-                    var tmp = v588;
+                    var tmp = v594;
                     return (typeof tmp == 'object' && 'name' in tmp);
-                })()?l4.value: l3.value) !== l3.value ? l42.fvalue(values, l157, v588) : (l43.fvalue(pv, v588) !== l3.value ? v588 : ((((function(){
-                    var tmp = v588;
+                })()?l4.value: l3.value) !== l3.value ? l42.fvalue(values, l157, v594) : (l43.fvalue(pv, v594) !== l3.value ? v594 : ((((function(){
+                    var tmp = v594;
                     return tmp === l3.value? l3.value: tmp.car;
                 })() === l160)?l4.value: l3.value) !== l3.value ? (function(){
-                    var tmp = v588;
+                    var tmp = v594;
                     return tmp === l3.value? l3.value: tmp.car;
                 })() : ((((function(){
-                    var tmp = v588;
+                    var tmp = v594;
                     return tmp === l3.value? l3.value: tmp.car;
-                })() === l158)?l4.value: l3.value) !== l3.value ? l249.fvalue(values, l249.fvalue(pv, l32.fvalue(pv, v588))) : ({car: l62, cdr: l69.fvalue(pv, (function (values,v589){
-                    checkArgsAtLeast(2);checkArgsAtLeast(2);return ((l57.fvalue(pv, v589) !== l3.value ? (((function(){
-                        var tmp = v589;
+                })() === l158)?l4.value: l3.value) !== l3.value ? l251.fvalue(values, l251.fvalue(pv, l32.fvalue(pv, v594))) : ({car: l62, cdr: l69.fvalue(pv, (function (values,v595){
+                    checkArgs(arguments, 2);
+                    return ((l57.fvalue(pv, v595) !== l3.value ? (((function(){
+                        var tmp = v595;
                         return tmp === l3.value? l3.value: tmp.car;
-                    })() === l160)?l4.value: l3.value) : l3.value) !== l3.value ? l42.fvalue(values, l42, l32.fvalue(pv, v589)) : ((l57.fvalue(pv, v589) !== l3.value ? (((function(){
-                        var tmp = v589;
+                    })() === l160)?l4.value: l3.value) : l3.value) !== l3.value ? l42.fvalue(values, l42, l32.fvalue(pv, v595)) : ((l57.fvalue(pv, v595) !== l3.value ? (((function(){
+                        var tmp = v595;
                         return tmp === l3.value? l3.value: tmp.car;
-                    })() === l159)?l4.value: l3.value) : l3.value) !== l3.value ? l32.fvalue(values, v589) : l42.fvalue(values, l42, l249.fvalue(pv, v589))));
-                
-                }), v588)})))));
+                    })() === l159)?l4.value: l3.value) : l3.value) !== l3.value ? l32.fvalue(values, v595) : l42.fvalue(values, l42, l251.fvalue(pv, v595))));
+                }), v594)})))));
         })();
-    
     }));
-    return l249;
+    return l251;
 })();
-var l250 = {name: "BACKQUOTE-EXPAND"};
+var l252 = {name: "BACKQUOTE-EXPAND"};
 (function(){
-    (l250).fvalue = (function(v592){
-        ((v592)["fname"] = "BACKQUOTE-EXPAND");
-        return v592;
-    })((function (values,v591){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-                return ((l57.fvalue(pv, v591) !== l3.value ? (((function(){
-                    var tmp = v591;
+    (l252).fvalue = (function(v598){
+        ((v598)["fname"] = "BACKQUOTE-EXPAND");
+        return v598;
+    })((function (values,v597){
+        checkArgs(arguments, 2);
+        return (function(){
+                return ((l57.fvalue(pv, v597) !== l3.value ? (((function(){
+                    var tmp = v597;
                     return tmp === l3.value? l3.value: tmp.car;
-                })() === l158)?l4.value: l3.value) : l3.value) !== l3.value ? l249.fvalue(values, l32.fvalue(pv, v591)) : v591);
+                })() === l158)?l4.value: l3.value) : l3.value) !== l3.value ? l251.fvalue(values, l32.fvalue(pv, v597)) : v597);
         })();
-    
     }));
-    return l250;
+    return l252;
 })();
 l158;
-((l198).value = ({car: l42.fvalue(pv, l158, (function (values,v593){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return l137.fvalue(values, l249.fvalue(pv, v593));
+((l198).value = ({car: l42.fvalue(pv, l158, (function (values,v599){
+    checkArgs(arguments, 2);
+    return (function(){
+            return l137.fvalue(values, l251.fvalue(pv, v599));
     })();
-
 })), cdr: (function(){
     var symbol = l198;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l251 = {name: "*BUILTINS*"};
+var l253 = {name: "*BUILTINS*"};
 (function(){
-    (((l251.value !== undefined)?l4.value: l3.value) !== l3.value ? l3.value : ((l251).value = l3.value));
-    return l251;
+    (((l253.value !== undefined)?l4.value: l3.value) !== l3.value ? l3.value : ((l253).value = l3.value));
+    return l253;
 })();
-var l252 = {name: "DEFINE-RAW-BUILTIN"};
-l252;
-var l253 = {name: "DEFINE-BUILTIN"};
-l253;
-var l254 = {name: "TYPE-CHECK"};
+var l254 = {name: "DEFINE-RAW-BUILTIN"};
 l254;
-var l255 = {name: "VARIABLE-ARITY-CALL"};
+var l255 = {name: "DEFINE-BUILTIN"};
+l255;
+var l256 = {name: "TYPE-CHECK"};
+l256;
+var l257 = {name: "VARIABLE-ARITY-CALL"};
 (function(){
-    (l255).fvalue = (function(v602){
-        ((v602)["fname"] = "VARIABLE-ARITY-CALL");
-        return v602;
-    })((function (values,v594,v595){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+    (l257).fvalue = (function(v608){
+        ((v608)["fname"] = "VARIABLE-ARITY-CALL");
+        return v608;
+    })((function (values,v600,v601){
+        checkArgs(arguments, 3);
+        return (function(){
                 (((function(){
-                    var tmp = v594;
+                    var tmp = v600;
                     return (typeof tmp == 'object' && 'car' in tmp);
                 })()?l4.value: l3.value) !== l3.value ? l3.value : (function(){
                     throw "ARGS must be a non-empty list";
                 })());
-                return (function(v596,v597,v598){
+                return (function(v602,v603,v604){
                     (function(){
-                            return (function(v599,v600){
+                            return (function(v605,v606){
                                 (function(){
-                                    while(v599 !== l3.value){
-                                        (v600 = (function(){
-                                            var tmp = v599;
+                                    while(v605 !== l3.value){
+                                        (v606 = (function(){
+                                            var tmp = v605;
                                             return tmp === l3.value? l3.value: tmp.car;
                                         })());
                                         (function(){
-                                            (function(v601){
-                                                (v597 = ({car: v601, cdr: v597}));
-                                                return (v598 = l124.fvalue(pv, v598, l124.fvalue(pv, "var ", v601, " = ", l137.fvalue(pv, v600), ";", (function(){
+                                            (function(v607){
+                                                (v603 = ({car: v607, cdr: v603}));
+                                                return (v604 = l124.fvalue(pv, v604, l124.fvalue(pv, "var ", v607, " = ", l137.fvalue(pv, v606), ";", (function(){
                                                     var symbol = l123;
                                                     var value = symbol.value;
                                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                     return value;
-                                                })(), "if (typeof ", v601, " !== 'number') throw 'Not a number!';", (function(){
+                                                })(), "if (typeof ", v607, " !== 'number') throw 'Not a number!';", (function(){
                                                     var symbol = l123;
                                                     var value = symbol.value;
                                                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                                     return value;
                                                 })())));
-                                            })(l124.fvalue(pv, "x", l16.fvalue(pv, (v596 = (function(){
-                                                var x1 = v596;
+                                            })(l124.fvalue(pv, "x", l16.fvalue(pv, (v602 = (function(){
+                                                var x1 = v602;
                                                 if (typeof x1 !== 'number') throw 'Not a number!';
                                                 var x2 = 1;
                                                 if (typeof x2 !== 'number') throw 'Not a number!';
@@ -5683,47 +5739,47 @@ var l255 = {name: "VARIABLE-ARITY-CALL"};
                                             })()))));
                                             return l3.value;
                                         })();
-                                        (v599 = (function(){
-                                            var tmp = v599;
+                                        (v605 = (function(){
+                                            var tmp = v605;
                                             return tmp === l3.value? l3.value: tmp.cdr;
                                         })());
                                     }return l3.value;
                                 })();
                                 return l3.value;
-                            })(v594,l3.value);
+                            })(v600,l3.value);
                     })();
                     return l124.fvalue(values, "(function(){", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
-                    })(), l135.fvalue(pv, v598, (v595)(pv, l64.fvalue(pv, v597))), "})()");
+                    })(), l135.fvalue(pv, v604, (v601)(pv, l64.fvalue(pv, v603))), "})()");
                 })(0,l3,"");
         })();
-    
     }));
-    return l255;
+    return l257;
 })();
-var l256 = {name: "VARIABLE-ARITY"};
-l256;
-var l257 = {name: "NUM-OP-NUM"};
+var l258 = {name: "VARIABLE-ARITY"};
+l258;
+var l259 = {name: "NUM-OP-NUM"};
 (function(){
-    (l257).fvalue = (function(v606){
-        ((v606)["fname"] = "NUM-OP-NUM");
-        return v606;
-    })((function (values,v603,v604,v605){
-        checkArgsAtLeast(4);checkArgsAtLeast(4);return (function(){
+    (l259).fvalue = (function(v612){
+        ((v612)["fname"] = "NUM-OP-NUM");
+        return v612;
+    })((function (values,v609,v610,v611){
+        checkArgs(arguments, 4);
+        return (function(){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v603, ";", (function(){
+                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v609, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })()), l124.fvalue(pv, "var ", "y", " = ", v605, ";", (function(){
+                })()), l124.fvalue(pv, "var ", "y", " = ", v611, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -5748,313 +5804,311 @@ var l257 = {name: "NUM-OP-NUM"};
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })())), l124.fvalue(pv, "return ", l124.fvalue(pv, "x", v604, "y"), ";", (function(){
+                })())), l124.fvalue(pv, "return ", l124.fvalue(pv, "x", v610, "y"), ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })())), "})()");
         })();
-    
     }));
-    return l257;
+    return l259;
 })();
-((l251).value = ({car: l42.fvalue(pv, l59, (function (values){
-    var v607= l3.value;
-    for (var i = arguments.length-1; i>=1; i--)
-        v607 = {car: arguments[i], cdr: 
-    v607};
-    return (function(){
-            return (l11.fvalue(pv, v607) !== l3.value ? "0" : l255.fvalue(values, v607, (function (values,v608){
-                checkArgsAtLeast(2);checkArgsAtLeast(2);return l124.fvalue(values, "return ", l126.fvalue(pv, v608, "+"), ";", (function(){
-                    var symbol = l123;
-                    var value = symbol.value;
-                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                    return value;
-                })());
-            
-            })));
-    })();
-
-})), cdr: (function(){
-    var symbol = l251;
-    var value = symbol.value;
-    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-    return value;
-})()}));
-((l251).value = ({car: l42.fvalue(pv, l60, (function (values,v610){
-    checkArgsAtLeast(2);var v609= l3.value;
-    for (var i = arguments.length-1; i>=2; i--)
-        v609 = {car: arguments[i], cdr: 
-    v609};
-    return (function(){
-            return (function(v611){
-                return l255.fvalue(values, v611, (function (values,v612){
-                    checkArgsAtLeast(2);checkArgsAtLeast(2);return l124.fvalue(values, "return ", (l11.fvalue(pv, v609) !== l3.value ? l124.fvalue(pv, "-", (function(){
-                        var tmp = v612;
-                        return tmp === l3.value? l3.value: tmp.car;
-                    })()) : l126.fvalue(pv, v612, "-")), ";", (function(){
-                        var symbol = l123;
-                        var value = symbol.value;
-                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-                        return value;
-                    })());
-                
-                }));
-            })(({car: v610, cdr: v609}));
-    })();
-
-})), cdr: (function(){
-    var symbol = l251;
-    var value = symbol.value;
-    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
-    return value;
-})()}));
-((l251).value = ({car: l42.fvalue(pv, l19, (function (values){
+((l253).value = ({car: l42.fvalue(pv, l59, (function (values){
     var v613= l3.value;
     for (var i = arguments.length-1; i>=1; i--)
         v613 = {car: arguments[i], cdr: 
     v613};
     return (function(){
-            return (l11.fvalue(pv, v613) !== l3.value ? "1" : l255.fvalue(values, v613, (function (values,v614){
-                checkArgsAtLeast(2);checkArgsAtLeast(2);return l124.fvalue(values, "return ", l126.fvalue(pv, v614, "*"), ";", (function(){
+            return (l11.fvalue(pv, v613) !== l3.value ? "0" : l257.fvalue(values, v613, (function (values,v614){
+                checkArgs(arguments, 2);
+                return l124.fvalue(values, "return ", l126.fvalue(pv, v614, "+"), ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })());
-            
             })));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-((l251).value = ({car: l42.fvalue(pv, l20, (function (values,v616){
-    checkArgsAtLeast(2);var v615= l3.value;
+((l253).value = ({car: l42.fvalue(pv, l60, (function (values,v616){
+    checkArgsAtLeast(arguments, 2);
+    var v615= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
         v615 = {car: arguments[i], cdr: 
     v615};
     return (function(){
             return (function(v617){
-                return l255.fvalue(values, v617, (function (values,v618){
-                    checkArgsAtLeast(2);checkArgsAtLeast(2);return l124.fvalue(values, "return ", (l11.fvalue(pv, v615) !== l3.value ? l124.fvalue(pv, "1 /", (function(){
+                return l257.fvalue(values, v617, (function (values,v618){
+                    checkArgs(arguments, 2);
+                    return l124.fvalue(values, "return ", (l11.fvalue(pv, v615) !== l3.value ? l124.fvalue(pv, "-", (function(){
                         var tmp = v618;
                         return tmp === l3.value? l3.value: tmp.car;
-                    })()) : l126.fvalue(pv, v618, "/")), ";", (function(){
+                    })()) : l126.fvalue(pv, v618, "-")), ";", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })());
-                
                 }));
             })(({car: v616, cdr: v615}));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l258 = {name: "MOD"};
-((l251).value = ({car: l42.fvalue(pv, l258, (function (values,v619,v620){
-    checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-            return (function(v621,v622){
-                return l257.fvalue(values, v621, "%", v622);
-            })(l137.fvalue(pv, v619),l137.fvalue(pv, v620));
+((l253).value = ({car: l42.fvalue(pv, l19, (function (values){
+    var v619= l3.value;
+    for (var i = arguments.length-1; i>=1; i--)
+        v619 = {car: arguments[i], cdr: 
+    v619};
+    return (function(){
+            return (l11.fvalue(pv, v619) !== l3.value ? "1" : l257.fvalue(values, v619, (function (values,v620){
+                checkArgs(arguments, 2);
+                return l124.fvalue(values, "return ", l126.fvalue(pv, v620, "*"), ";", (function(){
+                    var symbol = l123;
+                    var value = symbol.value;
+                    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                    return value;
+                })());
+            })));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l259 = {name: "COMPARISON-CONJUNTION"};
+((l253).value = ({car: l42.fvalue(pv, l20, (function (values,v622){
+    checkArgsAtLeast(arguments, 2);
+    var v621= l3.value;
+    for (var i = arguments.length-1; i>=2; i--)
+        v621 = {car: arguments[i], cdr: 
+    v621};
+    return (function(){
+            return (function(v623){
+                return l257.fvalue(values, v623, (function (values,v624){
+                    checkArgs(arguments, 2);
+                    return l124.fvalue(values, "return ", (l11.fvalue(pv, v621) !== l3.value ? l124.fvalue(pv, "1 /", (function(){
+                        var tmp = v624;
+                        return tmp === l3.value? l3.value: tmp.car;
+                    })()) : l126.fvalue(pv, v624, "/")), ";", (function(){
+                        var symbol = l123;
+                        var value = symbol.value;
+                        if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+                        return value;
+                    })());
+                }));
+            })(({car: v622, cdr: v621}));
+    })();
+})), cdr: (function(){
+    var symbol = l253;
+    var value = symbol.value;
+    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+    return value;
+})()}));
+var l260 = {name: "MOD"};
+((l253).value = ({car: l42.fvalue(pv, l260, (function (values,v625,v626){
+    checkArgs(arguments, 3);
+    return (function(){
+            return (function(v627,v628){
+                return l259.fvalue(values, v627, "%", v628);
+            })(l137.fvalue(pv, v625),l137.fvalue(pv, v626));
+    })();
+})), cdr: (function(){
+    var symbol = l253;
+    var value = symbol.value;
+    if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+    return value;
+})()}));
+var l261 = {name: "COMPARISON-CONJUNTION"};
 (function(){
-    (l259).fvalue = (function(v625){
-        ((v625)["fname"] = "COMPARISON-CONJUNTION");
-        return v625;
-    })((function (values,v623,v624){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
+    (l261).fvalue = (function(v631){
+        ((v631)["fname"] = "COMPARISON-CONJUNTION");
+        return v631;
+    })((function (values,v629,v630){
+        checkArgs(arguments, 3);
+        return (function(){
                 return (l11.fvalue(pv, (function(){
-                    var tmp = v623;
+                    var tmp = v629;
                     return tmp === l3.value? l3.value: tmp.cdr;
-                })()) !== l3.value ? "true" : (l11.fvalue(pv, l34.fvalue(pv, v623)) !== l3.value ? l124.fvalue(values, (function(){
-                    var tmp = v623;
+                })()) !== l3.value ? "true" : (l11.fvalue(pv, l34.fvalue(pv, v629)) !== l3.value ? l124.fvalue(values, (function(){
+                    var tmp = v629;
                     return tmp === l3.value? l3.value: tmp.car;
-                })(), v624, l32.fvalue(pv, v623)) : l124.fvalue(values, (function(){
-                    var tmp = v623;
+                })(), v630, l32.fvalue(pv, v629)) : l124.fvalue(values, (function(){
+                    var tmp = v629;
                     return tmp === l3.value? l3.value: tmp.car;
-                })(), v624, l32.fvalue(pv, v623), " && ", l259.fvalue(pv, (function(){
-                    var tmp = v623;
+                })(), v630, l32.fvalue(pv, v629), " && ", l261.fvalue(pv, (function(){
+                    var tmp = v629;
                     return tmp === l3.value? l3.value: tmp.cdr;
-                })(), v624))));
+                })(), v630))));
         })();
-    
     }));
-    return l259;
+    return l261;
 })();
-var l260 = {name: "DEFINE-BUILTIN-COMPARISON"};
-l260;
-var l261 = {name: ">"};
-((l251).value = ({car: l42.fvalue(pv, l261, (function (values,v627){
-    checkArgsAtLeast(2);var v626= l3.value;
+var l262 = {name: "DEFINE-BUILTIN-COMPARISON"};
+l262;
+var l263 = {name: ">"};
+((l253).value = ({car: l42.fvalue(pv, l263, (function (values,v633){
+    checkArgsAtLeast(arguments, 2);
+    var v632= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v626 = {car: arguments[i], cdr: 
-    v626};
+        v632 = {car: arguments[i], cdr: 
+    v632};
     return (function(){
-            return (function(v628){
-                return l255.fvalue(values, v628, (function (values,v629){
-                    checkArgsAtLeast(2);checkArgsAtLeast(2);return l124.fvalue(values, "return ", l136.fvalue(pv, l259.fvalue(pv, v629, ">")), ";", (function(){
+            return (function(v634){
+                return l257.fvalue(values, v634, (function (values,v635){
+                    checkArgs(arguments, 2);
+                    return l124.fvalue(values, "return ", l136.fvalue(pv, l261.fvalue(pv, v635, ">")), ";", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })());
-                
                 }));
-            })(({car: v627, cdr: v626}));
+            })(({car: v633, cdr: v632}));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l262 = {name: "<"};
-((l251).value = ({car: l42.fvalue(pv, l262, (function (values,v631){
-    checkArgsAtLeast(2);var v630= l3.value;
+var l264 = {name: "<"};
+((l253).value = ({car: l42.fvalue(pv, l264, (function (values,v637){
+    checkArgsAtLeast(arguments, 2);
+    var v636= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v630 = {car: arguments[i], cdr: 
-    v630};
+        v636 = {car: arguments[i], cdr: 
+    v636};
     return (function(){
-            return (function(v632){
-                return l255.fvalue(values, v632, (function (values,v633){
-                    checkArgsAtLeast(2);checkArgsAtLeast(2);return l124.fvalue(values, "return ", l136.fvalue(pv, l259.fvalue(pv, v633, "<")), ";", (function(){
+            return (function(v638){
+                return l257.fvalue(values, v638, (function (values,v639){
+                    checkArgs(arguments, 2);
+                    return l124.fvalue(values, "return ", l136.fvalue(pv, l261.fvalue(pv, v639, "<")), ";", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })());
-                
                 }));
-            })(({car: v631, cdr: v630}));
+            })(({car: v637, cdr: v636}));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l263 = {name: ">="};
-((l251).value = ({car: l42.fvalue(pv, l263, (function (values,v635){
-    checkArgsAtLeast(2);var v634= l3.value;
+var l265 = {name: ">="};
+((l253).value = ({car: l42.fvalue(pv, l265, (function (values,v641){
+    checkArgsAtLeast(arguments, 2);
+    var v640= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v634 = {car: arguments[i], cdr: 
-    v634};
+        v640 = {car: arguments[i], cdr: 
+    v640};
     return (function(){
-            return (function(v636){
-                return l255.fvalue(values, v636, (function (values,v637){
-                    checkArgsAtLeast(2);checkArgsAtLeast(2);return l124.fvalue(values, "return ", l136.fvalue(pv, l259.fvalue(pv, v637, ">=")), ";", (function(){
+            return (function(v642){
+                return l257.fvalue(values, v642, (function (values,v643){
+                    checkArgs(arguments, 2);
+                    return l124.fvalue(values, "return ", l136.fvalue(pv, l261.fvalue(pv, v643, ">=")), ";", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })());
-                
                 }));
-            })(({car: v635, cdr: v634}));
+            })(({car: v641, cdr: v640}));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l264 = {name: "<="};
-((l251).value = ({car: l42.fvalue(pv, l264, (function (values,v639){
-    checkArgsAtLeast(2);var v638= l3.value;
+var l266 = {name: "<="};
+((l253).value = ({car: l42.fvalue(pv, l266, (function (values,v645){
+    checkArgsAtLeast(arguments, 2);
+    var v644= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v638 = {car: arguments[i], cdr: 
-    v638};
+        v644 = {car: arguments[i], cdr: 
+    v644};
     return (function(){
-            return (function(v640){
-                return l255.fvalue(values, v640, (function (values,v641){
-                    checkArgsAtLeast(2);checkArgsAtLeast(2);return l124.fvalue(values, "return ", l136.fvalue(pv, l259.fvalue(pv, v641, "<=")), ";", (function(){
+            return (function(v646){
+                return l257.fvalue(values, v646, (function (values,v647){
+                    checkArgs(arguments, 2);
+                    return l124.fvalue(values, "return ", l136.fvalue(pv, l261.fvalue(pv, v647, "<=")), ";", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })());
-                
                 }));
-            })(({car: v639, cdr: v638}));
+            })(({car: v645, cdr: v644}));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-((l251).value = ({car: l42.fvalue(pv, l18, (function (values,v643){
-    checkArgsAtLeast(2);var v642= l3.value;
+((l253).value = ({car: l42.fvalue(pv, l18, (function (values,v649){
+    checkArgsAtLeast(arguments, 2);
+    var v648= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v642 = {car: arguments[i], cdr: 
-    v642};
+        v648 = {car: arguments[i], cdr: 
+    v648};
     return (function(){
-            return (function(v644){
-                return l255.fvalue(values, v644, (function (values,v645){
-                    checkArgsAtLeast(2);checkArgsAtLeast(2);return l124.fvalue(values, "return ", l136.fvalue(pv, l259.fvalue(pv, v645, "==")), ";", (function(){
+            return (function(v650){
+                return l257.fvalue(values, v650, (function (values,v651){
+                    checkArgs(arguments, 2);
+                    return l124.fvalue(values, "return ", l136.fvalue(pv, l261.fvalue(pv, v651, "==")), ";", (function(){
                         var symbol = l123;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
                     })());
-                
                 }));
-            })(({car: v643, cdr: v642}));
+            })(({car: v649, cdr: v648}));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l265 = {name: "NUMBERP"};
-((l251).value = ({car: l42.fvalue(pv, l265, (function (values,v646){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v647){
-                return l136.fvalue(values, l124.fvalue(pv, "(typeof (", v647, ") == \"number\")"));
-            })(l137.fvalue(pv, v646));
+var l267 = {name: "NUMBERP"};
+((l253).value = ({car: l42.fvalue(pv, l267, (function (values,v652){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v653){
+                return l136.fvalue(values, l124.fvalue(pv, "(typeof (", v653, ") == \"number\")"));
+            })(l137.fvalue(pv, v652));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l266 = {name: "FLOOR"};
-((l251).value = ({car: l42.fvalue(pv, l266, (function (values,v648){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v649){
+var l268 = {name: "FLOOR"};
+((l253).value = ({car: l42.fvalue(pv, l268, (function (values,v654){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v655){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v649, ";", (function(){
+                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v655, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6075,37 +6129,37 @@ var l266 = {name: "FLOOR"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })())), "})()");
-            })(l137.fvalue(pv, v648));
+            })(l137.fvalue(pv, v654));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-((l251).value = ({car: l42.fvalue(pv, l27, (function (values,v650,v651){
-    checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-            return (function(v652,v653){
-                return l124.fvalue(values, "({car: ", v652, ", cdr: ", v653, "})");
-            })(l137.fvalue(pv, v650),l137.fvalue(pv, v651));
+((l253).value = ({car: l42.fvalue(pv, l27, (function (values,v656,v657){
+    checkArgs(arguments, 3);
+    return (function(){
+            return (function(v658,v659){
+                return l124.fvalue(values, "({car: ", v658, ", cdr: ", v659, "})");
+            })(l137.fvalue(pv, v656),l137.fvalue(pv, v657));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-((l251).value = ({car: l42.fvalue(pv, l28, (function (values,v654){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v655){
+((l253).value = ({car: l42.fvalue(pv, l28, (function (values,v660){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v661){
                 return l136.fvalue(values, l124.fvalue(pv, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, "var tmp = ", v655, ";", (function(){
+                })(), l135.fvalue(pv, "var tmp = ", v661, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6116,24 +6170,24 @@ var l266 = {name: "FLOOR"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "})()"));
-            })(l137.fvalue(pv, v654));
+            })(l137.fvalue(pv, v660));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-((l251).value = ({car: l42.fvalue(pv, l29, (function (values,v656){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v657){
+((l253).value = ({car: l42.fvalue(pv, l29, (function (values,v662){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v663){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, "var tmp = ", v657, ";", (function(){
+                })(), l135.fvalue(pv, "var tmp = ", v663, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6144,24 +6198,24 @@ var l266 = {name: "FLOOR"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "})()");
-            })(l137.fvalue(pv, v656));
+            })(l137.fvalue(pv, v662));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-((l251).value = ({car: l42.fvalue(pv, l30, (function (values,v658){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v659){
+((l253).value = ({car: l42.fvalue(pv, l30, (function (values,v664){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v665){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, "var tmp = ", v659, ";", (function(){
+                })(), l135.fvalue(pv, "var tmp = ", v665, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6172,25 +6226,25 @@ var l266 = {name: "FLOOR"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "})()");
-            })(l137.fvalue(pv, v658));
+            })(l137.fvalue(pv, v664));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l267 = {name: "SETCAR"};
-((l251).value = ({car: l42.fvalue(pv, l267, (function (values,v660,v661){
-    checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-            return (function(v662,v663){
+var l269 = {name: "SETCAR"};
+((l253).value = ({car: l42.fvalue(pv, l269, (function (values,v666,v667){
+    checkArgs(arguments, 3);
+    return (function(){
+            return (function(v668,v669){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v662, ";", (function(){
+                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v668, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6205,31 +6259,31 @@ var l267 = {name: "SETCAR"};
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })())), l124.fvalue(pv, "return ", l124.fvalue(pv, "(x.car = ", v663, ")"), ";", (function(){
+                })())), l124.fvalue(pv, "return ", l124.fvalue(pv, "(x.car = ", v669, ")"), ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })())), "})()");
-            })(l137.fvalue(pv, v660),l137.fvalue(pv, v661));
+            })(l137.fvalue(pv, v666),l137.fvalue(pv, v667));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l268 = {name: "SETCDR"};
-((l251).value = ({car: l42.fvalue(pv, l268, (function (values,v664,v665){
-    checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-            return (function(v666,v667){
+var l270 = {name: "SETCDR"};
+((l253).value = ({car: l42.fvalue(pv, l270, (function (values,v670,v671){
+    checkArgs(arguments, 3);
+    return (function(){
+            return (function(v672,v673){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v666, ";", (function(){
+                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v672, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6244,31 +6298,31 @@ var l268 = {name: "SETCDR"};
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })())), l124.fvalue(pv, "return ", l124.fvalue(pv, "(x.cdr = ", v667, ")"), ";", (function(){
+                })())), l124.fvalue(pv, "return ", l124.fvalue(pv, "(x.cdr = ", v673, ")"), ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })())), "})()");
-            })(l137.fvalue(pv, v664),l137.fvalue(pv, v665));
+            })(l137.fvalue(pv, v670),l137.fvalue(pv, v671));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l269 = {name: "SYMBOLP"};
-((l251).value = ({car: l42.fvalue(pv, l269, (function (values,v668){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v669){
+var l271 = {name: "SYMBOLP"};
+((l253).value = ({car: l42.fvalue(pv, l271, (function (values,v674){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v675){
                 return l136.fvalue(values, l124.fvalue(pv, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, "var tmp = ", v669, ";", (function(){
+                })(), l135.fvalue(pv, "var tmp = ", v675, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6279,25 +6333,25 @@ var l269 = {name: "SYMBOLP"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "})()"));
-            })(l137.fvalue(pv, v668));
+            })(l137.fvalue(pv, v674));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l270 = {name: "MAKE-SYMBOL"};
-((l251).value = ({car: l42.fvalue(pv, l270, (function (values,v670){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v671){
+var l272 = {name: "MAKE-SYMBOL"};
+((l253).value = ({car: l42.fvalue(pv, l272, (function (values,v676){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v677){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "name", " = ", v671, ";", (function(){
+                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "name", " = ", v677, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6318,79 +6372,79 @@ var l270 = {name: "MAKE-SYMBOL"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })())), "})()");
-            })(l137.fvalue(pv, v670));
+            })(l137.fvalue(pv, v676));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l271 = {name: "SYMBOL-NAME"};
-((l251).value = ({car: l42.fvalue(pv, l271, (function (values,v672){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v673){
-                return l124.fvalue(values, "(", v673, ").name");
-            })(l137.fvalue(pv, v672));
+var l273 = {name: "SYMBOL-NAME"};
+((l253).value = ({car: l42.fvalue(pv, l273, (function (values,v678){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v679){
+                return l124.fvalue(values, "(", v679, ").name");
+            })(l137.fvalue(pv, v678));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-((l251).value = ({car: l42.fvalue(pv, l214, (function (values,v674,v675){
-    checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-            return (function(v676,v677){
-                return l124.fvalue(values, "(", v676, ").value = ", v677);
-            })(l137.fvalue(pv, v674),l137.fvalue(pv, v675));
+((l253).value = ({car: l42.fvalue(pv, l216, (function (values,v680,v681){
+    checkArgs(arguments, 3);
+    return (function(){
+            return (function(v682,v683){
+                return l124.fvalue(values, "(", v682, ").value = ", v683);
+            })(l137.fvalue(pv, v680),l137.fvalue(pv, v681));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l272 = {name: "FSET"};
-((l251).value = ({car: l42.fvalue(pv, l272, (function (values,v678,v679){
-    checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-            return (function(v680,v681){
-                return l124.fvalue(values, "(", v680, ").fvalue = ", v681);
-            })(l137.fvalue(pv, v678),l137.fvalue(pv, v679));
+var l274 = {name: "FSET"};
+((l253).value = ({car: l42.fvalue(pv, l274, (function (values,v684,v685){
+    checkArgs(arguments, 3);
+    return (function(){
+            return (function(v686,v687){
+                return l124.fvalue(values, "(", v686, ").fvalue = ", v687);
+            })(l137.fvalue(pv, v684),l137.fvalue(pv, v685));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-((l251).value = ({car: l42.fvalue(pv, l17, (function (values,v682){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v683){
-                return l136.fvalue(values, l124.fvalue(pv, "(", v683, ".value !== undefined)"));
-            })(l137.fvalue(pv, v682));
+((l253).value = ({car: l42.fvalue(pv, l17, (function (values,v688){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v689){
+                return l136.fvalue(values, l124.fvalue(pv, "(", v689, ".value !== undefined)"));
+            })(l137.fvalue(pv, v688));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l273 = {name: "SYMBOL-VALUE"};
-((l251).value = ({car: l42.fvalue(pv, l273, (function (values,v684){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v685){
+var l275 = {name: "SYMBOL-VALUE"};
+((l253).value = ({car: l42.fvalue(pv, l275, (function (values,v690){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v691){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, "var symbol = ", v685, ";", (function(){
+                })(), l135.fvalue(pv, "var symbol = ", v691, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6411,24 +6465,24 @@ var l273 = {name: "SYMBOL-VALUE"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "})()");
-            })(l137.fvalue(pv, v684));
+            })(l137.fvalue(pv, v690));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-((l251).value = ({car: l42.fvalue(pv, l223, (function (values,v686){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v687){
+((l253).value = ({car: l42.fvalue(pv, l225, (function (values,v692){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v693){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, "var symbol = ", v687, ";", (function(){
+                })(), l135.fvalue(pv, "var symbol = ", v693, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6449,81 +6503,81 @@ var l273 = {name: "SYMBOL-VALUE"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "})()");
-            })(l137.fvalue(pv, v686));
+            })(l137.fvalue(pv, v692));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l274 = {name: "SYMBOL-PLIST"};
-((l251).value = ({car: l42.fvalue(pv, l274, (function (values,v688){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v689){
-                return l124.fvalue(values, "((", v689, ").plist || ", l137.fvalue(pv, l3.value), ")");
-            })(l137.fvalue(pv, v688));
+var l276 = {name: "SYMBOL-PLIST"};
+((l253).value = ({car: l42.fvalue(pv, l276, (function (values,v694){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v695){
+                return l124.fvalue(values, "((", v695, ").plist || ", l137.fvalue(pv, l3.value), ")");
+            })(l137.fvalue(pv, v694));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l275 = {name: "LAMBDA-CODE"};
-((l251).value = ({car: l42.fvalue(pv, l275, (function (values,v690){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v691){
-                return l124.fvalue(values, "(", v691, ").toString()");
-            })(l137.fvalue(pv, v690));
+var l277 = {name: "LAMBDA-CODE"};
+((l253).value = ({car: l42.fvalue(pv, l277, (function (values,v696){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v697){
+                return l124.fvalue(values, "(", v697, ").toString()");
+            })(l137.fvalue(pv, v696));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l276 = {name: "EQ"};
-((l251).value = ({car: l42.fvalue(pv, l276, (function (values,v692,v693){
-    checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-            return (function(v694,v695){
-                return l136.fvalue(values, l124.fvalue(pv, "(", v694, " === ", v695, ")"));
-            })(l137.fvalue(pv, v692),l137.fvalue(pv, v693));
+var l278 = {name: "EQ"};
+((l253).value = ({car: l42.fvalue(pv, l278, (function (values,v698,v699){
+    checkArgs(arguments, 3);
+    return (function(){
+            return (function(v700,v701){
+                return l136.fvalue(values, l124.fvalue(pv, "(", v700, " === ", v701, ")"));
+            })(l137.fvalue(pv, v698),l137.fvalue(pv, v699));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l277 = {name: "EQUAL"};
-((l251).value = ({car: l42.fvalue(pv, l277, (function (values,v696,v697){
-    checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-            return (function(v698,v699){
-                return l136.fvalue(values, l124.fvalue(pv, "(", v698, " == ", v699, ")"));
-            })(l137.fvalue(pv, v696),l137.fvalue(pv, v697));
+var l279 = {name: "EQUAL"};
+((l253).value = ({car: l42.fvalue(pv, l279, (function (values,v702,v703){
+    checkArgs(arguments, 3);
+    return (function(){
+            return (function(v704,v705){
+                return l136.fvalue(values, l124.fvalue(pv, "(", v704, " == ", v705, ")"));
+            })(l137.fvalue(pv, v702),l137.fvalue(pv, v703));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l278 = {name: "CHAR-TO-STRING"};
-((l251).value = ({car: l42.fvalue(pv, l278, (function (values,v700){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v701){
+var l280 = {name: "CHAR-TO-STRING"};
+((l253).value = ({car: l42.fvalue(pv, l280, (function (values,v706){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v707){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v701, ";", (function(){
+                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v707, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6544,39 +6598,39 @@ var l278 = {name: "CHAR-TO-STRING"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })())), "})()");
-            })(l137.fvalue(pv, v700));
+            })(l137.fvalue(pv, v706));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l279 = {name: "STRINGP"};
-((l251).value = ({car: l42.fvalue(pv, l279, (function (values,v702){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v703){
-                return l136.fvalue(values, l124.fvalue(pv, "(typeof(", v703, ") == \"string\")"));
-            })(l137.fvalue(pv, v702));
+var l281 = {name: "STRINGP"};
+((l253).value = ({car: l42.fvalue(pv, l281, (function (values,v708){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v709){
+                return l136.fvalue(values, l124.fvalue(pv, "(typeof(", v709, ") == \"string\")"));
+            })(l137.fvalue(pv, v708));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l280 = {name: "STRING-UPCASE"};
-((l251).value = ({car: l42.fvalue(pv, l280, (function (values,v704){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v705){
+var l282 = {name: "STRING-UPCASE"};
+((l253).value = ({car: l42.fvalue(pv, l282, (function (values,v710){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v711){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v705, ";", (function(){
+                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v711, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6597,25 +6651,25 @@ var l280 = {name: "STRING-UPCASE"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })())), "})()");
-            })(l137.fvalue(pv, v704));
+            })(l137.fvalue(pv, v710));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l281 = {name: "STRING-LENGTH"};
-((l251).value = ({car: l42.fvalue(pv, l281, (function (values,v706){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v707){
+var l283 = {name: "STRING-LENGTH"};
+((l253).value = ({car: l42.fvalue(pv, l283, (function (values,v712){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v713){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v707, ";", (function(){
+                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v713, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6636,20 +6690,21 @@ var l281 = {name: "STRING-LENGTH"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })())), "})()");
-            })(l137.fvalue(pv, v706));
+            })(l137.fvalue(pv, v712));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l282 = {name: "SLICE"};
-((l251).value = ({car: l42.fvalue(pv, l282, (function (values,v708,v709,v710){
-    checkArgsAtLeast(3);checkArgsAtLeast(4);switch(arguments.length-1){
+var l284 = {name: "SLICE"};
+((l253).value = ({car: l42.fvalue(pv, l284, (function (values,v714,v715,v716){
+    checkArgsAtLeast(arguments, 3);
+    checkArgsAtMost(arguments, 4);
+    switch(arguments.length-1){
     case 2:
-    v710=l3.value;
+    v716=l3.value;
     default: break;
     }
     return (function(){
@@ -6658,12 +6713,12 @@ var l282 = {name: "SLICE"};
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), l135.fvalue(pv, "var str = ", l137.fvalue(pv, v708), ";", (function(){
+            })(), l135.fvalue(pv, "var str = ", l137.fvalue(pv, v714), ";", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), "var a = ", l137.fvalue(pv, v709), ";", (function(){
+            })(), "var a = ", l137.fvalue(pv, v715), ";", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6673,7 +6728,7 @@ var l282 = {name: "SLICE"};
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), (v710 !== l3.value ? l124.fvalue(pv, "b = ", l137.fvalue(pv, v710), ";", (function(){
+            })(), (v716 !== l3.value ? l124.fvalue(pv, "b = ", l137.fvalue(pv, v716), ";", (function(){
                 var symbol = l123;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6685,28 +6740,28 @@ var l282 = {name: "SLICE"};
                 return value;
             })()), "})()");
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l283 = {name: "CHAR"};
-((l251).value = ({car: l42.fvalue(pv, l283, (function (values,v711,v712){
-    checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-            return (function(v713,v714){
+var l285 = {name: "CHAR"};
+((l253).value = ({car: l42.fvalue(pv, l285, (function (values,v717,v718){
+    checkArgs(arguments, 3);
+    return (function(){
+            return (function(v719,v720){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "string", " = ", v713, ";", (function(){
+                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "string", " = ", v719, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })()), l124.fvalue(pv, "var ", "index", " = ", v714, ";", (function(){
+                })()), l124.fvalue(pv, "var ", "index", " = ", v720, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6737,29 +6792,29 @@ var l283 = {name: "CHAR"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })())), "})()");
-            })(l137.fvalue(pv, v711),l137.fvalue(pv, v712));
+            })(l137.fvalue(pv, v717),l137.fvalue(pv, v718));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-((l251).value = ({car: l42.fvalue(pv, l68, (function (values,v715,v716){
-    checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-            return (function(v717,v718){
+((l253).value = ({car: l42.fvalue(pv, l68, (function (values,v721,v722){
+    checkArgs(arguments, 3);
+    return (function(){
+            return (function(v723,v724){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "string1", " = ", v717, ";", (function(){
+                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "string1", " = ", v723, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })()), l124.fvalue(pv, "var ", "string2", " = ", v718, ";", (function(){
+                })()), l124.fvalue(pv, "var ", "string2", " = ", v724, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6790,23 +6845,23 @@ var l283 = {name: "CHAR"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })())), "})()");
-            })(l137.fvalue(pv, v715),l137.fvalue(pv, v716));
+            })(l137.fvalue(pv, v721),l137.fvalue(pv, v722));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l284 = {name: "FUNCALL"};
-((l251).value = ({car: l42.fvalue(pv, l284, (function (values,v720){
-    checkArgsAtLeast(2);var v719= l3.value;
+var l286 = {name: "FUNCALL"};
+((l253).value = ({car: l42.fvalue(pv, l286, (function (values,v726){
+    checkArgsAtLeast(arguments, 2);
+    var v725= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v719 = {car: arguments[i], cdr: 
-    v719};
+        v725 = {car: arguments[i], cdr: 
+    v725};
     return (function(){
-            return l124.fvalue(values, "(", l137.fvalue(pv, v720), ")(", l126.fvalue(pv, ({car: ((function(){
+            return l124.fvalue(values, "(", l137.fvalue(pv, v726), ")(", l126.fvalue(pv, ({car: ((function(){
                 var symbol = l162;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6816,29 +6871,29 @@ var l284 = {name: "FUNCALL"};
                 var func = symbol.fvalue;
                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                 return func;
-            })(), v719)}), ", "), ")");
+            })(), v725)}), ", "), ")");
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l285 = {name: "APPLY"};
-((l251).value = ({car: l42.fvalue(pv, l285, (function (values,v722){
-    checkArgsAtLeast(2);var v721= l3.value;
+var l287 = {name: "APPLY"};
+((l253).value = ({car: l42.fvalue(pv, l287, (function (values,v728){
+    checkArgsAtLeast(arguments, 2);
+    var v727= l3.value;
     for (var i = arguments.length-1; i>=2; i--)
-        v721 = {car: arguments[i], cdr: 
-    v721};
+        v727 = {car: arguments[i], cdr: 
+    v727};
     return (function(){
-            return (l11.fvalue(pv, v721) !== l3.value ? l124.fvalue(values, "(", l137.fvalue(pv, v722), ")()") : (function(v723,v724){
+            return (l11.fvalue(pv, v727) !== l3.value ? l124.fvalue(values, "(", l137.fvalue(pv, v728), ")()") : (function(v729,v730){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, "var f = ", l137.fvalue(pv, v722), ";", (function(){
+                })(), l135.fvalue(pv, "var f = ", l137.fvalue(pv, v728), ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6853,12 +6908,12 @@ var l285 = {name: "APPLY"};
                     var func = symbol.fvalue;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })(), v723)}), ", "), "];", (function(){
+                })(), v729)}), ", "), "];", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), "var tail = (", l137.fvalue(pv, v724), ");", (function(){
+                })(), "var tail = (", l137.fvalue(pv, v730), ");", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6889,28 +6944,28 @@ var l285 = {name: "APPLY"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "})()");
-            })(l81.fvalue(pv, v721),(function(){
-                var tmp = l80.fvalue(pv, v721);
+            })(l81.fvalue(pv, v727),(function(){
+                var tmp = l80.fvalue(pv, v727);
                 return tmp === l3.value? l3.value: tmp.car;
             })()));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l286 = {name: "JS-EVAL"};
-((l251).value = ({car: l42.fvalue(pv, l286, (function (values,v725){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v726){
+var l288 = {name: "JS-EVAL"};
+((l253).value = ({car: l42.fvalue(pv, l288, (function (values,v731){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v732){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "string", " = ", v726, ";", (function(){
+                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "string", " = ", v732, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6971,77 +7026,77 @@ var l286 = {name: "JS-EVAL"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })())), "})()");
-            })(l137.fvalue(pv, v725));
+            })(l137.fvalue(pv, v731));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l287 = {name: "ERROR"};
-((l251).value = ({car: l42.fvalue(pv, l287, (function (values,v727){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v728){
+var l289 = {name: "ERROR"};
+((l253).value = ({car: l42.fvalue(pv, l289, (function (values,v733){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v734){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, "throw ", v728, ";", (function(){
+                })(), l135.fvalue(pv, "throw ", v734, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "})()");
-            })(l137.fvalue(pv, v727));
+            })(l137.fvalue(pv, v733));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l288 = {name: "NEW"};
-((l251).value = ({car: l42.fvalue(pv, l288, (function (values){
-    checkArgsAtLeast(1);return (function(){
+var l290 = {name: "NEW"};
+((l253).value = ({car: l42.fvalue(pv, l290, (function (values){
+    checkArgsAtMost(arguments, 1);
+    return (function(){
             return (function(){
                 return "{}";
             })();
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l289 = {name: "OBJECTP"};
-((l251).value = ({car: l42.fvalue(pv, l289, (function (values,v729){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v730){
-                return l136.fvalue(values, l124.fvalue(pv, "(typeof (", v730, ") === 'object')"));
-            })(l137.fvalue(pv, v729));
+var l291 = {name: "OBJECTP"};
+((l253).value = ({car: l42.fvalue(pv, l291, (function (values,v735){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v736){
+                return l136.fvalue(values, l124.fvalue(pv, "(typeof (", v736, ") === 'object')"));
+            })(l137.fvalue(pv, v735));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l290 = {name: "OGET"};
-((l251).value = ({car: l42.fvalue(pv, l290, (function (values,v731,v732){
-    checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-            return (function(v733,v734){
+var l292 = {name: "OGET"};
+((l253).value = ({car: l42.fvalue(pv, l292, (function (values,v737,v738){
+    checkArgs(arguments, 3);
+    return (function(){
+            return (function(v739,v740){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, "var tmp = ", "(", v733, ")[", v734, "];", (function(){
+                })(), l135.fvalue(pv, "var tmp = ", "(", v739, ")[", v740, "];", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -7052,67 +7107,67 @@ var l290 = {name: "OGET"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "})()");
-            })(l137.fvalue(pv, v731),l137.fvalue(pv, v732));
+            })(l137.fvalue(pv, v737),l137.fvalue(pv, v738));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l291 = {name: "OSET"};
-((l251).value = ({car: l42.fvalue(pv, l291, (function (values,v735,v736,v737){
-    checkArgsAtLeast(4);checkArgsAtLeast(4);return (function(){
-            return (function(v738,v739,v740){
-                return l124.fvalue(values, "((", v738, ")[", v739, "] = ", v740, ")");
-            })(l137.fvalue(pv, v735),l137.fvalue(pv, v736),l137.fvalue(pv, v737));
+var l293 = {name: "OSET"};
+((l253).value = ({car: l42.fvalue(pv, l293, (function (values,v741,v742,v743){
+    checkArgs(arguments, 4);
+    return (function(){
+            return (function(v744,v745,v746){
+                return l124.fvalue(values, "((", v744, ")[", v745, "] = ", v746, ")");
+            })(l137.fvalue(pv, v741),l137.fvalue(pv, v742),l137.fvalue(pv, v743));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l292 = {name: "IN"};
-((l251).value = ({car: l42.fvalue(pv, l292, (function (values,v741,v742){
-    checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-            return (function(v743,v744){
-                return l136.fvalue(values, l124.fvalue(pv, "((", v743, ") in (", v744, "))"));
-            })(l137.fvalue(pv, v741),l137.fvalue(pv, v742));
+var l294 = {name: "IN"};
+((l253).value = ({car: l42.fvalue(pv, l294, (function (values,v747,v748){
+    checkArgs(arguments, 3);
+    return (function(){
+            return (function(v749,v750){
+                return l136.fvalue(values, l124.fvalue(pv, "((", v749, ") in (", v750, "))"));
+            })(l137.fvalue(pv, v747),l137.fvalue(pv, v748));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l293 = {name: "FUNCTIONP"};
-((l251).value = ({car: l42.fvalue(pv, l293, (function (values,v745){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v746){
-                return l136.fvalue(values, l124.fvalue(pv, "(typeof ", v746, " == 'function')"));
-            })(l137.fvalue(pv, v745));
+var l295 = {name: "FUNCTIONP"};
+((l253).value = ({car: l42.fvalue(pv, l295, (function (values,v751){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v752){
+                return l136.fvalue(values, l124.fvalue(pv, "(typeof ", v752, " == 'function')"));
+            })(l137.fvalue(pv, v751));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l294 = {name: "WRITE-STRING"};
-((l251).value = ({car: l42.fvalue(pv, l294, (function (values,v747){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v748){
+var l296 = {name: "WRITE-STRING"};
+((l253).value = ({car: l42.fvalue(pv, l296, (function (values,v753){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v754){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v748, ";", (function(){
+                })(), l135.fvalue(pv, l124.fvalue(pv, "var ", "x", " = ", v754, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -7133,19 +7188,19 @@ var l294 = {name: "WRITE-STRING"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })())), "})()");
-            })(l137.fvalue(pv, v747));
+            })(l137.fvalue(pv, v753));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l295 = {name: "MAKE-ARRAY"};
-((l251).value = ({car: l42.fvalue(pv, l295, (function (values,v749){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v750){
+var l297 = {name: "MAKE-ARRAY"};
+((l253).value = ({car: l42.fvalue(pv, l297, (function (values,v755){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v756){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
@@ -7156,7 +7211,7 @@ var l295 = {name: "MAKE-ARRAY"};
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), "for (var i = 0; i < ", v750, "; i++)", (function(){
+                })(), "for (var i = 0; i < ", v756, "; i++)", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -7172,49 +7227,49 @@ var l295 = {name: "MAKE-ARRAY"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "})()");
-            })(l137.fvalue(pv, v749));
+            })(l137.fvalue(pv, v755));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l296 = {name: "ARRAYP"};
-((l251).value = ({car: l42.fvalue(pv, l296, (function (values,v751){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v752){
+var l298 = {name: "ARRAYP"};
+((l253).value = ({car: l42.fvalue(pv, l298, (function (values,v757){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v758){
                 return l136.fvalue(values, l124.fvalue(pv, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, "var x = ", v752, ";", (function(){
+                })(), l135.fvalue(pv, "var x = ", v758, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), "return typeof x === 'object' && 'length' in x;"), "})()"));
-            })(l137.fvalue(pv, v751));
+            })(l137.fvalue(pv, v757));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l297 = {name: "AREF"};
-((l251).value = ({car: l42.fvalue(pv, l297, (function (values,v753,v754){
-    checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-            return (function(v755,v756){
+var l299 = {name: "AREF"};
+((l253).value = ({car: l42.fvalue(pv, l299, (function (values,v759,v760){
+    checkArgs(arguments, 3);
+    return (function(){
+            return (function(v761,v762){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, "var x = ", "(", v755, ")[", v756, "];", (function(){
+                })(), l135.fvalue(pv, "var x = ", "(", v761, ")[", v762, "];", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -7230,30 +7285,30 @@ var l297 = {name: "AREF"};
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "})()");
-            })(l137.fvalue(pv, v753),l137.fvalue(pv, v754));
+            })(l137.fvalue(pv, v759),l137.fvalue(pv, v760));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l298 = {name: "ASET"};
-((l251).value = ({car: l42.fvalue(pv, l298, (function (values,v757,v758,v759){
-    checkArgsAtLeast(4);checkArgsAtLeast(4);return (function(){
-            return (function(v760,v761,v762){
+var l300 = {name: "ASET"};
+((l253).value = ({car: l42.fvalue(pv, l300, (function (values,v763,v764,v765){
+    checkArgs(arguments, 4);
+    return (function(){
+            return (function(v766,v767,v768){
                 return l124.fvalue(values, "(function(){", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l135.fvalue(pv, "var x = ", v760, ";", (function(){
+                })(), l135.fvalue(pv, "var x = ", v766, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), "var i = ", v761, ";", (function(){
+                })(), "var i = ", v767, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -7263,59 +7318,58 @@ var l298 = {name: "ASET"};
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), "return x[i] = ", v762, ";", (function(){
+                })(), "return x[i] = ", v768, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })()), "})()");
-            })(l137.fvalue(pv, v757),l137.fvalue(pv, v758),l137.fvalue(pv, v759));
+            })(l137.fvalue(pv, v763),l137.fvalue(pv, v764),l137.fvalue(pv, v765));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l299 = {name: "GET-UNIX-TIME"};
-((l251).value = ({car: l42.fvalue(pv, l299, (function (values){
-    checkArgsAtLeast(1);return (function(){
+var l301 = {name: "GET-UNIX-TIME"};
+((l253).value = ({car: l42.fvalue(pv, l301, (function (values){
+    checkArgsAtMost(arguments, 1);
+    return (function(){
             return (function(){
                 return l124.fvalue(values, "(Math.round(new Date() / 1000))");
             })();
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l300 = {name: "VALUES-ARRAY"};
-((l251).value = ({car: l42.fvalue(pv, l300, (function (values,v763){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-            return (function(v764){
+var l302 = {name: "VALUES-ARRAY"};
+((l253).value = ({car: l42.fvalue(pv, l302, (function (values,v769){
+    checkArgs(arguments, 2);
+    return (function(){
+            return (function(v770){
                 return ((function(){
                     var symbol = l162;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })() !== l3.value ? l124.fvalue(values, "values.apply(this, ", v764, ")") : l124.fvalue(values, "pv.apply(this, ", v764, ")"));
-            })(l137.fvalue(pv, v763));
+                })() !== l3.value ? l124.fvalue(values, "values.apply(this, ", v770, ")") : l124.fvalue(values, "pv.apply(this, ", v770, ")"));
+            })(l137.fvalue(pv, v769));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-((l251).value = ({car: l42.fvalue(pv, l132, (function (values){
-    var v765= l3.value;
+((l253).value = ({car: l42.fvalue(pv, l132, (function (values){
+    var v771= l3.value;
     for (var i = arguments.length-1; i>=1; i--)
-        v765 = {car: arguments[i], cdr: 
-    v765};
+        v771 = {car: arguments[i], cdr: 
+    v771};
     return (function(){
             return ((function(){
                 var symbol = l162;
@@ -7327,60 +7381,60 @@ var l300 = {name: "VALUES-ARRAY"};
                 var func = symbol.fvalue;
                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                 return func;
-            })(), v765), ", "), ")") : l124.fvalue(values, "pv(", l126.fvalue(pv, l69.fvalue(pv, (function(){
+            })(), v771), ", "), ")") : l124.fvalue(values, "pv(", l126.fvalue(pv, l69.fvalue(pv, (function(){
                 var symbol = l137;
                 var func = symbol.fvalue;
                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                 return func;
-            })(), v765), ", "), ")"));
+            })(), v771), ", "), ")"));
     })();
-
 })), cdr: (function(){
-    var symbol = l251;
+    var symbol = l253;
     var value = symbol.value;
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
 (function(){
-    (l190).fvalue = (function(v768){
-        ((v768)["fname"] = "MACRO");
-        return v768;
-    })((function (values,v766){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+    (l190).fvalue = (function(v774){
+        ((v774)["fname"] = "MACRO");
+        return v774;
+    })((function (values,v772){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (((function(){
-                    var tmp = v766;
+                    var tmp = v772;
                     return (typeof tmp == 'object' && 'name' in tmp);
-                })()?l4.value: l3.value) !== l3.value ? (function(v767){
-                    return (((l166.fvalue(pv, v767) === l190)?l4.value: l3.value) !== l3.value ? v767 : l3.value);
-                })(l178.fvalue(pv, v766, (function(){
+                })()?l4.value: l3.value) !== l3.value ? (function(v773){
+                    return (((l166.fvalue(pv, v773) === l190)?l4.value: l3.value) !== l3.value ? v773 : l3.value);
+                })(l178.fvalue(pv, v772, (function(){
                     var symbol = l179;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })(), l98)) : l3.value);
         })();
-    
     }));
     return l190;
 })();
-var l301 = {name: "LS-MACROEXPAND-1"};
+var l303 = {name: "LS-MACROEXPAND-1"};
 (function(){
-    (l301).fvalue = (function(v773){
-        ((v773)["fname"] = "LS-MACROEXPAND-1");
-        return v773;
-    })((function (values,v769){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
-                return (function(v770){
-                    return (v770 !== l3.value ? (function(v771){
-                        (l57.fvalue(pv, v771) !== l3.value ? (function(v772){
-                            l169.fvalue(pv, v770, v772);
-                            return (v771 = v772);
-                        })(l225.fvalue(pv, v771)) : l3.value);
+    (l303).fvalue = (function(v779){
+        ((v779)["fname"] = "LS-MACROEXPAND-1");
+        return v779;
+    })((function (values,v775){
+        checkArgs(arguments, 2);
+        return (function(){
+                return (function(v776){
+                    return (v776 !== l3.value ? (function(v777){
+                        (l57.fvalue(pv, v777) !== l3.value ? (function(v778){
+                            l169.fvalue(pv, v776, v778);
+                            return (v777 = v778);
+                        })(l227.fvalue(pv, v777)) : l3.value);
                         return (function(){
-                            var f = v771;
+                            var f = v777;
                             var args = [values];
                             var tail = ((function(){
-                                var tmp = v769;
+                                var tmp = v775;
                                 return tmp === l3.value? l3.value: tmp.cdr;
                             })());
                             while (tail != l3.value){
@@ -7389,44 +7443,44 @@ var l301 = {name: "LS-MACROEXPAND-1"};
                             }
                             return f.apply(this, args);
                         })();
-                    })(l167.fvalue(pv, v770)) : v769);
+                    })(l167.fvalue(pv, v776)) : v775);
                 })(l190.fvalue(pv, (function(){
-                    var tmp = v769;
+                    var tmp = v775;
                     return tmp === l3.value? l3.value: tmp.car;
                 })()));
         })();
-    
     }));
-    return l301;
+    return l303;
 })();
-var l302 = {name: "COMPILE-FUNCALL"};
-var l303 = {name: "G764"};
+var l304 = {name: "COMPILE-FUNCALL"};
+var l305 = {name: "G764"};
 (function(){
-    (l302).fvalue = (function(v777){
-        ((v777)["fname"] = "COMPILE-FUNCALL");
-        return v777;
-    })((function (values,v774,v775){
-        checkArgsAtLeast(3);checkArgsAtLeast(3);return (function(){
-                return (function(v776){
+    (l304).fvalue = (function(v783){
+        ((v783)["fname"] = "COMPILE-FUNCALL");
+        return v783;
+    })((function (values,v780,v781){
+        checkArgs(arguments, 3);
+        return (function(){
+                return (function(v782){
                     return ((((function(){
-                        var tmp = v774;
+                        var tmp = v780;
                         return (typeof tmp == 'object' && 'name' in tmp);
-                    })()?l4.value: l3.value) !== l3.value ? (((l114.fvalue(pv, v774) === l105.fvalue(pv, "COMMON-LISP"))?l4.value: l3.value) !== l3.value ? (function(){
-                        var symbol = l303;
+                    })()?l4.value: l3.value) !== l3.value ? (((l114.fvalue(pv, v780) === l105.fvalue(pv, "COMMON-LISP"))?l4.value: l3.value) !== l3.value ? (function(){
+                        var symbol = l305;
                         var value = symbol.value;
                         if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                         return value;
-                    })() : l3.value) : l3.value) !== l3.value ? l124.fvalue(values, l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l157), l42.fvalue(pv, v774))), ".fvalue(", l126.fvalue(pv, ({car: v776, cdr: l69.fvalue(pv, (function(){
+                    })() : l3.value) : l3.value) !== l3.value ? l124.fvalue(values, l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l157), l42.fvalue(pv, v780))), ".fvalue(", l126.fvalue(pv, ({car: v782, cdr: l69.fvalue(pv, (function(){
                         var symbol = l137;
                         var func = symbol.fvalue;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v775)}), ", "), ")") : l124.fvalue(values, l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l98), l42.fvalue(pv, v774))), "(", l126.fvalue(pv, ({car: v776, cdr: l69.fvalue(pv, (function(){
+                    })(), v781)}), ", "), ")") : l124.fvalue(values, l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l98), l42.fvalue(pv, v780))), "(", l126.fvalue(pv, ({car: v782, cdr: l69.fvalue(pv, (function(){
                         var symbol = l137;
                         var func = symbol.fvalue;
                         if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                         return func;
-                    })(), v775)}), ", "), ")"));
+                    })(), v781)}), ", "), ")"));
                 })(((function(){
                     var symbol = l162;
                     var value = symbol.value;
@@ -7434,23 +7488,24 @@ var l303 = {name: "G764"};
                     return value;
                 })() !== l3.value ? "values" : "pv"));
         })();
-    
     }));
-    return l302;
+    return l304;
 })();
 (function(){
-    (l212).fvalue = (function(v780){
-        ((v780)["fname"] = "LS-COMPILE-BLOCK");
-        return v780;
-    })((function (values,v778,v779){
-        checkArgsAtLeast(2);checkArgsAtLeast(3);switch(arguments.length-1){
+    (l214).fvalue = (function(v786){
+        ((v786)["fname"] = "LS-COMPILE-BLOCK");
+        return v786;
+    })((function (values,v784,v785){
+        checkArgsAtLeast(arguments, 2);
+        checkArgsAtMost(arguments, 3);
+        switch(arguments.length-1){
         case 1:
-        v779=l3.value;
+        v785=l3.value;
         default: break;
         }
         return (function(){
-                return (v779 !== l3.value ? l124.fvalue(values, l212.fvalue(pv, l81.fvalue(pv, v778)), "return ", l137.fvalue(pv, (function(){
-                    var tmp = l80.fvalue(pv, v778);
+                return (v785 !== l3.value ? l124.fvalue(values, l214.fvalue(pv, l81.fvalue(pv, v784)), "return ", l137.fvalue(pv, (function(){
+                    var tmp = l80.fvalue(pv, v784);
                     return tmp === l3.value? l3.value: tmp.car;
                 })(), (function(){
                     var symbol = l162;
@@ -7467,180 +7522,182 @@ var l303 = {name: "G764"};
                     var func = symbol.fvalue;
                     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                     return func;
-                })(), v778)), l124.fvalue(pv, ";", (function(){
+                })(), v784)), l124.fvalue(pv, ";", (function(){
                     var symbol = l123;
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
                 })())));
         })();
-    
     }));
-    return l212;
+    return l214;
 })();
 (function(){
-    (l137).fvalue = (function(v790){
-        ((v790)["fname"] = "LS-COMPILE");
-        return v790;
-    })((function (values,v781,v782){
-        checkArgsAtLeast(2);checkArgsAtLeast(3);switch(arguments.length-1){
+    (l137).fvalue = (function(v796){
+        ((v796)["fname"] = "LS-COMPILE");
+        return v796;
+    })((function (values,v787,v788){
+        checkArgsAtLeast(arguments, 2);
+        checkArgsAtMost(arguments, 3);
+        switch(arguments.length-1){
         case 1:
-        v782=l3.value;
+        v788=l3.value;
         default: break;
         }
         return (function(){
-                return (function(v783){
+                return (function(v789){
                     try {
                         var tmp;
                         tmp = l162.value;
-                        l162.value = v783;
-                        v783 = tmp;
+                        l162.value = v789;
+                        v789 = tmp;
                         return (((function(){
-                            var tmp = v781;
+                            var tmp = v787;
                             return (typeof tmp == 'object' && 'name' in tmp);
-                        })()?l4.value: l3.value) !== l3.value ? (function(v784){
-                            return ((v784 !== l3.value ? l26.fvalue(pv, l82.fvalue(pv, l194, l168.fvalue(pv, v784))) : l3.value) !== l3.value ? l167.fvalue(values, v784) : ((function(v785){
-                                return (v785 !== l3.value ? v785 : l82.fvalue(pv, l196, l168.fvalue(pv, v784)));
-                            })(l113.fvalue(pv, v781)) !== l3.value ? l124.fvalue(values, l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l157), l42.fvalue(pv, v781))), ".value") : l137.fvalue(values, l62.fvalue(pv, l42.fvalue(pv, l273), l42.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l157), l42.fvalue(pv, v781)))))));
-                        })(l178.fvalue(pv, v781, (function(){
+                        })()?l4.value: l3.value) !== l3.value ? (function(v790){
+                            return ((v790 !== l3.value ? l26.fvalue(pv, l82.fvalue(pv, l194, l168.fvalue(pv, v790))) : l3.value) !== l3.value ? l167.fvalue(values, v790) : ((function(v791){
+                                return (v791 !== l3.value ? v791 : l82.fvalue(pv, l196, l168.fvalue(pv, v790)));
+                            })(l113.fvalue(pv, v787)) !== l3.value ? l124.fvalue(values, l137.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l157), l42.fvalue(pv, v787))), ".value") : l137.fvalue(values, l62.fvalue(pv, l42.fvalue(pv, l275), l42.fvalue(pv, l62.fvalue(pv, l42.fvalue(pv, l157), l42.fvalue(pv, v787)))))));
+                        })(l178.fvalue(pv, v787, (function(){
                             var symbol = l179;
                             var value = symbol.value;
                             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                             return value;
-                        })(), l99)) : (l75.fvalue(pv, v781) !== l3.value ? l16.fvalue(values, v781) : (((typeof(v781) == "string")?l4.value: l3.value) !== l3.value ? l124.fvalue(values, "\"", l140.fvalue(pv, v781), "\"") : (((function(){
-                            var x = v781;
+                        })(), l99)) : (l75.fvalue(pv, v787) !== l3.value ? l16.fvalue(values, v787) : (((typeof(v787) == "string")?l4.value: l3.value) !== l3.value ? l124.fvalue(values, "\"", l140.fvalue(pv, v787), "\"") : (((function(){
+                            var x = v787;
                             return typeof x === 'object' && 'length' in x;
-                        })()?l4.value: l3.value) !== l3.value ? l221.fvalue(values, v781) : (l57.fvalue(pv, v781) !== l3.value ? (function(v786,v787){
-                            return (l91.fvalue(pv, v786, (function(){
+                        })()?l4.value: l3.value) !== l3.value ? l223.fvalue(values, v787) : (l57.fvalue(pv, v787) !== l3.value ? (function(v792,v793){
+                            return (l91.fvalue(pv, v792, (function(){
                                 var symbol = l198;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })()) !== l3.value ? (function(v788){
+                            })()) !== l3.value ? (function(v794){
                                 return (function(){
-                                    var f = v788;
+                                    var f = v794;
                                     var args = [values];
-                                    var tail = (v787);
+                                    var tail = (v793);
                                     while (tail != l3.value){
                                         args.push(tail.car);
                                         tail = tail.cdr;
                                     }
                                     return f.apply(this, args);
                                 })();
-                            })(l39.fvalue(pv, l91.fvalue(pv, v786, (function(){
+                            })(l39.fvalue(pv, l91.fvalue(pv, v792, (function(){
                                 var symbol = l198;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })()))) : ((l91.fvalue(pv, v786, (function(){
-                                var symbol = l251;
+                            })()))) : ((l91.fvalue(pv, v792, (function(){
+                                var symbol = l253;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })()) !== l3.value ? l26.fvalue(pv, l192.fvalue(pv, v786, l98, l195)) : l3.value) !== l3.value ? (function(v789){
+                            })()) !== l3.value ? l26.fvalue(pv, l192.fvalue(pv, v792, l98, l195)) : l3.value) !== l3.value ? (function(v795){
                                 return (function(){
-                                    var f = v789;
+                                    var f = v795;
                                     var args = [values];
-                                    var tail = (v787);
+                                    var tail = (v793);
                                     while (tail != l3.value){
                                         args.push(tail.car);
                                         tail = tail.cdr;
                                     }
                                     return f.apply(this, args);
                                 })();
-                            })(l39.fvalue(pv, l91.fvalue(pv, v786, (function(){
-                                var symbol = l251;
+                            })(l39.fvalue(pv, l91.fvalue(pv, v792, (function(){
+                                var symbol = l253;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })()))) : (l190.fvalue(pv, v786) !== l3.value ? l137.fvalue(values, l301.fvalue(pv, v781), v782) : l302.fvalue(values, v786, v787))));
+                            })()))) : (l190.fvalue(pv, v792) !== l3.value ? l137.fvalue(values, l303.fvalue(pv, v787), v788) : l304.fvalue(values, v792, v793))));
                         })((function(){
-                            var tmp = v781;
+                            var tmp = v787;
                             return tmp === l3.value? l3.value: tmp.car;
                         })(),(function(){
-                            var tmp = v781;
+                            var tmp = v787;
                             return tmp === l3.value? l3.value: tmp.cdr;
                         })()) : (function(){
                             throw "How should I compile this?";
                         })())))));
                     }
                     finally {
-                        l162.value = v783;
+                        l162.value = v789;
                     }
-                })(v782);
+                })(v788);
         })();
-    
     }));
     return l137;
 })();
-var l304 = {name: "LS-COMPILE-TOPLEVEL"};
+var l306 = {name: "LS-COMPILE-TOPLEVEL"};
 (function(){
-    (l304).fvalue = (function(v797){
-        ((v797)["fname"] = "LS-COMPILE-TOPLEVEL");
-        return v797;
-    })((function (values,v791,v792){
-        checkArgsAtLeast(2);checkArgsAtLeast(3);switch(arguments.length-1){
+    (l306).fvalue = (function(v803){
+        ((v803)["fname"] = "LS-COMPILE-TOPLEVEL");
+        return v803;
+    })((function (values,v797,v798){
+        checkArgsAtLeast(arguments, 2);
+        checkArgsAtMost(arguments, 3);
+        switch(arguments.length-1){
         case 1:
-        v792=l3.value;
+        v798=l3.value;
         default: break;
         }
         return (function(){
-                return (function(v793){
+                return (function(v799){
                     try {
                         var tmp;
                         tmp = l185.value;
-                        l185.value = v793;
-                        v793 = tmp;
+                        l185.value = v799;
+                        v799 = tmp;
                         return ((((function(){
-                            var tmp = v791;
+                            var tmp = v797;
                             return (typeof tmp == 'object' && 'car' in tmp);
                         })()?l4.value: l3.value) !== l3.value ? (((function(){
-                            var tmp = v791;
+                            var tmp = v797;
                             return tmp === l3.value? l3.value: tmp.car;
-                        })() === l226)?l4.value: l3.value) : l3.value) !== l3.value ? (function(v795){
+                        })() === l228)?l4.value: l3.value) : l3.value) !== l3.value ? (function(v801){
                             return l126.fvalue(values, l84.fvalue(pv, (function(){
                                 var symbol = l187;
                                 var func = symbol.fvalue;
                                 if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
                                 return func;
-                            })(), v795));
-                        })(l69.fvalue(pv, (function (values,v794){
-                            checkArgsAtLeast(2);checkArgsAtLeast(2);return l304.fvalue(values, v794, l4.value);
-                        
+                            })(), v801));
+                        })(l69.fvalue(pv, (function (values,v800){
+                            checkArgs(arguments, 2);
+                            return l306.fvalue(values, v800, l4.value);
                         }), (function(){
-                            var tmp = v791;
+                            var tmp = v797;
                             return tmp === l3.value? l3.value: tmp.cdr;
-                        })())) : (function(v796){
+                        })())) : (function(v802){
                             return l124.fvalue(values, l127.fvalue(pv, l188.fvalue(pv), l124.fvalue(pv, ";", (function(){
                                 var symbol = l123;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
-                            })())), (v796 !== l3.value ? l124.fvalue(pv, v796, ";", (function(){
+                            })())), (v802 !== l3.value ? l124.fvalue(pv, v802, ";", (function(){
                                 var symbol = l123;
                                 var value = symbol.value;
                                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                                 return value;
                             })()) : ""));
-                        })(l137.fvalue(pv, v791, v792)));
+                        })(l137.fvalue(pv, v797, v798)));
                     }
                     finally {
-                        l185.value = v793;
+                        l185.value = v799;
                     }
                 })(l3.value);
         })();
-    
     }));
-    return l304;
+    return l306;
 })();
 (function(){
-    (l225).fvalue = (function(v799){
-        ((v799)["fname"] = "EVAL");
-        return v799;
-    })((function (values,v798){
-        checkArgsAtLeast(2);checkArgsAtLeast(2);return (function(){
+    (l227).fvalue = (function(v805){
+        ((v805)["fname"] = "EVAL");
+        return v805;
+    })((function (values,v804){
+        checkArgs(arguments, 2);
+        return (function(){
                 return (function(){
-                    var string = l304.fvalue(pv, v798, l4.value);
+                    var string = l306.fvalue(pv, v804, l4.value);
                     if (typeof string != 'string')
                         throw 'The value ' + string + ' is not a type string.';
                     return (function(){
@@ -7653,13 +7710,12 @@ var l304 = {name: "LS-COMPILE-TOPLEVEL"};
                     })();
                 })();
         })();
-    
     }));
-    return l225;
+    return l227;
 })();
-var l305 = {name: "&BODY"};
-var l306 = {car: l203, cdr: {car: l202, cdr: {car: l305, cdr: {car: l19, cdr: {car: l14, cdr: {car: l115, cdr: {car: l59, cdr: {car: l60, cdr: {car: l20, cdr: {car: l21, cdr: {car: l22, cdr: {car: l262, cdr: {car: l264, cdr: {car: l18, cdr: {car: l18, cdr: {car: l261, cdr: {car: l263, cdr: {car: l52, cdr: {car: l62, cdr: {car: l285, cdr: {car: l297, cdr: {car: l296, cdr: {car: l298, cdr: {car: l91, cdr: {car: l43, cdr: {car: l175, cdr: {car: l17, cdr: {car: l17, cdr: {car: l81, cdr: {car: l31, cdr: {car: l37, cdr: {car: l35, cdr: {car: l32, cdr: {car: l29, cdr: {car: l29, cdr: {car: l50, cdr: {car: l238, cdr: {car: l33, cdr: {car: l36, cdr: {car: l34, cdr: {car: l30, cdr: {car: l30, cdr: {car: l283, cdr: {car: l73, cdr: {car: l74, cdr: {car: l72, cdr: {car: l49, cdr: {car: l27, cdr: {car: l28, cdr: {car: l71, cdr: {car: l45, cdr: {car: l2, cdr: {car: l8, cdr: {car: l10, cdr: {car: l1, cdr: {car: l7, cdr: {car: l86, cdr: {car: l95, cdr: {car: l97, cdr: {car: l47, cdr: {car: l48, cdr: {car: l51, cdr: {car: l276, cdr: {car: l25, cdr: {car: l277, cdr: {car: l287, cdr: {car: l225, cdr: {car: l90, cdr: {car: l121, cdr: {car: l94, cdr: {car: l105, cdr: {car: l119, cdr: {car: l38, cdr: {car: l41, cdr: {car: l272, cdr: {car: l284, cdr: {car: l98, cdr: {car: l293, cdr: {car: l15, cdr: {car: l122, cdr: {car: l245, cdr: {car: l70, cdr: {car: l200, cdr: {car: l116, cdr: {car: l44, cdr: {car: l75, cdr: {car: l75, cdr: {car: l120, cdr: {car: l113, cdr: {car: l211, cdr: {car: l80, cdr: {car: l67, cdr: {car: l230, cdr: {car: l234, cdr: {car: l101, cdr: {car: l42, cdr: {car: l57, cdr: {car: l295, cdr: {car: l102, cdr: {car: l270, cdr: {car: l69, cdr: {car: l82, cdr: {car: l77, cdr: {car: l258, cdr: {car: l133, cdr: {car: l247, cdr: {car: l134, cdr: {car: l248, cdr: {car: l3, cdr: {car: l26, cdr: {car: l79, cdr: {car: l78, cdr: {car: l11, cdr: {car: l265, cdr: {car: l53, cdr: {car: l106, cdr: {car: l108, cdr: {car: l104, cdr: {car: l76, cdr: {car: l139, cdr: {car: l142, cdr: {car: l197, cdr: {car: l54, cdr: {car: l55, cdr: {car: l226, cdr: {car: l65, cdr: {car: l46, cdr: {car: l157, cdr: {car: l83, cdr: {car: l84, cdr: {car: l85, cdr: {car: l12, cdr: {car: l237, cdr: {car: l63, cdr: {car: l64, cdr: {car: l39, cdr: {car: l214, cdr: {car: l215, cdr: {car: l89, cdr: {car: l280, cdr: {car: l92, cdr: {car: l93, cdr: {car: l279, cdr: {car: l87, cdr: {car: l223, cdr: {car: l271, cdr: {car: l114, cdr: {car: l274, cdr: {car: l273, cdr: {car: l269, cdr: {car: l4, cdr: {car: l244, cdr: {car: l40, cdr: {car: l239, cdr: {car: l24, cdr: {car: l6, cdr: {car: l246, cdr: {car: l132, cdr: {car: l131, cdr: {car: l99, cdr: {car: l141, cdr: {car: l5, cdr: {car: l96, cdr: {car: l294, cdr: {car: l23, cdr: l3}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}};
-l121.fvalue(values, l306);
+var l307 = {name: "&BODY"};
+var l308 = {car: l203, cdr: {car: l202, cdr: {car: l307, cdr: {car: l19, cdr: {car: l14, cdr: {car: l115, cdr: {car: l59, cdr: {car: l60, cdr: {car: l20, cdr: {car: l21, cdr: {car: l22, cdr: {car: l264, cdr: {car: l266, cdr: {car: l18, cdr: {car: l18, cdr: {car: l263, cdr: {car: l265, cdr: {car: l52, cdr: {car: l62, cdr: {car: l287, cdr: {car: l299, cdr: {car: l298, cdr: {car: l300, cdr: {car: l91, cdr: {car: l43, cdr: {car: l175, cdr: {car: l17, cdr: {car: l17, cdr: {car: l81, cdr: {car: l31, cdr: {car: l37, cdr: {car: l35, cdr: {car: l32, cdr: {car: l29, cdr: {car: l29, cdr: {car: l50, cdr: {car: l240, cdr: {car: l33, cdr: {car: l36, cdr: {car: l34, cdr: {car: l30, cdr: {car: l30, cdr: {car: l285, cdr: {car: l73, cdr: {car: l74, cdr: {car: l72, cdr: {car: l49, cdr: {car: l27, cdr: {car: l28, cdr: {car: l71, cdr: {car: l45, cdr: {car: l2, cdr: {car: l8, cdr: {car: l10, cdr: {car: l1, cdr: {car: l7, cdr: {car: l86, cdr: {car: l95, cdr: {car: l97, cdr: {car: l47, cdr: {car: l48, cdr: {car: l51, cdr: {car: l278, cdr: {car: l25, cdr: {car: l279, cdr: {car: l289, cdr: {car: l227, cdr: {car: l90, cdr: {car: l121, cdr: {car: l94, cdr: {car: l105, cdr: {car: l119, cdr: {car: l38, cdr: {car: l41, cdr: {car: l274, cdr: {car: l286, cdr: {car: l98, cdr: {car: l295, cdr: {car: l15, cdr: {car: l122, cdr: {car: l247, cdr: {car: l70, cdr: {car: l200, cdr: {car: l116, cdr: {car: l44, cdr: {car: l75, cdr: {car: l75, cdr: {car: l120, cdr: {car: l113, cdr: {car: l213, cdr: {car: l80, cdr: {car: l67, cdr: {car: l232, cdr: {car: l236, cdr: {car: l101, cdr: {car: l42, cdr: {car: l57, cdr: {car: l297, cdr: {car: l102, cdr: {car: l272, cdr: {car: l69, cdr: {car: l82, cdr: {car: l77, cdr: {car: l260, cdr: {car: l133, cdr: {car: l249, cdr: {car: l134, cdr: {car: l250, cdr: {car: l3, cdr: {car: l26, cdr: {car: l79, cdr: {car: l78, cdr: {car: l11, cdr: {car: l267, cdr: {car: l53, cdr: {car: l106, cdr: {car: l108, cdr: {car: l104, cdr: {car: l76, cdr: {car: l139, cdr: {car: l142, cdr: {car: l197, cdr: {car: l54, cdr: {car: l55, cdr: {car: l228, cdr: {car: l65, cdr: {car: l46, cdr: {car: l157, cdr: {car: l83, cdr: {car: l84, cdr: {car: l85, cdr: {car: l12, cdr: {car: l239, cdr: {car: l63, cdr: {car: l64, cdr: {car: l39, cdr: {car: l216, cdr: {car: l217, cdr: {car: l89, cdr: {car: l282, cdr: {car: l92, cdr: {car: l93, cdr: {car: l281, cdr: {car: l87, cdr: {car: l225, cdr: {car: l273, cdr: {car: l114, cdr: {car: l276, cdr: {car: l275, cdr: {car: l271, cdr: {car: l4, cdr: {car: l246, cdr: {car: l40, cdr: {car: l241, cdr: {car: l24, cdr: {car: l6, cdr: {car: l248, cdr: {car: l132, cdr: {car: l131, cdr: {car: l99, cdr: {car: l141, cdr: {car: l5, cdr: {car: l96, cdr: {car: l296, cdr: {car: l23, cdr: l3}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}};
+l121.fvalue(values, l308);
 ((l115).value = (function(){
     var symbol = l111;
     var value = symbol.value;
@@ -7693,58 +7749,60 @@ l121.fvalue(values, l306);
     return func;
 })());
 (lisp.eval = (function(){
-    var symbol = l225;
+    var symbol = l227;
     var func = symbol.fvalue;
     if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
     return func;
 })());
-(lisp.compile = (function (values,v800){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return l304.fvalue(values, v800, l4.value);
-
+(lisp.compile = (function (values,v806){
+    checkArgs(arguments, 2);
+    return l306.fvalue(values, v806, l4.value);
 }));
-(lisp.evalString = (function (values,v801){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return l225.fvalue(values, l161.fvalue(pv, v801));
-
+(lisp.evalString = (function (values,v807){
+    checkArgs(arguments, 2);
+    return l227.fvalue(values, l161.fvalue(pv, v807));
 }));
-(lisp.compileString = (function (values,v802){
-    checkArgsAtLeast(2);checkArgsAtLeast(2);return l304.fvalue(values, l161.fvalue(pv, v802), l4.value);
-
+(lisp.compileString = (function (values,v808){
+    checkArgs(arguments, 2);
+    return l306.fvalue(values, l161.fvalue(pv, v808), l4.value);
 }));
-var l307 = {car: {car: l305, cdr: "l305"}, cdr: {car: {car: l304, cdr: "l304"}, cdr: {car: {car: l303, cdr: "l303"}, cdr: {car: {car: l302, cdr: "l302"}, cdr: {car: {car: l301, cdr: "l301"}, cdr: {car: {car: l300, cdr: "l300"}, cdr: {car: {car: l299, cdr: "l299"}, cdr: {car: {car: l298, cdr: "l298"}, cdr: {car: {car: l297, cdr: "l297"}, cdr: {car: {car: l296, cdr: "l296"}, cdr: {car: {car: l295, cdr: "l295"}, cdr: {car: {car: l294, cdr: "l294"}, cdr: {car: {car: l293, cdr: "l293"}, cdr: {car: {car: l292, cdr: "l292"}, cdr: {car: {car: l291, cdr: "l291"}, cdr: {car: {car: l290, cdr: "l290"}, cdr: {car: {car: l289, cdr: "l289"}, cdr: {car: {car: l288, cdr: "l288"}, cdr: {car: {car: l287, cdr: "l287"}, cdr: {car: {car: l286, cdr: "l286"}, cdr: {car: {car: l285, cdr: "l285"}, cdr: {car: {car: l284, cdr: "l284"}, cdr: {car: {car: l283, cdr: "l283"}, cdr: {car: {car: l282, cdr: "l282"}, cdr: {car: {car: l281, cdr: "l281"}, cdr: {car: {car: l280, cdr: "l280"}, cdr: {car: {car: l279, cdr: "l279"}, cdr: {car: {car: l278, cdr: "l278"}, cdr: {car: {car: l277, cdr: "l277"}, cdr: {car: {car: l276, cdr: "l276"}, cdr: {car: {car: l275, cdr: "l275"}, cdr: {car: {car: l274, cdr: "l274"}, cdr: {car: {car: l273, cdr: "l273"}, cdr: {car: {car: l272, cdr: "l272"}, cdr: {car: {car: l271, cdr: "l271"}, cdr: {car: {car: l270, cdr: "l270"}, cdr: {car: {car: l269, cdr: "l269"}, cdr: {car: {car: l268, cdr: "l268"}, cdr: {car: {car: l267, cdr: "l267"}, cdr: {car: {car: l266, cdr: "l266"}, cdr: {car: {car: l265, cdr: "l265"}, cdr: {car: {car: l264, cdr: "l264"}, cdr: {car: {car: l263, cdr: "l263"}, cdr: {car: {car: l262, cdr: "l262"}, cdr: {car: {car: l261, cdr: "l261"}, cdr: {car: {car: l260, cdr: "l260"}, cdr: {car: {car: l259, cdr: "l259"}, cdr: {car: {car: l258, cdr: "l258"}, cdr: {car: {car: l257, cdr: "l257"}, cdr: {car: {car: l256, cdr: "l256"}, cdr: {car: {car: l255, cdr: "l255"}, cdr: {car: {car: l254, cdr: "l254"}, cdr: {car: {car: l253, cdr: "l253"}, cdr: {car: {car: l252, cdr: "l252"}, cdr: {car: {car: l251, cdr: "l251"}, cdr: {car: {car: l250, cdr: "l250"}, cdr: {car: {car: l249, cdr: "l249"}, cdr: {car: {car: l248, cdr: "l248"}, cdr: {car: {car: l247, cdr: "l247"}, cdr: {car: {car: l246, cdr: "l246"}, cdr: {car: {car: l245, cdr: "l245"}, cdr: {car: {car: l244, cdr: "l244"}, cdr: {car: {car: l243, cdr: "l243"}, cdr: {car: {car: l242, cdr: "l242"}, cdr: {car: {car: l241, cdr: "l241"}, cdr: {car: {car: l240, cdr: "l240"}, cdr: {car: {car: l239, cdr: "l239"}, cdr: {car: {car: l238, cdr: "l238"}, cdr: {car: {car: l237, cdr: "l237"}, cdr: {car: {car: l236, cdr: "l236"}, cdr: {car: {car: l235, cdr: "l235"}, cdr: {car: {car: l234, cdr: "l234"}, cdr: {car: {car: l233, cdr: "l233"}, cdr: {car: {car: l232, cdr: "l232"}, cdr: {car: {car: l231, cdr: "l231"}, cdr: {car: {car: l230, cdr: "l230"}, cdr: {car: {car: l229, cdr: "l229"}, cdr: {car: {car: l228, cdr: "l228"}, cdr: {car: {car: l227, cdr: "l227"}, cdr: {car: {car: l226, cdr: "l226"}, cdr: {car: {car: l225, cdr: "l225"}, cdr: {car: {car: l224, cdr: "l224"}, cdr: {car: {car: l223, cdr: "l223"}, cdr: {car: {car: l222, cdr: "l222"}, cdr: {car: {car: l221, cdr: "l221"}, cdr: {car: {car: l220, cdr: "l220"}, cdr: {car: {car: l219, cdr: "l219"}, cdr: {car: {car: l218, cdr: "l218"}, cdr: {car: {car: l217, cdr: "l217"}, cdr: {car: {car: l216, cdr: "l216"}, cdr: {car: {car: l215, cdr: "l215"}, cdr: {car: {car: l214, cdr: "l214"}, cdr: {car: {car: l213, cdr: "l213"}, cdr: {car: {car: l212, cdr: "l212"}, cdr: {car: {car: l211, cdr: "l211"}, cdr: {car: {car: l210, cdr: "l210"}, cdr: {car: {car: l209, cdr: "l209"}, cdr: {car: {car: l208, cdr: "l208"}, cdr: {car: {car: l207, cdr: "l207"}, cdr: {car: {car: l206, cdr: "l206"}, cdr: {car: {car: l205, cdr: "l205"}, cdr: {car: {car: l203, cdr: "l203"}, cdr: {car: {car: l202, cdr: "l202"}, cdr: {car: {car: l201, cdr: "l201"}, cdr: {car: {car: l200, cdr: "l200"}, cdr: {car: {car: l199, cdr: "l199"}, cdr: {car: {car: l198, cdr: "l198"}, cdr: {car: {car: l197, cdr: "l197"}, cdr: {car: {car: l196, cdr: "l196"}, cdr: {car: {car: l195, cdr: "l195"}, cdr: {car: {car: l194, cdr: "l194"}, cdr: {car: {car: l193, cdr: "l193"}, cdr: {car: {car: l192, cdr: "l192"}, cdr: {car: {car: l191, cdr: "l191"}, cdr: {car: {car: l190, cdr: "l190"}, cdr: {car: {car: l189, cdr: "l189"}, cdr: {car: {car: l188, cdr: "l188"}, cdr: {car: {car: l187, cdr: "l187"}, cdr: {car: {car: l186, cdr: "l186"}, cdr: {car: {car: l185, cdr: "l185"}, cdr: {car: {car: l184, cdr: "l184"}, cdr: {car: {car: l183, cdr: "l183"}, cdr: {car: {car: l182, cdr: "l182"}, cdr: {car: {car: l181, cdr: "l181"}, cdr: {car: {car: l180, cdr: "l180"}, cdr: {car: {car: l179, cdr: "l179"}, cdr: {car: {car: l178, cdr: "l178"}, cdr: {car: {car: l177, cdr: "l177"}, cdr: {car: {car: l176, cdr: "l176"}, cdr: {car: {car: l175, cdr: "l175"}, cdr: {car: {car: l174, cdr: "l174"}, cdr: {car: {car: l173, cdr: "l173"}, cdr: {car: {car: l172, cdr: "l172"}, cdr: {car: {car: l171, cdr: "l171"}, cdr: {car: {car: l170, cdr: "l170"}, cdr: {car: {car: l169, cdr: "l169"}, cdr: {car: {car: l168, cdr: "l168"}, cdr: {car: {car: l167, cdr: "l167"}, cdr: {car: {car: l166, cdr: "l166"}, cdr: {car: {car: l165, cdr: "l165"}, cdr: {car: {car: l164, cdr: "l164"}, cdr: {car: {car: l163, cdr: "l163"}, cdr: {car: {car: l162, cdr: "l162"}, cdr: {car: {car: l161, cdr: "l161"}, cdr: {car: {car: l160, cdr: "l160"}, cdr: {car: {car: l159, cdr: "l159"}, cdr: {car: {car: l158, cdr: "l158"}, cdr: {car: {car: l157, cdr: "l157"}, cdr: {car: {car: l156, cdr: "l156"}, cdr: {car: {car: l155, cdr: "l155"}, cdr: {car: {car: l154, cdr: "l154"}, cdr: {car: {car: l153, cdr: "l153"}, cdr: {car: {car: l152, cdr: "l152"}, cdr: {car: {car: l151, cdr: "l151"}, cdr: {car: {car: l150, cdr: "l150"}, cdr: {car: {car: l149, cdr: "l149"}, cdr: {car: {car: l148, cdr: "l148"}, cdr: {car: {car: l147, cdr: "l147"}, cdr: {car: {car: l146, cdr: "l146"}, cdr: {car: {car: l145, cdr: "l145"}, cdr: {car: {car: l144, cdr: "l144"}, cdr: {car: {car: l143, cdr: "l143"}, cdr: {car: {car: l142, cdr: "l142"}, cdr: {car: {car: l141, cdr: "l141"}, cdr: {car: {car: l140, cdr: "l140"}, cdr: {car: {car: l139, cdr: "l139"}, cdr: {car: {car: l138, cdr: "l138"}, cdr: {car: {car: l137, cdr: "l137"}, cdr: {car: {car: l136, cdr: "l136"}, cdr: {car: {car: l135, cdr: "l135"}, cdr: {car: {car: l134, cdr: "l134"}, cdr: {car: {car: l133, cdr: "l133"}, cdr: {car: {car: l132, cdr: "l132"}, cdr: {car: {car: l131, cdr: "l131"}, cdr: {car: {car: l130, cdr: "l130"}, cdr: {car: {car: l129, cdr: "l129"}, cdr: {car: {car: l128, cdr: "l128"}, cdr: {car: {car: l127, cdr: "l127"}, cdr: {car: {car: l126, cdr: "l126"}, cdr: {car: {car: l125, cdr: "l125"}, cdr: {car: {car: l124, cdr: "l124"}, cdr: {car: {car: l123, cdr: "l123"}, cdr: {car: {car: l122, cdr: "l122"}, cdr: {car: {car: l121, cdr: "l121"}, cdr: {car: {car: l120, cdr: "l120"}, cdr: {car: {car: l119, cdr: "l119"}, cdr: {car: {car: l118, cdr: "l118"}, cdr: {car: {car: l117, cdr: "l117"}, cdr: {car: {car: l116, cdr: "l116"}, cdr: {car: {car: l115, cdr: "l115"}, cdr: {car: {car: l114, cdr: "l114"}, cdr: {car: {car: l113, cdr: "l113"}, cdr: {car: {car: l112, cdr: "l112"}, cdr: {car: {car: l111, cdr: "l111"}, cdr: {car: {car: l110, cdr: "l110"}, cdr: {car: {car: l109, cdr: "l109"}, cdr: {car: {car: l108, cdr: "l108"}, cdr: {car: {car: l107, cdr: "l107"}, cdr: {car: {car: l106, cdr: "l106"}, cdr: {car: {car: l105, cdr: "l105"}, cdr: {car: {car: l104, cdr: "l104"}, cdr: {car: {car: l103, cdr: "l103"}, cdr: {car: {car: l102, cdr: "l102"}, cdr: {car: {car: l101, cdr: "l101"}, cdr: {car: {car: l100, cdr: "l100"}, cdr: {car: {car: l99, cdr: "l99"}, cdr: {car: {car: l98, cdr: "l98"}, cdr: {car: {car: l97, cdr: "l97"}, cdr: {car: {car: l96, cdr: "l96"}, cdr: {car: {car: l95, cdr: "l95"}, cdr: {car: {car: l94, cdr: "l94"}, cdr: {car: {car: l93, cdr: "l93"}, cdr: {car: {car: l92, cdr: "l92"}, cdr: {car: {car: l91, cdr: "l91"}, cdr: {car: {car: l90, cdr: "l90"}, cdr: {car: {car: l89, cdr: "l89"}, cdr: {car: {car: l88, cdr: "l88"}, cdr: {car: {car: l87, cdr: "l87"}, cdr: {car: {car: l86, cdr: "l86"}, cdr: {car: {car: l85, cdr: "l85"}, cdr: {car: {car: l84, cdr: "l84"}, cdr: {car: {car: l83, cdr: "l83"}, cdr: {car: {car: l82, cdr: "l82"}, cdr: {car: {car: l81, cdr: "l81"}, cdr: {car: {car: l80, cdr: "l80"}, cdr: {car: {car: l79, cdr: "l79"}, cdr: {car: {car: l78, cdr: "l78"}, cdr: {car: {car: l77, cdr: "l77"}, cdr: {car: {car: l76, cdr: "l76"}, cdr: {car: {car: l75, cdr: "l75"}, cdr: {car: {car: l74, cdr: "l74"}, cdr: {car: {car: l73, cdr: "l73"}, cdr: {car: {car: l72, cdr: "l72"}, cdr: {car: {car: l71, cdr: "l71"}, cdr: {car: {car: l70, cdr: "l70"}, cdr: {car: {car: l69, cdr: "l69"}, cdr: {car: {car: l68, cdr: "l68"}, cdr: {car: {car: l67, cdr: "l67"}, cdr: {car: {car: l66, cdr: "l66"}, cdr: {car: {car: l65, cdr: "l65"}, cdr: {car: {car: l64, cdr: "l64"}, cdr: {car: {car: l63, cdr: "l63"}, cdr: {car: {car: l62, cdr: "l62"}, cdr: {car: {car: l61, cdr: "l61"}, cdr: {car: {car: l60, cdr: "l60"}, cdr: {car: {car: l59, cdr: "l59"}, cdr: {car: {car: l58, cdr: "l58"}, cdr: {car: {car: l57, cdr: "l57"}, cdr: {car: {car: l56, cdr: "l56"}, cdr: {car: {car: l55, cdr: "l55"}, cdr: {car: {car: l54, cdr: "l54"}, cdr: {car: {car: l53, cdr: "l53"}, cdr: {car: {car: l52, cdr: "l52"}, cdr: {car: {car: l51, cdr: "l51"}, cdr: {car: {car: l50, cdr: "l50"}, cdr: {car: {car: l49, cdr: "l49"}, cdr: {car: {car: l48, cdr: "l48"}, cdr: {car: {car: l47, cdr: "l47"}, cdr: {car: {car: l46, cdr: "l46"}, cdr: {car: {car: l45, cdr: "l45"}, cdr: {car: {car: l44, cdr: "l44"}, cdr: {car: {car: l43, cdr: "l43"}, cdr: {car: {car: l42, cdr: "l42"}, cdr: {car: {car: l41, cdr: "l41"}, cdr: {car: {car: l40, cdr: "l40"}, cdr: {car: {car: l39, cdr: "l39"}, cdr: {car: {car: l38, cdr: "l38"}, cdr: {car: {car: l37, cdr: "l37"}, cdr: {car: {car: l36, cdr: "l36"}, cdr: {car: {car: l35, cdr: "l35"}, cdr: {car: {car: l34, cdr: "l34"}, cdr: {car: {car: l33, cdr: "l33"}, cdr: {car: {car: l32, cdr: "l32"}, cdr: {car: {car: l31, cdr: "l31"}, cdr: {car: {car: l30, cdr: "l30"}, cdr: {car: {car: l29, cdr: "l29"}, cdr: {car: {car: l28, cdr: "l28"}, cdr: {car: {car: l27, cdr: "l27"}, cdr: {car: {car: l26, cdr: "l26"}, cdr: {car: {car: l25, cdr: "l25"}, cdr: {car: {car: l24, cdr: "l24"}, cdr: {car: {car: l23, cdr: "l23"}, cdr: {car: {car: l22, cdr: "l22"}, cdr: {car: {car: l21, cdr: "l21"}, cdr: {car: {car: l20, cdr: "l20"}, cdr: {car: {car: l19, cdr: "l19"}, cdr: {car: {car: l18, cdr: "l18"}, cdr: {car: {car: l17, cdr: "l17"}, cdr: {car: {car: l16, cdr: "l16"}, cdr: {car: {car: l15, cdr: "l15"}, cdr: {car: {car: l14, cdr: "l14"}, cdr: {car: {car: l13, cdr: "l13"}, cdr: {car: {car: l12, cdr: "l12"}, cdr: {car: {car: l11, cdr: "l11"}, cdr: {car: {car: l10, cdr: "l10"}, cdr: {car: {car: l9, cdr: "l9"}, cdr: {car: {car: l8, cdr: "l8"}, cdr: {car: {car: l7, cdr: "l7"}, cdr: {car: {car: l6, cdr: "l6"}, cdr: {car: {car: l5, cdr: "l5"}, cdr: {car: {car: l4, cdr: "l4"}, cdr: {car: {car: l3, cdr: "l3"}, cdr: {car: {car: l2, cdr: "l2"}, cdr: {car: {car: l1, cdr: "l1"}, cdr: l3}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}};
-var l308 = {name: "OP"};
-var l309 = {name: "SYM"};
-var l310 = {name: "X"};
-var l311 = {name: "ARGS"};
-var l312 = {name: "BODY"};
-var l313 = {name: "DECLS"};
-var l314 = {name: "DECL"};
-var l315 = {name: "NAME"};
-var l316 = {name: "ARG"};
-var l317 = {name: "FORM"};
-var l318 = {name: "VALUE-FROM"};
-var l319 = {name: "VARIABLES"};
-var l320 = {name: "PACKAGE-DESIGNATOR"};
-var l321 = {name: "PAIRS"};
-var l322 = {name: "ASSIGNMENTS"};
-var l323 = {name: "VALUE"};
-var l324 = {name: "FORM1"};
-var l325 = {name: "RESULT"};
-var l326 = {name: "FORMS"};
-var l327 = {name: "G"};
-var l328 = {name: "CLAUSULES"};
-var l329 = {name: "!FORM"};
-var l330 = {name: "CLAUSULE"};
-var l331 = {name: "ITER"};
-var l332 = {name: "G!TO"};
-var l333 = {name: "VAR"};
-var l334 = {name: "TO"};
-var l335 = {name: "G!LIST"};
-var l336 = {name: "PLACE"};
-var l337 = {name: "DELTA"};
-var l338 = {name: "CONDITION"};
-var l339 = {name: "DOCSTRING"};
-var l340 = {car: {car: {car: l251, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l241, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l240, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l235, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l219, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l218, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l201, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l198, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l185, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l180, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l179, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l163, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l162, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l156, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l123, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l115, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l112, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l111, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l110, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l100, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l14, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l4, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: {car: l196, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l3, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: {car: l196, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}}}}}}}}}}}}}}}}}}}}}, cdr: {car: {car: {car: l260, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l308, cdr: {car: l309, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: l252, cdr: {car: {car: l160, cdr: {car: l308, cdr: l3}}, cdr: {car: {car: l310, cdr: {car: l203, cdr: {car: l311, cdr: l3}}}, cdr: {car: {car: l230, cdr: {car: {car: {car: l311, cdr: {car: {car: l27, cdr: {car: l310, cdr: {car: l311, cdr: l3}}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l256, cdr: {car: l311, cdr: {car: {car: l136, cdr: {car: {car: l259, cdr: {car: l311, cdr: {car: {car: l160, cdr: {car: l309, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l256, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l311, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}, cdr: {car: {car: l6, cdr: {car: {car: l269, cdr: {car: l311, cdr: l3}}, cdr: {car: {car: l287, cdr: {car: "Bad usage of VARIABLE-ARITY, you must pass a symbol", cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l255, cdr: {car: {car: l160, cdr: {car: l311, cdr: l3}}, cdr: {car: {car: l211, cdr: {car: {car: {car: l160, cdr: {car: l311, cdr: l3}}, cdr: l3}, cdr: {car: {car: l124, cdr: {car: "return ", cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: {car: ";", cdr: {car: l123, cdr: l3}}}}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l254, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l313, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l138, cdr: {car: {car: l159, cdr: {car: {car: l69, cdr: {car: {car: l211, cdr: {car: {car: l314, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l124, cdr: {car: "var ", cdr: {car: {car: l160, cdr: {car: {car: l38, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: {car: " = ", cdr: {car: {car: l160, cdr: {car: {car: l40, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: {car: ";", cdr: {car: l123, cdr: l3}}}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l313, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: {car: l69, cdr: {car: {car: l211, cdr: {car: {car: l314, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l124, cdr: {car: "if (typeof ", cdr: {car: {car: l160, cdr: {car: {car: l38, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: {car: " != '", cdr: {car: {car: l160, cdr: {car: {car: l39, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: {car: "')", cdr: {car: l123, cdr: {car: {car: l135, cdr: {car: "throw 'The value ' + ", cdr: {car: {car: l160, cdr: {car: {car: l38, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: {car: " + ' is not a type ", cdr: {car: {car: l160, cdr: {car: {car: l39, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: {car: ".';", cdr: {car: l123, cdr: l3}}}}}}}, cdr: l3}}}}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l313, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l124, cdr: {car: "return ", cdr: {car: {car: l226, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: l3}}, cdr: {car: ";", cdr: {car: l123, cdr: l3}}}}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l253, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l315, cdr: {car: l311, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l226, cdr: {car: {car: l252, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l311, cdr: l3}}, cdr: {car: {car: l230, cdr: {car: {car: l160, cdr: {car: {car: l69, cdr: {car: {car: l211, cdr: {car: {car: l316, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: {car: l160, cdr: {car: l316, cdr: l3}}, cdr: {car: {car: l137, cdr: {car: {car: l160, cdr: {car: l316, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l311, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: l3}}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l252, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l315, cdr: {car: l311, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l46, cdr: {car: {car: l42, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l211, cdr: {car: {car: l160, cdr: {car: l311, cdr: l3}}, cdr: {car: {car: l175, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l251, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l317, cdr: l3}, cdr: {car: {car: l249, cdr: {car: l317, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l227, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l315, cdr: {car: l311, cdr: {car: l317, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l199, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l311, cdr: l3}}, cdr: {car: {car: l137, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l199, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l315, cdr: {car: l311, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l46, cdr: {car: {car: l42, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l211, cdr: {car: {car: l160, cdr: {car: l311, cdr: l3}}, cdr: {car: {car: l175, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l198, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l138, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l203, cdr: {car: l312, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: l124, cdr: {car: "(function(){", cdr: {car: l123, cdr: {car: {car: l135, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: l3}}, cdr: {car: "})()", cdr: l3}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l134, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l318, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l247, cdr: {car: {car: l98, cdr: {car: l42, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l318, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l133, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l319, cdr: {car: l318, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l247, cdr: {car: {car: l211, cdr: {car: {car: l202, cdr: {car: {car: l159, cdr: {car: l319, cdr: l3}}, cdr: {car: l203, cdr: {car: {car: l160, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l160, cdr: {car: l318, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l125, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l99, cdr: {car: l203, cdr: {car: l317, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l215, cdr: {car: {car: l160, cdr: {car: l99, cdr: l3}}, cdr: {car: {car: l124, cdr: {car: {car: l160, cdr: {car: l99, cdr: l3}}, cdr: {car: {car: l226, cdr: {car: {car: l159, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l116, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l320, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l224, cdr: {car: {car: l215, cdr: {car: l115, cdr: {car: {car: l103, cdr: {car: {car: l160, cdr: {car: l320, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l65, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l203, cdr: {car: l321, cdr: l3}}, cdr: {car: {car: l230, cdr: {car: {car: {car: l322, cdr: {car: {car: l157, cdr: {car: l3, cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l13, cdr: {car: l4, cdr: {car: {car: l49, cdr: {car: {car: {car: l11, cdr: {car: l321, cdr: l3}}, cdr: {car: {car: l12, cdr: l3}, cdr: l3}}, cdr: {car: {car: {car: l11, cdr: {car: {car: l30, cdr: {car: l321, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l287, cdr: {car: "Odd paris in PSETQ", cdr: l3}}, cdr: l3}}, cdr: {car: {car: l4, cdr: {car: {car: l230, cdr: {car: {car: {car: l99, cdr: {car: {car: l29, cdr: {car: l321, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l323, cdr: {car: {car: l32, cdr: {car: l321, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l46, cdr: {car: {car: l158, cdr: {car: {car: {car: l160, cdr: {car: l99, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l323, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: {car: l322, cdr: l3}}}, cdr: {car: {car: l215, cdr: {car: l321, cdr: {car: {car: l34, cdr: {car: l321, cdr: l3}}, cdr: l3}}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: {car: l215, cdr: {car: l322, cdr: {car: {car: l64, cdr: {car: l322, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l230, cdr: {car: {car: l160, cdr: {car: {car: l69, cdr: {car: {car: l98, cdr: {car: l30, cdr: l3}}, cdr: {car: l322, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l215, cdr: {car: {car: l159, cdr: {car: {car: l58, cdr: {car: {car: l98, cdr: {car: l62, cdr: l3}}, cdr: {car: {car: l69, cdr: {car: {car: l98, cdr: {car: l81, cdr: l3}}, cdr: {car: l322, cdr: l3}}}, cdr: {car: {car: l157, cdr: {car: l3, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l55, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l324, cdr: {car: l325, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l54, cdr: {car: {car: l226, cdr: {car: {car: l160, cdr: {car: l324, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l325, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l54, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l317, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}, cdr: {car: {car: l230, cdr: {car: {car: {car: l323, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l230, cdr: {car: {car: {car: {car: l160, cdr: {car: l323, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l323, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l53, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l203, cdr: {car: l326, cdr: l3}}, cdr: {car: {car: l49, cdr: {car: {car: {car: l11, cdr: {car: l326, cdr: l3}}, cdr: {car: l3, cdr: l3}}, cdr: {car: {car: {car: l11, cdr: {car: {car: l30, cdr: {car: l326, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l29, cdr: {car: l326, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l4, cdr: {car: {car: l230, cdr: {car: {car: {car: l327, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l230, cdr: {car: {car: {car: {car: l160, cdr: {car: l327, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: {car: l29, cdr: {car: l326, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l200, cdr: {car: {car: l160, cdr: {car: l327, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l327, cdr: l3}}, cdr: {car: {car: l53, cdr: {car: {car: l159, cdr: {car: {car: l30, cdr: {car: l326, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l52, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l203, cdr: {car: l326, cdr: l3}}, cdr: {car: {car: l49, cdr: {car: {car: {car: l11, cdr: {car: l326, cdr: l3}}, cdr: {car: l4, cdr: l3}}, cdr: {car: {car: {car: l11, cdr: {car: {car: l30, cdr: {car: l326, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l29, cdr: {car: l326, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l4, cdr: {car: {car: l158, cdr: {car: {car: l200, cdr: {car: {car: l160, cdr: {car: {car: l29, cdr: {car: l326, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l52, cdr: {car: {car: l159, cdr: {car: {car: l30, cdr: {car: l326, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: l3, cdr: l3}}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l51, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l317, cdr: {car: l203, cdr: {car: l328, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l50, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: {car: l62, cdr: {car: l328, cdr: {car: {car: l158, cdr: {car: {car: {car: l4, cdr: {car: {car: l287, cdr: {car: "ECASE expression failed.", cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l50, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l317, cdr: {car: l203, cdr: {car: l328, cdr: l3}}}, cdr: {car: {car: l230, cdr: {car: {car: {car: l329, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l230, cdr: {car: {car: {car: {car: l160, cdr: {car: l329, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l49, cdr: {car: {car: l159, cdr: {car: {car: l69, cdr: {car: {car: l211, cdr: {car: {car: l330, cdr: l3}, cdr: {car: {car: l200, cdr: {car: {car: l276, cdr: {car: {car: l29, cdr: {car: l330, cdr: l3}}, cdr: {car: l4, cdr: l3}}}, cdr: {car: l330, cdr: {car: {car: l158, cdr: {car: {car: {car: l25, cdr: {car: {car: l160, cdr: {car: l329, cdr: l3}}, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: {car: l29, cdr: {car: l330, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l159, cdr: {car: {car: l30, cdr: {car: l330, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l328, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l49, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l203, cdr: {car: l328, cdr: l3}}, cdr: {car: {car: l200, cdr: {car: {car: l11, cdr: {car: l328, cdr: l3}}, cdr: {car: l3, cdr: {car: {car: l200, cdr: {car: {car: l276, cdr: {car: {car: l31, cdr: {car: l328, cdr: l3}}, cdr: {car: l4, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l226, cdr: {car: {car: l159, cdr: {car: {car: l33, cdr: {car: l328, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: l200, cdr: {car: {car: l160, cdr: {car: {car: l31, cdr: {car: l328, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l226, cdr: {car: {car: l159, cdr: {car: {car: l33, cdr: {car: l328, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l49, cdr: {car: {car: l159, cdr: {car: {car: l30, cdr: {car: l328, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l48, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l331, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}, cdr: {car: {car: l230, cdr: {car: {car: {car: l332, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: {car: {car: l333, cdr: {car: {car: l38, cdr: {car: l331, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l334, cdr: {car: {car: l39, cdr: {car: l331, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l325, cdr: {car: {car: l40, cdr: {car: l331, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l175, cdr: {car: l3, cdr: {car: {car: l230, cdr: {car: {car: {car: {car: l160, cdr: {car: l333, cdr: l3}}, cdr: {car: 0, cdr: l3}}, cdr: {car: {car: {car: l160, cdr: {car: l332, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l334, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l222, cdr: {car: {car: l262, cdr: {car: {car: l160, cdr: {car: l333, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l332, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l244, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l44, cdr: {car: {car: l160, cdr: {car: l333, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l160, cdr: {car: l325, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l47, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l331, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}, cdr: {car: {car: l230, cdr: {car: {car: {car: l333, cdr: {car: {car: l38, cdr: {car: l331, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l335, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: l175, cdr: {car: l3, cdr: {car: {car: l230, cdr: {car: {car: {car: {car: l160, cdr: {car: l335, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: {car: l39, cdr: {car: l331, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: {car: l160, cdr: {car: l333, cdr: l3}}, cdr: {car: l3, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l222, cdr: {car: {car: l160, cdr: {car: l335, cdr: l3}}, cdr: {car: {car: l215, cdr: {car: {car: l160, cdr: {car: l333, cdr: l3}}, cdr: {car: {car: l29, cdr: {car: {car: l160, cdr: {car: l335, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l244, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l215, cdr: {car: {car: l160, cdr: {car: l335, cdr: l3}}, cdr: {car: {car: l30, cdr: {car: {car: l160, cdr: {car: l335, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}}}, cdr: {car: {car: l160, cdr: {car: {car: l40, cdr: {car: l331, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l46, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l310, cdr: {car: l336, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: l215, cdr: {car: {car: l160, cdr: {car: l336, cdr: l3}}, cdr: {car: {car: l27, cdr: {car: {car: l160, cdr: {car: l310, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l336, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l45, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l310, cdr: {car: l202, cdr: {car: {car: l337, cdr: {car: 1, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l215, cdr: {car: {car: l160, cdr: {car: l310, cdr: l3}}, cdr: {car: {car: l60, cdr: {car: {car: l160, cdr: {car: l310, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l337, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l44, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l310, cdr: {car: l202, cdr: {car: {car: l337, cdr: {car: 1, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l215, cdr: {car: {car: l160, cdr: {car: l310, cdr: l3}}, cdr: {car: {car: l59, cdr: {car: {car: l160, cdr: {car: l310, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l337, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l13, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l338, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l175, cdr: {car: l3, cdr: {car: {car: l222, cdr: {car: {car: l160, cdr: {car: l338, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l12, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l202, cdr: {car: l323, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: l237, cdr: {car: l3, cdr: {car: {car: l160, cdr: {car: l323, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l10, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l315, cdr: {car: l311, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l226, cdr: {car: {car: l272, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l9, cdr: {car: {car: l160, cdr: {car: {car: l271, cdr: {car: l315, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l311, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: {car: l200, cdr: {car: {car: l52, cdr: {car: {car: l279, cdr: {car: {car: l29, cdr: {car: l312, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l26, cdr: {car: {car: l11, cdr: {car: {car: l30, cdr: {car: l312, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: {car: l160, cdr: {car: {car: l29, cdr: {car: l312, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l175, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: {car: l30, cdr: {car: l312, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: {car: l175, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: l3}}}, cdr: l3}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l9, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l315, cdr: {car: l311, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}}, cdr: {car: {car: l230, cdr: {car: {car: {car: l310, cdr: {car: {car: l15, cdr: {car: "FN", cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l230, cdr: {car: {car: {car: {car: l160, cdr: {car: l310, cdr: l3}}, cdr: {car: {car: l211, cdr: {car: {car: l160, cdr: {car: l311, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l291, cdr: {car: {car: l160, cdr: {car: l310, cdr: l3}}, cdr: {car: "fname", cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l160, cdr: {car: l310, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l8, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l315, cdr: {car: l323, cdr: {car: l202, cdr: {car: l339, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l226, cdr: {car: {car: l215, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l323, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l159, cdr: {car: {car: l5, cdr: {car: {car: l279, cdr: {car: l339, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: {car: l291, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: l3}}, cdr: {car: "vardoc", cdr: {car: {car: l160, cdr: {car: l339, cdr: l3}}, cdr: l3}}}}, cdr: l3}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l7, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l315, cdr: {car: l323, cdr: {car: l202, cdr: {car: l339, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l226, cdr: {car: {car: l2, cdr: {car: {car: l194, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l6, cdr: {car: {car: l17, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l215, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l323, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: {car: l159, cdr: {car: {car: l5, cdr: {car: {car: l279, cdr: {car: l339, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: {car: l291, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: l3}}, cdr: {car: "vardoc", cdr: {car: {car: l160, cdr: {car: l339, cdr: l3}}, cdr: l3}}}}, cdr: l3}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: l3}}, cdr: l3}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l6, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l338, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l200, cdr: {car: {car: l160, cdr: {car: l338, cdr: l3}}, cdr: {car: l3, cdr: {car: {car: l226, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l5, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l338, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l200, cdr: {car: {car: l160, cdr: {car: l338, cdr: l3}}, cdr: {car: {car: l226, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: l3}}, cdr: {car: l3, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l2, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l203, cdr: {car: l313, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: l224, cdr: {car: {car: l159, cdr: {car: {car: l69, cdr: {car: {car: l211, cdr: {car: {car: l314, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l193, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l313, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l1, cdr: {car: l190, cdr: {car: {car: l211, cdr: {car: {car: l315, cdr: {car: l311, cdr: {car: l203, cdr: {car: l312, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l224, cdr: {car: {car: l189, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l315, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l157, cdr: {car: {car: l211, cdr: {car: {car: l160, cdr: {car: {car: l69, cdr: {car: {car: l211, cdr: {car: {car: l310, cdr: l3}, cdr: {car: {car: l200, cdr: {car: {car: l276, cdr: {car: l310, cdr: {car: {car: l157, cdr: {car: l305, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l157, cdr: {car: l203, cdr: l3}}, cdr: {car: l310, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l311, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: l312, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: l3}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}, cdr: {car: l3, cdr: {car: l3, cdr: l3}}}};
+var l309 = {car: {car: l307, cdr: "l307"}, cdr: {car: {car: l306, cdr: "l306"}, cdr: {car: {car: l305, cdr: "l305"}, cdr: {car: {car: l304, cdr: "l304"}, cdr: {car: {car: l303, cdr: "l303"}, cdr: {car: {car: l302, cdr: "l302"}, cdr: {car: {car: l301, cdr: "l301"}, cdr: {car: {car: l300, cdr: "l300"}, cdr: {car: {car: l299, cdr: "l299"}, cdr: {car: {car: l298, cdr: "l298"}, cdr: {car: {car: l297, cdr: "l297"}, cdr: {car: {car: l296, cdr: "l296"}, cdr: {car: {car: l295, cdr: "l295"}, cdr: {car: {car: l294, cdr: "l294"}, cdr: {car: {car: l293, cdr: "l293"}, cdr: {car: {car: l292, cdr: "l292"}, cdr: {car: {car: l291, cdr: "l291"}, cdr: {car: {car: l290, cdr: "l290"}, cdr: {car: {car: l289, cdr: "l289"}, cdr: {car: {car: l288, cdr: "l288"}, cdr: {car: {car: l287, cdr: "l287"}, cdr: {car: {car: l286, cdr: "l286"}, cdr: {car: {car: l285, cdr: "l285"}, cdr: {car: {car: l284, cdr: "l284"}, cdr: {car: {car: l283, cdr: "l283"}, cdr: {car: {car: l282, cdr: "l282"}, cdr: {car: {car: l281, cdr: "l281"}, cdr: {car: {car: l280, cdr: "l280"}, cdr: {car: {car: l279, cdr: "l279"}, cdr: {car: {car: l278, cdr: "l278"}, cdr: {car: {car: l277, cdr: "l277"}, cdr: {car: {car: l276, cdr: "l276"}, cdr: {car: {car: l275, cdr: "l275"}, cdr: {car: {car: l274, cdr: "l274"}, cdr: {car: {car: l273, cdr: "l273"}, cdr: {car: {car: l272, cdr: "l272"}, cdr: {car: {car: l271, cdr: "l271"}, cdr: {car: {car: l270, cdr: "l270"}, cdr: {car: {car: l269, cdr: "l269"}, cdr: {car: {car: l268, cdr: "l268"}, cdr: {car: {car: l267, cdr: "l267"}, cdr: {car: {car: l266, cdr: "l266"}, cdr: {car: {car: l265, cdr: "l265"}, cdr: {car: {car: l264, cdr: "l264"}, cdr: {car: {car: l263, cdr: "l263"}, cdr: {car: {car: l262, cdr: "l262"}, cdr: {car: {car: l261, cdr: "l261"}, cdr: {car: {car: l260, cdr: "l260"}, cdr: {car: {car: l259, cdr: "l259"}, cdr: {car: {car: l258, cdr: "l258"}, cdr: {car: {car: l257, cdr: "l257"}, cdr: {car: {car: l256, cdr: "l256"}, cdr: {car: {car: l255, cdr: "l255"}, cdr: {car: {car: l254, cdr: "l254"}, cdr: {car: {car: l253, cdr: "l253"}, cdr: {car: {car: l252, cdr: "l252"}, cdr: {car: {car: l251, cdr: "l251"}, cdr: {car: {car: l250, cdr: "l250"}, cdr: {car: {car: l249, cdr: "l249"}, cdr: {car: {car: l248, cdr: "l248"}, cdr: {car: {car: l247, cdr: "l247"}, cdr: {car: {car: l246, cdr: "l246"}, cdr: {car: {car: l245, cdr: "l245"}, cdr: {car: {car: l244, cdr: "l244"}, cdr: {car: {car: l243, cdr: "l243"}, cdr: {car: {car: l242, cdr: "l242"}, cdr: {car: {car: l241, cdr: "l241"}, cdr: {car: {car: l240, cdr: "l240"}, cdr: {car: {car: l239, cdr: "l239"}, cdr: {car: {car: l238, cdr: "l238"}, cdr: {car: {car: l237, cdr: "l237"}, cdr: {car: {car: l236, cdr: "l236"}, cdr: {car: {car: l235, cdr: "l235"}, cdr: {car: {car: l234, cdr: "l234"}, cdr: {car: {car: l233, cdr: "l233"}, cdr: {car: {car: l232, cdr: "l232"}, cdr: {car: {car: l231, cdr: "l231"}, cdr: {car: {car: l230, cdr: "l230"}, cdr: {car: {car: l229, cdr: "l229"}, cdr: {car: {car: l228, cdr: "l228"}, cdr: {car: {car: l227, cdr: "l227"}, cdr: {car: {car: l226, cdr: "l226"}, cdr: {car: {car: l225, cdr: "l225"}, cdr: {car: {car: l224, cdr: "l224"}, cdr: {car: {car: l223, cdr: "l223"}, cdr: {car: {car: l222, cdr: "l222"}, cdr: {car: {car: l221, cdr: "l221"}, cdr: {car: {car: l220, cdr: "l220"}, cdr: {car: {car: l219, cdr: "l219"}, cdr: {car: {car: l218, cdr: "l218"}, cdr: {car: {car: l217, cdr: "l217"}, cdr: {car: {car: l216, cdr: "l216"}, cdr: {car: {car: l215, cdr: "l215"}, cdr: {car: {car: l214, cdr: "l214"}, cdr: {car: {car: l213, cdr: "l213"}, cdr: {car: {car: l212, cdr: "l212"}, cdr: {car: {car: l211, cdr: "l211"}, cdr: {car: {car: l210, cdr: "l210"}, cdr: {car: {car: l209, cdr: "l209"}, cdr: {car: {car: l208, cdr: "l208"}, cdr: {car: {car: l207, cdr: "l207"}, cdr: {car: {car: l206, cdr: "l206"}, cdr: {car: {car: l205, cdr: "l205"}, cdr: {car: {car: l203, cdr: "l203"}, cdr: {car: {car: l202, cdr: "l202"}, cdr: {car: {car: l201, cdr: "l201"}, cdr: {car: {car: l200, cdr: "l200"}, cdr: {car: {car: l199, cdr: "l199"}, cdr: {car: {car: l198, cdr: "l198"}, cdr: {car: {car: l197, cdr: "l197"}, cdr: {car: {car: l196, cdr: "l196"}, cdr: {car: {car: l195, cdr: "l195"}, cdr: {car: {car: l194, cdr: "l194"}, cdr: {car: {car: l193, cdr: "l193"}, cdr: {car: {car: l192, cdr: "l192"}, cdr: {car: {car: l191, cdr: "l191"}, cdr: {car: {car: l190, cdr: "l190"}, cdr: {car: {car: l189, cdr: "l189"}, cdr: {car: {car: l188, cdr: "l188"}, cdr: {car: {car: l187, cdr: "l187"}, cdr: {car: {car: l186, cdr: "l186"}, cdr: {car: {car: l185, cdr: "l185"}, cdr: {car: {car: l184, cdr: "l184"}, cdr: {car: {car: l183, cdr: "l183"}, cdr: {car: {car: l182, cdr: "l182"}, cdr: {car: {car: l181, cdr: "l181"}, cdr: {car: {car: l180, cdr: "l180"}, cdr: {car: {car: l179, cdr: "l179"}, cdr: {car: {car: l178, cdr: "l178"}, cdr: {car: {car: l177, cdr: "l177"}, cdr: {car: {car: l176, cdr: "l176"}, cdr: {car: {car: l175, cdr: "l175"}, cdr: {car: {car: l174, cdr: "l174"}, cdr: {car: {car: l173, cdr: "l173"}, cdr: {car: {car: l172, cdr: "l172"}, cdr: {car: {car: l171, cdr: "l171"}, cdr: {car: {car: l170, cdr: "l170"}, cdr: {car: {car: l169, cdr: "l169"}, cdr: {car: {car: l168, cdr: "l168"}, cdr: {car: {car: l167, cdr: "l167"}, cdr: {car: {car: l166, cdr: "l166"}, cdr: {car: {car: l165, cdr: "l165"}, cdr: {car: {car: l164, cdr: "l164"}, cdr: {car: {car: l163, cdr: "l163"}, cdr: {car: {car: l162, cdr: "l162"}, cdr: {car: {car: l161, cdr: "l161"}, cdr: {car: {car: l160, cdr: "l160"}, cdr: {car: {car: l159, cdr: "l159"}, cdr: {car: {car: l158, cdr: "l158"}, cdr: {car: {car: l157, cdr: "l157"}, cdr: {car: {car: l156, cdr: "l156"}, cdr: {car: {car: l155, cdr: "l155"}, cdr: {car: {car: l154, cdr: "l154"}, cdr: {car: {car: l153, cdr: "l153"}, cdr: {car: {car: l152, cdr: "l152"}, cdr: {car: {car: l151, cdr: "l151"}, cdr: {car: {car: l150, cdr: "l150"}, cdr: {car: {car: l149, cdr: "l149"}, cdr: {car: {car: l148, cdr: "l148"}, cdr: {car: {car: l147, cdr: "l147"}, cdr: {car: {car: l146, cdr: "l146"}, cdr: {car: {car: l145, cdr: "l145"}, cdr: {car: {car: l144, cdr: "l144"}, cdr: {car: {car: l143, cdr: "l143"}, cdr: {car: {car: l142, cdr: "l142"}, cdr: {car: {car: l141, cdr: "l141"}, cdr: {car: {car: l140, cdr: "l140"}, cdr: {car: {car: l139, cdr: "l139"}, cdr: {car: {car: l138, cdr: "l138"}, cdr: {car: {car: l137, cdr: "l137"}, cdr: {car: {car: l136, cdr: "l136"}, cdr: {car: {car: l135, cdr: "l135"}, cdr: {car: {car: l134, cdr: "l134"}, cdr: {car: {car: l133, cdr: "l133"}, cdr: {car: {car: l132, cdr: "l132"}, cdr: {car: {car: l131, cdr: "l131"}, cdr: {car: {car: l130, cdr: "l130"}, cdr: {car: {car: l129, cdr: "l129"}, cdr: {car: {car: l128, cdr: "l128"}, cdr: {car: {car: l127, cdr: "l127"}, cdr: {car: {car: l126, cdr: "l126"}, cdr: {car: {car: l125, cdr: "l125"}, cdr: {car: {car: l124, cdr: "l124"}, cdr: {car: {car: l123, cdr: "l123"}, cdr: {car: {car: l122, cdr: "l122"}, cdr: {car: {car: l121, cdr: "l121"}, cdr: {car: {car: l120, cdr: "l120"}, cdr: {car: {car: l119, cdr: "l119"}, cdr: {car: {car: l118, cdr: "l118"}, cdr: {car: {car: l117, cdr: "l117"}, cdr: {car: {car: l116, cdr: "l116"}, cdr: {car: {car: l115, cdr: "l115"}, cdr: {car: {car: l114, cdr: "l114"}, cdr: {car: {car: l113, cdr: "l113"}, cdr: {car: {car: l112, cdr: "l112"}, cdr: {car: {car: l111, cdr: "l111"}, cdr: {car: {car: l110, cdr: "l110"}, cdr: {car: {car: l109, cdr: "l109"}, cdr: {car: {car: l108, cdr: "l108"}, cdr: {car: {car: l107, cdr: "l107"}, cdr: {car: {car: l106, cdr: "l106"}, cdr: {car: {car: l105, cdr: "l105"}, cdr: {car: {car: l104, cdr: "l104"}, cdr: {car: {car: l103, cdr: "l103"}, cdr: {car: {car: l102, cdr: "l102"}, cdr: {car: {car: l101, cdr: "l101"}, cdr: {car: {car: l100, cdr: "l100"}, cdr: {car: {car: l99, cdr: "l99"}, cdr: {car: {car: l98, cdr: "l98"}, cdr: {car: {car: l97, cdr: "l97"}, cdr: {car: {car: l96, cdr: "l96"}, cdr: {car: {car: l95, cdr: "l95"}, cdr: {car: {car: l94, cdr: "l94"}, cdr: {car: {car: l93, cdr: "l93"}, cdr: {car: {car: l92, cdr: "l92"}, cdr: {car: {car: l91, cdr: "l91"}, cdr: {car: {car: l90, cdr: "l90"}, cdr: {car: {car: l89, cdr: "l89"}, cdr: {car: {car: l88, cdr: "l88"}, cdr: {car: {car: l87, cdr: "l87"}, cdr: {car: {car: l86, cdr: "l86"}, cdr: {car: {car: l85, cdr: "l85"}, cdr: {car: {car: l84, cdr: "l84"}, cdr: {car: {car: l83, cdr: "l83"}, cdr: {car: {car: l82, cdr: "l82"}, cdr: {car: {car: l81, cdr: "l81"}, cdr: {car: {car: l80, cdr: "l80"}, cdr: {car: {car: l79, cdr: "l79"}, cdr: {car: {car: l78, cdr: "l78"}, cdr: {car: {car: l77, cdr: "l77"}, cdr: {car: {car: l76, cdr: "l76"}, cdr: {car: {car: l75, cdr: "l75"}, cdr: {car: {car: l74, cdr: "l74"}, cdr: {car: {car: l73, cdr: "l73"}, cdr: {car: {car: l72, cdr: "l72"}, cdr: {car: {car: l71, cdr: "l71"}, cdr: {car: {car: l70, cdr: "l70"}, cdr: {car: {car: l69, cdr: "l69"}, cdr: {car: {car: l68, cdr: "l68"}, cdr: {car: {car: l67, cdr: "l67"}, cdr: {car: {car: l66, cdr: "l66"}, cdr: {car: {car: l65, cdr: "l65"}, cdr: {car: {car: l64, cdr: "l64"}, cdr: {car: {car: l63, cdr: "l63"}, cdr: {car: {car: l62, cdr: "l62"}, cdr: {car: {car: l61, cdr: "l61"}, cdr: {car: {car: l60, cdr: "l60"}, cdr: {car: {car: l59, cdr: "l59"}, cdr: {car: {car: l58, cdr: "l58"}, cdr: {car: {car: l57, cdr: "l57"}, cdr: {car: {car: l56, cdr: "l56"}, cdr: {car: {car: l55, cdr: "l55"}, cdr: {car: {car: l54, cdr: "l54"}, cdr: {car: {car: l53, cdr: "l53"}, cdr: {car: {car: l52, cdr: "l52"}, cdr: {car: {car: l51, cdr: "l51"}, cdr: {car: {car: l50, cdr: "l50"}, cdr: {car: {car: l49, cdr: "l49"}, cdr: {car: {car: l48, cdr: "l48"}, cdr: {car: {car: l47, cdr: "l47"}, cdr: {car: {car: l46, cdr: "l46"}, cdr: {car: {car: l45, cdr: "l45"}, cdr: {car: {car: l44, cdr: "l44"}, cdr: {car: {car: l43, cdr: "l43"}, cdr: {car: {car: l42, cdr: "l42"}, cdr: {car: {car: l41, cdr: "l41"}, cdr: {car: {car: l40, cdr: "l40"}, cdr: {car: {car: l39, cdr: "l39"}, cdr: {car: {car: l38, cdr: "l38"}, cdr: {car: {car: l37, cdr: "l37"}, cdr: {car: {car: l36, cdr: "l36"}, cdr: {car: {car: l35, cdr: "l35"}, cdr: {car: {car: l34, cdr: "l34"}, cdr: {car: {car: l33, cdr: "l33"}, cdr: {car: {car: l32, cdr: "l32"}, cdr: {car: {car: l31, cdr: "l31"}, cdr: {car: {car: l30, cdr: "l30"}, cdr: {car: {car: l29, cdr: "l29"}, cdr: {car: {car: l28, cdr: "l28"}, cdr: {car: {car: l27, cdr: "l27"}, cdr: {car: {car: l26, cdr: "l26"}, cdr: {car: {car: l25, cdr: "l25"}, cdr: {car: {car: l24, cdr: "l24"}, cdr: {car: {car: l23, cdr: "l23"}, cdr: {car: {car: l22, cdr: "l22"}, cdr: {car: {car: l21, cdr: "l21"}, cdr: {car: {car: l20, cdr: "l20"}, cdr: {car: {car: l19, cdr: "l19"}, cdr: {car: {car: l18, cdr: "l18"}, cdr: {car: {car: l17, cdr: "l17"}, cdr: {car: {car: l16, cdr: "l16"}, cdr: {car: {car: l15, cdr: "l15"}, cdr: {car: {car: l14, cdr: "l14"}, cdr: {car: {car: l13, cdr: "l13"}, cdr: {car: {car: l12, cdr: "l12"}, cdr: {car: {car: l11, cdr: "l11"}, cdr: {car: {car: l10, cdr: "l10"}, cdr: {car: {car: l9, cdr: "l9"}, cdr: {car: {car: l8, cdr: "l8"}, cdr: {car: {car: l7, cdr: "l7"}, cdr: {car: {car: l6, cdr: "l6"}, cdr: {car: {car: l5, cdr: "l5"}, cdr: {car: {car: l4, cdr: "l4"}, cdr: {car: {car: l3, cdr: "l3"}, cdr: {car: {car: l2, cdr: "l2"}, cdr: {car: {car: l1, cdr: "l1"}, cdr: l3}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}};
+var l310 = {name: "OP"};
+var l311 = {name: "SYM"};
+var l312 = {name: "X"};
+var l313 = {name: "ARGS"};
+var l314 = {name: "BODY"};
+var l315 = {name: "DECLS"};
+var l316 = {name: "DECL"};
+var l317 = {name: "NAME"};
+var l318 = {name: "ARG"};
+var l319 = {name: "FORM"};
+var l320 = {name: "VALUE-FROM"};
+var l321 = {name: "VARIABLES"};
+var l322 = {name: "PACKAGE-DESIGNATOR"};
+var l323 = {name: "PAIRS"};
+var l324 = {name: "ASSIGNMENTS"};
+var l325 = {name: "VALUE"};
+var l326 = {name: "FORM1"};
+var l327 = {name: "RESULT"};
+var l328 = {name: "FORMS"};
+var l329 = {name: "G"};
+var l330 = {name: "CLAUSULES"};
+var l331 = {name: "!FORM"};
+var l332 = {name: "CLAUSULE"};
+var l333 = {name: "ITER"};
+var l334 = {name: "G!TO"};
+var l335 = {name: "VAR"};
+var l336 = {name: "TO"};
+var l337 = {name: "G!LIST"};
+var l338 = {name: "PLACE"};
+var l339 = {name: "DELTA"};
+var l340 = {name: "CONDITION"};
+var l341 = {name: "DOCSTRING"};
+var l342 = {car: {car: {car: l253, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l243, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l242, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l237, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l221, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l220, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l201, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l198, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l185, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l180, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l179, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l163, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l162, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l156, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l123, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l115, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l112, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l111, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l110, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l100, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l14, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: l3}, cdr: l3}}}}, cdr: {car: {car: l4, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: {car: l196, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l3, cdr: {car: l99, cdr: {car: l3, cdr: {car: {car: l194, cdr: {car: l196, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}}}}}}}}}}}}}}}}}}}}}, cdr: {car: {car: {car: l262, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l310, cdr: {car: l311, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: l254, cdr: {car: {car: l160, cdr: {car: l310, cdr: l3}}, cdr: {car: {car: l312, cdr: {car: l203, cdr: {car: l313, cdr: l3}}}, cdr: {car: {car: l232, cdr: {car: {car: {car: l313, cdr: {car: {car: l27, cdr: {car: l312, cdr: {car: l313, cdr: l3}}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l258, cdr: {car: l313, cdr: {car: {car: l136, cdr: {car: {car: l261, cdr: {car: l313, cdr: {car: {car: l160, cdr: {car: l311, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l258, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l313, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}, cdr: {car: {car: l6, cdr: {car: {car: l271, cdr: {car: l313, cdr: l3}}, cdr: {car: {car: l289, cdr: {car: "Bad usage of VARIABLE-ARITY, you must pass a symbol", cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l257, cdr: {car: {car: l160, cdr: {car: l313, cdr: l3}}, cdr: {car: {car: l213, cdr: {car: {car: {car: l160, cdr: {car: l313, cdr: l3}}, cdr: l3}, cdr: {car: {car: l124, cdr: {car: "return ", cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: {car: ";", cdr: {car: l123, cdr: l3}}}}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l256, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l315, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l138, cdr: {car: {car: l159, cdr: {car: {car: l69, cdr: {car: {car: l213, cdr: {car: {car: l316, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l124, cdr: {car: "var ", cdr: {car: {car: l160, cdr: {car: {car: l38, cdr: {car: l316, cdr: l3}}, cdr: l3}}, cdr: {car: " = ", cdr: {car: {car: l160, cdr: {car: {car: l40, cdr: {car: l316, cdr: l3}}, cdr: l3}}, cdr: {car: ";", cdr: {car: l123, cdr: l3}}}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l315, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: {car: l69, cdr: {car: {car: l213, cdr: {car: {car: l316, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l124, cdr: {car: "if (typeof ", cdr: {car: {car: l160, cdr: {car: {car: l38, cdr: {car: l316, cdr: l3}}, cdr: l3}}, cdr: {car: " != '", cdr: {car: {car: l160, cdr: {car: {car: l39, cdr: {car: l316, cdr: l3}}, cdr: l3}}, cdr: {car: "')", cdr: {car: l123, cdr: {car: {car: l135, cdr: {car: "throw 'The value ' + ", cdr: {car: {car: l160, cdr: {car: {car: l38, cdr: {car: l316, cdr: l3}}, cdr: l3}}, cdr: {car: " + ' is not a type ", cdr: {car: {car: l160, cdr: {car: {car: l39, cdr: {car: l316, cdr: l3}}, cdr: l3}}, cdr: {car: ".';", cdr: {car: l123, cdr: l3}}}}}}}, cdr: l3}}}}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l315, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l124, cdr: {car: "return ", cdr: {car: {car: l228, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: {car: ";", cdr: {car: l123, cdr: l3}}}}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l255, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l317, cdr: {car: l313, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l228, cdr: {car: {car: l254, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l313, cdr: l3}}, cdr: {car: {car: l232, cdr: {car: {car: l160, cdr: {car: {car: l69, cdr: {car: {car: l213, cdr: {car: {car: l318, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: {car: l160, cdr: {car: l318, cdr: l3}}, cdr: {car: {car: l137, cdr: {car: {car: l160, cdr: {car: l318, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l313, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: l3}}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l254, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l317, cdr: {car: l313, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l46, cdr: {car: {car: l42, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l213, cdr: {car: {car: l160, cdr: {car: l313, cdr: l3}}, cdr: {car: {car: l175, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l253, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l319, cdr: l3}, cdr: {car: {car: l251, cdr: {car: l319, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l229, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l317, cdr: {car: l313, cdr: {car: l319, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l199, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l313, cdr: l3}}, cdr: {car: {car: l137, cdr: {car: {car: l160, cdr: {car: l319, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l199, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l317, cdr: {car: l313, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l46, cdr: {car: {car: l42, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l213, cdr: {car: {car: l160, cdr: {car: l313, cdr: l3}}, cdr: {car: {car: l175, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l198, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l138, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l203, cdr: {car: l314, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: l124, cdr: {car: "(function(){", cdr: {car: l123, cdr: {car: {car: l135, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: {car: "})()", cdr: l3}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l134, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l320, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l249, cdr: {car: {car: l98, cdr: {car: l42, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l320, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l133, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l321, cdr: {car: l320, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l249, cdr: {car: {car: l213, cdr: {car: {car: l202, cdr: {car: {car: l159, cdr: {car: l321, cdr: l3}}, cdr: {car: l203, cdr: {car: {car: l160, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l160, cdr: {car: l320, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l125, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l99, cdr: {car: l203, cdr: {car: l319, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l217, cdr: {car: {car: l160, cdr: {car: l99, cdr: l3}}, cdr: {car: {car: l124, cdr: {car: {car: l160, cdr: {car: l99, cdr: l3}}, cdr: {car: {car: l228, cdr: {car: {car: l159, cdr: {car: l319, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l116, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l322, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l226, cdr: {car: {car: l217, cdr: {car: l115, cdr: {car: {car: l103, cdr: {car: {car: l160, cdr: {car: l322, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l65, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l203, cdr: {car: l323, cdr: l3}}, cdr: {car: {car: l232, cdr: {car: {car: {car: l324, cdr: {car: {car: l157, cdr: {car: l3, cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l13, cdr: {car: l4, cdr: {car: {car: l49, cdr: {car: {car: {car: l11, cdr: {car: l323, cdr: l3}}, cdr: {car: {car: l12, cdr: l3}, cdr: l3}}, cdr: {car: {car: {car: l11, cdr: {car: {car: l30, cdr: {car: l323, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l289, cdr: {car: "Odd paris in PSETQ", cdr: l3}}, cdr: l3}}, cdr: {car: {car: l4, cdr: {car: {car: l232, cdr: {car: {car: {car: l99, cdr: {car: {car: l29, cdr: {car: l323, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l325, cdr: {car: {car: l32, cdr: {car: l323, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l46, cdr: {car: {car: l158, cdr: {car: {car: {car: l160, cdr: {car: l99, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l325, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: {car: l324, cdr: l3}}}, cdr: {car: {car: l217, cdr: {car: l323, cdr: {car: {car: l34, cdr: {car: l323, cdr: l3}}, cdr: l3}}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: {car: l217, cdr: {car: l324, cdr: {car: {car: l64, cdr: {car: l324, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l232, cdr: {car: {car: l160, cdr: {car: {car: l69, cdr: {car: {car: l98, cdr: {car: l30, cdr: l3}}, cdr: {car: l324, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l217, cdr: {car: {car: l159, cdr: {car: {car: l58, cdr: {car: {car: l98, cdr: {car: l62, cdr: l3}}, cdr: {car: {car: l69, cdr: {car: {car: l98, cdr: {car: l81, cdr: l3}}, cdr: {car: l324, cdr: l3}}}, cdr: {car: {car: l157, cdr: {car: l3, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l55, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l326, cdr: {car: l327, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l54, cdr: {car: {car: l228, cdr: {car: {car: l160, cdr: {car: l326, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l327, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l54, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l319, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}, cdr: {car: {car: l232, cdr: {car: {car: {car: l325, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l232, cdr: {car: {car: {car: {car: l160, cdr: {car: l325, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l319, cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l325, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l53, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l203, cdr: {car: l328, cdr: l3}}, cdr: {car: {car: l49, cdr: {car: {car: {car: l11, cdr: {car: l328, cdr: l3}}, cdr: {car: l3, cdr: l3}}, cdr: {car: {car: {car: l11, cdr: {car: {car: l30, cdr: {car: l328, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l29, cdr: {car: l328, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l4, cdr: {car: {car: l232, cdr: {car: {car: {car: l329, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l232, cdr: {car: {car: {car: {car: l160, cdr: {car: l329, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: {car: l29, cdr: {car: l328, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l200, cdr: {car: {car: l160, cdr: {car: l329, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l329, cdr: l3}}, cdr: {car: {car: l53, cdr: {car: {car: l159, cdr: {car: {car: l30, cdr: {car: l328, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l52, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l203, cdr: {car: l328, cdr: l3}}, cdr: {car: {car: l49, cdr: {car: {car: {car: l11, cdr: {car: l328, cdr: l3}}, cdr: {car: l4, cdr: l3}}, cdr: {car: {car: {car: l11, cdr: {car: {car: l30, cdr: {car: l328, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l29, cdr: {car: l328, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l4, cdr: {car: {car: l158, cdr: {car: {car: l200, cdr: {car: {car: l160, cdr: {car: {car: l29, cdr: {car: l328, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l52, cdr: {car: {car: l159, cdr: {car: {car: l30, cdr: {car: l328, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: l3, cdr: l3}}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l51, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l319, cdr: {car: l203, cdr: {car: l330, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l50, cdr: {car: {car: l160, cdr: {car: l319, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: {car: l62, cdr: {car: l330, cdr: {car: {car: l158, cdr: {car: {car: {car: l4, cdr: {car: {car: l289, cdr: {car: "ECASE expression failed.", cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l50, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l319, cdr: {car: l203, cdr: {car: l330, cdr: l3}}}, cdr: {car: {car: l232, cdr: {car: {car: {car: l331, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l232, cdr: {car: {car: {car: {car: l160, cdr: {car: l331, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l319, cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l49, cdr: {car: {car: l159, cdr: {car: {car: l69, cdr: {car: {car: l213, cdr: {car: {car: l332, cdr: l3}, cdr: {car: {car: l200, cdr: {car: {car: l278, cdr: {car: {car: l29, cdr: {car: l332, cdr: l3}}, cdr: {car: l4, cdr: l3}}}, cdr: {car: l332, cdr: {car: {car: l158, cdr: {car: {car: {car: l25, cdr: {car: {car: l160, cdr: {car: l331, cdr: l3}}, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: {car: l29, cdr: {car: l332, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l159, cdr: {car: {car: l30, cdr: {car: l332, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l330, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l49, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l203, cdr: {car: l330, cdr: l3}}, cdr: {car: {car: l200, cdr: {car: {car: l11, cdr: {car: l330, cdr: l3}}, cdr: {car: l3, cdr: {car: {car: l200, cdr: {car: {car: l278, cdr: {car: {car: l31, cdr: {car: l330, cdr: l3}}, cdr: {car: l4, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l228, cdr: {car: {car: l159, cdr: {car: {car: l33, cdr: {car: l330, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: l200, cdr: {car: {car: l160, cdr: {car: {car: l31, cdr: {car: l330, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l228, cdr: {car: {car: l159, cdr: {car: {car: l33, cdr: {car: l330, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l49, cdr: {car: {car: l159, cdr: {car: {car: l30, cdr: {car: l330, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l48, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l333, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}, cdr: {car: {car: l232, cdr: {car: {car: {car: l334, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: {car: {car: l335, cdr: {car: {car: l38, cdr: {car: l333, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l336, cdr: {car: {car: l39, cdr: {car: l333, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l327, cdr: {car: {car: l40, cdr: {car: l333, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l175, cdr: {car: l3, cdr: {car: {car: l232, cdr: {car: {car: {car: {car: l160, cdr: {car: l335, cdr: l3}}, cdr: {car: 0, cdr: l3}}, cdr: {car: {car: {car: l160, cdr: {car: l334, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l336, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l224, cdr: {car: {car: l264, cdr: {car: {car: l160, cdr: {car: l335, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l334, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l246, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l44, cdr: {car: {car: l160, cdr: {car: l335, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l160, cdr: {car: l327, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l47, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l333, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}, cdr: {car: {car: l232, cdr: {car: {car: {car: l335, cdr: {car: {car: l38, cdr: {car: l333, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l337, cdr: {car: {car: l15, cdr: l3}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: l175, cdr: {car: l3, cdr: {car: {car: l232, cdr: {car: {car: {car: {car: l160, cdr: {car: l337, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: {car: l39, cdr: {car: l333, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: {car: l160, cdr: {car: l335, cdr: l3}}, cdr: {car: l3, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l224, cdr: {car: {car: l160, cdr: {car: l337, cdr: l3}}, cdr: {car: {car: l217, cdr: {car: {car: l160, cdr: {car: l335, cdr: l3}}, cdr: {car: {car: l29, cdr: {car: {car: l160, cdr: {car: l337, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l246, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l217, cdr: {car: {car: l160, cdr: {car: l337, cdr: l3}}, cdr: {car: {car: l30, cdr: {car: {car: l160, cdr: {car: l337, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}}}, cdr: {car: {car: l160, cdr: {car: {car: l40, cdr: {car: l333, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l46, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l312, cdr: {car: l338, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: l217, cdr: {car: {car: l160, cdr: {car: l338, cdr: l3}}, cdr: {car: {car: l27, cdr: {car: {car: l160, cdr: {car: l312, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l338, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l45, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l312, cdr: {car: l202, cdr: {car: {car: l339, cdr: {car: 1, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l217, cdr: {car: {car: l160, cdr: {car: l312, cdr: l3}}, cdr: {car: {car: l60, cdr: {car: {car: l160, cdr: {car: l312, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l339, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l44, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l312, cdr: {car: l202, cdr: {car: {car: l339, cdr: {car: 1, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l217, cdr: {car: {car: l160, cdr: {car: l312, cdr: l3}}, cdr: {car: {car: l59, cdr: {car: {car: l160, cdr: {car: l312, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l339, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l13, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l340, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l175, cdr: {car: l3, cdr: {car: {car: l224, cdr: {car: {car: l160, cdr: {car: l340, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l12, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l202, cdr: {car: l325, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: l239, cdr: {car: l3, cdr: {car: {car: l160, cdr: {car: l325, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l10, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l317, cdr: {car: l313, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l228, cdr: {car: {car: l274, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l9, cdr: {car: {car: l160, cdr: {car: {car: l273, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l313, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: {car: l200, cdr: {car: {car: l52, cdr: {car: {car: l281, cdr: {car: {car: l29, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l26, cdr: {car: {car: l11, cdr: {car: {car: l30, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: {car: l160, cdr: {car: {car: l29, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l175, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: {car: l30, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: {car: l175, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: l3}}}, cdr: l3}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}}, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l9, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l317, cdr: {car: l313, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}}, cdr: {car: {car: l232, cdr: {car: {car: {car: l312, cdr: {car: {car: l15, cdr: {car: "FN", cdr: l3}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l232, cdr: {car: {car: {car: {car: l160, cdr: {car: l312, cdr: l3}}, cdr: {car: {car: l213, cdr: {car: {car: l160, cdr: {car: l313, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}, cdr: {car: {car: l293, cdr: {car: {car: l160, cdr: {car: l312, cdr: l3}}, cdr: {car: "fname", cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: l3}}}}, cdr: {car: {car: l160, cdr: {car: l312, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l8, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l317, cdr: {car: l325, cdr: {car: l202, cdr: {car: l341, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l228, cdr: {car: {car: l217, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l325, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l159, cdr: {car: {car: l5, cdr: {car: {car: l281, cdr: {car: l341, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: {car: l293, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: {car: "vardoc", cdr: {car: {car: l160, cdr: {car: l341, cdr: l3}}, cdr: l3}}}}, cdr: l3}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l7, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l317, cdr: {car: l325, cdr: {car: l202, cdr: {car: l341, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l228, cdr: {car: {car: l2, cdr: {car: {car: l194, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l6, cdr: {car: {car: l17, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l217, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: {car: {car: l160, cdr: {car: l325, cdr: l3}}, cdr: l3}}}, cdr: l3}}}, cdr: {car: {car: l159, cdr: {car: {car: l5, cdr: {car: {car: l281, cdr: {car: l341, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: {car: l293, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: {car: "vardoc", cdr: {car: {car: l160, cdr: {car: l341, cdr: l3}}, cdr: l3}}}}, cdr: l3}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: l3}}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l6, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l340, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l200, cdr: {car: {car: l160, cdr: {car: l340, cdr: l3}}, cdr: {car: l3, cdr: {car: {car: l228, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l5, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l340, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}, cdr: {car: {car: l158, cdr: {car: {car: l200, cdr: {car: {car: l160, cdr: {car: l340, cdr: l3}}, cdr: {car: {car: l228, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: l3}}, cdr: {car: l3, cdr: l3}}}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l2, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l203, cdr: {car: l315, cdr: l3}}, cdr: {car: {car: l158, cdr: {car: {car: l226, cdr: {car: {car: l159, cdr: {car: {car: l69, cdr: {car: {car: l213, cdr: {car: {car: l316, cdr: l3}, cdr: {car: {car: l158, cdr: {car: {car: l193, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l316, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l315, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: {car: {car: l1, cdr: {car: l190, cdr: {car: {car: l213, cdr: {car: {car: l317, cdr: {car: l313, cdr: {car: l203, cdr: {car: l314, cdr: l3}}}}, cdr: {car: {car: l158, cdr: {car: {car: l226, cdr: {car: {car: l189, cdr: {car: {car: l157, cdr: {car: {car: l160, cdr: {car: l317, cdr: l3}}, cdr: l3}}, cdr: {car: {car: l157, cdr: {car: {car: l213, cdr: {car: {car: l160, cdr: {car: {car: l69, cdr: {car: {car: l213, cdr: {car: {car: l312, cdr: l3}, cdr: {car: {car: l200, cdr: {car: {car: l278, cdr: {car: l312, cdr: {car: {car: l157, cdr: {car: l307, cdr: l3}}, cdr: l3}}}, cdr: {car: {car: l157, cdr: {car: l203, cdr: l3}}, cdr: {car: l312, cdr: l3}}}}, cdr: l3}}}, cdr: {car: l313, cdr: l3}}}, cdr: l3}}, cdr: {car: {car: l159, cdr: {car: l314, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}}, cdr: l3}}, cdr: l3}}, cdr: l3}}}, cdr: {car: l3, cdr: l3}}}}, cdr: l3}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}, cdr: {car: l3, cdr: {car: l3, cdr: l3}}}};
 (function(){
+    l117.fvalue(pv, l307);
+    l117.fvalue(pv, l306);
     l117.fvalue(pv, l305);
     l117.fvalue(pv, l304);
     l117.fvalue(pv, l303);
@@ -8049,10 +8107,10 @@ var l340 = {car: {car: {car: l251, cdr: {car: l99, cdr: {car: l3, cdr: {car: {ca
     l117.fvalue(pv, l3);
     l117.fvalue(pv, l2);
     l117.fvalue(pv, l1);
-    ((l218).value = l307);
-    ((l179).value = l340);
-    ((l180).value = 802);
-    ((l14).value = 205);
-    return ((l235).value = 278);
+    ((l220).value = l309);
+    ((l179).value = l342);
+    ((l180).value = 808);
+    ((l14).value = 206);
+    return ((l237).value = 280);
 })();
-((l219).value = 340);
+((l221).value = 342);

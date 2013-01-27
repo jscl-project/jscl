@@ -21,3 +21,8 @@ function checkArgsAtLeast(args, n){
 function checkArgsAtMost(args, n){
     if (args.length > n) throw 'too many arguments';
 }
+
+function checkArgs(args, n){
+    checkArgsAtLeast(args, n);
+    checkArgsAtMost(args, n);
+}

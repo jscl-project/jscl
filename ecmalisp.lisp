@@ -1142,6 +1142,25 @@
         "return func;" *newline*)
       (join strs)))
 
+(defun lambda-check-argument-count
+    (n-required-arguments n-optional-arguments rest-p)
+  ;; Note: Remember that we assume that the number of arguments of a
+  ;; call is at least 1 (the values argument).
+  (let ((min (1+ n-required-arguments))
+        (max (if rest-p 'n/a (+ 1 n-required-arguments n-optional-arguments))))
+    (block nil
+      ;; Special case: a positive exact number of arguments.
+      (when (and (< 1 min) (eql min max))
+        (return (concat "checkArgs(arguments, " (integer-to-string min) ");" *newline*)))
+      ;; General case:
+      (concat
+       (if (< 1 min)
+           (concat "checkArgsAtLeast(arguments, " (integer-to-string min) ");" *newline*)
+           "")
+       (if (numberp max)
+           (concat "checkArgsAtMost(arguments, " (integer-to-string max) ");" *newline*)
+           "")))))
+
 (define-compilation lambda (lambda-list &rest body)
   (let ((required-arguments (lambda-list-required-arguments lambda-list))
         (optional-arguments (lambda-list-optional-arguments lambda-list))
@@ -1166,18 +1185,11 @@
                            (append required-arguments optional-arguments)))
              ",")
        "){" *newline*
-       ;; Check number of arguments
        (indent
-        (if required-arguments
-            (concat "checkArgsAtLeast("
-                    (integer-to-string (1+ n-required-arguments))
-                    ");" *newline*)
-            "")
-        (if (not rest-argument)
-            (concat "checkArgsAtLeast("
-                    (integer-to-string (+ 1 n-required-arguments n-optional-arguments))
-                    ");" *newline*)
-            "")
+        ;; Check number of arguments
+        (lambda-check-argument-count n-required-arguments
+                                     n-optional-arguments
+                                     rest-argument)
         ;; Optional arguments
         (if optional-arguments
             (concat "switch(arguments.length-1){" *newline*
