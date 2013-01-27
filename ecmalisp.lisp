@@ -1458,31 +1458,36 @@ function mv(){
 (defvar *block-counter* 0)
 
 (define-compilation block (name &rest body)
-  (let ((tr (integer-to-string (incf *block-counter*))))
-    (let ((b (make-binding name 'block tr)))
-      (js!selfcall
-        "try {" *newline*
-        (let ((*environment* (extend-lexenv (list b) *environment* 'block)))
-          (indent "return " (ls-compile `(progn ,@body) *multiple-value-p*) ";" *newline*))
-        "}" *newline*
-        "catch (cf){" *newline*
-        "    if (cf.type == 'block' && cf.id == " tr ")" *newline*
-        "        return cf.value;" *newline*
-        "    else" *newline*
-        "        throw cf;" *newline*
-        "}" *newline*))))
+  (let* ((tr (integer-to-string (incf *block-counter*)))
+         (b (make-binding name 'block tr))
+         (*environment* (extend-lexenv (list b) *environment* 'block))
+         (cbody (ls-compile-block body t)))
+    (if (member 'used (binding-declarations b))
+        (js!selfcall
+          "try {" *newline*
+          (indent cbody)
+          "}" *newline*
+          "catch (cf){" *newline*
+          "    if (cf.type == 'block' && cf.id == " tr ")" *newline*
+          "        return cf.value;" *newline*
+          "    else" *newline*
+          "        throw cf;" *newline*
+          "}" *newline*)
+        (js!selfcall
+          (indent cbody)))))
 
 (define-compilation return-from (name &optional value)
   (let ((b (lookup-in-lexenv name *environment* 'block)))
-    (if b
-        (js!selfcall
-          "throw ({"
-          "type: 'block', "
-          "id: " (binding-value b) ", "
-          "value: " (ls-compile value) ", "
-          "message: 'Return from unknown block " (symbol-name name) ".'"
-          "})")
-        (error (concat "Unknown block `" (symbol-name name) "'.")))))
+    (when (null b)
+      (error (concat "Unknown block `" (symbol-name name) "'.")))
+    (push-binding-declaration 'used b)
+    (js!selfcall
+      "throw ({"
+      "type: 'block', "
+      "id: " (binding-value b) ", "
+      "value: " (ls-compile value) ", "
+      "message: 'Return from unknown block " (symbol-name name) ".'"
+      "})")))
 
 (define-compilation catch (id &rest body)
   (js!selfcall
