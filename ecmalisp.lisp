@@ -23,26 +23,6 @@
 ;;; language to the compiler to be able to run.
 
 #+ecmalisp
-(js-eval "function pv (x) { return x ; }")
-
-#+ecmalisp
-(js-eval "
-function mv(){
-     var r = [];
-     r['multiple-value'] = true;
-     for (var i=0; i<arguments.length; i++)
-         r.push(arguments[i]);
-     return r;
-}")
-
-;;; NOTE: Define VALUES to be MV for toplevel forms. It is because
-;;; `eval' compiles the forms and execute the Javascript code at
-;;; toplevel with `js-eval', so it is necessary to return multiple
-;;; values from the eval function.
-#+ecmalisp
-(js-eval "var values = mv;")
-
-#+ecmalisp
 (progn
   (eval-when-compile
     (%compile-defmacro 'defmacro
@@ -91,7 +71,6 @@ function mv(){
 
   (defmacro defun (name args &rest body)
     `(progn
-       (declaim (non-overridable ,name))
        (fset ',name
              (named-lambda ,(symbol-name name) ,args
                ,@(if (and (stringp (car body)) (not (null (cdr body))))
@@ -1111,11 +1090,7 @@ function mv(){
     (constant
      (dolist (name (cdr decl))
        (let ((b (global-binding name 'variable 'variable)))
-         (push-binding-declaration 'constant b))))
-    (non-overridable
-     (dolist (name (cdr decl))
-       (let ((b (global-binding name 'function 'function)))
-         (push-binding-declaration 'non-overridable b))))))
+         (push-binding-declaration 'constant b))))))
 
 #+ecmalisp
 (fset 'proclaim #'!proclaim)
@@ -1167,6 +1142,25 @@ function mv(){
         "return func;" *newline*)
       (join strs)))
 
+(defun lambda-check-argument-count
+    (n-required-arguments n-optional-arguments rest-p)
+  ;; Note: Remember that we assume that the number of arguments of a
+  ;; call is at least 1 (the values argument).
+  (let ((min (1+ n-required-arguments))
+        (max (if rest-p 'n/a (+ 1 n-required-arguments n-optional-arguments))))
+    (block nil
+      ;; Special case: a positive exact number of arguments.
+      (when (and (< 1 min) (eql min max))
+        (return (concat "checkArgs(arguments, " (integer-to-string min) ");" *newline*)))
+      ;; General case:
+      (concat
+       (if (< 1 min)
+           (concat "checkArgsAtLeast(arguments, " (integer-to-string min) ");" *newline*)
+           "")
+       (if (numberp max)
+           (concat "checkArgsAtMost(arguments, " (integer-to-string max) ");" *newline*)
+           "")))))
+
 (define-compilation lambda (lambda-list &rest body)
   (let ((required-arguments (lambda-list-required-arguments lambda-list))
         (optional-arguments (lambda-list-optional-arguments lambda-list))
@@ -1191,17 +1185,11 @@ function mv(){
                            (append required-arguments optional-arguments)))
              ",")
        "){" *newline*
-       ;; Check number of arguments
        (indent
-        (if required-arguments
-            (concat "if (arguments.length < " (integer-to-string (1+ n-required-arguments))
-                    ") throw 'too few arguments';" *newline*)
-            "")
-        (if (not rest-argument)
-            (concat "if (arguments.length > "
-                    (integer-to-string (+ 1 n-required-arguments n-optional-arguments))
-                    ") throw 'too many arguments';" *newline*)
-            "")
+        ;; Check number of arguments
+        (lambda-check-argument-count n-required-arguments
+                                     n-optional-arguments
+                                     rest-argument)
         ;; Optional arguments
         (if optional-arguments
             (concat "switch(arguments.length-1){" *newline*
@@ -1237,7 +1225,6 @@ function mv(){
             "")
         ;; Body
         (let ((*multiple-value-p* t)) (ls-compile-block body t)))
-       *newline*
        "})"))))
 
 
@@ -1310,13 +1297,19 @@ function mv(){
 	   (toplevel-compilation (concat "var " v " = " s))
 	   v)))
     ((consp sexp)
-     (let ((c (concat "{car: " (literal (car sexp) t) ", "
-		      "cdr: " (literal (cdr sexp) t) "}")))
+     (let* ((head (butlast sexp))
+            (tail (last sexp))
+            (c (concat "QIList("
+                       (join-trailing (mapcar (lambda (x) (literal x t)) head) ",")
+                       (literal (car tail) t)
+                       ","
+                       (literal (cdr tail) t)
+                       ")")))
        (if recursive
 	   c
 	   (let ((v (genlit)))
-	     (toplevel-compilation (concat "var " v " = " c))
-	     v))))
+             (toplevel-compilation (concat "var " v " = " c))
+             v))))
     ((arrayp sexp)
      (let ((elements (vector-to-list sexp)))
        (let ((c (concat "[" (join (mapcar #'literal elements) ", ") "]")))
@@ -1617,6 +1610,11 @@ function mv(){
     (ls-compile-block forms)
     "return args;" *newline*))
 
+
+#+common-lisp
+(progn
+
+  )
 
 
 ;;; A little backquote implementation without optimizations of any
@@ -2020,7 +2018,8 @@ function mv(){
 (defun compile-funcall (function args)
   (let ((values-funcs (if *multiple-value-p* "values" "pv")))
     (if (and (symbolp function)
-             (claimp function 'function 'non-overridable))
+             #+ecmalisp (eq (symbol-package function) (find-package "COMMON-LISP"))
+             #+common-lisp t)
         (concat (ls-compile `',function) ".fvalue("
                 (join (cons values-funcs (mapcar #'ls-compile args))
                       ", ")
@@ -2166,6 +2165,7 @@ function mv(){
   (defun ls-compile-file (filename output)
     (setq *compilation-unit-checks* nil)
     (with-open-file (out output :direction :output :if-exists :supersede)
+      (write-string (read-whole-file "prelude.js") out)
       (let* ((source (read-whole-file filename))
              (in (make-string-stream source)))
         (loop
