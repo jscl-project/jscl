@@ -23,26 +23,6 @@
 ;;; language to the compiler to be able to run.
 
 #+ecmalisp
-(js-eval "function pv (x) { return x ; }")
-
-#+ecmalisp
-(js-eval "
-function mv(){
-     var r = [];
-     r['multiple-value'] = true;
-     for (var i=0; i<arguments.length; i++)
-         r.push(arguments[i]);
-     return r;
-}")
-
-;;; NOTE: Define VALUES to be MV for toplevel forms. It is because
-;;; `eval' compiles the forms and execute the Javascript code at
-;;; toplevel with `js-eval', so it is necessary to return multiple
-;;; values from the eval function.
-#+ecmalisp
-(js-eval "var values = mv;")
-
-#+ecmalisp
 (progn
   (eval-when-compile
     (%compile-defmacro 'defmacro
@@ -1189,13 +1169,14 @@ function mv(){
        ;; Check number of arguments
        (indent
         (if required-arguments
-            (concat "if (arguments.length < " (integer-to-string (1+ n-required-arguments))
-                    ") throw 'too few arguments';" *newline*)
+            (concat "checkArgsAtLeast("
+                    (integer-to-string (1+ n-required-arguments))
+                    ");")
             "")
         (if (not rest-argument)
-            (concat "if (arguments.length > "
+            (concat "checkArgsAtLeast("
                     (integer-to-string (+ 1 n-required-arguments n-optional-arguments))
-                    ") throw 'too many arguments';" *newline*)
+                    ");")
             "")
         ;; Optional arguments
         (if optional-arguments
@@ -1612,6 +1593,11 @@ function mv(){
     (ls-compile-block forms)
     "return args;" *newline*))
 
+
+#+common-lisp
+(progn
+
+  )
 
 
 ;;; A little backquote implementation without optimizations of any
@@ -2162,6 +2148,7 @@ function mv(){
   (defun ls-compile-file (filename output)
     (setq *compilation-unit-checks* nil)
     (with-open-file (out output :direction :output :if-exists :supersede)
+      (write-string (read-whole-file "prelude.js") out)
       (let* ((source (read-whole-file filename))
              (in (make-string-stream source)))
         (loop
