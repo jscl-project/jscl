@@ -1352,7 +1352,9 @@ function mv(){
      (ls-compile ,form)))
 
 (define-compilation progn (&rest body)
-  (js!selfcall (ls-compile-block body t)))
+  (if (null (cdr body))
+      (ls-compile (car body) *multiple-value-p*)
+      (js!selfcall (ls-compile-block body t))))
 
 (defun special-variable-p (x)
   (and (claimp x 'variable 'special) t))
@@ -1609,6 +1611,7 @@ function mv(){
     "var args = " (ls-compile first-form *multiple-value-p*) ";" *newline*
     (ls-compile-block forms)
     "return args;" *newline*))
+
 
 
 ;;; A little backquote implementation without optimizations of any
@@ -2025,7 +2028,7 @@ function mv(){
 (defun ls-compile-block (sexps &optional return-last-p)
   (if return-last-p
       (concat (ls-compile-block (butlast sexps))
-              "return "(ls-compile (car (last sexps)) *multiple-value-p*) ";")
+              "return " (ls-compile (car (last sexps)) *multiple-value-p*) ";")
       (join-trailing
        (remove-if #'null-or-empty-p (mapcar #'ls-compile sexps))
        (concat ";" *newline*))))
