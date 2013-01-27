@@ -1171,12 +1171,12 @@
         (if required-arguments
             (concat "checkArgsAtLeast("
                     (integer-to-string (1+ n-required-arguments))
-                    ");")
+                    ");" *newline*)
             "")
         (if (not rest-argument)
             (concat "checkArgsAtLeast("
                     (integer-to-string (+ 1 n-required-arguments n-optional-arguments))
-                    ");")
+                    ");" *newline*)
             "")
         ;; Optional arguments
         (if optional-arguments
@@ -1213,7 +1213,6 @@
             "")
         ;; Body
         (let ((*multiple-value-p* t)) (ls-compile-block body t)))
-       *newline*
        "})"))))
 
 
