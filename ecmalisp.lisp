@@ -91,7 +91,6 @@ function mv(){
 
   (defmacro defun (name args &rest body)
     `(progn
-       (declaim (non-overridable ,name))
        (fset ',name
              (named-lambda ,(symbol-name name) ,args
                ,@(if (and (stringp (car body)) (not (null (cdr body))))
@@ -1111,11 +1110,7 @@ function mv(){
     (constant
      (dolist (name (cdr decl))
        (let ((b (global-binding name 'variable 'variable)))
-         (push-binding-declaration 'constant b))))
-    (non-overridable
-     (dolist (name (cdr decl))
-       (let ((b (global-binding name 'function 'function)))
-         (push-binding-declaration 'non-overridable b))))))
+         (push-binding-declaration 'constant b))))))
 
 #+ecmalisp
 (fset 'proclaim #'!proclaim)
@@ -2020,7 +2015,8 @@ function mv(){
 (defun compile-funcall (function args)
   (let ((values-funcs (if *multiple-value-p* "values" "pv")))
     (if (and (symbolp function)
-             (claimp function 'function 'non-overridable))
+             #+ecmalisp (eq (symbol-package function) (find-package "COMMON-LISP"))
+             #+common-lisp t)
         (concat (ls-compile `',function) ".fvalue("
                 (join (cons values-funcs (mapcar #'ls-compile args))
                       ", ")
