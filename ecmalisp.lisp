@@ -1297,13 +1297,19 @@
 	   (toplevel-compilation (concat "var " v " = " s))
 	   v)))
     ((consp sexp)
-     (let ((c (concat "{car: " (literal (car sexp) t) ", "
-		      "cdr: " (literal (cdr sexp) t) "}")))
+     (let* ((head (butlast sexp))
+            (tail (last sexp))
+            (c (concat "QIList("
+                       (join-trailing (mapcar (lambda (x) (literal x t)) head) ",")
+                       (literal (car tail) t)
+                       ","
+                       (literal (cdr tail) t)
+                       ")")))
        (if recursive
 	   c
 	   (let ((v (genlit)))
-	     (toplevel-compilation (concat "var " v " = " c))
-	     v))))
+             (toplevel-compilation (concat "var " v " = " c))
+             v))))
     ((arrayp sexp)
      (let ((elements (vector-to-list sexp)))
        (let ((c (concat "[" (join (mapcar #'literal elements) ", ") "]")))

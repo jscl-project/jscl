@@ -26,3 +26,17 @@ function checkArgs(args, n){
     checkArgsAtLeast(args, n);
     checkArgsAtMost(args, n);
 }
+
+// Improper list constructor (like LIST*)
+function QIList(){
+    if (arguments.length == 1)
+        return arguments[0];
+    else {
+        var i = arguments.length-1;
+        var r = arguments[i--];
+        for (; i>=0; i--){
+            r = {car: arguments[i], cdr: r};
+        }
+        return r;
+    }
+}
