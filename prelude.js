@@ -1,4 +1,6 @@
-function pv (x) { return x ; }
+var nil;
+
+function pv (x) { return x==undefined? nil: x; }
 
 function mv(){
     var r = [];

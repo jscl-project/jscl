@@ -1,4 +1,6 @@
-function pv (x) { return x ; }
+var nil;
+
+function pv (x) { return x==undefined? nil: x; }
 
 function mv(){
     var r = [];
@@ -46,6 +48,7 @@ var l2 = {name: "DECLAIM"};
 l2;
 var l3 = {name: "NIL"};
 ((l3).value = l3);
+(nil = l3.value);
 var l4 = {name: "T"};
 ((l4).value = l4);
 var l5 = {name: "WHEN"};
@@ -7474,7 +7477,7 @@ var l303 = {name: "LS-MACROEXPAND-1"};
     return l303;
 })();
 var l304 = {name: "COMPILE-FUNCALL"};
-var l305 = {name: "G764"};
+var l305 = {name: "G870"};
 (function(){
     (l304).fvalue = (function(v786){
         ((v786)["fname"] = "COMPILE-FUNCALL");

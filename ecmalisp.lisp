@@ -42,6 +42,7 @@
 
   (declaim (constant nil t) (special t nil))
   (setq nil 'nil)
+  (js-vset "nil" nil)
   (setq t 't)
 
   (defmacro when (condition &body body)
