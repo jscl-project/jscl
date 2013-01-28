@@ -1612,11 +1612,6 @@
     "return args;" *newline*))
 
 
-#+common-lisp
-(progn
-
-  )
-
 
 ;;; A little backquote implementation without optimizations of any
 ;;; kind for ecmalisp.
