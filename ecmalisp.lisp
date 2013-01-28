@@ -992,8 +992,6 @@
 ;;; values, using the VALUES variable.
 (defvar *multiple-value-p* nil)
 
-(defvar *compilation-unit-checks* '())
-
 (defun make-binding (name type value &optional declarations)
   (list name type value declarations))
 
@@ -1066,7 +1064,8 @@
 
 (defun %compile-defmacro (name lambda)
   (toplevel-compilation (ls-compile `',name))
-  (push-to-lexenv (make-binding name 'macro lambda) *environment* 'function))
+  (push-to-lexenv (make-binding name 'macro lambda) *environment* 'function)
+  name)
 
 (defun global-binding (name type namespace)
   (or (lookup-in-lexenv name *environment* namespace)
@@ -1337,9 +1336,13 @@
     ((symbolp x)
      (ls-compile `(symbol-function ',x)))))
 
+(defvar *compiling-file* nil)
 (define-compilation eval-when-compile (&rest body)
-  (eval (cons 'progn body))
-  nil)
+  (if *compiling-file*
+      (progn
+        (eval (cons 'progn body))
+        nil)
+      (ls-compile `(progn ,@body))))
 
 (defmacro define-transformation (name args form)
   `(define-compilation ,name ,args
@@ -2159,20 +2162,17 @@
         seq)))
 
   (defun ls-compile-file (filename output)
-    (setq *compilation-unit-checks* nil)
-    (with-open-file (out output :direction :output :if-exists :supersede)
-      (write-string (read-whole-file "prelude.js") out)
-      (let* ((source (read-whole-file filename))
-             (in (make-string-stream source)))
-        (loop
-           for x = (ls-read in)
-           until (eq x *eof*)
-           for compilation = (ls-compile-toplevel x)
-           when (plusp (length compilation))
-           do (write-string compilation out))
-        (dolist (check *compilation-unit-checks*)
-          (funcall check))
-        (setq *compilation-unit-checks* nil))))
+    (let ((*compiling-file* t))
+      (with-open-file (out output :direction :output :if-exists :supersede)
+        (write-string (read-whole-file "prelude.js") out)
+        (let* ((source (read-whole-file filename))
+               (in (make-string-stream source)))
+          (loop
+             for x = (ls-read in)
+             until (eq x *eof*)
+             for compilation = (ls-compile-toplevel x)
+             when (plusp (length compilation))
+             do (write-string compilation out))))))
 
   (defun bootstrap ()
     (setq *environment* (make-lexenv))
