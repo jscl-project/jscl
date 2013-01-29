@@ -26,15 +26,17 @@
 (progn
   (eval-when-compile
     (%compile-defmacro 'defmacro
-                       '(lambda (name args &rest body)
-                         `(eval-when-compile
-                            (%compile-defmacro ',name
-                                               '(lambda ,(mapcar (lambda (x)
-                                                                   (if (eq x '&body)
-                                                                       '&rest
-                                                                       x))
-                                                                 args)
-                                                 ,@body))))))
+                       '(function
+                         (lambda (name args &rest body)
+                          `(eval-when-compile
+                             (%compile-defmacro ',name
+                                                '(function
+                                                  (lambda ,(mapcar #'(lambda (x)
+                                                                       (if (eq x '&body)
+                                                                           '&rest
+                                                                           x))
+                                                                   args)
+                                                   ,@body))))))))
 
   (defmacro declaim (&rest decls)
     `(eval-when-compile
@@ -44,6 +46,9 @@
   (setq nil 'nil)
   (js-vset "nil" nil)
   (setq t 't)
+
+  (defmacro lambda (args &body body)
+    `(function (lambda ,args ,@body)))
 
   (defmacro when (condition &body body)
     `(if ,condition (progn ,@body) nil))
@@ -1165,7 +1170,7 @@
            (concat "checkArgsAtMost(arguments, " (integer-to-string max) ");" *newline*)
            "")))))
 
-(define-compilation lambda (lambda-list &rest body)
+(defun compile-lambda (lambda-list body)
   (let ((required-arguments (lambda-list-required-arguments lambda-list))
         (optional-arguments (lambda-list-optional-arguments lambda-list))
         (rest-argument (lambda-list-rest-argument lambda-list))
@@ -1336,7 +1341,7 @@
 (define-compilation function (x)
   (cond
     ((and (listp x) (eq (car x) 'lambda))
-     (ls-compile x))
+     (compile-lambda (cadr x) (cddr x)))
     ((symbolp x)
      (ls-compile `(symbol-function ',x)))))
 
