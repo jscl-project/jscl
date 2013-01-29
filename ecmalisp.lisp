@@ -987,10 +987,14 @@
 ;;; too. The respective real functions are defined in the target (see
 ;;; the beginning of this file) as well as some primitive functions.
 
-;;; If the special variable `*multiple-value-p*' is NON-NIL, then the
-;;; compilation of the current form is allowed to return multiple
-;;; values, using the VALUES variable.
+;;; A Form can return a multiple values object calling VALUES, like
+;;; values(arg1, arg2, ...). It will work in any context, as well as
+;;; returning an individual object. However, if the special variable
+;;; `*multiple-value-p*' is NIL, is granted that only the primary
+;;; value will be used, so we can optimize to avoid the VALUES
+;;; function call.
 (defvar *multiple-value-p* nil)
+
 
 (defun make-binding (name type value &optional declarations)
   (list name type value declarations))
@@ -1456,33 +1460,41 @@
 
 (define-compilation block (name &rest body)
   (let* ((tr (integer-to-string (incf *block-counter*)))
-         (b (make-binding name 'block tr))
-         (*environment* (extend-lexenv (list b) *environment* 'block))
-         (cbody (ls-compile-block body t)))
-    (if (member 'used (binding-declarations b))
-        (js!selfcall
-          "try {" *newline*
-          (indent cbody)
-          "}" *newline*
-          "catch (cf){" *newline*
-          "    if (cf.type == 'block' && cf.id == " tr ")" *newline*
-          "        return cf.value;" *newline*
-          "    else" *newline*
-          "        throw cf;" *newline*
-          "}" *newline*)
-        (js!selfcall
-          (indent cbody)))))
+         (b (make-binding name 'block tr)))
+    (when *multiple-value-p*
+      (push-binding-declaration 'multiple-value b))
+    (let* ((*environment* (extend-lexenv (list b) *environment* 'block))
+           (cbody (ls-compile-block body t)))
+      (if (member 'used (binding-declarations b))
+          (js!selfcall
+            "try {" *newline*
+            (indent cbody)
+            "}" *newline*
+            "catch (cf){" *newline*
+            "    if (cf.type == 'block' && cf.id == " tr ")" *newline*
+            (if *multiple-value-p*
+                "        return values.apply(this, forcemv(cf.values));"
+                "        return cf.values;")
+            *newline*
+            "    else" *newline*
+            "        throw cf;" *newline*
+            "}" *newline*)
+          (js!selfcall cbody)))))
 
 (define-compilation return-from (name &optional value)
-  (let ((b (lookup-in-lexenv name *environment* 'block)))
+  (let* ((b (lookup-in-lexenv name *environment* 'block))
+         (multiple-value-p (member 'multiple-value (binding-declarations b))))
     (when (null b)
       (error (concat "Unknown block `" (symbol-name name) "'.")))
     (push-binding-declaration 'used b)
     (js!selfcall
+      (if multiple-value-p
+          (concat "var values = mv;" *newline*)
+          "")
       "throw ({"
       "type: 'block', "
       "id: " (binding-value b) ", "
-      "value: " (ls-compile value) ", "
+      "values: " (ls-compile value multiple-value-p) ", "
       "message: 'Return from unknown block " (symbol-name name) ".'"
       "})")))
 
@@ -1490,22 +1502,25 @@
   (js!selfcall
     "var id = " (ls-compile id) ";" *newline*
     "try {" *newline*
-    (indent "return " (ls-compile `(progn ,@body))
-            ";" *newline*)
+    (indent (ls-compile-block body t)) *newline*
     "}" *newline*
     "catch (cf){" *newline*
     "    if (cf.type == 'catch' && cf.id == id)" *newline*
-    "        return cf.value;" *newline*
+    (if *multiple-value-p*
+        "        return values.apply(this, forcemv(cf.values));"
+        "        return pv.apply(this, forcemv(cf.values));")
+    *newline*
     "    else" *newline*
     "        throw cf;" *newline*
     "}" *newline*))
 
 (define-compilation throw (id value)
   (js!selfcall
+    "var values = mv;" *newline*
     "throw ({"
     "type: 'catch', "
     "id: " (ls-compile id) ", "
-    "value: " (ls-compile value) ", "
+    "values: " (ls-compile value t) ", "
     "message: 'Throw uncatched.'"
     "})"))
 

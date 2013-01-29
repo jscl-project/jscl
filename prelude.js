@@ -10,6 +10,10 @@ function mv(){
     return r;
 }
 
+function forcemv (x) {
+    return typeof x == 'object' && 'multiple-value' in x? x: mv(x);
+}
+
 // NOTE: Define VALUES to be MV for toplevel forms. It is because
 // `eval' compiles the forms and execute the Javascript code at
 // toplevel with `js-eval', so it is necessary to return multiple
