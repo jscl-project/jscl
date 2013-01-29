@@ -623,11 +623,6 @@
   (defun concat-two (s1 s2)
     (concatenate 'string s1 s2))
 
-  (defun setcar (cons new)
-    (setf (car cons) new))
-  (defun setcdr (cons new)
-    (setf (cdr cons) new))
-
   (defun aset (array idx value)
     (setf (aref array idx) value)))
 
@@ -821,7 +816,7 @@
 (defun %read-char (stream)
   (and (< (cdr stream) (length (car stream)))
        (prog1 (char (car stream) (cdr stream))
-         (setcdr stream (1+ (cdr stream))))))
+         (rplacd stream (1+ (cdr stream))))))
 
 (defun whitespacep (ch)
   (or (char= ch #\space) (char= ch #\newline) (char= ch #\tab)))
@@ -1010,10 +1005,10 @@
 (defun binding-declarations (b) (fourth b))
 
 (defun set-binding-value (b value)
-  (setcar (cddr b) value))
+  (rplaca (cddr b) value))
 
 (defun set-binding-declarations (b value)
-  (setcar (cdddr b) value))
+  (rplaca (cdddr b) value))
 
 (defun push-binding-declaration (decl b)
   (set-binding-declarations b (cons decl (binding-declarations b))))
@@ -1027,10 +1022,10 @@
 
 (defun push-to-lexenv (binding lexenv namespace)
   (ecase namespace
-    (variable   (setcar        lexenv  (cons binding (car lexenv))))
-    (function   (setcar   (cdr lexenv) (cons binding (cadr lexenv))))
-    (block      (setcar  (cddr lexenv) (cons binding (caddr lexenv))))
-    (gotag      (setcar (cdddr lexenv) (cons binding (cadddr lexenv))))))
+    (variable   (rplaca        lexenv  (cons binding (car lexenv))))
+    (function   (rplaca   (cdr lexenv) (cons binding (cadr lexenv))))
+    (block      (rplaca  (cddr lexenv) (cons binding (caddr lexenv))))
+    (gotag      (rplaca (cdddr lexenv) (cons binding (cadddr lexenv))))))
 
 (defun extend-lexenv (bindings lexenv namespace)
   (let ((env (copy-lexenv lexenv)))
@@ -1820,13 +1815,13 @@
     (ls-compile nil)
     ": tmp.cdr;" *newline*))
 
-(define-builtin setcar (x new)
+(define-builtin rplaca (x new)
   (type-check (("x" "object" x))
-    (concat "(x.car = " new ")")))
+    (concat "(x.car = " new ", x)")))
 
-(define-builtin setcdr (x new)
+(define-builtin rplacd (x new)
   (type-check (("x" "object" x))
-    (concat "(x.cdr = " new ")")))
+    (concat "(x.cdr = " new ", x)")))
 
 (define-builtin symbolp (x)
   (js!bool
@@ -2133,10 +2128,10 @@
             nth nthcdr null numberp or package-name package-use-list packagep
             plusp prin1-to-string print proclaim prog1 prog2 progn psetq push
             quote remove remove-if remove-if-not return return-from revappend
-            reverse second set setq some string-upcase string string= stringp
-            subseq symbol-function symbol-name symbol-package symbol-plist
-            symbol-value symbolp t tagbody third throw truncate unless
-            unwind-protect values values-list variable warn when write-line
+            reverse rplaca rplacd second set setq some string-upcase string
+            string= stringp subseq symbol-function symbol-name symbol-package
+            symbol-plist symbol-value symbolp t tagbody third throw truncate
+            unless unwind-protect values values-list variable warn when write-line
             write-string zerop))
 
   (setq *package* *user-package*)

@@ -2830,7 +2830,7 @@ var l146 = {name: "%READ-CHAR"};
                     return (x.cdr = l22.fvalue(pv, (function(){
                         var tmp = v303;
                         return tmp === l3.value? l3.value: tmp.cdr;
-                    })()));
+                    })()), x);
                 })();
                 return v304;
             })((function(){
@@ -3346,7 +3346,7 @@ var l169 = {name: "SET-BINDING-VALUE"};
                 var x = l35.fvalue(pv, v368);
                 if (typeof x != 'object')
                     throw 'The value ' + x + ' is not a type object.';
-                return (x.car = v369);
+                return (x.car = v369, x);
             })();
         })();
     }));
@@ -3364,7 +3364,7 @@ var l170 = {name: "SET-BINDING-DECLARATIONS"};
                 var x = l37.fvalue(pv, v371);
                 if (typeof x != 'object')
                     throw 'The value ' + x + ' is not a type object.';
-                return (x.car = v372);
+                return (x.car = v372, x);
             })();
         })();
     }));
@@ -3427,7 +3427,7 @@ var l176 = {name: "GOTAG"};
                     return (x.car = ({car: v380, cdr: (function(){
                         var tmp = v381;
                         return tmp === l3.value? l3.value: tmp.car;
-                    })()}));
+                    })()}), x);
                 })() : (l26.fvalue(pv, v383, l99) !== l3.value ? (function(){
                     var x = (function(){
                         var tmp = v381;
@@ -3435,17 +3435,17 @@ var l176 = {name: "GOTAG"};
                     })();
                     if (typeof x != 'object')
                         throw 'The value ' + x + ' is not a type object.';
-                    return (x.car = ({car: v380, cdr: l33.fvalue(pv, v381)}));
+                    return (x.car = ({car: v380, cdr: l33.fvalue(pv, v381)}), x);
                 })() : (l26.fvalue(pv, v383, l175) !== l3.value ? (function(){
                     var x = l35.fvalue(pv, v381);
                     if (typeof x != 'object')
                         throw 'The value ' + x + ' is not a type object.';
-                    return (x.car = ({car: v380, cdr: l36.fvalue(pv, v381)}));
+                    return (x.car = ({car: v380, cdr: l36.fvalue(pv, v381)}), x);
                 })() : (l26.fvalue(pv, v383, l176) !== l3.value ? (function(){
                     var x = l37.fvalue(pv, v381);
                     if (typeof x != 'object')
                         throw 'The value ' + x + ' is not a type object.';
-                    return (x.car = ({car: v380, cdr: l38.fvalue(pv, v381)}));
+                    return (x.car = ({car: v380, cdr: l38.fvalue(pv, v381)}), x);
                 })() : (function(){
                     throw "ECASE expression failed.";
                 })()))));
@@ -6312,7 +6312,7 @@ var l270 = {name: "FLOOR"};
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l271 = {name: "SETCAR"};
+var l271 = {name: "RPLACA"};
 ((l255).value = ({car: l43.fvalue(pv, l271, (function (values,v671,v672){
     checkArgs(arguments, 3);
     return (function(){
@@ -6337,7 +6337,7 @@ var l271 = {name: "SETCAR"};
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })())), l125.fvalue(pv, "return ", l125.fvalue(pv, "(x.car = ", v674, ")"), ";", (function(){
+            })())), l125.fvalue(pv, "return ", l125.fvalue(pv, "(x.car = ", v674, ", x)"), ";", (function(){
                 var symbol = l124;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -6351,7 +6351,7 @@ var l271 = {name: "SETCAR"};
     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
     return value;
 })()}));
-var l272 = {name: "SETCDR"};
+var l272 = {name: "RPLACD"};
 ((l255).value = ({car: l43.fvalue(pv, l272, (function (values,v675,v676){
     checkArgs(arguments, 3);
     return (function(){
@@ -6376,7 +6376,7 @@ var l272 = {name: "SETCDR"};
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })())), l125.fvalue(pv, "return ", l125.fvalue(pv, "(x.cdr = ", v678, ")"), ";", (function(){
+            })())), l125.fvalue(pv, "return ", l125.fvalue(pv, "(x.cdr = ", v678, ", x)"), ";", (function(){
                 var symbol = l124;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -7531,7 +7531,7 @@ var l305 = {name: "LS-MACROEXPAND-1"};
     return l305;
 })();
 var l306 = {name: "COMPILE-FUNCALL"};
-var l307 = {name: "G764"};
+var l307 = {name: "G922"};
 (function(){
     (l306).fvalue = (function(v788){
         ((v788)["fname"] = "COMPILE-FUNCALL");
@@ -7792,7 +7792,7 @@ var l308 = {name: "LS-COMPILE-TOPLEVEL"};
     return l228;
 })();
 var l309 = {name: "&BODY"};
-var l310 = QIList(l203,l202,l309,l20,l15,l116,l60,l61,l21,l22,l23,l266,l268,l19,l19,l265,l267,l53,l63,l289,l301,l300,l302,l92,l44,l175,l18,l18,l82,l32,l38,l36,l33,l30,l30,l51,l242,l34,l37,l35,l31,l31,l287,l74,l75,l73,l50,l28,l29,l72,l46,l2,l9,l11,l1,l8,l87,l96,l98,l48,l49,l52,l280,l26,l281,l291,l228,l91,l122,l95,l106,l120,l39,l42,l276,l288,l99,l297,l16,l123,l249,l71,l200,l117,l45,l76,l76,l121,l114,l5,l81,l68,l233,l237,l102,l43,l58,l299,l103,l274,l70,l83,l78,l262,l134,l251,l135,l252,l3,l27,l80,l79,l12,l269,l54,l107,l109,l105,l77,l140,l143,l197,l55,l56,l229,l66,l47,l158,l84,l85,l86,l13,l241,l64,l65,l40,l216,l217,l90,l284,l93,l94,l283,l88,l225,l275,l115,l278,l277,l273,l4,l248,l41,l243,l25,l7,l250,l133,l132,l100,l142,l6,l97,l298,l24,l3);
+var l310 = QIList(l203,l202,l309,l20,l15,l116,l60,l61,l21,l22,l23,l266,l268,l19,l19,l265,l267,l53,l63,l289,l301,l300,l302,l92,l44,l175,l18,l18,l82,l32,l38,l36,l33,l30,l30,l51,l242,l34,l37,l35,l31,l31,l287,l74,l75,l73,l50,l28,l29,l72,l46,l2,l9,l11,l1,l8,l87,l96,l98,l48,l49,l52,l280,l26,l281,l291,l228,l91,l122,l95,l106,l120,l39,l42,l276,l288,l99,l297,l16,l123,l249,l71,l200,l117,l45,l76,l76,l121,l114,l5,l81,l68,l233,l237,l102,l43,l58,l299,l103,l274,l70,l83,l78,l262,l134,l251,l135,l252,l3,l27,l80,l79,l12,l269,l54,l107,l109,l105,l77,l140,l143,l197,l55,l56,l229,l66,l47,l158,l84,l85,l86,l13,l241,l64,l65,l271,l272,l40,l216,l217,l90,l284,l93,l94,l283,l88,l225,l275,l115,l278,l277,l273,l4,l248,l41,l243,l25,l7,l250,l133,l132,l100,l142,l6,l97,l298,l24,l3);
 l122.fvalue(values, l310);
 ((l116).value = (function(){
     var symbol = l112;
