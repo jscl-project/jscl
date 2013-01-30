@@ -301,6 +301,34 @@
       `(let ,(mapcar #'cdr assignments)
 	 (setq ,@(!reduce #'append (mapcar #'butlast assignments) '())))))
 
+  (defmacro do (varlist endlist &body body)
+    `(block nil        
+       (let ,(mapcar (lambda (x) (list (first x) (second x))) varlist)
+	 (while t
+	   (when ,(car endlist)
+	     (return (progn ,(cdr endlist))))
+	   (tagbody ,@body)
+	   (psetq
+	    ,@(apply #'append
+		     (mapcar (lambda (v)
+			       (and (consp (cdr v))
+				    (list (first v) (third v))))
+			     varlist)))))))
+
+  (defmacro do* (varlist endlist &body body)
+    `(block nil        
+       (let* ,(mapcar (lambda (x) (list (first x) (second x))) varlist)
+	 (while t
+	   (when ,(car endlist)
+	     (return (progn ,(cdr endlist))))
+	   (tagbody ,@body)
+	   (setq
+	    ,@(apply #'append
+		     (mapcar (lambda (v)
+			       (and (consp (cdr v))
+				    (list (first v) (third v))))
+			     varlist)))))))
+  
   (defun list-length (list)
     (let ((l 0))
       (while (not (null list))
@@ -2118,12 +2146,12 @@
             boundp butlast caar cadddr caddr cadr car car case catch cdar cdddr
             cddr cdr cdr char char-code char= code-char cond cons consp copy-list
             decf declaim defparameter defun defmacro defvar digit-char-p
-            disassemble documentation dolist dotimes ecase eq eql equal error eval
-            every export fdefinition find-package find-symbol first fourth fset
-            funcall function functionp gensym get-universal-time go identity if
-            in-package incf integerp integerp intern keywordp lambda last length
-            let let* list-all-packages list listp make-array make-package
-            make-symbol mapcar member minusp mod multiple-value-bind
+            disassemble do do* documentation dolist dotimes ecase eq eql equal
+	    error eval every export fdefinition find-package find-symbol first
+	    fourth fset funcall function functionp gensym get-universal-time go
+	    identity if in-package incf integerp integerp intern keywordp lambda
+	    last length let let* list-all-packages list listp make-array
+	    make-package make-symbol mapcar member minusp mod multiple-value-bind
             multiple-value-call multiple-value-list multiple-value-prog1 nil not
             nth nthcdr null numberp or package-name package-use-list packagep
             plusp prin1-to-string print proclaim prog1 prog2 progn psetq push
