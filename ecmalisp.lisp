@@ -2175,10 +2175,10 @@
 	    make-package make-symbol mapcar member minusp mod multiple-value-bind
             multiple-value-call multiple-value-list multiple-value-prog1 nil not
             nth nthcdr null numberp or package-name package-use-list packagep
-            plusp prin1-to-string print proclaim prog1 prog2 progn psetq push
-            quote remove remove-if remove-if-not return return-from revappend
-            reverse rplaca rplacd second set setq some string-upcase string
-            string= stringp subseq symbol-function symbol-name symbol-package
+            parse-integer plusp prin1-to-string print proclaim prog1 prog2 progn
+	    psetq push quote remove remove-if remove-if-not return return-from
+	    revappend reverse rplaca rplacd second set setq some string-upcase
+	    string string= stringp subseq symbol-function symbol-name symbol-package
             symbol-plist symbol-value symbolp t tagbody third throw truncate
             unless unwind-protect values values-list variable warn when write-line
             write-string zerop))
