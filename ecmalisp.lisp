@@ -302,7 +302,7 @@
 	 (setq ,@(!reduce #'append (mapcar #'butlast assignments) '())))))
 
   (defmacro do (varlist endlist &body body)
-    `(block nil        
+    `(block nil
        (let ,(mapcar (lambda (x) (list (first x) (second x))) varlist)
 	 (while t
 	   (when ,(car endlist)
@@ -311,12 +311,12 @@
 	   (psetq
 	    ,@(apply #'append
 		     (mapcar (lambda (v)
-			       (and (consp (cdr v))
+			       (and (consp (cddr v))
 				    (list (first v) (third v))))
 			     varlist)))))))
 
   (defmacro do* (varlist endlist &body body)
-    `(block nil        
+    `(block nil
        (let* ,(mapcar (lambda (x) (list (first x) (second x))) varlist)
 	 (while t
 	   (when ,(car endlist)
@@ -325,10 +325,10 @@
 	   (setq
 	    ,@(apply #'append
 		     (mapcar (lambda (v)
-			       (and (consp (cdr v))
+			       (and (consp (cddr v))
 				    (list (first v) (third v))))
 			     varlist)))))))
-  
+
   (defun list-length (list)
     (let ((l 0))
       (while (not (null list))
@@ -1079,7 +1079,7 @@
 (defun extend-local-env (args)
   (let ((new (copy-lexenv *environment*)))
     (dolist (symbol args new)
-      (let ((b (make-binding symbol 'lexical-variable (gvarname symbol))))
+      (let ((b (make-binding symbol 'variable (gvarname symbol))))
         (push-to-lexenv b new 'variable)))))
 
 ;;; Toplevel compilations
@@ -1262,7 +1262,9 @@
 
 (defun setq-pair (var val)
   (let ((b (lookup-in-lexenv var *environment* 'variable)))
-    (if (eq (binding-type b) 'lexical-variable)
+    (if (and (eq (binding-type b) 'variable)
+             (not (member 'special (binding-declarations b)))
+             (not (member 'constant (binding-declarations b))))
         (concat (binding-value b) " = " (ls-compile val))
         (ls-compile `(set ',var ,val)))))
 
@@ -1438,7 +1440,7 @@
 
 
 ;;; Return the code to initialize BINDING, and push it extending the
-;;; current lexical environment if the variable is special.
+;;; current lexical environment if the variable is not special.
 (defun let*-initialize-value (binding)
   (let ((var (first binding))
         (value (second binding)))
