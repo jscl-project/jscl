@@ -438,13 +438,32 @@
        (error "Unsupported argument."))))
 
   (defun parse-integer (string)
-    (let ((value 0)
-          (index 0)
-          (size (length string)))
-      (while (< index size)
-        (setq value (+ (* value 10) (digit-char-p (char string index))))
-        (incf index))
-      value))
+    (block nil
+      (let ((value 0)
+	    (index 0)
+	    (size (length string))
+	    (sign 1))
+	(when (zerop size) (return (values nil 0)))
+	;; Optional sign
+	(case (char string 0)
+	  (#\+ (incf index))
+	  (#\- (setq sign -1)
+	       (incf index)))
+	;; First digit
+	(unless (and (< index size)
+		     (setq value (digit-char-p (char string index))))
+	  (values nil index))
+	(incf index)
+	;; Other digits
+	(while (< index size)
+	  (let ((digit (digit-char-p (char string index))))
+	    (unless digit (return))
+	    (setq value (+ (* value 10) digit))
+	    (incf index)))
+	(if (or (= index size)
+		(char= (char string index) #\space))
+	    (values (* sign value) index)
+	    (values nil index)))))
 
   (defun some (function seq)
     (cond
