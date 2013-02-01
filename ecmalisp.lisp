@@ -510,6 +510,14 @@
          (error "Wrong argument type! it should be a symbol"))
        (oget x "vardoc"))))
 
+  (defmacro multiple-value-bind (variables value-from &body body)
+    `(multiple-value-call (lambda (&optional ,@variables &rest ,(gensym))
+                            ,@body)
+       ,value-from))
+
+  (defmacro multiple-value-list (value-from)
+    `(multiple-value-call #'list ,value-from))
+
   ;; Packages
 
   (defvar *package-list* nil)
@@ -584,24 +592,27 @@
       (oset symbols (symbol-name symbol) symbol)))
 
   (defun %find-symbol (name package)
-    (let ((package (find-package-or-fail package)))
-      (let ((symbols (%package-symbols package)))
-        (if (in name symbols)
-            (cons (oget symbols name) t)
-            (dolist (used (package-use-list package) (cons nil nil))
-              (let ((exports (%package-external-symbols used)))
-                (when (in name exports)
-                  (return-from %find-symbol
-                    (cons (oget exports name) t)))))))))
+    (let* ((package (find-package-or-fail package))
+           (symbols (%package-symbols package)))
+      (if (in name symbols)
+          (cons (oget symbols name) t)
+          (dolist (used (package-use-list package) (cons nil nil))
+            (let ((exports (%package-external-symbols used)))
+              (when (in name exports)
+                (return (cons (oget exports name) t))))))))
 
   (defun find-symbol (name &optional (package *package*))
-    (car (%find-symbol name package)))
+    (let ((x (%find-symbol name package)))
+      (if (cdr x)
+          (values (car x) t)
+          (values nil nil))))
 
   (defun intern (name &optional (package *package*))
     (let ((package (find-package-or-fail package)))
-      (let ((result (%find-symbol name package)))
-        (if (cdr result)
-            (car result)
+      (multiple-value-bind (symbol foundp)
+          (find-symbol name package)
+        (if foundp
+            symbol
             (let ((symbols (%package-symbols package)))
               (oget symbols name)
               (let ((symbol (make-symbol name)))
@@ -697,15 +708,7 @@
     (values-array (list-to-vector list)))
 
   (defun values (&rest args)
-    (values-list args))
-
-  (defmacro multiple-value-bind (variables value-from &body body)
-    `(multiple-value-call (lambda (&optional ,@variables &rest ,(gensym))
-                            ,@body)
-       ,value-from))
-
-  (defmacro multiple-value-list (value-from)
-    `(multiple-value-call #'list ,value-from)))
+    (values-list args)))
 
 
 ;;; Like CONCAT, but prefix each line with four spaces. Two versions
