@@ -617,7 +617,7 @@
       (multiple-value-bind (symbol foundp)
           (find-symbol name package)
         (if foundp
-            symbol
+            (values symbol foundp)
             (let ((symbols (%package-symbols package)))
               (oget symbols name)
               (let ((symbol (make-symbol name)))
@@ -625,7 +625,8 @@
                 (when (eq package *keyword-package*)
                   (oset symbol "value" symbol)
                   (export (list symbol) package))
-                (oset symbols name symbol)))))))
+                (oset symbols name symbol)
+                (values symbol nil)))))))
 
   (defun symbol-package (symbol)
     (unless (symbolp symbol)
