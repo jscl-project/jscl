@@ -587,8 +587,14 @@
   ;; This function is used internally to initialize the CL package
   ;; with the symbols built during bootstrap.
   (defun %intern-symbol (symbol)
-    (let ((symbols (%package-symbols *common-lisp-package*)))
-      (oset symbol "package" *common-lisp-package*)
+    (let* ((package
+            (if (in "package" symbol)
+                (find-package-or-fail (oget symbol "package"))
+                *common-lisp-package*))
+           (symbols (%package-symbols package)))
+      (oset symbol "package" package)
+      (when (eq package *keyword-package*)
+        (oset symbol "value" symbol))
       (oset symbols (symbol-name symbol) symbol)))
 
   (defun find-symbol (name &optional (package *package*))
@@ -1344,12 +1350,17 @@
     ((symbolp sexp)
      (or (cdr (assoc sexp *literal-symbols*))
 	 (let ((v (genlit))
-	       (s #+common-lisp (concat "{name: \"" (escape-string (symbol-name sexp)) "\"}")
-		  #+ecmalisp
-                  (let ((package (symbol-package sexp)))
-                    (if (null package)
-                        (concat "{name: \"" (escape-string (symbol-name sexp)) "\"}")
-                        (ls-compile `(intern ,(symbol-name sexp) ,(package-name package)))))))
+	       (s #+common-lisp
+                 (let ((package (symbol-package sexp)))
+                   (if (eq package (find-package "KEYWORD"))
+                       (concat "{name: \"" (escape-string (symbol-name sexp))
+                               "\", 'package': '" (package-name package) "'}")
+                       (concat "{name: \"" (escape-string (symbol-name sexp)) "\"}")))
+                 #+ecmalisp
+                 (let ((package (symbol-package sexp)))
+                   (if (null package)
+                       (concat "{name: \"" (escape-string (symbol-name sexp)) "\"}")
+                       (ls-compile `(intern ,(symbol-name sexp) ,(package-name package)))))))
 	   (push (cons sexp v) *literal-symbols*)
 	   (toplevel-compilation (concat "var " v " = " s))
 	   v)))
