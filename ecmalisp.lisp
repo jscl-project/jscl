@@ -599,13 +599,18 @@
 
   (defun find-symbol (name &optional (package *package*))
     (let* ((package (find-package-or-fail package))
+           (externals (%package-external-symbols package))
            (symbols (%package-symbols package)))
-      (if (in name symbols)
-          (values (oget symbols name) t)
-          (dolist (used (package-use-list package) (values nil nil))
-            (let ((exports (%package-external-symbols used)))
-              (when (in name exports)
-                (return (values (oget exports name) t))))))))
+      (cond
+        ((in name externals)
+         (values (oget externals name) :external))
+        ((in name symbols)
+         (values (oget symbols name) :internal))
+        (t
+         (dolist (used (package-use-list package) (values nil nil))
+           (let ((exports (%package-external-symbols used)))
+             (when (in name exports)
+               (return (values (oget exports name) :inherit)))))))))
 
   (defun intern (name &optional (package *package*))
     (let ((package (find-package-or-fail package)))
