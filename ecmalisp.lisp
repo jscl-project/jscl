@@ -133,6 +133,7 @@
   (defun second (x) (cadr x))
   (defun third (x) (caddr x))
   (defun fourth (x) (cadddr x))
+  (defun rest (x) (cdr x))
 
   (defun list (&rest args) args)
   (defun atom (x)
@@ -1410,6 +1411,34 @@
     ((symbolp x)
      (ls-compile `(symbol-function ',x)))))
 
+
+(defun make-function-binding (fname)
+  (make-binding fname 'function (gvarname fname)))
+
+(defun compile-function-definition (list)
+  (compile-lambda (car list) (cdr list)))
+
+(defun translate-function (name)
+  (let ((b (lookup-in-lexenv name *environment* 'function)))
+    (binding-value b)))
+
+(define-compilation flet (definitions &rest body)
+  (let* ((fnames (mapcar #'car definitions))
+         (fbody  (mapcar #'cdr definitions))
+         (cfuncs (mapcar #'compile-function-definition fbody))
+         (*environment*
+          (extend-lexenv (mapcar #'make-function-binding fnames)
+                         *environment*
+                         'function)))
+    (concat "(function("
+            (join (mapcar #'translate-function fnames) ",")
+            "){" *newline*
+            (let ((body (ls-compile-block body t)))
+              (indent body))
+            "})(" (join cfuncs ",") ")")))
+
+
+
 (defvar *compiling-file* nil)
 (define-compilation eval-when-compile (&rest body)
   (if *compiling-file*
@@ -2100,18 +2129,17 @@
         form)))
 
 (defun compile-funcall (function args)
-  (let ((values-funcs (if *multiple-value-p* "values" "pv")))
-    (if (and (symbolp function)
-             #+ecmalisp (eq (symbol-package function) (find-package "COMMON-LISP"))
-             #+common-lisp t)
-        (concat (ls-compile `',function) ".fvalue("
-                (join (cons values-funcs (mapcar #'ls-compile args))
-                      ", ")
-                ")")
-        (concat (ls-compile `#',function) "("
-                (join (cons values-funcs (mapcar #'ls-compile args))
-                      ", ")
-                ")"))))
+  (let* ((values-funcs (if *multiple-value-p* "values" "pv"))
+         (arglist (concat "(" (join (cons values-funcs (mapcar #'ls-compile args)) ", ") ")")))
+    (cond
+      ((translate-function function)
+       (concat (translate-function function) arglist))
+      ((and (symbolp function)
+            #+ecmalisp (eq (symbol-package function) (find-package "COMMON-LISP"))
+            #+common-lisp t)
+       (concat (ls-compile `',function) ".fvalue" arglist))
+      (t
+       (concat (ls-compile `#',function) arglist)))))
 
 (defun ls-compile-block (sexps &optional return-last-p)
   (if return-last-p
@@ -2190,8 +2218,8 @@
             decf declaim defparameter defun defmacro defvar digit-char-p
             disassemble do do* documentation dolist dotimes ecase eq eql equal
 	    error eval every export fdefinition find-package find-symbol first
-	    fourth fset funcall function functionp gensym get-universal-time go
-	    identity if in-package incf integerp integerp intern keywordp lambda
+	    flet fourth fset funcall function functionp gensym get-universal-time
+            go identity if in-package incf integerp integerp intern keywordp lambda
 	    last length let let* list-all-packages list listp make-array
 	    make-package make-symbol mapcar member minusp mod multiple-value-bind
             multiple-value-call multiple-value-list multiple-value-prog1 nil not
