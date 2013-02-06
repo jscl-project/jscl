@@ -71,7 +71,7 @@
         jqconsole.RegisterMatching('(', ')', 'parents');
 
         lisp.write = function(str){
-           jqconsole.Write(str, 'jqconsole-output');
+           jqconsole.Write(str, 'jqconsole-output', false);
            return str;
         }
 
