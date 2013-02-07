@@ -1439,19 +1439,17 @@
 
 (define-compilation labels (definitions &rest body)
   (let* ((fnames (mapcar #'car definitions))
-         (fbody  (mapcar #'cdr definitions))
 	 (*environment*
           (extend-lexenv (mapcar #'make-function-binding fnames)
                          *environment*
-                         'function))
-         (cfuncs (mapcar #'compile-function-definition fbody)))
-    (concat "(function(){" *newline*
-	    (join (mapcar (lambda (func)
-			    ())
-			  definitions))
-            (let ((body (ls-compile-block body t)))
-              (indent body))
-            "})")))
+                         'function)))
+    (js!selfcall
+      (mapconcat (lambda (func)
+		   (concat "var " (translate-function (car func))
+			   " = " (compile-lambda (cadr func) (cddr func))
+			   ";" *newline*))
+		 definitions)
+      (ls-compile-block body t))))
 
 
 
@@ -2235,8 +2233,8 @@
             disassemble do do* documentation dolist dotimes ecase eq eql equal
 	    error eval every export fdefinition find-package find-symbol first
 	    flet fourth fset funcall function functionp gensym get-universal-time
-            go identity if in-package incf integerp integerp intern keywordp lambda
-	    last length let let* list-all-packages list listp make-array
+            go identity if in-package incf integerp integerp intern keywordp labels
+	    lambda last length let let* list-all-packages list listp make-array
 	    make-package make-symbol mapcar member minusp mod multiple-value-bind
             multiple-value-call multiple-value-list multiple-value-prog1 nil not
             nth nthcdr null numberp or package-name package-use-list packagep
