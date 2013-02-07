@@ -429,6 +429,10 @@
         (- x #\0)
         nil))
 
+  (defun digit-char (weight)
+    (and (<= 0 weight 9)
+	 (char "0123456789" weight)))  
+
   (defun subseq (seq a &optional b)
     (cond
       ((stringp seq)
@@ -750,7 +754,6 @@
          do (write-string "    ")
          do (write-line line)))))
 
-
 (defun integer-to-string (x)
   (cond
     ((zerop x)
@@ -762,8 +765,8 @@
        (while (not (zerop x))
          (push (mod x 10) digits)
          (setq x (truncate x 10)))
-       (join (mapcar (lambda (d) (string (char "0123456789" d)))
-                     digits))))))
+       (mapconcat (lambda (x) (string (digit-char x)))
+		  digits)))))
 
 
 ;;; Wrap X with a Javascript code to convert the result from
@@ -2232,7 +2235,7 @@
             = > >= and append apply aref arrayp aset assoc atom block boundp
             boundp butlast caar cadddr caddr cadr car car case catch cdar cdddr
             cddr cdr cdr char char-code char= code-char cond cons consp copy-list
-            decf declaim defparameter defun defmacro defvar digit-char-p
+            decf declaim defparameter defun defmacro defvar digit-char digit-char-p
             disassemble do do* documentation dolist dotimes ecase eq eql equal
 	    error eval every export fdefinition find-package find-symbol first
 	    flet fourth fset funcall function functionp gensym get-universal-time
