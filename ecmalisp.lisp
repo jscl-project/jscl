@@ -1437,6 +1437,22 @@
               (indent body))
             "})(" (join cfuncs ",") ")")))
 
+(define-compilation labels (definitions &rest body)
+  (let* ((fnames (mapcar #'car definitions))
+         (fbody  (mapcar #'cdr definitions))
+	 (*environment*
+          (extend-lexenv (mapcar #'make-function-binding fnames)
+                         *environment*
+                         'function))
+         (cfuncs (mapcar #'compile-function-definition fbody)))
+    (concat "(function(){" *newline*
+	    (join (mapcar (lambda (func)
+			    ())
+			  definitions))
+            (let ((body (ls-compile-block body t)))
+              (indent body))
+            "})")))
+
 
 
 (defvar *compiling-file* nil)
