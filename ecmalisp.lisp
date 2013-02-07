@@ -1409,7 +1409,10 @@
     ((and (listp x) (eq (car x) 'lambda))
      (compile-lambda (cadr x) (cddr x)))
     ((symbolp x)
-     (ls-compile `(symbol-function ',x)))))
+     (let ((b (lookup-in-lexenv x *environment* 'function)))
+       (if b
+	   (binding-value b)
+	   (ls-compile `(symbol-function ',x)))))))
 
 
 (defun make-function-binding (fname)
