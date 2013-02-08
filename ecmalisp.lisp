@@ -350,10 +350,14 @@
     (concat-two s1 s2))
 
   (defun mapcar (func list)
-    (if (null list)
-        '()
-        (cons (funcall func (car list))
-              (mapcar func (cdr list)))))
+    (let* ((head (cons 'sentinel nil))
+	   (tail head))
+      (while (not (null list))
+	(let ((new (cons (funcall func (car list)) nil)))
+	  (rplacd tail new)
+	  (setq tail new
+		list (cdr list))))
+      (cdr head)))
 
   (defun identity (x) x)
 
