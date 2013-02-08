@@ -361,6 +361,10 @@
 
   (defun identity (x) x)
 
+  (defun constantly (x)
+    (lambda (&rest args)
+      x))
+
   (defun copy-list (x)
     (mapcar #'identity x))
 
@@ -2235,26 +2239,31 @@
   (defun eval (x)
     (js-eval (ls-compile-toplevel x t)))
 
-  (export '(&rest &optional &body * *gensym-counter* *package* + - / 1+ 1- < <= =
-            = > >= and append apply aref arrayp aset assoc atom block boundp
-            boundp butlast caar cadddr caddr cadr car car case catch cdar cdddr
-            cddr cdr cdr char char-code char= code-char cond cons consp copy-list
-            decf declaim defparameter defun defmacro defvar digit-char digit-char-p
-            disassemble do do* documentation dolist dotimes ecase eq eql equal
-	    error eval every export fdefinition find-package find-symbol first
-	    flet fourth fset funcall function functionp gensym get-universal-time
-            go identity if in-package incf integerp integerp intern keywordp labels
-	    lambda last length let let* list-all-packages list listp make-array
-	    make-package make-symbol mapcar member minusp mod multiple-value-bind
-            multiple-value-call multiple-value-list multiple-value-prog1 nil not
-            nth nthcdr null numberp or package-name package-use-list packagep
-            parse-integer plusp prin1-to-string print proclaim prog1 prog2 progn
-	    psetq push quote remove remove-if remove-if-not return return-from
-	    revappend reverse rplaca rplacd second set setq some string-upcase
-	    string string= stringp subseq symbol-function symbol-name symbol-package
-            symbol-plist symbol-value symbolp t tagbody third throw truncate
-            unless unwind-protect values values-list variable warn when write-line
-            write-string zerop))
+  (export '(&rest &optional &body * *gensym-counter* *package* + - /
+            1+ 1- < <= = = > >= and append apply aref arrayp aset
+            assoc atom block boundp boundp butlast caar cadddr caddr
+            cadr car car case catch cdar cdddr cddr cdr cdr char
+            char-code char= code-char cond cons consp constantly
+            copy-list decf declaim defparameter defun defmacro defvar
+            digit-char digit-char-p disassemble do do* documentation
+            dolist dotimes ecase eq eql equal error eval every export
+            fdefinition find-package find-symbol first flet fourth
+            fset funcall function functionp gensym get-universal-time
+            go identity if in-package incf integerp integerp intern
+            keywordp labels lambda last length let let*
+            list-all-packages list listp make-array make-package
+            make-symbol mapcar member minusp mod multiple-value-bind
+            multiple-value-call multiple-value-list
+            multiple-value-prog1 nil not nth nthcdr null numberp or
+            package-name package-use-list packagep parse-integer plusp
+            prin1-to-string print proclaim prog1 prog2 progn psetq
+            push quote remove remove-if remove-if-not return
+            return-from revappend reverse rplaca rplacd second set
+            setq some string-upcase string string= stringp subseq
+            symbol-function symbol-name symbol-package symbol-plist
+            symbol-value symbolp t tagbody third throw truncate unless
+            unwind-protect values values-list variable warn when
+            write-line write-string zerop))
 
   (setq *package* *user-package*)
 
