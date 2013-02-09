@@ -1191,27 +1191,47 @@
           " : " (ls-compile false *multiple-value-p*)
           ")"))
 
-(defvar *lambda-list-keywords* '(&optional &rest))
+(defvar *lambda-list-keywords* '(&optional &rest &key))
 
 (defun list-until-keyword (list)
   (if (or (null list) (member (car list) *lambda-list-keywords*))
       nil
       (cons (car list) (list-until-keyword (cdr list)))))
 
+(defun lambda-list-section (keyword lambda-list)
+  (list-until-keyword (cdr (member keyword lambda-list))))
+
 (defun lambda-list-required-arguments (lambda-list)
   (list-until-keyword lambda-list))
 
 (defun lambda-list-optional-arguments-with-default (lambda-list)
-  (mapcar #'ensure-list (list-until-keyword (cdr (member '&optional lambda-list)))))
+  (mapcar #'ensure-list (lambda-list-section '&optional lambda-list)))
 
 (defun lambda-list-optional-arguments (lambda-list)
   (mapcar #'car (lambda-list-optional-arguments-with-default lambda-list)))
 
 (defun lambda-list-rest-argument (lambda-list)
-  (let ((rest (list-until-keyword (cdr (member '&rest lambda-list)))))
+  (let ((rest (lambda-list-section '&rest lambda-list)))
     (when (cdr rest)
       (error "Bad lambda-list"))
     (car rest)))
+
+(defun lambda-list-keyword-arguments-canonical (lambda-list)
+  (flet ((canonalize (keyarg)
+	   ;; Build a canonical keyword argument descriptor, filling
+	   ;; the optional fields. The result is a list of the form
+	   ;; ((keyword-name var) init-form).
+	   (let* ((arg (ensure-list keyarg))
+		  (init-form (cadr arg))
+		  var
+		  keyword-name)
+	     (if (listp (car arg))
+		 (setq var (cadr (car arg))
+		       keyword-name (car (car arg)))
+		 (setq var (car arg)
+		       keyword-name (intern (symbol-name (car arg)) "KEYWORD")))
+	     `((,keyword-name ,var) ,init-form))))
+    (mapcar #'canonalize (lambda-list-section '&key lambda-list))))
 
 (defun lambda-docstring-wrapper (docstring &rest strs)
   (if docstring
