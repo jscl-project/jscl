@@ -2361,7 +2361,7 @@
 	    symbol-function symbol-name symbol-package symbol-plist
 	    symbol-value symbolp t tagbody third throw truncate unless
 	    unwind-protect values values-list variable warn when
-	    write-line write-string zeropt))
+	    write-line write-string zerop))
 
   (setq *package* *user-package*)
 
