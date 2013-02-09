@@ -1233,6 +1233,11 @@
 	     `((,keyword-name ,var) ,init-form))))
     (mapcar #'canonalize (lambda-list-section '&key lambda-list))))
 
+(defun lambda-list-keyword-arguments (lambda-list)
+  (mapcar (lambda (keyarg) (second (first keyarg)))
+	  (lambda-list-keyword-arguments-canonical lambda-list)))
+
+
 (defun lambda-docstring-wrapper (docstring &rest strs)
   (if docstring
       (js!selfcall
@@ -1263,7 +1268,10 @@
 (defun compile-lambda (lambda-list body)
   (let ((required-arguments (lambda-list-required-arguments lambda-list))
         (optional-arguments (lambda-list-optional-arguments lambda-list))
-        (rest-argument (lambda-list-rest-argument lambda-list))
+	(keyword-arguments  (lambda-list-keyword-arguments  lambda-list))
+        (rest-argument      (lambda-list-rest-argument      lambda-list))
+	(keyword-arguments-canonical
+	 (lambda-list-keyword-arguments-canonical lambda-list))
         documentation)
     ;; Get the documentation string for the lambda function
     (when (and (stringp (car body))
@@ -1275,7 +1283,8 @@
           (*environment* (extend-local-env
                           (append (ensure-list rest-argument)
                                   required-arguments
-                                  optional-arguments))))
+                                  optional-arguments
+				  keyword-arguments))))
       (lambda-docstring-wrapper
        documentation
        "(function ("
@@ -1288,7 +1297,7 @@
         ;; Check number of arguments
         (lambda-check-argument-count n-required-arguments
                                      n-optional-arguments
-                                     rest-argument)
+                                     (or rest-argument keyword-arguments))
         ;; Optional arguments
         (if optional-arguments
             (concat "switch(arguments.length-1){" *newline*
@@ -1317,11 +1326,54 @@
               (concat "var " js!rest "= " (ls-compile nil) ";" *newline*
                       "for (var i = arguments.length-1; i>="
                       (integer-to-string (+ 1 n-required-arguments n-optional-arguments))
-                      "; i--)" *newline*
-                      (indent js!rest " = "
+                      "; i--)" *newline*  
+		      (indent js!rest " = "
                               "{car: arguments[i], cdr: ") js!rest "};"
                       *newline*))
             "")
+
+	;; &key arguments
+	"var i;" *newline*
+	(mapconcat (lambda (arg)
+		     (concat "var " (translate-variable arg) "; " *newline*))
+		   keyword-arguments)
+	(mapconcat (lambda (keyarg)
+		     ;; ((keyword-name var) init-form)
+		     (concat "for (i="
+			     (integer-to-string (+ 1 n-required-arguments n-optional-arguments))
+			     "; i<arguments.length; i+=2){" *newline*
+			     (indent
+			      "if (arguments[i] === " (ls-compile (caar keyarg)) "){" *newline*
+			      (indent (translate-variable (cadr (car keyarg)))
+				      " = arguments[i+1];"
+				      *newline*
+				      "break;" *newline*)
+			      "}" *newline*)
+			     "}" *newline*
+			     ;; Default value
+			     "if (i == arguments.length){" *newline*
+			     (indent
+			      (translate-variable (cadr (car keyarg)))
+			      " = "
+			      (ls-compile (cadr keyarg))
+			      ";" *newline*)
+			     "}" *newline*))
+		   keyword-arguments-canonical)
+	;; Check for unknown keywords
+	(if (null keyword-arguments)
+	    ""
+	    (concat "for (i="
+		    (integer-to-string (+ 1 n-required-arguments n-optional-arguments))
+		    "; i<arguments.length; i+=2){" *newline*
+		    (indent "if ("
+			    (join (mapcar (lambda (x)
+					    (concat "arguments[i] !== " (ls-compile (caar x))))
+					  keyword-arguments-canonical)
+				  " && ")
+			    ")" *newline*
+			    (indent
+			     "throw 'Unknown keyword argument ' + arguments[i].name;" *newline*))
+		    "}" *newline*))
         ;; Body
         (let ((*multiple-value-p* t)) (ls-compile-block body t)))
        "})"))))
@@ -2259,10 +2311,10 @@
   (defun eval (x)
     (js-eval (ls-compile-toplevel x t)))
 
-  (export '(&rest &optional &body * *gensym-counter* *package* + - /
-            1+ 1- < <= = = > >= and append apply aref arrayp aset
-            assoc atom block boundp boundp butlast caar cadddr caddr
-            cadr car car case catch cdar cdddr cddr cdr cdr char
+  (export '(&rest &key &optional &body * *gensym-counter* *package*
+	    + - / 1+ 1- < <= = = > >= and append apply aref arrayp
+	    assoc atom block boundp boundp butlast caar cadddr caddr
+	    cadr car car case catch cdar cdddr cddr cdr cdr char
             char-code char= code-char cond cons consp constantly
             copy-list decf declaim defparameter defun defmacro defvar
             digit-char digit-char-p disassemble do do* documentation
