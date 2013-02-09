@@ -1237,7 +1237,6 @@
   (mapcar (lambda (keyarg) (second (first keyarg)))
 	  (lambda-list-keyword-arguments-canonical lambda-list)))
 
-
 (defun lambda-docstring-wrapper (docstring &rest strs)
   (if docstring
       (js!selfcall
@@ -1265,13 +1264,105 @@
            (concat "checkArgsAtMost(arguments, " (integer-to-string max) ");" *newline*)
            "")))))
 
+(defun compile-lambda-optional (lambda-list)
+  (let* ((optional-arguments (lambda-list-optional-arguments lambda-list))
+	 (n-required-arguments (length (lambda-list-required-arguments lambda-list)))
+	 (n-optional-arguments (length optional-arguments)))
+    (if optional-arguments
+	(concat "switch(arguments.length-1){" *newline*
+		(let ((optional-and-defaults
+		       (lambda-list-optional-arguments-with-default lambda-list))
+		      (cases nil)
+		      (idx 0))
+		  (progn
+		    (while (< idx n-optional-arguments)
+		      (let ((arg (nth idx optional-and-defaults)))
+			(push (concat "case "
+				      (integer-to-string (+ idx n-required-arguments)) ":" *newline*
+				      (translate-variable (car arg))
+				      "="
+				      (ls-compile (cadr arg))
+				      ";" *newline*)
+			      cases)
+			(incf idx)))
+		    (push (concat "default: break;" *newline*) cases)
+		    (join (reverse cases))))
+		"}" *newline*)
+	"")))
+
+(defun compile-lambda-rest (lambda-list)
+  (let ((n-required-arguments (length (lambda-list-required-arguments lambda-list)))
+	(n-optional-arguments (length (lambda-list-optional-arguments lambda-list)))
+	(rest-argument (lambda-list-rest-argument lambda-list)))
+    (if rest-argument
+	(let ((js!rest (translate-variable rest-argument)))
+	  (concat "var " js!rest "= " (ls-compile nil) ";" *newline*
+		  "for (var i = arguments.length-1; i>="
+		  (integer-to-string (+ 1 n-required-arguments n-optional-arguments))
+		  "; i--)" *newline*  
+		  (indent js!rest " = "
+			  "{car: arguments[i], cdr: ") js!rest "};"
+			  *newline*))
+	"")))
+
+(defun compile-lambda-parse-keywords (lambda-list)
+  (let ((n-required-arguments
+	 (length (lambda-list-required-arguments lambda-list)))
+	(n-optional-arguments
+	 (length (lambda-list-optional-arguments lambda-list)))
+	(keyword-arguments
+	 (lambda-list-keyword-arguments-canonical lambda-list)))
+    (concat
+     "var i;" *newline*
+     ;; Declare variables
+     (mapconcat (lambda (arg)
+		  (let ((var (second (car arg))))
+		    (concat "var " (translate-variable var) "; " *newline*)))
+		keyword-arguments)
+     ;; Parse keywords
+     (flet ((parse-keyword (keyarg)
+	      ;; ((keyword-name var) init-form)
+	      (concat "for (i="
+		      (integer-to-string (+ 1 n-required-arguments n-optional-arguments))
+		      "; i<arguments.length; i+=2){" *newline*
+		      (indent
+		       "if (arguments[i] === " (ls-compile (caar keyarg)) "){" *newline*
+		       (indent (translate-variable (cadr (car keyarg)))
+			       " = arguments[i+1];"
+			       *newline*
+			       "break;" *newline*)
+		       "}" *newline*)
+		      "}" *newline*
+		      ;; Default value
+		      "if (i == arguments.length){" *newline*
+		      (indent
+		       (translate-variable (cadr (car keyarg)))
+		       " = "
+		       (ls-compile (cadr keyarg))
+		       ";" *newline*)
+		      "}" *newline*)))
+       (mapconcat #'parse-keyword keyword-arguments))
+     ;; Check for unknown keywords
+     (if (null keyword-arguments)
+	 ""
+	 (concat "for (i="
+		 (integer-to-string (+ 1 n-required-arguments n-optional-arguments))
+		 "; i<arguments.length; i+=2){" *newline*
+		 (indent "if ("
+			 (join (mapcar (lambda (x)
+					 (concat "arguments[i] !== " (ls-compile (caar x))))
+				       keyword-arguments)
+			       " && ")
+			 ")" *newline*
+			 (indent
+			  "throw 'Unknown keyword argument ' + arguments[i].name;" *newline*))
+		 "}" *newline*)))))
+
 (defun compile-lambda (lambda-list body)
   (let ((required-arguments (lambda-list-required-arguments lambda-list))
         (optional-arguments (lambda-list-optional-arguments lambda-list))
 	(keyword-arguments  (lambda-list-keyword-arguments  lambda-list))
         (rest-argument      (lambda-list-rest-argument      lambda-list))
-	(keyword-arguments-canonical
-	 (lambda-list-keyword-arguments-canonical lambda-list))
         documentation)
     ;; Get the documentation string for the lambda function
     (when (and (stringp (car body))
@@ -1298,85 +1389,13 @@
         (lambda-check-argument-count n-required-arguments
                                      n-optional-arguments
                                      (or rest-argument keyword-arguments))
-        ;; Optional arguments
-        (if optional-arguments
-            (concat "switch(arguments.length-1){" *newline*
-                    (let ((optional-and-defaults
-                           (lambda-list-optional-arguments-with-default lambda-list))
-                          (cases nil)
-                          (idx 0))
-                      (progn
-                        (while (< idx n-optional-arguments)
-                          (let ((arg (nth idx optional-and-defaults)))
-                            (push (concat "case "
-                                          (integer-to-string (+ idx n-required-arguments)) ":" *newline*
-                                          (translate-variable (car arg))
-                                          "="
-                                          (ls-compile (cadr arg))
-                                          ";" *newline*)
-                                  cases)
-                            (incf idx)))
-                        (push (concat "default: break;" *newline*) cases)
-                        (join (reverse cases))))
-                    "}" *newline*)
-            "")
-        ;; &rest/&body argument
-        (if rest-argument
-            (let ((js!rest (translate-variable rest-argument)))
-              (concat "var " js!rest "= " (ls-compile nil) ";" *newline*
-                      "for (var i = arguments.length-1; i>="
-                      (integer-to-string (+ 1 n-required-arguments n-optional-arguments))
-                      "; i--)" *newline*  
-		      (indent js!rest " = "
-                              "{car: arguments[i], cdr: ") js!rest "};"
-                      *newline*))
-            "")
-
-	;; &key arguments
-	"var i;" *newline*
-	(mapconcat (lambda (arg)
-		     (concat "var " (translate-variable arg) "; " *newline*))
-		   keyword-arguments)
-	(mapconcat (lambda (keyarg)
-		     ;; ((keyword-name var) init-form)
-		     (concat "for (i="
-			     (integer-to-string (+ 1 n-required-arguments n-optional-arguments))
-			     "; i<arguments.length; i+=2){" *newline*
-			     (indent
-			      "if (arguments[i] === " (ls-compile (caar keyarg)) "){" *newline*
-			      (indent (translate-variable (cadr (car keyarg)))
-				      " = arguments[i+1];"
-				      *newline*
-				      "break;" *newline*)
-			      "}" *newline*)
-			     "}" *newline*
-			     ;; Default value
-			     "if (i == arguments.length){" *newline*
-			     (indent
-			      (translate-variable (cadr (car keyarg)))
-			      " = "
-			      (ls-compile (cadr keyarg))
-			      ";" *newline*)
-			     "}" *newline*))
-		   keyword-arguments-canonical)
-	;; Check for unknown keywords
-	(if (null keyword-arguments)
-	    ""
-	    (concat "for (i="
-		    (integer-to-string (+ 1 n-required-arguments n-optional-arguments))
-		    "; i<arguments.length; i+=2){" *newline*
-		    (indent "if ("
-			    (join (mapcar (lambda (x)
-					    (concat "arguments[i] !== " (ls-compile (caar x))))
-					  keyword-arguments-canonical)
-				  " && ")
-			    ")" *newline*
-			    (indent
-			     "throw 'Unknown keyword argument ' + arguments[i].name;" *newline*))
-		    "}" *newline*))
-        ;; Body
-        (let ((*multiple-value-p* t)) (ls-compile-block body t)))
+	(compile-lambda-optional lambda-list)
+	(compile-lambda-rest lambda-list)
+	(compile-lambda-parse-keywords lambda-list)
+        (let ((*multiple-value-p* t))
+	  (ls-compile-block body t)))
        "})"))))
+
 
 
 (defun setq-pair (var val)
