@@ -1930,16 +1930,18 @@
   (unless (consp args)
     (error "ARGS must be a non-empty list"))
   (let ((counter 0)
-        (variables '())
+        (fargs '())
         (prelude ""))
     (dolist (x args)
-      (let ((v (code "x" (incf counter))))
-        (push v variables)
-        (concatf prelude
-          (code "var " v " = " (ls-compile x) ";" *newline*
-                "if (typeof " v " !== 'number') throw 'Not a number!';"
-                *newline*))))
-    (js!selfcall prelude (funcall function (reverse variables)))))
+      (if (numberp x)
+          (push (integer-to-string x) fargs)
+          (let ((v (code "x" (incf counter))))
+            (push v fargs)
+            (concatf prelude
+              (code "var " v " = " (ls-compile x) ";" *newline*
+                    "if (typeof " v " !== 'number') throw 'Not a number!';"
+                    *newline*)))))
+    (js!selfcall prelude (funcall function (reverse fargs)))))
 
 
 (defmacro variable-arity (args &body body)
@@ -1947,7 +1949,7 @@
     (error "Bad usage of VARIABLE-ARITY, you must pass a symbol"))
   `(variable-arity-call ,args
                         (lambda (,args)
-                          (concat "return " ,@body ";" *newline*))))
+                          (code "return " ,@body ";" *newline*))))
 
 (defun num-op-num (x op y)
   (type-check (("x" "number" x) ("y" "number" y))
