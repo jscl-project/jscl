@@ -356,15 +356,38 @@
   (defun concat-two (s1 s2)
     (concat-two s1 s2))
 
-  (defun mapcar (func list)
-    (let* ((head (cons 'sentinel nil))
-	   (tail head))
-      (while (not (null list))
-	(let ((new (cons (funcall func (car list)) nil)))
-	  (rplacd tail new)
-	  (setq tail new
-		list (cdr list))))
-      (cdr head)))
+  (defmacro with-collect (&body body)
+    (let ((head (gensym))
+          (tail (gensym)))
+      `(let* ((,head (cons 'sentinel nil))
+              (,tail ,head))
+         (flet ((collect (x)
+                  (rplacd ,tail (cons x nil))
+                  (setq ,tail (cdr ,tail))
+                  x))
+           ,@body)
+         (cdr ,head))))
+
+  (defun map1 (func list)
+    (with-collect
+      (while list
+        (collect (funcall func (car list)))
+        (setq list (cdr list)))))
+
+  (defmacro loop (&body body)
+    `(while t ,@body))
+
+  (defun mapcar (func list &rest lists)
+    (let ((lists (cons list lists)))
+      (with-collect
+        (block loop
+          (loop
+             (let ((elems (map1 #'car lists)))
+               (do ((tail lists (cdr tail)))
+                   ((null tail))
+                 (when (null (car tail)) (return-from loop))
+                 (rplaca tail (cdar tail)))
+               (collect (apply func elems))))))))
 
   (defun identity (x) x)
 
@@ -2372,12 +2395,15 @@
   ;; environment at this point of the compilation.
   (eval-when-compile
     (toplevel-compilation
+     (ls-compile `(setq *environment* ',*environment*))))
+
+  (eval-when-compile
+    (toplevel-compilation
      (ls-compile
       `(progn
          ,@(mapcar (lambda (s) `(%intern-symbol (js-vref ,(cdr s))))
                    *literal-symbols*)
          (setq *literal-symbols* ',*literal-symbols*)
-         (setq *environment* ',*environment*)
          (setq *variable-counter* ,*variable-counter*)
          (setq *gensym-counter* ,*gensym-counter*)
          (setq *block-counter* ,*block-counter*)))))
