@@ -248,12 +248,12 @@
       x
       (list x)))
 
-(defun !reduce (func list initial)
+(defun !reduce (func list &key initial-value)
   (if (null list)
-      initial
+      initial-value
       (!reduce func
                (cdr list)
-               (funcall func initial (car list)))))
+               :initial-value (funcall func initial-value (car list)))))
 
 ;;; Go on growing the Lisp language in Ecmalisp, with more high
 ;;; level utilities as well as correct versions of other
@@ -279,7 +279,7 @@
               (append (cdr list1) list2))))
 
   (defun append (&rest lists)
-    (!reduce #'append-two lists '()))
+    (!reduce #'append-two lists))
 
   (defun revappend (list1 list2)
     (while list1
@@ -307,7 +307,7 @@
       (setq assignments (reverse assignments))
       ;;
       `(let ,(mapcar #'cdr assignments)
-	 (setq ,@(!reduce #'append (mapcar #'butlast assignments) '())))))
+	 (setq ,@(!reduce #'append (mapcar #'butlast assignments))))))
 
   (defmacro do (varlist endlist &body body)
     `(block nil
@@ -781,7 +781,7 @@
 (defvar *newline* (string (code-char 10)))
 
 (defun concat (&rest strs)
-  (!reduce #'concat-two strs ""))
+  (!reduce #'concat-two strs :initial-value ""))
 
 (defmacro concatf (variable &body form)
   `(setq ,variable (concat ,variable (progn ,@form))))
