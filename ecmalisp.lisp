@@ -561,7 +561,74 @@
   (defmacro multiple-value-list (value-from)
     `(multiple-value-call #'list ,value-from))
 
-  ;; Packages
+
+  ;;; Generalized references (SETF)
+
+  (defvar *setf-expanders* nil)
+
+  (defun get-setf-expansion (place)
+    (if (symbolp place)
+        (let ((value (gensym)))
+          (values nil
+                  nil
+                  `(,value)
+                  `(setq ,place ,value)
+                  place))
+        (let* ((access-fn (car place))
+             (expander (cdr (assoc access-fn *setf-expanders*))))
+          (when (null expander)
+            (error "Unknown generalized reference."))
+          (apply expander (cdr place)))))
+
+  (defmacro define-setf-expander (access-fn lambda-list &body body)
+    (unless (symbolp access-fn)
+      (error "ACCESS-FN must be a symbol."))
+    `(progn (push (cons ',access-fn (lambda ,lambda-list ,@body))
+                  *setf-expanders*)
+            ',access-fn))
+
+  (defmacro setf (&rest pairs)
+    (cond
+      ((null pairs)
+       nil)
+      ((null (cdr pairs))
+       (error "Odd number of arguments to setf."))
+      ((null (cddr pairs))
+       (let ((place (first pairs))
+             (value (second pairs)))
+         (multiple-value-bind (vars vals store-vars writer-form reader-form)
+             (get-setf-expansion place)
+           ;; TODO: Optimize the expansion code here.
+           `(let* ,(mapcar #'list vars vals)
+              (multiple-value-bind ,store-vars
+                  ,value
+                ,writer-form)))))
+      (t
+       `(progn
+          ,@(do ((pairs pairs (cddr pairs))
+                 (result '() (cons `(setf ,(car pairs) ,(cadr pairs)) result)))
+                ((null pairs)
+                 (reverse result)))))))
+
+  (define-setf-expander car (x)
+    (let ((cons (gensym))
+          (new-value (gensym)))
+      (values (list cons)
+              (list x)
+              (list new-value)
+              `(progn (rplaca ,cons ,new-value) ,new-value)
+              `(car ,cons))))
+
+  (define-setf-expander cdr (x)
+    (let ((cons (gensym))
+          (new-value (gensym)))
+      (values (list cons)
+              (list x)
+              (list new-value)
+              `(progn (rplacd ,cons ,new-value) ,new-value)
+              `(car ,cons))))
+
+  ;;; Packages
 
   (defvar *package-list* nil)
 
@@ -2373,7 +2440,7 @@
 	    package-name package-use-list packagep parse-integer plusp
 	    prin1-to-string print proclaim prog1 prog2 progn psetq
 	    push quote remove remove-if remove-if-not return
-	    return-from revappend reverse rplaca rplacd second set
+	    return-from revappend reverse rplaca rplacd second set setf
 	    setq some string-upcase string string= stringp subseq
 	    symbol-function symbol-name symbol-package symbol-plist
 	    symbol-value symbolp t tagbody third throw truncate unless
