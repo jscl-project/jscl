@@ -598,7 +598,8 @@
              (value (second pairs)))
          (multiple-value-bind (vars vals store-vars writer-form reader-form)
              (get-setf-expansion place)
-           ;; TODO: Optimize the expansion code here.
+           ;; TODO: Optimize the expansion a little bit to avoid let*
+           ;; or multiple-value-bind when unnecesary.
            `(let* ,(mapcar #'list vars vals)
               (multiple-value-bind ,store-vars
                   ,value
