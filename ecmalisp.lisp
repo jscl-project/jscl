@@ -636,7 +636,7 @@
   (defun list-all-packages ()
     *package-list*)
 
-  (defun make-package (name &optional use)
+  (defun make-package (name &key use)
     (let ((package (new))
           (use (mapcar #'find-package-or-fail use)))
       (oset package "packageName" name)
@@ -681,7 +681,7 @@
     (make-package "CL"))
 
   (defvar *user-package*
-    (make-package "CL-USER" (list *common-lisp-package*)))
+    (make-package "CL-USER" :use (list *common-lisp-package*)))
 
   (defvar *keyword-package*
     (make-package "KEYWORD"))
