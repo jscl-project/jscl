@@ -1412,7 +1412,6 @@
 	(keyword-arguments
 	 (lambda-list-keyword-arguments-canonical lambda-list)))
     (code
-     "var i;" *newline*
      ;; Declare variables
      (mapconcat (lambda (arg)
 		  (let ((var (second (car arg))))
@@ -1439,7 +1438,9 @@
                      (ls-compile (cadr keyarg))
                      ";" *newline*)
                     "}" *newline*)))
-       (mapconcat #'parse-keyword keyword-arguments))
+       (when keyword-arguments
+         (code "var i;" *newline*
+               (mapconcat #'parse-keyword keyword-arguments))))
      ;; Check for unknown keywords
      (when keyword-arguments
        (code "for (i=" (+ 1 n-required-arguments n-optional-arguments)
