@@ -2450,7 +2450,7 @@
 	    fset funcall function functionp gensym get-universal-time
 	    go identity if in-package incf integerp integerp intern
 	    keywordp labels lambda last length let let*
-	    list-all-packages list listp make-array make-package
+	    list-all-packages list listp loop make-array make-package
 	    make-symbol mapcar member minusp mod multiple-value-bind
 	    multiple-value-call multiple-value-list
 	    multiple-value-prog1 nil not nth nthcdr null numberp or
