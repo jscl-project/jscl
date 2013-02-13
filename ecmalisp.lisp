@@ -2255,7 +2255,7 @@
           "    args.push(tail.car);" *newline*
           "    tail = tail.cdr;" *newline*
           "}" *newline*
-          "return f.apply(this, args);" *newline*))))
+          "return (typeof f === 'function'? f : f.fvalue).apply(this, args);" *newline*))))
 
 (define-builtin js-eval (string)
   (type-check (("string" "string" string))

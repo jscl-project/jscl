@@ -696,10 +696,13 @@ var l62 = {name: "INITIAL-VALUE", 'package': 'KEYWORD'};
             return (l13.fvalue(pv, v70) !== l5.value ? v71 : l61.fvalue(values, v69, (function(){
                 var tmp = v70;
                 return tmp === l5.value? l5.value: tmp.cdr;
-            })(), l62.value, (v69)(pv, v71, (function(){
-                var tmp = v70;
-                return tmp === l5.value? l5.value: tmp.car;
-            })())));
+            })(), l62.value, (function(){
+                var f = v69;
+                return (typeof f === 'function'? f: f.fvalue)(pv, v71, (function(){
+                    var tmp = v70;
+                    return tmp === l5.value? l5.value: tmp.car;
+                })())
+            })()));
         })();
     }));
     return l61;
@@ -976,10 +979,13 @@ var l77 = {name: "SENTINEL"};
                     return (function(){
                         return (function(){
                             while(v103 !== l5.value){
-                                v107(pv, (v102)(pv, (function(){
-                                    var tmp = v103;
-                                    return tmp === l5.value? l5.value: tmp.car;
-                                })()));
+                                v107(pv, (function(){
+                                    var f = v102;
+                                    return (typeof f === 'function'? f: f.fvalue)(pv, (function(){
+                                        var tmp = v103;
+                                        return tmp === l5.value? l5.value: tmp.car;
+                                    })())
+                                })());
                                 (v103 = (function(){
                                     var tmp = v103;
                                     return tmp === l5.value? l5.value: tmp.cdr;
@@ -1085,7 +1091,7 @@ var l79 = {name: "MAPCAR"};
                                                         args.push(tail.car);
                                                         tail = tail.cdr;
                                                     }
-                                                    return f.apply(this, args);
+                                                    return (typeof f === 'function'? f : f.fvalue).apply(this, args);
                                                 })());
                                             })(l76.fvalue(pv, (function(){
                                                 var symbol = l31;
@@ -1462,10 +1468,13 @@ var l95 = {name: "REMOVE-IF"};
     })((function (values,v160,v161){
         checkArgs(arguments, 3);
         return (function(){
-            return (l13.fvalue(pv, v161) !== l5.value ? l5.value : ((v160)(pv, (function(){
-                var tmp = v161;
-                return tmp === l5.value? l5.value: tmp.car;
-            })()) !== l5.value ? l95.fvalue(values, v160, (function(){
+            return (l13.fvalue(pv, v161) !== l5.value ? l5.value : ((function(){
+                var f = v160;
+                return (typeof f === 'function'? f: f.fvalue)(pv, (function(){
+                    var tmp = v161;
+                    return tmp === l5.value? l5.value: tmp.car;
+                })())
+            })() !== l5.value ? l95.fvalue(values, v160, (function(){
                 var tmp = v161;
                 return tmp === l5.value? l5.value: tmp.cdr;
             })()) : ({car: (function(){
@@ -1487,10 +1496,13 @@ var l96 = {name: "REMOVE-IF-NOT"};
     })((function (values,v163,v164){
         checkArgs(arguments, 3);
         return (function(){
-            return (l13.fvalue(pv, v164) !== l5.value ? l5.value : ((v163)(pv, (function(){
-                var tmp = v164;
-                return tmp === l5.value? l5.value: tmp.car;
-            })()) !== l5.value ? ({car: (function(){
+            return (l13.fvalue(pv, v164) !== l5.value ? l5.value : ((function(){
+                var f = v163;
+                return (typeof f === 'function'? f: f.fvalue)(pv, (function(){
+                    var tmp = v164;
+                    return tmp === l5.value? l5.value: tmp.car;
+                })())
+            })() !== l5.value ? ({car: (function(){
                 var tmp = v164;
                 return tmp === l5.value? l5.value: tmp.car;
             })(), cdr: l96.fvalue(pv, v163, (function(){
@@ -1606,15 +1618,18 @@ var l100 = {name: "SOME"};
                                 if (typeof x2 !== 'number') throw 'Not a number!';
                                 return (x1<x2?l4.value: l5.value);
                             })() !== l5.value){
-                                ((v174)(pv, (function(){
-                                    var string = v175;
-                                    var index = v176;
-                                    if (typeof string != 'string')
-                                        throw 'The value ' + string + ' is not a type string.';
-                                    if (typeof index != 'number')
-                                        throw 'The value ' + index + ' is not a type number.';
-                                    return string.charCodeAt(index);
-                                })()) !== l5.value ? (function(){
+                                ((function(){
+                                    var f = v174;
+                                    return (typeof f === 'function'? f: f.fvalue)(pv, (function(){
+                                        var string = v175;
+                                        var index = v176;
+                                        if (typeof string != 'string')
+                                            throw 'The value ' + string + ' is not a type string.';
+                                        if (typeof index != 'number')
+                                            throw 'The value ' + index + ' is not a type number.';
+                                        return string.charCodeAt(index);
+                                    })())
+                                })() !== l5.value ? (function(){
                                     var values = mv;
                                     throw ({type: 'block', id: 77, values: l4.value, message: 'Return from unknown block SOME.'})
                                 })() : l5.value);
@@ -1637,7 +1652,10 @@ var l100 = {name: "SOME"};
                                         return tmp === l5.value? l5.value: tmp.car;
                                     })());
                                     (function(){
-                                        ((v174)(pv, v179) !== l5.value ? (function(){
+                                        ((function(){
+                                            var f = v174;
+                                            return (typeof f === 'function'? f: f.fvalue)(pv, v179)
+                                        })() !== l5.value ? (function(){
                                             var values = mv;
                                             throw ({type: 'block', id: 79, values: l4.value, message: 'Return from unknown block NIL.'})
                                         })() : l5.value);
@@ -1691,15 +1709,18 @@ var l101 = {name: "EVERY"};
                                 if (typeof x2 !== 'number') throw 'Not a number!';
                                 return (x1<x2?l4.value: l5.value);
                             })() !== l5.value){
-                                ((v181)(pv, (function(){
-                                    var string = v182;
-                                    var index = v183;
-                                    if (typeof string != 'string')
-                                        throw 'The value ' + string + ' is not a type string.';
-                                    if (typeof index != 'number')
-                                        throw 'The value ' + index + ' is not a type number.';
-                                    return string.charCodeAt(index);
-                                })()) !== l5.value ? l5.value : (function(){
+                                ((function(){
+                                    var f = v181;
+                                    return (typeof f === 'function'? f: f.fvalue)(pv, (function(){
+                                        var string = v182;
+                                        var index = v183;
+                                        if (typeof string != 'string')
+                                            throw 'The value ' + string + ' is not a type string.';
+                                        if (typeof index != 'number')
+                                            throw 'The value ' + index + ' is not a type number.';
+                                        return string.charCodeAt(index);
+                                    })())
+                                })() !== l5.value ? l5.value : (function(){
                                     var values = mv;
                                     throw ({type: 'block', id: 80, values: l5.value, message: 'Return from unknown block EVERY.'})
                                 })());
@@ -1722,7 +1743,10 @@ var l101 = {name: "EVERY"};
                                         return tmp === l5.value? l5.value: tmp.car;
                                     })());
                                     (function(){
-                                        ((v181)(pv, v186) !== l5.value ? l5.value : (function(){
+                                        ((function(){
+                                            var f = v181;
+                                            return (typeof f === 'function'? f: f.fvalue)(pv, v186)
+                                        })() !== l5.value ? l5.value : (function(){
                                             var values = mv;
                                             throw ({type: 'block', id: 82, values: l5.value, message: 'Return from unknown block NIL.'})
                                         })());
@@ -1955,7 +1979,7 @@ var l115 = {name: "SETQ"};
                         args.push(tail.car);
                         tail = tail.cdr;
                     }
-                    return f.apply(this, args);
+                    return (typeof f === 'function'? f : f.fvalue).apply(this, args);
                 })();
             })());
         })();
@@ -3127,7 +3151,10 @@ var l167 = {name: "READ-UNTIL"};
                 (v345 = l162.fvalue(pv, v342));
                 (function(){
                     return (function(){
-                        while((v345 !== l5.value ? l28.fvalue(pv, (v343)(pv, v345)) : l5.value) !== l5.value){
+                        while((v345 !== l5.value ? l28.fvalue(pv, (function(){
+                            var f = v343;
+                            return (typeof f === 'function'? f: f.fvalue)(pv, v345)
+                        })()) : l5.value) !== l5.value){
                             (v344 = l148.fvalue(pv, v344, l103.fvalue(pv, v345)));
                             l163.fvalue(pv, v342);
                             (v345 = l162.fvalue(pv, v342));
@@ -3729,7 +3756,7 @@ var l186 = {name: "INDENT"};
                     args.push(tail.car);
                     tail = tail.cdr;
                 }
-                return f.apply(this, args);
+                return (typeof f === 'function'? f : f.fvalue).apply(this, args);
             })());
         })();
     }));
@@ -4579,7 +4606,7 @@ var l238 = {name: "LAMBDA-DOCSTRING-WRAPPER"};
                     args.push(tail.car);
                     tail = tail.cdr;
                 }
-                return f.apply(this, args);
+                return (typeof f === 'function'? f : f.fvalue).apply(this, args);
             })());
         })();
     }));
@@ -6752,7 +6779,10 @@ var l292 = {name: "VARIABLE-ARITY-CALL"};
                     var value = symbol.value;
                     if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                     return value;
-                })(), l186.fvalue(pv, v716, (v713)(pv, l68.fvalue(pv, v715))), "})()");
+                })(), l186.fvalue(pv, v716, (function(){
+                    var f = v713;
+                    return (typeof f === 'function'? f: f.fvalue)(pv, l68.fvalue(pv, v715))
+                })()), "})()");
             })(0,l5,"");
         })();
     }));
@@ -7859,7 +7889,17 @@ var l319 = {name: "FUNCALL"};
         v837 = {car: arguments[i], cdr: 
     v837};
     return (function(){
-        return l182.fvalue(values, "(", l184.fvalue(pv, v838), ")(", l150.fvalue(pv, ({car: ((function(){
+        return l182.fvalue(values, "(function(){", (function(){
+            var symbol = l147;
+            var value = symbol.value;
+            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+            return value;
+        })(), l186.fvalue(pv, "var f = ", l184.fvalue(pv, v838), ";", (function(){
+            var symbol = l147;
+            var value = symbol.value;
+            if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
+            return value;
+        })(), "return (typeof f === 'function'? f: f.fvalue)(", l150.fvalue(pv, ({car: ((function(){
             var symbol = l187;
             var value = symbol.value;
             if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -7869,7 +7909,7 @@ var l319 = {name: "FUNCALL"};
             var func = symbol.fvalue;
             if (func === undefined) throw "Function `" + symbol.name + "' is undefined.";
             return func;
-        })(), v837)}), ", "), ")");
+        })(), v837)}), ", "), ")"), "})()");
     })();
 })), cdr: (function(){
     var symbol = l288;
@@ -7936,7 +7976,7 @@ var l320 = {name: "APPLY"};
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
                 return value;
-            })(), "return f.apply(this, args);", (function(){
+            })(), "return (typeof f === 'function'? f : f.fvalue).apply(this, args);", (function(){
                 var symbol = l147;
                 var value = symbol.value;
                 if (value === undefined) throw "Variable `" + symbol.name + "' is unbound.";
@@ -8439,7 +8479,7 @@ var l336 = {name: "LS-MACROEXPAND-1"};
                             args.push(tail.car);
                             tail = tail.cdr;
                         }
-                        return f.apply(this, args);
+                        return (typeof f === 'function'? f : f.fvalue).apply(this, args);
                     })();
                 })(l191.fvalue(pv, v888)) : v887);
             })(l213.fvalue(pv, (function(){
@@ -8451,7 +8491,7 @@ var l336 = {name: "LS-MACROEXPAND-1"};
     return l336;
 })();
 var l337 = {name: "COMPILE-FUNCALL"};
-var l338 = {name: "G764"};
+var l338 = {name: "G870"};
 (function(){
     (l337).fvalue = (function(v896){
         ((v896)["fname"] = "COMPILE-FUNCALL");
@@ -8578,7 +8618,7 @@ var l338 = {name: "G764"};
                                     args.push(tail.car);
                                     tail = tail.cdr;
                                 }
-                                return f.apply(this, args);
+                                return (typeof f === 'function'? f : f.fvalue).apply(this, args);
                             })();
                         })(l41.fvalue(pv, l102.fvalue(pv, v905, (function(){
                             var symbol = l221;
@@ -8599,7 +8639,7 @@ var l338 = {name: "G764"};
                                     args.push(tail.car);
                                     tail = tail.cdr;
                                 }
-                                return f.apply(this, args);
+                                return (typeof f === 'function'? f : f.fvalue).apply(this, args);
                             })();
                         })(l41.fvalue(pv, l102.fvalue(pv, v905, (function(){
                             var symbol = l288;
@@ -8712,7 +8752,7 @@ var l339 = {name: "LS-COMPILE-TOPLEVEL"};
     return l263;
 })();
 var l340 = {name: "&BODY"};
-var l341 = QIList(l226,l227,l225,l340,l21,l16,l137,l63,l64,l22,l23,l24,l299,l301,l20,l20,l298,l300,l55,l66,l320,l332,l331,l102,l46,l199,l19,l19,l92,l33,l39,l37,l34,l31,l31,l53,l275,l35,l38,l36,l32,l32,l318,l84,l85,l83,l52,l29,l30,l81,l82,l48,l2,l3,l10,l12,l1,l9,l98,l97,l106,l70,l71,l108,l50,l51,l54,l311,l27,l312,l322,l263,l101,l145,l105,l127,l140,l40,l259,l43,l307,l319,l109,l328,l17,l146,l282,l80,l223,l138,l47,l86,l86,l144,l135,l260,l6,l91,l73,l267,l270,l122,l45,l60,l330,l123,l305,l79,l93,l88,l295,l111,l284,l112,l285,l5,l28,l90,l89,l13,l302,l56,l128,l130,l126,l175,l87,l157,l160,l220,l57,l58,l118,l69,l49,l177,l94,l95,l96,l14,l274,l67,l68,l119,l120,l41,l247,l117,l115,l100,l315,l103,l104,l314,l99,l255,l306,l136,l309,l308,l304,l4,l281,l42,l276,l26,l8,l283,l156,l155,l110,l159,l7,l107,l329,l25,l5);
+var l341 = QIList(l226,l227,l225,l340,l21,l16,l137,l63,l64,l22,l23,l24,l299,l301,l20,l20,l298,l300,l55,l66,l320,l332,l331,l102,l46,l199,l19,l19,l92,l33,l39,l37,l34,l31,l31,l53,l275,l35,l38,l36,l32,l32,l318,l84,l85,l83,l52,l29,l30,l81,l82,l48,l2,l3,l10,l12,l1,l9,l98,l97,l106,l70,l71,l108,l50,l51,l54,l311,l27,l312,l322,l263,l101,l145,l105,l127,l140,l40,l259,l43,l307,l319,l109,l328,l17,l146,l282,l80,l223,l138,l47,l86,l86,l144,l135,l260,l6,l91,l73,l267,l270,l122,l45,l60,l78,l330,l123,l305,l79,l93,l88,l295,l111,l284,l112,l285,l5,l28,l90,l89,l13,l302,l56,l128,l130,l126,l175,l87,l157,l160,l220,l57,l58,l118,l69,l49,l177,l94,l95,l96,l14,l274,l67,l68,l119,l120,l41,l247,l117,l115,l100,l315,l103,l104,l314,l99,l255,l306,l136,l309,l308,l304,l4,l281,l42,l276,l26,l8,l283,l156,l155,l110,l159,l7,l107,l329,l25,l5);
 l145.fvalue(values, l341);
 ((l137).value = (function(){
     var symbol = l133;
