@@ -2231,11 +2231,13 @@
     "string1.concat(string2)"))
 
 (define-raw-builtin funcall (func &rest args)
-  (code "(" (ls-compile func) ")("
-        (join (cons (if *multiple-value-p* "values" "pv")
-                    (mapcar #'ls-compile args))
-              ", ")
-        ")"))
+  (js!selfcall
+    "var f = " (ls-compile func) ";" *newline*
+    "return (typeof f === 'function'? f: f.fvalue)("
+    (join (cons (if *multiple-value-p* "values" "pv")
+                (mapcar #'ls-compile args))
+          ", ")
+    ")"))
 
 (define-raw-builtin apply (func &rest args)
   (if (null args)
