@@ -2006,10 +2006,9 @@
          *builtins*))
 
 (defmacro define-builtin (name args &body body)
-  `(progn
-     (define-raw-builtin ,name ,args
-       (let ,(mapcar (lambda (arg) `(,arg (ls-compile ,arg))) args)
-         ,@body))))
+  `(define-raw-builtin ,name ,args
+     (let ,(mapcar (lambda (arg) `(,arg (ls-compile ,arg))) args)
+       ,@body)))
 
 ;;; DECLS is a list of (JSVARNAME TYPE LISPFORM) declarations.
 (defmacro type-check (decls &body body)
