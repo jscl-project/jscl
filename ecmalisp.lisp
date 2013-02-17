@@ -370,9 +370,9 @@
 
   (defun map1 (func list)
     (with-collect
-      (while list
-        (collect (funcall func (car list)))
-        (setq list (cdr list)))))
+        (while list
+          (collect (funcall func (car list)))
+          (setq list (cdr list)))))
 
   (defmacro loop (&body body)
     `(while t ,@body))
@@ -380,14 +380,14 @@
   (defun mapcar (func list &rest lists)
     (let ((lists (cons list lists)))
       (with-collect
-        (block loop
-          (loop
-             (let ((elems (map1 #'car lists)))
-               (do ((tail lists (cdr tail)))
-                   ((null tail))
-                 (when (null (car tail)) (return-from loop))
-                 (rplaca tail (cdar tail)))
-               (collect (apply func elems))))))))
+          (block loop
+            (loop
+               (let ((elems (map1 #'car lists)))
+                 (do ((tail lists (cdr tail)))
+                     ((null tail))
+                   (when (null (car tail)) (return-from loop))
+                   (rplaca tail (cdar tail)))
+                 (collect (apply func elems))))))))
 
   (defun identity (x) x)
 
@@ -562,7 +562,7 @@
     `(multiple-value-call #'list ,value-from))
 
 
-  ;;; Generalized references (SETF)
+;;; Generalized references (SETF)
 
   (defvar *setf-expanders* nil)
 
@@ -630,7 +630,17 @@
               `(progn (rplacd ,cons ,new-value) ,new-value)
               `(car ,cons))))
 
-  ;;; Packages
+  (defmacro push (x place)
+    (multiple-value-bind (dummies vals newval setter getter)
+        (get-setf-expansion place)
+      (let ((g (gensym)))
+        `(let* ((,g ,x)
+                ,@(mapcar #'list dummies vals)
+                (,(car newval) (cons ,g ,getter))
+                ,@(cdr newval))
+           ,setter))))
+
+  ;; Packages
 
   (defvar *package-list* nil)
 
