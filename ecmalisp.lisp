@@ -495,39 +495,35 @@
       (t
        (error "Unsupported argument."))))
 
+  (defmacro do-sequence (iteration &body body)
+    (let ((seq (gensym))
+          (index (gensym)))
+      `(let ((,seq ,(second iteration)))
+         (cond
+           ;; Strings
+           ((stringp ,seq)
+            (let ((,index 0))
+              (dotimes (,index (length ,seq))
+                (let ((,(first iteration)
+                       (char ,seq ,index)))
+                  ,@body))))
+           ;; Lists
+           ((listp ,seq)
+            (dolist (,(first iteration) ,seq)
+              ,@body))
+           (t
+            (error "type-error!"))))))
+
   (defun some (function seq)
-    (cond
-      ((stringp seq)
-       (let ((index 0)
-             (size (length seq)))
-         (while (< index size)
-           (when (funcall function (char seq index))
-             (return-from some t))
-           (incf index))
-         nil))
-      ((listp seq)
-       (dolist (x seq nil)
-         (when (funcall function x)
-           (return t))))
-      (t
-       (error "Unknown sequence."))))
+    (do-sequence (elt seq)
+      (when (funcall function elt)
+        (return-from some t))))
 
   (defun every (function seq)
-    (cond
-      ((stringp seq)
-       (let ((index 0)
-             (size (length seq)))
-         (while (< index size)
-           (unless (funcall function (char seq index))
-             (return-from every nil))
-           (incf index))
-         t))
-      ((listp seq)
-       (dolist (x seq t)
-         (unless (funcall function x)
-           (return))))
-      (t
-       (error "Unknown sequence."))))
+    (do-sequence (elt seq)
+      (unless (funcall function elt)
+        (return-from every nil)))
+    t)
 
   (defun assoc (x alist)
     (while alist
@@ -704,8 +700,8 @@
 
   (defun nreconc (x y)
     (do ((1st (cdr x) (if (endp 1st) 1st (cdr 1st)))
-         (2nd x 1st) ; 2nd follows first down the list.
-         (3rd y 2nd)) ;3rd follows 2nd down the list.
+         (2nd x 1st)                ; 2nd follows first down the list.
+         (3rd y 2nd))               ;3rd follows 2nd down the list.
         ((atom 2nd) 3rd)
       (rplacd 2nd 3rd)))
 
