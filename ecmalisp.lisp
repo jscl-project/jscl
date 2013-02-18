@@ -163,7 +163,14 @@
     `(setq ,x (- ,x ,delta)))
 
   (defmacro push (x place)
-    `(setq ,place (cons ,x ,place)))
+    (multiple-value-bind (dummies vals newval setter getter)
+        (get-setf-expansion place)
+      (let ((g (gensym)))
+        `(let* ((,g ,x)
+                ,@(mapcar #'list dummies vals)
+                (,(car newval) (cons ,g ,getter))
+                ,@(cdr newval))
+           ,setter))))
 
   (defmacro dolist (iter &body body)
     (let ((var (first iter))
@@ -466,6 +473,7 @@
       ((funcall func (car list))
        (remove-if func (cdr list)))
       (t
+       ;;
        (cons (car list) (remove-if func (cdr list))))))
 
   (defun remove-if-not (func list)
@@ -640,16 +648,6 @@
               (list new-value)
               `(progn (rplacd ,cons ,new-value) ,new-value)
               `(car ,cons))))
-
-  (defmacro push (x place)
-    (multiple-value-bind (dummies vals newval setter getter)
-        (get-setf-expansion place)
-      (let ((g (gensym)))
-        `(let* ((,g ,x)
-                ,@(mapcar #'list dummies vals)
-                (,(car newval) (cons ,g ,getter))
-                ,@(cdr newval))
-           ,setter))))
 
   ;; Incorrect typecase, but used in NCONC.
   (defmacro typecase (x &rest clausules)
