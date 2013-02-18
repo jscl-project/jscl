@@ -645,7 +645,6 @@
               `(progn (rplacd ,cons ,new-value) ,new-value)
               `(car ,cons))))
 
-<<<<<<< HEAD
   (defmacro push (x place)
     (multiple-value-bind (dummies vals newval setter getter)
         (get-setf-expansion place)
@@ -655,7 +654,7 @@
                 (,(car newval) (cons ,g ,getter))
                 ,@(cdr newval))
            ,setter))))
-=======
+
   ;; Incorrect typecase, but used in NCONC.
   (defmacro typecase (x &rest clausules)
     (let ((value (gensym)))
@@ -713,7 +712,6 @@
   (defun notany (fn seq)
     (not (some fn seq)))
 
->>>>>>> backquote
 
   ;; Packages
 
