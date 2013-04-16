@@ -9,8 +9,8 @@
   common special operators, functions and macros. In particular:
 
   - Multiple values
-  - Explicit control flow ([[http://www.lispworks.com/documentation/HyperSpec/Body/s_tagbod.htm][tagbody]] and [[http://www.lispworks.com/documentation/HyperSpec/Body/s_go.htm][go]])
-  - Static and dynamic non local exist ([[http://www.lispworks.com/documentation/HyperSpec/Body/s_catch.htm][catch]], [[http://www.lispworks.com/documentation/HyperSpec/Body/s_throw.htm][throw]]; [[http://www.lispworks.com/documentation/HyperSpec/Body/s_block.htm][block]], [[http://www.lispworks.com/documentation/HyperSpec/Body/s_ret_fr.htm][return-from]]).
+  - Explicit control tranfers ([[http://www.lispworks.com/documentation/HyperSpec/Body/s_tagbod.htm][tagbody]] and [[http://www.lispworks.com/documentation/HyperSpec/Body/s_go.htm][go]])
+  - Static and dynamic non local exit ([[http://www.lispworks.com/documentation/HyperSpec/Body/s_catch.htm][catch]], [[http://www.lispworks.com/documentation/HyperSpec/Body/s_throw.htm][throw]]; [[http://www.lispworks.com/documentation/HyperSpec/Body/s_block.htm][block]], [[http://www.lispworks.com/documentation/HyperSpec/Body/s_ret_fr.htm][return-from]]).
   - Lexical and special variables. However, declare expressions are
     missing, but you can /proclaim/ special variables.
   - Optional and keyword arguments
