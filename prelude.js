@@ -1,12 +1,13 @@
+// This file is prepended to the result of compile ecmalisp.lisp, and
+// contain runtime code that ecmalisp assumes to exist.
+
 var nil;
 
 function pv (x) { return x==undefined? nil: x; }
 
 function mv(){
-    var r = [];
+    var r = [].slice.call(arguments);
     r['multiple-value'] = true;
-    for (var i=0; i<arguments.length; i++)
-        r.push(arguments[i]);
     return r;
 }
 
