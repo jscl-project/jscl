@@ -758,6 +758,9 @@
   (defvar *common-lisp-package*
     (make-package "CL"))
 
+  (defvar *js-package*
+    (make-package "js"))
+
   (defvar *user-package*
     (make-package "CL-USER" :use (list *common-lisp-package*)))
 
@@ -812,6 +815,9 @@
               (let ((symbol (make-symbol name)))
                 (oset symbol "package" package)
                 (when (eq package *keyword-package*)
+                  (oset symbol "value" symbol)
+                  (export (list symbol) package))
+		(when (eq package *js-package*)
                   (oset symbol "value" symbol)
                   (export (list symbol) package))
                 (oset symbols name symbol)
@@ -1110,7 +1116,8 @@
          (incf index))
        (setq name (subseq string index))))
     ;; Canonalize symbol name and package
-    (setq name (string-upcase name))
+    (when (not (eq package "js"))
+      (setq name (string-upcase name)))
     (setq package (find-package package))
     ;; TODO: PACKAGE:SYMBOL should signal error if SYMBOL is not an
     ;; external symbol from PACKAGE.
@@ -1303,6 +1310,7 @@
 (defvar *environment* (make-lexenv))
 
 (defvar *variable-counter* 0)
+
 (defun gvarname (symbol)
   (code "v" (incf *variable-counter*)))
 
