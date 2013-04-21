@@ -954,7 +954,9 @@
                      (concat (prin1-to-string (car last)) " . " (prin1-to-string (cdr last)))))
                ")"))
       ((arrayp form)
-       (concat "#" (prin1-to-string (vector-to-list form))))
+       (concat "#" (if (zerop (length form))
+                       "()"
+                       (prin1-to-string (vector-to-list form)))))
       ((packagep form)
        (concat "#<PACKAGE " (package-name form) ">"))))
 
