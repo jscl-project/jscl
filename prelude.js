@@ -1,7 +1,12 @@
 // This file is prepended to the result of compile ecmalisp.lisp, and
 // contain runtime code that ecmalisp assumes to exist.
 
+var window = this;
 var nil;
+
+function globalEval (x) {
+    return eval.call (window, x);
+}
 
 function pv (x) { return x==undefined? nil: x; }
 
