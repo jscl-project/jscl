@@ -52,7 +52,7 @@
 
   (defconstant t 't)
   (defconstant nil 'nil)
-  (js-vset "nil" nil)
+  (%js-vset "nil" nil)
 
   (defmacro lambda (args &body body)
     `(function (lambda ,args ,@body)))
@@ -818,10 +818,18 @@
                   (oset symbol "value" symbol)
                   (export (list symbol) package))
 		(when (eq package (find-package "JS"))
-                  (fset symbol (lambda (&rest args)
-                                 ;; call to %js-call here!
-                                 ))
-		  (export (list symbol) package))
+		  (let ((sym-name (symbol-name symbol))
+                        (args (gensym)))
+                    ;; Generate a trampoline to call the JS function
+                    ;; properly. This trampoline is very inefficient,
+                    ;; but it still works. Ideas to optimize this are
+                    ;; provide a special lambda keyword
+                    ;; cl::&rest-vector to avoid list argument
+                    ;; consing, as well as allow inline declarations.
+		    (fset symbol
+                          (eval `(lambda (&rest ,args)
+                                   (let ((,args (list-to-vector ,args)))
+                                     (%js-call (%js-vref ,sym-name) ,args)))))))
                 (oset symbols name symbol)
                 (values symbol nil)))))))
 
@@ -1602,7 +1610,6 @@
        "})"))))
 
 
-
 (defun setq-pair (var val)
   (let ((b (lookup-in-lexenv var *environment* 'variable)))
     (if (and (eq (binding-type b) 'variable)
@@ -1611,10 +1618,6 @@
         (code (binding-value b) " = " (ls-compile val))
         (ls-compile `(set ',var ,val)))))
 
-
-(define-compilation %js-call (fun &rest args)
-  (let ((evaled-args (mapcar #'ls-compile args)))
-    (code fun "(" (join evaled-args ", ") ")")))
 
 (define-compilation setq (&rest pairs)
   (let ((result ""))
@@ -1629,13 +1632,6 @@
 		   (if (null (cddr pairs)) "" ", ")))
 	 (setq pairs (cddr pairs)))))
     (code "(" result ")")))
-
-;;; FFI Variable accessors
-(define-compilation js-vref (var)
-  var)
-
-(define-compilation js-vset (var val)
-  (code "(" var " = " (ls-compile val) ")"))
 
 
 ;;; Literals
@@ -2052,6 +2048,14 @@
     "var args = " (ls-compile first-form *multiple-value-p*) ";" *newline*
     (ls-compile-block forms)
     "return args;" *newline*))
+
+
+;;; Javascript FFI
+
+(define-compilation %js-vref (var) var)
+
+(define-compilation %js-vset (var val)
+  (code "(" var " = " (ls-compile val) ")"))
 
 
 ;;; Backquote implementation.
@@ -2648,6 +2652,12 @@
       (code "values(" (join (mapcar #'ls-compile args) ", ") ")")
       (code "pv(" (join (mapcar #'ls-compile args) ", ") ")")))
 
+;; Receives the JS function as first argument as a literal string. The
+;; second argument is compiled and should evaluate to a vector of
+;; values to apply to the the function. The result returned.
+(define-builtin %js-call (fun args)
+  (code fun ".apply(this, " args ")"))
+
 (defun macro (x)
   (and (symbolp x)
        (let ((b (lookup-in-lexenv x *environment* 'function)))
@@ -2779,13 +2789,13 @@
   (setq *package* *user-package*)
 
   (js-eval "var lisp")
-  (js-vset "lisp" (new))
-  (js-vset "lisp.read" #'ls-read-from-string)
-  (js-vset "lisp.print" #'prin1-to-string)
-  (js-vset "lisp.eval" #'eval)
-  (js-vset "lisp.compile" (lambda (s) (ls-compile-toplevel s t)))
-  (js-vset "lisp.evalString" (lambda (str) (eval (ls-read-from-string str))))
-  (js-vset "lisp.compileString" (lambda (str) (ls-compile-toplevel (ls-read-from-string str) t)))
+  (%js-vset "lisp" (new))
+  (%js-vset "lisp.read" #'ls-read-from-string)
+  (%js-vset "lisp.print" #'prin1-to-string)
+  (%js-vset "lisp.eval" #'eval)
+  (%js-vset "lisp.compile" (lambda (s) (ls-compile-toplevel s t)))
+  (%js-vset "lisp.evalString" (lambda (str) (eval (ls-read-from-string str))))
+  (%js-vset "lisp.compileString" (lambda (str) (ls-compile-toplevel (ls-read-from-string str) t)))
 
   ;; Set the initial global environment to be equal to the host global
   ;; environment at this point of the compilation.
@@ -2797,7 +2807,7 @@
     (toplevel-compilation
      (ls-compile
       `(progn
-         ,@(mapcar (lambda (s) `(%intern-symbol (js-vref ,(cdr s))))
+         ,@(mapcar (lambda (s) `(%intern-symbol (%js-vref ,(cdr s))))
                    *literal-symbols*)
          (setq *literal-symbols* ',*literal-symbols*)
          (setq *variable-counter* ,*variable-counter*)
