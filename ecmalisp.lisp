@@ -52,7 +52,7 @@
 
   (defconstant t 't)
   (defconstant nil 'nil)
-  (js-vset "nil" nil)
+  (%js-vset "nil" nil)
 
   (defmacro lambda (args &body body)
     `(function (lambda ,args ,@body)))
@@ -533,6 +533,14 @@
         (return-from every nil)))
     t)
 
+  (defun position (elt sequence)
+    (let ((pos 0))
+      (do-sequence (x seq)
+        (when (eq elt x)
+          (return))
+        (incf pos))
+      pos))
+
   (defun assoc (x alist)
     (while alist
       (if (eql x (caar alist))
@@ -818,9 +826,18 @@
                   (oset symbol "value" symbol)
                   (export (list symbol) package))
 		(when (eq package (find-package "JS"))
-		  (let ((sym-name (symbol-name symbol)))
-		    (fset symbol (lambda (&rest args)
-				   (%js-call sym-name args)))))
+		  (let ((sym-name (symbol-name symbol))
+                        (args (gensym)))
+                    ;; Generate a trampoline to call the JS function
+                    ;; properly. This trampoline is very inefficient,
+                    ;; but it still works. Ideas to optimize this are
+                    ;; provide a special lambda keyword
+                    ;; cl::&rest-vector to avoid list argument
+                    ;; consing, as well as allow inline declarations.
+		    (fset symbol
+                          (eval `(lambda (&rest ,args)
+                                   (let ((,args (list-to-vector ,args)))
+                                     (%js-call (%js-vref ,sym-name) ,args)))))))
                 (oset symbols name symbol)
                 (values symbol nil)))))))
 
@@ -1122,10 +1139,11 @@
     (setq package (find-package package))
     ;; TODO: PACKAGE:SYMBOL should signal error if SYMBOL is not an
     ;; external symbol from PACKAGE.
-    (if (or internalp (or (eq package (find-package "KEYWORD"))
-			  (eq package (find-package "JS"))))
-	(intern name package)
-	(find-symbol name package))))
+    (if (or internalp
+            (eq package (find-package "KEYWORD"))
+            (eq package (find-package "JS")))
+        (intern name package)
+        (find-symbol name package))))
 
 
 (defun !parse-integer (string junk-allow)
@@ -1600,7 +1618,6 @@
        "})"))))
 
 
-
 (defun setq-pair (var val)
   (let ((b (lookup-in-lexenv var *environment* 'variable)))
     (if (and (eq (binding-type b) 'variable)
@@ -1609,12 +1626,6 @@
         (code (binding-value b) " = " (ls-compile val))
         (ls-compile `(set ',var ,val)))))
 
-
-;; receives the js function as first param and its arguments as a
-;; list.
-(define-compilation %js-call (fun args)
-  (let ((evaled-args (mapcar #'ls-compile args)))
-    (code fun "(" (join evaled-args ", ") ")")))
 
 (define-compilation setq (&rest pairs)
   (let ((result ""))
@@ -1629,13 +1640,6 @@
 		   (if (null (cddr pairs)) "" ", ")))
 	 (setq pairs (cddr pairs)))))
     (code "(" result ")")))
-
-;;; FFI Variable accessors
-(define-compilation js-vref (var)
-  var)
-
-(define-compilation js-vset (var val)
-  (code "(" var " = " (ls-compile val) ")"))
 
 
 ;;; Literals
@@ -2052,6 +2056,14 @@
     "var args = " (ls-compile first-form *multiple-value-p*) ";" *newline*
     (ls-compile-block forms)
     "return args;" *newline*))
+
+
+;;; Javascript FFI
+
+(define-compilation %js-vref (var) var)
+
+(define-compilation %js-vset (var val)
+  (code "(" var " = " (ls-compile val) ")"))
 
 
 ;;; Backquote implementation.
@@ -2648,6 +2660,12 @@
       (code "values(" (join (mapcar #'ls-compile args) ", ") ")")
       (code "pv(" (join (mapcar #'ls-compile args) ", ") ")")))
 
+;; Receives the JS function as first argument as a literal string. The
+;; second argument is compiled and should evaluate to a vector of
+;; values to apply to the the function. The result returned.
+(define-builtin %js-call (fun args)
+  (code fun ".apply(this, " args ")"))
+
 (defun macro (x)
   (and (symbolp x)
        (let ((b (lookup-in-lexenv x *environment* 'function)))
@@ -2729,6 +2747,15 @@
       (t
        (error (concat "How should I compile " (prin1-to-string sexp) "?"))))))
 
+
+(defvar *compile-print-toplevels* nil)
+
+(defun truncate-string (string &optional (width 60))
+    (let ((size (length string))
+          (n (or (position #\newline string)
+                 (min width (length string)))))
+      (subseq string 0 n)))
+
 (defun ls-compile-toplevel (sexp &optional multiple-value-p)
   (let ((*toplevel-compilations* nil))
     (cond
@@ -2738,6 +2765,12 @@
                            (cdr sexp))))
          (join (remove-if #'null-or-empty-p subs))))
       (t
+       (when *compile-print-toplevels*
+         (let ((form-string (prin1-to-string sexp)))
+           (write-string "Compiling ")
+           (write-string (truncate-string form-string))
+           (write-line "...")))
+
        (let ((code (ls-compile sexp multiple-value-p)))
          (code (join-trailing (get-toplevel-compilations)
                               (code ";" *newline*))
@@ -2779,13 +2812,13 @@
   (setq *package* *user-package*)
 
   (js-eval "var lisp")
-  (js-vset "lisp" (new))
-  (js-vset "lisp.read" #'ls-read-from-string)
-  (js-vset "lisp.print" #'prin1-to-string)
-  (js-vset "lisp.eval" #'eval)
-  (js-vset "lisp.compile" (lambda (s) (ls-compile-toplevel s t)))
-  (js-vset "lisp.evalString" (lambda (str) (eval (ls-read-from-string str))))
-  (js-vset "lisp.compileString" (lambda (str) (ls-compile-toplevel (ls-read-from-string str) t)))
+  (%js-vset "lisp" (new))
+  (%js-vset "lisp.read" #'ls-read-from-string)
+  (%js-vset "lisp.print" #'prin1-to-string)
+  (%js-vset "lisp.eval" #'eval)
+  (%js-vset "lisp.compile" (lambda (s) (ls-compile-toplevel s t)))
+  (%js-vset "lisp.evalString" (lambda (str) (eval (ls-read-from-string str))))
+  (%js-vset "lisp.compileString" (lambda (str) (ls-compile-toplevel (ls-read-from-string str) t)))
 
   ;; Set the initial global environment to be equal to the host global
   ;; environment at this point of the compilation.
@@ -2797,7 +2830,7 @@
     (toplevel-compilation
      (ls-compile
       `(progn
-         ,@(mapcar (lambda (s) `(%intern-symbol (js-vref ,(cdr s))))
+         ,@(mapcar (lambda (s) `(%intern-symbol (%js-vref ,(cdr s))))
                    *literal-symbols*)
          (setq *literal-symbols* ',*literal-symbols*)
          (setq *variable-counter* ,*variable-counter*)
@@ -2821,8 +2854,9 @@
         (read-sequence seq in)
         seq)))
 
-  (defun ls-compile-file (filename output)
-    (let ((*compiling-file* t))
+  (defun ls-compile-file (filename output &key print)
+    (let ((*compiling-file* t)
+          (*compile-print-toplevels* print))
       (with-open-file (out output :direction :output :if-exists :supersede)
         (write-string (read-whole-file "prelude.js") out)
         (let* ((source (read-whole-file filename))
@@ -2841,4 +2875,4 @@
           *gensym-counter* 0
           *literal-counter* 0
           *block-counter* 0)
-    (ls-compile-file "ecmalisp.lisp" "ecmalisp.js")))
+    (ls-compile-file "ecmalisp.lisp" "ecmalisp.js" :print t)))
