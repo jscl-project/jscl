@@ -818,10 +818,9 @@
                   (oset symbol "value" symbol)
                   (export (list symbol) package))
 		(when (eq package (find-package "JS"))
-                  (in-package :js
-			      `(defun ,symbol (args)
-				(apply #'%js-call ,(symbol-name symbol)
-				       args)))
+                  (fset symbol (lambda (&rest args)
+                                 ;; call to %js-call here!
+                                 ))
 		  (export (list symbol) package))
                 (oset symbols name symbol)
                 (values symbol nil)))))))
@@ -1124,8 +1123,9 @@
     (setq package (find-package package))
     ;; TODO: PACKAGE:SYMBOL should signal error if SYMBOL is not an
     ;; external symbol from PACKAGE.
-    (if (or internalp (eq package (or (find-package "KEYWORD")
-				      (find-package "JS"))))
+    (if (or internalp
+            (eq package (find-package "KEYWORD"))
+            (eq package (find-package "JS")))
         (intern name package)
         (find-symbol name package))))
 

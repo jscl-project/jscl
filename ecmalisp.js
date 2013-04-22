@@ -2832,6 +2832,13 @@ var l155 = {name: "EXPORT"};
                                     ((v318)["value"] = v318);
                                     return l155.fvalue(pv, l47.fvalue(pv, v318), v313);
                                 })() : l5.value);
+                                (((v313 === l136.fvalue(pv, "JS"))?l4.value: l5.value) !== l5.value ? (function(){
+                                    (v318).fvalue = (function (values){
+                                        checkArgsAtMost(arguments, 1);
+                                        return l111.fvalue(values, "testing");
+                                    });
+                                    return l155.fvalue(pv, l47.fvalue(pv, v318), v313);
+                                })() : l5.value);
                                 ((v317)[v311] = v318);
                                 return values(v318, l5.value);
                             })((function(){
@@ -3773,9 +3780,9 @@ var l183 = {name: "READ-SYMBOL"};
                 })()) : l5.value);
                 (v422 = l136.fvalue(pv, v422));
                 return ((function(v426){
-                    return (v426 !== l5.value ? v426 : ((v422 === (function(v427){
-                        return (v427 !== l5.value ? v427 : l136.fvalue(pv, "JS"));
-                    })(l136.fvalue(pv, "KEYWORD")))?l4.value: l5.value));
+                    return (v426 !== l5.value ? v426 : (function(v427){
+                        return (v427 !== l5.value ? v427 : ((v422 === l136.fvalue(pv, "JS"))?l4.value: l5.value));
+                    })(((v422 === l136.fvalue(pv, "KEYWORD"))?l4.value: l5.value)));
                 })(v424) !== l5.value ? l154.fvalue(values, v423, v422) : l150.fvalue(values, v423, v422));
             })(l75.fvalue(pv, v420),l5.value,l5.value,l5.value,l5.value);
         })();
@@ -9903,7 +9910,7 @@ var l369 = {name: "VALUES-ARRAY"};
     return l120;
 })();
 var l370 = {name: "COMPILE-FUNCALL"};
-var l371 = {name: "G868"};
+var l371 = {name: "G907"};
 (function(){
     (l370).fvalue = (function(v1170){
         ((v1170)["fname"] = "COMPILE-FUNCALL");
