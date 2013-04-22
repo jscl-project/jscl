@@ -966,7 +966,9 @@
                        "()"
                        (prin1-to-string (vector-to-list form)))))
       ((packagep form)
-       (concat "#<PACKAGE " (package-name form) ">"))))
+       (concat "#<PACKAGE " (package-name form) ">"))
+      (t
+       (concat "#<javascript object>"))))
 
   (defun write-line (x)
     (write-string x)
