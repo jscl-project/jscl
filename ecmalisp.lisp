@@ -759,7 +759,7 @@
     (make-package "CL"))
 
   (defvar *js-package*
-    (make-package "js"))
+    (make-package "JS"))
 
   (defvar *user-package*
     (make-package "CL-USER" :use (list *common-lisp-package*)))
@@ -1116,12 +1116,13 @@
          (incf index))
        (setq name (subseq string index))))
     ;; Canonalize symbol name and package
-    (when (not (eq package "js"))
+    (when (not (eq package "JS"))
       (setq name (string-upcase name)))
     (setq package (find-package package))
     ;; TODO: PACKAGE:SYMBOL should signal error if SYMBOL is not an
     ;; external symbol from PACKAGE.
-    (if (or internalp (eq package (find-package "KEYWORD")))
+    (if (or internalp (eq package (or (find-package "KEYWORD")
+				      (find-package "JS"))))
         (intern name package)
         (find-symbol name package))))
 
