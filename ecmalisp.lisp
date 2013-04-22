@@ -533,6 +533,14 @@
         (return-from every nil)))
     t)
 
+  (defun position (elt sequence)
+    (let ((pos 0))
+      (do-sequence (x seq)
+        (when (eq elt x)
+          (return))
+        (incf pos))
+      pos))
+
   (defun assoc (x alist)
     (while alist
       (if (eql x (caar alist))
@@ -2712,6 +2720,15 @@
       (t
        (error (concat "How should I compile " (prin1-to-string sexp) "?"))))))
 
+
+(defvar *compile-print-toplevels* nil)
+
+(defun truncate-string (string &optional (width 60))
+    (let ((size (length string))
+          (n (or (position #\newline string)
+                 (min width (length string)))))
+      (subseq string 0 n)))
+
 (defun ls-compile-toplevel (sexp &optional multiple-value-p)
   (let ((*toplevel-compilations* nil))
     (cond
@@ -2721,6 +2738,12 @@
                            (cdr sexp))))
          (join (remove-if #'null-or-empty-p subs))))
       (t
+       (when *compile-print-toplevels*
+         (let ((form-string (prin1-to-string sexp)))
+           (write-string "Compiling ")
+           (write-string (truncate-string form-string))
+           (write-line "...")))
+       
        (let ((code (ls-compile sexp multiple-value-p)))
          (code (join-trailing (get-toplevel-compilations)
                               (code ";" *newline*))
@@ -2804,8 +2827,9 @@
         (read-sequence seq in)
         seq)))
 
-  (defun ls-compile-file (filename output)
-    (let ((*compiling-file* t))
+  (defun ls-compile-file (filename output &key print)
+    (let ((*compiling-file* t)
+          (*compile-print-toplevels* print))
       (with-open-file (out output :direction :output :if-exists :supersede)
         (write-string (read-whole-file "prelude.js") out)
         (let* ((source (read-whole-file filename))
@@ -2824,4 +2848,4 @@
           *gensym-counter* 0
           *literal-counter* 0
           *block-counter* 0)
-    (ls-compile-file "ecmalisp.lisp" "ecmalisp.js")))
+    (ls-compile-file "ecmalisp.lisp" "ecmalisp.js" :print t)))
