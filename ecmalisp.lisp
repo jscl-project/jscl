@@ -1608,6 +1608,11 @@
         (code (binding-value b) " = " (ls-compile val))
         (ls-compile `(set ',var ,val)))))
 
+
+(define-compilation %js-call (fun &rest args)
+  (let ((evaled-args (mapcar #'ls-compile args)))
+    (code fun "(" (join evaled-args ", ") ")")))
+
 (define-compilation setq (&rest pairs)
   (let ((result ""))
     (while t
