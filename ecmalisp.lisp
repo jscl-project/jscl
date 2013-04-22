@@ -818,11 +818,9 @@
                   (oset symbol "value" symbol)
                   (export (list symbol) package))
 		(when (eq package (find-package "JS"))
-                  (in-package :js
-			      `(defun ,symbol (args)
-				(apply #'%js-call ,(symbol-name symbol)
-				       args)))
-		  (export (list symbol) package))
+		  (let ((sym-name (symbol-name symbol)))
+		    (fset symbol (lambda (&rest args)
+				   (%js-call sym-name args)))))
                 (oset symbols name symbol)
                 (values symbol nil)))))))
 
@@ -1124,10 +1122,10 @@
     (setq package (find-package package))
     ;; TODO: PACKAGE:SYMBOL should signal error if SYMBOL is not an
     ;; external symbol from PACKAGE.
-    (if (or internalp (eq package (or (find-package "KEYWORD")
-				      (find-package "JS"))))
-        (intern name package)
-        (find-symbol name package))))
+    (if (or internalp (or (eq package (find-package "KEYWORD"))
+			  (eq package (find-package "JS"))))
+	(intern name package)
+	(find-symbol name package))))
 
 
 (defun !parse-integer (string junk-allow)
@@ -1612,7 +1610,9 @@
         (ls-compile `(set ',var ,val)))))
 
 
-(define-compilation %js-call (fun &rest args)
+;; receives the js function as first param and its arguments as a
+;; list.
+(define-compilation %js-call (fun args)
   (let ((evaled-args (mapcar #'ls-compile args)))
     (code fun "(" (join evaled-args ", ") ")")))
 
