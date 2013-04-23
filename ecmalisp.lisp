@@ -1154,7 +1154,9 @@
           (incf index)))
       (if (or junk-allow
               (= index size)
-              (char= (char string index) #\space))
+              (do ((i index (1+ i)))
+                  ((or (>= i size) (not (whitespacep (char string i))))
+                   (>= i size))))
           (values (* sign value) index)
           (values nil index)))))
 
