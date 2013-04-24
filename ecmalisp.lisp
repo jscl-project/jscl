@@ -1429,7 +1429,8 @@
 
 (defun %compile-defmacro (name lambda)
   (toplevel-compilation (ls-compile `',name))
-  (push-to-lexenv (make-binding :name name :type 'macro :value lambda) *environment* 'function)
+  (let ((binding (make-binding :name name :type 'macro :value lambda)))
+    (push-to-lexenv binding  *environment* 'function))
   name)
 
 (defun global-binding (name type namespace)
