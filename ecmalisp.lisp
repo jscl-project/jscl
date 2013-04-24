@@ -1376,7 +1376,12 @@
   name
   type
   value
-  declarations)
+  declarations
+  ;; This slot is using during bootstrapping in order to speed up the
+  ;; compilation time. The reason is we store the macro expanders as
+  ;; lists, but we do not want to compile the definition multiple
+  ;; times.
+  #+common-lisp cache)
 
 (def!struct lexenv
   variable
@@ -2789,17 +2794,22 @@
      (let ((macro-binding (macro (car form))))
        (if macro-binding
            (let ((expander (binding-value macro-binding)))
-             (when (listp expander)
-               (let ((compiled (eval expander)))
-                 ;; The list representation are useful while
-                 ;; bootstrapping, as we can dump the definition of the
-                 ;; macros easily, but they are slow because we have to
-                 ;; evaluate them and compile them now and again. So, let
-                 ;; us replace the list representation version of the
-                 ;; function with the compiled one.
-                 ;;
-                 #+ecmalisp (setf (binding-value macro-binding) compiled)
-                 (setq expander compiled)))
+             (cond
+               #+common-lisp
+               ((binding-cache macro-binding)
+                (setq expander (binding-cache macro-binding)))
+               ((listp expander)
+                (let ((compiled (eval expander)))
+                  ;; The list representation are useful while
+                  ;; bootstrapping, as we can dump the definition of the
+                  ;; macros easily, but they are slow because we have to
+                  ;; evaluate them and compile them now and again. So, let
+                  ;; us replace the list representation version of the
+                  ;; function with the compiled one.
+                  ;;
+                  #+ecmalisp (setf (binding-value macro-binding) compiled)
+                  #+common-lisp (setf (binding-cache macro-binding) compiled)
+                  (setq expander compiled))))
              (values (apply expander (cdr form)) t))
            (values form nil))))
     (t
