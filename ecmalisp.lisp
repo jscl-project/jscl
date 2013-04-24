@@ -1135,7 +1135,11 @@
           (index 0)
           (size (length string))
           (sign 1))
-      (when (zerop size) (return (values nil 0)))
+      ;; Leading whitespace
+      (while (and (< index size)
+                  (whitespacep (char string index)))
+        (incf index))
+      (unless (< index size) (return (values nil 0)))
       ;; Optional sign
       (case (char string 0)
         (#\+ (incf index))
