@@ -1364,16 +1364,6 @@
   value
   declarations)
 
-(defun set-binding-value (b value)
-  (setf (binding-value b) value))
-
-(defun set-binding-declarations (b value)
-  (setf (binding-declarations b) value))
-
-(defun push-binding-declaration (decl b)
-  (set-binding-declarations b (cons decl (binding-declarations b))))
-
-
 (defun make-lexenv ()
   (list nil nil nil nil))
 
@@ -1448,15 +1438,15 @@
     (special
      (dolist (name (cdr decl))
        (let ((b (global-binding name 'variable 'variable)))
-         (push-binding-declaration 'special b))))
+         (push 'special (binding-declarations b)))))
     (notinline
      (dolist (name (cdr decl))
        (let ((b (global-binding name 'function 'function)))
-         (push-binding-declaration 'notinline b))))
+         (push 'notinline (binding-declarations b)))))
     (constant
      (dolist (name (cdr decl))
        (let ((b (global-binding name 'variable 'variable)))
-         (push-binding-declaration 'constant b))))))
+         (push 'constant (binding-declarations b)))))))
 
 #+ecmalisp
 (fset 'proclaim #'!proclaim)
@@ -1966,7 +1956,7 @@
   (let* ((tr (incf *block-counter*))
          (b (make-binding :name name :type 'block :value tr)))
     (when *multiple-value-p*
-      (push-binding-declaration 'multiple-value b))
+      (push 'multiple-value (binding-declarations b)))
     (let* ((*environment* (extend-lexenv (list b) *environment* 'block))
            (cbody (ls-compile-block body t)))
       (if (member 'used (binding-declarations b))
@@ -1990,7 +1980,7 @@
          (multiple-value-p (member 'multiple-value (binding-declarations b))))
     (when (null b)
       (error (concat "Unknown block `" (symbol-name name) "'.")))
-    (push-binding-declaration 'used b)
+    (push 'used (binding-declarations b))
     (js!selfcall
       (when multiple-value-p (code "var values = mv;" *newline*))
       "throw ({"
@@ -2760,7 +2750,7 @@
               ;; us replace the list representation version of the
               ;; function with the compiled one.
               ;;
-              #+ecmalisp (set-binding-value macro-binding compiled)
+              #+ecmalisp (setf (binding-value macro-binding) compiled)
               (setq expander compiled)))
           (apply expander (cdr form)))
         form)))
