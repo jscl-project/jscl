@@ -830,7 +830,7 @@
                 (when (eq package *keyword-package*)
                   (oset symbol "value" symbol)
                   (export (list symbol) package))
-		(when (eq package (find-package "JS"))
+		(when (eq package *js-package*)
 		  (let ((sym-name (symbol-name symbol))
                         (args (gensym)))
                     ;; Generate a trampoline to call the JS function
@@ -842,7 +842,10 @@
 		    (fset symbol
                           (eval `(lambda (&rest ,args)
                                    (let ((,args (list-to-vector ,args)))
-                                     (%js-call (%js-vref ,sym-name) ,args)))))))
+                                     (%js-call (%js-vref ,sym-name) ,args)))))
+                    ;; Define it as a symbol macro to access to the
+                    ;; Javascript variable literally.
+                    (%define-symbol-macro symbol `(%js-vref ,(string symbol)))))
                 (oset symbols name symbol)
                 (values symbol nil)))))))
 
