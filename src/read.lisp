@@ -236,8 +236,8 @@
        (read-sharp stream))
       (t
        (let ((string (read-until stream #'terminalp)))
-	 (or (values (!parse-integer string nil))
-	     (read-symbol string)))))))
+         (or (values (!parse-integer string nil))
+             (read-symbol string)))))))
 
 (defun ls-read (stream &optional (eof-error-p t) eof-value)
   (let ((x (ls-read-1 stream)))
