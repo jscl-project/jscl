@@ -1152,11 +1152,12 @@
           (unless digit (return))
           (setq value (+ (* value 10) digit))
           (incf index)))
+      ;; Trailing whitespace
+      (do ((i index (1+ i)))
+          ((or (= i size) (not (whitespacep (char string i))))
+           (and (= i size) (setq index i))))
       (if (or junk-allow
-              (= index size)
-              (do ((i index (1+ i)))
-                  ((or (>= i size) (not (whitespacep (char string i))))
-                   (>= i size))))
+              (= index size))
           (values (* sign value) index)
           (values nil index)))))
 
