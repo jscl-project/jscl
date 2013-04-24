@@ -2065,6 +2065,15 @@
 (define-compilation %js-vset (var val)
   (code "(" var " = " (ls-compile val) ")"))
 
+(define-setf-expander %js-vref (var)
+  (let ((new-value (gensym)))
+    (unless (stringp var)
+      (error "a string was expected"))
+    (values nil
+            (list var)
+            (list new-value)
+            `(%js-vset ,var ,new-value)
+            `(%js-vref ,var))))
 
 ;;; Backquote implementation.
 ;;;
