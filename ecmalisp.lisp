@@ -1465,6 +1465,16 @@
 #+ecmalisp
 (fset 'proclaim #'!proclaim)
 
+(defun %define-symbol-macro (name expansion)
+  (let ((b (make-binding :name name :type 'macro :value expansion)))
+    (push-to-lexenv b *environment* 'variable)
+    name))
+
+#+ecmalisp
+(defmacro define-symbol-macro (name expansion)
+  `(%define-symbol-macro ',name ',expansion))
+
+
 ;;; Special forms
 
 (defvar *compilations* nil)
@@ -2752,22 +2762,31 @@
              nil))))
 
 (defun ls-macroexpand-1 (form)
-  (let ((macro-binding (macro (car form))))
-    (if macro-binding
-        (let ((expander (binding-value macro-binding)))
-          (when (listp expander)
-            (let ((compiled (eval expander)))
-              ;; The list representation are useful while
-              ;; bootstrapping, as we can dump the definition of the
-              ;; macros easily, but they are slow because we have to
-              ;; evaluate them and compile them now and again. So, let
-              ;; us replace the list representation version of the
-              ;; function with the compiled one.
-              ;;
-              #+ecmalisp (setf (binding-value macro-binding) compiled)
-              (setq expander compiled)))
-          (apply expander (cdr form)))
-        form)))
+  (cond
+    ((symbolp form)
+     (let ((b (lookup-in-lexenv form *environment* 'variable)))
+       (if (and b (eq (binding-type b) 'macro))
+           (values (binding-value b) t)
+           (values form nil))))
+    ((consp form)
+     (let ((macro-binding (macro (car form))))
+       (if macro-binding
+           (let ((expander (binding-value macro-binding)))
+             (when (listp expander)
+               (let ((compiled (eval expander)))
+                 ;; The list representation are useful while
+                 ;; bootstrapping, as we can dump the definition of the
+                 ;; macros easily, but they are slow because we have to
+                 ;; evaluate them and compile them now and again. So, let
+                 ;; us replace the list representation version of the
+                 ;; function with the compiled one.
+                 ;;
+                 #+ecmalisp (setf (binding-value macro-binding) compiled)
+                 (setq expander compiled)))
+             (values (apply expander (cdr form)) t))
+           (values form nil))))
+    (t
+     (values form nil))))
 
 (defun compile-funcall (function args)
   (let* ((values-funcs (if *multiple-value-p* "values" "pv"))
@@ -2791,40 +2810,42 @@
        (concat ";" *newline*))))
 
 (defun ls-compile (sexp &optional multiple-value-p)
-  (let ((*multiple-value-p* multiple-value-p))
-    (cond
-      ((symbolp sexp)
-       (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
-         (cond
-           ((and b (not (member 'special (binding-declarations b))))
-            (binding-value b))
-           ((or (keywordp sexp)
-                (and b (member 'constant (binding-declarations b))))
-            (code (ls-compile `',sexp) ".value"))
-           (t
-            (ls-compile `(symbol-value ',sexp))))))
-      ((integerp sexp) (integer-to-string sexp))
-      ((stringp sexp) (code "\"" (escape-string sexp) "\""))
-      ((arrayp sexp) (literal sexp))
-      ((listp sexp)
-       (let ((name (car sexp))
-             (args (cdr sexp)))
-         (cond
-           ;; Special forms
-           ((assoc name *compilations*)
-            (let ((comp (second (assoc name *compilations*))))
-              (apply comp args)))
-           ;; Built-in functions
-           ((and (assoc name *builtins*)
-                 (not (claimp name 'function 'notinline)))
-            (let ((comp (second (assoc name *builtins*))))
-              (apply comp args)))
-           (t
-            (if (macro name)
-                (ls-compile (ls-macroexpand-1 sexp) multiple-value-p)
-                (compile-funcall name args))))))
-      (t
-       (error (concat "How should I compile " (prin1-to-string sexp) "?"))))))
+  (multiple-value-bind (sexp expandedp) (ls-macroexpand-1 sexp)
+    (when expandedp
+      (return-from ls-compile (ls-compile sexp multiple-value-p)))
+    ;; The expression has been macroexpanded. Now compile it!
+    (let ((*multiple-value-p* multiple-value-p))
+      (cond
+        ((symbolp sexp)
+         (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
+           (cond
+             ((and b (not (member 'special (binding-declarations b))))
+              (binding-value b))
+             ((or (keywordp sexp)
+                  (and b (member 'constant (binding-declarations b))))
+              (code (ls-compile `',sexp) ".value"))
+             (t
+              (ls-compile `(symbol-value ',sexp))))))
+        ((integerp sexp) (integer-to-string sexp))
+        ((stringp sexp) (code "\"" (escape-string sexp) "\""))
+        ((arrayp sexp) (literal sexp))
+        ((listp sexp)
+         (let ((name (car sexp))
+               (args (cdr sexp)))
+           (cond
+             ;; Special forms
+             ((assoc name *compilations*)
+              (let ((comp (second (assoc name *compilations*))))
+                (apply comp args)))
+             ;; Built-in functions
+             ((and (assoc name *builtins*)
+                   (not (claimp name 'function 'notinline)))
+              (let ((comp (second (assoc name *builtins*))))
+                (apply comp args)))
+             (t
+              (compile-funcall name args)))))
+        (t
+         (error (concat "How should I compile " (prin1-to-string sexp) "?")))))))
 
 
 (defvar *compile-print-toplevels* nil)
@@ -2865,27 +2886,33 @@
   (defun eval (x)
     (js-eval (ls-compile-toplevel x t)))
 
-  (export '(&rest &key &optional &body * *gensym-counter* *package* + - / 1+ 1- <
-            <= = = > >= and append apply aref arrayp assoc atom block boundp
-            boundp butlast caar cadddr caddr cadr car car case catch cdar cdddr
-            cddr cdr cdr char char-code fdefinition find-package find-symbol first
-            flet fourth fset funcall function functionp gensym get-setf-expansion
-            get-universal-time go identity if in-package incf integerp integerp
-            intern keywordp labels lambda last length let let* char= code-char
-            cond cons consp constantly copy-list decf declaim define-setf-expander
-            defconstant defparameter defun defmacro defvar digit-char digit-char-p
-            disassemble do do* documentation dolist dotimes ecase eq eql equal
-            error eval every export list-all-packages list list* listp loop make-array
-            make-package make-symbol mapcar member minusp mod multiple-value-bind
-            multiple-value-call multiple-value-list multiple-value-prog1 nconc nil not
-            nth nthcdr null numberp or package-name package-use-list packagep
-            parse-integer plusp prin1-to-string print proclaim prog1 prog2 progn
-            psetq push quote nreconc remove remove-if remove-if-not return return-from
-            revappend reverse rplaca rplacd second set setf setq some
-            string-upcase string string= stringp subseq symbol-function
-            symbol-name symbol-package symbol-plist symbol-value symbolp t tagbody
-            third throw truncate unless unwind-protect values values-list variable
-            warn when write-line write-string zerop))
+  (export '(&body &key &optional &rest * *gensym-counter* *package* + - / 1+ 1- <
+            <= = = > >= and append apply aref arrayp assoc atom block
+            boundp boundp butlast caar cadddr caddr cadr car car case
+            catch cdar cdddr cddr cdr cdr char char-code char=
+            code-char cond cons consp constantly copy-list decf
+            declaim defconstant define-setf-expander
+            define-symbol-macro defmacro defparameter defun defvar
+            digit-char digit-char-p disassemble do do* documentation
+            dolist dotimes ecase eq eql equal error eval every export
+            fdefinition find-package find-symbol first flet fourth
+            fset funcall function functionp gensym get-setf-expansion
+            get-universal-time go identity if in-package incf integerp
+            integerp intern keywordp labels lambda last length let
+            let* list list* list-all-packages listp loop make-array
+            make-package make-symbol mapcar member minusp mod
+            multiple-value-bind multiple-value-call
+            multiple-value-list multiple-value-prog1 nconc nil not
+            nreconc nth nthcdr null numberp or package-name
+            package-use-list packagep parse-integer plusp
+            prin1-to-string print proclaim prog1 prog2 progn psetq
+            push quote remove remove-if remove-if-not return
+            return-from revappend reverse rplaca rplacd second set
+            setf setq some string string-upcase string= stringp subseq
+            symbol-function symbol-name symbol-package symbol-plist
+            symbol-value symbolp t tagbody third throw truncate unless
+            unwind-protect values values-list variable warn when
+            write-line write-string zerop))
 
   (setq *package* *user-package*)
 
