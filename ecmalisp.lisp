@@ -1157,8 +1157,8 @@
 	  (values nil index)))))
 
 #+ecmalisp
-(defun parse-integer (string)
-  (!parse-integer string nil))
+(defun parse-integer (string &key junk-allowed)
+  (!parse-integer string junk-allowed))
 
 (defvar *eof* (gensym))
 (defun ls-read (stream)
