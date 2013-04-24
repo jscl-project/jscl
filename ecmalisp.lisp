@@ -931,6 +931,10 @@
       (aset v i x)
       (incf i))))
 
+(defmacro awhen (condition &body body)
+  `(let ((it ,condition))
+     (when it ,@body)))
+
 #+ecmalisp
 (progn
   (defun values-list (list)
@@ -1358,6 +1362,9 @@
                 (incf index)))))
        ',name)))
 
+
+;;; Environment
+
 (def!struct binding
   name
   type
@@ -1399,7 +1406,8 @@
   (code "v" (incf *variable-counter*)))
 
 (defun translate-variable (symbol)
-  (binding-value (lookup-in-lexenv symbol *environment* 'variable)))
+  (awhen (lookup-in-lexenv symbol *environment* 'variable)
+    (binding-value it)))
 
 (defun extend-local-env (args)
   (let ((new (copy-lexenv *environment*)))
