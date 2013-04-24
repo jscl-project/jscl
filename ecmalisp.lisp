@@ -386,7 +386,7 @@
   ;; A very simple defstruct built on lists. It supports just slot with
   ;; an optional default initform, and it will create a constructor,
   ;; predicate and accessors for you.
-  (defmacro defstruct (name &rest slots)
+  (defmacro !defstruct (name &rest slots)
     (unless (symbolp name)
       (error "It is not a full defstruct implementation."))
     (let* ((name-string (symbol-name name))
@@ -412,11 +412,26 @@
          ,@(with-collect
             (let ((index 1))
               (dolist (slot slot-descriptions)
-                (let ((name (car slot)))
-                  (collect `(defun ,(intern (concat name-string "-" (string name))) (x)
-                              (unless (,predicate x)
-                                (error ,(concat "The object is not a type " name-string)))
-                              (nth ,index x)))
+                (let* ((name (car slot))
+                       (accessor-name (intern (concat name-string "-" (string name)))))
+                  (collect
+                      `(defun ,accessor-name (x)
+                           (unless (,predicate x)
+                             (error ,(concat "The object is not a type " name-string)))
+                         (nth ,index x)))
+                  ;; TODO: Implement this with a higher level
+                  ;; abstraction like defsetf or (defun (setf ..))
+                  (collect
+                      `(define-setf-expander ,accessor-name (x)
+                         (let ((object (gensym))
+                               (new-value (gensym)))
+                           (values (list object)
+                                   (list x)
+                                   (list new-value)
+                                   `(progn
+                                      (rplaca (nthcdr ,',index ,object) ,new-value) 
+                                      ,new-value)
+                                   `(,',accessor-name ,object)))))
                   (incf index)))))
          ',name)))
 
