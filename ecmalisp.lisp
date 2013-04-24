@@ -1364,31 +1364,32 @@
   value
   declarations)
 
-(defun make-lexenv ()
-  (list nil nil nil nil))
+(def!struct lexenv
+  variable
+  function
+  block
+  gotag)
 
-(defun copy-lexenv (lexenv)
-  (copy-list lexenv))
+(defun lookup-in-lexenv (name lexenv namespace)
+  (find name (ecase namespace
+                (variable (lexenv-variable lexenv))
+                (function (lexenv-function lexenv))
+                (block    (lexenv-block    lexenv))
+                (gotag    (lexenv-gotag    lexenv)))
+        :key #'binding-name))
 
 (defun push-to-lexenv (binding lexenv namespace)
   (ecase namespace
-    (variable   (rplaca        lexenv  (cons binding (car lexenv))))
-    (function   (rplaca   (cdr lexenv) (cons binding (cadr lexenv))))
-    (block      (rplaca  (cddr lexenv) (cons binding (caddr lexenv))))
-    (gotag      (rplaca (cdddr lexenv) (cons binding (cadddr lexenv))))))
+    (variable (push binding (lexenv-variable lexenv)))
+    (function (push binding (lexenv-function lexenv)))
+    (block    (push binding (lexenv-block    lexenv)))
+    (gotag    (push binding (lexenv-gotag    lexenv)))))
 
 (defun extend-lexenv (bindings lexenv namespace)
   (let ((env (copy-lexenv lexenv)))
     (dolist (binding (reverse bindings) env)
       (push-to-lexenv binding env namespace))))
 
-(defun lookup-in-lexenv (name lexenv namespace)
-  (find name (ecase namespace
-                (variable (first lexenv))
-                (function (second lexenv))
-                (block (third lexenv))
-                (gotag (fourth lexenv)))
-        :key #'binding-name))
 
 (defvar *environment* (make-lexenv))
 
