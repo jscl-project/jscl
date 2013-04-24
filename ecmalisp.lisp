@@ -2763,10 +2763,9 @@
 (defvar *compile-print-toplevels* nil)
 
 (defun truncate-string (string &optional (width 60))
-    (let ((size (length string))
-          (n (or (position #\newline string)
-                 (min width (length string)))))
-      (subseq string 0 n)))
+  (let ((n (or (position #\newline string)
+               (min width (length string)))))
+    (subseq string 0 n)))
 
 (defun ls-compile-toplevel (sexp &optional multiple-value-p)
   (let ((*toplevel-compilations* nil))
