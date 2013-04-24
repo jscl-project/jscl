@@ -270,6 +270,18 @@
                (cdr list)
                :initial-value (funcall func initial-value (car list)))))
 
+(defmacro with-collect (&body body)
+  (let ((head (gensym))
+        (tail (gensym)))
+    `(let* ((,head (cons 'sentinel nil))
+            (,tail ,head))
+       (flet ((collect (x)
+                (rplacd ,tail (cons x nil))
+                (setq ,tail (cdr ,tail))
+                x))
+         ,@body)
+       (cdr ,head))))
+
 ;;; Go on growing the Lisp language in Ecmalisp, with more high
 ;;; level utilities as well as correct versions of other
 ;;; constructions.
@@ -371,73 +383,6 @@
   (defun concat-two (s1 s2)
     (concat-two s1 s2))
 
-  (defmacro with-collect (&body body)
-    (let ((head (gensym))
-          (tail (gensym)))
-      `(let* ((,head (cons 'sentinel nil))
-              (,tail ,head))
-         (flet ((collect (x)
-                  (rplacd ,tail (cons x nil))
-                  (setq ,tail (cdr ,tail))
-                  x))
-           ,@body)
-         (cdr ,head))))
-
-  ;; A very simple defstruct built on lists. It supports just slot with
-  ;; an optional default initform, and it will create a constructor,
-  ;; predicate and accessors for you.
-  (defmacro defstruct (name &rest slots)
-    (unless (symbolp name)
-      (error "It is not a full defstruct implementation."))
-    (let* ((name-string (symbol-name name))
-           (slot-descriptions
-            (mapcar (lambda (sd)
-                      (cond
-                        ((symbolp sd)
-                         (list sd))
-                        ((and (listp sd) (car sd) (cddr sd))
-                         sd)
-                        (t
-                         (error "Bad slot accessor."))))
-                    slots))
-           (predicate (intern (concat name-string "P"))))
-      `(progn
-         ;; Constructor
-         (defun ,(intern (concat "MAKE-" name-string)) (&key ,@slot-descriptions)
-           (list ',name ,@(mapcar #'car slot-descriptions)))
-         ;; Predicate
-         (defun ,predicate (x)
-           (and (consp x) (eq (car x) ',name)))
-         ;; Copier
-         (defun ,(intern (concat "COPY-" name-string)) (x)
-           (copy-list x))
-         ;; Slot accessors
-         ,@(with-collect
-            (let ((index 1))
-              (dolist (slot slot-descriptions)
-                (let* ((name (car slot))
-                       (accessor-name (intern (concat name-string "-" (string name)))))
-                  (collect
-                      `(defun ,accessor-name (x)
-                           (unless (,predicate x)
-                             (error ,(concat "The object is not a type " name-string)))
-                         (nth ,index x)))
-                  ;; TODO: Implement this with a higher level
-                  ;; abstraction like defsetf or (defun (setf ..))
-                  (collect
-                      `(define-setf-expander ,accessor-name (x)
-                         (let ((object (gensym))
-                               (new-value (gensym)))
-                           (values (list object)
-                                   (list x)
-                                   (list new-value)
-                                   `(progn
-                                      (rplaca (nthcdr ,',index ,object) ,new-value) 
-                                      ,new-value)
-                                   `(,',accessor-name ,object)))))
-                  (incf index)))))
-         ',name)))
-
   (defun map1 (func list)
     (with-collect
         (while list
@@ -511,6 +456,11 @@
       (when (eql x (car list))
         (return list))
       (setq list (cdr list))))
+
+  (defun find (item list &key key (test #'eql))
+    (dolist (x list)
+      (when (funcall test (funcall key x) item)
+        (return x))))
 
   (defun remove (x list)
     (cond
@@ -937,8 +887,13 @@
 
 (defvar *newline* (string (code-char 10)))
 
+#+ecmalisp
 (defun concat (&rest strs)
   (!reduce #'concat-two strs :initial-value ""))
+#+common-lisp
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun concat (&rest strs)
+    (apply #'concatenate 'string strs)))
 
 (defmacro concatf (variable &body form)
   `(setq ,variable (concat ,variable (progn ,@form))))
@@ -1348,19 +1303,72 @@
 ;;; function call.
 (defvar *multiple-value-p* nil)
 
-(defun make-binding (name type value &optional declarations)
-  (list name type value declarations))
+;; A very simple defstruct built on lists. It supports just slot with
+;; an optional default initform, and it will create a constructor,
+;; predicate and accessors for you.
+(defmacro def!struct (name &rest slots)
+  (unless (symbolp name)
+    (error "It is not a full defstruct implementation."))
+  (let* ((name-string (symbol-name name))
+         (slot-descriptions
+          (mapcar (lambda (sd)
+                    (cond
+                      ((symbolp sd)
+                       (list sd))
+                      ((and (listp sd) (car sd) (cddr sd))
+                       sd)
+                      (t
+                       (error "Bad slot accessor."))))
+                  slots))
+         (predicate (intern (concat name-string "-P"))))
+    `(progn
+       ;; Constructor
+       (defun ,(intern (concat "MAKE-" name-string)) (&key ,@slot-descriptions)
+         (list ',name ,@(mapcar #'car slot-descriptions)))
+       ;; Predicate
+       (defun ,predicate (x)
+         (and (consp x) (eq (car x) ',name)))
+       ;; Copier
+       (defun ,(intern (concat "COPY-" name-string)) (x)
+         (copy-list x))
+       ;; Slot accessors
+       ,@(with-collect
+          (let ((index 1))
+            (dolist (slot slot-descriptions)
+              (let* ((name (car slot))
+                     (accessor-name (intern (concat name-string "-" (string name)))))
+                (collect
+                    `(defun ,accessor-name (x)
+                       (unless (,predicate x)
+                         (error ,(concat "The object is not a type " name-string)))
+                       (nth ,index x)))
+                ;; TODO: Implement this with a higher level
+                ;; abstraction like defsetf or (defun (setf ..))
+                (collect
+                    `(define-setf-expander ,accessor-name (x)
+                       (let ((object (gensym))
+                             (new-value (gensym)))
+                         (values (list object)
+                                 (list x)
+                                 (list new-value)
+                                 `(progn
+                                    (rplaca (nthcdr ,',index ,object) ,new-value) 
+                                    ,new-value)
+                                 `(,',accessor-name ,object)))))
+                (incf index)))))
+       ',name)))
 
-(defun binding-name (b) (first b))
-(defun binding-type (b) (second b))
-(defun binding-value (b) (third b))
-(defun binding-declarations (b) (fourth b))
+(def!struct binding
+  name
+  type
+  value
+  declarations)
 
 (defun set-binding-value (b value)
-  (rplaca (cddr b) value))
+  (setf (binding-value b) value))
 
 (defun set-binding-declarations (b value)
-  (rplaca (cdddr b) value))
+  (setf (binding-declarations b) value))
 
 (defun push-binding-declaration (decl b)
   (set-binding-declarations b (cons decl (binding-declarations b))))
@@ -1385,11 +1393,12 @@
       (push-to-lexenv binding env namespace))))
 
 (defun lookup-in-lexenv (name lexenv namespace)
-  (assoc name (ecase namespace
+  (find name (ecase namespace
                 (variable (first lexenv))
                 (function (second lexenv))
                 (block (third lexenv))
-                (gotag (fourth lexenv)))))
+                (gotag (fourth lexenv)))
+        :key #'binding-name))
 
 (defvar *environment* (make-lexenv))
 
@@ -1404,7 +1413,7 @@
 (defun extend-local-env (args)
   (let ((new (copy-lexenv *environment*)))
     (dolist (symbol args new)
-      (let ((b (make-binding symbol 'variable (gvarname symbol))))
+      (let ((b (make-binding :name symbol :type 'variable :value (gvarname symbol))))
         (push-to-lexenv b new 'variable)))))
 
 ;;; Toplevel compilations
@@ -1421,12 +1430,12 @@
 
 (defun %compile-defmacro (name lambda)
   (toplevel-compilation (ls-compile `',name))
-  (push-to-lexenv (make-binding name 'macro lambda) *environment* 'function)
+  (push-to-lexenv (make-binding :name name :type 'macro :value lambda) *environment* 'function)
   name)
 
 (defun global-binding (name type namespace)
   (or (lookup-in-lexenv name *environment* namespace)
-      (let ((b (make-binding name type nil)))
+      (let ((b (make-binding :name name :type type :value nil)))
         (push-to-lexenv b *environment* namespace)
         b)))
 
@@ -1684,7 +1693,8 @@
 
 (defun setq-pair (var val)
   (let ((b (lookup-in-lexenv var *environment* 'variable)))
-    (if (and (eq (binding-type b) 'variable)
+    (if (and (binding-p b)
+             (eq (binding-type b) 'variable)
              (not (member 'special (binding-declarations b)))
              (not (member 'constant (binding-declarations b))))
         (code (binding-value b) " = " (ls-compile val))
@@ -1795,14 +1805,14 @@
 
 
 (defun make-function-binding (fname)
-  (make-binding fname 'function (gvarname fname)))
+  (make-binding :name fname :type 'function :value (gvarname fname)))
 
 (defun compile-function-definition (list)
   (compile-lambda (car list) (cdr list)))
 
 (defun translate-function (name)
   (let ((b (lookup-in-lexenv name *environment* 'function)))
-    (binding-value b)))
+    (and b (binding-value b))))
 
 (define-compilation flet (definitions &rest body)
   (let* ((fnames (mapcar #'car definitions))
@@ -1911,7 +1921,7 @@
     (if (special-variable-p var)
         (code (ls-compile `(setq ,var ,value)) ";" *newline*)
         (let* ((v (gvarname var))
-               (b (make-binding var 'variable v)))
+               (b (make-binding :name var :type 'variable :value v)))
           (prog1 (code "var " v " = " (ls-compile value) ";" *newline*)
             (push-to-lexenv b *environment* 'variable))))))
 
@@ -1954,7 +1964,7 @@
 
 (define-compilation block (name &rest body)
   (let* ((tr (incf *block-counter*))
-         (b (make-binding name 'block tr)))
+         (b (make-binding :name name :type 'block :value tr)))
     (when *multiple-value-p*
       (push-binding-declaration 'multiple-value b))
     (let* ((*environment* (extend-lexenv (list b) *environment* 'block))
@@ -2027,7 +2037,7 @@
   (let ((bindings
          (mapcar (lambda (label)
                    (let ((tagidx (integer-to-string (incf *go-tag-counter*))))
-                     (make-binding label 'gotag (list tbidx tagidx))))
+                     (make-binding :name label :type 'gotag :value (list tbidx tagidx))))
                  (remove-if-not #'go-tag-p body))))
     (extend-lexenv bindings *environment* 'gotag)))
 
@@ -2733,8 +2743,9 @@
 (defun macro (x)
   (and (symbolp x)
        (let ((b (lookup-in-lexenv x *environment* 'function)))
-         (and (eq (binding-type b) 'macro)
-              b))))
+         (if (and b (eq (binding-type b) 'macro))
+             b
+             nil))))
 
 (defun ls-macroexpand-1 (form)
   (let ((macro-binding (macro (car form))))
@@ -2784,7 +2795,7 @@
            ((and b (not (member 'special (binding-declarations b))))
             (binding-value b))
            ((or (keywordp sexp)
-                (member 'constant (binding-declarations b)))
+                (and b (member 'constant (binding-declarations b))))
             (code (ls-compile `',sexp) ".value"))
            (t
             (ls-compile `(symbol-value ',sexp))))))
