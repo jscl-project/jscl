@@ -386,7 +386,7 @@
   ;; A very simple defstruct built on lists. It supports just slot with
   ;; an optional default initform, and it will create a constructor,
   ;; predicate and accessors for you.
-  (defmacro !defstruct (name &rest slots)
+  (defmacro defstruct (name &rest slots)
     (unless (symbolp name)
       (error "It is not a full defstruct implementation."))
     (let* ((name-string (symbol-name name))
@@ -408,6 +408,9 @@
          ;; Predicate
          (defun ,predicate (x)
            (and (consp x) (eq (car x) ',name)))
+         ;; Copier
+         (defun ,(intern (concat "COPY-" name-string)) (x)
+           (copy-list x))
          ;; Slot accessors
          ,@(with-collect
             (let ((index 1))
