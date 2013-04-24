@@ -627,7 +627,7 @@
       ((null (cdr pairs))
        (error "Odd number of arguments to setf."))
       ((null (cddr pairs))
-       (let ((place (first pairs))
+       (let ((place (ls-macroexpand-1 (first pairs)))
              (value (second pairs)))
          (multiple-value-bind (vars vals store-vars writer-form reader-form)
              (get-setf-expansion place)
@@ -1710,12 +1710,16 @@
 
 (defun setq-pair (var val)
   (let ((b (lookup-in-lexenv var *environment* 'variable)))
-    (if (and (binding-p b)
-             (eq (binding-type b) 'variable)
-             (not (member 'special (binding-declarations b)))
-             (not (member 'constant (binding-declarations b))))
-        (code (binding-value b) " = " (ls-compile val))
-        (ls-compile `(set ',var ,val)))))
+    (cond
+      ((and b
+            (eq (binding-type b) 'variable)
+            (not (member 'special (binding-declarations b)))
+            (not (member 'constant (binding-declarations b))))
+       (code (binding-value b) " = " (ls-compile val)))
+      ((and b (eq (binding-type b) 'macro))
+       (ls-compile `(setf ,var ,val)))
+      (t
+       (ls-compile `(set ',var ,val))))))
 
 
 (define-compilation setq (&rest pairs)
@@ -2165,6 +2169,7 @@
             (list new-value)
             `(%js-vset ,var ,new-value)
             `(%js-vref ,var))))
+
 
 ;;; Backquote implementation.
 ;;;
