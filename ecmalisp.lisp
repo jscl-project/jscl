@@ -2778,6 +2778,10 @@
              b
              nil))))
 
+#+common-lisp
+(defvar *macroexpander-cache*
+  (make-hash-table :test #'eq))
+
 (defun ls-macroexpand-1 (form)
   (cond
     ((symbolp form)
@@ -2789,17 +2793,22 @@
      (let ((macro-binding (macro (car form))))
        (if macro-binding
            (let ((expander (binding-value macro-binding)))
-             (when (listp expander)
-               (let ((compiled (eval expander)))
-                 ;; The list representation are useful while
-                 ;; bootstrapping, as we can dump the definition of the
-                 ;; macros easily, but they are slow because we have to
-                 ;; evaluate them and compile them now and again. So, let
-                 ;; us replace the list representation version of the
-                 ;; function with the compiled one.
-                 ;;
-                 #+ecmalisp (setf (binding-value macro-binding) compiled)
-                 (setq expander compiled)))
+             (cond
+               #+common-lisp
+               ((gethash macro-binding *macroexpander-cache*)
+                (setq expander (gethash macro-binding *macroexpander-cache*)))
+               ((listp expander)
+                (let ((compiled (eval expander)))
+                  ;; The list representation are useful while
+                  ;; bootstrapping, as we can dump the definition of the
+                  ;; macros easily, but they are slow because we have to
+                  ;; evaluate them and compile them now and again. So, let
+                  ;; us replace the list representation version of the
+                  ;; function with the compiled one.
+                  ;;
+                  #+ecmalisp (setf (binding-value macro-binding) compiled)
+                  #+common-lisp (setf (gethash macro-binding *macroexpander-cache*) compiled)
+                  (setq expander compiled))))
              (values (apply expander (cdr form)) t))
            (values form nil))))
     (t
