@@ -383,6 +383,43 @@
            ,@body)
          (cdr ,head))))
 
+  ;; A very simple defstruct built on lists. It supports just slot with
+  ;; an optional default initform, and it will create a constructor,
+  ;; predicate and accessors for you.
+  (defmacro defstruct (name &rest slots)
+    (unless (symbolp name)
+      (error "It is not a full defstruct implementation."))
+    (let* ((name-string (symbol-name name))
+           (slot-descriptions
+            (mapcar (lambda (sd)
+                      (cond
+                        ((symbolp sd)
+                         (list sd))
+                        ((and (listp sd) (car sd) (cddr sd))
+                         sd)
+                        (t
+                         (error "Bad slot accessor."))))
+                    slots))
+           (predicate (intern (concat name-string "P"))))
+      `(progn
+         ;; Constructor
+         (defun ,(intern (concat "MAKE-" name-string)) (&key ,@slot-descriptions)
+           (list ',name ,@(mapcar #'car slot-descriptions)))
+         ;; Predicate
+         (defun ,predicate (x)
+           (and (consp x) (eq (car x) ',name)))
+         ;; Slot accessors
+         ,@(with-collect
+            (let ((index 1))
+              (dolist (slot slot-descriptions)
+                (let ((name (car slot)))
+                  (collect `(defun ,(intern (concat name-string "-" (string name))) (x)
+                              (unless (,predicate x)
+                                (error ,(concat "The object is not a type " name-string)))
+                              (nth ,index x)))
+                  (incf index)))))
+         ',name)))
+
   (defun map1 (func list)
     (with-collect
         (while list
