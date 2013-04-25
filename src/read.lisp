@@ -163,6 +163,76 @@
         (intern name package)
         (find-symbol name package))))
 
+(defun read-float (string)
+  (block nil
+    (let ((sign 1)
+          (integer-part nil)
+          (fractional-part nil)
+          (number 0)
+          (divisor 1)
+          (exponent-sign 1)
+          (exponent 0)
+          (size (length string))
+          (index 0))
+      (when (zerop size) (return))
+      ;; Optional sign
+      (case (char string index)
+        (#\+ (incf index))
+        (#\- (setq sign -1)
+             (incf index)))
+      (unless (< index size) (return))
+      ;; Optional integer part
+      (let ((value (digit-char-p (char string index))))
+        (when value
+          (setq integer-part t)
+          (while (and (< index size)
+                      (setq value (digit-char-p (char string index))))
+            (setq number (+ (* number 10) value))
+            (incf index))))
+      (unless (< index size) (return))
+      ;; Decimal point is mandatory if there's no integer part
+      (unless (or integer-part (char= #\. (char string index))) (return))
+      ;; Optional fractional part
+      (when (char= #\. (char string index))
+        (incf index)
+        (unless (< index size) (return))
+        (let ((value (digit-char-p (char string index))))
+          (when value
+            (setq fractional-part t)
+            (while (and (< index size)
+                        (setq value (digit-char-p (char string index))))
+              (setq number (+ (* number 10) value))
+              (setq divisor (* divisor 10))
+              (incf index)))))
+      ;; Either left or right part of the dot must be present
+      (unless (or integer-part fractional-part) (return))
+      ;; Exponent is mandatory if there is no fractional part
+      (when (and (= index size) (not fractional-part)) (return))
+      ;; Optional exponent part
+      (when (< index size)
+        ;; Exponent-marker
+        (unless (member (char-upcase (char string index))
+                        '(#\E #\S #\F #\D \#L))
+          (return))
+        (incf index)
+        (unless (< index size) (return))
+        ;; Optional exponent sign
+        (case (char string index)
+          (#\+ (incf index))
+          (#\- (setq exponent-sign -1)
+               (incf index)))
+        (unless (< index size) (return))
+        ;; Exponent digits
+        (let ((value (digit-char-p (char string index))))
+          (unless value (return))
+          (while (and (< index size)
+                      (setq value (digit-char-p (char string index))))
+            (setq exponent (+ (* exponent 10) value))
+            (incf index))))
+      (unless (= index size) (return))
+      ;; Everything went ok, we have a float
+      (/ (* sign (expt 10 (* exponent-sign exponent)) number) divisor))))
+
 
 (defun !parse-integer (string junk-allow)
   (block nil
@@ -237,6 +307,7 @@
       (t
        (let ((string (read-until stream #'terminalp)))
          (or (values (!parse-integer string nil))
+             (read-float string)
              (read-symbol string)))))))
 
 (defun ls-read (stream &optional (eof-error-p t) eof-value)

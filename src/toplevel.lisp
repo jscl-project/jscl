@@ -53,7 +53,7 @@
           copy-list decf declaim defconstant define-setf-expander
           define-symbol-macro defmacro defparameter defun defvar
           digit-char digit-char-p disassemble do do* documentation
-          dolist dotimes ecase eq eql equal error eval every export
+          dolist dotimes ecase eq eql equal error eval every export expt
           fdefinition find-package find-symbol first flet fourth fset
           funcall function functionp gensym get-setf-expansion
           get-universal-time go identity if in-package incf integerp
