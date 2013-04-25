@@ -82,7 +82,7 @@
             // Output input with the class jqconsole-return.
             if (input[0] != ','){
                 try {
-                    var vs = lisp.evalString(mv, input);
+                    var vs = lisp.evalInput(mv, input);
                     for (var i=0; i<vs.length; i++){
                        jqconsole.Write(lisp.print(pv, vs[i]) + '\n', 'jqconsole-return');
                     }
