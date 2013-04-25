@@ -1,6 +1,6 @@
 ;;; compiler.lisp --- 
 
-;; Copyright (C) 2012, 2013 David Vazquez
+;; copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
 
 ;; This program is free software: you can redistribute it and/or
@@ -1601,6 +1601,10 @@
 (defun compile-funcall (function args)
   (let* ((values-funcs (if *multiple-value-p* "values" "pv"))
          (arglist (concat "(" (join (cons values-funcs (mapcar #'ls-compile args)) ", ") ")")))
+    (unless (or (symbolp function)
+                (and (consp function)
+                     (eq (car function) 'lambda)))
+      (error "Bad function"))
     (cond
       ((translate-function function)
        (concat (translate-function function) arglist))
