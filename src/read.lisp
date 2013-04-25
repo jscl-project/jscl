@@ -77,12 +77,12 @@
        nil)
       ((char= ch #\.)
        (%read-char stream)
-       (prog1 (ls-read stream)
+       (prog1 (ls-read-1 stream)
          (skip-whitespaces-and-comments stream)
          (unless (char= (%read-char stream) #\))
            (error "')' was expected."))))
       (t
-       (cons (ls-read stream) (%read-list stream))))))
+       (cons (ls-read-1 stream) (%read-list stream))))))
 
 (defun read-string (stream)
   (let ((string "")
@@ -101,7 +101,7 @@
   (%read-char stream)
   (ecase (%read-char stream)
     (#\'
-     (list 'function (ls-read stream)))
+     (list 'function (ls-read-1 stream)))
     (#\( (list-to-vector (%read-list stream)))
     (#\: (make-symbol (string-upcase (read-until stream #'terminalp))))
     (#\\
@@ -117,10 +117,10 @@
      (let ((feature (read-until stream #'terminalp)))
        (cond
          ((string= feature "common-lisp")
-          (ls-read stream)              ;ignore
-          (ls-read stream))
+          (ls-read-1 stream)              ;ignore
+          (ls-read-1 stream))
          ((string= feature "ecmalisp")
-          (ls-read stream))
+          (ls-read-1 stream))
          (t
           (error "Unknown reader form.")))))))
 
@@ -209,7 +209,7 @@
       (error "junk detected."))))
 
 (defvar *eof* (gensym))
-(defun ls-read (stream)
+(defun ls-read-1 (stream)
   (skip-whitespaces-and-comments stream)
   (let ((ch (%peek-char stream)))
     (cond
@@ -220,18 +220,18 @@
        (%read-list stream))
       ((char= ch #\')
        (%read-char stream)
-       (list 'quote (ls-read stream)))
+       (list 'quote (ls-read-1 stream)))
       ((char= ch #\`)
        (%read-char stream)
-       (list 'backquote (ls-read stream)))
+       (list 'backquote (ls-read-1 stream)))
       ((char= ch #\")
        (%read-char stream)
        (read-string stream))
       ((char= ch #\,)
        (%read-char stream)
        (if (eql (%peek-char stream) #\@)
-           (progn (%read-char stream) (list 'unquote-splicing (ls-read stream)))
-           (list 'unquote (ls-read stream))))
+           (progn (%read-char stream) (list 'unquote-splicing (ls-read-1 stream)))
+           (list 'unquote (ls-read-1 stream))))
       ((char= ch #\#)
        (read-sharp stream))
       (t
@@ -239,5 +239,11 @@
 	 (or (values (!parse-integer string nil))
 	     (read-symbol string)))))))
 
-(defun ls-read-from-string (string)
-  (ls-read (make-string-stream string)))
+(defun ls-read (stream &optional (eof-error-p t) eof-value)
+  (let ((x (ls-read-1 stream)))
+    (if (eq x *eof*)
+        (if eof-error-p (error "EOF") eof-value)
+        x)))
+
+(defun ls-read-from-string (string &optional (eof-error-p t) eof-value)
+  (ls-read (make-string-stream string) eof-error-p eof-value))

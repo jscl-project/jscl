@@ -55,8 +55,9 @@
            (in (make-string-stream source)))
       (format t "Compiling ~a...~%" filename)
       (loop
-         for x = (ls-read in)
-         until (eq x *eof*)
+         with eof-mark = (gensym)
+         for x = (ls-read in nil eof-mark)
+         until (eq x eof-mark)
          for compilation = (ls-compile-toplevel x)
          when (plusp (length compilation))
          do (write-string compilation out)))))
