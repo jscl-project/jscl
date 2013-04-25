@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+     /* The console container element */
+    body { background-color: black; font-size: 16px; font-family: Courier; overflow: hidden; padding: 0 0 0 0;}
+    #console {
+      position: absolute;
+      top: 0px;
+      bottom: 0px;
+      left: 0px;
+      right: 0px;
+      background-color:black;
+    }
+
+    .parents {
+        font-weight: bold;
+    }
+
+    /* The inner console element. */
+    .jqconsole {
+        padding: 10px;
+    }
+    /* The cursor. */
+    .jqconsole-cursor {
+        background-color: gray;
+    }
+    /* The cursor color when the console looses focus. */
+    .jqconsole-blurred .jqconsole-cursor {
+        background-color: #666;
+    }
+    /* The current prompt text color */
+    .jqconsole-prompt {
+        color: White;
+    }
+    /* The command history */
+    .jqconsole-old-prompt {
+        color: White;
+        font-weight: normal;
+    }
+    /* The text color when in input mode. */
+    .jqconsole-input {
+        color: White;
+    }
+    /* Previously entered input. */
+    .jqconsole-old-input {
+        color: White;
+        font-weight: normal;
+    }
+    /* The text color of the output. */
+    .jqconsole-output {
+        color: green;
+    }
+    .jqconsole-return, .jqconsole-header {
+        color: gray;
+    }
+    .jqconsole-error {
+        color: red;
+    }
+</style>
+  </head>
+  <body>
+    <div id="console"></div>
+    <script src="jquery.js" type="text/javascript" charset="utf-8"></script>
+    <script src="jqconsole.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="jscl.js" type="text/javascript"></script>
+    <script>
+      var jqconsole = $('#console').jqconsole();
+      lisp.write = function(str){
+           jqconsole.Write(str, 'jqconsole-output', false);
+           return str;
+      };
+    </script>
+    <script src="tests.js" type="text/javascript"></script>
+  </body>
+</html>

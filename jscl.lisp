@@ -23,7 +23,11 @@
     ("print"     :target)
     ("read"      :both)
     ("compiler"  :both)
-    ("toplevel"  :target)))
+    ("toplevel"  :target)
+    ;; Tests
+    ("tests"            :test)
+    ("eval"             :test)
+    ("tests-report"     :test)))
 
 (defun source-pathname
     (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
@@ -73,4 +77,12 @@
     (write-string (read-whole-file (source-pathname "prelude.js")) out)
     (dolist (input *source*)
       (when (member (cadr input) '(:target :both))
-        (ls-compile-file (source-pathname (car input) :type "lisp") out)))))
+        (ls-compile-file (source-pathname (car input) :type "lisp") out))))
+  ;; Tests
+  (with-open-file (out "tests.js" :direction :output :if-exists :supersede)
+    (dolist (input *source*)
+      (when (member (cadr input) '(:test))
+        (ls-compile-file (source-pathname (car input)
+                                          :directory '(:relative "tests")
+                                          :type "lisp")
+                         out)))))
