@@ -40,6 +40,9 @@
           *** **
           ** *
           * (car results)))
+  (unless (boundp '*)
+    ;; FIXME: Handle error
+    (setf * nil))
   (setf +++ ++
         ++ +
         + -)
