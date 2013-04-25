@@ -28,6 +28,7 @@
                (cond
                  ((null arg) "")
                  ((integerp arg) (integer-to-string arg))
+                 ((floatp arg) (float-to-string arg))
                  ((stringp arg) arg)
                  (t (error "Unknown argument."))))
              args))
@@ -535,6 +536,7 @@
 (defun literal (sexp &optional recursive)
   (cond
     ((integerp sexp) (integer-to-string sexp))
+    ((floatp sexp) (float-to-string sexp))
     ((stringp sexp) (code "\"" (escape-string sexp) "\""))
     ((symbolp sexp)
      (or (cdr (assoc sexp *literal-symbols*))
@@ -1243,14 +1245,15 @@
         (fargs '())
         (prelude ""))
     (dolist (x args)
-      (if (numberp x)
-          (push (integer-to-string x) fargs)
-          (let ((v (code "x" (incf counter))))
-            (push v fargs)
-            (concatf prelude
-              (code "var " v " = " (ls-compile x) ";" *newline*
-                    "if (typeof " v " !== 'number') throw 'Not a number!';"
-                    *newline*)))))
+      (cond
+        ((floatp x) (push (float-to-string x) fargs))
+        ((numberp x) (push (integer-to-string x) fargs))
+        (t (let ((v (code "x" (incf counter))))
+             (push v fargs)
+             (concatf prelude
+               (code "var " v " = " (ls-compile x) ";" *newline*
+                     "if (typeof " v " !== 'number') throw 'Not a number!';"
+                     *newline*))))))
     (js!selfcall prelude (funcall function (reverse fargs)))))
 
 
@@ -1323,6 +1326,15 @@
 (define-builtin floor (x)
   (type-check (("x" "number" x))
     "Math.floor(x)"))
+
+(define-builtin expt (x y)
+  (type-check (("x" "number" x)
+               ("y" "number" y))
+    "Math.pow(x, y)"))
+
+(define-builtin float-to-string (x)
+  (type-check (("x" "number" x))
+    "x.toString()"))
 
 (define-builtin cons (x y)
   (code "({car: " x ", cdr: " y "})"))
@@ -1625,6 +1637,7 @@
              (t
               (ls-compile `(symbol-value ',sexp))))))
         ((integerp sexp) (integer-to-string sexp))
+        ((floatp sexp) (float-to-string sexp))
         ((stringp sexp) (code "\"" (escape-string sexp) "\""))
         ((arrayp sexp) (literal sexp))
         ((listp sexp)

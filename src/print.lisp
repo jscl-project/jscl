@@ -33,6 +33,7 @@
                        (t (package-name package)))
                      ":" name)))))
     ((integerp form) (integer-to-string form))
+    ((floatp form) (float-to-string form))
     ((stringp form) (concat "\"" (escape-string form) "\""))
     ((functionp form)
      (let ((name (oget form "fname")))

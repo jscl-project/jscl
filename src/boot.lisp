@@ -410,6 +410,9 @@
 (defun integerp (x)
   (and (numberp x) (= (floor x) x)))
 
+(defun floatp (x)
+  (and (numberp x) (not (integerp x))))
+
 (defun plusp (x) (< 0 x))
 (defun minusp (x) (< x 0))
 
