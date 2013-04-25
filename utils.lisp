@@ -70,10 +70,6 @@
   `(let ((it ,condition))
      (when it ,@body)))
 
-#+ecmalisp
-(progn
-  )
-
 (defun integer-to-string (x)
   (cond
     ((zerop x)
