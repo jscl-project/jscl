@@ -154,11 +154,25 @@
 
 ;; Basic macros
 
-(defmacro incf (x &optional (delta 1))
-  `(setq ,x (+ ,x ,delta)))
+(defmacro incf (place &optional (delta 1))
+  (multiple-value-bind (dummies vals newval setter getter)
+      (get-setf-expansion place)
+    (let ((d (gensym)))
+      `(let* (,@(mapcar #'list dummies vals)
+              (,d ,delta)
+                (,(car newval) (+ ,getter ,d))
+                ,@(cdr newval))
+         ,setter))))
 
-(defmacro decf (x &optional (delta 1))
-  `(setq ,x (- ,x ,delta)))
+(defmacro decf (place &optional (delta 1))
+  (multiple-value-bind (dummies vals newval setter getter)
+      (get-setf-expansion place)
+    (let ((d (gensym)))
+      `(let* (,@(mapcar #'list dummies vals)
+              (,d ,delta)
+              (,(car newval) (- ,getter ,d))
+              ,@(cdr newval))
+         ,setter))))
 
 (defmacro push (x place)
   (multiple-value-bind (dummies vals newval setter getter)
