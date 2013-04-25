@@ -26,6 +26,7 @@
     ("toplevel"  :target)
     ;; Tests
     ("tests"            :test)
+    ("setf"             :test)
     ("eval"             :test)
     ("tests-report"     :test)))
 
