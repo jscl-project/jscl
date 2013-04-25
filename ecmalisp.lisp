@@ -25,16 +25,22 @@
     ("compiler"  :both)
     ("toplevel"  :target)))
 
+(defun source-pathname
+    (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
+  (if type
+      (make-pathname :type type :directory directory :defaults defaults)
+      (make-pathname            :directory directory :defaults defaults)))
+
 ;;; Compile ecmalisp into the host
 (with-compilation-unit ()
   (dolist (input *source*)
     (when (member (cadr input) '(:host :both))
-      (compile-file (car input)))))
+      (compile-file (source-pathname (car input))))))
 
 ;;; Load ecmalisp into the host
 (dolist (input *source*)
   (when (member (cadr input) '(:host :both))
-    (load (car input))))
+    (load (source-pathname (car input)))))
 
 (defun read-whole-file (filename)
   (with-open-file (in filename)
@@ -63,8 +69,7 @@
         *literal-counter* 0
         *block-counter* 0)
   (with-open-file (out "ecmalisp.js" :direction :output :if-exists :supersede)
-    (write-string (read-whole-file "prelude.js") out)
+    (write-string (read-whole-file (source-pathname "prelude.js")) out)
     (dolist (input *source*)
       (when (member (cadr input) '(:target :both))
-        (let ((file (make-pathname :type "lisp" :defaults (car input))))
-          (ls-compile-file file out))))))
+        (ls-compile-file (source-pathname (car input) :type "lisp") out)))))
