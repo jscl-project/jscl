@@ -62,12 +62,12 @@
 
   <body>
     <div id="console"></div>
-    <script src="ecmalisp.js" type="text/javascript"></script>
+    <script src="jscl.js" type="text/javascript"></script>
     <script src="jquery.js" type="text/javascript" charset="utf-8"></script>
     <script src="jqconsole.min.js" type="text/javascript" charset="utf-8"></script>
     <script>
       $(function () {
-        var jqconsole = $('#console').jqconsole('Welcome to Ecmalisp!\n\n', '');
+        var jqconsole = $('#console').jqconsole('Welcome to JSCL!\n\n', '');
         jqconsole.RegisterMatching('(', ')', 'parents');
 
         lisp.write = function(str){
@@ -82,7 +82,7 @@
             // Output input with the class jqconsole-return.
             if (input[0] != ','){
                 try {
-                    var vs = lisp.evalString(mv, input);
+                    var vs = lisp.evalInput(mv, input);
                     for (var i=0; i<vs.length; i++){
                        jqconsole.Write(lisp.print(pv, vs[i]) + '\n', 'jqconsole-return');
                     }
