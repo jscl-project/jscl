@@ -87,7 +87,5 @@
 		  digits)))))
 
 (defun float-to-string (x)
-  #+ecmalisp
-  (float-to-string x)
-  #+common-lisp
-  (format nil "~f" x))
+  #+jscl (float-to-string x)
+  #+common-lisp (format nil "~f" x))

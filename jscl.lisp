@@ -1,4 +1,4 @@
-;;; ecmalisp.lisp ---
+;;; jscl.lisp ---
 
 ;; Copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
@@ -31,13 +31,13 @@
       (make-pathname :type type :directory directory :defaults defaults)
       (make-pathname            :directory directory :defaults defaults)))
 
-;;; Compile ecmalisp into the host
+;;; Compile jscl into the host
 (with-compilation-unit ()
   (dolist (input *source*)
     (when (member (cadr input) '(:host :both))
       (compile-file (source-pathname (car input))))))
 
-;;; Load ecmalisp into the host
+;;; Load jscl into the host
 (dolist (input *source*)
   (when (member (cadr input) '(:host :both))
     (load (source-pathname (car input)))))
@@ -69,7 +69,7 @@
         *gensym-counter* 0
         *literal-counter* 0
         *block-counter* 0)
-  (with-open-file (out "ecmalisp.js" :direction :output :if-exists :supersede)
+  (with-open-file (out "jscl.js" :direction :output :if-exists :supersede)
     (write-string (read-whole-file (source-pathname "prelude.js")) out)
     (dolist (input *source*)
       (when (member (cadr input) '(:target :both))

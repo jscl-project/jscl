@@ -119,7 +119,7 @@
          ((string= feature "common-lisp")
           (ls-read-1 stream)              ;ignore
           (ls-read-1 stream))
-         ((string= feature "ecmalisp")
+         ((string= feature "jscl")
           (ls-read-1 stream))
          (t
           (error "Unknown reader form.")))))))
@@ -270,7 +270,7 @@
           (values (* sign value) index)
           (values nil index)))))
 
-#+ecmalisp
+#+jscl
 (defun parse-integer (string &key junk-allowed)
   (multiple-value-bind (num index)
       (!parse-integer string junk-allowed)

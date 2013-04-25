@@ -1,26 +1,26 @@
-* Ecmalisp
+* JSCL
 
-  Ecmalisp is a Common Lisp to Javascript compiler, which is
-  bootstrapped from Common Lisp and executed from the browser.
+  JSCL is a Common Lisp to Javascript compiler, which is bootstrapped
+  from Common Lisp and executed from the browser.
   
 ** Getting started
 
-You can try a demo [[http://davazp.net/ecmalisp/ecmalisp.html][here]]. But if you want to hack ecmalisp, you will
-have to download the repository
+You can try a demo [[http://davazp.net/jscl/jscl.html][here]]. But if you want to hack JSCL, you will have
+to download the repository
 
-=git clone git@github.com:davazp/ecmalisp.git=
+=git clone git@github.com:davazp/jscl.git=
 
-/load/ ecmalisp.lisp in your Lisp, and call the bootstrap function to
+/load/ jscl.lisp in your Lisp, and call the bootstrap function to
 compile the implementation itself:
 
 =(bootstrap)=
 
-It will generate a ecmalisp.js file in the top of the source tree. Now
-you can open ecmalisp.html in your browser and use it.
+It will generate a jscl.js file in the top of the source tree. Now you
+can open JSCL.html in your browser and use it.
 
 ** Status
 
-Ecmalisp is and will be a subset of Common Lisp.  Of course it is far
+JSCL is and will be a subset of Common Lisp.  Of course it is far
 from complete, but it supports partially most common special
 operators, functions and macros. In particular:
 

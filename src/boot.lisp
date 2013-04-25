@@ -16,11 +16,11 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-;;; This code is executed when ecmalisp compiles this file
-;;; itself. The compiler provides compilation of some special forms,
-;;; as well as funcalls and macroexpansion, but no functions. So, we
-;;; define the Lisp world from scratch. This code has to define enough
-;;; language to the compiler to be able to run.
+;;; This code is executed when JSCL compiles this file itself. The
+;;; compiler provides compilation of some special forms, as well as
+;;; funcalls and macroexpansion, but no functions. So, we define the
+;;; Lisp world from scratch. This code has to define enough language
+;;; to the compiler to be able to run.
 
 (eval-when-compile
   (%compile-defmacro 'defmacro

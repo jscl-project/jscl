@@ -1,5 +1,5 @@
-// This file is prepended to the result of compile ecmalisp.lisp, and
-// contain runtime code that ecmalisp assumes to exist.
+// This file is prepended to the result of compile jscl.lisp, and
+// contain runtime code that jscl assumes to exist.
 
 var window = this;
 var nil;

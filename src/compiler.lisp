@@ -50,7 +50,7 @@
 ;;; of this function are available, because the Ecmalisp version is
 ;;; very slow and bootstraping was annoying.
 
-#+ecmalisp
+#+jscl
 (defun indent (&rest string)
   (let ((input (apply #'code string)))
     (let ((output "")
@@ -238,7 +238,7 @@
        (let ((b (global-binding name 'variable 'variable)))
          (push 'constant (binding-declarations b)))))))
 
-#+ecmalisp
+#+jscl
 (fset 'proclaim #'!proclaim)
 
 (defun %define-symbol-macro (name expansion)
@@ -246,7 +246,7 @@
     (push-to-lexenv b *environment* 'variable)
     name))
 
-#+ecmalisp
+#+jscl
 (defmacro define-symbol-macro (name expansion)
   `(%define-symbol-macro ',name ',expansion))
 
@@ -547,7 +547,7 @@
                        (code "{name: \"" (escape-string (symbol-name sexp))
                              "\", 'package': '" (package-name package) "'}")
                        (code "{name: \"" (escape-string (symbol-name sexp)) "\"}")))
-                 #+ecmalisp
+                 #+jscl
                  (let ((package (symbol-package sexp)))
                    (if (null package)
                        (code "{name: \"" (escape-string (symbol-name sexp)) "\"}")
@@ -1590,7 +1590,7 @@
                   ;; us replace the list representation version of the
                   ;; function with the compiled one.
                   ;;
-                  #+ecmalisp (setf (binding-value macro-binding) compiled)
+                  #+jscl (setf (binding-value macro-binding) compiled)
                   #+common-lisp (setf (gethash macro-binding *macroexpander-cache*) compiled)
                   (setq expander compiled))))
              (values (apply expander (cdr form)) t))
@@ -1609,7 +1609,7 @@
       ((translate-function function)
        (concat (translate-function function) arglist))
       ((and (symbolp function)
-            #+ecmalisp (eq (symbol-package function) (find-package "COMMON-LISP"))
+            #+jscl (eq (symbol-package function) (find-package "COMMON-LISP"))
             #+common-lisp t)
        (code (ls-compile `',function) ".fvalue" arglist))
       (t
