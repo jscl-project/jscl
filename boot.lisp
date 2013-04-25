@@ -844,3 +844,13 @@
 
 (defun get-universal-time ()
   (+ (get-unix-time) 2208988800))
+
+(defun concat (&rest strs)
+  (!reduce #'concat-two strs :initial-value ""))
+
+
+(defun values-list (list)
+  (values-array (list-to-vector list)))
+
+(defun values (&rest args)
+  (values-list args))

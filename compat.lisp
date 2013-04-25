@@ -43,3 +43,6 @@
 
 (defun aset (array idx value)
   (setf (aref array idx) value))
+
+(defun concat (&rest strs)
+  (apply #'concatenate 'string strs))
