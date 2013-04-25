@@ -1,4 +1,4 @@
-;;; print.lisp --- 
+;;; print.lisp ---
 
 ;; Copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
@@ -69,3 +69,33 @@
 (defun print (x)
   (write-line (prin1-to-string x))
   x)
+
+#+jscl
+(progn
+  (defun format (destination fmt &rest args)
+    (let ((len (length fmt))
+	  (i 0)
+	  (res "")
+	  (arguments args))
+      (cl:%while (< i len)
+		 (let ((c (char fmt i)))
+		   (if (char= c #\~)
+		       (let ((next (char fmt (incf i))))
+			 (if (char= next #\~)
+			     (progn (setq res (cl:concat res "~"))
+				    (incf i))
+			     (progn
+			       (format-special next (car arguments))
+			       (setq arguments (cdr arguments)))))
+		       (progn
+			 (setq res (cl:concat res (cl:char-to-string c)))))
+		   (incf i)))
+      (if destination
+	  (progn
+	    (write-string res)
+	    nil)
+	  res)))
+
+
+  (defun format-special (chr arg)
+    chr))
