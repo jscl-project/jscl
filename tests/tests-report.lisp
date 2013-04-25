@@ -1,6 +1,6 @@
 (write-line "")
 (write-string "Finished. The execution took ")
-(write-string (prin1-to-string (- (get-universal-time) *timestaup*)))
+(write-string (prin1-to-string (- (get-universal-time) *timestamp*)))
 (write-line " seconds.")
 
 (cond
