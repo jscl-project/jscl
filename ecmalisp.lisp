@@ -903,15 +903,10 @@
 
 ;;; Concatenate a list of strings, with a separator
 (defun join (list &optional (separator ""))
-  (cond
-    ((null list)
-     "")
-    ((null (cdr list))
-     (car list))
-    (t
-     (concat (car list)
-             separator
-             (join (cdr list) separator)))))
+  (if (null list) 
+      ""
+      (concat (car list) (join (cdr list) separator))))
+
 
 (defun join-trailing (list &optional (separator ""))
   (if (null list)
