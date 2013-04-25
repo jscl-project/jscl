@@ -211,8 +211,8 @@
       ;; Optional exponent part
       (when (< index size)
         ;; Exponent-marker
-        (unless (member (char-upcase (char string index))
-                        '(#\E #\S #\F #\D \#L))
+        (unless (member (string-upcase (string (char string index)))
+                        '("E" "S" "F" "D" "L"))
           (return))
         (incf index)
         (unless (< index size) (return))
