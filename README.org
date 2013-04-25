@@ -1,7 +1,7 @@
 * Ecmalisp
 
-  Ecmalisp is a Lisp-to-Javascript compiler, which is bootstrapped
-  from Common Lisp and executed from the browser.
+  Ecmalisp is a Common Lisp to Javascript compiler, which is
+  bootstrapped from Common Lisp and executed from the browser.
   
 ** Getting started
 
@@ -19,8 +19,10 @@ It will generate a ecmalisp.js file in the top of the source tree. Now
 you can open ecmalisp.html in your browser and use it.
 
 ** Status
-It is just an experiment, of course. But it supports partially most
-common special operators, functions and macros. In particular:
+
+Ecmalisp is and will be a subset of Common Lisp.  Of course it is far
+from complete, but it supports partially most common special
+operators, functions and macros. In particular:
 
   - Multiple values
   - Explicit control tranfers ([[http://www.lispworks.com/documentation/HyperSpec/Body/s_tagbod.htm][tagbody]] and [[http://www.lispworks.com/documentation/HyperSpec/Body/s_go.htm][go]])
