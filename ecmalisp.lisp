@@ -17,11 +17,18 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (eval-when (:load-toplevel :compile-toplevel :execute)
-  (load "compat")
-  (load "utils")
-  (load "print")
-  (load "read")
-  (load "compiler"))
+  (defvar *source*
+    '(("boot.lisp"      :target)
+      ("compat"         :host)
+      ("utils.lisp"     :both)
+      ("print.lisp"     :both)
+      ("read.lisp"      :both)
+      ("compiler.lisp"  :both)
+      ("toplevel.lisp"  :target)))
+
+  (dolist (input *source*)
+    (when (member (cadr input) '(:host :both))
+      (load (car input)))))
 
 (defun read-whole-file (filename)
   (with-open-file (in filename)
@@ -51,10 +58,6 @@
         *block-counter* 0)
   (with-open-file (out "ecmalisp.js" :direction :output :if-exists :supersede)
     (write-string (read-whole-file "prelude.js") out)
-    (dolist (file '("boot.lisp"
-                    "utils.lisp"
-                    "print.lisp"
-                    "read.lisp"
-                    "compiler.lisp"
-                    "toplevel.lisp"))
-      (ls-compile-file file out))))
+    (dolist (input *source*)
+      (when (member (cadr input) '(:target :both))
+        (ls-compile-file (car input) out)))))
