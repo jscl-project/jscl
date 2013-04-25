@@ -2912,6 +2912,31 @@
   (defun eval (x)
     (js-eval (ls-compile-toplevel x t)))
 
+  (defvar * nil)
+  (defvar ** nil)
+  (defvar *** nil)
+  (defvar / nil)
+  (defvar // nil)
+  (defvar /// nil)
+  (defvar + nil)
+  (defvar ++ nil)
+  (defvar +++ nil)
+  (defvar - nil)
+
+  (defun eval-interactive (x)
+    (setf - x)
+    (let ((results (multiple-value-list (eval x))))
+      (setf /// //
+            // /
+            / results
+            *** **
+            ** *
+            * (car results)))
+    (setf +++ ++
+          ++ +
+          + -)
+    (values-list /))
+
   (export '(&body &key &optional &rest * *gensym-counter* *package* + - / 1+ 1- <
             <= = = > >= and append apply aref arrayp assoc atom block
             boundp boundp butlast caar cadddr caddr cadr car car case
@@ -2938,7 +2963,7 @@
             symbol-function symbol-name symbol-package symbol-plist
             symbol-value symbolp t tagbody third throw truncate unless
             unwind-protect values values-list variable warn when
-            write-line write-string zerop))
+            write-line write-string zerop ** *** // /// ++ +++))
 
   (setq *package* *user-package*)
 
@@ -2949,6 +2974,7 @@
   (%js-vset "lisp.eval" #'eval)
   (%js-vset "lisp.compile" (lambda (s) (ls-compile-toplevel s t)))
   (%js-vset "lisp.evalString" (lambda (str) (eval (ls-read-from-string str))))
+  (%js-vset "lisp.evalInput" (lambda (str) (eval-interactive (ls-read-from-string str))))
   (%js-vset "lisp.compileString" (lambda (str) (ls-compile-toplevel (ls-read-from-string str) t)))
 
   ;; Set the initial global environment to be equal to the host global
