@@ -1637,6 +1637,7 @@
              (t
               (ls-compile `(symbol-value ',sexp))))))
         ((integerp sexp) (integer-to-string sexp))
+        ((floatp sexp) (float-to-string sexp))
         ((stringp sexp) (code "\"" (escape-string sexp) "\""))
         ((arrayp sexp) (literal sexp))
         ((listp sexp)
