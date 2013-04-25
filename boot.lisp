@@ -848,7 +848,6 @@
 (defun concat (&rest strs)
   (!reduce #'concat-two strs :initial-value ""))
 
-
 (defun values-list (list)
   (values-array (list-to-vector list)))
 

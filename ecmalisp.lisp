@@ -16,19 +16,25 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(eval-when (:load-toplevel :compile-toplevel :execute)
-  (defvar *source*
-    '(("boot.lisp"      :target)
-      ("compat"         :host)
-      ("utils.lisp"     :both)
-      ("print.lisp"     :both)
-      ("read.lisp"      :both)
-      ("compiler.lisp"  :both)
-      ("toplevel.lisp"  :target)))
+(defvar *source*
+  '(("boot"      :target)
+    ("compat"    :host)
+    ("utils"     :both)
+    ("print"     :target)
+    ("read"      :both)
+    ("compiler"  :both)
+    ("toplevel"  :target)))
 
+;;; Compile ecmalisp into the host
+(with-compilation-unit ()
   (dolist (input *source*)
     (when (member (cadr input) '(:host :both))
-      (load (car input)))))
+      (compile-file (car input)))))
+
+;;; Load ecmalisp into the host
+(dolist (input *source*)
+  (when (member (cadr input) '(:host :both))
+    (load (car input))))
 
 (defun read-whole-file (filename)
   (with-open-file (in filename)
@@ -60,4 +66,5 @@
     (write-string (read-whole-file "prelude.js") out)
     (dolist (input *source*)
       (when (member (cadr input) '(:target :both))
-        (ls-compile-file (car input) out)))))
+        (let ((file (make-pathname :type "lisp" :defaults (car input))))
+          (ls-compile-file file out))))))

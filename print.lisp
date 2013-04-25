@@ -18,9 +18,7 @@
 
 ;;; Printer
 
-(defvar *newline* (string (code-char 10)))
-
-(defun !print1-to-string (form)
+(defun prin1-to-string (form)
   (cond
     ((symbolp form)
      (multiple-value-bind (symbol foundp)
@@ -58,21 +56,15 @@
     (t
      (concat "#<javascript object>"))))
 
+(defun write-line (x)
+  (write-string x)
+  (write-string *newline*)
+  x)
 
-#+ecmalisp
-(progn
-  (defun prin1-to-string (form)
-    (!print1-to-string form))
+(defun warn (string)
+  (write-string "WARNING: ")
+  (write-line string))
 
-  (defun write-line (x)
-    (write-string x)
-    (write-string *newline*)
-    x)
-
-  (defun warn (string)
-    (write-string "WARNING: ")
-    (write-line string))
-
-  (defun print (x)
-    (write-line (prin1-to-string x))
-    x))
+(defun print (x)
+  (write-line (prin1-to-string x))
+  x)
