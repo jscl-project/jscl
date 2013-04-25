@@ -2939,8 +2939,8 @@
 
   (export '(&body &key &optional &rest * *gensym-counter* *package* + - / 1+ 1- <
             <= = = > >= and append apply aref arrayp assoc atom block
-            boundp boundp butlast caar cadddr caddr cadr car car case
-            catch cdar cdddr cddr cdr cdr char char-code char=
+            boundp butlast caar cadddr caddr cadr car case
+            catch cdar cdddr cddr cdr char char-code char=
             code-char cond cons consp constantly copy-list decf
             declaim defconstant define-setf-expander
             define-symbol-macro defmacro defparameter defun defvar
@@ -2948,7 +2948,7 @@
             dolist dotimes ecase eq eql equal error eval every export
             fdefinition find-package find-symbol first flet fourth
             fset funcall function functionp gensym get-setf-expansion
-            get-universal-time go identity if in-package incf integerp
+            get-universal-time go identity if in-package incf
             integerp intern keywordp labels lambda last length let
             let* list list* list-all-packages listp loop make-array
             make-package make-symbol mapcar member minusp mod
