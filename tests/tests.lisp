@@ -1,6 +1,6 @@
 (defvar *passed-tets* 0)
 (defvar *failed-tets* 0)
-(defvar *timestamp* (get-universal-time))
+(defvar *timestamp* (get-internal-real-time))
 
 (defmacro test (condition)
   `(cond
