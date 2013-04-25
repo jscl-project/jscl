@@ -1536,8 +1536,8 @@
     "if (i < 0 || i >= x.length) throw 'Out of range';" *newline*
     "return x[i] = " value ";" *newline*))
 
-(define-builtin get-unix-time ()
-  (code "(Math.round(new Date() / 1000))"))
+(define-builtin get-internal-real-time ()
+  "(new Date()).getTime()")
 
 (define-builtin values-array (array)
   (if *multiple-value-p*

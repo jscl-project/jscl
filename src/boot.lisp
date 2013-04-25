@@ -120,7 +120,9 @@
 (defun 1+ (x) (+ x 1))
 (defun 1- (x) (- x 1))
 (defun zerop (x) (= x 0))
-(defun truncate (x y) (floor (/ x y)))
+
+(defun truncate (x &optional (y 1))
+  (floor (/ x y)))
 
 (defun eql (x y) (eq x y))
 
@@ -858,6 +860,15 @@
   (let ((exports (%package-external-symbols package)))
     (dolist (symb symbols t)
       (oset exports (symbol-name symb) symb))))
+
+
+(defconstant internal-time-units-per-second 1000) 
+
+(defun get-internal-real-time ()
+  (get-internal-real-time))
+
+(defun get-unix-time ()
+  (truncate (/ (get-internal-real-time) 1000)))
 
 (defun get-universal-time ()
   (+ (get-unix-time) 2208988800))

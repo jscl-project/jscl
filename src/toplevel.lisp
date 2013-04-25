@@ -55,9 +55,9 @@
           digit-char digit-char-p disassemble do do* documentation
           dolist dotimes ecase eq eql equal error eval every export expt
           fdefinition find-package find-symbol first flet fourth fset
-          funcall function functionp gensym get-setf-expansion
-          get-universal-time go identity if in-package incf integerp
-          intern keywordp labels lambda last length let let* list
+          funcall function functionp gensym get-internal-real-time
+          get-setf-expansion get-universal-time go identity if in-package
+          incf integerp intern keywordp labels lambda last length let let* list
           list* list-all-packages listp loop make-array make-package
           make-symbol mapcar member minusp mod multiple-value-bind
           multiple-value-call multiple-value-list multiple-value-prog1
