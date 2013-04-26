@@ -1,6 +1,6 @@
 (defvar *passed-tests* 0)
 (defvar *failed-tests* 0)
-(defvar *timestamp*)
+(defvar *timestamp* nil)
 
 (defmacro test (condition)
   `(cond
