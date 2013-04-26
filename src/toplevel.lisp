@@ -71,7 +71,7 @@
           prin1-to-string print proclaim prog1 prog2 progn psetq push
           quote read-from-string remove remove-if remove-if-not return
           return-from revappend reverse rplaca rplacd second set setf
-          setq some string string-upcase string= stringp subseq
+          setq some string string-upcase string= stringp subseq subst
           symbol-function symbol-name symbol-package symbol-plist
           symbol-value symbolp t tagbody third throw truncate unless
           unwind-protect values values-list variable warn when write-line

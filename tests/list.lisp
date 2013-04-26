@@ -1,5 +1,6 @@
 ; Tests for list functions
 
+; COPY-TREE
 (test (let* ((foo '((1 2) (3 4)))
              (bar (copy-tree foo)))
         ;; (SETF (CAR (CAR FOO)) 0) doesn't work in the test for some reason,
@@ -9,3 +10,6 @@
         ;; Once it does the lists can be compared directly
         (not (= (car (car foo))
                 (car (car bar))))))
+
+; SUBST
+; Can't really test this until EQUAL works properly on lists
