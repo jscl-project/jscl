@@ -49,8 +49,10 @@
   (values-list /))
 
 (export '(&body &key &optional &rest * ** *** *gensym-counter* *package* + ++
-          +++ - / // /// 1+ 1- < <= = = > >= and append apply aref
-          arrayp assoc atom block boundp butlast caar cadddr caddr
+          +++ - / // /// 1+ 1- < <= = = > >= and append apply aref arrayp
+          assoc atom block boundp butlast cadar caaar caadr cdaar cdadr
+          cddar caaaar caaadr caadar caaddr cadaar cadadr caddar cdaaar
+          cdaadr cdadar cdaddr cddaar cddadr cdddar cddddr caar cadddr caddr
           cadr car car case catch cdar cdddr cddr cdr cdr char
           char-code char= code-char cond cons consp constantly
           copy-list decf declaim defconstant define-setf-expander
