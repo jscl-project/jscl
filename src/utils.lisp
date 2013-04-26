@@ -36,16 +36,9 @@
                :initial-value (funcall func initial-value (car list)))))
 
 ;;; Concatenate a list of strings, with a separator
-(defun join (list &optional (separator ""))
-  (cond
-    ((null list)
-     "")
-    ((null (cdr list))
-     (car list))
-    (t
-     (concat (car list)
-             separator
-             (join (cdr list) separator)))))
+(!reduce (lambda (s o) (concat s separator o))  
+         (cdr list) 
+         :initial-value (car list))) 
 
 (defun join-trailing (list &optional (separator ""))
   (if (null list)
