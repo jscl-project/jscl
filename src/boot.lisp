@@ -680,6 +680,8 @@
                          `((,(ecase (car c)
                                     (integer 'integerp)
                                     (cons 'consp)
+                                    (symbol 'symbolp)
+                                    (array 'arrayp)
                                     (string 'stringp)
                                     (atom 'atom)
                                     (null 'null))
