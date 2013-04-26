@@ -527,7 +527,7 @@
     output))
 
 
-(defvar *literal-symbols* nil)
+(defvar *literal-table* nil)
 (defvar *literal-counter* 0)
 
 (defun genlit ()
@@ -565,27 +565,18 @@
     ((integerp sexp) (integer-to-string sexp))
     ((floatp sexp) (float-to-string sexp))
     ((stringp sexp) (code "\"" (escape-string sexp) "\""))
-    ((symbolp sexp)
-     (or (cdr (assoc sexp *literal-symbols*))
-	 (let ((v (genlit))
-	       (s (dump-symbol sexp)))
-	   (push (cons sexp v) *literal-symbols*)
-	   (toplevel-compilation (code "var " v " = " s))
-	   v)))
-    ((consp sexp)
-     (let ((c (dump-cons sexp)))
-       (if recursive
-	   c
-	   (let ((v (genlit)))
-             (toplevel-compilation (code "var " v " = " c))
-             v))))
-    ((arrayp sexp)
-     (let ((c (dump-array sexp)))
-       (if recursive
-           c
-           (let ((v (genlit)))
-             (toplevel-compilation (code "var " v " = " c))
-             v))))))
+    (t
+     (or (cdr (assoc sexp *literal-table*))
+	 (let ((dumped (typecase sexp
+                         (symbol (dump-symbol sexp))
+                         (cons (dump-cons sexp))
+                         (array (dump-array sexp)))))
+           (if recursive
+               dumped
+               (let ((jsvar (genlit)))
+                 (push (cons sexp jsvar) *literal-table*)
+                 (toplevel-compilation (code "var " jsvar " = " dumped))
+                 jsvar)))))))
 
 (define-compilation quote (sexp)
   (literal sexp))
