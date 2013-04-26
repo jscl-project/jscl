@@ -215,10 +215,12 @@
   (if (null clausules)
       nil
       (if (eq (caar clausules) t)
-          `(progn ,@(cdar clausules))
-          `(if ,(caar clausules)
-               (progn ,@(cdar clausules))
-               (cond ,@(cdr clausules))))))
+        `(progn ,@(cdar clausules))
+        `(if ,(caar clausules)
+           ,(if (null (cdar clausules))
+              (caar clausules)
+              `(progn ,@(cdar clausules)))
+           (cond ,@(cdr clausules))))))
 
 (defmacro case (form &rest clausules)
   (let ((!form (gensym)))
