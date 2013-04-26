@@ -567,11 +567,11 @@
     ((stringp sexp) (code "\"" (escape-string sexp) "\""))
     (t
      (or (cdr (assoc sexp *literal-table*))
-	 (let ((dumped (typecase sexp
+         (let ((dumped (typecase sexp
                          (symbol (dump-symbol sexp))
                          (cons (dump-cons sexp))
                          (array (dump-array sexp)))))
-           (if recursive
+           (if (and recursive (not (symbolp sexp)))
                dumped
                (let ((jsvar (genlit)))
                  (push (cons sexp jsvar) *literal-table*)
