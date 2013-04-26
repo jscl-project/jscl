@@ -213,14 +213,16 @@
 
 (defmacro cond (&rest clausules)
   (if (null clausules)
-      nil
-      (if (eq (caar clausules) t)
-        `(progn ,@(cdar clausules))
-        `(if ,(caar clausules)
-           ,(if (null (cdar clausules))
-              (caar clausules)
-              `(progn ,@(cdar clausules)))
-           (cond ,@(cdr clausules))))))
+    nil
+    (if (eq (caar clausules) t)
+      `(progn ,@(cdar clausules))
+      (let ((test-symbol (gensym)))
+        `(let ((,test-symbol ,(caar clausules)))
+           (if ,test-symbol
+             ,(if (null (cdar clausules))
+                test-symbol
+                `(progn ,@(cdar clausules)))
+             (cond ,@(cdr clausules))))))))
 
 (defmacro case (form &rest clausules)
   (let ((!form (gensym)))
