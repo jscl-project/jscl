@@ -4,12 +4,12 @@
 (write-line " seconds.")
 
 (cond
-  ((zerop *failed-tets*)
+  ((zerop *failed-tests*)
    (write-string "All tests (")
-   (write-string (prin1-to-string *passed-tets*))
+   (write-string (prin1-to-string *passed-tests*))
    (write-line ") passed successfully"))
   (t
-   (write-string (prin1-to-string *failed-tets*))
+   (write-string (prin1-to-string *failed-tests*))
    (write-string "/")
-   (write-string (prin1-to-string (+ *passed-tets* *failed-tets*)))
+   (write-string (prin1-to-string (+ *passed-tests* *failed-tests*)))
    (write-line " failed.")))
