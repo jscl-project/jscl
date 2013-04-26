@@ -54,3 +54,9 @@
      (cons (subst new old (car tree) :key key :test test)
            (subst new old (cdr tree) :key key :test test))) 
     (t tree)))
+
+(defmacro pop (place)
+  (let ((car-symbol (gensym)))
+    `(let ((,car-symbol (car ,place)))
+       (setf ,place (cdr ,place))
+       ,car-symbol)))
