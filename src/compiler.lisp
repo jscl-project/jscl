@@ -1476,13 +1476,13 @@
   (type-check (("string" "string" string))
     (if *multiple-value-p*
         (js!selfcall
-          "var v = eval.apply(window, [string]);" *newline*
+          "var v = globalEval(string);" *newline*
           "if (typeof v !== 'object' || !('multiple-value' in v)){" *newline*
           (indent "v = [v];" *newline*
                   "v['multiple-value'] = true;" *newline*)
           "}" *newline*
           "return values.apply(this, v);" *newline*)
-        "eval.apply(window, [string])")))
+        "globalEval(string)")))
 
 (define-builtin error (string)
   (js!selfcall "throw " string ";" *newline*))

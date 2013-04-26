@@ -4,9 +4,7 @@
 var window = this;
 var nil;
 
-function globalEval (x) {
-    return eval.call (window, x);
-}
+globalEval = eval;  // Just an indirect eval
 
 function pv (x) { return x==undefined? nil: x; }
 
