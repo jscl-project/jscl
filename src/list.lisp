@@ -56,7 +56,11 @@
     (t tree)))
 
 (defmacro pop (place)
-  (let ((car-symbol (gensym)))
-    `(let ((,car-symbol (car ,place)))
-       (setf ,place (cdr ,place))
-       ,car-symbol)))
+  (multiple-value-bind (dummies vals newval setter getter)
+    (get-setf-expansion place)
+    (let ((car-symbol (gensym)))
+      `(let* (,@(mapcar #'list dummies vals) 
+              (,car-symbol (car ,getter))
+              (,(car newval) (cdr ,getter)))
+         ,setter
+         ,car-symbol))))
