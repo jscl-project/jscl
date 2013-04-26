@@ -38,3 +38,10 @@
 (defun cddadr (x) (cdr (cdadr x)))
 (defun cdddar (x) (cdr (cddar x)))
 (defun cddddr (x) (cdr (cdddr x)))
+
+
+(defun copy-tree (tree)
+  (if (consp tree)
+    (cons (copy-tree (car tree))
+          (copy-tree (cdr tree)))
+    tree))
