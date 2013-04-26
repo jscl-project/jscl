@@ -533,6 +533,33 @@
 (defun genlit ()
   (code "l" (incf *literal-counter*)))
 
+(defun dump-symbol (symbol)
+  #+common-lisp
+  (let ((package (symbol-package symbol)))
+    (if (eq package (find-package "KEYWORD"))
+        (code "{name: \"" (escape-string (symbol-name symbol))
+              "\", 'package': '" (package-name package) "'}")
+        (code "{name: \"" (escape-string (symbol-name symbol)) "\"}")))
+  #+jscl
+  (let ((package (symbol-package symbol)))
+    (if (null package)
+        (code "{name: \"" (escape-string (symbol-name symbol)) "\"}")
+        (ls-compile `(intern ,(symbol-name symbol) ,(package-name package))))))
+
+(defun dump-cons (cons)
+  (let ((head (butlast cons))
+        (tail (last cons)))
+    (code "QIList("
+          (join-trailing (mapcar (lambda (x) (literal x t)) head) ",")
+          (literal (car tail) t)
+          ","
+          (literal (cdr tail) t)
+          ")")))
+
+(defun dump-array (array)
+  (let ((elements (vector-to-list array)))
+    (concat "[" (join (mapcar #'literal elements) ", ") "]")))
+
 (defun literal (sexp &optional recursive)
   (cond
     ((integerp sexp) (integer-to-string sexp))
@@ -541,42 +568,24 @@
     ((symbolp sexp)
      (or (cdr (assoc sexp *literal-symbols*))
 	 (let ((v (genlit))
-	       (s #+common-lisp
-                 (let ((package (symbol-package sexp)))
-                   (if (eq package (find-package "KEYWORD"))
-                       (code "{name: \"" (escape-string (symbol-name sexp))
-                             "\", 'package': '" (package-name package) "'}")
-                       (code "{name: \"" (escape-string (symbol-name sexp)) "\"}")))
-                 #+jscl
-                 (let ((package (symbol-package sexp)))
-                   (if (null package)
-                       (code "{name: \"" (escape-string (symbol-name sexp)) "\"}")
-                       (ls-compile `(intern ,(symbol-name sexp) ,(package-name package)))))))
+	       (s (dump-symbol sexp)))
 	   (push (cons sexp v) *literal-symbols*)
 	   (toplevel-compilation (code "var " v " = " s))
 	   v)))
     ((consp sexp)
-     (let* ((head (butlast sexp))
-            (tail (last sexp))
-            (c (code "QIList("
-                     (join-trailing (mapcar (lambda (x) (literal x t)) head) ",")
-                     (literal (car tail) t)
-                     ","
-                     (literal (cdr tail) t)
-                     ")")))
+     (let ((c (dump-cons sexp)))
        (if recursive
 	   c
 	   (let ((v (genlit)))
              (toplevel-compilation (code "var " v " = " c))
              v))))
     ((arrayp sexp)
-     (let ((elements (vector-to-list sexp)))
-       (let ((c (concat "[" (join (mapcar #'literal elements) ", ") "]")))
-	 (if recursive
-	     c
-	     (let ((v (genlit)))
-	       (toplevel-compilation (code "var " v " = " c))
-	       v)))))))
+     (let ((c (dump-array sexp)))
+       (if recursive
+           c
+           (let ((v (genlit)))
+             (toplevel-compilation (code "var " v " = " c))
+             v))))))
 
 (define-compilation quote (sexp)
   (literal sexp))
