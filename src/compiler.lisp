@@ -527,7 +527,7 @@
     output))
 
 
-(defvar *literal-table* nil)
+(defvar *literal-symbols* nil)
 (defvar *literal-counter* 0)
 
 (defun genlit ()
@@ -577,6 +577,7 @@
 	     (let ((v (genlit)))
 	       (toplevel-compilation (code "var " v " = " c))
 	       v)))))))
+
 
 (define-compilation quote (sexp)
   (literal sexp))
