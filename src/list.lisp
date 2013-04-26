@@ -47,9 +47,10 @@
     tree))
 
 (defun subst (new old tree &key (key #'identity) (test #'eql))
-  (if (funcall test (funcall key tree) (funcall key old))
-    new
-    (if (consp tree)
-      (cons (subst new old (car tree) :key key :test test)
-            (subst new old (cdr tree) :key key :test test))
-      tree)))
+  (cond 
+    ((funcall test (funcall key tree) (funcall key old))
+     new) 
+    ((consp tree)
+     (cons (subst new old (car tree) :key key :test test)
+           (subst new old (cdr tree) :key key :test test))) 
+    (t tree)))
