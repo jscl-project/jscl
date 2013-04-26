@@ -82,6 +82,7 @@
 
 (defmacro defun (name args &rest body)
   `(progn
+     
      (fset ',name
            (named-lambda ,(symbol-name name) ,args
              ,@(if (and (stringp (car body)) (not (null (cdr body))))
