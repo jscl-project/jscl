@@ -1,6 +1,6 @@
 (defvar *passed-tests* 0)
 (defvar *failed-tests* 0)
-(defvar *timestamp* (get-internal-real-time))
+(defvar *timestamp*)
 
 (defmacro test (condition)
   `(cond
@@ -13,3 +13,5 @@
 
 (write-line "Running tests...")
 (write-line "")
+
+(setq *timestamp* (get-internal-real-time))

@@ -80,3 +80,12 @@
                            (directory "tests/*.lisp")
                            (directory "tests-report.lisp"))) 
       (ls-compile-file input out))))
+
+
+;;; Run the tests in the host Lisp implementation. It is a quick way
+;;; to improve the level of trust of the tests.
+(defun run-tests-in-host ()
+  (dolist (input (append (directory "tests.lisp")
+                         (directory "tests/*.lisp")
+                         (directory "tests-report.lisp")))
+    (load input)))
