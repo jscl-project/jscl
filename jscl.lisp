@@ -23,12 +23,7 @@
     ("print"     :target)
     ("read"      :both)
     ("compiler"  :both)
-    ("toplevel"  :target)
-    ;; Tests
-    ("tests"            :test)
-    ("setf"             :test)
-    ("eval"             :test)
-    ("tests-report"     :test)))
+    ("toplevel"  :target)))
 
 (defun source-pathname
     (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
@@ -81,9 +76,7 @@
         (ls-compile-file (source-pathname (car input) :type "lisp") out))))
   ;; Tests
   (with-open-file (out "tests.js" :direction :output :if-exists :supersede)
-    (dolist (input *source*)
-      (when (member (cadr input) '(:test))
-        (ls-compile-file (source-pathname (car input)
-                                          :directory '(:relative "tests")
-                                          :type "lisp")
-                         out)))))
+    (dolist (input (append (directory "tests.lisp")
+                           (directory "tests/*.lisp")
+                           (directory "tests-report.lisp"))) 
+      (ls-compile-file input out))))
