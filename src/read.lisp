@@ -182,13 +182,12 @@
              (incf index)))
       (unless (< index size) (return))
       ;; Optional integer part
-      (let ((value (digit-char-p (char string index))))
-        (when value
-          (setq integer-part t)
-          (while (and (< index size)
-                      (setq value (digit-char-p (char string index))))
-            (setq number (+ (* number 10) value))
-            (incf index))))
+      (awhen (digit-char-p (char string index))
+        (setq integer-part t)
+        (while (and (< index size)
+                    (setq it (digit-char-p (char string index))))
+          (setq number (+ (* number 10) it))
+          (incf index)))
       (unless (< index size) (return))
       ;; Decimal point is mandatory if there's no integer part
       (unless (or integer-part (char= #\. (char string index))) (return))
@@ -196,14 +195,13 @@
       (when (char= #\. (char string index))
         (incf index)
         (unless (< index size) (return))
-        (let ((value (digit-char-p (char string index))))
-          (when value
-            (setq fractional-part t)
-            (while (and (< index size)
-                        (setq value (digit-char-p (char string index))))
-              (setq number (+ (* number 10) value))
-              (setq divisor (* divisor 10))
-              (incf index)))))
+        (awhen (digit-char-p (char string index))
+          (setq fractional-part t)
+          (while (and (< index size)
+                      (setq it (digit-char-p (char string index))))
+            (setq number (+ (* number 10) it))
+            (setq divisor (* divisor 10))
+            (incf index))))
       ;; Either left or right part of the dot must be present
       (unless (or integer-part fractional-part) (return))
       ;; Exponent is mandatory if there is no fractional part
@@ -318,3 +316,7 @@
 
 (defun ls-read-from-string (string &optional (eof-error-p t) eof-value)
   (ls-read (make-string-stream string) eof-error-p eof-value))
+
+#+jscl
+(defun read-from-string (string &optional (eof-errorp t) eof-value)
+  (ls-read-from-string string eof-errorp eof-value))
