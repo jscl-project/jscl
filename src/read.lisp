@@ -316,3 +316,7 @@
 
 (defun ls-read-from-string (string &optional (eof-error-p t) eof-value)
   (ls-read (make-string-stream string) eof-error-p eof-value))
+
+#+jscl
+(defun read-from-string (string &optional (eof-errorp t) eof-value)
+  (ls-read-from-string string eof-errorp eof-value))
