@@ -229,7 +229,7 @@
             (incf index))))
       (unless (= index size) (return))
       ;; Everything went ok, we have a float
-      (/ (* sign (expt 10 (* exponent-sign exponent)) number) divisor))))
+      (float (/ (* sign (expt 10 (* exponent-sign exponent)) number) divisor) 1.0))))
 
 
 (defun !parse-integer (string junk-allow)
