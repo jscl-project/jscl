@@ -76,11 +76,13 @@
        (%read-char stream)
        nil)
       ((char= ch #\.)
-       (%read-char stream)
-       (prog1 (ls-read-1 stream)
-         (skip-whitespaces-and-comments stream)
-         (unless (char= (%read-char stream) #\))
-           (error "')' was expected."))))
+       (let ((x (ls-read-1 stream)))
+         (if (eq x '\.)
+             (prog1 (ls-read-1 stream)
+               (skip-whitespaces-and-comments stream)
+               (unless (char= (%read-char stream) #\))
+                 (error "')' was expected.")))
+             (cons x (%read-list stream)))))
       (t
        (cons (ls-read-1 stream) (%read-list stream))))))
 
