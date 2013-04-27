@@ -272,9 +272,9 @@
 (defun parse-integer (string &key junk-allowed)
   (multiple-value-bind (num index)
       (!parse-integer string junk-allowed)
-    (when num
-      (values num index)
-      (error "junk detected."))))
+    (if num
+        (values num index)
+        (error "junk detected."))))
 
 (defvar *eof* (gensym))
 (defun ls-read-1 (stream)
