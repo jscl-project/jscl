@@ -23,6 +23,7 @@
     ("print"     :target)
     ("read"      :both)
     ("compiler"  :both)
+    ("list"      :target)
     ("toplevel"  :target)))
 
 (defun source-pathname
