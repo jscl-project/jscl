@@ -64,7 +64,7 @@
 
 (defun bootstrap ()
   (setq *environment* (make-lexenv))
-  (setq *literal-symbols* nil)
+  (setq *literal-table* nil)
   (setq *variable-counter* 0
         *gensym-counter* 0
         *literal-counter* 0

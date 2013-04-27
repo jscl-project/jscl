@@ -4,12 +4,20 @@
 (write-line " seconds.")
 
 (cond
-  ((zerop *failed-tests*)
-   (write-string "All tests (")
-   (write-string (prin1-to-string *passed-tests*))
-   (write-line ") passed successfully"))
+  ((= *passed-tests* *total-tests*)
+   (write-line "All the tests (")
+   (write-string (prin1-to-string *total-tests*))
+   (write-line ") passed successfully."))
   (t
-   (write-string (prin1-to-string *failed-tests*))
+   (write-string (prin1-to-string *passed-tests*))
    (write-string "/")
-   (write-string (prin1-to-string (+ *passed-tests* *failed-tests*)))
-   (write-line " failed.")))
+   (write-string (prin1-to-string *total-tests*))
+   (write-line " test(s) passed successfully.")))
+
+(unless (zerop *expected-failures*)
+  (write-string (prin1-to-string *expected-failures*))
+  (write-line " test(s) failed expectedly."))
+
+(unless (zerop *unexpected-passes*)
+  (write-string (prin1-to-string *unexpected-passes*))
+  (write-line " test(s) passed unexpectedly."))
