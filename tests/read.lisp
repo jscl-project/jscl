@@ -4,7 +4,7 @@
 (expected-failure
  (equal (read-from-string "(a b c)") (values '(A B C) 7)))
 
-(test (equal (prin1-to-string (read-from-string "(1 .25)")) "(1 0.25)"))
-(test (equal (prin1-to-string (read-from-string ".25")) "0.25"))
-(test (equal (prin1-to-string (read-from-string "(1 \\. 25)")) "(1 \\. 25)"))
-(test (equal (prin1-to-string (read-from-string "(1 . 25)")) "(1 . 25)"))
+(test (equal (read-from-string "(1 .25)") '(1 0.25)))
+(test (equal (read-from-string ".25") 0.25))
+(test (equal (read-from-string "(1 \\. 25)") '(1 \. 25)))
+(test (equal (read-from-string "(1 . 25)") '(1 . 25)))
