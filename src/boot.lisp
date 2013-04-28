@@ -464,19 +464,58 @@
       (return list))
     (setq list (cdr list))))
 
-(defun find (item list &key key (test #'eql))
-  (dolist (x list)
-    (when (funcall test (funcall key x) item)
-      (return x))))
+(defmacro doseq ((elt seq &optional index) &body body)
+  (let* ((nseq (gensym "seq"))
+         (i (or index (gensym "i")))
+         (list-body (if index
+                        `(let ((,i -1))
+                           (dolist (,elt ,nseq)
+                             (incf ,i)
+                             ,@body))
+                        `(dolist (,elt ,nseq)
+                           ,@body))))
+    `(let ((,nseq ,seq))
+       (if (listp ,nseq)
+           ,list-body
+           (dotimes (,i (length ,nseq))
+             (let ((,elt (aref ,nseq ,i)))
+               ,@body))))))
 
-(defun remove (x list)
+(defun find (item seq &key key (test #'eql))
+  (if key
+      (doseq (x seq)
+        (when (funcall test (funcall key x) item)
+          (return x)))
+      (doseq (x seq)
+        (when (funcall test x item)
+          (return x)))))
+
+(defun remove (x seq)
   (cond
-    ((null list)
+    ((null seq)
      nil)
-    ((eql x (car list))
-     (remove x (cdr list)))
+    ((listp seq)
+     (let* ((head (cons nil nil))
+            (tail head))
+       (doseq (elt seq)
+         (unless (eql x elt)
+           (let ((new (list elt)))
+             (rplacd tail new)
+             (setq tail new))))
+       (cdr head)))
     (t
-     (cons (car list) (remove x (cdr list))))))
+     (let (vector)
+       (doseq (elt seq index)
+         (if (eql x elt)
+             ;; Copy the beginning of the vector only when we find an element
+             ;; that does not match.
+             (unless vector
+               (setq vector (make-array 0))
+               (dotimes (i index)
+                 (vector-push-extend (aref seq i) vector)))
+             (when vector
+               (vector-push-extend elt vector))))
+       (or vector seq)))))
 
 (defun remove-if (func list)
   (cond
