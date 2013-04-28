@@ -57,6 +57,19 @@
       (setq ch (%peek-char stream)))
     string))
 
+(defun read-escaped-until (stream func)
+  (let ((string "")
+        (ch))
+    (setq ch (%peek-char stream))
+    (while (and ch (not (funcall func ch)))
+      (setq string (concat string (string ch)))
+      (%read-char stream)
+      (when (char= ch #\\)
+        ;; Note... escape char has been left in the string!
+        (setq string (concat string (string (%read-char stream)))))
+      (setq ch (%peek-char stream)))
+    string))
+
 (defun skip-whitespaces-and-comments (stream)
   (let (ch)
     (skip-whitespaces stream)
@@ -75,16 +88,21 @@
       ((char= ch #\))
        (%read-char stream)
        nil)
-      ((char= ch #\.)
-       (let ((x (ls-read-1 stream)))
-         (if (eq x '\.)
-             (prog1 (ls-read-1 stream)
-               (skip-whitespaces-and-comments stream)
-               (unless (char= (%read-char stream) #\))
-                 (error "')' was expected.")))
-             (cons x (%read-list stream)))))
       (t
-       (cons (ls-read-1 stream) (%read-list stream))))))
+       (let ((car (ls-read-1 stream)))
+         (skip-whitespaces-and-comments stream)
+         (cons car
+               (if (char= (%peek-char stream) #\.)
+                   (progn
+                     (%read-char stream)
+                     (if (terminalp (%peek-char stream))
+                         (ls-read-1 stream) ; Dotted pair notation
+                         (cons (let ((string (concat "." (read-escaped-until stream #'terminalp))))
+                                 (or (values (!parse-integer string nil))
+                                     (read-float string)
+                                     (read-symbol string)))
+                               (%read-list stream))))
+                   (%read-list stream))))))))
 
 (defun read-string (stream)
   (let ((string "")
@@ -126,6 +144,13 @@
          (t
           (error "Unknown reader form.")))))))
 
+(defun unescape (x)
+  (let ((result ""))
+    (dotimes (i (length x))
+      (unless (char= (char x i) #\\)
+        (setq result (concat result (string (char x i))))))
+    result))
+
 ;;; Parse a string of the form NAME, PACKAGE:NAME or
 ;;; PACKAGE::NAME and return the name. If the string is of the
 ;;; form 1) or 3), but the symbol does not exist, it will be created
@@ -136,23 +161,25 @@
     (setq index 0)
     (while (and (< index size)
                 (not (char= (char string index) #\:)))
+      (when (char= (char string index) #\\)
+        (incf index))
       (incf index))
     (cond
       ;; No package prefix
       ((= index size)
-       (setq name string)
+       (setq name (unescape string))
        (setq package *package*)
        (setq internalp t))
       (t
        ;; Package prefix
        (if (zerop index)
            (setq package "KEYWORD")
-           (setq package (string-upcase (subseq string 0 index))))
+           (setq package (string-upcase (unescape (subseq string 0 index)))))
        (incf index)
        (when (char= (char string index) #\:)
          (setq internalp t)
          (incf index))
-       (setq name (subseq string index))))
+       (setq name (unescape (subseq string index)))))
     ;; Canonalize symbol name and package
     (when (not (eq package "JS"))
       (setq name (string-upcase name)))
@@ -306,11 +333,11 @@
        (read-sharp stream))
       ((char= ch #\|)
        (%read-char stream)
-       (let ((string (read-until stream (lambda (x) (char= x #\|)))))
+       (let ((string (read-escaped-until stream (lambda (x) (char= x #\|)))))
          (%read-char stream)
          (read-symbol string)))
       (t
-       (let ((string (read-until stream #'terminalp)))
+       (let ((string (read-escaped-until stream #'terminalp)))
          (or (values (!parse-integer string nil))
              (read-float string)
              (read-symbol string)))))))
