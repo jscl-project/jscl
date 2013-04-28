@@ -6,5 +6,5 @@
 
 (test (equal (read-from-string "(1 .25)") '(1 0.25)))
 (test (equal (read-from-string ".25") 0.25))
-(test (equal (read-from-string "(1 \\. 25)") '(1 \. 25)))
+(test (equal (read-from-string "(1 |.| 25)") '(1 |.| 25)))
 (test (equal (read-from-string "(1 . 25)") '(1 . 25)))

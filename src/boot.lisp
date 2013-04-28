@@ -567,7 +567,7 @@
 
 (defun equal (x y)
   (cond
-    ((eq x y) t)
+    ((eql x y) t)
     ((consp x)
      (and (consp y)
           (equal (car x) (car y))
@@ -580,9 +580,6 @@
                 (unless (equal (aref x i) (aref y i))
                   (return-from equal nil)))
               t))))
-    ((stringp x)
-     (and (stringp y)
-          (eql x y)))
     (t nil)))
 
 (defun string= (s1 s2)
