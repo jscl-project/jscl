@@ -304,6 +304,11 @@
            (list 'unquote (ls-read-1 stream))))
       ((char= ch #\#)
        (read-sharp stream))
+      ((char= ch #\|)
+       (%read-char stream)
+       (let ((string (read-until stream (lambda (x) (char= x #\|)))))
+         (%read-char stream)
+         (read-symbol string)))
       (t
        (let ((string (read-until stream #'terminalp)))
          (or (values (!parse-integer string nil))
