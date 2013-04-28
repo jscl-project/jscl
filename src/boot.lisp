@@ -25,16 +25,16 @@
 (eval-when-compile
   (%compile-defmacro 'defmacro
                      '(function
-                       (lambda (name args &rest body)
-                        `(eval-when-compile
-                           (%compile-defmacro ',name
-                                              '(function
-                                                (lambda ,(mapcar #'(lambda (x)
-                                                                     (if (eq x '&body)
-                                                                         '&rest
-                                                                         x))
-                                                                 args)
-                                                 ,@body))))))))
+                       (lambda (defmacro-form)
+                        (destructuring-bind (name lambda-list &body body) (cdr defmacro-form)
+                          (let ((whole (gensym "whole")))
+                            `(eval-when-compile
+                               (%compile-defmacro ',name
+                                                  '(function
+                                                    (lambda (,whole)
+                                                     (destructuring-bind ,lambda-list
+                                                         (cdr ,whole)
+                                                       ,@body)))))))))))
 
 (defmacro declaim (&rest decls)
   `(eval-when-compile

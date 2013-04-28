@@ -1567,6 +1567,8 @@
   (make-hash-table :test #'eq))
 
 (defun ls-macroexpand-1 (form)
+  ;; FIXME: *macroexpand-hook*
+  ;; FIXME: macros need access to the lexical environment
   (cond
     ((symbolp form)
      (let ((b (lookup-in-lexenv form *environment* 'variable)))
@@ -1593,8 +1595,8 @@
                   #+jscl (setf (binding-value macro-binding) compiled)
                   #+common-lisp (setf (gethash macro-binding *macroexpander-cache*) compiled)
                   (setq expander compiled))))
-             (values (apply expander (cdr form)) t))
-           (values form nil))))
+             (values (funcall expander form) t))
+             (values form nil))))
     (t
      (values form nil))))
 
