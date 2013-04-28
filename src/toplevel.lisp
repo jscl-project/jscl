@@ -100,8 +100,8 @@
    (ls-compile
     `(progn
        ,@(mapcar (lambda (s) `(%intern-symbol (%js-vref ,(cdr s))))
-                 *literal-symbols*)
-       (setq *literal-symbols* ',*literal-symbols*)
+                 *literal-table*)
+       (setq *literal-table* ',*literal-table*)
        (setq *variable-counter* ,*variable-counter*)
        (setq *gensym-counter* ,*gensym-counter*)
        (setq *block-counter* ,*block-counter*)))))
