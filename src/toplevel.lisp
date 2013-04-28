@@ -59,7 +59,7 @@
           define-setf-expander define-symbol-macro defmacro defparameter defun
           defvar destructuring-bind digit-char digit-char-p disassemble do do* documentation
           dolist dotimes ecase eighth eq eql equal error eval every export expt
-          fdefinition fifth find-package find-symbol first flet format fourth
+          fdefinition fifth find-package find find-symbol first flet format fourth
           fset funcall function functionp gensym get-internal-real-time
           get-setf-expansion get-universal-time go identity if in-package
           incf integerp intern intersection keywordp labels lambda last length
