@@ -47,7 +47,7 @@
     (load (source-pathname (car input)))))
 
 (defun read-whole-file (filename)
-  (with-open-file (in filename)
+  (with-open-file (in filename :external-format :latin-1)
     (let ((seq (make-array (file-length in) :element-type 'character)))
       (read-sequence seq in)
       seq)))
