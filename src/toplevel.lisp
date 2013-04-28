@@ -74,7 +74,7 @@
           setq sixth some string string-upcase string= stringp subseq subst
           symbol-function symbol-name symbol-package symbol-plist
           symbol-value symbolp t tagbody tailp tenth third throw tree-equal
-          truncate unless unwind-protect values values-list variable warn when
+          truncate unless unwind-protect values values-list variable vector-push-extend warn when
           write-line write-string zerop))
 
 (setq *package* *user-package*)
