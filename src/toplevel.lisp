@@ -57,7 +57,7 @@
           define-symbol-macro defmacro defparameter defun defvar
           digit-char digit-char-p disassemble do do* documentation
           dolist dotimes ecase eq eql equal error eval every export expt
-          fdefinition find-package find-symbol first flet fourth fset
+          fdefinition find find-package find-symbol first flet fourth fset
           funcall function functionp gensym get-internal-real-time
           get-setf-expansion get-universal-time go identity if in-package
           incf integerp intern keywordp labels lambda last length let let* list
@@ -72,7 +72,7 @@
           setq some string string-upcase string= stringp subseq
           symbol-function symbol-name symbol-package symbol-plist
           symbol-value symbolp t tagbody third throw truncate unless
-          unwind-protect values values-list variable warn when write-line
+          unwind-protect values values-list variable vector-push-extend warn when write-line
           write-string zerop))
 
 (setq *package* *user-package*)
