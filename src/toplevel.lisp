@@ -57,7 +57,7 @@
           define-symbol-macro defmacro defparameter defun defvar
           digit-char digit-char-p disassemble do do* documentation
           dolist dotimes ecase eq eql equal error eval every export expt
-          fdefinition find-package find-symbol first flet fourth fset
+          fdefinition find find-package find-symbol first flet fourth fset
           funcall function functionp gensym get-internal-real-time
           get-setf-expansion get-universal-time go identity if in-package
           incf integerp intern keywordp labels lambda last length let let* list
