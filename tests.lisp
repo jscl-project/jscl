@@ -14,7 +14,9 @@
         (write-line ,(concat "Test `" (prin1-to-string condition) "' passed"))
         (incf *passed-tests*))
        (t
-        (write-line ,(concat "Test `" (prin1-to-string condition) "' failed."))
+        (write-line ,(concat "<font color=red>Test `"
+                             (prin1-to-string condition) 
+                             "' failed.</font>"))
         (incf *failed-tests*)))
      (incf *total-tests*)))
 
@@ -22,7 +24,9 @@
   `(progn
      (cond
        (,condition
-        (write-line ,(concat "Test `" (prin1-to-string condition) "' passed unexpectedly!"))
+        (write-line ,(concat "<font color=orange>Test `"
+                             (prin1-to-string condition)
+                             "' passed unexpectedly!</font>"))
         (incf *unexpected-passes*))
        (t
         (write-line ,(concat "Test `" (prin1-to-string condition) "' failed expectedly."))
