@@ -636,7 +636,7 @@
     ((null (cddr pairs))
      (let ((place (ls-macroexpand-1 (first pairs)))
            (value (second pairs)))
-       (multiple-value-bind (vars vals store-vars writer-form reader-form)
+       (multiple-value-bind (vars vals store-vars writer-form)
            (get-setf-expansion place)
          ;; TODO: Optimize the expansion a little bit to avoid let*
          ;; or multiple-value-bind when unnecesary.
