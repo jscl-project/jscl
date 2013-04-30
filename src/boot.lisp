@@ -565,6 +565,23 @@
         ((symbolp x) (symbol-name x))
         (t (char-to-string x))))
 
+(defun equal (x y)
+  (cond
+    ((eql x y) t)
+    ((consp x)
+     (and (consp y)
+          (equal (car x) (car y))
+          (equal (cdr x) (cdr y))))
+    ((arrayp x)
+     (and (arrayp y)
+          (let ((n (length x)))
+            (when (= (length y) n)
+              (dotimes (i n)
+                (unless (equal (aref x i) (aref y i))
+                  (return-from equal nil)))
+              t))))
+    (t nil)))
+
 (defun string= (s1 s2)
   (equal s1 s2))
 
