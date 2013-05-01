@@ -553,9 +553,9 @@
       (incf pos))
     pos))
 
-(defun assoc (x alist)
+(defun assoc (x alist &key (test #'eql))
   (while alist
-    (if (eql x (caar alist))
+    (if (funcall test x (caar alist))
         (return)
         (setq alist (cdr alist))))
   (car alist))
