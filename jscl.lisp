@@ -90,7 +90,8 @@
 ;;; Run the tests in the host Lisp implementation. It is a quick way
 ;;; to improve the level of trust of the tests.
 (defun run-tests-in-host ()
-  (dolist (input (append (directory "tests.lisp")
-                         (directory "tests/*.lisp")
-                         (directory "tests-report.lisp")))
-    (load input)))
+  (load "tests.lisp")
+  (let ((*use-html-output-p* nil))
+    (dolist (input (directory "tests/*.lisp"))
+      (load input)))
+  (load "tests-report.lisp"))
