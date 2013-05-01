@@ -59,15 +59,24 @@
 
 (defun read-escaped-until (stream func)
   (let ((string "")
-        (ch))
-    (setq ch (%peek-char stream))
-    (while (and ch (not (funcall func ch)))
-      (setq string (concat string (string ch)))
+        (ch (%peek-char stream))
+        (multi-escape nil))
+    (while (and ch (or multi-escape (not (funcall func ch))))
+      (cond
+        ((char= ch #\|)
+         (if multi-escape
+             (setf multi-escape nil)
+             (setf multi-escape t)))
+        ((char= ch #\\)
+         (%read-char stream)
+         (setf ch (%peek-char stream))
+         (setf string (concat string "\\" (string ch))))
+        (t
+         (if multi-escape
+             (setf string (concat string "\\" (string ch)))
+             (setf string (concat string (string ch))))))
       (%read-char stream)
-      (when (char= ch #\\)
-        ;; Note... escape char has been left in the string!
-        (setq string (concat string (string (%read-char stream)))))
-      (setq ch (%peek-char stream)))
+      (setf ch (%peek-char stream)))
     string))
 
 (defun skip-whitespaces-and-comments (stream)
@@ -151,6 +160,27 @@
         (setq result (concat result (string (char x i))))))
     result))
 
+(defun escape-all (x)
+  (let ((result ""))
+    (dotimes (i (length x))
+      (setq result (concat result "\\"))
+      (setq result (concat result (string (char x i)))))
+    result))
+
+(defun string-upcase-noescaped (s)
+  (let ((result "")
+        (last-escape nil))
+    (dotimes (i (length s))
+      (let ((ch (char s i)))
+        (if last-escape
+            (progn
+              (setf last-escape nil)
+              (setf result (concat result (string ch))))
+            (if (char= ch #\\)
+                (setf last-escape t)
+                (setf result (concat result (string-upcase (string ch))))))))
+    result))
+
 ;;; Parse a string of the form NAME, PACKAGE:NAME or
 ;;; PACKAGE::NAME and return the name. If the string is of the
 ;;; form 1) or 3), but the symbol does not exist, it will be created
@@ -167,30 +197,33 @@
     (cond
       ;; No package prefix
       ((= index size)
-       (setq name (unescape string))
+       (setq name string)
        (setq package *package*)
        (setq internalp t))
       (t
        ;; Package prefix
        (if (zerop index)
            (setq package "KEYWORD")
-           (setq package (string-upcase (unescape (subseq string 0 index)))))
+           (setq package (string-upcase-noescaped (subseq string 0 index))))
        (incf index)
        (when (char= (char string index) #\:)
          (setq internalp t)
          (incf index))
-       (setq name (unescape (subseq string index)))))
+       (setq name (subseq string index))))
     ;; Canonalize symbol name and package
-    (when (not (eq package "JS"))
-      (setq name (string-upcase name)))
+    (setq name (if (equal package "JS")
+                   (setq name (unescape name))
+                   (setq name (string-upcase-noescaped name))))
     (setq package (find-package package))
-    ;; TODO: PACKAGE:SYMBOL should signal error if SYMBOL is not an
-    ;; external symbol from PACKAGE.
     (if (or internalp
             (eq package (find-package "KEYWORD"))
             (eq package (find-package "JS")))
         (intern name package)
-        (find-symbol name package))))
+        (multiple-value-bind (symbol external)
+            (find-symbol name package)
+          (if (eq external :external)
+              symbol
+              (error (concat "The symbol '" name "' is not external")))))))
 
 (defun read-integer (string)
   (let ((sign 1)
@@ -205,7 +238,7 @@
            (case elt
              (#\+ nil)
              (#\- (setq sign -1))
-             (otherwise (return-from read-integer))))
+             (t (return-from read-integer))))
           ((and (= i (1- size)) (char= elt #\.)) nil)
           (t (return-from read-integer)))))
     (and number (* sign number))))
@@ -349,11 +382,6 @@
            (list 'unquote (ls-read-1 stream))))
       ((char= ch #\#)
        (read-sharp stream))
-      ((char= ch #\|)
-       (%read-char stream)
-       (let ((string (read-escaped-until stream (lambda (x) (char= x #\|)))))
-         (%read-char stream)
-         (read-symbol string)))
       (t
        (let ((string (read-escaped-until stream #'terminalp)))
          (or (read-integer string)
