@@ -1,9 +1,8 @@
-(defvar *total-tests* 0)
-(defvar *passed-tests* 0)
-(defvar *failed-tests* 0)
-
-(defvar *expected-failures* 0)
-(defvar *unexpected-passes* 0)
+(defparameter *total-tests* 0)
+(defparameter *passed-tests* 0)
+(defparameter *failed-tests* 0)
+(defparameter *expected-failures* 0)
+(defparameter *unexpected-passes* 0)
 
 (defvar *use-html-output-p* t)
 (defun if-html (string) (if *use-html-output-p* string ""))
