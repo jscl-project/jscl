@@ -163,6 +163,24 @@
         (intern name package)
         (find-symbol name package))))
 
+(defun read-integer (string)
+  (let ((sign 1)
+        (number nil)
+        (size (length string)))
+    (dotimes (i size)
+      (let ((elt (char string i)))
+        (cond
+          ((digit-char-p elt)
+           (setq number (+ (* (or number 0) 10) (digit-char-p elt))))
+          ((zerop i)
+           (case elt
+             (#\+ nil)
+             (#\- (setq sign -1))
+             (otherwise (return-from read-integer))))
+          ((and (= i (1- size)) (char= elt #\.)) nil)
+          (t (return-from read-integer)))))
+    (and number (* sign number))))
+
 (defun read-float (string)
   (block nil
     (let ((sign 1)
@@ -305,7 +323,7 @@
        (read-sharp stream))
       (t
        (let ((string (read-until stream #'terminalp)))
-         (or (values (!parse-integer string nil))
+         (or (read-integer string)
              (read-float string)
              (read-symbol string)))))))
 
