@@ -183,8 +183,9 @@
     `(let ((,!form ,form))
        (cond
          ,@(mapcar (lambda (clausule)
-                     (if (eq (car clausule) t)
-                         clausule
+                     (if (or (eq (car clausule) t)
+                             (eq (car clausule) 'otherwise))
+                         `(t ,@(cdr clausule))
                          `((eql ,!form ',(car clausule))
                            ,@(cdr clausule))))
                    clausules)))))
