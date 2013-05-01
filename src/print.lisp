@@ -97,4 +97,4 @@
 
 
  (defun format-special (chr arg)
-   chr))
+   chr)
