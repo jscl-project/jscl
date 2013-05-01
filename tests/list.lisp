@@ -4,7 +4,7 @@
 ;; Once it does the lists can be compared directly in many of these tests
 
 ; COPY-TREE
-(test (let* ((foo '((1 2) (3 4)))
+(test (let* ((foo (list '(1 2) '(3 4)))
              (bar (copy-tree foo)))
         ;; (SETF (CAR (CAR FOO)) 0) doesn't work in the test for some reason,
         ;; despite working fine in the REPL

@@ -15,3 +15,10 @@
 (test (=   2   (cond (1 2))))
 (test (=   3   (cond (nil 1) (2 3))))
 (test (eql nil (cond (nil 1) (nil 2))))
+
+; CASE
+
+(test (= (case 1 (2 3) (otherwise 42)) 42))
+(test (= (case 1 (2 3) (t 42)) 42))
+(test (= (case 1 (2 3) (1 42)) 42))
+(test (null (case 1 (2 3))))

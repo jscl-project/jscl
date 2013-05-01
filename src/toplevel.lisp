@@ -66,7 +66,7 @@
           list* list-all-packages listp loop make-array make-package
           make-symbol mapcar member minusp mod multiple-value-bind
           multiple-value-call multiple-value-list multiple-value-prog1
-          nconc nil not nreconc nth nthcdr null numberp or
+          nconc nil not nreconc nth nthcdr null numberp or otherwise
           package-name package-use-list packagep parse-integer plusp pop
           prin1-to-string print proclaim prog1 prog2 progn psetq push
           quote read-from-string remove remove-if remove-if-not return
@@ -103,8 +103,7 @@
                  *literal-table*)
        (setq *literal-table* ',*literal-table*)
        (setq *variable-counter* ,*variable-counter*)
-       (setq *gensym-counter* ,*gensym-counter*)
-       (setq *block-counter* ,*block-counter*)))))
+       (setq *gensym-counter* ,*gensym-counter*)))))
 
 (eval-when-compile
   (toplevel-compilation

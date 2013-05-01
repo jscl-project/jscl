@@ -73,8 +73,7 @@
   (setq *literal-table* nil)
   (setq *variable-counter* 0
         *gensym-counter* 0
-        *literal-counter* 0
-        *block-counter* 0)
+        *literal-counter* 0)
   (with-open-file (out "jscl.js" :direction :output :if-exists :supersede)
     (write-string (read-whole-file (source-pathname "prelude.js")) out)
     (dolist (input *source*)
@@ -91,7 +90,9 @@
 ;;; Run the tests in the host Lisp implementation. It is a quick way
 ;;; to improve the level of trust of the tests.
 (defun run-tests-in-host ()
-  (dolist (input (append (directory "tests.lisp")
-                         (directory "tests/*.lisp")
-                         (directory "tests-report.lisp")))
-    (load input)))
+  (load "tests.lisp")
+  (let ((*use-html-output-p* nil))
+    (declare (special *use-html-output-p*))
+    (dolist (input (directory "tests/*.lisp"))
+      (load input)))
+  (load "tests-report.lisp"))
