@@ -5,6 +5,9 @@
 (defvar *expected-failures* 0)
 (defvar *unexpected-passes* 0)
 
+(defvar *use-html-output-p* t)
+(defun if-html (string) (if *use-html-output-p* string ""))
+
 (defvar *timestamp* nil)
 
 (defmacro test (condition)
@@ -14,9 +17,11 @@
         (write-line ,(concat "Test `" (prin1-to-string condition) "' passed"))
         (incf *passed-tests*))
        (t
-        (write-line ,(concat "<font color=red>Test `"
-                             (prin1-to-string condition) 
-                             "' failed.</font>"))
+        (write-line (concat (if-html "<font color=red>")
+                            "Test `"
+                            ,(prin1-to-string condition) 
+                            "' failed."
+                            (if-html "</font>")))
         (incf *failed-tests*)))
      (incf *total-tests*)))
 
@@ -24,9 +29,11 @@
   `(progn
      (cond
        (,condition
-        (write-line ,(concat "<font color=orange>Test `"
-                             (prin1-to-string condition)
-                             "' passed unexpectedly!</font>"))
+         (write-line (concat (if-html "<font color=orange>")
+                             "Test `"
+                             ,(prin1-to-string condition)
+                             "' passed unexpectedly!"
+                             (if-html "</font>")))
         (incf *unexpected-passes*))
        (t
         (write-line ,(concat "Test `" (prin1-to-string condition) "' failed expectedly."))
