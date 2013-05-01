@@ -4,4 +4,5 @@
 
 (test (string= "a~a" (format nil "a~~a")))
 
-(test (string= "a\na" (format nil "a~%a")))
+(test (string= "a
+a" (format nil "a~%a")))
