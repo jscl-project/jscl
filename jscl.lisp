@@ -20,10 +20,11 @@
   '(("boot"      :target)
     ("compat"    :host)
     ("utils"     :both)
+    ("list"      :target)
     ("print"     :target)
+    ("package"   :target)
     ("read"      :both)
     ("compiler"  :both)
-    ("list"      :target)
     ("toplevel"  :target)))
 
 (defun source-pathname

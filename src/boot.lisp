@@ -79,16 +79,6 @@
      (fset ',name #'(named-lambda ,name ,args ,@body))
      ',name))
 
-(defun null (x)
-  (eq x nil))
-
-(defun endp (x)
-  (if (null x)
-      t
-      (if (consp x)
-          nil
-          (error "type-error"))))
-
 (defmacro return (&optional value)
   `(return-from nil ,value))
 
@@ -117,32 +107,6 @@
 (defun eql (x y) (eq x y))
 
 (defun not (x) (if x nil t))
-
-(defun cons (x y ) (cons x y))
-(defun consp (x) (consp x))
-
-(defun car (x)
-  "Return the CAR part of a cons, or NIL if X is null."
-  (car x))
-
-(defun cdr (x) (cdr x))
-(defun caar (x) (car (car x)))
-(defun cadr (x) (car (cdr x)))
-(defun cdar (x) (cdr (car x)))
-(defun cddr (x) (cdr (cdr x)))
-(defun cadar (x) (car (cdr (car x))))
-(defun caddr (x) (car (cdr (cdr x))))
-(defun cdddr (x) (cdr (cdr (cdr x))))
-(defun cadddr (x) (car (cdr (cdr (cdr x)))))
-(defun first (x) (car x))
-(defun second (x) (cadr x))
-(defun third (x) (caddr x))
-(defun fourth (x) (cadddr x))
-(defun rest (x) (cdr x))
-
-(defun list (&rest args) args)
-(defun atom (x)
-  (not (consp x)))
 
 ;; Basic macros
 
@@ -376,42 +340,15 @@
          ,@body)
        (cdr ,head))))
 
-(defun map1 (func list)
-  (with-collect
-    (while list
-      (collect (funcall func (car list)))
-      (setq list (cdr list)))))
 
 (defmacro loop (&body body)
   `(while t ,@body))
-
-(defun mapcar (func list &rest lists)
-  (let ((lists (cons list lists)))
-    (with-collect
-      (block loop
-        (loop
-           (let ((elems (map1 #'car lists)))
-             (do ((tail lists (cdr tail)))
-                 ((null tail))
-               (when (null (car tail)) (return-from loop))
-               (rplaca tail (cdar tail)))
-             (collect (apply func elems))))))))
 
 (defun identity (x) x)
 
 (defun constantly (x)
   (lambda (&rest args)
     x))
-
-(defun copy-list (x)
-  (mapcar #'identity x))
-
-(defun list* (arg &rest others)
-  (cond ((null others) arg)
-        ((null (cdr others)) (cons arg (car others)))
-        (t (do ((x others (cdr x)))
-               ((null (cddr x)) (rplacd x (cadr x))))
-           (cons arg others))))
 
 (defun code-char (x) x)
 (defun char-code (x) x)
@@ -426,32 +363,8 @@
 (defun plusp (x) (< 0 x))
 (defun minusp (x) (< x 0))
 
-(defun listp (x)
-  (or (consp x) (null x)))
-
-(defun nthcdr (n list)
-  (while (and (plusp n) list)
-    (setq n (1- n))
-    (setq list (cdr list)))
-  list)
-
-(defun nth (n list)
-  (car (nthcdr n list)))
-
-(defun last (x)
-  (while (consp (cdr x))
-    (setq x (cdr x)))
-  x)
-
-(defun butlast (x)
-  (and (consp (cdr x))
-       (cons (car x) (butlast (cdr x)))))
-
-(defun member (x list)
-  (while list
-    (when (eql x (car list))
-      (return list))
-    (setq list (cdr list))))
+(defun atom (x)
+  (not (consp x)))
 
 (defun find (item list &key key (test #'eql))
   (dolist (x list)
@@ -541,13 +454,6 @@
         (return))
       (incf pos))
     pos))
-
-(defun assoc (x alist &key (test #'eql))
-  (while alist
-    (if (funcall test x (caar alist))
-        (return)
-        (setq alist (cdr alist))))
-  (car alist))
 
 (defun string (x)
   (cond ((stringp x) x)
@@ -657,24 +563,6 @@
               ((null pairs)
                (reverse result)))))))
 
-(define-setf-expander car (x)
-  (let ((cons (gensym))
-        (new-value (gensym)))
-    (values (list cons)
-            (list x)
-            (list new-value)
-            `(progn (rplaca ,cons ,new-value) ,new-value)
-            `(car ,cons))))
-
-(define-setf-expander cdr (x)
-  (let ((cons (gensym))
-        (new-value (gensym)))
-    (values (list cons)
-            (list x)
-            (list new-value)
-            `(progn (rplacd ,cons ,new-value) ,new-value)
-            `(car ,cons))))
-
 ;; Incorrect typecase, but used in NCONC.
 (defmacro typecase (x &rest clausules)
   (let ((value (gensym)))
@@ -696,183 +584,8 @@
                                  (list nil)))))
                    clausules)))))
 
-;; The NCONC function is based on the SBCL's one.
-(defun nconc (&rest lists)
-  (flet ((fail (object)
-           (error "type-error in nconc")))
-    (do ((top lists (cdr top)))
-        ((null top) nil)
-      (let ((top-of-top (car top)))
-        (typecase top-of-top
-          (cons
-           (let* ((result top-of-top)
-                  (splice result))
-             (do ((elements (cdr top) (cdr elements)))
-                 ((endp elements))
-               (let ((ele (car elements)))
-                 (typecase ele
-                   (cons (rplacd (last splice) ele)
-                         (setf splice ele))
-                   (null (rplacd (last splice) nil))
-                   (atom (if (cdr elements)
-                             (fail ele)
-                             (rplacd (last splice) ele))))))
-             (return result)))
-          (null)
-          (atom
-           (if (cdr top)
-               (fail top-of-top)
-               (return top-of-top))))))))
-
-(defun nreconc (x y)
-  (do ((1st (cdr x) (if (endp 1st) 1st (cdr 1st)))
-       (2nd x 1st)                ; 2nd follows first down the list.
-       (3rd y 2nd))               ;3rd follows 2nd down the list.
-      ((atom 2nd) 3rd)
-    (rplacd 2nd 3rd)))
-
 (defun notany (fn seq)
   (not (some fn seq)))
-
-
-;; Packages
-
-(defvar *package-list* nil)
-
-(defun list-all-packages ()
-  *package-list*)
-
-(defun make-package (name &key use)
-  (let ((package (new))
-        (use (mapcar #'find-package-or-fail use)))
-    (oset package "packageName" name)
-    (oset package "symbols" (new))
-    (oset package "exports" (new))
-    (oset package "use" use)
-    (push package *package-list*)
-    package))
-
-(defun packagep (x)
-  (and (objectp x) (in "symbols" x)))
-
-(defun find-package (package-designator)
-  (when (packagep package-designator)
-    (return-from find-package package-designator))
-  (let ((name (string package-designator)))
-    (dolist (package *package-list*)
-      (when (string= (package-name package) name)
-        (return package)))))
-
-(defun find-package-or-fail (package-designator)
-  (or (find-package package-designator)
-      (error "Package unknown.")))
-
-(defun package-name (package-designator)
-  (let ((package (find-package-or-fail package-designator)))
-    (oget package "packageName")))
-
-(defun %package-symbols (package-designator)
-  (let ((package (find-package-or-fail package-designator)))
-    (oget package "symbols")))
-
-(defun package-use-list (package-designator)
-  (let ((package (find-package-or-fail package-designator)))
-    (oget package "use")))
-
-(defun %package-external-symbols (package-designator)
-  (let ((package (find-package-or-fail package-designator)))
-    (oget package "exports")))
-
-(defvar *common-lisp-package*
-  (make-package "CL"))
-
-(defvar *js-package*
-  (make-package "JS"))
-
-(defvar *user-package*
-  (make-package "CL-USER" :use (list *common-lisp-package*)))
-
-(defvar *keyword-package*
-  (make-package "KEYWORD"))
-
-(defun keywordp (x)
-  (and (symbolp x) (eq (symbol-package x) *keyword-package*)))
-
-(defvar *package* *common-lisp-package*)
-
-(defmacro in-package (package-designator)
-  `(eval-when-compile
-     (setq *package* (find-package-or-fail ,package-designator))))
-
-;; This function is used internally to initialize the CL package
-;; with the symbols built during bootstrap.
-(defun %intern-symbol (symbol)
-  (let* ((package
-          (if (in "package" symbol)
-              (find-package-or-fail (oget symbol "package"))
-              *common-lisp-package*))
-         (symbols (%package-symbols package)))
-    (oset symbol "package" package)
-    (when (eq package *keyword-package*)
-      (oset symbol "value" symbol))
-    (oset symbols (symbol-name symbol) symbol)))
-
-(defun find-symbol (name &optional (package *package*))
-  (let* ((package (find-package-or-fail package))
-         (externals (%package-external-symbols package))
-         (symbols (%package-symbols package)))
-    (cond
-      ((in name externals)
-       (values (oget externals name) :external))
-      ((in name symbols)
-       (values (oget symbols name) :internal))
-      (t
-       (dolist (used (package-use-list package) (values nil nil))
-         (let ((exports (%package-external-symbols used)))
-           (when (in name exports)
-             (return (values (oget exports name) :inherit)))))))))
-
-(defun intern (name &optional (package *package*))
-  (let ((package (find-package-or-fail package)))
-    (multiple-value-bind (symbol foundp)
-        (find-symbol name package)
-      (if foundp
-          (values symbol foundp)
-          (let ((symbols (%package-symbols package)))
-            (oget symbols name)
-            (let ((symbol (make-symbol name)))
-              (oset symbol "package" package)
-              (when (eq package *keyword-package*)
-                (oset symbol "value" symbol)
-                (export (list symbol) package))
-              (when (eq package *js-package*)
-                (let ((sym-name (symbol-name symbol))
-                      (args (gensym)))
-                  ;; Generate a trampoline to call the JS function
-                  ;; properly. This trampoline is very inefficient,
-                  ;; but it still works. Ideas to optimize this are
-                  ;; provide a special lambda keyword
-                  ;; cl::&rest-vector to avoid list argument
-                  ;; consing, as well as allow inline declarations.
-                  (fset symbol
-                        (eval `(lambda (&rest ,args)
-                                 (let ((,args (list-to-vector ,args)))
-                                   (%js-call (%js-vref ,sym-name) ,args)))))
-                  ;; Define it as a symbol macro to access to the
-                  ;; Javascript variable literally.
-                  (%define-symbol-macro symbol `(%js-vref ,(string symbol)))))
-              (oset symbols name symbol)
-              (values symbol nil)))))))
-
-(defun symbol-package (symbol)
-  (unless (symbolp symbol)
-    (error "it is not a symbol"))
-  (oget symbol "package"))
-
-(defun export (symbols &optional (package *package*))
-  (let ((exports (%package-external-symbols package)))
-    (dolist (symb symbols t)
-      (oset exports (symbol-name symb) symb))))
 
 
 (defconstant internal-time-units-per-second 1000) 
