@@ -3,18 +3,18 @@
 ;; copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
 
-;; This program is free software: you can redistribute it and/or
+;; JSCL is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation, either version 3 of the
 ;; License, or (at your option) any later version.
 ;;
-;; This program is distributed in the hope that it will be useful, but
+;; JSCL is distributed in the hope that it will be useful, but
 ;; WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ;; General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;;; Compiler
 
@@ -183,6 +183,7 @@
 (defvar *variable-counter* 0)
 
 (defun gvarname (symbol)
+  (declare (ignore symbol))
   (code "v" (incf *variable-counter*)))
 
 (defun translate-variable (symbol)
@@ -316,11 +317,14 @@
           (ll-optional-arguments-canonical lambda-list))))
     (remove nil (mapcar #'third args))))
 
-(defun lambda-docstring-wrapper (docstring &rest strs)
-  (if docstring
+(defun lambda-name/docstring-wrapper (name docstring &rest strs)
+  (if (or name docstring)
       (js!selfcall
         "var func = " (join strs) ";" *newline*
-        "func.docstring = '" docstring "';" *newline*
+        (when name
+          (code "func.fname = '" (escape-string name) "';" *newline*))
+        (when docstring
+          (code "func.docstring = '" (escape-string docstring) "';" *newline*))
         "return func;" *newline*)
       (apply #'code strs)))
 
@@ -441,44 +445,75 @@
                       "throw 'Unknown keyword argument ' + arguments[i].name;" *newline*))
              "}" *newline*)))))
 
-(defun compile-lambda (ll body)
-  (let ((required-arguments (ll-required-arguments ll))
-        (optional-arguments (ll-optional-arguments ll))
-	(keyword-arguments  (ll-keyword-arguments  ll))
-        (rest-argument      (ll-rest-argument      ll))
-        documentation)
-    ;; Get the documentation string for the lambda function
-    (when (and (stringp (car body))
+(defun parse-lambda-list (ll)
+  (values (ll-required-arguments ll)
+          (ll-optional-arguments ll)
+          (ll-keyword-arguments  ll)
+          (ll-rest-argument      ll)))
+
+;;; Process BODY for declarations and/or docstrings. Return as
+;;; multiple values the BODY without docstrings or declarations, the
+;;; list of declaration forms and the docstring.
+(defun parse-body (body &key declarations docstring)
+  (let ((value-declarations)
+        (value-docstring))
+    ;; Parse declarations
+    (when declarations
+      (do* ((rest body (cdr rest))
+            (form (car rest) (car rest)))
+           ((or (atom form) (not (eq (car form) 'declare)))
+            (setf body rest))
+        (push form value-declarations)))
+    ;; Parse docstring
+    (when (and docstring
+               (stringp (car body))
                (not (null (cdr body))))
-      (setq documentation (car body))
+      (setq value-docstring (car body))
       (setq body (cdr body)))
-    (let ((n-required-arguments (length required-arguments))
-          (n-optional-arguments (length optional-arguments))
-          (*environment* (extend-local-env
-                          (append (ensure-list rest-argument)
-                                  required-arguments
-                                  optional-arguments
-				  keyword-arguments
-                                  (ll-svars ll)))))
-      (lambda-docstring-wrapper
-       documentation
-       "(function ("
-       (join (cons "values"
-                   (mapcar #'translate-variable
-                           (append required-arguments optional-arguments)))
-             ",")
-       "){" *newline*
-       (indent
-        ;; Check number of arguments
-        (lambda-check-argument-count n-required-arguments
-                                     n-optional-arguments
-                                     (or rest-argument keyword-arguments))
-	(compile-lambda-optional ll)
-	(compile-lambda-rest ll)
-	(compile-lambda-parse-keywords ll)
-        (let ((*multiple-value-p* t))
-	  (ls-compile-block body t)))
-       "})"))))
+    (values body value-declarations value-docstring)))
+
+;;; Compile a lambda function with lambda list LL and body BODY. If
+;;; NAME is given, it should be a constant string and it will become
+;;; the name of the function. If BLOCK is non-NIL, a named block is
+;;; created around the body. NOTE: No block (even anonymous) is
+;;; created if BLOCk is NIL.
+(defun compile-lambda (ll body &key name block)
+  (multiple-value-bind (required-arguments
+                        optional-arguments
+                        keyword-arguments
+                        rest-argument)
+      (parse-lambda-list ll)
+    (multiple-value-bind (body decls documentation)
+        (parse-body body :declarations t :docstring t)
+      (declare (ignore decls))
+      (let ((n-required-arguments (length required-arguments))
+            (n-optional-arguments (length optional-arguments))
+            (*environment* (extend-local-env
+                            (append (ensure-list rest-argument)
+                                    required-arguments
+                                    optional-arguments
+                                    keyword-arguments
+                                    (ll-svars ll)))))
+        (lambda-name/docstring-wrapper name documentation
+         "(function ("
+         (join (cons "values"
+                     (mapcar #'translate-variable
+                             (append required-arguments optional-arguments)))
+               ",")
+         "){" *newline*
+         (indent
+          ;; Check number of arguments
+          (lambda-check-argument-count n-required-arguments
+                                       n-optional-arguments
+                                       (or rest-argument keyword-arguments))
+                                        (compile-lambda-optional ll)
+                                        (compile-lambda-rest ll)
+                                        (compile-lambda-parse-keywords ll)
+                                        (let ((*multiple-value-p* t))
+                                          (if block
+                                              (ls-compile-block `((block ,block ,@body)) t)
+                                              (ls-compile-block body t))))
+         "})")))))
 
 
 (defun setq-pair (var val)
@@ -592,6 +627,15 @@
   (cond
     ((and (listp x) (eq (car x) 'lambda))
      (compile-lambda (cadr x) (cddr x)))
+    ((and (listp x) (eq (car x) 'named-lambda))
+     ;; TODO: destructuring-bind now! Do error checking manually is
+     ;; very annoying.
+     (let ((name (cadr x))
+           (ll (caddr x))
+           (body (cdddr x)))
+       (compile-lambda ll body
+                       :name (symbol-name name)
+                       :block name)))
     ((symbolp x)
      (let ((b (lookup-in-lexenv x *environment* 'function)))
        (if b
@@ -1410,7 +1454,6 @@
   (code "(" x ").toString()"))
 
 (define-builtin eq    (x y) (js!bool (code "(" x " === " y ")")))
-(define-builtin equal (x y) (js!bool (code "(" x  " == " y ")")))
 
 (define-builtin char-to-string (x)
   (type-check (("x" "number" x))

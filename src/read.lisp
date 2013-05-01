@@ -3,18 +3,18 @@
 ;; Copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
 
-;; This program is free software: you can redistribute it and/or
+;; JSCL is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation, either version 3 of the
 ;; License, or (at your option) any later version.
 ;;
-;; This program is distributed in the hope that it will be useful, but
+;; JSCL is distributed in the hope that it will be useful, but
 ;; WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ;; General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 
 ;;;; Reader
@@ -192,6 +192,24 @@
         (intern name package)
         (find-symbol name package))))
 
+(defun read-integer (string)
+  (let ((sign 1)
+        (number nil)
+        (size (length string)))
+    (dotimes (i size)
+      (let ((elt (char string i)))
+        (cond
+          ((digit-char-p elt)
+           (setq number (+ (* (or number 0) 10) (digit-char-p elt))))
+          ((zerop i)
+           (case elt
+             (#\+ nil)
+             (#\- (setq sign -1))
+             (otherwise (return-from read-integer))))
+          ((and (= i (1- size)) (char= elt #\.)) nil)
+          (t (return-from read-integer)))))
+    (and number (* sign number))))
+
 (defun read-float (string)
   (block nil
     (let ((sign 1)
@@ -258,8 +276,8 @@
             (incf index))))
       (unless (= index size) (return))
       ;; Everything went ok, we have a float
+      ;; XXX: Use FLOAT when implemented.
       (/ (* sign (expt 10.0 (* exponent-sign exponent)) number) divisor))))
-
 
 (defun !parse-integer (string junk-allow)
   (block nil
@@ -338,7 +356,7 @@
          (read-symbol string)))
       (t
        (let ((string (read-escaped-until stream #'terminalp)))
-         (or (values (!parse-integer string nil))
+         (or (read-integer string)
              (read-float string)
              (read-symbol string)))))))
 

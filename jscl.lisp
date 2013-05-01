@@ -3,24 +3,26 @@
 ;; Copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
 
-;; This program is free software: you can redistribute it and/or
+;; JSCL is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation, either version 3 of the
 ;; License, or (at your option) any later version.
 ;;
-;; This program is distributed in the hope that it will be useful, but
+;; JSCL is distributed in the hope that it will be useful, but
 ;; WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ;; General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 (defvar *source*
   '(("boot"      :target)
     ("compat"    :host)
     ("utils"     :both)
+    ("list"      :target)
     ("print"     :target)
+    ("package"   :target)
     ("read"      :both)
     ("compiler"  :both)
     ("toplevel"  :target)))
@@ -35,7 +37,11 @@
 (with-compilation-unit ()
   (dolist (input *source*)
     (when (member (cadr input) '(:host :both))
-      (compile-file (source-pathname (car input))))))
+      (let ((fname (source-pathname (car input))))
+        (multiple-value-bind (fasl warn fail) (compile-file fname)
+          (declare (ignore fasl warn))
+          (when fail
+            (error "Compilation of ~A failed." fname)))))))
 
 ;;; Load jscl into the host
 (dolist (input *source*)
@@ -43,7 +49,7 @@
     (load (source-pathname (car input)))))
 
 (defun read-whole-file (filename)
-  (with-open-file (in filename)
+  (with-open-file (in filename :external-format :latin-1)
     (let ((seq (make-array (file-length in) :element-type 'character)))
       (read-sequence seq in)
       seq)))
