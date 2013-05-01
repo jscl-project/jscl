@@ -332,32 +332,25 @@
     (n-required-arguments n-optional-arguments rest-p)
   ;; Note: Remember that we assume that the number of arguments of a
   ;; call is at least 1 (the values argument).
-  (let ((min (1+ n-required-arguments))
-        (max (if rest-p 'n/a (+ 1 n-required-arguments n-optional-arguments))))
+  (let ((min n-required-arguments)
+        (max (if rest-p 'n/a (+ n-required-arguments n-optional-arguments))))
     (block nil
       ;; Special case: a positive exact number of arguments.
-      (when (and (< 1 min) (eql min max))
-        (return (code "checkArgs(arguments, " min ");" *newline*)))
+      (when (and (< 0 min) (eql min max))
+        (return (code "checkArgs(nargs, " min ");" *newline*)))
       ;; General case:
       (code
-       (when (< 1 min)
-         (code "checkArgsAtLeast(arguments, " min ");" *newline*))
+       (when (< 0 min)
+         (code "checkArgsAtLeast(nargs, " min ");" *newline*))
        (when (numberp max)
-         (code "checkArgsAtMost(arguments, " max ");" *newline*))))))
+         (code "checkArgsAtMost(nargs, " max ");" *newline*))))))
 
 (defun compile-lambda-optional (ll)
   (let* ((optional-arguments (ll-optional-arguments-canonical ll))
 	 (n-required-arguments (length (ll-required-arguments ll)))
 	 (n-optional-arguments (length optional-arguments)))
     (when optional-arguments
-      (code (mapconcat (lambda (arg)
-                         (code "var " (translate-variable (first arg)) "; " *newline*
-                               (when (third arg)
-                                 (code "var " (translate-variable (third arg))
-                                       " = " (ls-compile t)
-                                       "; " *newline*))))
-                       optional-arguments)
-            "switch(arguments.length-1){" *newline*
+      (code "switch(nargs){" *newline*
             (let ((cases nil)
                   (idx 0))
               (progn
@@ -385,11 +378,9 @@
     (when rest-argument
       (let ((js!rest (translate-variable rest-argument)))
         (code "var " js!rest "= " (ls-compile nil) ";" *newline*
-              "for (var i = arguments.length-1; i>="
-              (+ 1 n-required-arguments n-optional-arguments)
+              "for (var i = nargs-1; i>=" (+ n-required-arguments n-optional-arguments)
               "; i--)" *newline*
-              (indent js!rest " = {car: arguments[i], cdr: ") js!rest "};"
-              *newline*)))))
+              (indent js!rest " = {car: arguments[i+2], cdr: " js!rest "};" *newline*))))))
 
 (defun compile-lambda-parse-keywords (ll)
   (let ((n-required-arguments
@@ -411,12 +402,12 @@
      ;; Parse keywords
      (flet ((parse-keyword (keyarg)
 	      ;; ((keyword-name var) init-form)
-	      (code "for (i=" (+ 1 n-required-arguments n-optional-arguments)
-                    "; i<arguments.length; i+=2){" *newline*
+	      (code "for (i=" (+ n-required-arguments n-optional-arguments)
+                    "; i<nargs; i+=2){" *newline*
                     (indent
-                     "if (arguments[i] === " (ls-compile (caar keyarg)) "){" *newline*
+                     "if (arguments[i+2] === " (ls-compile (caar keyarg)) "){" *newline*
                      (indent (translate-variable (cadr (car keyarg)))
-                             " = arguments[i+1];"
+                             " = arguments[i+3];"
                              *newline*
                              (let ((svar (third keyarg)))
                                (when svar
@@ -425,7 +416,7 @@
                      "}" *newline*)
                     "}" *newline*
                     ;; Default value
-                    "if (i == arguments.length){" *newline*
+                    "if (i == nargs){" *newline*
                     (indent (translate-variable (cadr (car keyarg))) " = " (ls-compile (cadr keyarg)) ";" *newline*)
                     "}" *newline*)))
        (when keyword-arguments
@@ -433,11 +424,11 @@
                (mapconcat #'parse-keyword keyword-arguments))))
      ;; Check for unknown keywords
      (when keyword-arguments
-       (code "for (i=" (+ 1 n-required-arguments n-optional-arguments)
-             "; i<arguments.length; i+=2){" *newline*
+       (code "for (i=" (+ n-required-arguments n-optional-arguments)
+             "; i<nargs; i+=2){" *newline*
              (indent "if ("
                      (join (mapcar (lambda (x)
-                                     (concat "arguments[i] !== " (ls-compile (caar x))))
+                                     (concat "arguments[i+2] !== " (ls-compile (caar x))))
                                    keyword-arguments)
                            " && ")
                      ")" *newline*
@@ -496,9 +487,10 @@
                                     (ll-svars ll)))))
         (lambda-name/docstring-wrapper name documentation
          "(function ("
-         (join (cons "values"
-                     (mapcar #'translate-variable
-                             (append required-arguments optional-arguments)))
+         (join (list* "values"
+                      "nargs"
+                      (mapcar #'translate-variable
+                              (append required-arguments optional-arguments)))
                ",")
          "){" *newline*
          (indent
@@ -959,7 +951,7 @@
 (define-compilation multiple-value-call (func-form &rest forms)
   (js!selfcall
     "var func = " (ls-compile func-form) ";" *newline*
-    "var args = [" (if *multiple-value-p* "values" "pv") "];" *newline*
+    "var args = [" (if *multiple-value-p* "values" "pv") ", 0];" *newline*
     "return "
     (js!selfcall
       "var values = mv;" *newline*
@@ -971,6 +963,7 @@
                          "else" *newline*
                          (indent "args.push(vs);" *newline*)))
                  forms)
+      "args[1] = args.length-2;" *newline*
       "return func.apply(window, args);" *newline*) ";" *newline*))
 
 (define-compilation multiple-value-prog1 (first-form &rest forms)
@@ -1501,8 +1494,9 @@
   (js!selfcall
     "var f = " (ls-compile func) ";" *newline*
     "return (typeof f === 'function'? f: f.fvalue)("
-    (join (cons (if *multiple-value-p* "values" "pv")
-                (mapcar #'ls-compile args))
+    (join (list* (if *multiple-value-p* "values" "pv")
+                 (integer-to-string (length args))
+                 (mapcar #'ls-compile args))
           ", ")
     ")"))
 
@@ -1513,13 +1507,15 @@
             (last (car (last args))))
         (js!selfcall
           "var f = " (ls-compile func) ";" *newline*
-          "var args = [" (join (cons (if *multiple-value-p* "values" "pv")
-                                     (mapcar #'ls-compile args))
+          "var args = [" (join (list* (if *multiple-value-p* "values" "pv")
+                                      (integer-to-string (length args))
+                                      (mapcar #'ls-compile args))
                                ", ")
           "];" *newline*
           "var tail = (" (ls-compile last) ");" *newline*
           "while (tail != " (ls-compile nil) "){" *newline*
           "    args.push(tail.car);" *newline*
+          "    args[1] += 1;" *newline*
           "    tail = tail.cdr;" *newline*
           "}" *newline*
           "return (typeof f === 'function'? f : f.fvalue).apply(this, args);" *newline*))))
@@ -1529,11 +1525,7 @@
     (if *multiple-value-p*
         (js!selfcall
           "var v = globalEval(string);" *newline*
-          "if (typeof v !== 'object' || !('multiple-value' in v)){" *newline*
-          (indent "v = [v];" *newline*
-                  "v['multiple-value'] = true;" *newline*)
-          "}" *newline*
-          "return values.apply(this, v);" *newline*)
+          "return values.apply(this, forcemv(v));" *newline*)
         "globalEval(string)")))
 
 (define-builtin error (string)
@@ -1652,7 +1644,9 @@
 
 (defun compile-funcall (function args)
   (let* ((values-funcs (if *multiple-value-p* "values" "pv"))
-         (arglist (concat "(" (join (cons values-funcs (mapcar #'ls-compile args)) ", ") ")")))
+         (arglist (concat "(" (join (list* values-funcs
+                                           (integer-to-string (length args))
+                                           (mapcar #'ls-compile args)) ", ") ")")))
     (unless (or (symbolp function)
                 (and (consp function)
                      (eq (car function) 'lambda)))
