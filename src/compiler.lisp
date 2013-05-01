@@ -1410,7 +1410,6 @@
   (code "(" x ").toString()"))
 
 (define-builtin eq    (x y) (js!bool (code "(" x " === " y ")")))
-(define-builtin equal (x y) (js!bool (code "(" x  " == " y ")")))
 
 (define-builtin char-to-string (x)
   (type-check (("x" "number" x))
