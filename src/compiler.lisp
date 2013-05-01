@@ -799,11 +799,15 @@
         (let*-binding-wrapper specials body)))))
 
 
-(defvar *block-counter* 0)
-
 (define-compilation block (name &rest body)
-  (let* ((tr (incf *block-counter*))
-         (b (make-binding :name name :type 'block :value tr)))
+  ;; We use Javascript exceptions to implement non local control
+  ;; transfer. Exceptions has dynamic scoping, so we use a uniquely
+  ;; generated object to identify the block. The instance of a empty
+  ;; array is used to distinguish between nested dynamic Javascript
+  ;; exceptions. See https://github.com/davazp/jscl/issues/64 for
+  ;; futher details.
+  (let* ((idvar (gvarname name))
+         (b (make-binding :name name :type 'block :value idvar)))
     (when *multiple-value-p*
       (push 'multiple-value (binding-declarations b)))
     (let* ((*environment* (extend-lexenv (list b) *environment* 'block))
@@ -811,10 +815,11 @@
       (if (member 'used (binding-declarations b))
           (js!selfcall
             "try {" *newline*
+            "var " idvar " = [];" *newline*
             (indent cbody)
             "}" *newline*
             "catch (cf){" *newline*
-            "    if (cf.type == 'block' && cf.id == " tr ")" *newline*
+            "    if (cf.type == 'block' && cf.id == " idvar ")" *newline*
             (if *multiple-value-p*
                 "        return values.apply(this, forcemv(cf.values));"
                 "        return cf.values;")
@@ -830,6 +835,10 @@
     (when (null b)
       (error (concat "Unknown block `" (symbol-name name) "'.")))
     (push 'used (binding-declarations b))
+    ;; The binding value is the name of a variable, whose value is the
+    ;; unique identifier of the block as exception. We can't use the
+    ;; variable name itself, because it could not to be unique, so we
+    ;; capture it in a closure.
     (js!selfcall
       (when multiple-value-p (code "var values = mv;" *newline*))
       "throw ({"
@@ -865,19 +874,16 @@
     "message: 'Throw uncatched.'"
     "})"))
 
-
-(defvar *tagbody-counter* 0)
-(defvar *go-tag-counter* 0)
-
 (defun go-tag-p (x)
   (or (integerp x) (symbolp x)))
 
 (defun declare-tagbody-tags (tbidx body)
-  (let ((bindings
-         (mapcar (lambda (label)
-                   (let ((tagidx (integer-to-string (incf *go-tag-counter*))))
-                     (make-binding :name label :type 'gotag :value (list tbidx tagidx))))
-                 (remove-if-not #'go-tag-p body))))
+  (let* ((go-tag-counter 0)
+         (bindings
+          (mapcar (lambda (label)
+                    (let ((tagidx (integer-to-string (incf go-tag-counter))))
+                      (make-binding :name label :type 'gotag :value (list tbidx tagidx))))
+                  (remove-if-not #'go-tag-p body))))
     (extend-lexenv bindings *environment* 'gotag)))
 
 (define-compilation tagbody (&rest body)
@@ -890,18 +896,21 @@
   (unless (go-tag-p (car body))
     (push (gensym "START") body))
   ;; Tagbody compilation
-  (let ((tbidx *tagbody-counter*))
+  (let ((branch (gvarname 'branch))
+        (tbidx (gvarname 'tbidx)))
     (let ((*environment* (declare-tagbody-tags tbidx body))
           initag)
       (let ((b (lookup-in-lexenv (first body) *environment* 'gotag)))
         (setq initag (second (binding-value b))))
       (js!selfcall
-        "var tagbody_" tbidx " = " initag ";" *newline*
+        ;; TAGBODY branch to take
+        "var " branch " = " initag ";" *newline*
+        "var " tbidx " = [];" *newline*
         "tbloop:" *newline*
         "while (true) {" *newline*
         (indent "try {" *newline*
                 (indent (let ((content ""))
-                          (code "switch(tagbody_" tbidx "){" *newline*
+                          (code "switch(" branch "){" *newline*
                                 "case " initag ":" *newline*
                                 (dolist (form (cdr body) content)
                                   (concatf content
@@ -915,7 +924,7 @@
                 "}" *newline*
                 "catch (jump) {" *newline*
                 "    if (jump.type == 'tagbody' && jump.id == " tbidx ")" *newline*
-                "        tagbody_" tbidx " = jump.label;" *newline*
+                "        " branch " = jump.label;" *newline*
                 "    else" *newline*
                 "        throw(jump);" *newline*
                 "}" *newline*)

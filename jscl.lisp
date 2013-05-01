@@ -73,8 +73,7 @@
   (setq *literal-table* nil)
   (setq *variable-counter* 0
         *gensym-counter* 0
-        *literal-counter* 0
-        *block-counter* 0)
+        *literal-counter* 0)
   (with-open-file (out "jscl.js" :direction :output :if-exists :supersede)
     (write-string (read-whole-file (source-pathname "prelude.js")) out)
     (dolist (input *source*)
