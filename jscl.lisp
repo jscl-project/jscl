@@ -92,6 +92,7 @@
 (defun run-tests-in-host ()
   (load "tests.lisp")
   (let ((*use-html-output-p* nil))
+    (declare (special *use-html-output-p*))
     (dolist (input (directory "tests/*.lisp"))
       (load input)))
   (load "tests-report.lisp"))
