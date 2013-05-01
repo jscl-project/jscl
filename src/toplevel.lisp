@@ -103,8 +103,7 @@
                  *literal-table*)
        (setq *literal-table* ',*literal-table*)
        (setq *variable-counter* ,*variable-counter*)
-       (setq *gensym-counter* ,*gensym-counter*)
-       (setq *block-counter* ,*block-counter*)))))
+       (setq *gensym-counter* ,*gensym-counter*)))))
 
 (eval-when-compile
   (toplevel-compilation
