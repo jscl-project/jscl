@@ -316,11 +316,14 @@
           (ll-optional-arguments-canonical lambda-list))))
     (remove nil (mapcar #'third args))))
 
-(defun lambda-docstring-wrapper (docstring &rest strs)
-  (if docstring
+(defun lambda-name/docstring-wrapper (name docstring &rest strs)
+  (if (or name docstring)
       (js!selfcall
         "var func = " (join strs) ";" *newline*
-        "func.docstring = '" docstring "';" *newline*
+        (when name
+          (code "func.fname = '" (escape-string name) "';" *newline*))
+        (when docstring
+          (code "func.docstring = '" (escape-string docstring) "';" *newline*))
         "return func;" *newline*)
       (apply #'code strs)))
 
@@ -441,7 +444,12 @@
                       "throw 'Unknown keyword argument ' + arguments[i].name;" *newline*))
              "}" *newline*)))))
 
-(defun compile-lambda (ll body)
+;;; Compile a lambda function with lambda list LL and body BODY. If
+;;; NAME is given, it should be a constant string and it will become
+;;; the name of the function. If BLOCK is non-NIL, a named block is
+;;; created around the body. NOTE: No block (even anonymous) is
+;;; created if BLOCk is NIL.
+(defun compile-lambda (ll body &key name block)
   (let ((required-arguments (ll-required-arguments ll))
         (optional-arguments (ll-optional-arguments ll))
 	(keyword-arguments  (ll-keyword-arguments  ll))
@@ -460,8 +468,7 @@
                                   optional-arguments
 				  keyword-arguments
                                   (ll-svars ll)))))
-      (lambda-docstring-wrapper
-       documentation
+      (lambda-name/docstring-wrapper name documentation
        "(function ("
        (join (cons "values"
                    (mapcar #'translate-variable
@@ -477,7 +484,9 @@
 	(compile-lambda-rest ll)
 	(compile-lambda-parse-keywords ll)
         (let ((*multiple-value-p* t))
-	  (ls-compile-block body t)))
+          (if block
+              (ls-compile-block `((block ,block ,@body)) t)
+              (ls-compile-block body t))))
        "})"))))
 
 
@@ -592,6 +601,15 @@
   (cond
     ((and (listp x) (eq (car x) 'lambda))
      (compile-lambda (cadr x) (cddr x)))
+    ((and (listp x) (eq (car x) 'named-lambda))
+     ;; TODO: destructuring-bind now! Do error checking manually is
+     ;; very annoying.
+     (let ((name (cadr x))
+           (ll (caddr x))
+           (body (cdddr x)))
+       (compile-lambda ll body
+                       :name (symbol-name name)
+                       :block name)))
     ((symbolp x)
      (let ((b (lookup-in-lexenv x *environment* 'function)))
        (if b

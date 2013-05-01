@@ -74,20 +74,9 @@
      ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
      ',name))
 
-(defmacro named-lambda (name args &rest body)
-  (let ((x (gensym "FN")))
-    `(let ((,x (lambda ,args ,@body)))
-       (oset ,x "fname" ,name)
-       ,x)))
-
 (defmacro defun (name args &rest body)
   `(progn
-     
-     (fset ',name
-           (named-lambda ,(symbol-name name) ,args
-             ,@(if (and (stringp (car body)) (not (null (cdr body))))
-                   `(,(car body) (block ,name ,@(cdr body)))
-                   `((block ,name ,@body)))))
+     (fset ',name #'(named-lambda ,name ,args ,@body))
      ',name))
 
 (defun null (x)
