@@ -444,50 +444,75 @@
                       "throw 'Unknown keyword argument ' + arguments[i].name;" *newline*))
              "}" *newline*)))))
 
+(defun parse-lambda-list (ll)
+  (values (ll-required-arguments ll)
+          (ll-optional-arguments ll)
+          (ll-keyword-arguments  ll)
+          (ll-rest-argument      ll)))
+
+;;; Process BODY for declarations and/or docstrings. Return as
+;;; multiple values the BODY without docstrings or declarations, the
+;;; list of declaration forms and the docstring.
+(defun parse-body (body &key declarations docstring)
+  (let ((value-declarations)
+        (value-docstring))
+    ;; Parse declarations
+    (when declarations
+      (do* ((rest body (cdr rest))
+            (form (car rest) (car rest)))
+           ((or (atom form) (not (eq (car form) 'declare)))
+            (setf body rest))
+        (push form value-declarations)))
+    ;; Parse docstring
+    (when (and docstring
+               (stringp (car body))
+               (not (null (cdr body))))
+      (setq value-docstring (car body))
+      (setq body (cdr body)))
+    (values body value-declarations value-docstring)))
+
 ;;; Compile a lambda function with lambda list LL and body BODY. If
 ;;; NAME is given, it should be a constant string and it will become
 ;;; the name of the function. If BLOCK is non-NIL, a named block is
 ;;; created around the body. NOTE: No block (even anonymous) is
 ;;; created if BLOCk is NIL.
 (defun compile-lambda (ll body &key name block)
-  (let ((required-arguments (ll-required-arguments ll))
-        (optional-arguments (ll-optional-arguments ll))
-	(keyword-arguments  (ll-keyword-arguments  ll))
-        (rest-argument      (ll-rest-argument      ll))
-        documentation)
-    ;; Get the documentation string for the lambda function
-    (when (and (stringp (car body))
-               (not (null (cdr body))))
-      (setq documentation (car body))
-      (setq body (cdr body)))
-    (let ((n-required-arguments (length required-arguments))
-          (n-optional-arguments (length optional-arguments))
-          (*environment* (extend-local-env
-                          (append (ensure-list rest-argument)
-                                  required-arguments
-                                  optional-arguments
-				  keyword-arguments
-                                  (ll-svars ll)))))
-      (lambda-name/docstring-wrapper name documentation
-       "(function ("
-       (join (cons "values"
-                   (mapcar #'translate-variable
-                           (append required-arguments optional-arguments)))
-             ",")
-       "){" *newline*
-       (indent
-        ;; Check number of arguments
-        (lambda-check-argument-count n-required-arguments
-                                     n-optional-arguments
-                                     (or rest-argument keyword-arguments))
-	(compile-lambda-optional ll)
-	(compile-lambda-rest ll)
-	(compile-lambda-parse-keywords ll)
-        (let ((*multiple-value-p* t))
-          (if block
-              (ls-compile-block `((block ,block ,@body)) t)
-              (ls-compile-block body t))))
-       "})"))))
+  (multiple-value-bind (required-arguments
+                        optional-arguments
+                        keyword-arguments
+                        rest-argument)
+      (parse-lambda-list ll)
+    (multiple-value-bind (body decls documentation)
+        (parse-body body :declarations t :docstring t)
+      (declare (ignore decls))
+      (let ((n-required-arguments (length required-arguments))
+            (n-optional-arguments (length optional-arguments))
+            (*environment* (extend-local-env
+                            (append (ensure-list rest-argument)
+                                    required-arguments
+                                    optional-arguments
+                                    keyword-arguments
+                                    (ll-svars ll)))))
+        (lambda-name/docstring-wrapper name documentation
+         "(function ("
+         (join (cons "values"
+                     (mapcar #'translate-variable
+                             (append required-arguments optional-arguments)))
+               ",")
+         "){" *newline*
+         (indent
+          ;; Check number of arguments
+          (lambda-check-argument-count n-required-arguments
+                                       n-optional-arguments
+                                       (or rest-argument keyword-arguments))
+                                        (compile-lambda-optional ll)
+                                        (compile-lambda-rest ll)
+                                        (compile-lambda-parse-keywords ll)
+                                        (let ((*multiple-value-p* t))
+                                          (if block
+                                              (ls-compile-block `((block ,block ,@body)) t)
+                                              (ls-compile-block body t))))
+         "})")))))
 
 
 (defun setq-pair (var val)
