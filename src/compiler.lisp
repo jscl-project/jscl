@@ -183,6 +183,7 @@
 (defvar *variable-counter* 0)
 
 (defun gvarname (symbol)
+  (declare (ignore symbol))
   (code "v" (incf *variable-counter*)))
 
 (defun translate-variable (symbol)

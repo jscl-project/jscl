@@ -36,7 +36,11 @@
 (with-compilation-unit ()
   (dolist (input *source*)
     (when (member (cadr input) '(:host :both))
-      (compile-file (source-pathname (car input))))))
+      (let ((fname (source-pathname (car input))))
+        (multiple-value-bind (fasl warn fail) (compile-file fname)
+          (declare (ignore fasl warn))
+          (when fail
+            (error "Compilation of ~A failed." fname)))))))
 
 ;;; Load jscl into the host
 (dolist (input *source*)
@@ -44,7 +48,7 @@
     (load (source-pathname (car input)))))
 
 (defun read-whole-file (filename)
-  (with-open-file (in filename)
+  (with-open-file (in filename :external-format :latin-1)
     (let ((seq (make-array (file-length in) :element-type 'character)))
       (read-sequence seq in)
       seq)))
