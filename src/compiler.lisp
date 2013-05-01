@@ -1582,6 +1582,21 @@
 (define-builtin get-internal-real-time ()
   "(new Date()).getTime()")
 
+(define-builtin disassemble (func)
+  (js!selfcall
+    "lisp.write("
+    (js!selfcall
+      "var func = " func ";"                                *newline*
+      "if (typeof func == 'function') return func;"         *newline*
+      "else if (typeof func == 'object' && 'name' in func)" *newline*
+      "    if (func.fvalue === undefined)"                  *newline*
+      "        throw func.name + ' is not a function';"     *newline*
+      "    else return func.fvalue;"                        *newline*
+      "else throw 'Cannot disassemble ' + func"             *newline*)
+    ".toString());" *newline* 
+    (ls-compile '(write-line "")) ";"                       *newline* 
+    "return " (ls-compile nil)    ";"                       *newline*))
+
 (define-builtin values-array (array)
   (if *multiple-value-p*
       (code "values.apply(this, " array ")")
