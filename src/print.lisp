@@ -18,7 +18,9 @@
 
 ;;; Printer
 
-(defun prin1-to-string (form)
+(defvar *print-escape* t)
+
+(defun write-to-string (form)
   (cond
     ((symbolp form)
      (multiple-value-bind (symbol foundp)
@@ -34,7 +36,9 @@
                      ":" name)))))
     ((integerp form) (integer-to-string form))
     ((floatp form) (float-to-string form))
-    ((stringp form) (concat "\"" (escape-string form) "\""))
+    ((stringp form) (if *print-escape*
+			(concat "\"" (escape-string form) "\"")
+		      form))
     ((functionp form)
      (let ((name (oget form "fname")))
        (if name
@@ -56,6 +60,14 @@
      (concat "#<PACKAGE " (package-name form) ">"))
     (t
      (concat "#<javascript object>"))))
+
+(defun prin1-to-string (form)
+  (let ((*print-escape* t))
+    (write-to-string form)))
+
+(defun princ-to-string (form)
+  (let ((*print-escape* nil))
+    (write-to-string form)))
 
 (defun write-line (x)
   (write-string x)
@@ -85,7 +97,7 @@
 		((char= next #\%)
 		 (setq res (concat res *newline*)))
 		(t
-		 (format-special next (car arguments))
+		 (setq res (concat res (format-special next (car arguments))))
 		 (setq arguments (cdr arguments)))))
 	    (setq res (concat res (char-to-string c))))
 	(incf i)))
@@ -97,4 +109,6 @@
 
 
  (defun format-special (chr arg)
-   chr)
+   (case chr
+     (#\S (prin1-to-string arg))
+     (#\a (princ-to-string arg))))

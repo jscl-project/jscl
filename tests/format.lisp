@@ -6,3 +6,7 @@
 
 (test (string= "a
 a" (format nil "a~%a")))
+
+(test (string= "this is foo" (format nil "this is ~a" "foo")))
+
+(test (string= "this is \"foo\"" (format nil "this is ~S" "foo")))
