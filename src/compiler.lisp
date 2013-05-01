@@ -647,8 +647,11 @@
 
 (define-compilation flet (definitions &rest body)
   (let* ((fnames (mapcar #'car definitions))
-         (fbody  (mapcar #'cdr definitions))
-         (cfuncs (mapcar #'compile-function-definition fbody))
+         (cfuncs (mapcar (lambda (def)
+                           (compile-lambda (cadr def)
+                                           `((block ,(car def)
+                                               ,@(cddr def)))))
+                         definitions))
          (*environment*
           (extend-lexenv (mapcar #'make-function-binding fnames)
                          *environment*
@@ -669,7 +672,8 @@
     (js!selfcall
       (mapconcat (lambda (func)
 		   (code "var " (translate-function (car func))
-                         " = " (compile-lambda (cadr func) (cddr func))
+                         " = " (compile-lambda (cadr func)
+                                               `((block ,(car func) ,@(cddr func))))
                          ";" *newline*))
 		 definitions)
       (ls-compile-block body t))))

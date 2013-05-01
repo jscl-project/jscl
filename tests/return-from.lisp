@@ -1,0 +1,20 @@
+(test (equal (flet ((foo () (return-from foo 42)))
+               (foo))
+             42))
+
+(test (equal (let ((out (list)))
+               (labels ((zfoo (n rf i)
+                          (if (> n 0)
+                              (progn
+                                (push (lambda () (return-from zfoo n)) rf)
+                                (push n out)
+                                (zfoo (1- n) rf i)
+                                (push (- n) out))
+                              (progn
+                                (push 999 out)
+                                (funcall (nth i (reverse rf)))
+                                (push -999 out)))))
+                 (let ((rf (list)))
+                   (zfoo 5 rf 3)
+                   out)))
+             '(-5 -4 -3 999 1 2 3 4 5)))
