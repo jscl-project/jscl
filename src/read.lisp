@@ -223,7 +223,7 @@
             (find-symbol name package)
           (if (eq external :external)
               symbol
-              (error (concat "The symbol '" name "' is not external")))))))
+              (error "The symbol `~S' is not external in the package ~S." name package))))))
 
 (defun read-integer (string)
   (let ((sign 1)
@@ -354,7 +354,7 @@
       (!parse-integer string junk-allowed)
     (if num
         (values num index)
-        (error "junk detected."))))
+        (error "Junk detected."))))
 
 (defvar *eof* (gensym))
 (defun ls-read-1 (stream)
@@ -391,7 +391,9 @@
 (defun ls-read (stream &optional (eof-error-p t) eof-value)
   (let ((x (ls-read-1 stream)))
     (if (eq x *eof*)
-        (if eof-error-p (error "EOF") eof-value)
+        (if eof-error-p
+            (error "End of file")
+            eof-value)
         x)))
 
 (defun ls-read-from-string (string &optional (eof-error-p t) eof-value)

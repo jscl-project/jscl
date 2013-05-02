@@ -191,11 +191,13 @@
                    clausules)))))
 
 (defmacro ecase (form &rest clausules)
-  `(case ,form
-     ,@(append
-        clausules
-        `((t
-           (error "ECASE expression failed."))))))
+  (let ((g!form (gensym)))
+    `(let ((,g!form ,form))
+       (case ,g!form
+         ,@(append
+            clausules
+            `((t
+               (error "ECASE expression failed for the object `~S'." ,g!form))))))))
 
 (defmacro and (&rest forms)
   (cond
@@ -493,7 +495,7 @@
     ((symbolp x)
      (symbol-function x))
     (t
-     (error "Invalid function"))))
+     (error "Invalid function `~S'." x))))
 
 (defun disassemble (function)
   (write-line (lambda-code (fdefinition function)))
@@ -507,7 +509,7 @@
        (oget func "docstring")))
     (variable
      (unless (symbolp x)
-       (error "Wrong argument type! it should be a symbol"))
+       (error "The type of documentation `~S' is not a symbol." type))
      (oget x "vardoc"))))
 
 (defmacro multiple-value-bind (variables value-from &body body)
@@ -540,7 +542,7 @@
 
 (defmacro define-setf-expander (access-fn lambda-list &body body)
   (unless (symbolp access-fn)
-    (error "ACCESS-FN must be a symbol."))
+    (error "ACCESS-FN `~S' must be a symbol." access-fn))
   `(progn (push (cons ',access-fn (lambda ,lambda-list ,@body))
                 *setf-expanders*)
           ',access-fn))
@@ -616,4 +618,3 @@
 
 (defun error (fmt &rest args)
   (%throw (apply #'format nil fmt args)))
-

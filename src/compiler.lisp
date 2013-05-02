@@ -30,7 +30,7 @@
                  ((integerp arg) (integer-to-string arg))
                  ((floatp arg) (float-to-string arg))
                  ((stringp arg) arg)
-                 (t (error "Unknown argument."))))
+                 (t (error "Unknown argument `~S'." arg))))
              args))
 
 ;;; Wrap X with a Javascript code to convert the result from
@@ -102,7 +102,7 @@
                       ((and (listp sd) (car sd) (cddr sd))
                        sd)
                       (t
-                       (error "Bad slot accessor."))))
+                       (error "Bad slot description `~S'." sd))))
                   slots))
          (predicate (intern (concat name-string "-P"))))
     `(progn
@@ -124,7 +124,7 @@
                 (collect
                     `(defun ,accessor-name (x)
                        (unless (,predicate x)
-                         (error ,(concat "The object is not a type " name-string)))
+                         (error "The object `~S' is not of type `~S'" x ,name-string))
                        (nth ,index x)))
                 ;; TODO: Implement this with a higher level
                 ;; abstraction like defsetf or (defun (setf ..))
@@ -291,7 +291,7 @@
 (defun ll-rest-argument (ll)
   (let ((rest (ll-section '&rest ll)))
     (when (cdr rest)
-      (error "Bad lambda-list"))
+      (error "Bad lambda-list `~S'." ll))
     (car rest)))
 
 (defun ll-keyword-arguments-canonical (ll)
@@ -528,7 +528,7 @@
       (cond
 	((null pairs) (return))
 	((null (cdr pairs))
-	 (error "Odd paris in SETQ"))
+	 (error "Odd pairs in SETQ"))
 	(t
 	 (concatf result
 	   (concat (setq-pair (car pairs) (cadr pairs))
@@ -830,7 +830,7 @@
   (let* ((b (lookup-in-lexenv name *environment* 'block))
          (multiple-value-p (member 'multiple-value (binding-declarations b))))
     (when (null b)
-      (error (concat "Unknown block `" (symbol-name name) "'.")))
+      (error "Return from unknown block `~S'." (symbol-name name)))
     (push 'used (binding-declarations b))
     ;; The binding value is the name of a variable, whose value is the
     ;; unique identifier of the block as exception. We can't use the
@@ -934,7 +934,7 @@
              ((symbolp label) (symbol-name label))
              ((integerp label) (integer-to-string label)))))
     (when (null b)
-      (error (concat "Unknown tag `" n "'.")))
+      (error "Unknown tag `~S'" label))
     (js!selfcall
       "throw ({"
       "type: 'tagbody', "
@@ -988,7 +988,7 @@
 (define-setf-expander %js-vref (var)
   (let ((new-value (gensym)))
     (unless (stringp var)
-      (error "a string was expected"))
+      (error "`~S' is not a string." var))
     (values nil
             (list var)
             (list new-value)
@@ -1071,8 +1071,7 @@
          (bq-process (bq-completely-process (cadr x))))
         ((eq (car x) *comma*) (cadr x))
         ((eq (car x) *comma-atsign*)
-         ;; (error ",@~S after `" (cadr x))
-         (error "ill-formed"))
+         (error ",@~S after `" (cadr x)))
         ;; ((eq (car x) *comma-dot*)
         ;;  ;; (error ",.~S after `" (cadr x))
         ;;  (error "ill-formed"))
@@ -1083,13 +1082,11 @@
                       (nreconc q (list (list *bq-quote* p)))))
              (when (eq (car p) *comma*)
                (unless (null (cddr p))
-                 ;; (error "Malformed ,~S" p)
-                 (error "Malformed"))
+                 (error "Malformed ,~S" p))
                (return (cons *bq-append*
                              (nreconc q (list (cadr p))))))
              (when (eq (car p) *comma-atsign*)
-               ;; (error "Dotted ,@~S" p)
-               (error "Dotted"))
+               (error "Dotted ,@~S" p))
              ;; (when (eq (car p) *comma-dot*)
              ;;   ;; (error "Dotted ,.~S" p)
              ;;   (error "Dotted"))
@@ -1310,7 +1307,7 @@
 
 (defmacro variable-arity (args &body body)
   (unless (symbolp args)
-    (error "Bad usage of VARIABLE-ARITY, you must pass a symbol"))
+    (error "`~S' is not a symbol." args))
   `(variable-arity-call ,args
                         (lambda (,args)
                           (code "return " ,@body ";" *newline*))))
@@ -1670,7 +1667,7 @@
     (unless (or (symbolp function)
                 (and (consp function)
                      (eq (car function) 'lambda)))
-      (error "Bad function"))
+      (error "Bad function designator `~S'" function))
     (cond
       ((translate-function function)
        (concat (translate-function function) arglist))
@@ -1727,7 +1724,7 @@
              (t
               (compile-funcall name args)))))
         (t
-         (error (concat "How should I compile " (prin1-to-string sexp) "?")))))))
+         (error "How should I compile `~S'?" sexp))))))
 
 
 (defvar *compile-print-toplevels* nil)
