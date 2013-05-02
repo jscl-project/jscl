@@ -1478,8 +1478,8 @@
      "return (typeof(" x ") == \"string\") && x.length == 1;")))
 
 (define-builtin char-to-string (x)
-  (type-check (("x" "number" x))
-    "String.fromCharCode(x)"))
+  (type-check (("x" "string" x))
+    "(x)"))
 
 (define-builtin stringp (x)
   (js!bool (code "(typeof(" x ") == \"string\")")))

@@ -83,7 +83,7 @@
   (with-open-file (out "tests.js" :direction :output :if-exists :supersede)
     (dolist (input (append (directory "tests.lisp")
                            (directory "tests/*.lisp")
-                           (directory "tests-report.lisp"))) 
+                           (directory "tests-report.lisp")))
       (ls-compile-file input out))))
 
 

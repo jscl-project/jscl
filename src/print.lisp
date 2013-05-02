@@ -1,4 +1,4 @@
-;;; print.lisp --- 
+;;; print.lisp ---
 
 ;; Copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
@@ -18,7 +18,9 @@
 
 ;;; Printer
 
-(defun prin1-to-string (form)
+(defvar *print-escape* t)
+
+(defun write-to-string (form)
   (cond
     ((symbolp form)
      (multiple-value-bind (symbol foundp)
@@ -35,12 +37,14 @@
     ((integerp form) (integer-to-string form))
     ((floatp form) (float-to-string form))
     ((characterp form)
-     (concat "#\\" 
+     (concat "#\\"
              (case form
                (#\newline "newline")
                (#\space "space")
                (otherwise (string form)))))
-    ((stringp form) (concat "\"" (escape-string form) "\""))
+    ((stringp form) (if *print-escape*
+			(concat "\"" (escape-string form) "\"")
+			form))
     ((functionp form)
      (let ((name (oget form "fname")))
        (if name
@@ -48,20 +52,28 @@
            (concat "#<FUNCTION>"))))
     ((listp form)
      (concat "("
-             (join-trailing (mapcar #'prin1-to-string (butlast form)) " ")
+             (join-trailing (mapcar #'write-to-string (butlast form)) " ")
              (let ((last (last form)))
                (if (null (cdr last))
-                   (prin1-to-string (car last))
-                   (concat (prin1-to-string (car last)) " . " (prin1-to-string (cdr last)))))
+                   (write-to-string (car last))
+                   (concat (write-to-string (car last)) " . " (write-to-string (cdr last)))))
              ")"))
     ((arrayp form)
      (concat "#" (if (zerop (length form))
                      "()"
-                     (prin1-to-string (vector-to-list form)))))
+                     (write-to-string (vector-to-list form)))))
     ((packagep form)
      (concat "#<PACKAGE " (package-name form) ">"))
     (t
      (concat "#<javascript object>"))))
+
+(defun prin1-to-string (form)
+  (let ((*print-escape* t))
+    (write-to-string form)))
+
+(defun princ-to-string (form)
+  (let ((*print-escape* nil))
+    (write-to-string form)))
 
 (defun write-line (x)
   (write-string x)
@@ -75,3 +87,34 @@
 (defun print (x)
   (write-line (prin1-to-string x))
   x)
+
+(defun format (destination fmt &rest args)
+  (let ((len (length fmt))
+	(i 0)
+	(res "")
+	(arguments args))
+    (while (< i len)
+      (let ((c (char fmt i)))
+	(if (char= c #\~)
+	    (let ((next (char fmt (incf i))))
+	      (cond
+	       ((char= next #\~)
+		(setq res (concat res "~")))
+	       ((char= next #\%)
+		(setq res (concat res *newline*)))
+	       (t
+		(setq res (concat res (format-special next (car arguments))))
+		(setq arguments (cdr arguments)))))
+	  (setq res (concat res (char-to-string c))))
+	(incf i)))
+    (if destination
+	(progn
+	  (write-string res)
+	  nil)
+      res)))
+
+
+(defun format-special (chr arg)
+  (case chr
+    (#\S (prin1-to-string arg))
+    (#\a (princ-to-string arg))))
