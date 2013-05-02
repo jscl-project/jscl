@@ -42,13 +42,3 @@ just enough compliant to include a [[http://www.cs.cmu.edu/afs/cs/project/ai-rep
 implementation, or even [[http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/oop/0.html][CLOS]] or non-CLOS OOP.
 
 /Feel free to hack it yourself/
-
-
-** Hacking
-
-*** Newbie guide
-    - load slime from the root directory.
-    - c-c c-l jscl.lisp  to load the whole project
-    - (bootstrap) will generate jscl.js
-    - add tests
-    - open tests.html in your browser to see your failed tests

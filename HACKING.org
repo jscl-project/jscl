@@ -1,0 +1,7 @@
+* Hacking JSCL
+** Newbie guide
+    - Load slime from the root directory.
+    - C-c C-l jscl.lisp  to load the whole project
+    - =(bootstrap)= will generate jscl.js
+    - Add tests
+    - Open tests.html in your browser to see your failed tests
