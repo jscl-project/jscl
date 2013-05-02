@@ -99,12 +99,12 @@
 	    (let ((next (char fmt (incf i))))
 	      (cond
 	       ((char= next #\~)
-		(setq res (concat res "~")))
+		(concatf res "~"))
 	       ((char= next #\%)
-		(setq res (concat res *newline*)))
+		(concatf res *newline*))
 	       (t
-		(setq res (concat res (format-special next (car arguments))))
-		(setq arguments (cdr arguments)))))
+		(concatf res (format-special next (car arguments)))
+		(pop arguments))))
 	  (setq res (concat res (char-to-string c))))
 	(incf i)))
     (if destination
