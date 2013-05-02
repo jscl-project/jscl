@@ -5,7 +5,6 @@
  (equal (multiple-value-list (read-from-string "(a b c)"))
         '((A B C) 7)))
 
-(test (equal (symbol-name (read-from-string "js:alert")) "alert"))
 (test (equal (symbol-name (read-from-string "cl:cond")) "COND"))
 (test (equal (symbol-name (read-from-string "co|N|d")) "COND"))
 (test (equal (symbol-name (read-from-string "abc\\def")) "ABCdEF"))
