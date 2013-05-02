@@ -3,18 +3,18 @@
 ;; Copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
 
-;; This program is free software: you can redistribute it and/or
+;; JSCL is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation, either version 3 of the
 ;; License, or (at your option) any later version.
 ;;
-;; This program is distributed in the hope that it will be useful, but
+;; JSCL is distributed in the hope that it will be useful, but
 ;; WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ;; General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 
 ;;;; Reader
@@ -57,6 +57,28 @@
       (setq ch (%peek-char stream)))
     string))
 
+(defun read-escaped-until (stream func)
+  (let ((string "")
+        (ch (%peek-char stream))
+        (multi-escape nil))
+    (while (and ch (or multi-escape (not (funcall func ch))))
+      (cond
+        ((char= ch #\|)
+         (if multi-escape
+             (setf multi-escape nil)
+             (setf multi-escape t)))
+        ((char= ch #\\)
+         (%read-char stream)
+         (setf ch (%peek-char stream))
+         (setf string (concat string "\\" (string ch))))
+        (t
+         (if multi-escape
+             (setf string (concat string "\\" (string ch)))
+             (setf string (concat string (string ch))))))
+      (%read-char stream)
+      (setf ch (%peek-char stream)))
+    string))
+
 (defun skip-whitespaces-and-comments (stream)
   (let (ch)
     (skip-whitespaces stream)
@@ -75,14 +97,21 @@
       ((char= ch #\))
        (%read-char stream)
        nil)
-      ((char= ch #\.)
-       (%read-char stream)
-       (prog1 (ls-read-1 stream)
-         (skip-whitespaces-and-comments stream)
-         (unless (char= (%read-char stream) #\))
-           (error "')' was expected."))))
       (t
-       (cons (ls-read-1 stream) (%read-list stream))))))
+       (let ((car (ls-read-1 stream)))
+         (skip-whitespaces-and-comments stream)
+         (cons car
+               (if (char= (%peek-char stream) #\.)
+                   (progn
+                     (%read-char stream)
+                     (if (terminalp (%peek-char stream))
+                         (ls-read-1 stream) ; Dotted pair notation
+                         (cons (let ((string (concat "." (read-escaped-until stream #'terminalp))))
+                                 (or (values (!parse-integer string nil))
+                                     (read-float string)
+                                     (read-symbol string)))
+                               (%read-list stream))))
+                   (%read-list stream))))))))
 
 (defun read-string (stream)
   (let ((string "")
@@ -109,10 +138,10 @@
             (concat (string (%read-char stream))
                     (read-until stream #'terminalp))))
        (cond
-         ((string= cname "space") (char-code #\space))
-         ((string= cname "tab") (char-code #\tab))
-         ((string= cname "newline") (char-code #\newline))
-         (t (char-code (char cname 0))))))
+         ((string= cname "space") #\space)
+         ((string= cname "tab") #\tab)
+         ((string= cname "newline") #\newline)
+         (t (char cname 0)))))
     (#\+
      (let ((feature (read-until stream #'terminalp)))
        (cond
@@ -124,6 +153,34 @@
          (t
           (error "Unknown reader form.")))))))
 
+(defun unescape (x)
+  (let ((result ""))
+    (dotimes (i (length x))
+      (unless (char= (char x i) #\\)
+        (setq result (concat result (string (char x i))))))
+    result))
+
+(defun escape-all (x)
+  (let ((result ""))
+    (dotimes (i (length x))
+      (setq result (concat result "\\"))
+      (setq result (concat result (string (char x i)))))
+    result))
+
+(defun string-upcase-noescaped (s)
+  (let ((result "")
+        (last-escape nil))
+    (dotimes (i (length s))
+      (let ((ch (char s i)))
+        (if last-escape
+           (progn
+              (setf last-escape nil)
+              (setf result (concat result (string ch))))
+            (if (char= ch #\\)
+                (setf last-escape t)
+                (setf result (concat result (string-upcase (string ch))))))))
+    result))
+
 ;;; Parse a string of the form NAME, PACKAGE:NAME or
 ;;; PACKAGE::NAME and return the name. If the string is of the
 ;;; form 1) or 3), but the symbol does not exist, it will be created
@@ -134,6 +191,8 @@
     (setq index 0)
     (while (and (< index size)
                 (not (char= (char string index) #\:)))
+      (when (char= (char string index) #\\)
+        (incf index))
       (incf index))
     (cond
       ;; No package prefix
@@ -145,23 +204,44 @@
        ;; Package prefix
        (if (zerop index)
            (setq package "KEYWORD")
-           (setq package (string-upcase (subseq string 0 index))))
+           (setq package (string-upcase-noescaped (subseq string 0 index))))
        (incf index)
        (when (char= (char string index) #\:)
          (setq internalp t)
          (incf index))
        (setq name (subseq string index))))
     ;; Canonalize symbol name and package
-    (when (not (eq package "JS"))
-      (setq name (string-upcase name)))
+    (setq name (if (equal package "JS")
+                   (setq name (unescape name))
+                   (setq name (string-upcase-noescaped name))))
     (setq package (find-package package))
-    ;; TODO: PACKAGE:SYMBOL should signal error if SYMBOL is not an
-    ;; external symbol from PACKAGE.
     (if (or internalp
             (eq package (find-package "KEYWORD"))
             (eq package (find-package "JS")))
         (intern name package)
-        (find-symbol name package))))
+        (multiple-value-bind (symbol external)
+            (find-symbol name package)
+          (if (eq external :external)
+              symbol
+              (error (concat "The symbol '" name "' is not external")))))))
+
+(defun read-integer (string)
+  (let ((sign 1)
+        (number nil)
+        (size (length string)))
+    (dotimes (i size)
+      (let ((elt (char string i)))
+        (cond
+          ((digit-char-p elt)
+           (setq number (+ (* (or number 0) 10) (digit-char-p elt))))
+          ((zerop i)
+           (case elt
+             (#\+ nil)
+             (#\- (setq sign -1))
+             (t (return-from read-integer))))
+          ((and (= i (1- size)) (char= elt #\.)) nil)
+          (t (return-from read-integer)))))
+    (and number (* sign number))))
 
 (defun read-float (string)
   (block nil
@@ -182,13 +262,12 @@
              (incf index)))
       (unless (< index size) (return))
       ;; Optional integer part
-      (let ((value (digit-char-p (char string index))))
-        (when value
-          (setq integer-part t)
-          (while (and (< index size)
-                      (setq value (digit-char-p (char string index))))
-            (setq number (+ (* number 10) value))
-            (incf index))))
+      (awhen (digit-char-p (char string index))
+        (setq integer-part t)
+        (while (and (< index size)
+                    (setq it (digit-char-p (char string index))))
+          (setq number (+ (* number 10) it))
+          (incf index)))
       (unless (< index size) (return))
       ;; Decimal point is mandatory if there's no integer part
       (unless (or integer-part (char= #\. (char string index))) (return))
@@ -196,14 +275,13 @@
       (when (char= #\. (char string index))
         (incf index)
         (unless (< index size) (return))
-        (let ((value (digit-char-p (char string index))))
-          (when value
-            (setq fractional-part t)
-            (while (and (< index size)
-                        (setq value (digit-char-p (char string index))))
-              (setq number (+ (* number 10) value))
-              (setq divisor (* divisor 10))
-              (incf index)))))
+        (awhen (digit-char-p (char string index))
+          (setq fractional-part t)
+          (while (and (< index size)
+                      (setq it (digit-char-p (char string index))))
+            (setq number (+ (* number 10) it))
+            (setq divisor (* divisor 10))
+            (incf index))))
       ;; Either left or right part of the dot must be present
       (unless (or integer-part fractional-part) (return))
       ;; Exponent is mandatory if there is no fractional part
@@ -231,8 +309,8 @@
             (incf index))))
       (unless (= index size) (return))
       ;; Everything went ok, we have a float
-      (/ (* sign (expt 10 (* exponent-sign exponent)) number) divisor))))
-
+      ;; XXX: Use FLOAT when implemented.
+      (/ (* sign (expt 10.0 (* exponent-sign exponent)) number) divisor))))
 
 (defun !parse-integer (string junk-allow)
   (block nil
@@ -274,9 +352,9 @@
 (defun parse-integer (string &key junk-allowed)
   (multiple-value-bind (num index)
       (!parse-integer string junk-allowed)
-    (when num
-      (values num index)
-      (error "junk detected."))))
+    (if num
+        (values num index)
+        (error "junk detected."))))
 
 (defvar *eof* (gensym))
 (defun ls-read-1 (stream)
@@ -305,8 +383,8 @@
       ((char= ch #\#)
        (read-sharp stream))
       (t
-       (let ((string (read-until stream #'terminalp)))
-         (or (values (!parse-integer string nil))
+       (let ((string (read-escaped-until stream #'terminalp)))
+         (or (read-integer string)
              (read-float string)
              (read-symbol string)))))))
 
@@ -318,3 +396,7 @@
 
 (defun ls-read-from-string (string &optional (eof-error-p t) eof-value)
   (ls-read (make-string-stream string) eof-error-p eof-value))
+
+#+jscl
+(defun read-from-string (string &optional (eof-errorp t) eof-value)
+  (ls-read-from-string string eof-errorp eof-value))

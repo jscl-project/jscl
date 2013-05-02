@@ -3,33 +3,29 @@
 ;; Copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
 
-;; This program is free software: you can redistribute it and/or
+;; JSCL is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation, either version 3 of the
 ;; License, or (at your option) any later version.
 ;;
-;; This program is distributed in the hope that it will be useful, but
+;; JSCL is distributed in the hope that it will be useful, but
 ;; WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ;; General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 (defvar *source*
   '(("boot"      :target)
     ("compat"    :host)
     ("utils"     :both)
+    ("list"      :target)
     ("print"     :target)
+    ("package"   :target)
     ("read"      :both)
     ("compiler"  :both)
-    ("toplevel"  :target)
-    ;; Tests
-    ("tests"            :test)
-    ("format"           :test)
-    ("setf"             :test)
-    ("eval"             :test)
-    ("tests-report"     :test)))
+    ("toplevel"  :target)))
 
 (defun source-pathname
     (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
@@ -41,7 +37,11 @@
 (with-compilation-unit ()
   (dolist (input *source*)
     (when (member (cadr input) '(:host :both))
-      (compile-file (source-pathname (car input))))))
+      (let ((fname (source-pathname (car input))))
+        (multiple-value-bind (fasl warn fail) (compile-file fname)
+          (declare (ignore fasl warn))
+          (when fail
+            (error "Compilation of ~A failed." fname)))))))
 
 ;;; Load jscl into the host
 (dolist (input *source*)
@@ -49,7 +49,7 @@
     (load (source-pathname (car input)))))
 
 (defun read-whole-file (filename)
-  (with-open-file (in filename)
+  (with-open-file (in filename :external-format :latin-1)
     (let ((seq (make-array (file-length in) :element-type 'character)))
       (read-sequence seq in)
       seq)))
@@ -70,11 +70,10 @@
 
 (defun bootstrap ()
   (setq *environment* (make-lexenv))
-  (setq *literal-symbols* nil)
+  (setq *literal-table* nil)
   (setq *variable-counter* 0
         *gensym-counter* 0
-        *literal-counter* 0
-        *block-counter* 0)
+        *literal-counter* 0)
   (with-open-file (out "jscl.js" :direction :output :if-exists :supersede)
     (write-string (read-whole-file (source-pathname "prelude.js")) out)
     (dolist (input *source*)
@@ -82,9 +81,18 @@
         (ls-compile-file (source-pathname (car input) :type "lisp") out))))
   ;; Tests
   (with-open-file (out "tests.js" :direction :output :if-exists :supersede)
-    (dolist (input *source*)
-      (when (member (cadr input) '(:test))
-        (ls-compile-file (source-pathname (car input)
-                                          :directory '(:relative "tests")
-                                          :type "lisp")
-                         out)))))
+    (dolist (input (append (directory "tests.lisp")
+                           (directory "tests/*.lisp")
+                           (directory "tests-report.lisp")))
+      (ls-compile-file input out))))
+
+
+;;; Run the tests in the host Lisp implementation. It is a quick way
+;;; to improve the level of trust of the tests.
+(defun run-tests-in-host ()
+  (load "tests.lisp")
+  (let ((*use-html-output-p* nil))
+    (declare (special *use-html-output-p*))
+    (dolist (input (directory "tests/*.lisp"))
+      (load input)))
+  (load "tests-report.lisp"))

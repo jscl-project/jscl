@@ -3,18 +3,18 @@
 ;; Copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
 
-;; This program is free software: you can redistribute it and/or
+;; JSCL is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation, either version 3 of the
 ;; License, or (at your option) any later version.
 ;;
-;; This program is distributed in the hope that it will be useful, but
+;; JSCL is distributed in the hope that it will be useful, but
 ;; WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ;; General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 (defvar *newline* (string (code-char 10)))
 
@@ -37,15 +37,9 @@
 
 ;;; Concatenate a list of strings, with a separator
 (defun join (list &optional (separator ""))
-  (cond
-    ((null list)
-     "")
-    ((null (cdr list))
-     (car list))
-    (t
-     (concat (car list)
-             separator
-             (join (cdr list) separator)))))
+  (!reduce (lambda (s o) (concat s separator o))  
+           (cdr list) 
+           :initial-value (car list))) 
 
 (defun join-trailing (list &optional (separator ""))
   (if (null list)

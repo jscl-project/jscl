@@ -4,9 +4,7 @@
 var window = this;
 var nil;
 
-function globalEval (x) {
-    return eval.call (window, x);
-}
+globalEval = eval;  // Just an indirect eval
 
 function pv (x) { return x==undefined? nil: x; }
 
@@ -27,11 +25,11 @@ function forcemv (x) {
 var values = mv;
 
 function checkArgsAtLeast(args, n){
-    if (args.length < n) throw 'too few arguments';
+    if (args < n) throw 'too few arguments';
 }
 
 function checkArgsAtMost(args, n){
-    if (args.length > n) throw 'too many arguments';
+    if (args > n) throw 'too many arguments';
 }
 
 function checkArgs(args, n){
