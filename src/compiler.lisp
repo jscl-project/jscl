@@ -1548,7 +1548,7 @@
           "return values.apply(this, forcemv(v));" *newline*)
         "globalEval(string)")))
 
-(define-builtin error (string)
+(define-builtin %throw (string)
   (js!selfcall "throw " string ";" *newline*))
 
 (define-builtin new () "{}")
