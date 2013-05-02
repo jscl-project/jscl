@@ -351,9 +351,14 @@
   (lambda (&rest args)
     x))
 
-(defun code-char (x) x)
-(defun char-code (x) x)
-(defun char= (x y) (= x y))
+(defun code-char (x)
+  (code-char x))
+
+(defun char-code (x)
+  (char-code x))
+
+(defun char= (x y)
+  (eql x y))
 
 (defun integerp (x)
   (and (numberp x) (= (floor x) x)))
@@ -401,8 +406,8 @@
      (remove-if-not func (cdr list)))))
 
 (defun digit-char-p (x)
-  (if (and (<= #\0 x) (<= x #\9))
-      (- x #\0)
+  (if (and (<= (char-code #\0) (char-code x) (char-code #\9)))
+      (- (char-code x) (char-code #\0))
       nil))
 
 (defun digit-char (weight)

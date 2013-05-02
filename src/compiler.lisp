@@ -591,6 +591,7 @@
   (cond
     ((integerp sexp) (integer-to-string sexp))
     ((floatp sexp) (float-to-string sexp))
+    ((characterp sexp) (code "\"" (escape-string (string sexp)) "\""))
     ((stringp sexp) (code "\"" (escape-string sexp) "\""))
     (t
      (or (cdr (assoc sexp *literal-table*))
@@ -1459,7 +1460,19 @@
 (define-builtin lambda-code (x)
   (code "(" x ").toString()"))
 
-(define-builtin eq    (x y) (js!bool (code "(" x " === " y ")")))
+(define-builtin eq (x y)
+  (js!bool (code "(" x " === " y ")")))
+
+(define-builtin char-code (x)
+  (type-check (("x" "string" x))
+    "x.charCodeAt(0)"))
+
+(define-builtin code-char (x)
+  (type-check (("x" "number" x))
+    "String.fromCharCode(x)"))
+
+(define-builtin characterp (x)
+  (js!bool (code "(typeof(" x ") == \"string\")")))
 
 (define-builtin char-to-string (x)
   (type-check (("x" "number" x))
@@ -1487,7 +1500,7 @@
 (define-builtin char (string index)
   (type-check (("string" "string" string)
                ("index" "number" index))
-    "string.charCodeAt(index)"))
+    "string.charAt(index)"))
 
 (define-builtin concat-two (string1 string2)
   (type-check (("string1" "string" string1)
@@ -1692,6 +1705,7 @@
               (ls-compile `(symbol-value ',sexp))))))
         ((integerp sexp) (integer-to-string sexp))
         ((floatp sexp) (float-to-string sexp))
+        ((characterp sexp) (code "\"" (escape-string (string sexp)) "\""))
         ((stringp sexp) (code "\"" (escape-string sexp) "\""))
         ((arrayp sexp) (literal sexp))
         ((listp sexp)

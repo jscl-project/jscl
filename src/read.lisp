@@ -141,7 +141,7 @@
          ((string= cname "space") (char-code #\space))
          ((string= cname "tab") (char-code #\tab))
          ((string= cname "newline") (char-code #\newline))
-         (t (char-code (char cname 0))))))
+         (t (char cname 0)))))
     (#\+
      (let ((feature (read-until stream #'terminalp)))
        (cond
