@@ -45,7 +45,7 @@
       (setq ch (%peek-char stream)))))
 
 (defun terminalp (ch)
-  (or (null ch) (whitespacep ch) (char= #\) ch) (char= #\( ch)))
+  (or (null ch) (whitespacep ch) (char= #\" ch) (char= #\) ch) (char= #\( ch)))
 
 (defun read-until (stream func)
   (let ((string "")
