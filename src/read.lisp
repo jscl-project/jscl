@@ -138,9 +138,9 @@
             (concat (string (%read-char stream))
                     (read-until stream #'terminalp))))
        (cond
-         ((string= cname "space") (char-code #\space))
-         ((string= cname "tab") (char-code #\tab))
-         ((string= cname "newline") (char-code #\newline))
+         ((string= cname "space") #\space)
+         ((string= cname "tab") #\tab)
+         ((string= cname "newline") #\newline)
          (t (char cname 0)))))
     (#\+
      (let ((feature (read-until stream #'terminalp)))
@@ -173,7 +173,7 @@
     (dotimes (i (length s))
       (let ((ch (char s i)))
         (if last-escape
-            (progn
+           (progn
               (setf last-escape nil)
               (setf result (concat result (string ch))))
             (if (char= ch #\\)
