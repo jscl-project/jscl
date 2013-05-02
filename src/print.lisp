@@ -46,16 +46,16 @@
            (concat "#<FUNCTION>"))))
     ((listp form)
      (concat "("
-             (join-trailing (mapcar #'prin1-to-string (butlast form)) " ")
+             (join-trailing (mapcar #'write-to-string (butlast form)) " ")
              (let ((last (last form)))
                (if (null (cdr last))
-                   (prin1-to-string (car last))
-                   (concat (prin1-to-string (car last)) " . " (prin1-to-string (cdr last)))))
+                   (write-to-string (car last))
+                   (concat (write-to-string (car last)) " . " (write-to-string (cdr last)))))
              ")"))
     ((arrayp form)
      (concat "#" (if (zerop (length form))
                      "()"
-                     (prin1-to-string (vector-to-list form)))))
+                     (write-to-string (vector-to-list form)))))
     ((packagep form)
      (concat "#<PACKAGE " (package-name form) ">"))
     (t
