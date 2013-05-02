@@ -1472,7 +1472,10 @@
     "String.fromCharCode(x)"))
 
 (define-builtin characterp (x)
-  (js!bool (code "(typeof(" x ") == \"string\")")))
+  (js!bool
+   (js!selfcall
+     "var x = " x ";" *newline*
+     "return (typeof(" x ") == \"string\") && x.length == 1;")))
 
 (define-builtin char-to-string (x)
   (type-check (("x" "number" x))

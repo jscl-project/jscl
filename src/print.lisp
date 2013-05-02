@@ -34,6 +34,12 @@
                      ":" name)))))
     ((integerp form) (integer-to-string form))
     ((floatp form) (float-to-string form))
+    ((characterp form)
+     (concat "#\\" 
+             (case form
+               (#\newline "newline")
+               (#\space "space")
+               (otherwise (string form)))))
     ((stringp form) (concat "\"" (escape-string form) "\""))
     ((functionp form)
      (let ((name (oget form "fname")))
