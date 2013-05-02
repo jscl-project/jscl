@@ -42,7 +42,9 @@
                (#\newline "newline")
                (#\space "space")
                (otherwise (string form)))))
-    ((stringp form) (concat "\"" (escape-string form) "\""))
+    ((stringp form) (if *print-escape*
+			(concat "\"" (escape-string form) "\"")
+			form))
     ((functionp form)
      (let ((name (oget form "fname")))
        (if name
