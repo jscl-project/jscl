@@ -16,3 +16,8 @@
 (test (string= "foo" "foo"))
 (test (not (string= "Foo" "foo")))
 (test (not (string= "foo" "foox")))
+
+(let ((str "hello"))
+  (setf (char str 0) #\X)
+  (setf (char str 4) #\X)
+  (test (string= str "XellX")))
