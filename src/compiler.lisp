@@ -1571,7 +1571,7 @@
   (js!bool (code "(typeof " x " == 'function')")))
 
 (define-builtin write-string (x)
-  (code "lisp.write(xstring(" x "))"))
+  (code "lisp.write(" x ")"))
 
 (define-builtin make-array (n)
   (js!selfcall
