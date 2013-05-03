@@ -37,11 +37,17 @@
 
 (defun cdr (x) (cdr x))
 
-(defun first (x) (car x))
-(defun second (x) (cadr x))
-(defun third (x) (caddr x))
-(defun fourth (x) (cadddr x))
-(defun rest (x) (cdr x))
+(defun first   (x) (car    x))
+(defun second  (x) (cadr   x))
+(defun third   (x) (caddr  x))
+(defun fourth  (x) (cadddr x))
+(defun fifth   (x) (car    (cddddr x)))
+(defun sixth   (x) (cadr   (cddddr x)))
+(defun seventh (x) (caddr  (cddddr x)))
+(defun eighth  (x) (cadddr (cddddr x)))
+(defun ninth   (x) (car  (cddddr (cddddr x))))
+(defun tenth   (x) (cadr (cddddr (cddddr x))))
+(defun rest    (x) (cdr x))
 
 (defun list (&rest args)
   args)

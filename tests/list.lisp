@@ -18,6 +18,19 @@
 (test (tree-equal (cons 1 2) (cons 2 3)
                   :test (lambda (a b) (not (= a b)))))
 
+; FIRST to TENTH
+(let ((nums '(1 2 3 4 5 6 7 8 9 10)))
+  (test (= (first   nums) 1))
+  (test (= (second  nums) 2))
+  (test (= (third   nums) 3))
+  (test (= (fourth  nums) 4))
+  (test (= (fifth   nums) 5))
+  (test (= (sixth   nums) 6))
+  (test (= (seventh nums) 7))
+  (test (= (eighth  nums) 8))
+  (test (= (ninth   nums) 9))
+  (test (= (tenth   nums) 10)))
+
 ; SUBST
 ; Can't really test this until EQUAL works properly on lists
 

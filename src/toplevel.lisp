@@ -58,24 +58,24 @@
           copy-list copy-tree decf declaim declare defconstant define-setf-expander
           define-symbol-macro defmacro defparameter defun defvar
           digit-char digit-char-p disassemble do do* documentation
-          dolist dotimes ecase eq eql equal error eval every export expt
-          fdefinition find-package find-symbol first flet format fourth fset
-          funcall function functionp gensym get-internal-real-time
+          dolist dotimes ecase eighth eq eql equal error eval every export expt
+          fdefinition fifth find-package find-symbol first flet format fourth
+          fset funcall function functionp gensym get-internal-real-time
           get-setf-expansion get-universal-time go identity if in-package
           incf integerp intern keywordp labels lambda last length let let* list
           list* list-all-packages listp loop make-array make-package
           make-symbol mapcar member minusp mod multiple-value-bind
           multiple-value-call multiple-value-list multiple-value-prog1
-          nconc nil not nreconc nth nthcdr null numberp or otherwise
+          nconc nil ninth not nreconc nth nthcdr null numberp or otherwise
           package-name package-use-list packagep parse-integer plusp pop
           prin1-to-string print proclaim prog1 prog2 progn psetq push
           quote read-from-string remove remove-if remove-if-not return
-          return-from revappend reverse rplaca rplacd second set setf
-          setq some string string-upcase string= stringp subseq subst
+          return-from revappend reverse rplaca rplacd second set setf seventh
+          setq sixth some string string-upcase string= stringp subseq subst
           symbol-function symbol-name symbol-package symbol-plist
-          symbol-value symbolp t tagbody third throw tree-equal truncate unless
-          unwind-protect values values-list variable warn when write-line
-          write-string zerop))
+          symbol-value symbolp t tagbody tenth third throw tree-equal truncate
+          unless unwind-protect values values-list variable warn when
+          write-line write-string zerop))
 
 (setq *package* *user-package*)
 
