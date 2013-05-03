@@ -62,7 +62,6 @@
 (defun nth (n list)
   (car (nthcdr n list)))
 
-;;; The rest of the C[AD]*R functions; only a few were defined in boot.lisp
 (defun caar (x) (car (car x)))
 (defun cadr (x) (car (cdr x)))
 (defun cdar (x) (cdr (car x)))
