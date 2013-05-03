@@ -564,13 +564,13 @@
   #+common-lisp
   (let ((package (symbol-package symbol)))
     (if (eq package (find-package "KEYWORD"))
-        (code "{name: \"" (escape-string (symbol-name symbol))
-              "\", 'package': '" (package-name package) "'}")
-        (code "{name: \"" (escape-string (symbol-name symbol)) "\"}")))
+        (code "{name: " (dump-string (symbol-name symbol))
+              ", 'package': " (dump-string (package-name package)) "}")
+        (code "{name: " (dump-string (symbol-name symbol)) "}")))
   #+jscl
   (let ((package (symbol-package symbol)))
     (if (null package)
-        (code "{name: \"" (escape-string (symbol-name symbol)) "\"}")
+        (code "{name: " (dump-symbol (symbol-name symbol)) "}")
         (ls-compile `(intern ,(symbol-name symbol) ,(package-name package))))))
 
 (defun dump-cons (cons)
@@ -1486,7 +1486,7 @@
   (js!bool
    (js!selfcall
      "var x = " x ";" *newline*
-      "return typeof(x) == 'object' && 'length' in x && x.type == 'character';")))
+     "return typeof(x) == 'object' && 'length' in x && x.type == 'character';")))
 
 (define-builtin string-upcase (x)
   (code "make_lisp_string(" x ".join('').toUppercase())"))
