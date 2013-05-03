@@ -70,7 +70,6 @@
       (null ch))))
 
 (defun special-escape (s package)
-  (return-from special-escape s)
   (if (or (potential-number s)
           (special-symbol-name s :uppercase (not (eq package (find-package "JS")))))
       (let ((result "|"))

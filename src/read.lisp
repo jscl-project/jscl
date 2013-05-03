@@ -132,7 +132,10 @@
     (#\'
      (list 'function (ls-read-1 stream)))
     (#\( (list-to-vector (%read-list stream)))
-    (#\: (make-symbol (string-upcase (read-until stream #'terminalp))))
+    (#\: (make-symbol
+          (unescape
+           (string-upcase-noescaped
+            (read-escaped-until stream #'terminalp)))))
     (#\\
      (let ((cname
             (concat (string (%read-char stream))
