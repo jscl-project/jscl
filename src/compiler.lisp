@@ -433,7 +433,7 @@
                            " && ")
                      ")" *newline*
                      (indent
-                      "throw 'Unknown keyword argument ' + arguments[i].name;" *newline*))
+                      "throw 'Unknown keyword argument ' + xstring(arguments[i].name);" *newline*))
              "}" *newline*)))))
 
 (defun parse-lambda-list (ll)
@@ -1443,14 +1443,14 @@
   (js!selfcall
     "var symbol = " x ";" *newline*
     "var value = symbol.value;" *newline*
-    "if (value === undefined) throw \"Variable `\" + symbol.name + \"' is unbound.\";" *newline*
+    "if (value === undefined) throw \"Variable `\" + xstring(symbol.name) + \"' is unbound.\";" *newline*
     "return value;" *newline*))
 
 (define-builtin symbol-function (x)
   (js!selfcall
     "var symbol = " x ";" *newline*
     "var func = symbol.fvalue;" *newline*
-    "if (func === undefined) throw \"Function `\" + symbol.name + \"' is undefined.\";" *newline*
+    "if (func === undefined) throw \"Function `\" + xstring(symbol.name) + \"' is undefined.\";" *newline*
     "return func;" *newline*))
 
 (define-builtin symbol-plist (x)

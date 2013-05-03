@@ -87,7 +87,9 @@
                        jqconsole.Write(xstring(lisp.print(pv, 1, vs[i])) + '\n', 'jqconsole-return');
                     }
                 } catch(error) {
-                    jqconsole.Write('ERROR: ' + (error.message || error) + '\n', 'jqconsole-error');
+                    var msg = error.message || error || 'Unknown error';
+                    if (typeof(msg) != 'string') msg = xstring(msg);
+                    jqconsole.Write('ERROR: ' + msg + '\n', 'jqconsole-error');
                 }
             } else {
                 jqconsole.Write(xstring(lisp.compileString(pv, 1, make_lisp_string(input.slice(1)))) + '\n', 'jqconsole-return');
