@@ -82,7 +82,8 @@
     ;; not collide with the compiler itself.
     (late-compile
      `(progn
-        ,@(mapcar (lambda (s) `(%intern-symbol (%js-vref ,(cdr s)))) *literal-table*)
+        ,@(mapcar (lambda (s) `(%intern-symbol (%js-vref ,(cdr s))))
+                  (remove-if-not #'symbolp *literal-table* :key #'car))
         (setq *literal-table* ',*literal-table*)
         (setq *variable-counter* ,*variable-counter*)
         (setq *gensym-counter* ,*gensym-counter*)))
