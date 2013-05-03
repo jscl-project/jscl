@@ -12,6 +12,12 @@
         (not (= (car (car foo))
                 (car (car bar))))))
 
+; TREE-EQUAL
+(test (tree-equal '(1 2 3) '(1 2 3)))
+(test (tree-equal '(1 (2 (3 4) 5) 6) '(1 (2 (3 4) 5) 6)))
+(test (tree-equal (cons 1 2) (cons 2 3)
+                  :test (lambda (a b) (not (= a b)))))
+
 ; SUBST
 ; Can't really test this until EQUAL works properly on lists
 

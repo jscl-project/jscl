@@ -73,7 +73,7 @@
           return-from revappend reverse rplaca rplacd second set setf
           setq some string string-upcase string= stringp subseq subst
           symbol-function symbol-name symbol-package symbol-plist
-          symbol-value symbolp t tagbody third throw truncate unless
+          symbol-value symbolp t tagbody third throw tree-equal truncate unless
           unwind-protect values values-list variable warn when write-line
           write-string zerop))
 

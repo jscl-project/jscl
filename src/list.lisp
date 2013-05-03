@@ -103,6 +103,13 @@
           (copy-tree (cdr tree)))
     tree))
 
+(defun tree-equal (tree1 tree2 &key (test #'eql))
+  (if (atom tree1)
+    (and (atom tree2) (funcall test tree1 tree2))
+    (and (consp tree2)
+         (tree-equal (car tree1) (car tree2) :test test)
+         (tree-equal (cdr tree1) (cdr tree2) :test test))))
+
 (defun subst (new old tree &key (key #'identity) (test #'eql))
   (cond 
     ((funcall test (funcall key tree) (funcall key old))
