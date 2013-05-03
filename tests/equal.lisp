@@ -3,8 +3,3 @@
 (test (equal "abc" "abc"))
 (test (not (equal "abc" "def")))
 (test (not (equal "Abc" "abc")))
-(test (equal #(1 2 3) #(1 2 3)))
-(test (equal '(1 2 #(3 4 ("a b c" T)))
-             '(1 2 #(3 4 ("a b c" T)))))
-(test (not (equal '(1 2 #(3 4 ("a b c" T)))
-                  '(1 2 #(3 4 ("a b x" T))))))

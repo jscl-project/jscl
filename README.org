@@ -2,7 +2,7 @@
 
   JSCL is a Common Lisp to Javascript compiler, which is bootstrapped
   from Common Lisp and executed from the browser.
-  
+
 ** Getting started
 
 You can try a demo [[http://davazp.net/jscl/jscl.html][here]]. But if you want to hack JSCL, you will have
@@ -32,7 +32,7 @@ operators, functions and macros. In particular:
   - Optional and keyword arguments
   - SETF places
   - Packages
-    
+
 The compiler is very verbose, some simple optimizations or
 /minification/ could help to deal with it.
 

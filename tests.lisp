@@ -1,20 +1,22 @@
-(defvar *total-tests* 0)
-(defvar *passed-tests* 0)
-(defvar *failed-tests* 0)
+(defparameter *total-tests* 0)
+(defparameter *passed-tests* 0)
+(defparameter *failed-tests* 0)
+(defparameter *expected-failures* 0)
+(defparameter *unexpected-passes* 0)
 
-(defvar *expected-failures* 0)
-(defvar *unexpected-passes* 0)
-
+(defvar *use-html-output-p* t)
 (defvar *timestamp* nil)
 
 (defmacro test (condition)
   `(progn
      (cond
        (,condition
-        (write-line ,(concat "Test `" (prin1-to-string condition) "' passed"))
+        (format t "Test `~S' passed~%" ',condition)
         (incf *passed-tests*))
        (t
-        (write-line ,(concat "Test `" (prin1-to-string condition) "' failed."))
+        (if *use-html-output-p*
+            (format t "<font color='red'>Test `~S' failed.</font>~%" ',condition)
+            (format t "Test `~S' failed.~%" ',condition))
         (incf *failed-tests*)))
      (incf *total-tests*)))
 
@@ -22,14 +24,14 @@
   `(progn
      (cond
        (,condition
-        (write-line ,(concat "Test `" (prin1-to-string condition) "' passed unexpectedly!"))
+        (if *use-html-output-p*
+            (format t "<font color='orange'>Test `~S' passed unexpectedly!</font>~%" ',condition)
+            (format t "Test `~S' passed unexpectedly!~%" ',condition))
         (incf *unexpected-passes*))
        (t
-        (write-line ,(concat "Test `" (prin1-to-string condition) "' failed expectedly."))
+        (format t "Test `~S' failed failed expectedly.~%" ',condition)
         (incf *expected-failures*)))
      (incf *total-tests*)))
 
-(write-line "Running tests...")
-(write-line "")
-
+(format t "Running tests...~%~%")
 (setq *timestamp* (get-internal-real-time))
