@@ -1546,7 +1546,7 @@
       (js!selfcall
         "var v = globalEval(xstring(" string "));" *newline*
         "return values.apply(this, forcemv(v));" *newline*)
-      (code "globalEval(xstring(" string ")")))
+      (code "globalEval(xstring(" string "))")))
 
 (define-builtin %throw (string)
   (js!selfcall "throw " string ";" *newline*))
@@ -1565,7 +1565,7 @@
   (code "((" object ")[xstring(" key ")] = " value ")"))
 
 (define-builtin in (key object)
-  (js!bool (code "(xstring(" key ") in (" object ")")))
+  (js!bool (code "(xstring(" key ") in (" object "))")))
 
 (define-builtin functionp (x)
   (js!bool (code "(typeof " x " == 'function')")))

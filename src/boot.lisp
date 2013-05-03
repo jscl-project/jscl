@@ -459,18 +459,6 @@
       (incf pos))
     pos))
 
-(defun string (x)
-  (cond ((stringp x) x)
-        ((symbolp x) (symbol-name x))
-        (t (char-to-string x))))
-
-(defun string= (s1 s2)
-  (let ((n (length s1)))
-    (when (= (length s2) n)
-      (dotimes (i n t)
-        (unless (char= (char s1 i) (char s2 i))
-          (return-from string= nil))))))
-
 (defun equal (x y)
   (cond
     ((eql x y) t)
@@ -612,3 +600,4 @@
 
 (defun error (fmt &rest args)
   (%throw (apply #'format nil fmt args)))
+

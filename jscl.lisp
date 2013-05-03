@@ -21,6 +21,7 @@
     ("compat"    :host)
     ("utils"     :both)
     ("list"      :target)
+    ("string"    :target)
     ("print"     :target)
     ("package"   :target)
     ("read"      :both)
