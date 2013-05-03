@@ -417,13 +417,9 @@
        (char "0123456789" weight)))
 
 (defun subseq (seq a &optional b)
-  (cond
-    ((stringp seq)
-     (if b
-         (slice seq a b)
-         (slice seq a)))
-    (t
-     (error "Unsupported argument."))))
+  (if b
+      (slice seq a b)
+      (slice seq a)))
 
 (defmacro do-sequence (iteration &body body)
   (let ((seq (gensym))
@@ -468,6 +464,13 @@
         ((symbolp x) (symbol-name x))
         (t (char-to-string x))))
 
+(defun string= (s1 s2)
+  (let ((n (length s1)))
+    (when (= (length s2) n)
+      (dotimes (i n t)
+        (unless (char= (char s1 i) (char s2 i))
+          (return-from string= nil))))))
+
 (defun equal (x y)
   (cond
     ((eql x y) t)
@@ -475,18 +478,9 @@
      (and (consp y)
           (equal (car x) (car y))
           (equal (cdr x) (cdr y))))
-    ((arrayp x)
-     (and (arrayp y)
-          (let ((n (length x)))
-            (when (= (length y) n)
-              (dotimes (i n)
-                (unless (equal (aref x i) (aref y i))
-                  (return-from equal nil)))
-              t))))
+    ((stringp x)
+     (and (stringp y) (string= x y)))
     (t nil)))
-
-(defun string= (s1 s2)
-  (equal s1 s2))
 
 (defun fdefinition (x)
   (cond

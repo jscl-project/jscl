@@ -587,17 +587,20 @@
   (let ((elements (vector-to-list array)))
     (concat "[" (join (mapcar #'literal elements) ", ") "]")))
 
+(defun dump-string (string)
+  (code "make_lisp_string(\"" (escape-string string) "\")"))
+
 (defun literal (sexp &optional recursive)
   (cond
     ((integerp sexp) (integer-to-string sexp))
     ((floatp sexp) (float-to-string sexp))
     ((characterp sexp) (code "\"" (escape-string (string sexp)) "\""))
-    ((stringp sexp) (code "\"" (escape-string sexp) "\""))
     (t
-     (or (cdr (assoc sexp *literal-table*))
+     (or (cdr (assoc sexp *literal-table* :test #'equal))
          (let ((dumped (typecase sexp
                          (symbol (dump-symbol sexp))
                          (cons (dump-cons sexp))
+                         (string (dump-string sexp))
                          (array (dump-array sexp)))))
            (if (and recursive (not (symbolp sexp)))
                dumped
@@ -1382,7 +1385,7 @@
 
 (define-builtin float-to-string (x)
   (type-check (("x" "number" x))
-    "x.toString()"))
+    "make_lisp_string(x.toString())"))
 
 (define-builtin cons (x y)
   (code "({car: " x ", cdr: " y "})"))
@@ -1422,8 +1425,7 @@
      "return (typeof tmp == 'object' && 'name' in tmp);" *newline*)))
 
 (define-builtin make-symbol (name)
-  (type-check (("name" "string" name))
-    "({name: name})"))
+  (code "({name: " name "})"))
 
 (define-builtin symbol-name (x)
   (code "(" x ").name"))
@@ -1455,7 +1457,7 @@
   (code "((" x ").plist || " (ls-compile nil) ")"))
 
 (define-builtin lambda-code (x)
-  (code "(" x ").toString()"))
+  (code "make_lisp_string((" x ").toString())"))
 
 (define-builtin eq (x y)
   (js!bool (code "(" x " === " y ")")))
@@ -1475,37 +1477,39 @@
      "return (typeof(" x ") == \"string\") && x.length == 1;")))
 
 (define-builtin char-to-string (x)
-  (type-check (("x" "string" x))
-    "(x)"))
+  (js!selfcall
+    "var r = [" x "];" *newline*
+    "r.type = 'character';"
+    "return r"))
 
 (define-builtin stringp (x)
-  (js!bool (code "(typeof(" x ") == \"string\")")))
+  (js!bool
+   (js!selfcall
+     "var x = " x ";" *newline*
+      "return typeof(x) == 'object' && 'length' in x && x.type == 'character';")))
 
 (define-builtin string-upcase (x)
-  (type-check (("x" "string" x))
-    "x.toUpperCase()"))
+  (code "make_lisp_string(" x ".join('').toUppercase())"))
 
 (define-builtin string-length (x)
-  (type-check (("x" "string" x))
-    "x.length"))
+  (code x ".length"))
 
-(define-raw-builtin slice (string a &optional b)
+(define-raw-builtin slice (vector a &optional b)
   (js!selfcall
-    "var str = " (ls-compile string) ";" *newline*
+    "var vector = " (ls-compile vector) ";" *newline*
     "var a = " (ls-compile a) ";" *newline*
     "var b;" *newline*
     (when b (code "b = " (ls-compile b) ";" *newline*))
-    "return str.slice(a,b);" *newline*))
+    "return vector.slice(a,b);" *newline*))
 
 (define-builtin char (string index)
-  (type-check (("string" "string" string)
-               ("index" "number" index))
-    "string.charAt(index)"))
+  (code string "[" index "]"))
 
 (define-builtin concat-two (string1 string2)
-  (type-check (("string1" "string" string1)
-               ("string2" "string" string2))
-    "string1.concat(string2)"))
+  (js!selfcall
+    "var r = " string1 ".concat(" string2 ");" *newline*
+    "r.type = 'character';"
+    "return r;" *newline*))
 
 (define-raw-builtin funcall (func &rest args)
   (js!selfcall
@@ -1538,12 +1542,11 @@
           "return (typeof f === 'function'? f : f.fvalue).apply(this, args);" *newline*))))
 
 (define-builtin js-eval (string)
-  (type-check (("string" "string" string))
-    (if *multiple-value-p*
-        (js!selfcall
-          "var v = globalEval(string);" *newline*
-          "return values.apply(this, forcemv(v));" *newline*)
-        "globalEval(string)")))
+  (if *multiple-value-p*
+      (js!selfcall
+        "var v = globalEval(" string ".join(''));" *newline*
+        "return values.apply(this, forcemv(v));" *newline*)
+      (code "globalEval(" string ".join(''))")))
 
 (define-builtin %throw (string)
   (js!selfcall "throw " string ";" *newline*))
@@ -1568,8 +1571,7 @@
   (js!bool (code "(typeof " x " == 'function')")))
 
 (define-builtin write-string (x)
-  (type-check (("x" "string" x))
-    "lisp.write(x)"))
+  (code "lisp.write(" x ".join(''))"))
 
 (define-builtin make-array (n)
   (js!selfcall
@@ -1703,11 +1705,8 @@
               (code (ls-compile `',sexp) ".value"))
              (t
               (ls-compile `(symbol-value ',sexp))))))
-        ((integerp sexp) (integer-to-string sexp))
-        ((floatp sexp) (float-to-string sexp))
-        ((characterp sexp) (code "\"" (escape-string (string sexp)) "\""))
-        ((stringp sexp) (code "\"" (escape-string sexp) "\""))
-        ((arrayp sexp) (literal sexp))
+        ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp))
+         (literal sexp))
         ((listp sexp)
          (let ((name (car sexp))
                (args (cdr sexp)))
@@ -1745,10 +1744,7 @@
       (t
        (when *compile-print-toplevels*
          (let ((form-string (prin1-to-string sexp)))
-           (write-string "Compiling ")
-           (write-string (truncate-string form-string))
-           (write-line "...")))
-
+           (format t "Compiling ~a..." (truncate-string form-string))))
        (let ((code (ls-compile sexp multiple-value-p)))
          (code (join-trailing (get-toplevel-compilations)
                               (code ";" *newline*))
