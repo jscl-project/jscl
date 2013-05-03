@@ -29,7 +29,7 @@
       t
       (if (consp x)
           nil
-          (error "type-error"))))
+          (error "The value `~S' is not a type list." x))))
 
 (defun car (x)
   "Return the CAR part of a cons, or NIL if X is null."

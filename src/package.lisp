@@ -41,7 +41,7 @@
 
 (defun find-package-or-fail (package-designator)
   (or (find-package package-designator)
-      (error "Package unknown.")))
+      (error "The name `~S' does not designate any package." package-designator)))
 
 (defun package-name (package-designator)
   (let ((package (find-package-or-fail package-designator)))
@@ -142,7 +142,7 @@
 
 (defun symbol-package (symbol)
   (unless (symbolp symbol)
-    (error "it is not a symbol"))
+    (error "`~S' is not a symbol." symbol))
   (oget symbol "package"))
 
 (defun export (symbols &optional (package *package*))
