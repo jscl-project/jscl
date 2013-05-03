@@ -79,6 +79,8 @@
 
 (setq *package* *user-package*)
 
+;;; Set some external entry point to the Lisp implementation to the
+;;; console. It would not be necessary when FFI is finished.
 (js-eval "var lisp")
 (%js-vset "lisp" (new))
 (%js-vset "lisp.read" #'ls-read-from-string)
@@ -88,24 +90,3 @@
 (%js-vset "lisp.evalString" (lambda (str) (eval (ls-read-from-string str))))
 (%js-vset "lisp.evalInput" (lambda (str) (eval-interactive (ls-read-from-string str))))
 (%js-vset "lisp.compileString" (lambda (str) (ls-compile-toplevel (ls-read-from-string str) t)))
-
-;; Set the initial global environment to be equal to the host global
-;; environment at this point of the compilation.
-(eval-when-compile
-  (toplevel-compilation
-   (ls-compile `(setq *environment* ',*environment*))))
-
-(eval-when-compile
-  (toplevel-compilation
-   (ls-compile
-    `(progn
-       ,@(mapcar (lambda (s) `(%intern-symbol (%js-vref ,(cdr s))))
-                 (remove-if-not #'symbolp *literal-table* :key #'car))
-       (setq *literal-table* ',*literal-table*)
-       (setq *variable-counter* ,*variable-counter*)
-       (setq *gensym-counter* ,*gensym-counter*)))))
-
-(eval-when-compile
-  (toplevel-compilation
-   (ls-compile
-    `(setq *literal-counter* ,*literal-counter*))))

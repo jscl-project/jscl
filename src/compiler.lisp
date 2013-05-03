@@ -537,7 +537,8 @@
     (code "(" result ")")))
 
 
-;;; Literals
+;;; Compilation of literals an object dumping
+
 (defun escape-string (string)
   (let ((output "")
         (index 0)
@@ -553,9 +554,18 @@
       (incf index))
     output))
 
-
 (defvar *literal-table* nil)
 (defvar *literal-counter* 0)
+
+;;; BOOTSTRAP MAGIC: During bootstrap, we record the macro definitions
+;;; as lists. Once everything is compiled, we want to dump the whole
+;;; global environment to the output file to reproduce it in the
+;;; run-time. However, the environment must contain expander functions
+;;; rather than lists. We do not know how to dump function objects
+;;; itself, so we mark the definitions with this object and the
+;;; compiler will be called when this object has to be dumped.
+;;; Backquote/unquote does a similar magic, but this use is exclusive.
+(defvar *magic-unquote-marker* (gensym "MAGIC-UNQUOTE"))
 
 (defun genlit ()
   (code "l" (incf *literal-counter*)))
@@ -599,8 +609,11 @@
      (or (cdr (assoc sexp *literal-table* :test #'equal))
          (let ((dumped (typecase sexp
                          (symbol (dump-symbol sexp))
-                         (cons (dump-cons sexp))
                          (string (dump-string sexp))
+                         (cons
+                          (if (eq (car sexp) *magic-unquote-marker*)
+                              (ls-compile (cdr sexp))
+                              (dump-cons sexp)))
                          (array (dump-array sexp)))))
            (if (and recursive (not (symbolp sexp)))
                dumped
@@ -608,6 +621,7 @@
                  (push (cons sexp jsvar) *literal-table*)
                  (toplevel-compilation (code "var " jsvar " = " dumped))
                  jsvar)))))))
+
 
 (define-compilation quote (sexp)
   (literal sexp))
@@ -1618,18 +1632,36 @@
 (define-builtin %js-call (fun args)
   (code fun ".apply(this, " args ")"))
 
-(defun macro (x)
-  (and (symbolp x)
-       (let ((b (lookup-in-lexenv x *environment* 'function)))
-         (if (and b (eq (binding-type b) 'macro))
-             b
-             nil))))
-
 #+common-lisp
 (defvar *macroexpander-cache*
   (make-hash-table :test #'eq))
 
-(defun ls-macroexpand-1 (form)
+(defun !macro-function (symbol)
+  (unless (symbolp symbol)
+    (error "`~S' is not a symbol." symbol))
+  (let ((b (lookup-in-lexenv symbol *environment* 'function)))
+    (if (and b (eq (binding-type b) 'macro))
+        (let ((expander (binding-value b)))
+          (cond
+            #+common-lisp
+            ((gethash b *macroexpander-cache*)
+             (setq expander (gethash b *macroexpander-cache*)))
+            ((listp expander)
+             (let ((compiled (eval expander)))
+               ;; The list representation are useful while
+               ;; bootstrapping, as we can dump the definition of the
+               ;; macros easily, but they are slow because we have to
+               ;; evaluate them and compile them now and again. So, let
+               ;; us replace the list representation version of the
+               ;; function with the compiled one.
+               ;;
+               #+jscl (setf (binding-value b) compiled)
+               #+common-lisp (setf (gethash b *macroexpander-cache*) compiled)
+               (setq expander compiled))))
+          expander)
+        nil)))
+
+(defun !macroexpand-1 (form)
   (cond
     ((symbolp form)
      (let ((b (lookup-in-lexenv form *environment* 'variable)))
@@ -1637,26 +1669,9 @@
            (values (binding-value b) t)
            (values form nil))))
     ((consp form)
-     (let ((macro-binding (macro (car form))))
-       (if macro-binding
-           (let ((expander (binding-value macro-binding)))
-             (cond
-               #+common-lisp
-               ((gethash macro-binding *macroexpander-cache*)
-                (setq expander (gethash macro-binding *macroexpander-cache*)))
-               ((listp expander)
-                (let ((compiled (eval expander)))
-                  ;; The list representation are useful while
-                  ;; bootstrapping, as we can dump the definition of the
-                  ;; macros easily, but they are slow because we have to
-                  ;; evaluate them and compile them now and again. So, let
-                  ;; us replace the list representation version of the
-                  ;; function with the compiled one.
-                  ;;
-                  #+jscl (setf (binding-value macro-binding) compiled)
-                  #+common-lisp (setf (gethash macro-binding *macroexpander-cache*) compiled)
-                  (setq expander compiled))))
-             (values (apply expander (cdr form)) t))
+     (let ((macrofun (!macro-function (car form))))
+       (if macrofun
+           (values (apply macrofun (cdr form)) t)
            (values form nil))))
     (t
      (values form nil))))
@@ -1689,7 +1704,7 @@
        (concat ";" *newline*))))
 
 (defun ls-compile (sexp &optional multiple-value-p)
-  (multiple-value-bind (sexp expandedp) (ls-macroexpand-1 sexp)
+  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
     (when expandedp
       (return-from ls-compile (ls-compile sexp multiple-value-p)))
     ;; The expression has been macroexpanded. Now compile it!
