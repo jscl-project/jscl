@@ -184,6 +184,8 @@
         (setq alist (cdr alist))))
   (car alist))
 
+(defun acons (key datum alist)
+  (cons (cons key datum) alist))
 
 
 (define-setf-expander car (x)

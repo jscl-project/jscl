@@ -38,6 +38,12 @@
   (test (tailp a a)))
 (test (tailp 'a (cons 'b 'a)))
 
+; ACONS
+; FIXME: Write the alist in a more natural form once #72 has been fixed
+(test (equal (cons (cons 1 2) (list (cons 3 4)))
+             (acons 1 2 (list (cons 3 4)))))
+(test (equal (list (cons 1 2)) (acons 1 2 ())))
+
 ; SUBST
 ; Can't really test this until EQUAL works properly on lists
 
