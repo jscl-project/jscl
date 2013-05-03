@@ -68,11 +68,15 @@
          when (plusp (length compilation))
          do (write-string compilation out)))))
 
+
 (defun dump-global-environment (stream)
   (flet ((late-compile (form)
            (write-string (ls-compile-toplevel form) stream)))
-    ;; Set the initial global environment to be equal to the host global
-    ;; environment at this point of the compilation.
+    ;; We assume that environments have a friendly list representation
+    ;; for the compiler and it can be dumped.
+    (dolist (b (lexenv-function *environment*))
+      (when (eq (binding-type b) 'macro)
+        (push *magic-unquote-marker* (binding-value b))))
     (late-compile `(setq *environment* ',*environment*))
     ;; Set some counter variable properly, so user compiled code will
     ;; not collide with the compiler itself.
@@ -83,6 +87,7 @@
         (setq *variable-counter* ,*variable-counter*)
         (setq *gensym-counter* ,*gensym-counter*)))
     (late-compile `(setq *literal-counter* ,*literal-counter*))))
+
 
 (defun bootstrap ()
   (setq *environment* (make-lexenv))

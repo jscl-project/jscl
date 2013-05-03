@@ -537,7 +537,8 @@
     (code "(" result ")")))
 
 
-;;; Literals
+;;; Compilation of literals an object dumping
+
 (defun escape-string (string)
   (let ((output "")
         (index 0)
@@ -553,9 +554,18 @@
       (incf index))
     output))
 
-
 (defvar *literal-table* nil)
 (defvar *literal-counter* 0)
+
+;;; BOOTSTRAP MAGIC: During bootstrap, we record the macro definitions
+;;; as lists. Once everything is compiled, we want to dump the whole
+;;; global environment to the output file to reproduce it in the
+;;; run-time. However, the environment must contain expander functions
+;;; rather than lists. We do not know how to dump function objects
+;;; itself, so we mark the definitions with this object and the
+;;; compiler will be called when this object has to be dumped.
+;;; Backquote/unquote does a similar magic, but this use is exclusive.
+(defvar *magic-unquote-marker* (gensym "MAGIC-UNQUOTE"))
 
 (defun genlit ()
   (code "l" (incf *literal-counter*)))
@@ -597,7 +607,10 @@
      (or (cdr (assoc sexp *literal-table*))
          (let ((dumped (typecase sexp
                          (symbol (dump-symbol sexp))
-                         (cons (dump-cons sexp))
+                         (cons
+                          (if (eq (car sexp) *magic-unquote-marker*)
+                              (ls-compile (cdr sexp))
+                              (dump-cons sexp)))
                          (array (dump-array sexp)))))
            (if (and recursive (not (symbolp sexp)))
                dumped
@@ -605,6 +618,7 @@
                  (push (cons sexp jsvar) *literal-table*)
                  (toplevel-compilation (code "var " jsvar " = " dumped))
                  jsvar)))))))
+
 
 (define-compilation quote (sexp)
   (literal sexp))
