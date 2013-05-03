@@ -580,7 +580,7 @@
   #+jscl
   (let ((package (symbol-package symbol)))
     (if (null package)
-        (code "{name: " (dump-symbol (symbol-name symbol)) "}")
+        (code "{name: " (dump-string (symbol-name symbol)) "}")
         (ls-compile `(intern ,(symbol-name symbol) ,(package-name package))))))
 
 (defun dump-cons (cons)
