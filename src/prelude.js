@@ -50,3 +50,14 @@ function QIList(){
         return r;
     }
 }
+
+
+// Create and return a lisp string for the Javascript string STRING.
+function make_lisp_string (string){
+    var array = string.split("");
+    array.type = 'character'
+    return array;
+}
+
+function xstring(x){ return x.join(''); }
+

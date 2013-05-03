@@ -21,6 +21,7 @@
     ("compat"    :host)
     ("utils"     :both)
     ("list"      :target)
+    ("string"    :target)
     ("print"     :target)
     ("package"   :target)
     ("read"      :both)
@@ -68,6 +69,28 @@
          when (plusp (length compilation))
          do (write-string compilation out)))))
 
+
+(defun dump-global-environment (stream)
+  (flet ((late-compile (form)
+           (write-string (ls-compile-toplevel form) stream)))
+    ;; We assume that environments have a friendly list representation
+    ;; for the compiler and it can be dumped.
+    (dolist (b (lexenv-function *environment*))
+      (when (eq (binding-type b) 'macro)
+        (push *magic-unquote-marker* (binding-value b))))
+    (late-compile `(setq *environment* ',*environment*))
+    ;; Set some counter variable properly, so user compiled code will
+    ;; not collide with the compiler itself.
+    (late-compile
+     `(progn
+        ,@(mapcar (lambda (s) `(%intern-symbol (%js-vref ,(cdr s))))
+                  (remove-if-not #'symbolp *literal-table* :key #'car))
+        (setq *literal-table* ',*literal-table*)
+        (setq *variable-counter* ,*variable-counter*)
+        (setq *gensym-counter* ,*gensym-counter*)))
+    (late-compile `(setq *literal-counter* ,*literal-counter*))))
+
+
 (defun bootstrap ()
   (setq *environment* (make-lexenv))
   (setq *literal-table* nil)
@@ -78,7 +101,8 @@
     (write-string (read-whole-file (source-pathname "prelude.js")) out)
     (dolist (input *source*)
       (when (member (cadr input) '(:target :both))
-        (ls-compile-file (source-pathname (car input) :type "lisp") out))))
+        (ls-compile-file (source-pathname (car input) :type "lisp") out)))
+    (dump-global-environment out))
   ;; Tests
   (with-open-file (out "tests.js" :direction :output :if-exists :supersede)
     (dolist (input (append (directory "tests.lisp")

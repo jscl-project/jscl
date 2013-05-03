@@ -71,32 +71,34 @@
         jqconsole.RegisterMatching('(', ')', 'parents');
 
         lisp.write = function(str){
-           jqconsole.Write(str, 'jqconsole-output', false);
+           jqconsole.Write(xstring(str), 'jqconsole-output', false);
            return str;
         }
 
         var startPrompt = function () {
           // Start the prompt with history enabled.
-          jqconsole.Write(lisp.evalString(pv, 1, '(CL:PACKAGE-NAME CL:*PACKAGE*)') + '> ', 'jqconsole-prompt');
+          jqconsole.Write(xstring(lisp.evalString(pv, 1, make_lisp_string('(CL:PACKAGE-NAME CL:*PACKAGE*)'))) + '> ', 'jqconsole-prompt');
           jqconsole.Prompt(true, function (input) {
             // Output input with the class jqconsole-return.
             if (input[0] != ','){
                 try {
-                    var vs = lisp.evalInput(mv, 1, input);
+                    var vs = lisp.evalInput(mv, 1, make_lisp_string(input));
                     for (var i=0; i<vs.length; i++){
-                       jqconsole.Write(lisp.print(pv, 1, vs[i]) + '\n', 'jqconsole-return');
+                       jqconsole.Write(xstring(lisp.print(pv, 1, vs[i])) + '\n', 'jqconsole-return');
                     }
                 } catch(error) {
-                    jqconsole.Write('ERROR: ' + (error.message || error) + '\n', 'jqconsole-error');
+                    var msg = error.message || error || 'Unknown error';
+                    if (typeof(msg) != 'string') msg = xstring(msg);
+                    jqconsole.Write('ERROR: ' + msg + '\n', 'jqconsole-error');
                 }
             } else {
-                jqconsole.Write(lisp.compileString(pv, 1, input.slice(1)) + '\n', 'jqconsole-return');
+                jqconsole.Write(xstring(lisp.compileString(pv, 1, make_lisp_string(input.slice(1)))) + '\n', 'jqconsole-return');
             }
             // Restart the prompt.
             startPrompt();
           }, function(input){
             try {
-                lisp.read(pv, 1, input[0]==','? input.slice(1): input);
+                lisp.read(pv, 1, make_lisp_string(input[0]==','? input.slice(1): input));
             } catch(error) {
                 return 0;
             }

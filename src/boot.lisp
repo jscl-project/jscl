@@ -254,7 +254,7 @@
             (append (cdr list1) list2))))
 
 (defun append (&rest lists)
-  (!reduce #'append-two lists))
+  (!reduce #'append-two lists nil))
 
 (defun revappend (list1 list2)
   (while list1
@@ -282,7 +282,7 @@
     (setq assignments (reverse assignments))
     ;;
     `(let ,(mapcar #'cdr assignments)
-       (setq ,@(!reduce #'append (mapcar #'butlast assignments))))))
+       (setq ,@(!reduce #'append (mapcar #'butlast assignments) nil)))))
 
 (defmacro do (varlist endlist &body body)
   `(block nil
@@ -374,7 +374,7 @@
 (defun atom (x)
   (not (consp x)))
 
-(defun find (item list &key key (test #'eql))
+(defun find (item list &key (key #'identity) (test #'eql))
   (dolist (x list)
     (when (funcall test (funcall key x) item)
       (return x))))
@@ -417,13 +417,9 @@
        (char "0123456789" weight)))
 
 (defun subseq (seq a &optional b)
-  (cond
-    ((stringp seq)
-     (if b
-         (slice seq a b)
-         (slice seq a)))
-    (t
-     (error "Unsupported argument."))))
+  (if b
+      (slice seq a b)
+      (slice seq a)))
 
 (defmacro do-sequence (iteration &body body)
   (let ((seq (gensym))
@@ -463,11 +459,6 @@
       (incf pos))
     pos))
 
-(defun string (x)
-  (cond ((stringp x) x)
-        ((symbolp x) (symbol-name x))
-        (t (char-to-string x))))
-
 (defun equal (x y)
   (cond
     ((eql x y) t)
@@ -475,18 +466,9 @@
      (and (consp y)
           (equal (car x) (car y))
           (equal (cdr x) (cdr y))))
-    ((arrayp x)
-     (and (arrayp y)
-          (let ((n (length x)))
-            (when (= (length y) n)
-              (dotimes (i n)
-                (unless (equal (aref x i) (aref y i))
-                  (return-from equal nil)))
-              t))))
+    ((stringp x)
+     (and (stringp y) (string= x y)))
     (t nil)))
-
-(defun string= (s1 s2)
-  (equal s1 s2))
 
 (defun fdefinition (x)
   (cond
@@ -533,7 +515,7 @@
                 `(,value)
                 `(setq ,place ,value)
                 place))
-      (let ((place (ls-macroexpand-1 place)))
+      (let ((place (!macroexpand-1 place)))
         (let* ((access-fn (car place))
                (expander (cdr (assoc access-fn *setf-expanders*))))
           (when (null expander)
@@ -554,7 +536,7 @@
     ((null (cdr pairs))
      (error "Odd number of arguments to setf."))
     ((null (cddr pairs))
-     (let ((place (ls-macroexpand-1 (first pairs)))
+     (let ((place (!macroexpand-1 (first pairs)))
            (value (second pairs)))
        (multiple-value-bind (vars vals store-vars writer-form)
            (get-setf-expansion place)
@@ -608,7 +590,7 @@
   (+ (get-unix-time) 2208988800))
 
 (defun concat (&rest strs)
-  (!reduce #'concat-two strs :initial-value ""))
+  (!reduce #'concat-two strs ""))
 
 (defun values-list (list)
   (values-array (list-to-vector list)))
@@ -618,3 +600,4 @@
 
 (defun error (fmt &rest args)
   (%throw (apply #'format nil fmt args)))
+

@@ -433,7 +433,7 @@
                            " && ")
                      ")" *newline*
                      (indent
-                      "throw 'Unknown keyword argument ' + arguments[i].name;" *newline*))
+                      "throw 'Unknown keyword argument ' + xstring(arguments[i].name);" *newline*))
              "}" *newline*)))))
 
 (defun parse-lambda-list (ll)
@@ -537,7 +537,8 @@
     (code "(" result ")")))
 
 
-;;; Literals
+;;; Compilation of literals an object dumping
+
 (defun escape-string (string)
   (let ((output "")
         (index 0)
@@ -553,9 +554,18 @@
       (incf index))
     output))
 
-
 (defvar *literal-table* nil)
 (defvar *literal-counter* 0)
+
+;;; BOOTSTRAP MAGIC: During bootstrap, we record the macro definitions
+;;; as lists. Once everything is compiled, we want to dump the whole
+;;; global environment to the output file to reproduce it in the
+;;; run-time. However, the environment must contain expander functions
+;;; rather than lists. We do not know how to dump function objects
+;;; itself, so we mark the definitions with this object and the
+;;; compiler will be called when this object has to be dumped.
+;;; Backquote/unquote does a similar magic, but this use is exclusive.
+(defvar *magic-unquote-marker* (gensym "MAGIC-UNQUOTE"))
 
 (defun genlit ()
   (code "l" (incf *literal-counter*)))
@@ -564,13 +574,13 @@
   #+common-lisp
   (let ((package (symbol-package symbol)))
     (if (eq package (find-package "KEYWORD"))
-        (code "{name: \"" (escape-string (symbol-name symbol))
-              "\", 'package': '" (package-name package) "'}")
-        (code "{name: \"" (escape-string (symbol-name symbol)) "\"}")))
+        (code "{name: " (dump-string (symbol-name symbol))
+              ", 'package': " (dump-string (package-name package)) "}")
+        (code "{name: " (dump-string (symbol-name symbol)) "}")))
   #+jscl
   (let ((package (symbol-package symbol)))
     (if (null package)
-        (code "{name: \"" (escape-string (symbol-name symbol)) "\"}")
+        (code "{name: " (dump-symbol (symbol-name symbol)) "}")
         (ls-compile `(intern ,(symbol-name symbol) ,(package-name package))))))
 
 (defun dump-cons (cons)
@@ -587,17 +597,23 @@
   (let ((elements (vector-to-list array)))
     (concat "[" (join (mapcar #'literal elements) ", ") "]")))
 
+(defun dump-string (string)
+  (code "make_lisp_string(\"" (escape-string string) "\")"))
+
 (defun literal (sexp &optional recursive)
   (cond
     ((integerp sexp) (integer-to-string sexp))
     ((floatp sexp) (float-to-string sexp))
     ((characterp sexp) (code "\"" (escape-string (string sexp)) "\""))
-    ((stringp sexp) (code "\"" (escape-string sexp) "\""))
     (t
-     (or (cdr (assoc sexp *literal-table*))
+     (or (cdr (assoc sexp *literal-table* :test #'equal))
          (let ((dumped (typecase sexp
                          (symbol (dump-symbol sexp))
-                         (cons (dump-cons sexp))
+                         (string (dump-string sexp))
+                         (cons
+                          (if (eq (car sexp) *magic-unquote-marker*)
+                              (ls-compile (cdr sexp))
+                              (dump-cons sexp)))
                          (array (dump-array sexp)))))
            (if (and recursive (not (symbolp sexp)))
                dumped
@@ -605,6 +621,7 @@
                  (push (cons sexp jsvar) *literal-table*)
                  (toplevel-compilation (code "var " jsvar " = " dumped))
                  jsvar)))))))
+
 
 (define-compilation quote (sexp)
   (literal sexp))
@@ -1382,7 +1399,7 @@
 
 (define-builtin float-to-string (x)
   (type-check (("x" "number" x))
-    "x.toString()"))
+    "make_lisp_string(x.toString())"))
 
 (define-builtin cons (x y)
   (code "({car: " x ", cdr: " y "})"))
@@ -1422,8 +1439,7 @@
      "return (typeof tmp == 'object' && 'name' in tmp);" *newline*)))
 
 (define-builtin make-symbol (name)
-  (type-check (("name" "string" name))
-    "({name: name})"))
+  (code "({name: " name "})"))
 
 (define-builtin symbol-name (x)
   (code "(" x ").name"))
@@ -1441,21 +1457,21 @@
   (js!selfcall
     "var symbol = " x ";" *newline*
     "var value = symbol.value;" *newline*
-    "if (value === undefined) throw \"Variable `\" + symbol.name + \"' is unbound.\";" *newline*
+    "if (value === undefined) throw \"Variable `\" + xstring(symbol.name) + \"' is unbound.\";" *newline*
     "return value;" *newline*))
 
 (define-builtin symbol-function (x)
   (js!selfcall
     "var symbol = " x ";" *newline*
     "var func = symbol.fvalue;" *newline*
-    "if (func === undefined) throw \"Function `\" + symbol.name + \"' is undefined.\";" *newline*
+    "if (func === undefined) throw \"Function `\" + xstring(symbol.name) + \"' is undefined.\";" *newline*
     "return func;" *newline*))
 
 (define-builtin symbol-plist (x)
   (code "((" x ").plist || " (ls-compile nil) ")"))
 
 (define-builtin lambda-code (x)
-  (code "(" x ").toString()"))
+  (code "make_lisp_string((" x ").toString())"))
 
 (define-builtin eq (x y)
   (js!bool (code "(" x " === " y ")")))
@@ -1475,37 +1491,39 @@
      "return (typeof(" x ") == \"string\") && x.length == 1;")))
 
 (define-builtin char-to-string (x)
-  (type-check (("x" "string" x))
-    "(x)"))
+  (js!selfcall
+    "var r = [" x "];" *newline*
+    "r.type = 'character';"
+    "return r"))
 
 (define-builtin stringp (x)
-  (js!bool (code "(typeof(" x ") == \"string\")")))
+  (js!bool
+   (js!selfcall
+     "var x = " x ";" *newline*
+     "return typeof(x) == 'object' && 'length' in x && x.type == 'character';")))
 
 (define-builtin string-upcase (x)
-  (type-check (("x" "string" x))
-    "x.toUpperCase()"))
+  (code "make_lisp_string(xstring(" x ").toUpperCase())"))
 
 (define-builtin string-length (x)
-  (type-check (("x" "string" x))
-    "x.length"))
+  (code x ".length"))
 
-(define-raw-builtin slice (string a &optional b)
+(define-raw-builtin slice (vector a &optional b)
   (js!selfcall
-    "var str = " (ls-compile string) ";" *newline*
+    "var vector = " (ls-compile vector) ";" *newline*
     "var a = " (ls-compile a) ";" *newline*
     "var b;" *newline*
     (when b (code "b = " (ls-compile b) ";" *newline*))
-    "return str.slice(a,b);" *newline*))
+    "return vector.slice(a,b);" *newline*))
 
 (define-builtin char (string index)
-  (type-check (("string" "string" string)
-               ("index" "number" index))
-    "string.charAt(index)"))
+  (code string "[" index "]"))
 
 (define-builtin concat-two (string1 string2)
-  (type-check (("string1" "string" string1)
-               ("string2" "string" string2))
-    "string1.concat(string2)"))
+  (js!selfcall
+    "var r = " string1 ".concat(" string2 ");" *newline*
+    "r.type = 'character';"
+    "return r;" *newline*))
 
 (define-raw-builtin funcall (func &rest args)
   (js!selfcall
@@ -1538,12 +1556,11 @@
           "return (typeof f === 'function'? f : f.fvalue).apply(this, args);" *newline*))))
 
 (define-builtin js-eval (string)
-  (type-check (("string" "string" string))
-    (if *multiple-value-p*
-        (js!selfcall
-          "var v = globalEval(string);" *newline*
-          "return values.apply(this, forcemv(v));" *newline*)
-        "globalEval(string)")))
+  (if *multiple-value-p*
+      (js!selfcall
+        "var v = globalEval(xstring(" string "));" *newline*
+        "return values.apply(this, forcemv(v));" *newline*)
+      (code "globalEval(xstring(" string "))")))
 
 (define-builtin %throw (string)
   (js!selfcall "throw " string ";" *newline*))
@@ -1555,21 +1572,20 @@
 
 (define-builtin oget (object key)
   (js!selfcall
-    "var tmp = " "(" object ")[" key "];" *newline*
+    "var tmp = " "(" object ")[xstring(" key ")];" *newline*
     "return tmp == undefined? " (ls-compile nil) ": tmp ;" *newline*))
 
 (define-builtin oset (object key value)
-  (code "((" object ")[" key "] = " value ")"))
+  (code "((" object ")[xstring(" key ")] = " value ")"))
 
 (define-builtin in (key object)
-  (js!bool (code "((" key ") in (" object "))")))
+  (js!bool (code "(xstring(" key ") in (" object "))")))
 
 (define-builtin functionp (x)
   (js!bool (code "(typeof " x " == 'function')")))
 
 (define-builtin write-string (x)
-  (type-check (("x" "string" x))
-    "lisp.write(x)"))
+  (code "lisp.write(" x ")"))
 
 (define-builtin make-array (n)
   (js!selfcall
@@ -1616,18 +1632,36 @@
 (define-builtin %js-call (fun args)
   (code fun ".apply(this, " args ")"))
 
-(defun macro (x)
-  (and (symbolp x)
-       (let ((b (lookup-in-lexenv x *environment* 'function)))
-         (if (and b (eq (binding-type b) 'macro))
-             b
-             nil))))
-
 #+common-lisp
 (defvar *macroexpander-cache*
   (make-hash-table :test #'eq))
 
-(defun ls-macroexpand-1 (form)
+(defun !macro-function (symbol)
+  (unless (symbolp symbol)
+    (error "`~S' is not a symbol." symbol))
+  (let ((b (lookup-in-lexenv symbol *environment* 'function)))
+    (if (and b (eq (binding-type b) 'macro))
+        (let ((expander (binding-value b)))
+          (cond
+            #+common-lisp
+            ((gethash b *macroexpander-cache*)
+             (setq expander (gethash b *macroexpander-cache*)))
+            ((listp expander)
+             (let ((compiled (eval expander)))
+               ;; The list representation are useful while
+               ;; bootstrapping, as we can dump the definition of the
+               ;; macros easily, but they are slow because we have to
+               ;; evaluate them and compile them now and again. So, let
+               ;; us replace the list representation version of the
+               ;; function with the compiled one.
+               ;;
+               #+jscl (setf (binding-value b) compiled)
+               #+common-lisp (setf (gethash b *macroexpander-cache*) compiled)
+               (setq expander compiled))))
+          expander)
+        nil)))
+
+(defun !macroexpand-1 (form)
   (cond
     ((symbolp form)
      (let ((b (lookup-in-lexenv form *environment* 'variable)))
@@ -1635,26 +1669,9 @@
            (values (binding-value b) t)
            (values form nil))))
     ((consp form)
-     (let ((macro-binding (macro (car form))))
-       (if macro-binding
-           (let ((expander (binding-value macro-binding)))
-             (cond
-               #+common-lisp
-               ((gethash macro-binding *macroexpander-cache*)
-                (setq expander (gethash macro-binding *macroexpander-cache*)))
-               ((listp expander)
-                (let ((compiled (eval expander)))
-                  ;; The list representation are useful while
-                  ;; bootstrapping, as we can dump the definition of the
-                  ;; macros easily, but they are slow because we have to
-                  ;; evaluate them and compile them now and again. So, let
-                  ;; us replace the list representation version of the
-                  ;; function with the compiled one.
-                  ;;
-                  #+jscl (setf (binding-value macro-binding) compiled)
-                  #+common-lisp (setf (gethash macro-binding *macroexpander-cache*) compiled)
-                  (setq expander compiled))))
-             (values (apply expander (cdr form)) t))
+     (let ((macrofun (!macro-function (car form))))
+       (if macrofun
+           (values (apply macrofun (cdr form)) t)
            (values form nil))))
     (t
      (values form nil))))
@@ -1687,7 +1704,7 @@
        (concat ";" *newline*))))
 
 (defun ls-compile (sexp &optional multiple-value-p)
-  (multiple-value-bind (sexp expandedp) (ls-macroexpand-1 sexp)
+  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
     (when expandedp
       (return-from ls-compile (ls-compile sexp multiple-value-p)))
     ;; The expression has been macroexpanded. Now compile it!
@@ -1703,11 +1720,8 @@
               (code (ls-compile `',sexp) ".value"))
              (t
               (ls-compile `(symbol-value ',sexp))))))
-        ((integerp sexp) (integer-to-string sexp))
-        ((floatp sexp) (float-to-string sexp))
-        ((characterp sexp) (code "\"" (escape-string (string sexp)) "\""))
-        ((stringp sexp) (code "\"" (escape-string sexp) "\""))
-        ((arrayp sexp) (literal sexp))
+        ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp))
+         (literal sexp))
         ((listp sexp)
          (let ((name (car sexp))
                (args (cdr sexp)))
@@ -1745,10 +1759,7 @@
       (t
        (when *compile-print-toplevels*
          (let ((form-string (prin1-to-string sexp)))
-           (write-string "Compiling ")
-           (write-string (truncate-string form-string))
-           (write-line "...")))
-
+           (format t "Compiling ~a..." (truncate-string form-string))))
        (let ((code (ls-compile sexp multiple-value-p)))
          (code (join-trailing (get-toplevel-compilations)
                               (code ";" *newline*))
