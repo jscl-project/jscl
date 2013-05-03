@@ -1,23 +1,12 @@
-(write-line "")
-(write-string "Finished. The execution took ")
-(write-string (prin1-to-string (/ (- (get-internal-real-time) *timestamp*) internal-time-units-per-second 1.0)))
-(write-line " seconds.")
+(format t "~%Finished. The execution took ~a seconds.~%"
+        (/ (- (get-internal-real-time) *timestamp*) internal-time-units-per-second 1.0))
 
-(cond
-  ((= *passed-tests* *total-tests*)
-   (write-line "All the tests (")
-   (write-string (prin1-to-string *total-tests*))
-   (write-line ") passed successfully."))
-  (t
-   (write-string (prin1-to-string *passed-tests*))
-   (write-string "/")
-   (write-string (prin1-to-string *total-tests*))
-   (write-line " test(s) passed successfully.")))
+(if (= *passed-tests* *total-tests*)
+    (format t "All the tests (~a) passed successfully.~%" *total-tests*)
+    (format t "~a/~a test(s) passed successfully.~%" *passed-tests* *total-tests*))
 
 (unless (zerop *expected-failures*)
-  (write-string (prin1-to-string *expected-failures*))
-  (write-line " test(s) failed expectedly."))
+  (format t "~a test(s) failed expectedly.~%" *expected-failures*))
 
 (unless (zerop *unexpected-passes*)
-  (write-string (prin1-to-string *unexpected-passes*))
-  (write-line " test(s) passed unexpectedly."))
+  (format t "~a test(s) passed unexpectedly.~%" *unexpected-passes*))
