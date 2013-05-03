@@ -31,6 +31,13 @@
   (test (= (ninth   nums) 9))
   (test (= (tenth   nums) 10)))
 
+; TAILP
+(let* ((a (list 1 2 3))
+       (b (cdr a)))
+  (test (tailp b a))
+  (test (tailp a a)))
+(test (tailp 'a (cons 'b 'a)))
+
 ; SUBST
 ; Can't really test this until EQUAL works properly on lists
 

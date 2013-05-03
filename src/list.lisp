@@ -116,6 +116,12 @@
          (tree-equal (car tree1) (car tree2) :test test)
          (tree-equal (cdr tree1) (cdr tree2) :test test))))
 
+(defun tailp (object list)
+  (do ((tail list (cdr tail)))
+    ((atom tail) (eq object tail))
+    (when (eql tail object)
+      (return-from tailp t))))
+
 (defun subst (new old tree &key (key #'identity) (test #'eql))
   (cond 
     ((funcall test (funcall key tree) (funcall key old))
