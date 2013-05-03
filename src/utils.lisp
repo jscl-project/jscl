@@ -29,20 +29,18 @@
       x
       (list x)))
 
-(defun !reduce (func list &key initial-value)
-  (if (null list)
-      initial-value
-      (!reduce func
-               (cdr list)
-               :initial-value (funcall func initial-value (car list)))))
+(defun !reduce (func list initial-value)
+  (let ((result initial-value))
+    (dolist (element list result)
+      (setq result (funcall func result element)))))
 
 ;;; Concatenate a list of strings, with a separator
 (defun join (list &optional (separator ""))
   (if (null list)
       ""
-      (!reduce (lambda (s o) (concat s separator o))  
-               (cdr list) 
-               :initial-value (car list)))) 
+      (!reduce (lambda (s o) (concat s separator o))
+               (cdr list)
+               (car list))))
 
 (defun join-trailing (list &optional (separator ""))
   (if (null list)

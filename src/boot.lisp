@@ -254,7 +254,7 @@
             (append (cdr list1) list2))))
 
 (defun append (&rest lists)
-  (!reduce #'append-two lists))
+  (!reduce #'append-two lists nil))
 
 (defun revappend (list1 list2)
   (while list1
@@ -282,7 +282,7 @@
     (setq assignments (reverse assignments))
     ;;
     `(let ,(mapcar #'cdr assignments)
-       (setq ,@(!reduce #'append (mapcar #'butlast assignments))))))
+       (setq ,@(!reduce #'append (mapcar #'butlast assignments) nil)))))
 
 (defmacro do (varlist endlist &body body)
   `(block nil
@@ -590,7 +590,7 @@
   (+ (get-unix-time) 2208988800))
 
 (defun concat (&rest strs)
-  (!reduce #'concat-two strs :initial-value ""))
+  (!reduce #'concat-two strs ""))
 
 (defun values-list (list)
   (values-array (list-to-vector list)))
