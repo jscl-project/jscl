@@ -1639,7 +1639,7 @@
                ;; us replace the list representation version of the
                ;; function with the compiled one.
                ;;
-               #+jscl (setf (binding-value macro-binding) compiled)
+               #+jscl (setf (binding-value b) compiled)
                #+common-lisp (setf (gethash b *macroexpander-cache*) compiled)
                (setq expander compiled))))
           expander)
