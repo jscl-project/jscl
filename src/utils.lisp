@@ -37,9 +37,11 @@
 
 ;;; Concatenate a list of strings, with a separator
 (defun join (list &optional (separator ""))
-  (!reduce (lambda (s o) (concat s separator o))  
-           (cdr list) 
-           :initial-value (car list))) 
+  (if (null list)
+      ""
+      (!reduce (lambda (s o) (concat s separator o))  
+               (cdr list) 
+               :initial-value (car list)))) 
 
 (defun join-trailing (list &optional (separator ""))
   (if (null list)
