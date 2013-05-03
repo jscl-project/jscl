@@ -68,6 +68,22 @@
          when (plusp (length compilation))
          do (write-string compilation out)))))
 
+(defun dump-global-environment (stream)
+  (flet ((late-compile (form)
+           (write-string (ls-compile-toplevel form) stream)))
+    ;; Set the initial global environment to be equal to the host global
+    ;; environment at this point of the compilation.
+    (late-compile `(setq *environment* ',*environment*))
+    ;; Set some counter variable properly, so user compiled code will
+    ;; not collide with the compiler itself.
+    (late-compile
+     `(progn
+        ,@(mapcar (lambda (s) `(%intern-symbol (%js-vref ,(cdr s)))) *literal-table*)
+        (setq *literal-table* ',*literal-table*)
+        (setq *variable-counter* ,*variable-counter*)
+        (setq *gensym-counter* ,*gensym-counter*)))
+    (late-compile `(setq *literal-counter* ,*literal-counter*))))
+
 (defun bootstrap ()
   (setq *environment* (make-lexenv))
   (setq *literal-table* nil)
@@ -78,7 +94,8 @@
     (write-string (read-whole-file (source-pathname "prelude.js")) out)
     (dolist (input *source*)
       (when (member (cadr input) '(:target :both))
-        (ls-compile-file (source-pathname (car input) :type "lisp") out))))
+        (ls-compile-file (source-pathname (car input) :type "lisp") out)))
+    (dump-global-environment out))
   ;; Tests
   (with-open-file (out "tests.js" :direction :output :if-exists :supersede)
     (dolist (input (append (directory "tests.lisp")
