@@ -1,3 +1,5 @@
-(print "testing")
-(print (eval '(+ 1 3)))
+(print "<<<")
+(print (find 'a '((b) (c) (a)) :key #'car))
+(print ">>>")
+
 (test (= (eval '(+ 1 2)) 3))

@@ -374,7 +374,7 @@
 (defun atom (x)
   (not (consp x)))
 
-(defun find (item list &key key (test #'eql))
+(defun find (item list &key (key #'identity) (test #'eql))
   (dolist (x list)
     (when (funcall test (funcall key x) item)
       (return x))))

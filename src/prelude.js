@@ -59,3 +59,4 @@ function make_lisp_string (string){
     return array;
 }
 
+function xstring(x){ return x.join(''); }

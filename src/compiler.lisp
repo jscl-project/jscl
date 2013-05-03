@@ -1489,7 +1489,7 @@
      "return typeof(x) == 'object' && 'length' in x && x.type == 'character';")))
 
 (define-builtin string-upcase (x)
-  (code "make_lisp_string(" x ".join('').toUppercase())"))
+  (code "make_lisp_string(xstring(" x ").toUpperCase())"))
 
 (define-builtin string-length (x)
   (code x ".length"))
@@ -1544,9 +1544,9 @@
 (define-builtin js-eval (string)
   (if *multiple-value-p*
       (js!selfcall
-        "var v = globalEval(" string ".join(''));" *newline*
+        "var v = globalEval(xstring(" string "));" *newline*
         "return values.apply(this, forcemv(v));" *newline*)
-      (code "globalEval(" string ".join(''))")))
+      (code "globalEval(xstring(" string ")")))
 
 (define-builtin %throw (string)
   (js!selfcall "throw " string ";" *newline*))
@@ -1558,20 +1558,20 @@
 
 (define-builtin oget (object key)
   (js!selfcall
-    "var tmp = " "(" object ")[" key "];" *newline*
+    "var tmp = " "(" object ")[xstring(" key ")];" *newline*
     "return tmp == undefined? " (ls-compile nil) ": tmp ;" *newline*))
 
 (define-builtin oset (object key value)
-  (code "((" object ")[" key "] = " value ")"))
+  (code "((" object ")[xstring(" key ")] = " value ")"))
 
 (define-builtin in (key object)
-  (js!bool (code "((" key ") in (" object "))")))
+  (js!bool (code "(xstring(" key ") in (" object ")")))
 
 (define-builtin functionp (x)
   (js!bool (code "(typeof " x " == 'function')")))
 
 (define-builtin write-string (x)
-  (code "lisp.write(" x ".join(''))"))
+  (code "lisp.write(xstring(" x "))"))
 
 (define-builtin make-array (n)
   (js!selfcall
