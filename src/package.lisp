@@ -62,9 +62,6 @@
 (defvar *common-lisp-package*
   (make-package "CL"))
 
-(defvar *js-package*
-  (make-package "JS"))
-
 (defvar *user-package*
   (make-package "CL-USER" :use (list *common-lisp-package*)))
 
@@ -108,6 +105,11 @@
            (when (in name exports)
              (return (values (oget exports name) :inherit)))))))))
 
+
+;;; It is a function to call when a symbol is interned. The function
+;;; is invoked with the already interned symbol as argument.
+(defvar *intern-hook* nil)
+
 (defun intern (name &optional (package *package*))
   (let ((package (find-package-or-fail package)))
     (multiple-value-bind (symbol foundp)
@@ -121,22 +123,8 @@
               (when (eq package *keyword-package*)
                 (oset symbol "value" symbol)
                 (export (list symbol) package))
-              (when (eq package *js-package*)
-                (let ((sym-name (symbol-name symbol))
-                      (args (gensym)))
-                  ;; Generate a trampoline to call the JS function
-                  ;; properly. This trampoline is very inefficient,
-                  ;; but it still works. Ideas to optimize this are
-                  ;; provide a special lambda keyword
-                  ;; cl::&rest-vector to avoid list argument
-                  ;; consing, as well as allow inline declarations.
-                  (fset symbol
-                        (eval `(lambda (&rest ,args)
-                                 (let ((,args (list-to-vector ,args)))
-                                   (%js-call (%js-vref ,sym-name) ,args)))))
-                  ;; Define it as a symbol macro to access to the
-                  ;; Javascript variable literally.
-                  (%define-symbol-macro symbol `(%js-vref ,(string symbol)))))
+              (when *intern-hook*
+                (funcall *intern-hook* symbol))
               (oset symbols name symbol)
               (values symbol nil)))))))
 
