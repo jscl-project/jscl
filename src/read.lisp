@@ -304,8 +304,7 @@
       ;; Optional exponent part
       (when (< index size)
         ;; Exponent-marker
-        (unless (member (string-upcase (string (char string index)))
-                        '("E" "S" "F" "D" "L"))
+        (unless (find (char-upcase (char string index)) "ESFDL")
           (return))
         (incf index)
         (unless (< index size) (return))
