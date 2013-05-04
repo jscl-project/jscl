@@ -170,9 +170,9 @@
   (and (consp (cdr x))
        (cons (car x) (butlast (cdr x)))))
 
-(defun member (x list)
+(defun member (x list &key (key #'identity) (test #'eql))
   (while list
-    (when (eql x (car list))
+    (when (funcall test x (funcall key (car list)))
       (return list))
     (setq list (cdr list))))
 

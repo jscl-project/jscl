@@ -63,6 +63,12 @@
   (test (not   (assoc  2 alist)))
   (test (not   (rassoc 1 alist))))
 
+; MEMBER
+(test (equal (member 2 '(1 2 3)) '(2 3)))
+(test (not   (member 4 '(1 2 3))))
+(test (equal (member 4 '((1 . 2) (3 . 4)) :key #'cdr) '((3 . 4))))
+(test (member '(2) '((1) (2) (3)) :test #'equal))
+
 ; SUBST
 ; Can't really test this until EQUAL works properly on lists
 
