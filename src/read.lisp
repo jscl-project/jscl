@@ -99,30 +99,34 @@
   (skip-whitespaces-and-comments stream)
   (let ((ch (%peek-char stream)))
     (cond
-      ((null ch)
-       (error "Unspected EOF"))
-      ((char= ch #\))
-       (discard-char stream #\))
-       nil)
-      (t
-       (let* ((eof (gensym))
-              (next (ls-read stream nil eof)))
-         (skip-whitespaces-and-comments stream)
-         (cond
-           ((eq next eof)
-            (discard-char stream #\)))
-           (t
-            (cons next
-                  (if (char= (%peek-char stream) #\.)
-                      (progn
-                        (discard-char stream #\.)
-                        (if (terminalp (%peek-char stream))
-                            (prog1 (ls-read stream) ; Dotted pair notation
-                              (discard-char stream #\)))
-                            (let ((token (concat "." (read-escaped-until stream #'terminalp))))
-                              (cons (interpret-token token)
-                                    (%read-list stream)))))
-                      (%read-list stream))))))))))
+     ((null ch)
+      (error "Unspected EOF"))
+     ((char= ch #\))
+      (discard-char stream #\))
+      nil)
+     (t
+      (let* ((eof (gensym))
+             (next (ls-read stream nil eof)))
+        (skip-whitespaces-and-comments stream)
+        (cond
+         ((eq next eof)
+          (discard-char stream #\)))
+         (t
+          (cons next
+                (if (char= (%peek-char stream) #\.)
+                    (progn
+                      (discard-char stream #\.)
+                      (if (terminalp (%peek-char stream))
+                          (prog1 (ls-read stream) ; Dotted pair notation
+                            (skip-whitespaces-and-comments stream)
+                            (let ((ch (%peek-char stream)))
+                              (if (or (null ch) (char= #\) ch))
+                                  (discard-char stream #\))
+                                  (error "Multiple objects following . in a list"))))
+                          (let ((token (concat "." (read-escaped-until stream #'terminalp))))
+                            (cons (interpret-token token)
+                                  (%read-list stream)))))
+                    (%read-list stream))))))))))
 
 (defun read-string (stream)
   (let ((string "")
@@ -170,13 +174,6 @@
     (dotimes (i (length x))
       (unless (char= (char x i) #\\)
         (setq result (concat result (string (char x i))))))
-    result))
-
-(defun escape-all (x)
-  (let ((result ""))
-    (dotimes (i (length x))
-      (setq result (concat result "\\"))
-      (setq result (concat result (string (char x i)))))
     result))
 
 (defun string-upcase-noescaped (s)
