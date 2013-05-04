@@ -49,6 +49,13 @@
 (test (equal '((1 . 2) (a . b))
              (pairlis '(1) '(2) '((a . b)))))
 
+; COPY-ALIST
+(let* ((alist '((1 . 2) (3 . 4)))
+       (copy (copy-alist alist)))
+  (test (not (eql alist copy)))
+  (test (not (eql (car alist) (car copy))))
+  (test (equal alist copy)))
+
 ; SUBST
 ; Can't really test this until EQUAL works properly on lists
 

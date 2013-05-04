@@ -55,9 +55,9 @@
           cdaadr cdadar cdaddr cddaar cddadr cdddar cddddr caar cadddr caddr
           cadr car car case catch cdar cdddr cddr cdr cdr char
           char-code char= code-char cond cons consp constantly
-          copy-list copy-tree decf declaim declare defconstant define-setf-expander
-          define-symbol-macro defmacro defparameter defun defvar
-          digit-char digit-char-p disassemble do do* documentation
+          copy-alist copy-list copy-tree decf declaim declare defconstant
+          define-setf-expander define-symbol-macro defmacro defparameter defun
+          defvar digit-char digit-char-p disassemble do do* documentation
           dolist dotimes ecase eighth eq eql equal error eval every export expt
           fdefinition fifth find-package find-symbol first flet format fourth
           fset funcall function functionp gensym get-internal-real-time

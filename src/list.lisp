@@ -194,6 +194,13 @@
     (setq data (cdr data)))
   alist)
 
+(defun copy-alist (alist)
+  (let ((new-alist ()))
+    (while alist
+      (push (cons (caar alist) (cdar alist)) new-alist)
+      (setq alist (cdr alist)))
+    (reverse new-alist)))
+
 
 (define-setf-expander car (x)
   (let ((cons (gensym))
