@@ -265,6 +265,11 @@
     (rplacd 2nd 3rd)))
 
 
+(defun adjoin (item list &key (test #'eql) (key #'identity))
+  (if (member item list :key key :test test)
+    list
+    (cons item list)))
+
 (defun intersection (list1 list2 &key (test #'eql) (key #'identity))
   (let ((new-list ()))
     (dolist (x list1)
