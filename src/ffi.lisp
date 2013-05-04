@@ -16,6 +16,9 @@
 (defvar *js-package*
   (make-package "JS"))
 
+(defun lisp-to-js (x) (%lisp-to-js x))
+(defun js-to-list (x) (%js-to-lisp x))
+
 (defun ffi-intern-hook (symbol)
   (when (eq (symbol-package symbol) *js-package*)
     (let ((sym-name (symbol-name symbol))
@@ -28,8 +31,8 @@
       ;; consing, as well as allow inline declarations.
       (fset symbol
             (eval `(lambda (&rest ,args)
-                     (let ((,args (list-to-vector ,args)))
-                       (%js-call (%js-vref ,sym-name) ,args)))))
+                     (let ((,args (list-to-vector (mapcar #'lisp-to-js ,args))))
+                       (js-to-list (%js-call (%js-vref ,sym-name) ,args))))))
       ;; Define it as a symbol macro to access to the
       ;; Javascript variable literally.
       (%define-symbol-macro symbol `(%js-vref ,(string symbol))))))

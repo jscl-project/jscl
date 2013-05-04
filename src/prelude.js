@@ -61,3 +61,26 @@ function make_lisp_string (string){
 
 function xstring(x){ return x.join(''); }
 
+
+function lisp_to_js (x) {
+    if (typeof x == 'object' && 'length' in x && x.type == 'character')
+        return xstring(x);
+    else if (typeof x == 'function'){
+        // Trampoline calling the Lisp function
+        return (function(){
+            return x.apply(this, [pv, arguments.length] + Array.prototype.slice.call(arguments));
+        })
+    }
+    else return x;
+}
+
+function js_to_lisp (x) {
+    if (typeof x == 'string')
+        return make_lisp_string(x);
+    else if (typeof x == 'function'){
+        // Trampoline calling the JS function
+        return (function(values, nargs){
+            return x.apply(this, Array.prototype.slice.call(arguments, 2));
+        })
+    } else return x;
+}

@@ -1505,6 +1505,9 @@
 (define-builtin string-upcase (x)
   (code "make_lisp_string(xstring(" x ").toUpperCase())"))
 
+(define-builtin %lisp-to-js (x) (code "lisp_to_js(" x ")"))
+(define-builtin %js-to-lisp (x) (code "js_to_lisp(" x ")"))
+
 (define-builtin string-length (x)
   (code x ".length"))
 
