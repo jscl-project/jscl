@@ -98,24 +98,27 @@
   (cond
     ((null form) "NIL")
     ((symbolp form)
-     (multiple-value-bind (found-symbol status)
-         (find-symbol (symbol-name form))
-       (if (eq found-symbol form)
-           (escape-token (symbol-name form) *package*)
-           (let ((package (symbol-package form))
-                 (name (symbol-name form)))
-             (concat (cond
-                       ((null package) "#")
-                       ((eq package (find-package "KEYWORD")) "")
-                       (t (package-name package)))
-                     ":"
-                     (if (and package
-                              (eq (second (multiple-value-list
-                                              (find-symbol name package)))
-                                  :internal))
-                         ":"
-                         "")
-                     (escape-token name package))))))
+     ;; Check if the symbol is accesible from the current package. It
+     ;; is true even if the symbol's home package is not the current
+     ;; package, because it could be inherited.
+     (if (eq form (find-symbol (symbol-name form)))
+         (escape-token (symbol-name form) *package*)
+         ;; Symbol is not accesible from *PACKAGE*, so let us prefix
+         ;; the symbol with the optional package or uninterned mark.
+         (let ((package (symbol-package form))
+               (name (symbol-name form)))
+           (concat (cond
+                     ((null package) "#")
+                     ((eq package (find-package "KEYWORD")) "")
+                     (t (package-name package)))
+                   ":"
+                   (if (and package
+                            (eq (second (multiple-value-list
+                                         (find-symbol name package)))
+                                :internal))
+                       ":"
+                       "")
+                   (escape-token name package)))))
     ((integerp form) (integer-to-string form))
     ((floatp form) (float-to-string form))
     ((characterp form)
