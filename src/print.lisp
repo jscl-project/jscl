@@ -80,15 +80,13 @@
 #+nil
 (mapcar #'potential-number-p '("/" "/5" "+" "1+" "1-" "foo+" "ab.cd" "_" "^" "^/-"))
 
-
 (defun escape-token-p (string &optional uppercase)
   (or (potential-number-p string)
       (escape-symbol-name-p string uppercase)))
 
-;;; Returns the token in a form that can be used for
-;;; reading it back as a symbol in the specified package.
-(defun escape-token (s package)
-  (if (escape-token-p s (not (eq package (find-package "JS"))))
+;;; Returns the token in a form that can be used for reading it back.
+(defun escape-token (s &optional uppercase)
+  (if (escape-token-p s uppercase)
       (let ((result "|"))
         (dotimes (i (length s))
           (let ((ch (char s i)))
@@ -105,19 +103,19 @@
   (cond
     ((null form) "NIL")
     ((symbolp form)
-     ;; Check if the symbol is accesible from the current package. It
-     ;; is true even if the symbol's home package is not the current
-     ;; package, because it could be inherited.
-     (if (eq form (find-symbol (symbol-name form)))
-         (escape-token (symbol-name form) *package*)
-         ;; Symbol is not accesible from *PACKAGE*, so let us prefix
-         ;; the symbol with the optional package or uninterned mark.
-         (let ((package (symbol-package form))
-               (name (symbol-name form)))
+     (let ((name (symbol-name form))
+           (package (symbol-package form)))
+       ;; Check if the symbol is accesible from the current package. It
+       ;; is true even if the symbol's home package is not the current
+       ;; package, because it could be inherited.
+       (if (eq form (find-symbol (symbol-name form)))
+           (escape-token (symbol-name form) (not (eq package *js-package*)))
+           ;; Symbol is not accesible from *PACKAGE*, so let us prefix
+           ;; the symbol with the optional package or uninterned mark.
            (concat (cond
                      ((null package) "#")
                      ((eq package (find-package "KEYWORD")) "")
-                     (t (package-name package)))
+                     (t (escape-token (package-name package) t)))
                    ":"
                    (if (and package
                             (eq (second (multiple-value-list
@@ -125,7 +123,7 @@
                                 :internal))
                        ":"
                        "")
-                   (escape-token name package)))))
+                   (escape-token name (not (eq package *js-package*)))))))
     ((integerp form) (integer-to-string form))
     ((floatp form) (float-to-string form))
     ((characterp form)
