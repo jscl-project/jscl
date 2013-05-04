@@ -148,7 +148,7 @@
      (list 'function (ls-read stream)))
     (#\( (list-to-vector (%read-list stream)))
     (#\: (make-symbol
-          (unescape
+          (unescape-token
            (string-upcase-noescaped
             (read-escaped-until stream #'terminalp)))))
     (#\\
@@ -172,7 +172,7 @@
          (:jscl
           (ls-read stream eof-error-p eof-value)))))))
 
-(defun unescape (x)
+(defun unescape-token (x)
   (let ((result ""))
     (dotimes (i (length x))
       (unless (char= (char x i) #\\)
@@ -224,7 +224,7 @@
        (setq name (subseq string index))))
     ;; Canonalize symbol name and package
     (setq name (if (equal package "JS")
-                   (setq name (unescape name))
+                   (setq name (unescape-token name))
                    (setq name (string-upcase-noescaped name))))
     (setq package (find-package package))
     (if (or internalp

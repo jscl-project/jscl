@@ -18,7 +18,9 @@
 
 ;;; Printer
 
-(defun special-symbol-name (s &key uppercase)
+;;; Return T if the string S contains characters which need to be
+;;; escaped to print the symbol name, NIL otherwise.
+(defun escape-symbol-name-p (s &optional uppercase)
   (let ((dots-only t))
     (dotimes (i (length s))
       (let ((ch (char s i)))
@@ -28,10 +30,10 @@
                   (and uppercase (not (char= ch (char (string-upcase (string ch)) 0))))
                   (char= ch #\\)
                   (char= ch #\|))
-          (return-from special-symbol-name t))))
+          (return-from escape-symbol-name-p t))))
     dots-only))
 
-(defun potential-number (s)
+(defun potential-number-p (s)
   (let ((i 0)
         (n (length s))
         (ch nil))
@@ -39,16 +41,16 @@
                  (setf ch (and (< i n) (char s (1- (incf i)))))))
       (next)
       (cond
-       ((null ch) (return-from potential-number))
+       ((null ch) (return-from potential-number-p))
        ((digit-char-p ch))
        ((char= ch #\.))
        ((char= ch #\+) (next))
        ((char= ch #\-) (next))
-       (t (return-from potential-number)))
+       (t (return-from potential-number-p)))
       (when ch
         (while (and ch (digit-char-p ch)) (next))
         (when (null ch)
-          (return-from potential-number t)))
+          (return-from potential-number-p t)))
       (when (char= ch #\.)
         (next)
         (when ch
@@ -59,19 +61,22 @@
                 (char= ch #\L) (char= ch #\l))
         (next)
         (cond
-         ((null ch) (return-from potential-number))
+         ((null ch) (return-from potential-number-p))
          ((digit-char-p ch))
          ((char= ch #\+) (next))
          ((char= ch #\-) (next))
-         (t (return-from potential-number)))
+         (t (return-from potential-number-p)))
         (unless (and ch (digit-char-p ch))
-          (return-from potential-number))
+          (return-from potential-number-p))
         (while (and ch (digit-char-p ch)) (next)))
       (null ch))))
 
-(defun special-escape (s package)
-  (if (or (potential-number s)
-          (special-symbol-name s :uppercase (not (eq package (find-package "JS")))))
+(defun escape-token-p (string &optional uppercase)
+  (or (potential-number-p string)
+      (escape-symbol-name-p string uppercase)))
+
+(defun escape-token (s &optional uppercase)
+  (if (escape-token-p s uppercase)
       (let ((result "|"))
         (dotimes (i (length s))
           (let ((ch (char s i)))
@@ -82,61 +87,59 @@
         (concat result "|"))
       s))
 
+
 (defvar *print-escape* t)
 
 (defun write-to-string (form)
   (cond
-   ((null form) "NIL")
-   ((symbolp form)
-    (multiple-value-bind (found-symbol status)
-        (find-symbol (symbol-name form))
-      (if (eq found-symbol form)
-          (special-escape (symbol-name form) *package*)
-          (let ((package (symbol-package form))
-                (name (symbol-name form)))
-            (concat (cond
-                     ((null package) "#")
-                     ((eq package (find-package "KEYWORD")) "")
-                     (t (package-name package)))
-                    ":"
-                    (if (eq (cadr (multiple-value-list
-                                   (find-symbol name)))
-                            :internal)
-                        ":"
-                        "")
-                    (special-escape name package))))))
-   ((integerp form) (integer-to-string form))
-   ((floatp form) (float-to-string form))
-   ((characterp form)
-    (concat "#\\"
-            (case form
-              (#\newline "newline")
-              (#\space "space")
-              (otherwise (string form)))))
-   ((stringp form) (if *print-escape*
-                       (concat "\"" (escape-string form) "\"")
-                       form))
-   ((functionp form)
-    (let ((name (oget form "fname")))
-      (if name
-          (concat "#<FUNCTION " name ">")
-          (concat "#<FUNCTION>"))))
-   ((listp form)
-    (concat "("
-            (join-trailing (mapcar #'write-to-string (butlast form)) " ")
-            (let ((last (last form)))
-              (if (null (cdr last))
-                  (write-to-string (car last))
-                  (concat (write-to-string (car last)) " . " (write-to-string (cdr last)))))
-            ")"))
-   ((arrayp form)
-    (concat "#" (if (zerop (length form))
-                    "()"
-                    (write-to-string (vector-to-list form)))))
-   ((packagep form)
-    (concat "#<PACKAGE " (package-name form) ">"))
-   (t
-    (concat "#<javascript object>"))))
+    ((null form) "NIL")
+    ((symbolp form)
+     (multiple-value-bind (found-symbol status)
+         (find-symbol (symbol-name form))
+       (if (eq found-symbol form)
+           (escape-token (symbol-name form) (not (eq *package* *js-package*)))
+           (let ((package (symbol-package form))
+                 (name (symbol-name form)))
+             (concat (cond
+                       ((null package) "#")
+                       ((eq package (find-package "KEYWORD")) "")
+                       (t (escape-token (package-name package))))
+                     ":"
+                     (if (or (null package) (eq :external (second (multiple-value-list (find-symbol name package)))))
+                         "" ":")
+                     (escape-token name package))))))
+    ((integerp form) (integer-to-string form))
+    ((floatp form) (float-to-string form))
+    ((characterp form)
+     (concat "#\\"
+             (case form
+               (#\newline "newline")
+               (#\space "space")
+               (otherwise (string form)))))
+    ((stringp form) (if *print-escape*
+                        (concat "\"" (escape-string form) "\"")
+                        form))
+    ((functionp form)
+     (let ((name (oget form "fname")))
+       (if name
+           (concat "#<FUNCTION " name ">")
+           (concat "#<FUNCTION>"))))
+    ((listp form)
+     (concat "("
+             (join-trailing (mapcar #'write-to-string (butlast form)) " ")
+             (let ((last (last form)))
+               (if (null (cdr last))
+                   (write-to-string (car last))
+                   (concat (write-to-string (car last)) " . " (write-to-string (cdr last)))))
+             ")"))
+    ((arrayp form)
+     (concat "#" (if (zerop (length form))
+                     "()"
+                     (write-to-string (vector-to-list form)))))
+    ((packagep form)
+     (concat "#<PACKAGE " (package-name form) ">"))
+    (t
+     (concat "#<javascript object>"))))
 
 (defun prin1-to-string (form)
   (let ((*print-escape* t))
