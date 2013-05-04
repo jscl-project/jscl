@@ -26,9 +26,7 @@
       ;; provide a special lambda keyword
       ;; cl::&rest-vector to avoid list argument
       ;; consing, as well as allow inline declarations.
-      (fset symbol
-            (eval `(lambda (&rest ,args)
-                     (apply (%js-vref ,sym-name) ,args))))
+      (fset symbol (eval `(%js-vref ,sym-name)))
       ;; Define it as a symbol macro to access to the
       ;; Javascript variable literally.
       (%define-symbol-macro symbol `(%js-vref ,(string symbol))))))
