@@ -62,9 +62,9 @@
           fdefinition fifth find-package find-symbol first flet format fourth
           fset funcall function functionp gensym get-internal-real-time
           get-setf-expansion get-universal-time go identity if in-package
-          incf integerp intern keywordp labels lambda last length let let* list
-          list* list-all-packages listp loop make-array make-package
-          make-symbol mapcar member minusp mod multiple-value-bind
+          incf integerp intern intersection keywordp labels lambda last length
+          let let* list list* list-all-packages listp loop make-array
+          make-package make-symbol mapcar member minusp mod multiple-value-bind
           multiple-value-call multiple-value-list multiple-value-prog1
           nconc nil ninth not nreconc nth nthcdr null numberp or otherwise
           package-name package-use-list packagep pairlis parse-integer plusp

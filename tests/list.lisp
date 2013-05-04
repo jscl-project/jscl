@@ -69,6 +69,11 @@
 (test (equal (member 4 '((1 . 2) (3 . 4)) :key #'cdr) '((3 . 4))))
 (test (member '(2) '((1) (2) (3)) :test #'equal))
 
+; INTERSECTION
+(test (equal (intersection '(1 2) '(2 3)) '(2)))
+(test (not (intersection '(1 2 3) '(4 5 6))))
+(test (equal (intersection '((1) (2)) '((2) (3)) :test #'equal) '((2))))
+
 ; SUBST
 ; Can't really test this until EQUAL works properly on lists
 

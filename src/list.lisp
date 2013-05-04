@@ -263,3 +263,11 @@
        (3rd y 2nd))               ;3rd follows 2nd down the list.
       ((atom 2nd) 3rd)
     (rplacd 2nd 3rd)))
+
+
+(defun intersection (list1 list2 &key (test #'eql) (key #'identity))
+  (let ((new-list ()))
+    (dolist (x list1)
+      (when (member x list2 :test test :key key)
+        (push x new-list)))
+    new-list))
