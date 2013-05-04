@@ -36,43 +36,50 @@
 ;;; Return T if the specified string can be read as a number
 ;;; In case such a string is the name of a symbol then escaping
 ;;; is required when printing to ensure correct reading.
-(defun potential-number-p (s)
-  (let ((i 0)
-        (n (length s))
-        (ch nil))
-    (flet ((next ()
-                 (setf ch (and (< i n) (char s (1- (incf i)))))))
-      (next)
+(defun potential-number-p (string)
+  ;; The four rules for being a potential number are described in
+  ;; 2.3.1.1 Potential Numbers as Token
+  ;;
+  ;; First Rule
+  (dotimes (i (length string))
+    (let ((char (char string i)))
       (cond
-       ((null ch) (return-from potential-number-p))
-       ((digit-char-p ch))
-       ((char= ch #\.))
-       ((char= ch #\+) (next))
-       ((char= ch #\-) (next))
-       (t (return-from potential-number-p)))
-      (when ch
-        (while (and ch (digit-char-p ch)) (next))
-        (when (null ch)
-          (return-from potential-number-p t)))
-      (when (char= ch #\.)
-        (next)
-        (when ch
-          (while (and ch (digit-char-p ch)) (next))))
-      (when (or (char= ch #\E) (char= ch #\e)
-                (char= ch #\D) (char= ch #\d)
-                (char= ch #\F) (char= ch #\f)
-                (char= ch #\L) (char= ch #\l))
-        (next)
-        (cond
-         ((null ch) (return-from potential-number-p))
-         ((digit-char-p ch))
-         ((char= ch #\+) (next))
-         ((char= ch #\-) (next))
-         (t (return-from potential-number-p)))
-        (unless (and ch (digit-char-p ch))
-          (return-from potential-number-p))
-        (while (and ch (digit-char-p ch)) (next)))
-      (null ch))))
+        ;; Digits TODO: DIGIT-CHAR-P should work with the current
+        ;; radix here. If the radix is not decimal, then we have to
+        ;; make sure there is not a decimal-point in the string.
+        ((digit-char-p char))
+        ;; Signs, ratios, decimal point and extension mark
+        ((find char "+-/._^"))
+        ;; Number marker
+        ((alpha-char-p char)
+         (when (and (< i (1- (length string)))
+                    (alpha-char-p (char string (1+ i))))
+           ;; fail: adjacent letters are not number marker, or
+           ;; there is a decimal point in the string.
+           (return-from potential-number-p)))
+        (t
+         ;; fail: there is a non-allowed character
+         (return-from potential-number-p)))))
+  (and
+   ;; Second Rule. In particular string is not empty.
+   (find-if #'digit-char-p string)
+   ;; Third rule
+   (let ((first (char string 0)))
+     (and (not (char= first #\:))
+          (or (digit-char-p first)
+              (find first "+-._^"))))
+   ;; Fourth rule
+   (not (find (char string (1- (length string))) "+-)"))))
+
+#+nil
+(mapcar #'potential-number-p
+        '("1b5000" "777777q" "1.7J" "-3/4+6.7J" "12/25/83" "27^19"
+          "3^4/5" "6//7" "3.1.2.6" "^-43^" "3.141_592_653_589_793_238_4"
+          "-3.7+2.6i-6.17j+19.6k"))
+
+#+nil
+(mapcar #'potential-number-p '("/" "/5" "+" "1+" "1-" "foo+" "ab.cd" "_" "^" "^/-"))
+
 
 (defun escape-token-p (string &optional uppercase)
   (or (potential-number-p string)
