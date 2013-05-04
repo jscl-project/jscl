@@ -170,6 +170,9 @@
           (ls-read stream)
           (ls-read stream eof-error-p eof-value))
          (:jscl
+          (ls-read stream eof-error-p eof-value))
+         (:nil
+          (ls-read stream)
           (ls-read stream eof-error-p eof-value)))))))
 
 (defun unescape-token (x)
