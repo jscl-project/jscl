@@ -119,9 +119,10 @@
                       (if (terminalp (%peek-char stream))
                           (prog1 (ls-read stream) ; Dotted pair notation
                             (skip-whitespaces-and-comments stream)
-                            (if (char= (%peek-char stream) #\) )
-                                (discard-char stream #\))
-                                (error "More than one object follows . in list")))
+                            (let ((ch (%peek-char stream)))
+                              (if (or (null ch) (char= #\) ch))
+                                  (discard-char stream #\))
+                                  (error "Multiple objects following . in a list"))))
                           (let ((token (concat "." (read-escaped-until stream #'terminalp))))
                             (cons (interpret-token token)
                                   (%read-list stream)))))
