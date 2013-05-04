@@ -28,7 +28,7 @@
       ;; consing, as well as allow inline declarations.
       (fset symbol
             (eval `(lambda (&rest ,args)
-                     (%js-call (%js-vref ,sym-name) (list-to-vector ,args)))))
+                     (apply (%js-vref ,sym-name) ,args))))
       ;; Define it as a symbol macro to access to the
       ;; Javascript variable literally.
       (%define-symbol-macro symbol `(%js-vref ,(string symbol))))))

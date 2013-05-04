@@ -1611,14 +1611,6 @@
 
 ;;; Javascript FFI
 
-;; Receives the JS function as first argument as a literal string. The
-;; second argument is compiled and should evaluate to a vector of
-;; values to apply to the the function. The result returned. No type
-;; conversion is done here. It is supposed to happen in the
-;; trampoline.
-(define-builtin %js-call (fun args)
-  (code fun ".apply(this, " args "))"))
-
 (define-compilation %js-vref (var)
   (code "js_to_lisp(" var ")"))
 
