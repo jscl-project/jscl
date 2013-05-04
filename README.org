@@ -13,7 +13,7 @@ to download the repository
 /load/ jscl.lisp in your Lisp, and call the bootstrap function to
 compile the implementation itself:
 
-=(bootstrap)=
+=(jscl:bootstrap)=
 
 It will generate a jscl.js file in the top of the source tree. Now you
 can open JSCL.html in your browser and use it.
