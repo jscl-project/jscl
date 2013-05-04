@@ -324,7 +324,7 @@
       (unless (= index size) (return))
       ;; Everything went ok, we have a float
       ;; XXX: Use FLOAT when implemented.
-      (/ (* sign (expt 10.0 (* exponent-sign exponent)) number) divisor))))
+      (/ (* sign (expt 10.0 (* exponent-sign exponent)) number) divisor 1.0))))
 
 (defun !parse-integer (string junk-allow)
   (block nil
