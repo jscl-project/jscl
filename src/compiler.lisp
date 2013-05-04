@@ -1668,7 +1668,7 @@
        (if (and b (eq (binding-type b) 'macro))
            (values (binding-value b) t)
            (values form nil))))
-    ((consp form)
+    ((and (consp form) (symbolp (car form)))
      (let ((macrofun (!macro-function (car form))))
        (if macrofun
            (values (apply macrofun (cdr form)) t)
