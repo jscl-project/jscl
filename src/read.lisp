@@ -88,6 +88,13 @@
       (skip-whitespaces stream)
       (setq ch (%peek-char stream)))))
 
+(defun discard-char (stream expected)
+  (let ((ch (%read-char stream)))
+    (when (null ch)
+      (error "End of file when character ~S was expected." expected))
+    (unless (char= ch expected)
+      (error "Character ~S was found but ~S was expected." ch expected))))
+
 (defun %read-list (stream)
   (skip-whitespaces-and-comments stream)
   (let ((ch (%peek-char stream)))
@@ -95,23 +102,27 @@
       ((null ch)
        (error "Unspected EOF"))
       ((char= ch #\))
-       (%read-char stream)
+       (discard-char stream #\))
        nil)
       (t
-       (let ((car (ls-read-1 stream)))
+       (let* ((eof (gensym))
+              (next (ls-read stream nil eof)))
          (skip-whitespaces-and-comments stream)
-         (cons car
-               (if (char= (%peek-char stream) #\.)
-                   (progn
-                     (%read-char stream)
-                     (if (terminalp (%peek-char stream))
-                         (ls-read-1 stream) ; Dotted pair notation
-                         (cons (let ((string (concat "." (read-escaped-until stream #'terminalp))))
-                                 (or (values (!parse-integer string nil))
-                                     (read-float string)
-                                     (read-symbol string)))
-                               (%read-list stream))))
-                   (%read-list stream))))))))
+         (cond
+           ((eq next eof)
+            (discard-char stream #\)))
+           (t
+            (cons next
+                  (if (char= (%peek-char stream) #\.)
+                      (progn
+                        (discard-char stream #\.)
+                        (if (terminalp (%peek-char stream))
+                            (prog1 (ls-read stream) ; Dotted pair notation
+                              (discard-char stream #\)))
+                            (let ((token (concat "." (read-escaped-until stream #'terminalp))))
+                              (cons (interpret-token token)
+                                    (%read-list stream)))))
+                      (%read-list stream))))))))))
 
 (defun read-string (stream)
   (let ((string "")
@@ -126,11 +137,11 @@
       (setq ch (%read-char stream)))
     string))
 
-(defun read-sharp (stream)
+(defun read-sharp (stream &optional eof-error-p eof-value)
   (%read-char stream)
   (ecase (%read-char stream)
     (#\'
-     (list 'function (ls-read-1 stream)))
+     (list 'function (ls-read stream)))
     (#\( (list-to-vector (%read-list stream)))
     (#\: (make-symbol (string-upcase (read-until stream #'terminalp))))
     (#\\
@@ -143,15 +154,16 @@
          ((string= cname "newline") #\newline)
          (t (char cname 0)))))
     (#\+
-     (let ((feature (read-until stream #'terminalp)))
-       (cond
-         ((string= feature "common-lisp")
-          (ls-read-1 stream)              ;ignore
-          (ls-read-1 stream))
-         ((string= feature "jscl")
-          (ls-read-1 stream))
-         (t
-          (error "Unknown reader form.")))))))
+     (let ((feature (let ((symbol (ls-read stream)))
+                      (unless (symbolp symbol)
+                        (error "Invalid feature ~S" symbol))
+                      (intern (string symbol) "KEYWORD"))))
+       (ecase feature
+         (:common-lisp
+          (ls-read stream)
+          (ls-read stream eof-error-p eof-value))
+         (:jscl
+          (ls-read stream eof-error-p eof-value)))))))
 
 (defun unescape (x)
   (let ((result ""))
@@ -356,45 +368,42 @@
         (values num index)
         (error "Junk detected."))))
 
-(defvar *eof* (gensym))
-(defun ls-read-1 (stream)
+
+(defun interpret-token (string)
+  (or (read-integer string)
+      (read-float string)
+      (read-symbol string)))
+
+(defun ls-read (stream  &optional (eof-error-p t) eof-value)
   (skip-whitespaces-and-comments stream)
   (let ((ch (%peek-char stream)))
     (cond
       ((or (null ch) (char= ch #\)))
-       *eof*)
+       (if eof-error-p
+           (error "End of file")
+           eof-value))
       ((char= ch #\()
        (%read-char stream)
        (%read-list stream))
       ((char= ch #\')
        (%read-char stream)
-       (list 'quote (ls-read-1 stream)))
+       (list 'quote (ls-read stream)))
       ((char= ch #\`)
        (%read-char stream)
-       (list 'backquote (ls-read-1 stream)))
+       (list 'backquote (ls-read stream)))
       ((char= ch #\")
        (%read-char stream)
        (read-string stream))
       ((char= ch #\,)
        (%read-char stream)
        (if (eql (%peek-char stream) #\@)
-           (progn (%read-char stream) (list 'unquote-splicing (ls-read-1 stream)))
-           (list 'unquote (ls-read-1 stream))))
+           (progn (%read-char stream) (list 'unquote-splicing (ls-read stream)))
+           (list 'unquote (ls-read stream))))
       ((char= ch #\#)
        (read-sharp stream))
       (t
        (let ((string (read-escaped-until stream #'terminalp)))
-         (or (read-integer string)
-             (read-float string)
-             (read-symbol string)))))))
-
-(defun ls-read (stream &optional (eof-error-p t) eof-value)
-  (let ((x (ls-read-1 stream)))
-    (if (eq x *eof*)
-        (if eof-error-p
-            (error "End of file")
-            eof-value)
-        x)))
+         (interpret-token string))))))
 
 (defun ls-read-from-string (string &optional (eof-error-p t) eof-value)
   (ls-read (make-string-stream string) eof-error-p eof-value))

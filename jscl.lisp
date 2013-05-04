@@ -24,6 +24,7 @@
     ("string"    :target)
     ("print"     :target)
     ("package"   :target)
+    ("ffi"       :target)
     ("read"      :both)
     ("compiler"  :both)
     ("toplevel"  :target)))
