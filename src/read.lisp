@@ -179,13 +179,6 @@
         (setq result (concat result (string (char x i))))))
     result))
 
-(defun escape-all (x)
-  (let ((result ""))
-    (dotimes (i (length x))
-      (setq result (concat result "\\"))
-      (setq result (concat result (string (char x i)))))
-    result))
-
 (defun string-upcase-noescaped (s)
   (let ((result "")
         (last-escape nil))
