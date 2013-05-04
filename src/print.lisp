@@ -33,6 +33,9 @@
           (return-from escape-symbol-name-p t))))
     dots-only))
 
+;;; Return T if the specified string can be read as a number
+;;; In case such a string is the name of a symbol then escaping
+;;; is required when printing to ensure correct reading.
 (defun potential-number-p (s)
   (let ((i 0)
         (n (length s))
@@ -75,8 +78,10 @@
   (or (potential-number-p string)
       (escape-symbol-name-p string uppercase)))
 
-(defun escape-token (s &optional uppercase)
-  (if (escape-token-p s uppercase)
+;;; Returns the token in a form that can be used for
+;;; reading it back as a symbol in the specified package.
+(defun escape-token (s package)
+  (if (escape-token-p s (not (eq package (find-package "JS"))))
       (let ((result "|"))
         (dotimes (i (length s))
           (let ((ch (char s i)))
@@ -87,28 +92,30 @@
         (concat result "|"))
       s))
 
-
 (defvar *print-escape* t)
 
 (defun write-to-string (form)
   (cond
     ((null form) "NIL")
     ((symbolp form)
-     (let ((name (symbol-name form))
-           (package (symbol-package form)))
-       (if (eq package *package*)
-           (escape-token (symbol-name form) (not (eq package *js-package*)))
-           (concat (cond
-                     ((null package) "#")
-                     ((eq package (find-package "KEYWORD")) "")
-                     (t (escape-token (package-name package) t)))
-                   ":"
-                   (if (or (null package)
-                           (multiple-value-bind (_ status)
-                               (find-symbol name package)
-                             (eq status :external)))
-                       "" ":")
-                   (escape-token name (not (eq (symbol-package form) *js-package*)))))))
+     (multiple-value-bind (found-symbol status)
+         (find-symbol (symbol-name form))
+       (if (eq found-symbol form)
+           (escape-token (symbol-name form) *package*)
+           (let ((package (symbol-package form))
+                 (name (symbol-name form)))
+             (concat (cond
+                       ((null package) "#")
+                       ((eq package (find-package "KEYWORD")) "")
+                       (t (package-name package)))
+                     ":"
+                     (if (and package
+                              (eq (second (multiple-value-list
+                                              (find-symbol name package)))
+                                  :internal))
+                         ":"
+                         "")
+                     (escape-token name package))))))
     ((integerp form) (integer-to-string form))
     ((floatp form) (float-to-string form))
     ((characterp form)
