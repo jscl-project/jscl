@@ -56,6 +56,13 @@
   (test (not (eql (car alist) (car copy))))
   (test (equal alist copy)))
 
+; ASSOC and RASSOC
+(let ((alist '((1 . 2) (3 . 4))))
+  (test (equal (assoc  1 alist) '(1 . 2)))
+  (test (equal (rassoc 2 alist) '(1 . 2)))
+  (test (not   (assoc  2 alist)))
+  (test (not   (rassoc 1 alist))))
+
 ; SUBST
 ; Can't really test this until EQUAL works properly on lists
 

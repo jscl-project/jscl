@@ -180,8 +180,15 @@
 (defun assoc (x alist &key (test #'eql))
   (while alist
     (if (funcall test x (caar alist))
-        (return)
-        (setq alist (cdr alist))))
+      (return)
+      (setq alist (cdr alist))))
+  (car alist))
+
+(defun rassoc (x alist &key (test #'eql))
+  (while alist
+    (if (funcall test x (cdar alist))
+      (return)
+      (setq alist (cdr alist))))
   (car alist))
 
 (defun acons (key datum alist)
