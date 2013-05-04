@@ -37,11 +37,17 @@
 
 (defun cdr (x) (cdr x))
 
-(defun first (x) (car x))
-(defun second (x) (cadr x))
-(defun third (x) (caddr x))
-(defun fourth (x) (cadddr x))
-(defun rest (x) (cdr x))
+(defun first   (x) (car    x))
+(defun second  (x) (cadr   x))
+(defun third   (x) (caddr  x))
+(defun fourth  (x) (cadddr x))
+(defun fifth   (x) (car    (cddddr x)))
+(defun sixth   (x) (cadr   (cddddr x)))
+(defun seventh (x) (caddr  (cddddr x)))
+(defun eighth  (x) (cadddr (cddddr x)))
+(defun ninth   (x) (car  (cddddr (cddddr x))))
+(defun tenth   (x) (cadr (cddddr (cddddr x))))
+(defun rest    (x) (cdr x))
 
 (defun list (&rest args)
   args)
@@ -62,7 +68,6 @@
 (defun nth (n list)
   (car (nthcdr n list)))
 
-;;; The rest of the C[AD]*R functions; only a few were defined in boot.lisp
 (defun caar (x) (car (car x)))
 (defun cadr (x) (car (cdr x)))
 (defun cdar (x) (cdr (car x)))
@@ -103,6 +108,19 @@
     (cons (copy-tree (car tree))
           (copy-tree (cdr tree)))
     tree))
+
+(defun tree-equal (tree1 tree2 &key (test #'eql))
+  (if (atom tree1)
+    (and (atom tree2) (funcall test tree1 tree2))
+    (and (consp tree2)
+         (tree-equal (car tree1) (car tree2) :test test)
+         (tree-equal (cdr tree1) (cdr tree2) :test test))))
+
+(defun tailp (object list)
+  (do ((tail list (cdr tail)))
+    ((atom tail) (eq object tail))
+    (when (eql tail object)
+      (return-from tailp t))))
 
 (defun subst (new old tree &key (key #'identity) (test #'eql))
   (cond 
@@ -152,9 +170,9 @@
   (and (consp (cdr x))
        (cons (car x) (butlast (cdr x)))))
 
-(defun member (x list)
+(defun member (x list &key (key #'identity) (test #'eql))
   (while list
-    (when (eql x (car list))
+    (when (funcall test x (funcall key (car list)))
       (return list))
     (setq list (cdr list))))
 
@@ -162,10 +180,33 @@
 (defun assoc (x alist &key (test #'eql))
   (while alist
     (if (funcall test x (caar alist))
-        (return)
-        (setq alist (cdr alist))))
+      (return)
+      (setq alist (cdr alist))))
   (car alist))
 
+(defun rassoc (x alist &key (test #'eql))
+  (while alist
+    (if (funcall test x (cdar alist))
+      (return)
+      (setq alist (cdr alist))))
+  (car alist))
+
+(defun acons (key datum alist)
+  (cons (cons key datum) alist))
+
+(defun pairlis (keys data &optional (alist ()))
+  (while keys
+    (setq alist (acons (car keys) (car data) alist))
+    (setq keys (cdr keys))
+    (setq data (cdr data)))
+  alist)
+
+(defun copy-alist (alist)
+  (let ((new-alist ()))
+    (while alist
+      (push (cons (caar alist) (cdar alist)) new-alist)
+      (setq alist (cdr alist)))
+    (reverse new-alist)))
 
 
 (define-setf-expander car (x)
@@ -222,3 +263,16 @@
        (3rd y 2nd))               ;3rd follows 2nd down the list.
       ((atom 2nd) 3rd)
     (rplacd 2nd 3rd)))
+
+
+(defun adjoin (item list &key (test #'eql) (key #'identity))
+  (if (member item list :key key :test test)
+    list
+    (cons item list)))
+
+(defun intersection (list1 list2 &key (test #'eql) (key #'identity))
+  (let ((new-list ()))
+    (dolist (x list1)
+      (when (member x list2 :test test :key key)
+        (push x new-list)))
+    new-list))
