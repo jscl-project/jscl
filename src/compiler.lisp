@@ -574,13 +574,13 @@
   #+common-lisp
   (let ((package (symbol-package symbol)))
     (if (eq package (find-package "KEYWORD"))
-        (code "{name: " (dump-string (symbol-name symbol))
-              ", 'package': " (dump-string (package-name package)) "}")
-        (code "{name: " (dump-string (symbol-name symbol)) "}")))
+        (code "(new Symbol(" (dump-string (symbol-name symbol)) ", "
+              (dump-string (package-name package)) "))")
+        (code "(new Symbol(" (dump-string (symbol-name symbol)) "))")))
   #+jscl
   (let ((package (symbol-package symbol)))
     (if (null package)
-        (code "{name: " (dump-string (symbol-name symbol)) "}")
+        (code "(new Symbol(" (dump-string (symbol-name symbol)) "))")
         (ls-compile `(intern ,(symbol-name symbol) ,(package-name package))))))
 
 (defun dump-cons (cons)
@@ -993,24 +993,6 @@
     "var args = " (ls-compile first-form *multiple-value-p*) ";" *newline*
     (ls-compile-block forms)
     "return args;" *newline*))
-
-
-;;; Javascript FFI
-
-(define-compilation %js-vref (var) var)
-
-(define-compilation %js-vset (var val)
-  (code "(" var " = " (ls-compile val) ")"))
-
-(define-setf-expander %js-vref (var)
-  (let ((new-value (gensym)))
-    (unless (stringp var)
-      (error "`~S' is not a string." var))
-    (values nil
-            (list var)
-            (list new-value)
-            `(%js-vset ,var ,new-value)
-            `(%js-vref ,var))))
 
 
 ;;; Backquote implementation.
@@ -1433,13 +1415,10 @@
     (code "(x.cdr = " new ", x)")))
 
 (define-builtin symbolp (x)
-  (js!bool
-   (js!selfcall
-     "var tmp = " x ";" *newline*
-     "return (typeof tmp == 'object' && 'name' in tmp);" *newline*)))
+  (js!bool (code "(" x " instanceof Symbol)")))
 
 (define-builtin make-symbol (name)
-  (code "({name: " name "})"))
+  (code "(new Symbol(" name "))"))
 
 (define-builtin symbol-name (x)
   (code "(" x ").name"))
@@ -1626,11 +1605,25 @@
       (code "values(" (join (mapcar #'ls-compile args) ", ") ")")
       (code "pv(" (join (mapcar #'ls-compile args) ", ") ")")))
 
-;; Receives the JS function as first argument as a literal string. The
-;; second argument is compiled and should evaluate to a vector of
-;; values to apply to the the function. The result returned.
-(define-builtin %js-call (fun args)
-  (code fun ".apply(this, " args ")"))
+
+;;; Javascript FFI
+
+(define-compilation %js-vref (var)
+  (code "js_to_lisp(" var ")"))
+
+(define-compilation %js-vset (var val)
+  (code "(" var " = lisp_to_js(" (ls-compile val) "))"))
+
+(define-setf-expander %js-vref (var)
+  (let ((new-value (gensym)))
+    (unless (stringp var)
+      (error "`~S' is not a string." var))
+    (values nil
+            (list var)
+            (list new-value)
+            `(%js-vset ,var ,new-value)
+            `(%js-vref ,var))))
+
 
 #+common-lisp
 (defvar *macroexpander-cache*
@@ -1668,7 +1661,7 @@
        (if (and b (eq (binding-type b) 'macro))
            (values (binding-value b) t)
            (values form nil))))
-    ((consp form)
+    ((and (consp form) (symbolp (car form)))
      (let ((macrofun (!macro-function (car form))))
        (if macrofun
            (values (apply macrofun (cdr form)) t)
