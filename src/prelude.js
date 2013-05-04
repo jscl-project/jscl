@@ -62,6 +62,12 @@ function make_lisp_string (string){
 function xstring(x){ return x.join(''); }
 
 
+function Symbol(name, package_name){
+    this.name = name;
+    if (package_name)
+        this['package'] = package_name;
+}
+
 function lisp_to_js (x) {
     if (typeof x == 'object' && 'length' in x && x.type == 'character')
         return xstring(x);

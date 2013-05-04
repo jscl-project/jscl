@@ -574,13 +574,13 @@
   #+common-lisp
   (let ((package (symbol-package symbol)))
     (if (eq package (find-package "KEYWORD"))
-        (code "{name: " (dump-string (symbol-name symbol))
-              ", 'package': " (dump-string (package-name package)) "}")
-        (code "{name: " (dump-string (symbol-name symbol)) "}")))
+        (code "(new Symbol(" (dump-string (symbol-name symbol)) ", "
+              (dump-string (package-name package)) "))")
+        (code "(new Symbol(" (dump-string (symbol-name symbol)) "))")))
   #+jscl
   (let ((package (symbol-package symbol)))
     (if (null package)
-        (code "{name: " (dump-symbol (symbol-name symbol)) "}")
+        (code "(new Symbol(" (dump-symbol (symbol-name symbol)) "))")
         (ls-compile `(intern ,(symbol-name symbol) ,(package-name package))))))
 
 (defun dump-cons (cons)
@@ -1415,13 +1415,10 @@
     (code "(x.cdr = " new ", x)")))
 
 (define-builtin symbolp (x)
-  (js!bool
-   (js!selfcall
-     "var tmp = " x ";" *newline*
-     "return (typeof tmp == 'object' && 'name' in tmp);" *newline*)))
+  (js!bool (code "(" x " instanceof Symbol)")))
 
 (define-builtin make-symbol (name)
-  (code "({name: " name "})"))
+  (code "(new Symbol(" name "))"))
 
 (define-builtin symbol-name (x)
   (code "(" x ").name"))
