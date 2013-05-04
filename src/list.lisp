@@ -187,6 +187,13 @@
 (defun acons (key datum alist)
   (cons (cons key datum) alist))
 
+(defun pairlis (keys data &optional (alist ()))
+  (while keys
+    (setq alist (acons (car keys) (car data) alist))
+    (setq keys (cdr keys))
+    (setq data (cdr data)))
+  alist)
+
 
 (define-setf-expander car (x)
   (let ((cons (gensym))

@@ -44,6 +44,12 @@
              (acons 1 2 (list (cons 3 4)))))
 (test (equal (list (cons 1 2)) (acons 1 2 ())))
 
+; PAIRLIS
+(test (equal (list (cons 1 3) (cons 0 2))
+             (pairlis '(0 1) '(2 3))))
+(test (equal (list (cons 1 2) (cons 'a 'b))
+             (pairlis '(1) '(2) (list (cons 'a 'b)))))
+
 ; SUBST
 ; Can't really test this until EQUAL works properly on lists
 
