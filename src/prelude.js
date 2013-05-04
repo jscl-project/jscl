@@ -68,8 +68,11 @@ function lisp_to_js (x) {
     else if (typeof x == 'function'){
         // Trampoline calling the Lisp function
         return (function(){
-            return x.apply(this, [pv, arguments.length] + Array.prototype.slice.call(arguments));
-        })
+            var args = Array.prototype.slice.call(arguments);
+            for (var i in args)
+                args[i] = js_to_lisp(args[i]);
+            return lisp_to_js(x.apply(this, [pv, arguments.length].concat(args)));
+        });
     }
     else return x;
 }
@@ -80,7 +83,10 @@ function js_to_lisp (x) {
     else if (typeof x == 'function'){
         // Trampoline calling the JS function
         return (function(values, nargs){
-            return x.apply(this, Array.prototype.slice.call(arguments, 2));
-        })
+            var args = Array.prototype.slice.call(arguments, 2);
+            for (var i in args)
+                args[i] = lisp_to_js(args[i]);
+            return values(js_to_lisp(x.apply(this, args)));
+        });
     } else return x;
 }

@@ -995,24 +995,6 @@
     "return args;" *newline*))
 
 
-;;; Javascript FFI
-
-(define-compilation %js-vref (var) var)
-
-(define-compilation %js-vset (var val)
-  (code "(" var " = " (ls-compile val) ")"))
-
-(define-setf-expander %js-vref (var)
-  (let ((new-value (gensym)))
-    (unless (stringp var)
-      (error "`~S' is not a string." var))
-    (values nil
-            (list var)
-            (list new-value)
-            `(%js-vset ,var ,new-value)
-            `(%js-vref ,var))))
-
-
 ;;; Backquote implementation.
 ;;;
 ;;;    Author: Guy L. Steele Jr.     Date: 27 December 1985
@@ -1505,9 +1487,6 @@
 (define-builtin string-upcase (x)
   (code "make_lisp_string(xstring(" x ").toUpperCase())"))
 
-(define-builtin %lisp-to-js (x) (code "lisp_to_js(" x ")"))
-(define-builtin %js-to-lisp (x) (code "js_to_lisp(" x ")"))
-
 (define-builtin string-length (x)
   (code x ".length"))
 
@@ -1629,11 +1608,33 @@
       (code "values(" (join (mapcar #'ls-compile args) ", ") ")")
       (code "pv(" (join (mapcar #'ls-compile args) ", ") ")")))
 
+
+;;; Javascript FFI
+
 ;; Receives the JS function as first argument as a literal string. The
 ;; second argument is compiled and should evaluate to a vector of
-;; values to apply to the the function. The result returned.
+;; values to apply to the the function. The result returned. No type
+;; conversion is done here. It is supposed to happen in the
+;; trampoline.
 (define-builtin %js-call (fun args)
-  (code fun ".apply(this, " args ")"))
+  (code fun ".apply(this, " args "))"))
+
+(define-compilation %js-vref (var)
+  (code "js_to_lisp(" var ")"))
+
+(define-compilation %js-vset (var val)
+  (code "(" var " = lisp_to_js(" (ls-compile val) "))"))
+
+(define-setf-expander %js-vref (var)
+  (let ((new-value (gensym)))
+    (unless (stringp var)
+      (error "`~S' is not a string." var))
+    (values nil
+            (list var)
+            (list new-value)
+            `(%js-vset ,var ,new-value)
+            `(%js-vref ,var))))
+
 
 #+common-lisp
 (defvar *macroexpander-cache*
