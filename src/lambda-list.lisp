@@ -13,8 +13,8 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-;;; lambda-list-keywords
-;; '(&optional &rest &key &aux &allow-other-keys &body &optional)
+(defconstant !lambda-list-keywords
+  '(&optional &rest &key &aux &allow-other-keys &body &optional))
 
 ;;;; Lambda list parsing
 
@@ -121,7 +121,7 @@
            ;; position of the lambda list.
            (in-section-p ()
              (and (consp lambda-list)
-                  (not (find (first lambda-list) lambda-list-keywords)))))
+                  (not (find (first lambda-list) !lambda-list-keywords)))))
       
       ;; &whole var
       (when (lambda-section '&whole)
