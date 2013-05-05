@@ -68,7 +68,7 @@
           multiple-value-call multiple-value-list multiple-value-prog1
           nconc nil ninth not nreconc nth nthcdr null numberp or otherwise
           package-name package-use-list packagep pairlis parse-integer plusp
-          pop prin1-to-string print proclaim prog1 prog2 progn psetq push
+          pop prin1-to-string print proclaim prog prog1 prog2 progn psetq push
           quote rassoc read-from-string remove remove-if remove-if-not return
           return-from revappend reverse rplaca rplacd second set setf seventh
           setq sixth some string string-upcase string= stringp subseq subst
