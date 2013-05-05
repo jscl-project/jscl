@@ -583,9 +583,14 @@
                                  (list nil)))))
                    clausules)))))
 
+(defmacro etypecase (x &rest clausules)
+  (let ((g!x (gensym)))
+    `(typecase ,g!x
+       ,@clausules
+       (t (error "~X fell through etypeacase expression." ,g!x)))))
+
 (defun notany (fn seq)
   (not (some fn seq)))
-
 
 (defconstant internal-time-units-per-second 1000) 
 
