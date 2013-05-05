@@ -17,9 +17,9 @@
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 (defvar *source*
-  '(("boot"      :target)
-    ("compat"    :host)
+  '(("compat"    :host)
     ("utils"     :both)
+    ("boot"      :target)
     ("list"      :target)
     ("string"    :target)
     ("print"     :target)
@@ -28,6 +28,10 @@
     ("read"      :both)
     ("compiler"  :both)
     ("toplevel"  :target)))
+
+(setf *default-pathname-defaults* (parse-namestring (directory-namestring *load-pathname* )))
+#+ccl(load #P "src/compat.lisp")
+#+ccl(load #P "src/utils.lisp") 
 
 (defun source-pathname
     (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
