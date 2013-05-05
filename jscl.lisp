@@ -29,7 +29,7 @@
     ("compiler"  :both)
     ("toplevel"  :target)))
 
-(setf *default-pathname-defaults* (directory-namestring *load-pathname* ))
+(setf *default-pathname-defaults* (parse-namestring (directory-namestring *load-pathname* )))
 #+ccl(load #P "src/compat.lisp")
 #+ccl(load #P "src/utils.lisp") 
 
