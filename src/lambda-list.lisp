@@ -217,11 +217,11 @@
       (unless (consp tail)
         (error "Odd number of keyword arguments.")))))
 
-(defun !destructuring-bind-macro-function (lambda-list expression &rest body)
+(defun !expand-destructuring-bind (lambda-list expression &rest body)
   (multiple-value-bind (d-ll)
       (parse-destructuring-lambda-list lambda-list)
     (let ((bindings '()))
-      (labels ( ;; Return a chain of the form (CAR (CDR (CDR ... (CDR X))),
+      (labels (;; Return a chain of the form (CAR (CDR (CDR ... (CDR X))),
                ;; such that there are N calls to CDR.
                (nth-chain (x n &optional tail)
                  (if tail
@@ -235,77 +235,66 @@
                (compute-pbindings (pattern form)
                  (cond
                    ((null pattern))
-                   ;; Bind the symbol to FORM.
                    ((symbolp pattern)
-                    (push `(,pattern ,form) bindings)
-                    (values pattern))
+                    (push `(,pattern ,form) bindings))
                    ((d-lambda-list-p pattern)
-                    ;; Bind FORM to a auxiliar variable and bind
-                    ;; pattern agains it recursively.
-                    (let ((subpart (gensym)))
-                      (push `(,subpart
-                              (progn
-                                ,form))
-                            bindings)
-                      (compute-bindings pattern subpart)
-                      (values subpart)))))
+                    (compute-bindings pattern form))))
                
                ;; Compute the bindings for the full D-LAMBDA-LIST d-ll
                ;; against FORM.
                (compute-bindings (d-ll form)
-                 (compute-pbindings (d-lambda-list-wholevar d-ll) form)
-                 (let ((reqvar-count (length (d-lambda-list-reqvars d-ll)))
-                       (optvar-count (length (d-lambda-list-optvars d-ll)))
-                       (count 0))
-                   ;; Required vars
-                   (dolist (reqvar (d-lambda-list-reqvars d-ll))
-                     (compute-pbindings reqvar (nth-chain form count))
-                     (incf count))
-                   ;; Optional vars
-                   (dolist (optvar (d-lambda-list-optvars d-ll))
-                     (when (optvar-supplied-p-parameter optvar)
-                       (compute-pbindings (optvar-supplied-p-parameter optvar)
-                                          `(not (null ,(nth-chain form count t)))))
-                     (compute-pbindings (optvar-variable optvar)
-                                        `(if (null ,(nth-chain form count t))
-                                             ,(optvar-initform optvar)
-                                             ,(nth-chain form count)))
-                     (incf count))
+                 (let ((whole (or (d-lambda-list-wholevar d-ll) (gensym))))
+                   (push `(,whole ,form) bindings)
+                   (let ((count 0))
+                     ;; Required vars
+                     (dolist (reqvar (d-lambda-list-reqvars d-ll))
+                       (compute-pbindings reqvar (nth-chain whole count))
+                       (incf count))
+                     ;; Optional vars
+                     (dolist (optvar (d-lambda-list-optvars d-ll))
+                       (when (optvar-supplied-p-parameter optvar)
+                         (compute-pbindings (optvar-supplied-p-parameter optvar)
+                                            `(not (null ,(nth-chain whole count t)))))
+                       (compute-pbindings (optvar-variable optvar)
+                                          `(if (null ,(nth-chain whole count t))
+                                               ,(optvar-initform optvar)
+                                               ,(nth-chain whole count)))
+                       (incf count))
 
-                   ;; Rest-variable and keywords
-                   (when (or (d-lambda-list-restvar d-ll)
-                             (d-lambda-list-keyvars d-ll))
-                     ;; If there is a rest or keyword variable, we
-                     ;; will add a binding for the rest or an
-                     ;; auxiliary variable. The computations in of the
-                     ;; keyword start in this variable, so we avoid
-                     ;; the long tail of nested CAR/CDR operations
-                     ;; each time.
-                     (let* ((chain (nth-chain form (+ reqvar-count optvar-count) t))
-                            (pattern (or (d-lambda-list-restvar d-ll) (gensym)))
-                            (rest (compute-pbindings pattern chain)))
-                       (dolist (keyvar (d-lambda-list-keyvars d-ll))
-                         (let ((variable (keyvar-variable keyvar))
-                               (keyword (keyvar-keyword-name keyvar))
-                               (supplied (or (keyvar-supplied-p-parameter keyvar)
-                                             (gensym))))
-                           (when supplied
-                             (compute-pbindings supplied `(keyword-supplied-p ,keyword ,rest)))
-                           (compute-pbindings variable `(if ,supplied
-                                                            (keyword-lookup ,keyword ,rest)
-                                                            ,(keyvar-initform keyvar)))))))
+                     ;; Rest-variable and keywords
+                     (when (or (d-lambda-list-restvar d-ll)
+                               (d-lambda-list-keyvars d-ll))
+                       ;; If there is a rest or keyword variable, we
+                       ;; will add a binding for the rest or an
+                       ;; auxiliary variable. The computations in of the
+                       ;; keyword start in this variable, so we avoid
+                       ;; the long tail of nested CAR/CDR operations
+                       ;; each time.
+                       (let* ((reqvar-count (length (d-lambda-list-reqvars d-ll)))
+                              (optvar-count (length (d-lambda-list-optvars d-ll)))
+                              (chain (nth-chain whole (+ reqvar-count optvar-count) t))
+                              (pattern (or (d-lambda-list-restvar d-ll) (gensym)))
+                              (rest (compute-pbindings pattern chain)))
+                         (dolist (keyvar (d-lambda-list-keyvars d-ll))
+                           (let ((variable (keyvar-variable keyvar))
+                                 (keyword (keyvar-keyword-name keyvar))
+                                 (supplied (or (keyvar-supplied-p-parameter keyvar)
+                                               (gensym))))
+                             (when supplied
+                               (compute-pbindings supplied `(keyword-supplied-p ,keyword ,rest)))
+                             (compute-pbindings variable `(if ,supplied
+                                                              (keyword-lookup ,keyword ,rest)
+                                                              ,(keyvar-initform keyvar)))))))
 
-                   ;; Aux variables
-                   (dolist (auxvar (d-lambda-list-auxvars d-ll))
-                     (compute-pbindings (auxvar-variable auxvar) (auxvar-initform auxvar))))))
+                     ;; Aux variables
+                     (dolist (auxvar (d-lambda-list-auxvars d-ll))
+                       (compute-pbindings (auxvar-variable auxvar) (auxvar-initform auxvar)))))))
 
         ;; Macroexpansion. Compute bindings and generate code for them
         ;; and some necessary checking.
-        (let ((whole (gensym)))
-          (compute-bindings d-ll whole)
-          `(let ((,whole ,expression))
-             (let* ,(reverse bindings)
-               ,@body)))))))
+        (compute-bindings d-ll expression)
+        `(let* ,(reverse bindings)
+           ,@body)))))
 
 
 ;;; Because DEFMACRO uses destructuring-bind to parse the arguments of
@@ -315,13 +304,13 @@
 
 #+common-lisp
 (defmacro !destructuring-bind (lambda-list expression &body body)
-  (apply #'!destructuring-bind-macro-function lambda-list expression body))
+  (apply #'!expand-destructuring-bind lambda-list expression body))
 
 #+jscl
 (eval-when-compile
   (let ((macroexpander
          '#'(lambda (form &optional environment)
               (declare (ignore environment))
-              (apply #'!destructuring-bind-macro-function form))))
+              (apply #'!expand-destructuring-bind form))))
     (%compile-defmacro '!destructuring-bind macroexpander)
     (%compile-defmacro  'destructuring-bind macroexpander)))
