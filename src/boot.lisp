@@ -374,11 +374,6 @@
 (defun atom (x)
   (not (consp x)))
 
-(defun find (item list &key (key #'identity) (test #'eql))
-  (dolist (x list)
-    (when (funcall test (funcall key x) item)
-      (return x))))
-
 (defun remove (x list)
   (cond
     ((null list)
@@ -406,6 +401,10 @@
      (cons (car list) (remove-if-not func (cdr list))))
     (t
      (remove-if-not func (cdr list)))))
+
+(defun alpha-char-p (x)
+  (or (<= (char-code #\a) (char-code x) (char-code #\z))
+      (<= (char-code #\Z) (char-code x) (char-code #\Z))))
 
 (defun digit-char-p (x)
   (if (and (<= (char-code #\0) (char-code x) (char-code #\9)))
@@ -439,6 +438,16 @@
             ,@body))
          (t
           (error "type-error!"))))))
+
+(defun find (item sequence &key (key #'identity) (test #'eql))
+  (do-sequence (x sequence)
+    (when (funcall test (funcall key x) item)
+      (return x))))
+
+(defun find-if (predicate sequence &key (key #'identity))
+  (do-sequence (x sequence)
+    (when (funcall predicate (funcall key x))
+      (return x))))
 
 (defun some (function seq)
   (do-sequence (elt seq)
