@@ -1,4 +1,6 @@
 *~
 *.fasl
+*.fas
+*.lib
 jscl.js
 tests.js

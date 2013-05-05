@@ -67,7 +67,7 @@
     <script>
       var jqconsole = $('#console').jqconsole();
       lisp.write = function(str){
-           jqconsole.Write(str, 'jqconsole-output', false);
+           jqconsole.Write(xstring(str), 'jqconsole-output', false);
            return str;
       };
     </script>

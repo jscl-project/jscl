@@ -170,6 +170,9 @@
           (ls-read stream)
           (ls-read stream eof-error-p eof-value))
          (:jscl
+          (ls-read stream eof-error-p eof-value))
+         (:nil
+          (ls-read stream)
           (ls-read stream eof-error-p eof-value)))))))
 
 (defun unescape-token (x)
@@ -301,8 +304,7 @@
       ;; Optional exponent part
       (when (< index size)
         ;; Exponent-marker
-        (unless (member (string-upcase (string (char string index)))
-                        '("E" "S" "F" "D" "L"))
+        (unless (find (char-upcase (char string index)) "ESFDL")
           (return))
         (incf index)
         (unless (< index size) (return))
@@ -322,7 +324,7 @@
       (unless (= index size) (return))
       ;; Everything went ok, we have a float
       ;; XXX: Use FLOAT when implemented.
-      (/ (* sign (expt 10.0 (* exponent-sign exponent)) number) divisor))))
+      (/ (* sign (expt 10.0 (* exponent-sign exponent)) number) divisor 1.0))))
 
 (defun !parse-integer (string junk-allow)
   (block nil

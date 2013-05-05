@@ -1475,6 +1475,12 @@
     "r.type = 'character';"
     "return r"))
 
+(define-builtin char-upcase (x)
+  (code x ".toUpperCase()"))
+
+(define-builtin char-downcase (x)
+  (code x ".toLowerCase()"))
+
 (define-builtin stringp (x)
   (js!bool
    (js!selfcall

@@ -33,5 +33,9 @@
         (incf *expected-failures*)))
      (incf *total-tests*)))
 
+(defmacro test-equal (form value)
+  `(test (equal ,form, value)))
+
+
 (format t "Running tests...~%~%")
 (setq *timestamp* (get-internal-real-time))
