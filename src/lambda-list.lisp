@@ -283,7 +283,11 @@
                              (compute-pbindings supplied `(keyword-supplied-p ,keyword ,rest)))
                            (compute-pbindings variable `(if ,supplied
                                                             (keyword-lookup ,keyword ,rest)
-                                                            ,(keyvar-initform keyvar))))))))))
+                                                            ,(keyvar-initform keyvar)))))))
+
+                   ;; Aux variables
+                   (dolist (auxvar (d-lambda-list-auxvars d-ll))
+                     (compute-pbindings (auxvar-variable auxvar) (auxvar-initform auxvar))))))
 
         ;; Macroexpansion. Compute bindings and generate code for them
         ;; and some necessary checking.
@@ -297,10 +301,3 @@
 #+jscl
 (defmacro destructuring-bind (lambda-list expression &body body)
   `(!destructuring-bind ,lambda-list ,expression ,@body))
-
-
-
-
-
-
-
