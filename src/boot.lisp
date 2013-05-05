@@ -585,9 +585,10 @@
 
 (defmacro etypecase (x &rest clausules)
   (let ((g!x (gensym)))
-    `(typecase ,g!x
-       ,@clausules
-       (t (error "~X fell through etypeacase expression." ,g!x)))))
+    `(let ((,g!x ,x))
+       (typecase ,g!x
+         ,@clausules
+         (t (error "~X fell through etypeacase expression." ,g!x))))))
 
 (defun notany (fn seq)
   (not (some fn seq)))
