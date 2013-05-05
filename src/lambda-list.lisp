@@ -13,7 +13,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-(defconstant !lambda-list-keywords
+(defvar !lambda-list-keywords
   '(&optional &rest &key &aux &allow-other-keys &body &optional))
 
 ;;;; Lambda list parsing
@@ -220,9 +220,7 @@
 (defmacro !destructuring-bind (lambda-list expression &body body)
   (multiple-value-bind (d-ll)
       (parse-destructuring-lambda-list lambda-list)
-    (let ((reqvar-count (length (d-lambda-list-reqvars d-ll)))
-          (optvar-count (length (d-lambda-list-optvars d-ll)))
-          (bindings '()))
+    (let ((bindings '()))
       (labels (;; Return a chain of the form (CAR (CDR (CDR ... (CDR X))),
                ;; such that there are N calls to CDR.
                (nth-chain (x n &optional tail)
@@ -256,7 +254,9 @@
                ;; against FORM.
                (compute-bindings (d-ll form)
                  (compute-pbindings (d-lambda-list-wholevar d-ll) form)
-                 (let ((count 0))
+                 (let ((reqvar-count (length (d-lambda-list-reqvars d-ll)))
+                       (optvar-count (length (d-lambda-list-optvars d-ll)))
+                       (count 0))
                    ;; Required vars
                    (dolist (reqvar (d-lambda-list-reqvars d-ll))
                      (compute-pbindings reqvar (nth-chain form count))
