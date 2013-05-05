@@ -18,16 +18,16 @@
 
 ;;;; Lambda list parsing
 
-(defstruct optvar
+(def!struct optvar
   variable initform supplied-p-parameter)
 
-(defstruct keyvar
+(def!struct keyvar
   variable keyword-name initform supplied-p-parameter)
 
-(defstruct auxvar
+(def!struct auxvar
   variable initform)
 
-(defstruct d-lambda-list
+(def!struct d-lambda-list
   wholevar
   reqvars
   optvars
