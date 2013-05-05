@@ -23,18 +23,17 @@
 ;;; to the compiler to be able to run.
 
 (eval-when-compile
-  (%compile-defmacro 'defmacro
-                     '(function
-                       (lambda (name args &rest body)
-                        `(eval-when-compile
-                           (%compile-defmacro ',name
-                                              '(function
-                                                (lambda ,(mapcar #'(lambda (x)
-                                                                     (if (eq x '&body)
-                                                                         '&rest
-                                                                         x))
-                                                                 args)
-                                                 ,@body))))))))
+  (let ((defmacro-macroexpander
+         '#'(lambda (form)
+              (destructuring-bind (name args &body body)
+                  form
+                (let ((whole (gensym)))
+                  `(eval-when-compile
+                     (%compile-defmacro ',name
+                                        '#'(lambda (,whole)
+                                             (destructuring-bind ,args ,whole
+                                               ,@body)))))))))
+    (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
 (defmacro declaim (&rest decls)
   `(eval-when-compile

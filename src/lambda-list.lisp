@@ -217,11 +217,11 @@
       (unless (consp tail)
         (error "Odd number of keyword arguments.")))))
 
-(defmacro !destructuring-bind (lambda-list expression &body body)
+(defun !destructuring-bind-macro-function (lambda-list expression &rest body)
   (multiple-value-bind (d-ll)
       (parse-destructuring-lambda-list lambda-list)
     (let ((bindings '()))
-      (labels (;; Return a chain of the form (CAR (CDR (CDR ... (CDR X))),
+      (labels ( ;; Return a chain of the form (CAR (CDR (CDR ... (CDR X))),
                ;; such that there are N calls to CDR.
                (nth-chain (x n &optional tail)
                  (if tail
@@ -308,6 +308,20 @@
                ,@body)))))))
 
 
+;;; Because DEFMACRO uses destructuring-bind to parse the arguments of
+;;; the macro-function, we can't define DESTRUCTURING-BIND with
+;;; defmacro to avoid a circularity. So just define the macro function
+;;; explicitly.
+
+#+common-lisp
+(defmacro !destructuring-bind (lambda-list expression &body body)
+  (apply #'!destructuring-bind-macro-function lambda-list expression body))
+
 #+jscl
-(defmacro destructuring-bind (lambda-list expression &body body)
-  `(!destructuring-bind ,lambda-list ,expression ,@body))
+(eval-when-compile
+  (let ((macroexpander
+         '#'(lambda (form &optional environment)
+              (declare (ignore environment))
+              (apply #'!destructuring-bind-macro-function form))))
+    (%compile-defmacro '!destructuring-bind macroexpander)
+    (%compile-defmacro  'destructuring-bind macroexpander)))
