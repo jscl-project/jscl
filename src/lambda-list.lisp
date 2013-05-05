@@ -99,14 +99,13 @@
        (make-auxvar :variable (var-or-pattern variable)
                     :initform initform)))))
 
-
 (defun parse-destructuring-lambda-list (lambda-list)
   (let (;; Destructured lambda list structure where we accumulate the
         ;; results of the parsing.
         (d-ll (make-d-lambda-list))
         ;; List of lambda list keywords which we have already seen.
         (lambda-keywords nil))
-    (flet (;; Check if we are in the beginning of the section NAME in
+    (flet ( ;; Check if we are in the beginning of the section NAME in
            ;; the lambda list. It checks also if the section is in the
            ;; proper place and it is new.
            (lambda-section (name)
@@ -130,17 +129,17 @@
           (setf (d-lambda-list-wholevar d-ll) (var-or-pattern wholevar))))
       
       ;; required vars
-      (loop while (in-section-p)
-         do (let ((var (pop lambda-list)))
-              (push (var-or-pattern var) (d-lambda-list-reqvars d-ll))))
+      (while (in-section-p)
+        (let ((var (pop lambda-list)))
+          (push (var-or-pattern var) (d-lambda-list-reqvars d-ll))))
       (setf (d-lambda-list-reqvars d-ll)
             (reverse (d-lambda-list-reqvars d-ll)))
       
       ;; optional vars
       (when (lambda-section '&optional)
-        (loop while (in-section-p)
-           do (push (parse-optvar (pop lambda-list))
-                    (d-lambda-list-optvars d-ll)))
+        (while (in-section-p)
+          (push (parse-optvar (pop lambda-list))
+                (d-lambda-list-optvars d-ll)))
         (setf (d-lambda-list-optvars d-ll)
               (reverse (d-lambda-list-optvars d-ll))))
       
@@ -156,9 +155,9 @@
 
       ;; Keyword arguments
       (when (lambda-section '&key)
-        (loop while (in-section-p)
-           do (push (parse-keyvar (pop lambda-list))
-                    (d-lambda-list-keyvars d-ll)))
+        (while (in-section-p)
+          (push (parse-keyvar (pop lambda-list))
+                (d-lambda-list-keyvars d-ll)))
         (setf (d-lambda-list-keyvars d-ll)
               (reverse (d-lambda-list-keyvars d-ll))))      
       (when (lambda-section '&allow-other-keys)
@@ -166,9 +165,9 @@
 
       ;; Aux variables
       (when (lambda-section '&aux)
-        (loop while (in-section-p)
-           do (push (parse-auxvar (pop lambda-list))
-                    (d-lambda-list-auxvars d-ll)))
+        (while (in-section-p)
+          (push (parse-auxvar (pop lambda-list))
+                (d-lambda-list-auxvars d-ll)))
         (setf (d-lambda-list-auxvars d-ll)
               (reverse (d-lambda-list-auxvars d-ll))))
       d-ll)))
@@ -176,18 +175,28 @@
 
 ;;;; Destructuring
 
+(defmacro do-keywords (var value list &body body)
+  (let ((g!list (gensym)))
+    `(let ((,g!list ,list))
+       (while ,g!list
+         (let ((,var (car ,g!list))
+               (,value (cadr ,g!list)))
+           ,@body)
+         (setq ,g!list (cddr ,g!list))))))
+
 ;;; Return T if KEYWORD is supplied in the list of arguments LIST.
 (defun keyword-supplied-p (keyword list)
-  (loop
-     for (key value) on list by #'cddr
-     thereis (eq key keyword)))
+  (do-keywords key value list
+    (declare (ignore value))
+    (when (eq key keyword) (return t))
+    (setq list (cddr list))))
 
 ;;; Return the value of KEYWORD in the list of arguments LIST or NIL
 ;;; if it is not supplied.
 (defun keyword-lookup (keyword list)
-  (loop
-     for (key value) on list by #'cddr
-     when (eq key keyword) do (return value)))
+  (do-keywords key value list
+    (when (eq key keyword) (return value))
+    (setq list (cddr list))))
 
 ;;; Validate a list of keyword arguments.
 (defun validate-keyvars (list keyword-list &optional allow-other-keys)
@@ -196,16 +205,17 @@
         (allow-other-keys
          (or allow-other-keys (keyword-lookup :allow-other-keys list))))
     (unless allow-other-keys
-      (or (loop
-             for (key value) on list by #'cddr
-             unless (find key keyword-list)
-             do (error "Unknown keyword argument `~S'." key))))
-    (loop
-       for (key . tail) on list by #'cddr
-       unless (symbolp key) do
-         (error "Keyword argument `~S' is not a symbol." key)
-       unless (consp tail) do
-         (error "Odd number of keyword arguments."))))
+      (do-keywords key value list
+        (declare (ignore value))
+        (unless (find key keyword-list)
+          (error "Unknown keyword argument `~S'." key))))
+    (do* ((tail list (cddr tail))
+          (key (car tail) (car tail)))
+         ((null list))
+      (unless (symbolp key)
+        (error "Keyword argument `~S' is not a symbol." key))
+      (unless (consp tail)
+        (error "Odd number of keyword arguments.")))))
 
 (defmacro !destructuring-bind (lambda-list expression &body body)
   (multiple-value-bind (d-ll)
@@ -213,8 +223,8 @@
     (let ((reqvar-count (length (d-lambda-list-reqvars d-ll)))
           (optvar-count (length (d-lambda-list-optvars d-ll)))
           (bindings '()))
-      (labels ( ;; Return a chain of the form (CAR (CDR (CDR ... (CDR X))), such that
-               ;; there are N calls to CDR.
+      (labels (;; Return a chain of the form (CAR (CDR (CDR ... (CDR X))),
+               ;; such that there are N calls to CDR.
                (nth-chain (x n &optional tail)
                  (if tail
                      (if (zerop n) x `(cdr ,(nth-chain x (1- n) t)))
