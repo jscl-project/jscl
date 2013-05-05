@@ -230,6 +230,12 @@
 (defmacro prog2 (form1 result &body body)
   `(prog1 (progn ,form1 ,result) ,@body))
 
+(defmacro prog (inits &rest body )
+  (multiple-value-bind (forms decls docstring) (parse-body body)
+    `(block nil
+       (let ,inits
+         ,@decls
+         (tagbody ,@forms)))))
 
 
 ;;; Go on growing the Lisp language in Ecmalisp, with more high level
