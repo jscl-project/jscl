@@ -235,15 +235,15 @@
                ;; symbol it will be bound to the form. The variable
                ;; where the form is bound is returned.
                (compute-pbindings (pattern form)
-                 (etypecase pattern
-                   (null)
-                   ;; Bind the symbol to FORM. 
-                   (symbol
+                 (cond
+                   ((null pattern))
+                   ;; Bind the symbol to FORM.
+                   ((symbolp pattern)
                     (push `(,pattern ,form) bindings)
                     (values pattern))
-                   ;; Bind FORM to a auxiliar variable and bind
-                   ;; pattern agains it recursively.
-                   (d-lambda-list
+                   ((d-lambda-list-p pattern)
+                    ;; Bind FORM to a auxiliar variable and bind
+                    ;; pattern agains it recursively.
                     (let ((subpart (gensym)))
                       (push `(,subpart
                               (progn
