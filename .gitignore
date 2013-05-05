@@ -4,3 +4,8 @@
 *.lib
 jscl.js
 tests.js
+*.dx64fsl
+#*
+.#*
+
+
