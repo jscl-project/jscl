@@ -498,6 +498,25 @@
       (incf index))
     output))
 
+;;; BOOTSTRAP MAGIC: We record the macro definitions as lists during
+;;; the bootstrap. Once everything is compiled, we want to dump the
+;;; whole global environment to the output file to reproduce it in the
+;;; run-time. However, the environment must contain expander functions
+;;; rather than lists. We do not know how to dump function objects
+;;; itself, so we mark the list definitions with this object and the
+;;; compiler will be called when this object has to be dumped.
+;;; Backquote/unquote does a similar magic, but this use is exclusive.
+;;;
+;;; Indeed, perhaps to compile the object other macros need to be
+;;; evaluated. For this reason we define a valid macro-function for
+;;; this symbol.
+(defvar *magic-unquote-marker* (gensym "MAGIC-UNQUOTE"))
+#+common-lisp
+(setf (macro-function *magic-unquote-marker*)
+      (lambda (form &optional environment)
+        (declare (ignore environment))
+        (second form)))
+
 (defvar *literal-table* nil)
 (defvar *literal-counter* 0)
 
