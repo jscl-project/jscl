@@ -35,6 +35,10 @@
     ("compiler"  :both)
     ("toplevel"  :target)))
 
+(setf *default-pathname-defaults* (parse-namestring (directory-namestring *load-pathname* )))
+#+ccl(load #P "src/compat.lisp")
+#+ccl(load #P "src/utils.lisp") 
+
 (defun source-pathname
     (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
   (if type
