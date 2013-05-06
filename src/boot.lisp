@@ -163,17 +163,22 @@
          ,result))))
 
 (defmacro cond (&rest clausules)
-  (if (null clausules)
-    nil
-    (if (eq (caar clausules) t)
-      `(progn ,@(cdar clausules))
-      (let ((test-symbol (gensym)))
-        `(let ((,test-symbol ,(caar clausules)))
-           (if ,test-symbol
-             ,(if (null (cdar clausules))
-                test-symbol
-                `(progn ,@(cdar clausules)))
-             (cond ,@(cdr clausules))))))))
+  (unless (null clausules)
+    (destructuring-bind (condition &body body)
+        (first clausules)
+      (cond
+        ((eq condition t)
+         `(progn ,@body))
+        ((null body)
+         (let ((test-symbol (gensym)))
+           `(let ((,test-symbol ,condition))
+              (if ,test-symbol
+                  ,test-symbol
+                  (cond ,@(rest clausules))))))
+        (t
+         `(if ,condition
+              (progn ,@body)
+              (cond ,@(rest clausules))))))))
 
 (defmacro case (form &rest clausules)
   (let ((!form (gensym)))
