@@ -214,7 +214,7 @@
                                      (write-to-string (cdr last) known-objects object-ids))))
                        ")"))
               ((arrayp form)
-               (let ((result "(")
+               (let ((result "#(")
                      (sep ""))
                  (dotimes (i (length form))
                    (setf result (concat result sep
