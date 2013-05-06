@@ -23,18 +23,17 @@
 ;;; to the compiler to be able to run.
 
 (eval-when-compile
-  (%compile-defmacro 'defmacro
-                     '(function
-                       (lambda (name args &rest body)
-                        `(eval-when-compile
-                           (%compile-defmacro ',name
-                                              '(function
-                                                (lambda ,(mapcar #'(lambda (x)
-                                                                     (if (eq x '&body)
-                                                                         '&rest
-                                                                         x))
-                                                                 args)
-                                                 ,@body))))))))
+  (let ((defmacro-macroexpander
+         '#'(lambda (form)
+              (destructuring-bind (name args &body body)
+                  form
+                (let ((whole (gensym)))
+                  `(eval-when-compile
+                     (%compile-defmacro ',name
+                                        '#'(lambda (,whole)
+                                             (destructuring-bind ,args ,whole
+                                               ,@body)))))))))
+    (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
 (defmacro declaim (&rest decls)
   `(eval-when-compile
@@ -140,27 +139,25 @@
               ,@(cdr newval))
          ,setter))))
 
-(defmacro dolist (iter &body body)
-  (let ((var (first iter))
-        (g!list (gensym)))
+(defmacro dolist ((var list &optional result) &body body)
+  (let ((g!list (gensym)))
+    (unless (symbolp var) (error "`~S' is not a symbol." var))
     `(block nil
-       (let ((,g!list ,(second iter))
+       (let ((,g!list ,list)
              (,var nil))
          (%while ,g!list
                  (setq ,var (car ,g!list))
                  (tagbody ,@body)
                  (setq ,g!list (cdr ,g!list)))
-         ,(third iter)))))
+         ,result))))
 
-(defmacro dotimes (iter &body body)
-  (let ((g!to (gensym))
-        (var (first iter))
-        (to (second iter))
-        (result (third iter)))
+(defmacro dotimes ((var count &optional result) &body body)
+  (let ((g!count (gensym)))
+    (unless (symbolp var) (error "`~S' is not a symbol." var))
     `(block nil
        (let ((,var 0)
-             (,g!to ,to))
-         (%while (< ,var ,g!to)
+             (,g!count ,count))
+         (%while (< ,var ,g!count)
                  (tagbody ,@body)
                  (incf ,var))
          ,result))))
@@ -230,6 +227,12 @@
 (defmacro prog2 (form1 result &body body)
   `(prog1 (progn ,form1 ,result) ,@body))
 
+(defmacro prog (inits &rest body )
+  (multiple-value-bind (forms decls docstring) (parse-body body)
+    `(block nil
+       (let ,inits
+         ,@decls
+         (tagbody ,@forms)))))
 
 
 ;;; Go on growing the Lisp language in Ecmalisp, with more high level
@@ -591,9 +594,15 @@
                                  (list nil)))))
                    clausules)))))
 
+(defmacro etypecase (x &rest clausules)
+  (let ((g!x (gensym)))
+    `(let ((,g!x ,x))
+       (typecase ,g!x
+         ,@clausules
+         (t (error "~X fell through etypeacase expression." ,g!x))))))
+
 (defun notany (fn seq)
   (not (some fn seq)))
-
 
 (defconstant internal-time-units-per-second 1000) 
 

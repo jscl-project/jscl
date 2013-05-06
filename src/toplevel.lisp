@@ -57,7 +57,7 @@
           char-code char= code-char cond cons consp constantly
           copy-alist copy-list copy-tree decf declaim declare defconstant
           define-setf-expander define-symbol-macro defmacro defparameter defun
-          defvar digit-char digit-char-p disassemble do do* documentation
+          defvar destructuring-bind digit-char digit-char-p disassemble do do* documentation
           dolist dotimes ecase eighth eq eql equal error eval every export expt
           fdefinition fifth find-package find-symbol first flet format fourth
           fset funcall function functionp gensym get-internal-real-time
@@ -68,7 +68,7 @@
           multiple-value-call multiple-value-list multiple-value-prog1
           nconc nil ninth not nreconc nth nthcdr null numberp or otherwise
           package-name package-use-list packagep pairlis parse-integer plusp
-          pop prin1-to-string print proclaim prog1 prog2 progn psetq push
+          pop prin1-to-string print proclaim prog prog1 prog2 progn psetq push
           quote rassoc read-from-string remove remove-if remove-if-not return
           return-from revappend reverse rplaca rplacd second set setf seventh
           setq sixth some string string-upcase string= stringp subseq subst
