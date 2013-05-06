@@ -13,48 +13,29 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-(defmacro do-sequence (iteration &body body)
-  (let ((seq (gensym))
-        (index (gensym)))
-    `(let ((,seq ,(second iteration)))
-       (cond
-         ;; Strings
-         ((stringp ,seq)
-          (let ((,index 0))
-            (dotimes (,index (length ,seq))
-              (let ((,(first iteration)
-                     (char ,seq ,index)))
-                ,@body))))
-         ;; Lists
-         ((listp ,seq)
-          (dolist (,(first iteration) ,seq)
-            ,@body))
-         (t
-          (error "type-error!"))))))
-
-(defmacro doseq ((elt seq &optional index) &body body)
-  (let* ((nseq (gensym "seq"))
-         (i (or index (gensym "i")))
-         (list-body (if index
-                        `(let ((,i -1))
-                           (dolist (,elt ,nseq)
-                             (incf ,i)
-                             ,@body))
-                        `(dolist (,elt ,nseq)
-                           ,@body))))
+(defmacro do-sequence ((elt seq &optional (index (gensym "i") index-p)) &body body)
+  (let ((nseq (gensym "seq")))
+    (unless (symbolp elt)
+      (error "`~S' must be a symbol." elt))
     `(let ((,nseq ,seq))
        (if (listp ,nseq)
-           ,list-body
-           (dotimes (,i (length ,nseq))
-             (let ((,elt (aref ,nseq ,i)))
+           ,(if index-p
+                `(let ((,index -1))
+                   (dolist (,elt ,nseq)
+                     (incf ,index)
+                     ,@body))
+                `(dolist (,elt ,nseq)
+                   ,@body))
+           (dotimes (,index (length ,nseq))
+             (let ((,elt (aref ,nseq ,index)))
                ,@body))))))
 
 (defun find (item seq &key key (test #'eql))
   (if key
-      (doseq (x seq)
+      (do-sequence (x seq)
         (when (funcall test (funcall key x) item)
           (return x)))
-      (doseq (x seq)
+      (do-sequence (x seq)
         (when (funcall test x item)
           (return x)))))
 
@@ -90,7 +71,7 @@
     ((listp seq)
      (let* ((head (cons nil nil))
             (tail head))
-       (doseq (elt seq)
+       (do-sequence (elt seq)
          (unless (eql x elt)
            (let ((new (list elt)))
              (rplacd tail new)
@@ -98,7 +79,7 @@
        (cdr head)))
     (t
      (let (vector)
-       (doseq (elt seq index)
+       (do-sequence (elt seq index)
          (if (eql x elt)
              ;; Copy the beginning of the vector only when we find an element
              ;; that does not match.
