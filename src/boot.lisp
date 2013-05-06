@@ -60,10 +60,10 @@
 (defmacro unless (condition &body body)
   `(if ,condition nil (progn ,@body)))
 
-(defmacro defvar (name value &optional docstring)
+(defmacro defvar (name &optional (value nil value-p) docstring)
   `(progn
      (declaim (special ,name))
-     (unless (boundp ',name) (setq ,name ,value))
+     ,@(when value-p `((unless (boundp ',name) (setq ,name ,value))))
      ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
      ',name))
 
