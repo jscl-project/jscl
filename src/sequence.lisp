@@ -13,6 +13,25 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
+(defmacro do-sequence (iteration &body body)
+  (let ((seq (gensym))
+        (index (gensym)))
+    `(let ((,seq ,(second iteration)))
+       (cond
+         ;; Strings
+         ((stringp ,seq)
+          (let ((,index 0))
+            (dotimes (,index (length ,seq))
+              (let ((,(first iteration)
+                     (char ,seq ,index)))
+                ,@body))))
+         ;; Lists
+         ((listp ,seq)
+          (dolist (,(first iteration) ,seq)
+            ,@body))
+         (t
+          (error "type-error!"))))))
+
 (defmacro doseq ((elt seq &optional index) &body body)
   (let* ((nseq (gensym "seq"))
          (i (or index (gensym "i")))
@@ -112,3 +131,9 @@
      (cons (car list) (remove-if-not func (cdr list))))
     (t
      (remove-if-not func (cdr list)))))
+
+(defun subseq (seq a &optional b)
+  (if b
+      (slice seq a b)
+      (slice seq a)))
+

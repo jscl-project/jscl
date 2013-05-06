@@ -397,30 +397,6 @@
   (and (<= 0 weight 9)
        (char "0123456789" weight)))
 
-(defun subseq (seq a &optional b)
-  (if b
-      (slice seq a b)
-      (slice seq a)))
-
-(defmacro do-sequence (iteration &body body)
-  (let ((seq (gensym))
-        (index (gensym)))
-    `(let ((,seq ,(second iteration)))
-       (cond
-         ;; Strings
-         ((stringp ,seq)
-          (let ((,index 0))
-            (dotimes (,index (length ,seq))
-              (let ((,(first iteration)
-                     (char ,seq ,index)))
-                ,@body))))
-         ;; Lists
-         ((listp ,seq)
-          (dolist (,(first iteration) ,seq)
-            ,@body))
-         (t
-          (error "type-error!"))))))
-
 (defun equal (x y)
   (cond
     ((eql x y) t)
