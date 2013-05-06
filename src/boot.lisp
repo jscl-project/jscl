@@ -185,11 +185,13 @@
     `(let ((,!form ,form))
        (cond
          ,@(mapcar (lambda (clausule)
-                     (if (or (eq (car clausule) t)
-                             (eq (car clausule) 'otherwise))
-                         `(t ,@(cdr clausule))
-                         `((eql ,!form ',(car clausule))
-                           ,@(cdr clausule))))
+                     (destructuring-bind (keys &body body)
+                         clausule
+                       (if (or (eq keys 't) (eq keys 'otherwise))
+                           `(t nil ,@body)
+                           (let ((keys (if (listp keys) keys (list keys))))
+                             `((or ,@(mapcar (lambda (key) `(eql ,!form ',key)) keys))
+                               nil ,@body)))))
                    clausules)))))
 
 (defmacro ecase (form &rest clausules)
