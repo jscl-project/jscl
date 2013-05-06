@@ -381,6 +381,9 @@
 (defun plusp (x) (< 0 x))
 (defun minusp (x) (< x 0))
 
+(defun atom (x)
+  (not (consp x)))
+
 (defmacro doseq ((elt seq &optional index) &body body)
   (let* ((nseq (gensym "seq"))
          (i (or index (gensym "i")))
