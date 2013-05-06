@@ -384,34 +384,6 @@
 (defun atom (x)
   (not (consp x)))
 
-(defun remove (x list)
-  (cond
-    ((null list)
-     nil)
-    ((eql x (car list))
-     (remove x (cdr list)))
-    (t
-     (cons (car list) (remove x (cdr list))))))
-
-(defun remove-if (func list)
-  (cond
-    ((null list)
-     nil)
-    ((funcall func (car list))
-     (remove-if func (cdr list)))
-    (t
-     ;;
-     (cons (car list) (remove-if func (cdr list))))))
-
-(defun remove-if-not (func list)
-  (cond
-    ((null list)
-     nil)
-    ((funcall func (car list))
-     (cons (car list) (remove-if-not func (cdr list))))
-    (t
-     (remove-if-not func (cdr list)))))
-
 (defun alpha-char-p (x)
   (or (<= (char-code #\a) (char-code x) (char-code #\z))
       (<= (char-code #\Z) (char-code x) (char-code #\Z))))
@@ -424,59 +396,6 @@
 (defun digit-char (weight)
   (and (<= 0 weight 9)
        (char "0123456789" weight)))
-
-(defun subseq (seq a &optional b)
-  (if b
-      (slice seq a b)
-      (slice seq a)))
-
-(defmacro do-sequence (iteration &body body)
-  (let ((seq (gensym))
-        (index (gensym)))
-    `(let ((,seq ,(second iteration)))
-       (cond
-         ;; Strings
-         ((stringp ,seq)
-          (let ((,index 0))
-            (dotimes (,index (length ,seq))
-              (let ((,(first iteration)
-                     (char ,seq ,index)))
-                ,@body))))
-         ;; Lists
-         ((listp ,seq)
-          (dolist (,(first iteration) ,seq)
-            ,@body))
-         (t
-          (error "type-error!"))))))
-
-(defun find (item sequence &key (key #'identity) (test #'eql))
-  (do-sequence (x sequence)
-    (when (funcall test (funcall key x) item)
-      (return x))))
-
-(defun find-if (predicate sequence &key (key #'identity))
-  (do-sequence (x sequence)
-    (when (funcall predicate (funcall key x))
-      (return x))))
-
-(defun some (function seq)
-  (do-sequence (elt seq)
-    (when (funcall function elt)
-      (return-from some t))))
-
-(defun every (function seq)
-  (do-sequence (elt seq)
-    (unless (funcall function elt)
-      (return-from every nil)))
-  t)
-
-(defun position (elt sequence)
-  (let ((pos 0))
-    (do-sequence (x seq)
-      (when (eq elt x)
-        (return))
-      (incf pos))
-    pos))
 
 (defun equal (x y)
   (cond

@@ -1536,6 +1536,14 @@
     (indent "r.push(" (ls-compile nil) ");" *newline*)
     "return r;" *newline*))
 
+;;; FIXME: should take optional min-extension.
+;;; FIXME: should use fill-pointer instead of the absolute end of array
+(define-builtin vector-push-extend (new vector)
+  (js!selfcall
+    "var v = " vector ";" *newline*
+    "v.push(" new ");" *newline*
+    "return v;"))
+
 (define-builtin arrayp (x)
   (js!bool
    (js!selfcall

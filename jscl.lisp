@@ -28,6 +28,7 @@
     ("utils"            :both)
     ("list"             :target)
     ("string"           :target)
+    ("sequence"         :target)
     ("print"            :target)
     ("package"          :target)
     ("ffi"              :target)
