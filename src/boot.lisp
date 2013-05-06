@@ -493,10 +493,10 @@
          (t
           (error "type-error!"))))))
 
-(defun find (item sequence &key (key #'identity) (test #'eql))
-  (do-sequence (x sequence)
-    (when (funcall test (funcall key x) item)
-      (return x))))
+;; (defun find (item sequence &key (key #'identity) (test #'eql))
+;;   (do-sequence (x sequence)
+;;     (when (funcall test (funcall key x) item)
+;;       (return x))))
 
 (defun find-if (predicate sequence &key (key #'identity))
   (do-sequence (x sequence)
