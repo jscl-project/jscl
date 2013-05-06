@@ -39,30 +39,19 @@
         (when (funcall test x item)
           (return x)))))
 
-(defun find-if (predicate sequence &key (key #'identity))
-  (do-sequence (x sequence)
-    (when (funcall predicate (funcall key x))
-      (return x))))
+(defun find-if (predicate sequence &key key)
+  (if key
+      (do-sequence (x sequence)
+        (when (funcall predicate (funcall key x))
+          (return x)))
+      (do-sequence (x sequence)
+        (when (funcall predicate x)
+          (return x)))))
 
-(defun some (function seq)
-  (do-sequence (elt seq)
-    (when (funcall function elt)
-      (return-from some t))))
-
-(defun every (function seq)
-  (do-sequence (elt seq)
-    (unless (funcall function elt)
-      (return-from every nil)))
-  t)
-
-(defun position (elt sequence)
-  (let ((pos 0))
-    (do-sequence (x seq)
-      (when (eq elt x)
-        (return))
-      (incf pos))
-    pos))
-
+(defun position (elt sequence &key (test #'eql))
+  (do-sequence (x seq index)
+    (when (funcall test elt x)
+      (return index))))
 
 (defun remove (x seq)
   (cond
@@ -92,7 +81,19 @@
        (or vector seq)))))
 
 
-;;; TODO: Support vectors
+(defun some (function seq)
+  (do-sequence (elt seq)
+    (when (funcall function elt)
+      (return-from some t))))
+
+(defun every (function seq)
+  (do-sequence (elt seq)
+    (unless (funcall function elt)
+      (return-from every nil)))
+  t)
+
+
+;;; TODO: Support both List and vectors in the following functions
 
 (defun remove-if (func list)
   (cond
