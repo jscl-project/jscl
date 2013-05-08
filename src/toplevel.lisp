@@ -48,7 +48,7 @@
         + -)
   (values-list /))
 
-(export '(&body &key &optional &rest * ** *** *gensym-counter* *package* + ++
+(export '(&body &key &optional &rest * ** *** *gensym-counter* *package* *print-circle* + ++
           +++ - / // /// 1+ 1- < <= = = > >= acons adjoin and append apply aref
           arrayp assoc atom block boundp butlast cadar caaar caadr cdaar cdadr
           cddar caaaar caaadr caadar caaddr cadaar cadadr caddar cdaaar

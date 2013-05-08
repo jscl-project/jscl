@@ -22,6 +22,53 @@
 ;;; The Lisp reader, parse strings and return Lisp objects. The main
 ;;; entry points are `ls-read' and `ls-read-from-string'.
 
+;;; #= / ## implementation
+
+;; For now associations label->object are kept in a plist
+;; May be it makes sense to use a vector instead if speed
+;; is considered a problem with many labelled objects
+(defvar *labelled-objects* nil)
+
+(defun new-labelled-objects-table ()
+  (setf *labelled-objects* nil))
+
+(defun find-labelled-object (id)
+  (assoc id *labelled-objects*))
+
+(defun add-labelled-object (id value)
+  (push (cons id value) *labelled-objects*))
+
+;; A unique value used to mark in the labelled objects
+;; table an object that is being constructed
+;; (e.g. #1# while reading elements of "#1=(#1# #1# #1#)")
+(defvar *future-value* (make-symbol "future"))
+
+;; A unique value used to mark temporary values that will
+;; be replaced when fixups are run.
+(defvar *fixup-value* (make-symbol "fixup"))
+
+;; Fixup locations keeps a list of conses where the CAR
+;; is a callable to be called with the value of the object
+;; associated to label stored in CDR once reading is completed
+(defvar *fixup-locations* nil)
+
+(defun fixup-backrefs ()
+  (while *fixup-locations*
+    (let* ((fixup (pop *fixup-locations*))
+           (callable (car fixup))
+           (cell (find-labelled-object (cdr fixup))))
+      (if cell
+          (funcall callable (cdr cell))
+          (error "Internal error in fixup-backrefs: object #~S# not found"
+                 (cdr fixup))))))
+
+;; A function that will need to return a fixup callback
+;; for the object that is being read. The returned callback will
+;; be called with the result of reading.
+(defvar *make-fixup-function*
+  (lambda ()
+    (error "Internal error in fixup creation during read")))
+
 (defun make-string-stream (string)
   (cons string 0))
 
@@ -95,7 +142,7 @@
     (unless (char= ch expected)
       (error "Character ~S was found but ~S was expected." ch expected))))
 
-(defun %read-list (stream)
+(defun %read-list (stream &optional (eof-error-p t) eof-value)
   (skip-whitespaces-and-comments stream)
   (let ((ch (%peek-char stream)))
     (cond
@@ -105,28 +152,38 @@
        (discard-char stream #\))
        nil)
       (t
-       (let* ((eof (gensym))
-              (next (ls-read stream nil eof)))
+       (let* ((cell (cons nil nil))
+              (*make-fixup-function* (lambda ()
+                                       (lambda (obj)
+                                         (rplaca cell obj))))
+              (eof (gensym))
+              (next (ls-read stream nil eof t)))
+         (rplaca cell next)
          (skip-whitespaces-and-comments stream)
          (cond
            ((eq next eof)
-            (discard-char stream #\)))
+            (discard-char stream #\))
+            nil)
            (t
-            (cons next
-                  (if (char= (%peek-char stream) #\.)
-                      (progn
-                        (discard-char stream #\.)
-                        (if (terminalp (%peek-char stream))
-                            (prog1 (ls-read stream) ; Dotted pair notation
-                              (skip-whitespaces-and-comments stream)
-                              (let ((ch (%peek-char stream)))
-                                (if (or (null ch) (char= #\) ch))
-                                    (discard-char stream #\))
-                                    (error "Multiple objects following . in a list"))))
-                            (let ((token (concat "." (read-escaped-until stream #'terminalp))))
-                              (cons (interpret-token token)
-                                    (%read-list stream)))))
-                      (%read-list stream))))))))))
+            (if (char= (%peek-char stream) #\.)
+                (progn
+                  (discard-char stream #\.)
+                  (if (terminalp (%peek-char stream))
+                      (let ((*make-fixup-function* (lambda ()
+                                                     (lambda (obj)
+                                                       (rplacd cell obj)))))
+                        ;; Dotted pair notation
+                        (rplacd cell (ls-read stream eof-error-p eof-value t))
+                        (skip-whitespaces-and-comments stream)
+                        (let ((ch (%peek-char stream)))
+                          (if (or (null ch) (char= #\) ch))
+                              (discard-char stream #\))
+                              (error "Multiple objects following . in a list"))))
+                      (let ((token (concat "." (read-escaped-until stream #'terminalp))))
+                        (rplacd cell (cons (interpret-token token)
+                                           (%read-list stream eof-error-p eof-value))))))
+                (rplacd cell (%read-list stream eof-error-p eof-value)))
+            cell)))))))
 
 (defun read-string (stream)
   (let ((string "")
@@ -143,37 +200,89 @@
 
 (defun read-sharp (stream &optional eof-error-p eof-value)
   (%read-char stream)
-  (ecase (%read-char stream)
-    (#\'
-     (list 'function (ls-read stream)))
-    (#\( (list-to-vector (%read-list stream)))
-    (#\: (make-symbol
-          (unescape-token
-           (string-upcase-noescaped
-            (read-escaped-until stream #'terminalp)))))
-    (#\\
-     (let ((cname
-            (concat (string (%read-char stream))
-                    (read-until stream #'terminalp))))
-       (cond
-         ((string= cname "space") #\space)
-         ((string= cname "tab") #\tab)
-         ((string= cname "newline") #\newline)
-         (t (char cname 0)))))
-    (#\+
-     (let ((feature (let ((symbol (ls-read stream)))
-                      (unless (symbolp symbol)
-                        (error "Invalid feature ~S" symbol))
-                      (intern (string symbol) "KEYWORD"))))
-       (ecase feature
-         (:common-lisp
-          (ls-read stream)
-          (ls-read stream eof-error-p eof-value))
-         (:jscl
-          (ls-read stream eof-error-p eof-value))
-         (:nil
-          (ls-read stream)
-          (ls-read stream eof-error-p eof-value)))))))
+  (let ((ch (%read-char stream)))
+    (cond
+      ((char= ch #\')
+       (list 'function (ls-read stream eof-error-p eof-value t)))
+      ((char= ch #\()
+       (do ((elements nil)
+            (result nil)
+            (index 0 (1+ index)))
+           ((progn (skip-whitespaces-and-comments stream)
+                   (or (null (%peek-char stream))
+                       (char= (%peek-char stream) #\))))
+              (discard-char stream #\))
+              (setf result (make-array index))
+              (dotimes (i index)
+                (aset result (decf index) (pop elements)))
+              result)
+         (let* ((ix index) ; Can't just use index: the same var would be captured in all fixups
+                (*make-fixup-function* (lambda ()
+                                         (lambda (obj)
+                                           (aset result ix obj))))
+                (eof (gensym))
+                (value (ls-read stream nil eof t)))
+           (push value elements))))
+      ((char= ch #\:)
+       (make-symbol
+        (unescape-token
+         (string-upcase-noescaped
+          (read-escaped-until stream #'terminalp)))))
+      ((char= ch #\\)
+       (let ((cname
+              (concat (string (%read-char stream))
+                      (read-until stream #'terminalp))))
+         (cond
+           ((string= cname "space") #\space)
+           ((string= cname "tab") #\tab)
+           ((string= cname "newline") #\newline)
+           (t (char cname 0)))))
+      ((char= ch #\+)
+       (let ((feature (let ((symbol (ls-read stream eof-error-p eof-value t)))
+                        (unless (symbolp symbol)
+                          (error "Invalid feature ~S" symbol))
+                        (intern (string symbol) "KEYWORD"))))
+         (ecase feature
+           (:common-lisp
+              (ls-read stream)
+              (ls-read stream eof-error-p eof-value t))
+           (:jscl
+              (ls-read stream eof-error-p eof-value t))
+           (:nil
+              (ls-read stream)
+              (ls-read stream eof-error-p eof-value t)))))
+      ((and ch (digit-char-p ch))
+       (let ((id (digit-char-p ch)))
+         (while (and (%peek-char stream)
+                     (digit-char-p (%peek-char stream)))
+           (setf id (+ (* id 10) (digit-char-p (%read-char stream)))))
+         (ecase (%peek-char stream)
+           (#\=
+              (%read-char stream)
+              (if (find-labelled-object id)
+                  (error "Duplicated label #~S=" id)
+                  (progn
+                    (add-labelled-object id *future-value*)
+                    (let ((obj (ls-read stream eof-error-p eof-value t)))
+                      ;; FIXME: somehow the more natural
+                      ;;    (setf (cdr (find-labelled-object id)) obj)
+                      ;; doesn't work
+                      (rplacd (find-labelled-object id) obj)
+                      obj))))
+           (#\#
+              (%read-char stream)
+              (let ((cell (find-labelled-object id)))
+                (if cell
+                    (if (eq (cdr cell) *future-value*)
+                        (progn
+                          (push (cons (funcall *make-fixup-function*)
+                                      id)
+                                *fixup-locations*)
+                          *fixup-value*)
+                        (cdr cell))
+                    (error "Invalid labelled object #~S#" id)))))))
+      (t
+       (error "Invalid dispatch character after #")))))
 
 (defun unescape-token (x)
   (let ((result ""))
@@ -376,36 +485,48 @@
       (read-float string)
       (read-symbol string)))
 
-(defun ls-read (stream  &optional (eof-error-p t) eof-value)
-  (skip-whitespaces-and-comments stream)
-  (let ((ch (%peek-char stream)))
-    (cond
-      ((or (null ch) (char= ch #\)))
-       (if eof-error-p
-           (error "End of file")
-           eof-value))
-      ((char= ch #\()
-       (%read-char stream)
-       (%read-list stream))
-      ((char= ch #\')
-       (%read-char stream)
-       (list 'quote (ls-read stream)))
-      ((char= ch #\`)
-       (%read-char stream)
-       (list 'backquote (ls-read stream)))
-      ((char= ch #\")
-       (%read-char stream)
-       (read-string stream))
-      ((char= ch #\,)
-       (%read-char stream)
-       (if (eql (%peek-char stream) #\@)
-           (progn (%read-char stream) (list 'unquote-splicing (ls-read stream)))
-           (list 'unquote (ls-read stream))))
-      ((char= ch #\#)
-       (read-sharp stream))
-      (t
-       (let ((string (read-escaped-until stream #'terminalp)))
-         (interpret-token string))))))
+(defun ls-read (stream &optional (eof-error-p t) eof-value recursive-p)
+  (let ((save-labelled-objects *labelled-objects*)
+        (save-fixup-locations *fixup-locations*))
+    (unless recursive-p
+      (setf *fixup-locations* nil)
+      (setf *labelled-objects* (new-labelled-objects-table)))
+    (prog1
+        (progn
+          (skip-whitespaces-and-comments stream)
+          (let ((ch (%peek-char stream)))
+            (cond
+              ((or (null ch) (char= ch #\)))
+               (if eof-error-p
+                   (error "End of file")
+                   eof-value))
+              ((char= ch #\()
+               (%read-char stream)
+               (%read-list stream eof-error-p eof-value))
+              ((char= ch #\')
+               (%read-char stream)
+               (list 'quote (ls-read stream eof-error-p eof-value t)))
+              ((char= ch #\`)
+               (%read-char stream)
+               (list 'backquote (ls-read stream eof-error-p eof-value t)))
+              ((char= ch #\")
+               (%read-char stream)
+               (read-string stream))
+              ((char= ch #\,)
+               (%read-char stream)
+               (if (eql (%peek-char stream) #\@)
+                   (progn (%read-char stream) (list 'unquote-splicing
+                                                    (ls-read stream eof-error-p eof-value t)))
+                   (list 'unquote (ls-read stream eof-error-p eof-value t))))
+              ((char= ch #\#)
+               (read-sharp stream eof-error-p eof-value))
+              (t
+               (let ((string (read-escaped-until stream #'terminalp)))
+                 (interpret-token string))))))
+      (unless recursive-p
+        (fixup-backrefs)
+        (setf *labelled-objects* save-labelled-objects)
+        (setf *fixup-locations* save-fixup-locations)))))
 
 (defun ls-read-from-string (string &optional (eof-error-p t) eof-value)
   (ls-read (make-string-stream string) eof-error-p eof-value))
