@@ -1564,6 +1564,18 @@
     "if (i < 0 || i >= x.length) throw 'Out of range';" *newline*
     "return x[i] = " value ";" *newline*))
 
+(define-builtin afind (value array)
+  (js!selfcall
+    "var v = " value ";" *newline*
+    "var x = " array ";" *newline*
+    "return x.indexOf(v);" *newline*))
+
+(define-builtin aresize (array new-size)
+  (js!selfcall
+    "var x = " array ";" *newline*
+    "var n = " new-size ";" *newline*
+    "return x.length = n;" *newline*))
+
 (define-builtin get-internal-real-time ()
   "(new Date()).getTime()")
 
