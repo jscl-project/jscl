@@ -32,6 +32,7 @@
     ("print"            :target)
     ("package"          :target)
     ("ffi"              :target)
+    ("misc"             :target)
     ("read"             :both)
     ("defstruct"        :both)
     ("lambda-list"      :both)
