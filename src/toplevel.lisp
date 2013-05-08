@@ -48,13 +48,8 @@
         + -)
   (values-list /))
 
-(export '(&body &key &optional &rest * ** ***
-
-          *gensym-counter* *package* *features*
-
-         + ++ +++ - / // /// 1+ 1- < <= = = > >=
-
-          acons adjoin and append apply aref
+(export '(&body &key &optional &rest * ** *** *gensym-counter* *package* *print-circle* *features* + ++
+          +++ - / // /// 1+ 1- < <= = = > >= acons adjoin and append apply aref
           arrayp assoc atom block boundp butlast cadar caaar caadr cdaar cdadr
           cddar caaaar caaadr caadar caaddr cadaar cadadr caddar cdaaar
           cdaadr cdadar cdaddr cddaar cddadr cdddar cddddr caar cadddr caddr

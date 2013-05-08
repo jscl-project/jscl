@@ -84,11 +84,14 @@
           (if (in "package" symbol)
               (find-package-or-fail (oget symbol "package"))
               *common-lisp-package*))
-         (symbols (%package-symbols package)))
+         (symbols (%package-symbols package))
+         (exports (%package-external-symbols package)))
     (oset symbol "package" package)
+    (oset symbols (symbol-name symbol) symbol)
+    ;; Turn keywords self-evaluated and export them.
     (when (eq package *keyword-package*)
-      (oset symbol "value" symbol))
-    (oset symbols (symbol-name symbol) symbol)))
+      (oset symbol "value" symbol)
+      (oset exports (symbol-name symbol) symbol))))
 
 (defun find-symbol (name &optional (package *package*))
   (let* ((package (find-package-or-fail package))

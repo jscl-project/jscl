@@ -527,8 +527,7 @@
   #+common-lisp
   (let ((package (symbol-package symbol)))
     (if (eq package (find-package "KEYWORD"))
-        (code "(new Symbol(" (dump-string (symbol-name symbol)) ", "
-              (dump-string (package-name package)) "))")
+        (code "(new Symbol(" (dump-string (symbol-name symbol)) ", " (dump-string (package-name package)) "))")
         (code "(new Symbol(" (dump-string (symbol-name symbol)) "))")))
   #+jscl
   (let ((package (symbol-package symbol)))
@@ -577,6 +576,8 @@
                (let ((jsvar (genlit)))
                  (push (cons sexp jsvar) *literal-table*)
                  (toplevel-compilation (code "var " jsvar " = " dumped))
+                 (when (keywordp sexp)
+                   (toplevel-compilation (code jsvar ".value = " jsvar)))
                  jsvar)))))))
 
 
@@ -1562,6 +1563,18 @@
     "var i = " n ";" *newline*
     "if (i < 0 || i >= x.length) throw 'Out of range';" *newline*
     "return x[i] = " value ";" *newline*))
+
+(define-builtin afind (value array)
+  (js!selfcall
+    "var v = " value ";" *newline*
+    "var x = " array ";" *newline*
+    "return x.indexOf(v);" *newline*))
+
+(define-builtin aresize (array new-size)
+  (js!selfcall
+    "var x = " array ";" *newline*
+    "var n = " new-size ";" *newline*
+    "return x.length = n;" *newline*))
 
 (define-builtin get-internal-real-time ()
   "(new Date()).getTime()")
