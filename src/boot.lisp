@@ -23,18 +23,17 @@
 ;;; to the compiler to be able to run.
 
 (eval-when-compile
-  (%compile-defmacro 'defmacro
-                     '(function
-                       (lambda (name args &rest body)
-                        `(eval-when-compile
-                           (%compile-defmacro ',name
-                                              '(function
-                                                (lambda ,(mapcar #'(lambda (x)
-                                                                     (if (eq x '&body)
-                                                                         '&rest
-                                                                         x))
-                                                                 args)
-                                                 ,@body))))))))
+  (let ((defmacro-macroexpander
+         '#'(lambda (form)
+              (destructuring-bind (name args &body body)
+                  form
+                (let ((whole (gensym)))
+                  `(eval-when-compile
+                     (%compile-defmacro ',name
+                                        '#'(lambda (,whole)
+                                             (destructuring-bind ,args ,whole
+                                               ,@body)))))))))
+    (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
 (defmacro declaim (&rest decls)
   `(eval-when-compile
@@ -61,10 +60,10 @@
 (defmacro unless (condition &body body)
   `(if ,condition nil (progn ,@body)))
 
-(defmacro defvar (name value &optional docstring)
+(defmacro defvar (name &optional (value nil value-p) docstring)
   `(progn
      (declaim (special ,name))
-     (unless (boundp ',name) (setq ,name ,value))
+     ,@(when value-p `((unless (boundp ',name) (setq ,name ,value))))
      ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
      ',name))
 
@@ -140,54 +139,59 @@
               ,@(cdr newval))
          ,setter))))
 
-(defmacro dolist (iter &body body)
-  (let ((var (first iter))
-        (g!list (gensym)))
+(defmacro dolist ((var list &optional result) &body body)
+  (let ((g!list (gensym)))
+    (unless (symbolp var) (error "`~S' is not a symbol." var))
     `(block nil
-       (let ((,g!list ,(second iter))
+       (let ((,g!list ,list)
              (,var nil))
          (%while ,g!list
                  (setq ,var (car ,g!list))
                  (tagbody ,@body)
                  (setq ,g!list (cdr ,g!list)))
-         ,(third iter)))))
+         ,result))))
 
-(defmacro dotimes (iter &body body)
-  (let ((g!to (gensym))
-        (var (first iter))
-        (to (second iter))
-        (result (third iter)))
+(defmacro dotimes ((var count &optional result) &body body)
+  (let ((g!count (gensym)))
+    (unless (symbolp var) (error "`~S' is not a symbol." var))
     `(block nil
        (let ((,var 0)
-             (,g!to ,to))
-         (%while (< ,var ,g!to)
+             (,g!count ,count))
+         (%while (< ,var ,g!count)
                  (tagbody ,@body)
                  (incf ,var))
          ,result))))
 
 (defmacro cond (&rest clausules)
-  (if (null clausules)
-    nil
-    (if (eq (caar clausules) t)
-      `(progn ,@(cdar clausules))
-      (let ((test-symbol (gensym)))
-        `(let ((,test-symbol ,(caar clausules)))
-           (if ,test-symbol
-             ,(if (null (cdar clausules))
-                test-symbol
-                `(progn ,@(cdar clausules)))
-             (cond ,@(cdr clausules))))))))
+  (unless (null clausules)
+    (destructuring-bind (condition &body body)
+        (first clausules)
+      (cond
+        ((eq condition t)
+         `(progn ,@body))
+        ((null body)
+         (let ((test-symbol (gensym)))
+           `(let ((,test-symbol ,condition))
+              (if ,test-symbol
+                  ,test-symbol
+                  (cond ,@(rest clausules))))))
+        (t
+         `(if ,condition
+              (progn ,@body)
+              (cond ,@(rest clausules))))))))
 
 (defmacro case (form &rest clausules)
   (let ((!form (gensym)))
     `(let ((,!form ,form))
        (cond
          ,@(mapcar (lambda (clausule)
-                     (if (or (eq (car clausule) t)
-                             (eq (car clausule) 'otherwise))
-                         `(t ,@(cdr clausule))
-                         `((eql ,!form ',(car clausule))
-                           ,@(cdr clausule))))
+                     (destructuring-bind (keys &body body)
+                         clausule
+                       (if (or (eq keys 't) (eq keys 'otherwise))
+                           `(t nil ,@body)
+                           (let ((keys (if (listp keys) keys (list keys))))
+                             `((or ,@(mapcar (lambda (key) `(eql ,!form ',key)) keys))
+                               nil ,@body)))))
                    clausules)))))
 
 (defmacro ecase (form &rest clausules)
@@ -230,6 +234,12 @@
 (defmacro prog2 (form1 result &body body)
   `(prog1 (progn ,form1 ,result) ,@body))
 
+(defmacro prog (inits &rest body )
+  (multiple-value-bind (forms decls docstring) (parse-body body)
+    `(block nil
+       (let ,inits
+         ,@decls
+         (tagbody ,@forms)))))
 
 
 ;;; Go on growing the Lisp language in Ecmalisp, with more high level
@@ -374,34 +384,6 @@
 (defun atom (x)
   (not (consp x)))
 
-(defun remove (x list)
-  (cond
-    ((null list)
-     nil)
-    ((eql x (car list))
-     (remove x (cdr list)))
-    (t
-     (cons (car list) (remove x (cdr list))))))
-
-(defun remove-if (func list)
-  (cond
-    ((null list)
-     nil)
-    ((funcall func (car list))
-     (remove-if func (cdr list)))
-    (t
-     ;;
-     (cons (car list) (remove-if func (cdr list))))))
-
-(defun remove-if-not (func list)
-  (cond
-    ((null list)
-     nil)
-    ((funcall func (car list))
-     (cons (car list) (remove-if-not func (cdr list))))
-    (t
-     (remove-if-not func (cdr list)))))
-
 (defun alpha-char-p (x)
   (or (<= (char-code #\a) (char-code x) (char-code #\z))
       (<= (char-code #\Z) (char-code x) (char-code #\Z))))
@@ -414,59 +396,6 @@
 (defun digit-char (weight)
   (and (<= 0 weight 9)
        (char "0123456789" weight)))
-
-(defun subseq (seq a &optional b)
-  (if b
-      (slice seq a b)
-      (slice seq a)))
-
-(defmacro do-sequence (iteration &body body)
-  (let ((seq (gensym))
-        (index (gensym)))
-    `(let ((,seq ,(second iteration)))
-       (cond
-         ;; Strings
-         ((stringp ,seq)
-          (let ((,index 0))
-            (dotimes (,index (length ,seq))
-              (let ((,(first iteration)
-                     (char ,seq ,index)))
-                ,@body))))
-         ;; Lists
-         ((listp ,seq)
-          (dolist (,(first iteration) ,seq)
-            ,@body))
-         (t
-          (error "type-error!"))))))
-
-(defun find (item sequence &key (key #'identity) (test #'eql))
-  (do-sequence (x sequence)
-    (when (funcall test (funcall key x) item)
-      (return x))))
-
-(defun find-if (predicate sequence &key (key #'identity))
-  (do-sequence (x sequence)
-    (when (funcall predicate (funcall key x))
-      (return x))))
-
-(defun some (function seq)
-  (do-sequence (elt seq)
-    (when (funcall function elt)
-      (return-from some t))))
-
-(defun every (function seq)
-  (do-sequence (elt seq)
-    (unless (funcall function elt)
-      (return-from every nil)))
-  t)
-
-(defun position (elt sequence)
-  (let ((pos 0))
-    (do-sequence (x seq)
-      (when (eq elt x)
-        (return))
-      (incf pos))
-    pos))
 
 (defun equal (x y)
   (cond
@@ -591,9 +520,15 @@
                                  (list nil)))))
                    clausules)))))
 
+(defmacro etypecase (x &rest clausules)
+  (let ((g!x (gensym)))
+    `(let ((,g!x ,x))
+       (typecase ,g!x
+         ,@clausules
+         (t (error "~X fell through etypeacase expression." ,g!x))))))
+
 (defun notany (fn seq)
   (not (some fn seq)))
-
 
 (defconstant internal-time-units-per-second 1000) 
 
