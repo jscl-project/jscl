@@ -14,7 +14,11 @@
 (test (equal (read-from-string "(1 . 25)") '(1 . 25)))
 
 (test (equal (read-from-string "(#1=99 2 3 #1#)") '(99 2 3 99)))
-(test (equal (read-from-string "#(#1=99 2 3 #1#)") '#(99 2 3 99)))
+(let ((v (read-from-string "#(#1=99 2 3 #1#)")))
+  (test (and (eql (aref v 0) 99)
+             (eql (aref v 1) 2)
+             (eql (aref v 2) 3)
+             (eql (aref v 3) 99))))
 
 (test (let ((x (read-from-string "#1=(42 . #1#)")))
         (and (eql (nth 99 x) 42)
