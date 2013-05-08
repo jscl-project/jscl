@@ -527,8 +527,7 @@
   #+common-lisp
   (let ((package (symbol-package symbol)))
     (if (eq package (find-package "KEYWORD"))
-        (code "(new Symbol(" (dump-string (symbol-name symbol)) ", "
-              (dump-string (package-name package)) "))")
+        (code "(new Symbol(" (dump-string (symbol-name symbol)) ", " (dump-string (package-name package)) "))")
         (code "(new Symbol(" (dump-string (symbol-name symbol)) "))")))
   #+jscl
   (let ((package (symbol-package symbol)))
@@ -577,6 +576,8 @@
                (let ((jsvar (genlit)))
                  (push (cons sexp jsvar) *literal-table*)
                  (toplevel-compilation (code "var " jsvar " = " dumped))
+                 (when (keywordp sexp)
+                   (toplevel-compilation (code jsvar ".value = " jsvar)))
                  jsvar)))))))
 
 
