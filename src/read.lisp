@@ -237,20 +237,17 @@
            ((string= cname "tab") #\tab)
            ((string= cname "newline") #\newline)
            (t (char cname 0)))))
-      ((char= ch #\+)
+      ((or (char= ch #\+)
+           (char= ch #\-))
        (let ((feature (let ((symbol (ls-read stream eof-error-p eof-value t)))
                         (unless (symbolp symbol)
                           (error "Invalid feature ~S" symbol))
                         (intern (string symbol) "KEYWORD"))))
-         (ecase feature
-           (:common-lisp
-              (ls-read stream)
-              (ls-read stream eof-error-p eof-value t))
-           (:jscl
-              (ls-read stream eof-error-p eof-value t))
-           (:nil
-              (ls-read stream)
-              (ls-read stream eof-error-p eof-value t)))))
+         (if (eql (char= ch #\+)
+                  (and (find feature *features*) t))
+              (ls-read stream eof-error-p eof-value t)
+              (prog2 (ls-read stream)
+                  (ls-read stream eof-error-p eof-value t)))))
       ((and ch (digit-char-p ch))
        (let ((id (digit-char-p ch)))
          (while (and (%peek-char stream)

@@ -338,7 +338,7 @@
 ;;; defmacro to avoid a circularity. So just define the macro function
 ;;; explicitly.
 
-#+common-lisp
+#-jscl
 (defmacro !destructuring-bind (lambda-list expression &body body)
   (apply #'!expand-destructuring-bind lambda-list expression body))
 

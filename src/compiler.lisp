@@ -68,7 +68,7 @@
         (incf index))
       output)))
 
-#+common-lisp
+#-jscl
 (defun indent (&rest string)
   (with-output-to-string (*standard-output*)
     (with-input-from-string (input (apply #'code string))
@@ -511,7 +511,7 @@
 ;;; evaluated. For this reason we define a valid macro-function for
 ;;; this symbol.
 (defvar *magic-unquote-marker* (gensym "MAGIC-UNQUOTE"))
-#+common-lisp
+#-jscl
 (setf (macro-function *magic-unquote-marker*)
       (lambda (form &optional environment)
         (declare (ignore environment))
@@ -524,7 +524,7 @@
   (code "l" (incf *literal-counter*)))
 
 (defun dump-symbol (symbol)
-  #+common-lisp
+  #-jscl
   (let ((package (symbol-package symbol)))
     (if (eq package (find-package "KEYWORD"))
         (code "(new Symbol(" (dump-string (symbol-name symbol)) ", " (dump-string (package-name package)) "))")
@@ -1609,7 +1609,7 @@
             `(%js-vref ,var))))
 
 
-#+common-lisp
+#-jscl
 (defvar *macroexpander-cache*
   (make-hash-table :test #'eq))
 
@@ -1620,7 +1620,7 @@
     (if (and b (eq (binding-type b) 'macro))
         (let ((expander (binding-value b)))
           (cond
-            #+common-lisp
+            #-jscl
             ((gethash b *macroexpander-cache*)
              (setq expander (gethash b *macroexpander-cache*)))
             ((listp expander)
@@ -1633,7 +1633,7 @@
                ;; function with the compiled one.
                ;;
                #+jscl (setf (binding-value b) compiled)
-               #+common-lisp (setf (gethash b *macroexpander-cache*) compiled)
+               #-jscl (setf (gethash b *macroexpander-cache*) compiled)
                (setq expander compiled))))
           expander)
         nil)))
@@ -1667,7 +1667,7 @@
        (concat (translate-function function) arglist))
       ((and (symbolp function)
             #+jscl (eq (symbol-package function) (find-package "COMMON-LISP"))
-            #+common-lisp t)
+            #-jscl t)
        (code (ls-compile `',function) ".fvalue" arglist))
       (t
        (code (ls-compile `#',function) arglist)))))

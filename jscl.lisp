@@ -102,7 +102,8 @@
 
 
 (defun bootstrap ()
-  (let ((*package* (find-package "JSCL")))
+  (let ((*features* (cons :jscl *features*))
+        (*package* (find-package "JSCL")))
     (setq *environment* (make-lexenv))
     (setq *literal-table* nil)
     (setq *variable-counter* 0

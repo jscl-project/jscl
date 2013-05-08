@@ -83,4 +83,4 @@
 
 (defun float-to-string (x)
   #+jscl (float-to-string x)
-  #+common-lisp (format nil "~f" x))
+  #-jscl (format nil "~f" x))
