@@ -3,4 +3,3 @@
 (test (equal "abc" "abc"))
 (test (not (equal "abc" "def")))
 (test (not (equal "Abc" "abc")))
-(test (equal #(1 2 3) #(1 2 3)))
