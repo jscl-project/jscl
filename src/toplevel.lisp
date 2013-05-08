@@ -48,34 +48,35 @@
         + -)
   (values-list /))
 
-(export '(&body &key &optional &rest * ** *** *gensym-counter* *package* *print-circle* *features* + ++
-          +++ - / // /// 1+ 1- < <= = = > >= acons adjoin and append apply aref
-          arrayp assoc atom block boundp butlast cadar caaar caadr cdaar cdadr
-          cddar caaaar caaadr caadar caaddr cadaar cadadr caddar cdaaar
-          cdaadr cdadar cdaddr cddaar cddadr cdddar cddddr caar cadddr caddr
-          cadr car car case catch cdar cdddr cddr cdr cdr char
-          char-code char= code-char cond cons consp constantly
-          copy-alist copy-list copy-tree decf declaim declare defconstant
+(export '(&body &key &optional &rest * ** *** *features* *gensym-counter*
+          *package* *print-circle* + ++ +++ - / // /// 1+ 1- < <= = = > >= acons
+          adjoin and append apply aref arrayp assoc atom block boundp butlast
+          caaaar caaadr caaar caadar caaddr caadr caar cadaar cadadr cadar
+          caddar cadddr caddr cadr car car case catch cdaaar cdaadr cdaar cdadar
+          cdaddr cdadr cdar cddaar cddadr cddar cdddar cddddr cdddr cddr cdr cdr
+          char char-code char= code-char cond cons consp constantly copy-alist
+          copy-list copy-tree decf declaim declare defconstant
           define-setf-expander define-symbol-macro defmacro defparameter defun
-          defvar destructuring-bind digit-char digit-char-p disassemble do do* documentation
-          dolist dotimes ecase eighth eq eql equal error eval every export expt
-          fdefinition fifth find-package find find-symbol first flet format fourth
-          fset funcall function functionp gensym get-internal-real-time
-          get-setf-expansion get-universal-time go identity if in-package
-          incf integerp intern intersection keywordp labels lambda last length
-          let let* list list* list-all-packages listp loop make-array
-          make-package make-symbol mapcar member minusp mod multiple-value-bind
-          multiple-value-call multiple-value-list multiple-value-prog1
-          nconc nil ninth not nreconc nth nthcdr null numberp or otherwise
-          package-name package-use-list packagep pairlis parse-integer plusp
-          pop prin1-to-string print proclaim prog prog1 prog2 progn psetq push
-          quote rassoc read-from-string remove remove-if remove-if-not return
-          return-from revappend reverse rplaca rplacd second set setf seventh
-          setq sixth some string string-upcase string= stringp subseq subst
-          symbol-function symbol-name symbol-package symbol-plist
-          symbol-value symbolp t tagbody tailp tenth third throw tree-equal
-          truncate unless unwind-protect values values-list variable vector-push-extend warn when
-          write-line write-string zerop))
+          defvar destructuring-bind digit-char digit-char-p disassemble do do*
+          documentation dolist dotimes ecase eighth eq eql equal error eval
+          every export expt fdefinition fifth find find-package find-symbol
+          first flet format fourth fset funcall function functionp gensym
+          get-internal-real-time get-setf-expansion get-universal-time go
+          identity if in-package incf integerp intern intersection keywordp
+          labels lambda last length let let* lisp-implementation-type list list*
+          list-all-packages listp loop make-array make-package make-symbol
+          mapcar member minusp mod multiple-value-bind multiple-value-call
+          multiple-value-list multiple-value-prog1 nconc nil ninth not nreconc
+          nth nthcdr null numberp or otherwise package-name package-use-list
+          packagep pairlis parse-integer plusp pop prin1-to-string print
+          proclaim prog prog1 prog2 progn psetq push quote rassoc
+          read-from-string remove remove-if remove-if-not return return-from
+          revappend reverse rplaca rplacd second set setf setq seventh sixth
+          some string string-upcase string= stringp subseq subst symbol-function
+          symbol-name symbol-package symbol-plist symbol-value symbolp t tagbody
+          tailp tenth third throw tree-equal truncate unless unwind-protect
+          values values-list variable vector-push-extend warn when write-line
+          write-string zerop))
 
 (setq *package* *user-package*)
 
