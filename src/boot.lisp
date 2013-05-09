@@ -92,6 +92,9 @@
 (defun boundp (x)
   (boundp x))
 
+(defun fboundp (x)
+  (fboundp x))
+
 ;; Basic functions
 (defun = (x y) (= x y))
 (defun * (x y) (* x y))
@@ -544,4 +547,3 @@
 
 (defun error (fmt &rest args)
   (%throw (apply #'format nil fmt args)))
-

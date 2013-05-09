@@ -1,4 +1,4 @@
-;;; compiler.lisp --- 
+;;; compiler.lisp ---
 
 ;; copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
@@ -1389,6 +1389,9 @@
 
 (define-builtin boundp (x)
   (js!bool (code "(" x ".value !== undefined)")))
+
+(define-builtin fboundp (x)
+  (js!bool (code "(" x ".fvalue !== undefined)")))
 
 (define-builtin symbol-value (x)
   (js!selfcall
