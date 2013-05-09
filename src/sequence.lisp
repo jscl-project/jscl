@@ -92,30 +92,38 @@
       (return-from every nil)))
   t)
 
+(defun remove-if (func seq)
+  (cond
+    ((listp  seq) (list-remove-if   func seq nil))
+    ((arrayp seq) (vector-remove-if func seq nil))
+    (t (error "`~S' is not of type SEQUENCE" seq))))
+
+(defun remove-if-not (func seq)
+  (cond
+    ((listp  seq) (list-remove-if   func seq t))
+    ((arrayp seq) (vector-remove-if func seq t))
+    (t (error "`~S' is not of type SEQUENCE" seq))))
+
+(defun list-remove-if (func list negate)
+  (if (endp list)
+    ()
+    (let ((test (funcall func (car list))))
+      (if (if negate (not test) test)
+        (list-remove-if func (cdr list) negate)
+        (cons (car list) (list-remove-if func (cdr list) negate))))))
+
+(defun vector-remove-if (func vector negate)
+  (let ((out-vector (make-array 0)))
+    (dotimes (i (length vector))
+      (let* ((element (aref vector i))
+             (test (funcall func element)))
+        (when (if negate test (not test))
+          (vector-push-extend element out-vector))))
+    out-vector))
 
 ;;; TODO: Support both List and vectors in the following functions
-
-(defun remove-if (func list)
-  (cond
-    ((null list)
-     nil)
-    ((funcall func (car list))
-     (remove-if func (cdr list)))
-    (t
-     ;;
-     (cons (car list) (remove-if func (cdr list))))))
-
-(defun remove-if-not (func list)
-  (cond
-    ((null list)
-     nil)
-    ((funcall func (car list))
-     (cons (car list) (remove-if-not func (cdr list))))
-    (t
-     (remove-if-not func (cdr list)))))
 
 (defun subseq (seq a &optional b)
   (if b
       (slice seq a b)
       (slice seq a)))
-
