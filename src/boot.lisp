@@ -386,7 +386,7 @@
 
 (defun alpha-char-p (x)
   (or (<= (char-code #\a) (char-code x) (char-code #\z))
-      (<= (char-code #\Z) (char-code x) (char-code #\Z))))
+      (<= (char-code #\A) (char-code x) (char-code #\Z))))
 
 (defun digit-char-p (x)
   (if (and (<= (char-code #\0) (char-code x) (char-code #\9)))
