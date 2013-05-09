@@ -180,3 +180,55 @@ character exists."
   (char-code character))
 
 (defconstant char-code-limit 1114111)  ;; 0x10FFFF
+
+(defconstant +ascii-names+
+  #("NULL" "START_OF_HEADING" "START_OF_TEXT" "END_OF_TEXT" "END_OF_TRANSMISSION" "ENQUIRY" "ACKNOWLEDGE"
+    "BELL" "Backspace" "Tab" "Newline" "LINE_TABULATION" "Page" "Return" "SHIFT_OUT" "SHIFT_IN"
+    "DATA_LINK_ESCAPE" "DEVICE_CONTROL_ONE" "DEVICE_CONTROL_TWO" "DEVICE_CONTROL_THREE" "DEVICE_CONTROL_FOUR"
+    "NEGATIVE_ACKNOWLEDGE" "SYNCHRONOUS_IDLE" "END_OF_TRANSMISSION_BLOCK" "CANCEL" "END_OF_MEDIUM" "SUBSTITUTE"
+    "ESCAPE" "INFORMATION_SEPARATOR_FOUR" "INFORMATION_SEPARATOR_THREE" "INFORMATION_SEPARATOR_TWO"
+    "INFORMATION_SEPARATOR_ONE" "Space" "EXCLAMATION_MARK" "QUOTATION_MARK" "NUMBER_SIGN" "DOLLAR_SIGN"
+    "PERCENT_SIGN" "AMPERSAND" "APOSTROPHE" "LEFT_PARENTHESIS" "RIGHT_PARENTHESIS" "ASTERISK" "PLUS_SIGN"
+    "COMMA" "HYPHEN-MINUS" "FULL_STOP" "SOLIDUS" "DIGIT_ZERO" "DIGIT_ONE" "DIGIT_TWO" "DIGIT_THREE" "DIGIT_FOUR"
+    "DIGIT_FIVE" "DIGIT_SIX" "DIGIT_SEVEN" "DIGIT_EIGHT" "DIGIT_NINE" "COLON" "SEMICOLON" "LESS-THAN_SIGN"
+    "EQUALS_SIGN" "GREATER-THAN_SIGN" "QUESTION_MARK" "COMMERCIAL_AT" "LATIN_CAPITAL_LETTER_A"
+    "LATIN_CAPITAL_LETTER_B" "LATIN_CAPITAL_LETTER_C" "LATIN_CAPITAL_LETTER_D" "LATIN_CAPITAL_LETTER_E"
+    "LATIN_CAPITAL_LETTER_F" "LATIN_CAPITAL_LETTER_G" "LATIN_CAPITAL_LETTER_H" "LATIN_CAPITAL_LETTER_I"
+    "LATIN_CAPITAL_LETTER_J" "LATIN_CAPITAL_LETTER_K" "LATIN_CAPITAL_LETTER_L" "LATIN_CAPITAL_LETTER_M"
+    "LATIN_CAPITAL_LETTER_N" "LATIN_CAPITAL_LETTER_O" "LATIN_CAPITAL_LETTER_P" "LATIN_CAPITAL_LETTER_Q"
+    "LATIN_CAPITAL_LETTER_R" "LATIN_CAPITAL_LETTER_S" "LATIN_CAPITAL_LETTER_T" "LATIN_CAPITAL_LETTER_U"
+    "LATIN_CAPITAL_LETTER_V" "LATIN_CAPITAL_LETTER_W" "LATIN_CAPITAL_LETTER_X" "LATIN_CAPITAL_LETTER_Y"
+    "LATIN_CAPITAL_LETTER_Z" "LEFT_SQUARE_BRACKET" "REVERSE_SOLIDUS" "RIGHT_SQUARE_BRACKET" "CIRCUMFLEX_ACCENT"
+    "LOW_LINE" "GRAVE_ACCENT" "LATIN_SMALL_LETTER_A" "LATIN_SMALL_LETTER_B" "LATIN_SMALL_LETTER_C"
+    "LATIN_SMALL_LETTER_D" "LATIN_SMALL_LETTER_E" "LATIN_SMALL_LETTER_F" "LATIN_SMALL_LETTER_G"
+    "LATIN_SMALL_LETTER_H" "LATIN_SMALL_LETTER_I" "LATIN_SMALL_LETTER_J" "LATIN_SMALL_LETTER_K"
+    "LATIN_SMALL_LETTER_L" "LATIN_SMALL_LETTER_M" "LATIN_SMALL_LETTER_N" "LATIN_SMALL_LETTER_O"
+    "LATIN_SMALL_LETTER_P" "LATIN_SMALL_LETTER_Q" "LATIN_SMALL_LETTER_R" "LATIN_SMALL_LETTER_S"
+    "LATIN_SMALL_LETTER_T" "LATIN_SMALL_LETTER_U" "LATIN_SMALL_LETTER_V" "LATIN_SMALL_LETTER_W"
+    "LATIN_SMALL_LETTER_X" "LATIN_SMALL_LETTER_Y" "LATIN_SMALL_LETTER_Z" "LEFT_CURLY_BRACKET" "VERTICAL_LINE"
+    "RIGHT_CURLY_BRACKET" "TILDE" "Rubout")
+  "Names/codepoints of the first 128 characters from Unicode 6.2,
+except with Common Lisp's suggested changes.
+For the first 32 characters ('C0 controls'), the first
+'Commonly used alternative alias' is used -- note that this differs from SBCL, which uses abbreviations.")
+;; I hope being slightly different from SBCL doesn't bite me down the road.
+;; I'll figure out a good way to add the other 21701 names later.
+
+(defun char-name (char)
+  ;; For consistency, I'm using the SBCL convention of the Unicode
+  ;; name, with spaces as underscores.  It would be nice to use
+  ;; their "Uxxxx" convention for names I don't know, but there's
+  ;; not much in FORMAT yet.  I'm only implementing ASCII names right
+  ;; now, since Unicode is kind of big.
+
+  (let ((code (char-code char)))
+    (if (<= code 127)
+	(aref +ascii-names+ code)
+      nil)))  ;; for now, no name
+
+(defun name-char (name)
+  (let ((name-upcase (string-upcase (string name))))
+    (dotimes (i (length +ascii-names+))
+      (when (string= name-upcase (string-upcase (aref +ascii-names+ i)))  ;; poor man's STRING-EQUAL
+	(return-from name-char (code-char i))))
+    nil))

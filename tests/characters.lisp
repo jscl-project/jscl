@@ -94,6 +94,17 @@
 ;; CHAR-CODE-LIMIT
 (test (< 95 char-code-limit 10000000))
 
-;; TODO: CHAR-NAME
+;; CHAR-NAME
+(test (string= "Space" (char-name #\ )))
+;; (test (string= "Space" (char-name #\Space)))
+(test (string= "Page" (char-name (code-char 12))))  ;; #\Page
+(test (string= "LATIN_SMALL_LETTER_A" (char-name #\a)))
+(test (string= "LATIN_CAPITAL_LETTER_A" (char-name #\A)))
 
-;; TODO: NAME-CHAR
+;; NAME-CHAR
+(test (char= #\  (name-char 'space)))  ;; should be: #\Space
+(test (char= #\  (name-char "space")))  ;; #\Space
+(test (char= #\  (name-char "Space")))  ;; #\Space
+(test
+ (let ((x (char-name #\a)))
+  (or (not x) (eql (name-char x) #\a))))
