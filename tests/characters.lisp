@@ -1,5 +1,41 @@
-;; CHAR=
+;; CHAR=, CHAR/=, etc.
 (test (char= (code-char 127744) (code-char 127744)))
+(test (char= #\d #\d))
+(test (not (char= #\A #\a)))
+(test (not (char= #\d #\x)))
+(test (not (char= #\d #\D)))
+(test (not (char/= #\d #\d)))
+(test (char/= #\d #\x))
+(test (char/= #\d #\D))
+(test (char= #\d #\d #\d #\d))
+(test (not (char/= #\d #\d #\d #\d)))
+(test (not (char= #\d #\d #\x #\d)))
+(test (not (char/= #\d #\d #\x #\d)))
+(test (not (char= #\d #\y #\x #\c)))
+(test (char/= #\d #\y #\x #\c))
+(test (not (char= #\d #\c #\d)))
+(test (not (char/= #\d #\c #\d)))
+(test (char< #\d #\x))
+(test (char<= #\d #\x))
+(test (not (char< #\d #\d)))
+(test (char<= #\d #\d))
+(test (char< #\a #\e #\y #\z))
+(test (char<= #\a #\e #\y #\z))
+(test (not (char< #\a #\e #\e #\y)))
+(test (char<= #\a #\e #\e #\y))
+(test (char> #\e #\d))
+(test (char>= #\e #\d))
+(test (char> #\d #\c #\b #\a))
+(test (char>= #\d #\c #\b #\a))
+(test (not (char> #\d #\d #\c #\a)))
+(test (char>= #\d #\d #\c #\a))
+(test (not (char> #\e #\d #\b #\c #\a)))
+(test (not (char>= #\e #\d #\b #\c #\a)))
+;; (char> #\z #\A) =>  implementation-dependent
+;; (char> #\Z #\a) =>  implementation-dependent
+;; (test (char-equal #\A #\a))
+;; (stable-sort (list #\b #\A #\B #\a #\c #\C) #'char-lessp) =>  (#\A #\a #\b #\B #\c #\C)
+;; (stable-sort (list #\b #\A #\B #\a #\c #\C) #'char<) => implementation-dependent
 
 ;; TODO: char/=, char<, etc.
 

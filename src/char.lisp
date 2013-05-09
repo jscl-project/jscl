@@ -1,3 +1,48 @@
+;; These comparison functions heavily borrowed from SBCL/CMUCL (public domain).
+
+(defun char= (character &rest more-characters)
+  (dolist (c more-characters t)
+    (unless (eql c character) (return nil))))
+
+(defun char/= (character &rest more-characters)
+  (do* ((head character (car list))
+        (list more-characters (cdr list)))
+       ((null list) t)
+       (dolist (c list)
+	 (when (eql head c) (return-from char/= nil)))))
+
+(defun char< (character &rest more-characters)
+  (do* ((c character (car list))
+        (list more-characters (cdr list)))
+       ((null list) t)
+       (unless (< (char-int c)
+		  (char-int (car list)))
+	 (return nil))))
+
+(defun char> (character &rest more-characters)
+  (do* ((c character (car list))
+        (list more-characters (cdr list)))
+       ((null list) t)
+       (unless (> (char-int c)
+		  (char-int (car list)))
+	 (return nil))))
+
+(defun char<= (character &rest more-characters)
+  (do* ((c character (car list))
+        (list more-characters (cdr list)))
+       ((null list) t)
+       (unless (<= (char-int c)
+		   (char-int (car list)))
+	 (return nil))))
+
+(defun char>= (character &rest more-characters)
+  (do* ((c character (car list))
+        (list more-characters (cdr list)))
+       ((null list) t)
+       (unless (>= (char-int c)
+		   (char-int (car list)))
+	 (return nil))))
+
 (defun character (character)
   (cond ((characterp character)
 	 character)
