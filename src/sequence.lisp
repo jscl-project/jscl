@@ -13,6 +13,9 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
+(defun not-seq-error (thing)
+  (error "`~S' is not of type SEQUENCE" thing))
+
 (defmacro do-sequence ((elt seq &optional (index (gensym "i") index-p)) &body body)
   (let ((nseq (gensym "seq")))
     (unless (symbolp elt)
@@ -96,13 +99,13 @@
   (cond
     ((listp  seq) (list-remove-if   func seq nil))
     ((arrayp seq) (vector-remove-if func seq nil))
-    (t (error "`~S' is not of type SEQUENCE" seq))))
+    (t (not-seq-error seq))))
 
 (defun remove-if-not (func seq)
   (cond
     ((listp  seq) (list-remove-if   func seq t))
     ((arrayp seq) (vector-remove-if func seq t))
-    (t (error "`~S' is not of type SEQUENCE" seq))))
+    (t (not-seq-error seq))))
 
 (defun list-remove-if (func list negate)
   (if (endp list)
@@ -120,9 +123,27 @@
           (vector-push-extend element out-vector))))
     out-vector))
 
-;;; TODO: Support both List and vectors in the following functions
-
 (defun subseq (seq a &optional b)
-  (if b
-      (slice seq a b)
-      (slice seq a)))
+  (cond
+    ((listp seq)
+     (if b
+       (let ((diff (- b a)))
+         (cond
+           ((zerop  diff) ()) 
+           ((minusp diff)
+            (error "Start index must be smaller than end index"))
+           (t
+            (let* ((drop-a (nthcdr a seq))
+                   (pointer drop-a))
+              (dotimes (n (1- diff))
+                (setq pointer (cdr pointer))
+                (when (null pointer)
+                  (error "Ending index larger than length of list")))
+              (setf (cdr pointer) nil) 
+              drop-a))))
+       (nthcdr a seq)))
+    ((arrayp seq) 
+     (if b
+       (slice seq a b)
+       (slice seq a)))
+    (t (not-seq-error seq))))
