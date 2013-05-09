@@ -31,6 +31,7 @@
     ("print"     :target)
     ("package"   :target)
     ("ffi"       :target)
+    ("char"      :target)
     ("read"      :both)
     ("compiler"  :both)
     ("toplevel"  :target)))
