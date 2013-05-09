@@ -43,6 +43,68 @@
 		   (char-int (car list)))
 	 (return nil))))
 
+(defun equal-char-code (character)
+  (char-code (char-upcase character)))
+
+(defun two-arg-char-equal (c1 c2)
+  (= (equal-char-code c1) (equal-char-code c2)))
+
+(defun char-equal (character &rest more-characters)
+  (do ((clist more-characters (cdr clist)))
+      ((null clist) t)
+      (unless (two-arg-char-equal (car clist) character)
+	(return nil))))
+
+(defun char-not-equal (character &rest more-characters)
+  (do* ((head character (car list))
+        (list more-characters (cdr list)))
+       ((null list) t)
+       (unless (do* ((l list (cdr l)))
+  		    ((null l) t)
+  		    (when (two-arg-char-equal head (car l))
+  			(return nil)))
+  	 (return nil))))
+
+(defun two-arg-char-lessp (c1 c2)
+  (< (equal-char-code c1) (equal-char-code c2)))
+
+(defun char-lessp (character &rest more-characters)
+  (do* ((c character (car list))
+        (list more-characters (cdr list)))
+       ((null list) t)
+       (unless (two-arg-char-lessp c (car list))
+	 (return nil))))
+
+(defun two-arg-char-greaterp (c1 c2)
+  (> (equal-char-code c1) (equal-char-code c2)))
+
+(defun char-greaterp (character &rest more-characters)
+  (do* ((c character (car list))
+        (list more-characters (cdr list)))
+       ((null list) t)
+       (unless (two-arg-char-greaterp c (car list))
+	 (return nil))))
+
+(defun two-arg-char-not-greaterp (c1 c2)
+  (<= (equal-char-code c1) (equal-char-code c2)))
+
+(defun char-not-greaterp (character &rest more-characters)
+  (do* ((c character (car list))
+        (list more-characters (cdr list)))
+       ((null list) t)
+       (unless (two-arg-char-not-greaterp c (car list))
+	 (return nil))))
+
+(defun two-arg-char-not-lessp (c1 c2)
+  (>= (equal-char-code c1) (equal-char-code c2)))
+
+(defun char-not-lessp (character &rest more-characters)
+  (do* ((c character (car list))
+        (list more-characters (cdr list)))
+       ((null list) t)
+       (unless (two-arg-char-not-lessp c (car list))
+	 (return nil))))
+
 (defun character (character)
   (cond ((characterp character)
 	 character)
