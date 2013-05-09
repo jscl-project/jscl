@@ -87,3 +87,9 @@
              (bar (pop foo)))
         (and (= bar 1)
              (= (car foo) 2))))
+
+;; MAPC
+(test (equal (mapc #'+ '(1 2) '(3) '(4 5 6)) '(1 2)))
+(test (let (foo)
+        (mapc (lambda (x y z) (print (list x y z)) (push (+ x y z) foo)) '(1 2) '(3) '(4 5 6))
+        (equal foo '(8))))

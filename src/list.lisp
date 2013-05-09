@@ -161,6 +161,13 @@
                (rplaca tail (cdar tail)))
              (collect (apply func elems))))))))
 
+(defun mapc (func &rest lists)
+  (do* ((elems (map1 #'car lists) (map1 #'car lists-rest))
+        (lists-rest (map1 #'cdr lists) (map1 #'cdr lists-rest)))
+       ((dolist (x elems) (when (null x) (return t)))
+        (car lists))
+    (apply func elems)))
+
 (defun last (x)
   (while (consp (cdr x))
     (setq x (cdr x)))

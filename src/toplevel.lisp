@@ -65,7 +65,7 @@
           get-universal-time go identity if in-package incf integerp intern
           intersection keywordp labels lambda last length let let*
           lisp-implementation-type list list* list-all-packages listp loop
-          make-array make-package make-symbol mapcar member minusp mod
+          make-array make-package make-symbol mapc mapcar member minusp mod
           multiple-value-bind multiple-value-call multiple-value-list
           multiple-value-prog1 nconc nil ninth not nreconc nth nthcdr null
           numberp or otherwise package-name package-use-list packagep pairlis
