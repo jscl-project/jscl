@@ -114,9 +114,8 @@
 
 (defun vector-remove-if (func vector negate)
   (let ((out-vector (make-array 0)))
-    (dotimes (i (length vector))
-      (let* ((element (aref vector i))
-             (test (funcall func element)))
+    (do-sequence (element vector i)
+      (let ((test (funcall func element)))
         (when (if negate test (not test))
           (vector-push-extend element out-vector))))
     out-vector))
