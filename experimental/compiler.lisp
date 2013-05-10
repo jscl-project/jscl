@@ -22,12 +22,30 @@
 
 ;;;; Utils
 
+(defmacro with-gensyms ((&rest vars) &body body)
+  `(let ,(mapcar (lambda (var) `(,var (gensym ,(string var)))) vars)
+     ,@body))
+
 (defun singlep (x)
   (and (consp x) (null (cdr x))))
 
 (defun unlist (x)
   (assert (singlep x))
   (first x))
+
+;;;; Lexical environment
+;;;;
+;;;; The Lexical environment is compromised of a list of bindings,
+;;;; which associates information to symbols. It tracks lexical
+;;;; variables, tags, local declarations and many other information in
+;;;; order to guide the compiler.
+
+(defstruct binding
+  name type value declarations)
+
+(defstruct lexenv
+  bindings)
+
 
 ;;;; Intermediate representation
 ;;;;
@@ -115,34 +133,54 @@
   consequent
   alternative)
 
-
-;;; BBlock stands for `basic block', which is a maximal sequence of
-;;; nodes with an entry point and an exit. Basic blocks are organized
-;;; as a control flow graph with some more information in omponents.
-(defstruct bblock
+;;; Blocks are `basic block', which is a maximal sequence of nodes
+;;; with an entry point and an exit. Basic blocks are organized as a
+;;; control flow graph with some more information in omponents.
+(defstruct (basic-block
+             (:conc-name "BLOCK-")
+             (:constructor make-block)
+             (:predicate block-p))
   (id (gensym "L"))
   succ
   pred
   entry
   exit)
 
-(defstruct (component-entry (:include bblock)))
-(defstruct (component-exit (:include bblock)))
+(defstruct (component-entry (:include basic-block)))
+(defstruct (component-exit (:include basic-block)))
 
-(defun make-empty-bblock ()
+(defun make-empty-block ()
   (let ((entry (make-block-entry))
         (exit (make-block-exit)))
     (setf (node-next entry) exit
           (node-prev exit) entry)
-    (make-bblock :entry entry :exit exit)))
+    (make-block :entry entry :exit exit)))
 
 (defun empty-block-p (b)
-  (block-exit-p (node-next (bblock-entry b))))
+  (block-exit-p (node-next (block-entry b))))
 
-(defmacro do-nodes ((node block &optional result) &body body)
-  (check-type node symbol)
-  `(do ((,node (node-next (bblock-entry ,block)) (node-next ,node)))
-       ((block-exit-p ,node) ,result)
+(defmacro do-nodes
+    ((node block &optional result &key include-sentinel-p) &body body)
+  `(do ((,node ,(if include-sentinel-p
+                    `(block-entry ,block)
+                    `(node-next (block-entry ,block))) 
+               (node-next ,node)))
+       (,(if include-sentinel-p
+             `(null ,node)
+             `(block-exit-p ,node))
+        ,result)
+     ,@body))
+
+(defmacro do-nodes-backward
+    ((node block &optional result &key include-sentinel-p) &body body)
+  `(do ((,node ,(if include-sentinel-p
+                    `(block-exit ,block)
+                    `(node-prev (block-entry ,block))) 
+               (node-prev ,node)))
+       (,(if include-sentinel-p
+             `(null ,node)
+             `(block-entry-p ,node))
+        ,result)
      ,@body))
 
 ;;; Link FROM and TO nodes together. FROM and TO must belong to the
@@ -153,55 +191,61 @@
         (node-prev to) from)
   (values))
 
-;;; Insert NODE before NEXT.
-(defun insert-node-before (next node)
-  (link-nodes (node-prev next) node)
-  (link-nodes node next))
-
-
 ;;; Components are connected pieces of the control flow graph with
 ;;; some additional information. Components have well-defined entry
 ;;; and exit nodes. They also track what basic blocks we have and
 ;;; other useful information. It is the toplevel organizational entity
 ;;; in the compiler. The IR translation result is accumulated into
 ;;; components incrementally.
-(defstruct (component
-             #-jscl (:print-object print-component))
+(defstruct (component #-jscl (:print-object print-component))
   entry
-  exit
-  blocks)
+  exit)
 
 ;;; Create a new component, compromised of the sentinel nodes and a
 ;;; empty basic block, ready to start conversion to IR. It returnes
 ;;; the component and the basic block as multiple values.
 (defun make-empty-component ()
   (let ((entry (make-component-entry))
-        (bblock (make-empty-bblock))
+        (block (make-empty-block))
         (exit (make-component-exit)))
-    (setf (bblock-succ entry)  (list bblock)
-          (bblock-pred exit)   (list bblock)
-          (bblock-succ bblock) (list exit)
-          (bblock-pred bblock) (list entry))
-    (values (make-component :entry entry :exit exit) bblock)))
+    (setf (block-succ entry)  (list block)
+          (block-pred exit)   (list block)
+          (block-succ block) (list exit)
+          (block-pred block) (list entry))
+    (values (make-component :entry entry :exit exit) block)))
 
-;;; Delete an empty block. It is the same as a jump to an
-;;; uncondiditonal jump.
+;;; Return the list of blocks in COMPONENT.
+(defun component-blocks (component)
+  (let ((output nil))
+    (labels ((compute-rdfo-from (block)
+               (unless (or (component-exit-p block) (find block output))
+                 (dolist (successor (block-succ block))
+                   (unless (component-exit-p block)
+                     (compute-rdfo-from successor)))
+                 (push block output))))
+      (compute-rdfo-from (unlist (block-succ (component-entry component))))
+      output)))
+
+;;; Iterate across different blocks in COMPONENT.
+(defmacro do-blocks ((block component &optional result) &body body)
+  `(dolist (,block (component-blocks ,component) ,result)
+     ,@body))
+
 (defun delete-empty-block (block)
   (when (or (component-entry-p block) (component-exit-p block))
     (error "Cannot delete entry or exit basic blocks."))
   (unless (empty-block-p block)
-    (error "Block `~S' is not empty!" (bblock-id block)))
-  (assert (singlep (bblock-succ block)))
-  (let ((successor (first (bblock-succ block))))
-    (dolist (pred (bblock-pred block))
-      (setf (bblock-succ pred)
-            (substitute successor block (bblock-succ pred)))
-      (pushnew pred (bblock-pred successor)))))
+    (error "Block `~S' is not empty!" (block-id block)))
+  (let ((succ (unlist (block-succ block))))
+    (setf (block-pred succ) (remove block (block-pred succ)))
+    (dolist (pred (block-pred block))
+      (setf (block-succ pred) (substitute succ block (block-succ pred)))
+      (pushnew pred (block-pred succ)))))
 
-(defun finish-component (&optional (component *component*))
-  (dolist (blk (bblock-pred (component-exit component)))
-    (when (empty-block-p blk)
-      (delete-empty-block blk))))
+(defun finish-component (component)
+  (do-blocks (block component)
+    (when (empty-block-p block)
+      (delete-empty-block block))))
 
 ;;; IR Translation
 
@@ -209,164 +253,201 @@
 ;;; conversion in this component.
 (defvar *component*)
 
-;;; The current block in the current component. IR conversion usually
-;;; append nodes to this block. Branching instructions will modify
-;;; this variable.
-(defvar *bblock*)
-
-;;; Prepare a new component with a current empty content block ready
-;;; to start IR conversion. Then BODY is evaluated and the value of
-;;; the last form is returned.
+;;; Prepare a new component with a current empty block ready to start
+;;; IR conversion bound in the current cursor. BODY is evaluated and
+;;; the value of the last form is returned.
 (defmacro with-component-compilation (&body body)
-  `(multiple-value-bind (*component* *bblock*)
-       (make-empty-component)
+  (let ((block (gensym)))
+    `(multiple-value-bind (*component* ,block)
+         (make-empty-component)
+       (with-cursor (:block ,block)
+         ,@body))))
+
+;;; A cursor stands for a point between two nodes in some basic block
+;;; in the IR representation where manipulations can take place,
+;;; similarly to the cursors in text editing.
+(defstruct cursor
+  block next)
+
+;;; The current cursor. It is the point where IR manipulations act by
+;;; default. Particularly, newly converted IR code is inserted here.
+(defvar *cursor*)
+
+;;; Create a cursor which pointsto the basic block BLOCK. If omitted,
+;;; then the current block is used.
+;;;
+;;; The keywords AFTER and BEFORE specify the cursor will point after
+;;; or before that node respectively. If none is specified, the cursor
+;;; is created before the exit node in BLOCK. An error is signaled if
+;;; both keywords are specified inconsistently, or if the nodes do not
+;;; belong to BLOCK.
+;;;
+;;; The special values :ENTRY and :EXIT stands for the entry and exit
+;;; nodes of the block respectively.
+(defun cursor (&key (block (cursor-block *cursor*))
+                 (before nil before-p)
+                 (after nil after-p))
+  ;; Handle special values :ENTRY and :EXIT.
+  (flet ((node-designator (x)
+           (case x
+             (:entry (block-entry block))
+             (:exit  (block-exit block))
+             (t x))))
+    (setq before (node-designator before))
+    (setq after  (node-designator after)))
+  (let* ((next (or before (and after (node-next after)) (block-exit block)))
+         (cursor (make-cursor :block block :next next)))
+    (flet ((out-of-range-cursor ()
+             (error "Out of range cursor."))
+           (ambiguous-cursor ()
+             (error "Ambiguous cursor specified between two non-adjacent nodes.")))
+      (when (or (null next) (block-entry-p next))
+        (out-of-range-cursor))
+      (when (and before-p after-p (not (eq after before)))
+        (ambiguous-cursor))
+      (do-nodes-backward (node block (out-of-range-cursor) :include-sentinel-p t)
+        (when (eq next node) (return))))
+    cursor))
+
+(defun set-cursor (&rest cursor-spec)
+  (let ((newcursor (apply #'cursor cursor-spec)))
+    (setf (cursor-block *cursor*) (cursor-block newcursor))
+    (setf (cursor-next *cursor*) (cursor-next newcursor))
+    *cursor*))
+
+;;; Create and bind the current cursor. The cursor specification is
+;;; the same as described in the function `create-cursor'.
+(defmacro with-cursor ((&rest cursor-spec) &body body)
+  `(let* ((*cursor* (cursor ,@cursor-spec)))
      ,@body))
 
-;;; The Lexical environment is compromised of a list of bindings,
-;;; which associates information to symbols. It tracks lexical
-;;; variables, tags, local declarations and many other information in
-;;; order to guide the compiler.
-(defstruct binding
-  name type value declarations)
+(defun end-of-block-p (&optional (cursor *cursor*))
+  (block-exit-p (cursor-next cursor)))
 
-(defstruct lexenv
-  bindings)
+;;; Insert NODE at cursor.
+(defun insert-node (node &optional (cursor *cursor*))
+  (link-nodes (node-prev (cursor-next cursor)) node)
+  (link-nodes node (cursor-next cursor))
+  t)
+
+;;; Split the block CURSOR points in two basic blocks, returning the
+;;; new basic block. The cursor is kept to point at the end of shrunk
+;;; basic block.
+(defun split-block (&optional (cursor *cursor*))
+  (let* ((block (cursor-block cursor))
+         (exit (block-exit block))
+         newblock
+         (newexit (make-block-exit))
+         (newentry (make-block-entry)))
+    (insert-node newexit)
+    (insert-node newentry)
+    (setf (node-next newexit)  nil)
+    (setf (node-prev newentry) nil)
+    (setf (block-exit block) newexit)
+    (setq newblock (make-block :entry newentry :exit exit))
+    (shiftf (block-succ newblock) (block-succ block) (list newblock))
+    newblock))
+
 
 ;;; A alist of IR translator functions.
 (defvar *ir-translator* nil)
 
 ;;; Define a IR translator for NAME.
-(defmacro define-ir-translator (name (next result) lambda-list &body body)
+(defmacro define-ir-translator (name lambda-list &body body)
+  (check-type name symbol)
   (let ((fname (intern (format nil "IR-CONVERT-~a" (string name))))
+        (result (gensym))
         (form (gensym)))
-    (check-type name symbol)
-    (check-type next symbol)
     `(progn
-       (defun ,fname (,form ,next ,result)
-         (destructuring-bind ,lambda-list ,form
-           ,@body))
+       (defun ,fname (,form ,result)
+         (flet ((result-lvar () ,result))
+           (destructuring-bind ,lambda-list ,form
+             ,@body)))
        (push (cons ',name #',fname) *ir-translator*))))
 
+(defun ir-convert-constant (form result)
+  (let* ((leaf (make-constant :value form)))
+    (insert-node (make-ref :leaf leaf :lvar result))))
 
-(defun ir-convert-constant (form next result)
-  (let* ((leaf (make-constant :value form))
-         (ref (make-ref :leaf leaf :lvar result)))
-    (insert-node-before next ref)))
+(define-ir-translator quote (form)
+  (ir-convert-constant form (result-lvar)))
 
-(define-ir-translator quote (next result) (form)
-  (ir-convert-constant form next result))
-
-(define-ir-translator setq (next result) (variable value)
+(define-ir-translator setq (variable value)
   (let ((var (make-var :name variable))
         (value-lvar (make-lvar)))
-    (ir-convert value next value-lvar)
-    (let ((assign (make-assignment :variable var :value value-lvar :lvar result)))
-      (insert-node-before next assign))))
+    (ir-convert value value-lvar)
+    (let ((assign (make-assignment :variable var :value value-lvar :lvar (result-lvar))))
+      (insert-node assign))))
 
-;;; Split BLOCK in two basic blocks. BLOCK ends just before BLOCK. A
-;;; new block is created starting at NODE until the exit of the
-;;; original block. The successors of BLOCK become the successors of
-;;; the new block.
-(defun split-basic-block-before (node block)
-  (let ((exit (node-prev (bblock-exit block)))
-        (newexit (make-block-exit))
-        (newentry (make-block-entry))
-        newblock)
-    (insert-node-before node newentry)
-    (insert-node-before newentry newexit)
-    (setf (node-next newexit)  nil)
-    (setf (node-prev newentry) nil)
-    (setf (bblock-exit block) newexit)
-    (setq newblock (make-bblock :entry newentry :exit exit))
-    (rotatef (bblock-succ block) (bblock-succ newblock))
-    newblock))
-
-(define-ir-translator if (next result) (test then &optional else)
-  (let ((test-lvar (make-lvar))
-        (then-block (make-empty-bblock))
-        (else-block (make-empty-bblock))
-        (join-block (make-empty-bblock)))
-    ;; Convert the test into the current basic block.
-    (ir-convert test next test-lvar)
-    (setq next (bblock-exit *bblock*))
-    (let ((cond (make-conditional :test test-lvar :consequent then-block :alternative else-block)))
-      (insert-node-before next cond))
-    ;; If we are not at the end of the content block, split it.
-    (unless (block-exit-p next)
-      (setq join-block (split-basic-block-before next *bblock*)))
-    (dolist (succ (bblock-succ *bblock*))
-      (setf (bblock-pred succ) (substitute join-block *bblock* (bblock-pred succ))))
-    (psetf (bblock-succ *bblock*)   (list else-block then-block)
-           (bblock-pred else-block) (list *bblock*)
-           (bblock-pred then-block) (list *bblock*)
-           (bblock-succ then-block) (list join-block)
-           (bblock-succ else-block) (list join-block)
-           (bblock-pred join-block) (list else-block then-block)
-           (bblock-succ join-block) (bblock-succ *bblock*))
-    (let ((*bblock* then-block))
-      (ir-convert then (bblock-exit then-block) result))
-    (let ((*bblock* else-block))
-      (ir-convert else (bblock-exit else-block) result))
-    (setq *bblock* join-block)))
+(define-ir-translator if (test then &optional else)
+  (when (conditional-p (cursor-next *cursor*))
+    (error "Impossible to insert a conditional after another conditional."))
+  ;; Split the basic block if we are in the middle of one.
+  (unless (end-of-block-p) (split-block))
+  (let* ((block (cursor-block *cursor*))
+         (test-lvar (make-lvar))
+         (then-block (make-empty-block))
+         (else-block (make-empty-block))
+         (join-block (make-empty-block))
+         (tail-block (unlist (block-succ block))))
+    ;; Insert conditional IR
+    (ir-convert test test-lvar)
+    (insert-node (make-conditional :test test-lvar :consequent then-block :alternative else-block))
+    ;; Link together the different created basic blocks.
+    (setf (block-succ block)      (list else-block then-block)
+          (block-pred else-block) (list block)
+          (block-pred then-block) (list block)
+          (block-succ then-block) (list join-block)
+          (block-succ else-block) (list join-block)
+          (block-pred join-block) (list else-block then-block)
+          (block-succ join-block) (list tail-block)
+          (block-pred tail-block) (substitute join-block block (block-pred tail-block)))
+    ;; Convert he consequent and alternative forms and update cursor.
+    (ir-convert then (result-lvar) (cursor :block then-block))
+    (ir-convert else (result-lvar) (cursor :block else-block))
+    (set-cursor :block join-block)))
 
 
-(defun ir-convert-var (form next result)
+(defun ir-convert-var (form result)
   (let* ((leaf (make-var :name form))
          (ref (make-ref :leaf leaf :lvar result)))
-    (insert-node-before next ref)))
+    (insert-node ref)))
 
-(defun ir-convert-call (form next result)
+(defun ir-convert-call (form result)
   (destructuring-bind (function &rest args) form
     (let ((func-lvar (make-lvar))
           (args-lvars nil))
       (when (symbolp function)
-        (ir-convert `(%symbol-function ,function) next func-lvar))
+        (ir-convert `(%symbol-function ,function) func-lvar))
       (dolist (arg args)
-        (push (make-lvar) args-lvars)
-        (ir-convert arg next (first args-lvars)))
+        (let ((arg-lvar (make-lvar)))
+          (push arg-lvar args-lvars)
+          (ir-convert arg arg-lvar)))
       (setq args-lvars (reverse args-lvars))
       (let ((call (make-call :function func-lvar :arguments args-lvars :lvar result)))
-        (insert-node-before next call)))))
-
+        (insert-node call)))))
 
 ;;; Convert the Lisp expression FORM into IR before the NEXT node, it
 ;;; may create new basic blocks into the current component. During the
 ;;; initial IR conversion, The NEXT node is the EXIT node of the
 ;;; current basic block, but optimizations could call it to insert IR
 ;;; code somewhere.
-(defun ir-convert (form next result)
-  (when (block-entry-p next)
-    (error "Can't insert IR before the entry node."))
+(defun ir-convert (form &optional result (*cursor* *cursor*))
   (cond
     ((atom form)
      (cond
        ((symbolp form)
-        (ir-convert-var form next result))
+        (ir-convert-var form result))
        (t
-        (ir-convert-constant form next result))))
+        (ir-convert-constant form result))))
     (t
      (destructuring-bind (op &rest args) form
        (let ((translator (cdr (assoc op *ir-translator*))))
          (if translator
-             (funcall translator args next result)
-             (ir-convert-call form next result))))))
+             (funcall translator args result)
+             (ir-convert-call form result))))))
   (values))
 
-(defun compute-dfo (component)
-  (or (component-blocks component)
-      (let ((output nil))
-        (labels ((compute-dfo-from (block)
-                   (unless (or (component-exit-p block) (find block output))
-                     (dolist (successor (bblock-succ block))
-                       (unless (component-exit-p block)
-                         (compute-dfo-from successor)))
-                     (push block output))))
-          (compute-dfo-from (unlist (bblock-succ (component-entry component))))
-          (setf (component-blocks component) output)))))
-
-(defmacro do-blocks ((bblock component &optional result) &body body)
-  `(dolist (,bblock (compute-dfo ,component) ,result)
-     ,@body))
 
 ;;; IR Debugging
 
@@ -396,53 +477,54 @@
     ((conditional-p node)
      (format t "if ~a ~a ~a"
              (lvar-id (conditional-test node))
-             (bblock-id (conditional-consequent node))
-             (bblock-id (conditional-alternative node))))
+             (block-id (conditional-consequent node))
+             (block-id (conditional-alternative node))))
     (t
      (error "`print-node' does not support printing ~S as a node." node)))
   (terpri))
 
-(defun print-bblock (block)
-  (flet ((bblock-name (block)
+(defun print-block (block)
+  (flet ((block-name (block)
            (cond
-             ((and (singlep (bblock-pred block))
-                   (component-entry-p (bblock-pred block)))
+             ((and (singlep (block-pred block))
+                   (component-entry-p (block-pred block)))
               "ENTRY")
              ((component-exit-p block)
               "EXIT")
-             (t (string (bblock-id block))))))
-    (format t "BLOCK ~a:~%" (bblock-name block))
+             (t (string (block-id block))))))
+    (format t "BLOCK ~a:~%" (block-name block))
     (do-nodes (node block)
-     (print-node node))
-    (when (singlep (bblock-succ block))
-      (format t "GO ~a~%" (bblock-name (first (bblock-succ block)))))
+      (print-node node))
+    (when (singlep (block-succ block))
+      (format t "GO ~a~%" (block-name (first (block-succ block)))))
     (terpri)))
 
 (defun print-component (component &optional (stream *standard-output*))
   (let ((*standard-output* stream))
     (do-blocks (block component)
-      (print-bblock block))))
+      (print-block block))))
 
+;;; A few consistency checks in the IR useful for catching bugs.
 (defun check-ir-consistency (&optional (component *component*))
   (with-simple-restart (continue "Continue execution")
     (do-blocks (block component)
-      (dolist (succ (bblock-succ block))
-        (unless (find block (bblock-pred succ))
+      (dolist (succ (block-succ block))
+        (unless (find block (block-pred succ))
           (error "The block `~S' does not belong to the predecessors list of the its successor `~S'"
-                 (bblock-id block)
-                 (bblock-id succ))))
-      (dolist (pred (bblock-pred block))
-        (unless (find block (bblock-succ pred))
+                 (block-id block)
+                 (block-id succ))))
+      (dolist (pred (block-pred block))
+        (unless (find block (block-succ pred))
           (error "The block `~S' does not belong to the successors' list of its predecessor `~S'"
-                 (bblock-id block)
-                 (bblock-id pred)))))))
+                 (block-id block)
+                 (block-id pred)))))))
 
 ;;; Translate FORM into IR and print a textual repreresentation of the
 ;;; component.
 (defun describe-ir (form)
   (with-component-compilation
-    (ir-convert form (bblock-exit *bblock*) (make-lvar :id "$out"))
-    (finish-component)
+    (ir-convert form (make-lvar :id "$out"))
+    (finish-component *component*)
     (check-ir-consistency)
     (print-component *component*)))
 
