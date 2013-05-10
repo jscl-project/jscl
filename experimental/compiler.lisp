@@ -288,6 +288,7 @@
         (join-block (make-empty-bblock)))
     ;; Convert the test into the current basic block.
     (ir-convert test next test-lvar)
+    (setq next (bblock-exit *bblock*))
     (let ((cond (make-conditional :test test-lvar :consequent then-block :alternative else-block)))
       (insert-node-before next cond))
     ;; If we are not at the end of the content block, split it.
@@ -295,12 +296,12 @@
       (setq join-block (split-basic-block-before next *bblock*)))
     (dolist (succ (bblock-succ *bblock*))
       (setf (bblock-pred succ) (substitute join-block *bblock* (bblock-pred succ))))
-    (psetf (bblock-succ *bblock*)   (list then-block else-block)
+    (psetf (bblock-succ *bblock*)   (list else-block then-block)
            (bblock-pred else-block) (list *bblock*)
            (bblock-pred then-block) (list *bblock*)
            (bblock-succ then-block) (list join-block)
            (bblock-succ else-block) (list join-block)
-           (bblock-pred join-block) (list then-block else-block)
+           (bblock-pred join-block) (list else-block then-block)
            (bblock-succ join-block) (bblock-succ *bblock*))
     (let ((*bblock* then-block))
       (ir-convert then (bblock-exit then-block) result))
