@@ -558,7 +558,7 @@
     ((floatp sexp) (float-to-string sexp))
     ((characterp sexp) (code "\"" (escape-string (string sexp)) "\""))
     (t
-     (or (cdr (assoc sexp *literal-table* :test #'equal))
+     (or (cdr (assoc sexp *literal-table* :test #'eql))
          (let ((dumped (typecase sexp
                          (symbol (dump-symbol sexp))
                          (string (dump-string sexp))
