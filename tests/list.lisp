@@ -1,5 +1,39 @@
 ;; Tests for list functions
 
+;; CONS
+(test (equal (cons 1 2) '(1 . 2)))
+(test (equal (cons 1 nil) '(1)))
+(test (equal (cons nil 2) '(NIL . 2)))
+(test (equal (cons nil nil) '(NIL)))
+(test (equal (cons 1 (cons 2 (cons 3 (cons 4 nil)))) '(1 2 3 4)))
+(test (equal (cons 'a 'b) '(A . B)))
+(test (equal (cons 'a (cons 'b (cons 'c '()))) '(A B C)))
+(test (equal (cons 'a '(b c d)) '(A B C D)))
+
+;; CONSP
+(test (not (consp 'nil)))
+(test (not (consp nil)))
+(test (not (consp ())))
+(test (not (consp '())))
+(test (consp (cons 1 2)))
+
+;; ATOM
+(test (atom 'sss))
+(test (not (atom (cons 1 2))))
+(test (atom nil))
+(test (atom '()))
+(test (atom 3))
+
+;; RPLACA
+(let ((some-list (list* 'one 'two 'three 'four)))
+  (test (equal (rplaca some-list 'uno) '(UNO TWO THREE . FOUR)))
+  (test (equal some-list '(UNO TWO THREE . FOUR))))
+
+;; RPLACD
+(let ((some-list (list* 'one 'two 'three 'four)))
+  (test (equal (rplacd (last some-list) (list 'IV)) '(THREE IV)))
+  (test (equal some-list '(ONE TWO THREE IV))))
+
 ; COPY-TREE
 (test (let* ((foo (list '(1 2) '(3 4)))
              (bar (copy-tree foo)))
