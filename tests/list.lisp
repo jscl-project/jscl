@@ -88,6 +88,9 @@
         (and (= bar 1)
              (= (car foo) 2))))
 
+;; MAPCAR
+(test (equal (mapcar #'+ '(1 2) '(3) '(4 5 6)) '(8)))
+
 ;; MAPC
 (test (equal (mapc #'+ '(1 2) '(3) '(4 5 6)) '(1 2)))
 (test (let (foo)
