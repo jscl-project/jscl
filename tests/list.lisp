@@ -1,8 +1,5 @@
 ;; Tests for list functions
 
-;; TODO: EQUAL doesn't compare lists correctly at the moment.
-;; Once it does the lists can be compared directly in many of these tests
-
 ; COPY-TREE
 (test (let* ((foo (list '(1 2) '(3 4)))
              (bar (copy-tree foo)))
@@ -80,7 +77,6 @@
 (test (equal (intersection '((1) (2)) '((2) (3)) :test #'equal) '((2))))
 
 ; SUBST
-; Can't really test this until EQUAL works properly on lists
 
 ; POP
 (test (let* ((foo '(1 2 3))
