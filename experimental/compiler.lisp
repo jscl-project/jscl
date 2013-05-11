@@ -231,6 +231,21 @@
   `(dolist (,block (component-blocks ,component) ,result)
      ,@body))
 
+;;; A few consistency checks in the IR useful for catching bugs.
+(defun check-ir-consistency (&optional (component *component*))
+  (with-simple-restart (continue "Continue execution")
+    (do-blocks (block component)
+      (dolist (succ (block-succ block))
+        (unless (find block (block-pred succ))
+          (error "The block `~S' does not belong to the predecessors list of the its successor `~S'"
+                 (block-id block)
+                 (block-id succ))))
+      (dolist (pred (block-pred block))
+        (unless (find block (block-succ pred))
+          (error "The block `~S' does not belong to the successors' list of its predecessor `~S'"
+                 (block-id block)
+                 (block-id pred)))))))
+
 (defun delete-empty-block (block)
   (when (or (component-entry-p block) (component-exit-p block))
     (error "Cannot delete entry or exit basic blocks."))
@@ -242,10 +257,23 @@
       (setf (block-succ pred) (substitute succ block (block-succ pred)))
       (pushnew pred (block-pred succ)))))
 
+;;; Try to coalesce BLOCK with the successor if it is unique and block
+;;; is its unique predecessor.
+(defun maybe-coalesce-block (block)
+  (when (singlep (block-succ block))
+    (let ((succ (first (block-succ block))))
+      (when (and (singlep (block-pred succ)) (not (component-exit-p succ)))
+        (link-nodes (node-prev (block-exit block)) (node-next (block-entry succ)))
+        (setf (block-succ block) (block-succ succ))
+        (dolist (next (block-succ succ))
+          (setf (block-pred next) (substitute block succ (block-pred next))))
+        t))))
+
 (defun finish-component (component)
   (do-blocks (block component)
-    (when (empty-block-p block)
-      (delete-empty-block block))))
+    (if (empty-block-p block)
+        (delete-empty-block block)
+        (maybe-coalesce-block block))))
 
 ;;; IR Translation
 
@@ -335,17 +363,22 @@
 ;;; basic block.
 (defun split-block (&optional (cursor *cursor*))
   (let* ((block (cursor-block cursor))
-         (exit (block-exit block))
-         newblock
          (newexit (make-block-exit))
-         (newentry (make-block-entry)))
+         (newentry (make-block-entry))
+         (exit (block-exit block))
+         (newblock (make-block :entry newentry
+                               :exit exit
+                               :pred (list block)
+                               :succ (block-succ block))))
     (insert-node newexit)
     (insert-node newentry)
     (setf (node-next newexit)  nil)
     (setf (node-prev newentry) nil)
     (setf (block-exit block) newexit)
-    (setq newblock (make-block :entry newentry :exit exit))
-    (shiftf (block-succ newblock) (block-succ block) (list newblock))
+    (setf (block-succ block) (list newblock))
+    (dolist (succ (block-succ newblock))
+      (setf (block-pred succ) (substitute newblock block (block-pred succ))))
+    (set-cursor :block block :before newexit)
     newblock))
 
 
@@ -491,7 +524,7 @@
   (flet ((block-name (block)
            (cond
              ((and (singlep (block-pred block))
-                   (component-entry-p (block-pred block)))
+                   (component-entry-p (unlist (block-pred block))))
               "ENTRY")
              ((component-exit-p block)
               "EXIT")
@@ -508,21 +541,6 @@
     (do-blocks (block component)
       (print-block block))))
 
-;;; A few consistency checks in the IR useful for catching bugs.
-(defun check-ir-consistency (&optional (component *component*))
-  (with-simple-restart (continue "Continue execution")
-    (do-blocks (block component)
-      (dolist (succ (block-succ block))
-        (unless (find block (block-pred succ))
-          (error "The block `~S' does not belong to the predecessors list of the its successor `~S'"
-                 (block-id block)
-                 (block-id succ))))
-      (dolist (pred (block-pred block))
-        (unless (find block (block-succ pred))
-          (error "The block `~S' does not belong to the successors' list of its predecessor `~S'"
-                 (block-id block)
-                 (block-id pred)))))))
-
 ;;; Translate FORM into IR and print a textual repreresentation of the
 ;;; component.
 (defun describe-ir (form)
@@ -533,16 +551,17 @@
     (print-component *component*)))
 
 
-
-
-;;;; Code generation
-
-
-(defun relooper (component)
-  )
-
-
-
+(defun test-conditional ()
+  (with-component-compilation 
+    (ir-convert 1)
+    (ir-convert 2)
+    (ir-convert 3)
+    (with-cursor (:after :entry)
+      (ir-convert '(if x 1 0))
+      (ir-convert nil))
+    (finish-component *component*)
+    (check-ir-consistency)
+    (print-component *component*)))
 
 
 ;;; compiler.lisp ends here
