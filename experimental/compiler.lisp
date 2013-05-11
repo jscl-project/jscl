@@ -35,10 +35,10 @@
 
 ;;;; Lexical environment
 ;;;;
-;;;; The Lexical environment is compromised of a list of bindings,
-;;;; which associates information to symbols. It tracks lexical
-;;;; variables, tags, local declarations and many other information in
-;;;; order to guide the compiler.
+;;;; The Lexical environment comprises a list of bindings, which
+;;;; associates information to symbols. It tracks lexical variables,
+;;;; tags, local declarations and many other information in order to
+;;;; guide the compiler.
 
 (defstruct binding
   name type value declarations)
@@ -201,9 +201,9 @@
   entry
   exit)
 
-;;; Create a new component, compromised of the sentinel nodes and a
-;;; empty basic block, ready to start conversion to IR. It returnes
-;;; the component and the basic block as multiple values.
+;;; Create a new component with sentinel nodes and an empty basic
+;;; block, ready to start conversion to IR. It returns the component
+;;; and the basic block as multiple values.
 (defun make-empty-component ()
   (let ((entry (make-component-entry))
         (block (make-empty-block))
@@ -282,7 +282,7 @@
 ;;; both keywords are specified inconsistently, or if the nodes do not
 ;;; belong to BLOCK.
 ;;;
-;;; The special values :ENTRY and :EXIT stands for the entry and exit
+;;; The special values :ENTRY and :EXIT stand for the entry and exit
 ;;; nodes of the block respectively.
 (defun cursor (&key (block (cursor-block *cursor*))
                  (before nil before-p)
@@ -531,6 +531,18 @@
     (finish-component *component*)
     (check-ir-consistency)
     (print-component *component*)))
+
+
+
+
+;;;; Code generation
+
+
+(defun relooper (component)
+  )
+
+
+
 
 
 ;;; compiler.lisp ends here
