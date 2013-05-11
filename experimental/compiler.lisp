@@ -56,7 +56,7 @@
 ;;;; what it is because you know the name.
 ;;;;
 
-;;; A leaf stands for leaf in the tree of computations. Lexical
+;;; A leaf stands for a leaf in the tree of computations. Lexical
 ;;; variables, constants and literal functions are leafs. Leafs are
 ;;; not nodes itself, a `ref' node will stands for putting a leaf into
 ;;; a lvar, which can be used in computations.
@@ -232,7 +232,7 @@
      ,@body))
 
 ;;; A few consistency checks in the IR useful for catching bugs.
-(defun check-ir-consistency (&optional (component *component*))
+(defun check-ir-consistency (component)
   (with-simple-restart (continue "Continue execution")
     (do-blocks (block component)
       (dolist (succ (block-succ block))
@@ -445,12 +445,6 @@
     (set-cursor :block join-block)))
 
 
-(define-ir-translator progn (&body body)
-  (dolist (form (butlast body))
-    (ir-convert form))
-  (ir-convert (car (last body)) (result-lvar)))
-
-
 (defun ir-convert-var (form result)
   (let* ((leaf (make-var :name form))
          (ref (make-ref :leaf leaf :lvar result)))
@@ -553,7 +547,7 @@
   (with-component-compilation
     (ir-convert form (make-lvar :id "$out"))
     (finish-component *component*)
-    (check-ir-consistency)
+    (check-ir-consistency *component*)
     (print-component *component*)))
 
 
