@@ -551,17 +551,4 @@
     (print-component *component*)))
 
 
-(defun test-conditional ()
-  (with-component-compilation 
-    (ir-convert 1)
-    (ir-convert 2)
-    (ir-convert 3)
-    (with-cursor (:after :entry)
-      (ir-convert '(if x 1 0))
-      (ir-convert nil))
-    (finish-component *component*)
-    (check-ir-consistency)
-    (print-component *component*)))
-
-
 ;;; compiler.lisp ends here
