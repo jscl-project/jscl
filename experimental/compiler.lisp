@@ -445,6 +445,12 @@
     (set-cursor :block join-block)))
 
 
+(define-ir-translator progn (&body body)
+  (dolist (form (butlast body))
+    (ir-convert form))
+  (ir-convert (car (last body)) (result-lvar)))
+
+
 (defun ir-convert-var (form result)
   (let* ((leaf (make-var :name form))
          (ref (make-ref :leaf leaf :lvar result)))
