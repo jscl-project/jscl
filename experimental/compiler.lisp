@@ -545,8 +545,7 @@
   (destructuring-bind (function &rest args) form
     (let ((func-lvar (make-lvar))
           (args-lvars nil))
-      (when (symbolp function)
-        (ir-convert `(%symbol-function ,function) func-lvar))
+      (ir-convert function func-lvar)
       (dolist (arg args)
         (let ((arg-lvar (make-lvar)))
           (push arg-lvar args-lvars)
@@ -698,6 +697,7 @@
     (when complete (ir-complete))
     (check-ir-consistency *component*)
     (print-component *component*)))
+
 
 
 
