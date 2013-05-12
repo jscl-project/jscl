@@ -25,7 +25,7 @@
 ;;;; Random Common Lisp code useful to use here and there. 
 
 (defmacro with-gensyms ((&rest vars) &body body)
-  `(let ,(mapcar (lambda (var) `(,var (gensym ,(string var)))) vars)
+  `(let ,(mapcar (lambda (var) `(,var (gensym ,(concatenate 'string (string var) "-")))) vars)
      ,@body))
 
 (defun singlep (x)
@@ -412,16 +412,15 @@
 ;;; unique successor, and so it should be when the translator returns.
 (defmacro define-ir-translator (name lambda-list &body body)
   (check-type name symbol)
-  (let ((fname (intern (format nil "IR-CONVERT-~a" (string name))))
-        (result (gensym))
-        (form (gensym)))
-    `(progn
-       (defun ,fname (,form ,result)
-         (flet ((result-lvar () ,result))
-           (declare (ignorable (function result-lvar)))
-           (destructuring-bind ,lambda-list ,form
-             ,@body)))
-       (push (cons ',name #',fname) *ir-translator*))))
+  (let ((fname (intern (format nil "IR-CONVERT-~a" (string name)))))
+    (with-gensyms (result form)
+      `(progn
+         (defun ,fname (,form ,result)
+           (flet ((result-lvar () ,result))
+             (declare (ignorable (function result-lvar)))
+             (destructuring-bind ,lambda-list ,form
+               ,@body)))
+         (push (cons ',name #',fname) *ir-translator*)))))
 
 ;;; Return the unique successor of the current block. If it is not
 ;;; unique signal an error.
@@ -488,8 +487,10 @@
     (set-cursor :block join-block)))
 
 (define-ir-translator block (name &body body)
-  (push-binding name 'block (cons (next-block) (result-lvar)))
-  (ir-convert `(progn ,@body) (result-lvar)))
+  (let ((new (split-block)))
+    (push-binding name 'block (cons (next-block) (result-lvar)))
+    (ir-convert `(progn ,@body) (result-lvar))
+    (set-cursor :block new)))
 
 (define-ir-translator return-from (name &optional value)
   (let ((binding
@@ -586,7 +587,7 @@
 ;;; IR conversion bound in the current cursor. BODY is evaluated and
 ;;; the value of the last form is returned.
 (defmacro with-component-compilation (&body body)
-  (let ((block (gensym)))
+  (with-gensyms (block)
     `(multiple-value-bind (*component* ,block)
          (make-empty-component)
        (let ((*cursor* (cursor :block ,block))
