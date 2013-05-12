@@ -561,7 +561,7 @@
       (setq args-lvars (reverse args-lvars))
       ;; Funcall
       (if (find-primitive function)
-          (insert-node (make-primitive
+          (insert-node (make-primitive-call
                         :function (find-primitive function)
                         :arguments args-lvars
                         :lvar result))
