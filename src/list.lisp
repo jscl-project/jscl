@@ -99,6 +99,19 @@
 (defun cdddar (x) (cdr (cddar x)))
 (defun cddddr (x) (cdr (cdddr x)))
 
+(defun sublis (alist tree &key key (test #'eql testp) (test-not #'eql test-not-p))
+  (labels ((s (tree)
+             (when (and testp test-not-p)
+               (error "Both test and test-not are set"))
+             (let* ((key-val (if key (funcall key tree) tree))
+                    (replace (if test-not-p
+                                 (assoc key-val alist :test-not test-not)
+                                 (assoc key-val alist :test test)))
+                    (x (if replace (cdr replace) tree)))
+               (if (atom x)
+                   x
+                   (cons (s (car x)) (s (cdr x)))))))
+    (s tree)))
 
 (defun copy-list (x)
   (mapcar #'identity x))

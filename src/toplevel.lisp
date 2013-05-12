@@ -73,7 +73,7 @@
           prog2 progn psetq push quote rassoc read-from-string remove remove-if
           remove-if-not return return-from revappend reverse rplaca rplacd
           second set setf setq seventh sixth some string string-upcase string=
-          stringp subseq subst symbol-function symbol-name symbol-package
+          stringp sublis subseq subst symbol-function symbol-name symbol-package
           symbol-plist symbol-value symbolp t tagbody tailp tenth third throw
           tree-equal truncate unless unwind-protect values values-list variable
           vector-push-extend warn when write-line write-string zerop))
