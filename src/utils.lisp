@@ -23,7 +23,7 @@
   `(setq ,variable (concat ,variable (progn ,@form))))
 
 ;;; This couple of helper functions will be defined in both Common
-;;; Lisp and in Ecmalisp.
+;;; Lisp and in JSCL
 (defun ensure-list (x)
   (if (listp x)
       x
