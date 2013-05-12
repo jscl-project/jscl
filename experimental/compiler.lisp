@@ -554,10 +554,10 @@
       (let ((call (make-call :function func-lvar :arguments args-lvars :lvar result)))
         (insert-node call)))))
 
-;;; Convert the Lisp expression FORM into IR before the NEXT node, it
-;;; may create new basic blocks into the current component. RESULT is
-;;; the lvar representing the result of the computation or null if the
-;;; value should be discarded. The IR is inserted at *CURSOR*.
+;;; Convert the Lisp expression FORM, it may create new basic
+;;; blocks. RESULT is the lvar representing the result of the
+;;; computation or null if the value should be discarded. The IR is
+;;; inserted at *CURSOR*.
 (defun ir-convert (form &optional result (*cursor* *cursor*))
   ;; Rebinding the lexical environment here we make sure that the
   ;; lexical information introduced by FORM is just available for
