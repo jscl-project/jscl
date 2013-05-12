@@ -322,9 +322,11 @@
 
 ;;; Return the list of blocks in COMPONENT, conveniently sorted.
 (defun component-blocks (component)
-  (let ((output nil))
+  (let ((seen nil)
+        (output nil))
     (labels ((compute-rdfo-from (block)
-               (unless (or (component-exit-p block) (find block output))
+               (unless (or (component-exit-p block) (find block seen))
+                 (push block seen)
                  (dolist (successor (block-succ block))
                    (unless (component-exit-p block)
                      (compute-rdfo-from successor)))
@@ -423,13 +425,12 @@
 
 ;;; Set the next block of the current one.
 (defun (setf next-block) (new-value)
-  (let ((block (current-block))
-        (next (next-block)))
-    (setf (block-pred next) (remove block (block-pred next)))
+  (let ((block (current-block)))
+    (dolist (succ (block-succ block))
+      (setf (block-pred succ) (remove block (block-pred succ))))
     (setf (block-succ block) (list new-value))
     (push block (block-pred new-value))
     new-value))
-
 
 (defun ir-convert-constant (form result)
   (let* ((leaf (make-constant :value form)))
@@ -452,9 +453,9 @@
 (define-ir-translator if (test then &optional else)
   ;; It is the schema of how the basic blocks will look like
   ;;
-  ;;                              / ..then.. \
-  ;;  <aaaa|> --  =>  <aaaaXX> --<            >-- <|> --<zzzz>
-  ;;                              \ ..else.. /
+  ;;              / ..then.. \
+  ;;  <aaaaXX> --<            >-- <|> -- <zzzz>
+  ;;              \ ..else.. /
   ;;
   ;; Note that is important to leave the cursor in an empty basic
   ;; block, as zzz could be the exit basic block of the component,
@@ -492,9 +493,43 @@
     (destructuring-bind (jump-block . lvar)
         (binding-value binding)
       (ir-convert value lvar)
-      (let ((new (split-block)))
-        (setf (next-block) jump-block)
-        (set-cursor :block new)))))
+      (setf (next-block) jump-block)
+      ;; This block is really unreachable, even if the following code
+      ;; is labelled in a tagbody, as tagbody will create a new block
+      ;; for each label. However, we have to leave the cursor
+      ;; somewhere to convert new input.
+      (let ((dummy (make-empty-block)))
+        (set-cursor :block dummy)))))
+
+(define-ir-translator tagbody (&rest statements)
+  (flet ((go-tag-p (x)
+           (or (integerp x) (symbolp x))))
+    (let* ((tags (remove-if-not #'go-tag-p statements))
+           (tag-blocks nil))
+      ;; Create a chain of basic blocks for the tags, recording each
+      ;; block in a alist in TAG-BLOCKS.
+      (let ((*cursor* *cursor*))
+        (dolist (tag tags)
+          (set-cursor :block (split-block))
+          (push-binding tag 'tag (current-block))
+          (if (assoc tag tag-blocks)
+              (error "Duplicated tag `~S' in tagbody." tag)
+              (push (cons tag (current-block)) tag-blocks))))
+      ;; Convert the statements into the correct block.
+      (dolist (stmt statements)
+        (if (go-tag-p stmt)
+            (set-cursor :block (cdr (assoc stmt tag-blocks)))
+            (ir-convert stmt))))))
+
+(define-ir-translator go (label)
+  (let ((tag-binding
+         (or (find-binding label 'tag)
+             (error "Unable to jump to the label `~S'" label))))
+    (setf (next-block) (binding-value tag-binding))
+    ;; Unreachable block.
+    (let ((dummy (make-empty-block)))
+      (set-cursor :block dummy))))
+
 
 (defun ir-convert-var (form result)
   (let* ((leaf (make-var :name form)))
@@ -553,24 +588,33 @@
              (*lexenv* nil))
          ,@body))))
 
+;;; Change all the predecessors of BLOCK to precede NEW-BLOCK instead.
+(defun replace-block (block new-block)
+  (let ((predecessors (block-pred block)))
+    (setf (block-pred new-block) (union (block-pred new-block) predecessors))
+    (dolist (pred predecessors)
+      (setf (block-succ pred) (substitute new-block block (block-succ pred)))
+      (unless (component-entry-p pred)
+        (let ((last-node (node-prev (block-exit pred))))
+          (when (conditional-p last-node)
+            (macrolet ((replacef (place)
+                         `(setf ,place (if (eq block ,place) new-block ,place))))
+              (replacef (conditional-consequent last-node))
+              (replacef (conditional-alternative last-node)))))))))
+
 (defun delete-empty-block (block)
   (when (or (component-entry-p block) (component-exit-p block))
     (error "Cannot delete entry or exit basic blocks."))
   (unless (empty-block-p block)
     (error "Block `~S' is not empty!" (block-id block)))
-  (let ((succ (unlist (block-succ block))))
-    (setf (block-pred succ) (remove block (block-pred succ)))
-    (dolist (pred (block-pred block))
-      (setf (block-succ pred) (substitute succ block (block-succ pred)))
-      (pushnew pred (block-pred succ)))))
+  (replace-block block (unlist (block-succ block))))
 
 ;;; Try to coalesce BLOCK with the successor if it is unique and block
 ;;; is its unique predecessor.
 (defun maybe-coalesce-block (block)
   (when (singlep (block-succ block))
     (let ((succ (first (block-succ block))))
-      (when (and (singlep (block-pred succ))
-                 (not (component-exit-p succ)))
+      (when (and (not (component-exit-p succ)) (singlep (block-pred succ)))
         (link-nodes (node-prev (block-exit block))
                     (node-next (block-entry succ)))
         (setf (block-succ block) (block-succ succ))
@@ -580,9 +624,9 @@
 
 (defun ir-complete (&optional (component *component*))
   (do-blocks (block component)
-    (if (empty-block-p block)
-        (delete-empty-block block)
-        (maybe-coalesce-block block))))
+    (maybe-coalesce-block block)
+    (when (empty-block-p block)
+      (delete-empty-block block))))
 
 
 ;;; IR Debugging
@@ -597,7 +641,7 @@
          ((var-p leaf)
           (format t "~a" (var-name leaf)))
          ((constant-p leaf)
-          (format t "'~a" (constant-value leaf)))
+          (format t "'~s" (constant-value leaf)))
          ((functional-p leaf)
           (format t "#<function ~a at ~a>"
                   (functional-name leaf)
@@ -642,12 +686,14 @@
 
 ;;; Translate FORM into IR and print a textual repreresentation of the
 ;;; component.
-(defun describe-ir (form)
+(defun describe-ir (form &optional (complete t))
   (with-component-compilation
     (ir-convert form (make-lvar :id "$out"))
-    (ir-complete)
+    (when complete (ir-complete))
     (check-ir-consistency *component*)
     (print-component *component*)))
+
+
 
 
 ;;; compiler.lisp ends here
