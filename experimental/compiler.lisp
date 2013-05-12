@@ -104,10 +104,18 @@
   variable
   value)
 
-;;; Call the lvar FUNCTION with a list of lvars as ARGUMENTS.
-(defstruct (call (:include node))
-  function
+;;; A base node to function calls with a list of lvar as ARGUMENTS.
+(defstruct (combination (:include node) (:constructor))
   arguments)
+
+;;; A function call to the ordinary Lisp function in the lvar FUNCTION.
+(defstruct (call (:include combination))
+  function)
+
+;;; A function call to the primitive FUNCTION.
+(defstruct (primitive-call (:include combination))
+  function)
+
 
 ;;; A conditional branch. If the LVAR is not NIL, then we will jump to
 ;;; the basic block CONSEQUENT, jumping to ALTERNATIVE otherwise. By
@@ -545,14 +553,23 @@
   (destructuring-bind (function &rest args) form
     (let ((func-lvar (make-lvar))
           (args-lvars nil))
-      (ir-convert function func-lvar)
+      ;; Argument list
       (dolist (arg args)
         (let ((arg-lvar (make-lvar)))
           (push arg-lvar args-lvars)
           (ir-convert arg arg-lvar)))
       (setq args-lvars (reverse args-lvars))
-      (let ((call (make-call :function func-lvar :arguments args-lvars :lvar result)))
-        (insert-node call)))))
+      ;; Funcall
+      (if (find-primitive function)
+          (insert-node (make-primitive
+                        :function (find-primitive function)
+                        :arguments args-lvars
+                        :lvar result))
+          (progn
+            (ir-convert `(symbol-function ,function) func-lvar)
+            (insert-node (make-call :function func-lvar
+                                    :arguments args-lvars
+                                    :lvar result)))))))
 
 ;;; Convert the Lisp expression FORM, it may create new basic
 ;;; blocks. RESULT is the lvar representing the result of the
@@ -655,6 +672,10 @@
      (format t "set ~a ~a"
              (var-name (assignment-variable node))
              (lvar-id (assignment-value node))))
+    ((primitive-call-p node)
+     (format t "primitive ~a" (primitive-name (primitive-call-function node)))
+     (dolist (arg (primitive-call-arguments node))
+       (format t " ~a" (lvar-id arg))))
     ((call-p node)
      (format t "call ~a" (lvar-id (call-function node)))
      (dolist (arg (call-arguments node))
@@ -700,6 +721,31 @@
 
 
 
+;;;; Primitives
+;;;;
+;;;; Primitive functions are a set of functions provided by the
+;;;; compiler. They cannot usually be written in terms of other
+;;;; functions. When the compiler tries to compile a function call, it
+;;;; looks for a primitive function firstly, and if it is found and
+;;;; the declarations allow it, a primitive call is inserted in the
+;;;; IR. The back-end of the compiler knows how to compile primitive
+;;;; calls.
+;;;; 
+
+(defvar *primitive-function-table* nil)
+
+(defstruct primitive
+  name)
+
+(defmacro define-primitive (name args &body body)
+  (declare (ignore args body))
+  `(push (make-primitive :name ',name)
+         *primitive-function-table*))
+
+(defun find-primitive (name)
+  (find name *primitive-function-table* :key #'primitive-name))
+
+(define-primitive symbol-function (symbol))
 
 
 ;;; compiler.lisp ends here
