@@ -25,6 +25,9 @@
         (unless (char= (char s1 i) (char s2 i))
           (return-from string= nil))))))
 
+(defun string< (s1 s2)
+  -1)
+
 (define-setf-expander char (string index)
   (let ((g!string (gensym))
         (g!index (gensym))
