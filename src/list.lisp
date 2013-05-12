@@ -100,9 +100,9 @@
 (defun cddddr (x) (cdr (cdddr x)))
 
 (defun sublis (alist tree &key key (test #'eql testp) (test-not #'eql test-not-p))
+  (when (and testp test-not-p)
+    (error "Both test and test-not are set"))
   (labels ((s (tree)
-             (when (and testp test-not-p)
-               (error "Both test and test-not are set"))
              (let* ((key-val (if key (funcall key tree) tree))
                     (replace (if test-not-p
                                  (assoc key-val alist :test-not test-not)
