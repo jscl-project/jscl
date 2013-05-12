@@ -18,6 +18,10 @@
 (test (not (string= "foo" "foox")))
 
 (test (= (string< "one" "two") 0))
+(test (= (string< "oob" "ooc") 2))
+(test (null (string< "" "")))
+(test (null (string< "a" "")))
+(test (= (string< "" "a") 0))
 
 ;;; BUG: The compiler will macroexpand the forms below (char str N)
 ;;; will expand to internal SBCL code instead of our (setf char). It
