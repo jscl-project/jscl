@@ -26,8 +26,14 @@
           (return-from string= nil))))))
 
 (defun string< (s1 s2)
-  -1)
-
+  (let ((len-1 (length s1))
+		(len-2 (length s2)))
+	(cond ((= len-2 0) nil)
+		  ((= len-1 0) 0)
+		  (t (dotimes (i len-1 nil)
+			   (when (char< (char s1 i) (char s2 i))
+				 (return-from string< i)))))))
+		
 (define-setf-expander char (string index)
   (let ((g!string (gensym))
         (g!index (gensym))

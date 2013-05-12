@@ -375,6 +375,9 @@
 (defun char= (x y)
   (eql x y))
 
+(defun char< (x y)
+  (< (char-code x) (char-code y)))
+
 (defun integerp (x)
   (and (numberp x) (= (floor x) x)))
 
