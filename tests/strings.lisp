@@ -17,6 +17,8 @@
 (test (not (string= "Foo" "foo")))
 (test (not (string= "foo" "foox")))
 
+(test (= (string< "one" "two") 0))
+
 ;;; BUG: The compiler will macroexpand the forms below (char str N)
 ;;; will expand to internal SBCL code instead of our (setf char). It
 ;;; is because macrodefinitions during bootstrapping are not included
