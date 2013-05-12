@@ -339,6 +339,11 @@
   `(dolist (,block (component-blocks ,component) ,result)
      ,@body))
 
+(defmacro do-blocks-backward ((block component &optional result) &body body)
+  `(dolist (,block (reverse (component-blocks ,component)) ,result)
+     ,@body))
+
+
 ;;; A few consistency checks in the IR useful for catching bugs.
 (defun check-ir-consistency (component)
   (with-simple-restart (continue "Continue execution")
@@ -623,7 +628,7 @@
         t))))
 
 (defun ir-complete (&optional (component *component*))
-  (do-blocks (block component)
+  (do-blocks-backward (block component)
     (maybe-coalesce-block block)
     (when (empty-block-p block)
       (delete-empty-block block))))
