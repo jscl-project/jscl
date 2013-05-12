@@ -524,7 +524,7 @@
       ;; block in a alist in TAG-BLOCKS.
       (let ((*cursor* *cursor*))
         (dolist (tag tags)
-          (set-cursor :block (split-block))
+          (setq *cursor* (cursor :block (split-block)))
           (push-binding tag 'tag (current-block))
           (if (assoc tag tag-blocks)
               (error "Duplicated tag `~S' in tagbody." tag)
