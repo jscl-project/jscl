@@ -377,7 +377,7 @@
 (defstruct binding
   name namespace type value)
 
-(defvar *lexenv*)
+(defvar *lexenv* nil)
 
 (defun find-binding (name namespace)
   (find-if (lambda (b)
@@ -545,6 +545,31 @@
       (set-cursor :block dummy))))
 
 
+(defun ir-convert-functoid (result name arguments &rest body)
+  (let ((component)
+        (return-lvar (make-lvar)))
+    (with-component-compilation
+      (ir-convert `(progn ,@body) return-lvar)
+      (setq component *component*))
+    (let ((functional
+           (make-functional
+            :name name
+            :arguments arguments
+            :entry-point component
+            :return-lvar return-lvar)))
+      (insert-node (make-ref :leaf functional :lvar result)))))
+
+(define-ir-translator function (name)
+  (if (atom name)
+      (ir-convert `(symbol-function ,name) (result-lvar))
+      (ecase (car name)
+        ((lambda named-lambda)
+         (let ((desc (cdr name)))
+           (when (eq 'lambda (car name))
+             (push nil desc))
+           (apply #'ir-convert-functoid (result-lvar) desc)))
+        (setf))))
+
 (defun ir-convert-var (form result)
   (let* ((leaf (make-var :name form)))
     (insert-node (make-ref :leaf leaf :lvar result))))
@@ -606,8 +631,7 @@
   (with-gensyms (block)
     `(multiple-value-bind (*component* ,block)
          (make-empty-component)
-       (let ((*cursor* (cursor :block ,block))
-             (*lexenv* nil))
+       (let ((*cursor* (cursor :block ,block)))
          ,@body))))
 
 ;;; Change all the predecessors of BLOCK to precede NEW-BLOCK instead.
@@ -665,9 +689,7 @@
          ((constant-p leaf)
           (format t "'~s" (constant-value leaf)))
          ((functional-p leaf)
-          (format t "#<function ~a at ~a>"
-                  (functional-name leaf)
-                  (functional-entry-point leaf))))))
+          (format t "#<function ~a>" (functional-name leaf))))))
     ((assignment-p node)
      (format t "set ~a ~a"
              (var-name (assignment-variable node))
@@ -746,6 +768,9 @@
   (find name *primitive-function-table* :key #'primitive-name))
 
 (define-primitive symbol-function (symbol))
+
+
+
 
 
 ;;; compiler.lisp ends here
