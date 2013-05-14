@@ -113,6 +113,17 @@
                    (cons (s (car x)) (s (cdr x)))))))
     (s tree)))
 
+(defun subst (new old tree &key key (test #'eql testp) (test-not #'eql test-not-p))
+  (when (and testp test-not-p)
+    (error "Both test and test-not are set"))
+  (labels ((s (x)
+             (let ((key-val (if key (funcall key x) x)))
+               (cond
+                 ((funcall (if test-not-p test-not test) key-val old) new)
+                 ((atom x) x)
+                 (t (cons (s (car x)) (s (cdr x))))))))
+    (s tree)))
+
 (defun copy-list (x)
   (mapcar #'identity x))
 
@@ -134,15 +145,6 @@
     ((atom tail) (eq object tail))
     (when (eql tail object)
       (return-from tailp t))))
-
-(defun subst (new old tree &key (key #'identity) (test #'eql))
-  (cond 
-    ((funcall test (funcall key tree) (funcall key old))
-     new) 
-    ((consp tree)
-     (cons (subst new old (car tree) :key key :test test)
-           (subst new old (cdr tree) :key key :test test))) 
-    (t tree)))
 
 (defmacro pop (place)
   (multiple-value-bind (dummies vals newval setter getter)
