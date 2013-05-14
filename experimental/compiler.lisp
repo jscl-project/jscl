@@ -587,6 +587,7 @@
         (return-lvar (make-lvar)))
     (with-component-compilation (name)
       (ir-convert `(progn ,@body) return-lvar)
+      (ir-complete)
       (setq component *component*))
     (let ((functional
            (make-functional
@@ -707,6 +708,15 @@
 
 ;;; IR Debugging
 
+(defun format-block-name (block)
+  (cond
+    ((eq block (unlist (block-succ (component-entry (block-component block)))))
+     (format nil "ENTRY-~a" (component-id (block-component block))))
+    ((component-exit-p block)
+     (format nil "EXIT-~a" (component-id (block-component block))))
+    (t
+     (format nil "BLOCK ~a" (block-id block)))))
+
 (defun print-node (node)
   (when (node-lvar node)
     (format t "$~a = " (lvar-id (node-lvar node))))
@@ -733,32 +743,23 @@
      (dolist (arg (call-arguments node))
        (format t " $~a" (lvar-id arg))))
     ((conditional-p node)
-     (format t "if $~a ~a ~a"
+     (format t "if $~a then ~a else ~a~%"
              (lvar-id (conditional-test node))
-             (block-id (conditional-consequent node))
-             (block-id (conditional-alternative node))))
+             (format-block-name (conditional-consequent node))
+             (format-block-name (conditional-alternative node))))
     (t
      (error "`print-node' does not support printing ~S as a node." node)))
   (terpri))
 
 (defun print-block (block)
-  (flet ((print-block-name (block)
-           (cond
-             ((and (singlep (block-pred block))
-                   (component-entry-p (unlist (block-pred block))))
-              (format nil "ENTRY-~a" (component-id (block-component block))))
-             ((component-exit-p block)
-              (format nil "EXIT-~a" (component-id (block-component block))))
-             (t
-              (format nil "BLOCK ~a" (block-id block))))))
-    (write-line (print-block-name block))
-    (do-nodes (node block)
-      (print-node node))
-    (when (singlep (block-succ block))
-      (format t "GO ~a~%" (print-block-name (first (block-succ block)))))))
+  (write-line (format-block-name block))
+  (do-nodes (node block)
+    (print-node node))
+  (when (singlep (block-succ block))
+    (format t "GO ~a~%~%" (format-block-name (unlist (block-succ block))))))
 
 (defun print-component (component &optional (stream *standard-output*))
-  (format t ";;; COMPONENT ~a (~a) ~%" (component-name component) (component-id component))
+  (format t ";;; COMPONENT ~a (~a) ~%~%" (component-name component) (component-id component))
   (let ((*standard-output* stream))
     (do-blocks (block component)
       (print-block block)))
