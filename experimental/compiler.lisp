@@ -571,8 +571,10 @@
         (setf))))
 
 (defun ir-convert-var (form result)
-  (let* ((leaf (make-var :name form)))
-    (insert-node (make-ref :leaf leaf :lvar result))))
+  (let ((binds (find-binding form 'variable)))
+    (if binds
+        (insert-node (make-ref :leaf (binding-value binds) :lvar result))
+        (ir-convert `(symbol-value ',form) result))))
 
 (defun ir-convert-call (form result)
   (destructuring-bind (function &rest args) form
@@ -768,6 +770,7 @@
   (find name *primitive-function-table* :key #'primitive-name))
 
 (define-primitive symbol-function (symbol))
+(define-primitive symbol-value (symbol))
 
 
 
