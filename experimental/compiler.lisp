@@ -470,11 +470,16 @@
   (ir-convert-constant form (result-lvar)))
 
 (define-ir-translator setq (variable value)
-  (let ((var (make-var :name variable))
-        (value-lvar (make-lvar)))
-    (ir-convert value value-lvar)
-    (let ((assign (make-assignment :variable var :value value-lvar :lvar (result-lvar))))
-      (insert-node assign))))
+  (let ((b (find-binding variable 'variable)))
+    (cond
+      (b
+       (let ((var (make-var :name variable))
+             (value-lvar (make-lvar)))
+         (ir-convert value value-lvar)
+         (let ((assign (make-assignment :variable var :value value-lvar :lvar (result-lvar))))
+           (insert-node assign))))
+      (t
+       (ir-convert `(set ',variable ,value) (result-lvar))))))
 
 (define-ir-translator progn (&body body)
   (mapc #'ir-convert (butlast body))
@@ -781,6 +786,17 @@
 
 (define-primitive symbol-function (symbol))
 (define-primitive symbol-value (symbol))
+(define-primitive set (symbol value))
+(define-primitive fset (symbol value))
+
+(define-primitive + (&rest numbers))
+(define-primitive - (number &rest other-numbers))
+
+(define-primitive consp (x))
+(define-primitive cons (x y))
+(define-primitive car (x))
+(define-primitive cdr (x))
+
 
 
 ;;; compiler.lisp ends here
