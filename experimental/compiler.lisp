@@ -35,6 +35,9 @@
   (assert (singlep x))
   (first x))
 
+(defun generic-printer (x stream)
+  (print-unreadable-object (x stream :type t :identity t)))
+
 
 ;;;; Intermediate representation structures
 ;;;;
@@ -65,7 +68,7 @@
 
 ;;; A lambda expression. Why do we name it `functional'? Well,
 ;;; function is reserved by the ANSI, isn't it?
-(defstruct (functional (:include leaf))
+(defstruct (functional (:include leaf) (:print-object generic-printer))
   ;; The symbol which names this function in the source code or null
   ;; if we do not know or it is an anonymous function.
   name
@@ -82,7 +85,7 @@
 
 ;;; A base structure for every single computation. Most of the
 ;;; computations are valued.
-(defstruct node
+(defstruct (node (:print-object generic-printer))
   ;; The next and the prev slots are the next nodes and the previous
   ;; node in the basic block sequence respectively.
   next prev
@@ -133,7 +136,7 @@
 ;;;; well-defined entry and exit nodes. It is the toplevel
 ;;;; organizational entity in the compiler. The IR translation result
 ;;;; is accumulated into components incrementally.
-(defstruct (component)
+(defstruct (component (:print-object generic-printer))
   entry
   exit)
 
@@ -191,7 +194,7 @@
      ,@body))
 
 ;;; A few consistency checks in the IR useful for catching bugs.
-(defun check-ir-consistency (component)
+(defun check-ir-consistency (&optional (component *component*))
   (with-simple-restart (continue "Continue execution")
     (do-blocks (block component)
       (dolist (succ (block-succ block))
@@ -741,13 +744,15 @@
 
 ;;; Translate FORM into IR and print a textual repreresentation of the
 ;;; component.
-(defun describe-ir (form &optional (complete t))
+(defun convert-toplevel-and-print (form &optional (complete t))
   (with-component-compilation
     (ir-convert form (make-lvar :id "$out"))
     (when complete (ir-complete))
-    (check-ir-consistency *component*)
+    (check-ir-consistency)
     (print-component *component*)))
 
+(defmacro /ir (form)
+  `(convert-toplevel-and-print ',form))
 
 
 ;;;; Primitives
