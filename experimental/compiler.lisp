@@ -38,6 +38,17 @@
 (defun generic-printer (x stream)
   (print-unreadable-object (x stream :type t :identity t)))
 
+;;; A generic counter mechanism. IDs are used generally for debugging
+;;; purposes. You can bind *counter-alist* to NIL to reset the
+;;; counters in a dynamic extent.
+(defvar *counter-alist* nil)
+(defun generate-id (class)
+  (let ((e (assoc class *counter-alist*)))
+    (if e
+        (incf (cdr e))
+        (prog1 1
+          (push (cons class 1) *counter-alist*)))))
+
 
 ;;;; Intermediate representation structures
 ;;;;
@@ -74,14 +85,14 @@
   name
   arguments
   return-lvar
-  entry-point)
+  component)
 
 ;;; An abstract place where the result of a computation is stored and
 ;;; it can be referenced from other nodes, so lvars are responsible
 ;;; for keeping the necessary information of the nested structure of
 ;;; the code in this plain representation.
 (defstruct lvar
-  (id (gensym "$")))
+  (id (generate-id 'lvar)))
 
 ;;; A base structure for every single computation. Most of the
 ;;; computations are valued.
@@ -137,8 +148,11 @@
 ;;;; organizational entity in the compiler. The IR translation result
 ;;;; is accumulated into components incrementally.
 (defstruct (component (:print-object generic-printer))
+  (id (generate-id 'component))
+  name
   entry
-  exit)
+  exit
+  functions)
 
 ;;; The current component. We accumulate the results of the IR
 ;;; conversion in this component.
@@ -147,8 +161,8 @@
 ;;; Create a new component with an empty basic block, ready to start
 ;;; conversion to IR. It returns the component and the basic block as
 ;;; multiple values.
-(defun make-empty-component ()
-  (let ((*component* (make-component)))
+(defun make-empty-component (&optional name)
+  (let ((*component* (make-component :name name)))
     (let ((entry (make-component-entry))
           (block (make-empty-block))
           (exit (make-component-exit)))
@@ -163,10 +177,10 @@
 ;;; Prepare a new component with a current empty block ready to start
 ;;; IR conversion bound in the current cursor. BODY is evaluated and
 ;;; the value of the last form is returned.
-(defmacro with-component-compilation (&body body)
+(defmacro with-component-compilation ((&optional name) &body body)
   (with-gensyms (block)
     `(multiple-value-bind (*component* ,block)
-         (make-empty-component)
+         (make-empty-component ,name)
        (let ((*cursor* (cursor :block ,block)))
          ,@body))))
 
@@ -215,7 +229,7 @@
              (:conc-name "BLOCK-")
              (:constructor make-block)
              (:predicate block-p))
-  (id (gensym "L"))
+  (id (generate-id 'basic-block))
   ;; List of successors and predecessors of this basic block.
   succ pred
   ;; The sentinel nodes of the sequence.
@@ -571,15 +585,16 @@
 (defun ir-convert-functoid (result name arguments &rest body)
   (let ((component)
         (return-lvar (make-lvar)))
-    (with-component-compilation
+    (with-component-compilation (name)
       (ir-convert `(progn ,@body) return-lvar)
       (setq component *component*))
     (let ((functional
            (make-functional
             :name name
             :arguments arguments
-            :entry-point component
+            :component component
             :return-lvar return-lvar)))
+      (push functional (component-functions *component*))
       (insert-node (make-ref :leaf functional :lvar result)))))
 
 (define-ir-translator function (name)
@@ -694,7 +709,7 @@
 
 (defun print-node (node)
   (when (node-lvar node)
-    (format t "~a = " (lvar-id (node-lvar node))))
+    (format t "$~a = " (lvar-id (node-lvar node))))
   (cond
     ((ref-p node)
      (let ((leaf (ref-leaf node)))
@@ -706,19 +721,19 @@
          ((functional-p leaf)
           (format t "#<function ~a>" (functional-name leaf))))))
     ((assignment-p node)
-     (format t "set ~a ~a"
+     (format t "set ~a $~a"
              (var-name (assignment-variable node))
              (lvar-id (assignment-value node))))
     ((primitive-call-p node)
      (format t "primitive ~a" (primitive-name (primitive-call-function node)))
      (dolist (arg (primitive-call-arguments node))
-       (format t " ~a" (lvar-id arg))))
+       (format t " $~a" (lvar-id arg))))
     ((call-p node)
-     (format t "call ~a" (lvar-id (call-function node)))
+     (format t "call $~a" (lvar-id (call-function node)))
      (dolist (arg (call-arguments node))
-       (format t " ~a" (lvar-id arg))))
+       (format t " $~a" (lvar-id arg))))
     ((conditional-p node)
-     (format t "if ~a ~a ~a"
+     (format t "if $~a ~a ~a"
              (lvar-id (conditional-test node))
              (block-id (conditional-consequent node))
              (block-id (conditional-alternative node))))
@@ -727,34 +742,40 @@
   (terpri))
 
 (defun print-block (block)
-  (flet ((block-name (block)
+  (flet ((print-block-name (block)
            (cond
              ((and (singlep (block-pred block))
                    (component-entry-p (unlist (block-pred block))))
-              "ENTRY")
+              (format nil "ENTRY-~a" (component-id (block-component block))))
              ((component-exit-p block)
-              "EXIT")
-             (t (string (block-id block))))))
-    (format t "BLOCK ~a:~%" (block-name block))
+              (format nil "EXIT-~a" (component-id (block-component block))))
+             (t
+              (format nil "BLOCK ~a" (block-id block))))))
+    (write-line (print-block-name block))
     (do-nodes (node block)
       (print-node node))
     (when (singlep (block-succ block))
-      (format t "GO ~a~%" (block-name (first (block-succ block)))))
-    (terpri)))
+      (format t "GO ~a~%" (print-block-name (first (block-succ block)))))))
 
 (defun print-component (component &optional (stream *standard-output*))
+  (format t ";;; COMPONENT ~a (~a) ~%" (component-name component) (component-id component))
   (let ((*standard-output* stream))
     (do-blocks (block component)
-      (print-block block))))
+      (print-block block)))
+  (format t ";;; END COMPONENT ~a ~%~%" (component-name component))
+  (let ((*standard-output* stream))
+    (dolist (func (component-functions component))
+      (print-component (functional-component func)))))
 
 ;;; Translate FORM into IR and print a textual repreresentation of the
 ;;; component.
 (defun convert-toplevel-and-print (form &optional (complete t))
-  (with-component-compilation
-    (ir-convert form (make-lvar :id "$out"))
-    (when complete (ir-complete))
-    (check-ir-consistency)
-    (print-component *component*)))
+  (let ((*counter-alist* nil))
+    (with-component-compilation ('toplevel)
+      (ir-convert form (make-lvar :id "out"))
+      (when complete (ir-complete))
+      (check-ir-consistency)
+      (print-component *component*))))
 
 (defmacro /ir (form)
   `(convert-toplevel-and-print ',form))
