@@ -126,6 +126,86 @@
   alternative)
 
 
+;;;; Components
+;;;;
+;;;; Components are connected pieces of the control flow graph of
+;;;; basic blocks with some additional information. Components have
+;;;; well-defined entry and exit nodes. It is the toplevel
+;;;; organizational entity in the compiler. The IR translation result
+;;;; is accumulated into components incrementally.
+(defstruct (component)
+  entry
+  exit)
+
+;;; The current component. We accumulate the results of the IR
+;;; conversion in this component.
+(defvar *component*)
+
+;;; Create a new component with an empty basic block, ready to start
+;;; conversion to IR. It returns the component and the basic block as
+;;; multiple values.
+(defun make-empty-component ()
+  (let ((*component* (make-component)))
+    (let ((entry (make-component-entry))
+          (block (make-empty-block))
+          (exit (make-component-exit)))
+      (setf (block-succ entry) (list block)
+            (block-pred exit)  (list block)
+            (block-succ block) (list exit)
+            (block-pred block) (list entry)
+            (component-entry *component*) entry
+            (component-exit  *component*) exit)
+      (values *component* block))))
+
+;;; Prepare a new component with a current empty block ready to start
+;;; IR conversion bound in the current cursor. BODY is evaluated and
+;;; the value of the last form is returned.
+(defmacro with-component-compilation (&body body)
+  (with-gensyms (block)
+    `(multiple-value-bind (*component* ,block)
+         (make-empty-component)
+       (let ((*cursor* (cursor :block ,block)))
+         ,@body))))
+
+;;; Return the list of blocks in COMPONENT, conveniently sorted.
+(defun component-blocks (component)
+  (let ((seen nil)
+        (output nil))
+    (labels ((compute-rdfo-from (block)
+               (unless (or (component-exit-p block) (find block seen))
+                 (push block seen)
+                 (dolist (successor (block-succ block))
+                   (unless (component-exit-p block)
+                     (compute-rdfo-from successor)))
+                 (push block output))))
+      (compute-rdfo-from (unlist (block-succ (component-entry component))))
+      output)))
+
+;;; Iterate across different blocks in COMPONENT.
+(defmacro do-blocks ((block component &optional result) &body body)
+  `(dolist (,block (component-blocks ,component) ,result)
+     ,@body))
+
+(defmacro do-blocks-backward ((block component &optional result) &body body)
+  `(dolist (,block (reverse (component-blocks ,component)) ,result)
+     ,@body))
+
+;;; A few consistency checks in the IR useful for catching bugs.
+(defun check-ir-consistency (component)
+  (with-simple-restart (continue "Continue execution")
+    (do-blocks (block component)
+      (dolist (succ (block-succ block))
+        (unless (find block (block-pred succ))
+          (error "The block `~S' does not belong to the predecessors list of the its successor `~S'"
+                 (block-id block)
+                 (block-id succ))))
+      (dolist (pred (block-pred block))
+        (unless (find block (block-succ pred))
+          (error "The block `~S' does not belong to the successors' list of its predecessor `~S'"
+                 (block-id block)
+                 (block-id pred)))))))
+
+
 ;;; Blocks are `basic block`. Basic blocks are organized as a control
 ;;; flow graph with some more information in omponents.
 (defstruct (basic-block
@@ -136,7 +216,9 @@
   ;; List of successors and predecessors of this basic block.
   succ pred
   ;; The sentinel nodes of the sequence.
-  entry exit)
+  entry exit
+  ;; The component where this block belongs
+  (component *component*))
 
 ;;; Sentinel nodes in the control flow graph of basic blocks.
 (defstruct (component-entry (:include basic-block)))
@@ -304,69 +386,6 @@
     (split-block cursor)))
 
 
-;;;; Components
-;;;;
-;;;; Components are connected pieces of the control flow graph of
-;;;; basic blocks with some additional information. Components have
-;;;; well-defined entry and exit nodes. It is the toplevel
-;;;; organizational entity in the compiler. The IR translation result
-;;;; is accumulated into components incrementally.
-(defstruct (component #-jscl (:print-object print-component))
-  entry
-  exit)
-
-;;; Create a new component with an empty basic block, ready to start
-;;; conversion to IR. It returns the component and the basic block as
-;;; multiple values.
-(defun make-empty-component ()
-  (let ((entry (make-component-entry))
-        (block (make-empty-block))
-        (exit (make-component-exit)))
-    (setf (block-succ entry)  (list block)
-          (block-pred exit)   (list block)
-          (block-succ block) (list exit)
-          (block-pred block) (list entry))
-    (values (make-component :entry entry :exit exit) block)))
-
-;;; Return the list of blocks in COMPONENT, conveniently sorted.
-(defun component-blocks (component)
-  (let ((seen nil)
-        (output nil))
-    (labels ((compute-rdfo-from (block)
-               (unless (or (component-exit-p block) (find block seen))
-                 (push block seen)
-                 (dolist (successor (block-succ block))
-                   (unless (component-exit-p block)
-                     (compute-rdfo-from successor)))
-                 (push block output))))
-      (compute-rdfo-from (unlist (block-succ (component-entry component))))
-      output)))
-
-;;; Iterate across different blocks in COMPONENT.
-(defmacro do-blocks ((block component &optional result) &body body)
-  `(dolist (,block (component-blocks ,component) ,result)
-     ,@body))
-
-(defmacro do-blocks-backward ((block component &optional result) &body body)
-  `(dolist (,block (reverse (component-blocks ,component)) ,result)
-     ,@body))
-
-
-;;; A few consistency checks in the IR useful for catching bugs.
-(defun check-ir-consistency (component)
-  (with-simple-restart (continue "Continue execution")
-    (do-blocks (block component)
-      (dolist (succ (block-succ block))
-        (unless (find block (block-pred succ))
-          (error "The block `~S' does not belong to the predecessors list of the its successor `~S'"
-                 (block-id block)
-                 (block-id succ))))
-      (dolist (pred (block-pred block))
-        (unless (find block (block-succ pred))
-          (error "The block `~S' does not belong to the successors' list of its predecessor `~S'"
-                 (block-id block)
-                 (block-id pred)))))))
-
 
 ;;;; Lexical environment
 ;;;;
@@ -403,10 +422,6 @@
 ;;;;
 ;;;; The function `ir-complete' will coalesce basic blocks in a
 ;;;; component to generate proper maximal basic blocks.
-
-;;; The current component. We accumulate the results of the IR
-;;; conversion in this component.
-(defvar *component*)
 
 ;;; A alist of IR translator functions.
 (defvar *ir-translator* nil)
@@ -626,16 +641,6 @@
     (values)))
 
 
-;;; Prepare a new component with a current empty block ready to start
-;;; IR conversion bound in the current cursor. BODY is evaluated and
-;;; the value of the last form is returned.
-(defmacro with-component-compilation (&body body)
-  (with-gensyms (block)
-    `(multiple-value-bind (*component* ,block)
-         (make-empty-component)
-       (let ((*cursor* (cursor :block ,block)))
-         ,@body))))
-
 ;;; Change all the predecessors of BLOCK to precede NEW-BLOCK instead.
 (defun replace-block (block new-block)
   (let ((predecessors (block-pred block)))
@@ -771,9 +776,6 @@
 
 (define-primitive symbol-function (symbol))
 (define-primitive symbol-value (symbol))
-
-
-
 
 
 ;;; compiler.lisp ends here
