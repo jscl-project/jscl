@@ -97,7 +97,7 @@
 (let ((tree1 '(1 (1 2) (1 2 3) (1 2 3 4))))
   (test (equal (subst "two" 2 tree1) '(1 (1 "two") (1 "two" 3) (1 "two" 3 4))))
   (test (equal (subst "five" 5 tree1) '(1 (1 2) (1 2 3) (1 2 3 4))))
-  (test (not (eq tree1 (subst "five" 5 tree1)))) ; Implementation dependent
+  (test (eq tree1 (subst "five" 5 tree1))) ; Implementation dependent
   (test (equal tree1 '(1 (1 2) (1 2 3) (1 2 3 4)))))
 (test (equal (subst 'tempest 'hurricane
                     '(shakespeare wrote (the hurricane)))

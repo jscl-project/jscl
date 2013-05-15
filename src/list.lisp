@@ -114,14 +114,17 @@
     (s tree)))
 
 (defun subst (new old tree &key key (test #'eql testp) (test-not #'eql test-not-p))
-  (when (and testp test-not-p)
-    (error "Both test and test-not are set"))
   (labels ((s (x)
-             (let ((key-val (if key (funcall key x) x)))
-               (cond
-                 ((funcall (if test-not-p test-not test) key-val old) new)
-                 ((atom x) x)
-                 (t (cons (s (car x)) (s (cdr x))))))))
+             (cond ((satisfies-test-p old x :key key :test test :testp testp
+                                      :test-not test-not :test-not-p test-not-p)
+                    new)
+                   ((atom x) x)
+                   (t (let ((a (s (car x)))
+                            (b (s (cdr x))))
+                        (if (and (eq a (car x))
+                                 (eq b (cdr x)))
+                            x
+                            (cons a b)))))))
     (s tree)))
 
 (defun copy-list (x)
