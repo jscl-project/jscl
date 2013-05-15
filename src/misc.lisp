@@ -17,3 +17,12 @@
 
 (defun lisp-implementation-type ()
   "JSCL")
+
+(defmacro time (form)
+  (let ((start (gensym))
+        (end (gensym)))
+    `(let ((,start (get-internal-real-time))
+           (,end))
+       (prog1 (progn ,form)
+         (setq ,end (get-internal-real-time))
+         (format t "Execution took ~a seconds.~%" (/ (- ,end ,start) 1000.0))))))
