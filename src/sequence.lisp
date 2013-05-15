@@ -33,6 +33,15 @@
              (let ((,elt (aref ,nseq ,index)))
                ,@body))))))
 
+(define-setf-expander cdr (x)
+  (let ((cons (gensym))
+        (new-value (gensym)))
+    (values (list cons)
+            (list x)
+            (list new-value)
+            `(progn (rplacd ,cons ,new-value) ,new-value)
+            `(car ,cons))))
+
 (defun find (item seq &key key (test #'eql))
   (if key
       (do-sequence (x seq)
@@ -55,6 +64,21 @@
   (do-sequence (x seq index)
     (when (funcall test elt x)
       (return index))))
+
+(defun elt (sequence index)
+	(cond
+			((not (or (listp sequence)
+								(arrayp sequence)))
+			 (error "type-error sequence is not a proper sequence"))
+		((or (not (integerp index))
+				 (>= index (length sequence)))
+		 (error "type-error index is not valid sequence index"))
+		(t
+		 (let ((i 0))
+			 (do-sequence (el sequence)
+				 (when (= i index)
+					 (return el))
+				 (incf i))))))
 
 (defun remove (x seq)
   (cond
@@ -129,7 +153,7 @@
      (if b
        (let ((diff (- b a)))
          (cond
-           ((zerop  diff) ()) 
+           ((zerop  diff) ())
            ((minusp diff)
             (error "Start index must be smaller than end index"))
            (t
@@ -139,11 +163,14 @@
                 (setq pointer (cdr pointer))
                 (when (null pointer)
                   (error "Ending index larger than length of list")))
-              (rplacd pointer ()) 
+              (rplacd pointer ())
               drop-a))))
        (copy-list (nthcdr a seq))))
-    ((arrayp seq) 
+    ((arrayp seq)
      (if b
        (slice seq a b)
        (slice seq a)))
     (t (not-seq-error seq))))
+
+(defun vector (&rest args)
+	(apply #'list-to-vector args))

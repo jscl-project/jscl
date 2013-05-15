@@ -58,7 +58,7 @@
           consp constantly copy-alist copy-list copy-tree decf declaim declare
           defconstant define-setf-expander define-symbol-macro defmacro
           defparameter defun defvar destructuring-bind digit-char digit-char-p
-          disassemble do do* documentation dolist dotimes ecase eighth eq eql
+          disassemble do do* documentation dolist dotimes ecase eighth elt eq eql
           equal error eval every export expt fdefinition fifth find
           find-package find-symbol first flet format fourth fboundp fset funcall
           function functionp gensym get-internal-real-time get-setf-expansion
@@ -76,7 +76,7 @@
           stringp sublis subseq subst symbol-function symbol-name symbol-package
           symbol-plist symbol-value symbolp t tagbody tailp tenth third throw
           time trace tree-equal truncate unless untrace unwind-protect values
-          values-list variable vector-push-extend warn when write-line write-string
+          values-list variable vector vector-push-extend warn when write-line write-string
           zerop))
 
 (setq *package* *user-package*)
