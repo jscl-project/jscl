@@ -26,3 +26,56 @@
        (prog1 (progn ,form)
          (setq ,end (get-internal-real-time))
          (format t "Execution took ~a seconds.~%" (/ (- ,end ,start) 1000.0))))))
+
+
+;;;; TRACE
+
+;;; This trace implementation works on symbols, replacing the function
+;;; with a wrapper. So it will not trace calls to the function if they
+;;; got the function object before it was traced.
+
+;;; An alist of the form (NAME FUNCTION), where NAME is the name of a
+;;; function, and FUNCTION is the function traced.
+(defvar *traced-functions* nil)
+(defvar *trace-level* 0)
+
+(defun trace-report-call (name args)
+  (dotimes (i *trace-level*) (write-string " "))
+  (format t "~a: ~S~%" *trace-level* (cons name args)))
+
+(defun trace-report-return (name values)
+  (dotimes (i *trace-level*) (write-string " "))
+  (format t "~a: ~S returned " *trace-level* name)
+  (dolist (value values) (format t "~S " value))
+  (format t "~%"))
+
+(defun trace-functions (names)
+  (if (null names)
+      (mapcar #'car *traced-functions*)
+      (dolist (name names names)
+        (if (find name *traced-functions* :key #'car)
+            (format t "`~S' is already traced.~%" name)
+            (let ((func (fdefinition name)))
+              (fset name (lambda (&rest args)
+                           (let (values)
+                             (trace-report-call name args)
+                             (let ((*trace-level* (+ *trace-level* 1)))
+                               (setq values (multiple-value-list (apply func args))))
+                             (trace-report-return name values)
+                             (values-list values))))
+              (push (cons name func) *traced-functions*))))))
+
+(defun untrace-functions (names)
+  (when (null names)
+    (setq names (mapcar #'car *traced-functions*)))
+  (dolist (name names)
+    (let ((func (cdr (find name *traced-functions* :key #'car))))
+      (if func
+          (fset name func)
+          (format t "~S is not being traced.~%" name)))))
+
+(defmacro trace (&rest names)
+  `(trace-functions ',names))
+
+(defmacro untrace (&rest names)
+  `(untrace-functions ',names))

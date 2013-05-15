@@ -75,8 +75,9 @@
           second set setf setq seventh sixth some string string-upcase string=
           stringp sublis subseq subst symbol-function symbol-name symbol-package
           symbol-plist symbol-value symbolp t tagbody tailp tenth third throw
-          time tree-equal truncate unless unwind-protect values values-list variable
-          vector-push-extend warn when write-line write-string zerop))
+          time trace tree-equal truncate unless untrace unwind-protect values
+          values-list variable vector-push-extend warn when write-line write-string
+          zerop))
 
 (setq *package* *user-package*)
 
