@@ -15,7 +15,7 @@
 
 ;;;; Various list functions
 
-(defun cons (x y ) (cons x y))
+(defun cons (x y) (cons x y))
 (defun consp (x) (consp x))
 
 (defun listp (x)
