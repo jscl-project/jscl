@@ -282,7 +282,7 @@ implemented and tested.
 *** TODO Variable *PACKAGE*
 *** TODO Condition Type PACKAGE-ERROR
 *** TODO Function PACKAGE-ERROR-PACKAGE
-** [0/84][0%]a Numbers
+** [0/84][0%] Numbers
 *** TODO System Class NUMBER
 *** TODO System Class COMPLEX
 *** TODO System Class REAL
