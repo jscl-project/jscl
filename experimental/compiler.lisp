@@ -364,7 +364,6 @@
 
 ;;; Insert NODE at cursor.
 (defun insert-node (node &optional (cursor *cursor*))
-  ;; After if? wrong!
   (link-nodes (node-prev (cursor-next cursor)) node)
   (link-nodes node (cursor-next cursor))
   t)
