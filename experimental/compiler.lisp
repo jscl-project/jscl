@@ -437,7 +437,7 @@
 ;;;; translators. This function ss intended to do the initial
 ;;;; conversion as well as insert new IR code during optimizations.
 ;;;;
-;;;; The function `ir-complete' will coalesce basic blocks in a
+;;;; The function `ir-normalize' will coalesce basic blocks in a
 ;;;; component to generate proper maximal basic blocks.
 
 ;;; A alist of IR translator functions.
@@ -587,7 +587,7 @@
         (return-lvar (make-lvar)))
     (with-component-compilation (name)
       (ir-convert `(progn ,@body) return-lvar)
-      (ir-complete)
+      (ir-normalize)
       (setq component *component*))
     (let ((functional
            (make-functional
@@ -699,7 +699,7 @@
           (setf (block-pred next) (substitute block succ (block-pred next))))
         t))))
 
-(defun ir-complete (&optional (component *component*))
+(defun ir-normalize (&optional (component *component*))
   (do-blocks-backward (block component)
     (maybe-coalesce-block block)
     (when (empty-block-p block)
@@ -770,11 +770,11 @@
 
 ;;; Translate FORM into IR and print a textual repreresentation of the
 ;;; component.
-(defun convert-toplevel-and-print (form &optional (complete t))
+(defun convert-toplevel-and-print (form &optional (normalize t))
   (let ((*counter-alist* nil))
     (with-component-compilation ('toplevel)
       (ir-convert form (make-lvar :id "out"))
-      (when complete (ir-complete))
+      (when normalize (ir-normalize))
       (check-ir-consistency)
       (print-component *component*))))
 
