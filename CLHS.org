@@ -1,13 +1,14 @@
+#+SEQ_TODO: TODO DOING | DONE
+
 Current JSCL implementation status, taking Common Lisp Hyper Spec Dictionaries
 as a base. DONE status will be achieved whenever a feature is fully
 implemented and tested.
 
-#+SEQ_TODO: TODO DOING | DONE 
-* [0/678][0%]
+* Implementation status [0/678][0%]
   :PROPERTIES:
        :COOKIE_DATA: todo recursive
        :END:
-** [1/21][4%] Evaluation and Compilation
+** [0/21][0%] Evaluation and Compilation
 *** TODO Function COMPILE
 *** TODO Special Operator EVAL-WHEN
 *** TODO Special Operator LOAD-TIME-VALUE
