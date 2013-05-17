@@ -362,6 +362,10 @@
 
 (defun identity (x) x)
 
+(defun complement (x)
+  (lambda (&rest args)
+    (not (apply x args))))
+
 (defun constantly (x)
   (lambda (&rest args)
     x))
