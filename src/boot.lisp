@@ -106,6 +106,7 @@
 (defun truncate (x &optional (y 1))
   (floor (/ x y)))
 
+(defun eq (x y) (eq x y))
 (defun eql (x y) (eq x y))
 
 (defun not (x) (if x nil t))
