@@ -152,7 +152,8 @@
   name
   entry
   exit
-  functions)
+  functions
+  blocks)
 
 ;;; The current component. We accumulate the results of the IR
 ;;; conversion in this component.
@@ -184,27 +185,30 @@
        (let ((*cursor* (cursor :block ,block)))
          ,@body))))
 
-;;; Return the list of blocks in COMPONENT, conveniently sorted.
-(defun component-blocks (component)
-  (let ((seen nil)
-        (output nil))
-    (labels ((compute-rdfo-from (block)
+;;; Call function for each block in component in post-order.
+(defun map-postorder-blocks (function component)
+  (let ((seen nil))
+    (labels ((compute-from (block)
                (unless (or (component-exit-p block) (find block seen))
                  (push block seen)
                  (dolist (successor (block-succ block))
                    (unless (component-exit-p block)
-                     (compute-rdfo-from successor)))
-                 (push block output))))
-      (compute-rdfo-from (unlist (block-succ (component-entry component))))
-      output)))
+                     (compute-from successor)))
+                 (funcall function block))))
+      (compute-from (unlist (block-succ (component-entry component))))
+      nil)))
 
 ;;; Iterate across different blocks in COMPONENT.
 (defmacro do-blocks ((block component &optional result) &body body)
-  `(dolist (,block (component-blocks ,component) ,result)
+  `(dolist (,block (or (component-blocks ,component)
+                       (error "Component is not normalized."))
+             ,result)
      ,@body))
 
 (defmacro do-blocks-backward ((block component &optional result) &body body)
-  `(dolist (,block (reverse (component-blocks ,component)) ,result)
+  `(dolist (,block (or (reverse (component-blocks ,component))
+                       (error "component is not normalized."))
+             ,result)
      ,@body))
 
 ;;; A few consistency checks in the IR useful for catching bugs.
@@ -437,7 +441,8 @@
 ;;;; conversion as well as insert new IR code during optimizations.
 ;;;;
 ;;;; The function `ir-normalize' will coalesce basic blocks in a
-;;;; component to generate proper maximal basic blocks.
+;;;; component to generate proper maximal basic blocks, as well as
+;;;; compute reverse depth first ordering on the blocks.
 
 ;;; A alist of IR translator functions.
 (defvar *ir-translator* nil)
@@ -698,11 +703,18 @@
           (setf (block-pred next) (substitute block succ (block-pred next))))
         t))))
 
+;;; Normalize a component. This function must be called after a batch
+;;; of modifications to the flowgraph of the component to make sure it
+;;; is a valid input for the possible optimizations and the backend.
 (defun ir-normalize (&optional (component *component*))
-  (do-blocks-backward (block component)
-    (maybe-coalesce-block block)
-    (when (empty-block-p block)
-      (delete-empty-block block))))
+  (flet ((clean-and-coallesce (block)
+           (maybe-coalesce-block block)
+           (when (empty-block-p block)
+             (delete-empty-block block)))
+         (add-to-list (block)
+           (push block (component-blocks *component*))))
+    (map-postorder-blocks #'clean-and-coallesce component)
+    (map-postorder-blocks #'add-to-list component)))
 
 
 ;;; IR Debugging
