@@ -4,7 +4,7 @@ Current JSCL implementation status, taking Common Lisp Hyper Spec Dictionaries
 as a base. DONE status will be achieved whenever a feature is fully
 implemented and tested.
 
-* Implementation status [0/678][0%]
+* Implementation status [4/678][0%]
   :PROPERTIES:
        :COOKIE_DATA: todo recursive
        :END:
@@ -282,7 +282,7 @@ implemented and tested.
 *** TODO Variable *PACKAGE*
 *** TODO Condition Type PACKAGE-ERROR
 *** TODO Function PACKAGE-ERROR-PACKAGE
-** [0/84][0%]a Numbers
+** [0/84][0%] Numbers
 *** TODO System Class NUMBER
 *** TODO System Class COMPLEX
 *** TODO System Class REAL
@@ -389,19 +389,19 @@ implemented and tested.
 *** TODO Constant Variable CHAR-CODE-LIMIT
 *** TODO Function CHAR-NAME
 *** TODO Function NAME-CHAR
-** [0/49][0%] Conses
+** [4/49][8%] Conses
 *** TODO System Class LIST
 *** TODO System Class NULL
 *** TODO System Class CONS
 *** TODO Type ATOM
-*** TODO Function CONS
-*** TODO Function CONSP
-*** TODO Function ATOM
-*** TODO Function RPLACA, RPLACD
-*** TODO Accessor CAR, CDR, CAAR, CADR, CDAR, CDDR, CAAAR, CAADR, CADAR, CADDR, CDAAR, CDADR, CDDAR, CDDDR, CAAAAR, CAAADR, CAADAR, CAADDR, CADAAR, CADADR, CADDAR, CADDDR, CDAAAR, CDAADR, CDADAR, CDADDR, CDDAAR, CDDADR, CDDDAR, CDDDDR
+*** DONE Function CONS
+*** DONE Function CONSP
+*** DONE Function ATOM
+*** DONE Function RPLACA, RPLACD
+*** DOING Accessor CAR, CDR, CAAR, CADR, CDAR, CDDR, CAAAR, CAADR, CADAR, CADDR, CDAAR, CDADR, CDDAR, CDDDR, CAAAAR, CAAADR, CAADAR, CAADDR, CADAAR, CADADR, CADDAR, CADDDR, CDAAAR, CDAADR, CDADAR, CDADDR, CDDAAR, CDDADR, CDDDAR, CDDDDR
 *** TODO Function COPY-TREE
-*** TODO Function SUBLIS, NSUBLIS
-*** TODO Function SUBST, SUBST-IF, SUBST-IF-NOT, NSUBST, NSUBST-IF, NSUBST-IF-NOT
+*** DOING Function SUBLIS, NSUBLIS
+*** DOING Function SUBST, SUBST-IF, SUBST-IF-NOT, NSUBST, NSUBST-IF, NSUBST-IF-NOT
 *** TODO Function TREE-EQUAL
 *** TODO Function COPY-LIST
 *** TODO Function LIST, LIST*
@@ -410,7 +410,7 @@ implemented and tested.
 *** TODO Function MAKE-LIST
 *** TODO Macro PUSH
 *** TODO Macro POP
-*** TODO Accessor FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH, EIGHTH, NINTH, TENTH
+*** DOING Accessor FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH, EIGHTH, NINTH, TENTH
 *** TODO Accessor NTH
 *** TODO Function ENDP
 *** TODO Function NULL
