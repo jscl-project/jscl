@@ -220,14 +220,14 @@
           (error "The block `~S' does not belong to the predecessors list of the its successor `~S'"
                  (block-id block)
                  (block-id succ)))
-        (unless (find succ (component-blocks component))
+        (unless (or (boundary-block-p succ) (find succ (component-blocks component)))
           (error "Block `~S' is reachable but it is not in the component `~S'" succ component)))
       (dolist (pred (block-pred block))
         (unless (find block (block-succ pred))
           (error "The block `~S' does not belong to the successors' list of its predecessor `~S'"
                  (block-id block)
                  (block-id pred)))
-        (unless (find pred (component-blocks component))
+        (unless (or (boundary-block-p pred) (find pred (component-blocks component)))
           (error "Block `~S' is reachable but it is not in the component `~S'" pred component))))))
 
 
@@ -262,6 +262,10 @@
 ;;; Return T if B is an empty basic block and NIL otherwise.
 (defun empty-block-p (b)
   (block-exit-p (node-next (block-entry b))))
+
+(defun boundary-block-p (block)
+  (or (component-entry-p block)
+      (component-exit-p block)))
 
 ;;; Iterate across the nodes in a basic block forward.
 (defmacro do-nodes
@@ -337,7 +341,7 @@
 (defun cursor (&key (block (current-block))
                  (before nil before-p)
                  (after nil after-p))
-  (when (or (component-entry-p block) (component-exit-p block))
+  (when (boundary-block-p block)
     (error "Invalid cursor on special entry/exit basic block."))
   ;; Handle special values :ENTRY and :EXIT.
   (flet ((node-designator (x)
@@ -689,11 +693,11 @@
               (replacef (conditional-consequent last-node))
               (replacef (conditional-alternative last-node)))))))))
 
-(defun delete-empty-block (block)
-  (when (or (component-entry-p block) (component-exit-p block))
+(defun delete-block (block)
+  (when (boundary-block-p block)
     (error "Cannot delete entry or exit basic blocks."))
-  (unless (empty-block-p block)
-    (error "Block `~S' is not empty!" (block-id block)))
+  (unless (singlep (block-succ block))
+    (error "Cannot delete a basic block with multiple successors."))
   (replace-block block (unlist (block-succ block))))
 
 ;;; Try to coalesce BLOCK with the successor if it is unique and block
@@ -716,7 +720,7 @@
   (flet ((clean-and-coallesce (block)
            (maybe-coalesce-block block)
            (when (empty-block-p block)
-             (delete-empty-block block)))
+             (delete-block block)))
          (add-to-list (block)
            (push block (component-blocks *component*))))
     (map-postorder-blocks #'clean-and-coallesce component)
@@ -788,11 +792,11 @@
 
 ;;; Translate FORM into IR and print a textual repreresentation of the
 ;;; component.
-(defun convert-toplevel-and-print (form &optional (normalize t))
+(defun convert-toplevel-and-print (form)
   (let ((*counter-alist* nil))
     (with-component-compilation ('toplevel)
       (ir-convert form (make-lvar :id "out"))
-      (when normalize (ir-normalize))
+      (ir-normalize)
       (/print *component*)
       *component*)))
 
@@ -866,7 +870,6 @@
 (define-primitive cons (x y))
 (define-primitive car (x))
 (define-primitive cdr (x))
-
 
 
 ;;; compiler.lisp ends here
