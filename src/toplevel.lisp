@@ -54,9 +54,9 @@
           boundp butlast caaaar caaadr caaar caadar caaddr caadr caar cadaar
           cadadr cadar caddar cadddr caddr cadr car car case catch cdaaar
           cdaadr cdaar cdadar cdaddr cdadr cdar cddaar cddadr cddar cdddar
-          cddddr cdddr cddr cdr cdr char char-code char= code-char cond cons
-          consp constantly copy-alist copy-list copy-tree decf declaim declare
-          defconstant define-setf-expander define-symbol-macro defmacro
+          cddddr cdddr cddr cdr cdr char char-code char= code-char complement
+          cond cons consp constantly copy-alist copy-list copy-tree decf declaim
+          declare defconstant define-setf-expander define-symbol-macro defmacro
           defparameter defun defvar destructuring-bind digit-char digit-char-p
           disassemble do do* documentation dolist dotimes ecase eighth eq eql
           equal error eval every export expt fdefinition fifth find

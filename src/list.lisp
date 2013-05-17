@@ -15,7 +15,7 @@
 
 ;;;; Various list functions
 
-(defun cons (x y ) (cons x y))
+(defun cons (x y) (cons x y))
 (defun consp (x) (consp x))
 
 (defun listp (x)
@@ -113,6 +113,20 @@
                    (cons (s (car x)) (s (cdr x)))))))
     (s tree)))
 
+(defun subst (new old tree &key key (test #'eql testp) (test-not #'eql test-not-p))
+  (labels ((s (x)
+             (cond ((satisfies-test-p old x :key key :test test :testp testp
+                                      :test-not test-not :test-not-p test-not-p)
+                    new)
+                   ((atom x) x)
+                   (t (let ((a (s (car x)))
+                            (b (s (cdr x))))
+                        (if (and (eq a (car x))
+                                 (eq b (cdr x)))
+                            x
+                            (cons a b)))))))
+    (s tree)))
+
 (defun copy-list (x)
   (mapcar #'identity x))
 
@@ -134,15 +148,6 @@
     ((atom tail) (eq object tail))
     (when (eql tail object)
       (return-from tailp t))))
-
-(defun subst (new old tree &key (key #'identity) (test #'eql))
-  (cond 
-    ((funcall test (funcall key tree) (funcall key old))
-     new) 
-    ((consp tree)
-     (cons (subst new old (car tree) :key key :test test)
-           (subst new old (cdr tree) :key key :test test))) 
-    (t tree)))
 
 (defmacro pop (place)
   (multiple-value-bind (dummies vals newval setter getter)

@@ -93,6 +93,22 @@
   (test (equal (sublis '(("two" . 2)) tree2 :test 'equal)
                '("one" ("one" 2) (("one" "Two" "three"))))))
 
+;; SUBST
+(let ((tree1 '(1 (1 2) (1 2 3) (1 2 3 4))))
+  (test (equal (subst "two" 2 tree1) '(1 (1 "two") (1 "two" 3) (1 "two" 3 4))))
+  (test (equal (subst "five" 5 tree1) '(1 (1 2) (1 2 3) (1 2 3 4))))
+  (test (eq tree1 (subst "five" 5 tree1))) ; Implementation dependent
+  (test (equal tree1 '(1 (1 2) (1 2 3) (1 2 3 4)))))
+(test (equal (subst 'tempest 'hurricane
+                    '(shakespeare wrote (the hurricane)))
+             '(SHAKESPEARE WROTE (THE TEMPEST))))
+(test (equal (subst 'foo 'nil '(shakespeare wrote (twelfth night)))
+             '(SHAKESPEARE WROTE (TWELFTH NIGHT . FOO) . FOO)))
+(test (equal (subst '(a . cons) '(old . pair)
+                    '((old . spice) ((old . shoes) old . pair) (old . pair))
+                    :test #'equal)
+             '((OLD . SPICE) ((OLD . SHOES) A . CONS) (A . CONS))))
+
 ; COPY-TREE
 (test (let* ((foo (list '(1 2) '(3 4)))
              (bar (copy-tree foo)))
@@ -168,8 +184,6 @@
 (test (equal (intersection '(1 2) '(2 3)) '(2)))
 (test (not (intersection '(1 2 3) '(4 5 6))))
 (test (equal (intersection '((1) (2)) '((2) (3)) :test #'equal) '((2))))
-
-; SUBST
 
 ; POP
 (test (let* ((foo '(1 2 3))
