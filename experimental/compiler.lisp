@@ -219,12 +219,16 @@
         (unless (find block (block-pred succ))
           (error "The block `~S' does not belong to the predecessors list of the its successor `~S'"
                  (block-id block)
-                 (block-id succ))))
+                 (block-id succ)))
+        (unless (find succ (component-blocks component))
+          (error "Block `~S' is reachable but it is not in the component `~S'" succ component)))
       (dolist (pred (block-pred block))
         (unless (find block (block-succ pred))
           (error "The block `~S' does not belong to the successors' list of its predecessor `~S'"
                  (block-id block)
-                 (block-id pred)))))))
+                 (block-id pred)))
+        (unless (find pred (component-blocks component))
+          (error "Block `~S' is reachable but it is not in the component `~S'" pred component))))))
 
 
 ;;; Blocks are `basic block`. Basic blocks are organized as a control
@@ -232,14 +236,16 @@
 (defstruct (basic-block
              (:conc-name "BLOCK-")
              (:constructor make-block)
-             (:predicate block-p))
+             (:predicate block-p)
+             (:print-object generic-printer))
   (id (generate-id 'basic-block))
   ;; List of successors and predecessors of this basic block.
   succ pred
   ;; The sentinel nodes of the sequence.
   entry exit
   ;; The component where this block belongs
-  (component *component*))
+  (component *component*)
+  (dominators%))
 
 ;;; Sentinel nodes in the control flow graph of basic blocks.
 (defstruct (component-entry (:include basic-block)))
@@ -714,7 +720,8 @@
          (add-to-list (block)
            (push block (component-blocks *component*))))
     (map-postorder-blocks #'clean-and-coallesce component)
-    (map-postorder-blocks #'add-to-list component)))
+    (map-postorder-blocks #'add-to-list component)
+    (check-ir-consistency)))
 
 
 ;;; IR Debugging
@@ -769,7 +776,7 @@
   (when (singlep (block-succ block))
     (format t "GO ~a~%~%" (format-block-name (unlist (block-succ block))))))
 
-(defun print-component (component &optional (stream *standard-output*))
+(defun /print (component &optional (stream *standard-output*))
   (format t ";;; COMPONENT ~a (~a) ~%~%" (component-name component) (component-id component))
   (let ((*standard-output* stream))
     (do-blocks (block component)
@@ -777,7 +784,7 @@
   (format t ";;; END COMPONENT ~a ~%~%" (component-name component))
   (let ((*standard-output* stream))
     (dolist (func (component-functions component))
-      (print-component (functional-component func)))))
+      (/print (functional-component func)))))
 
 ;;; Translate FORM into IR and print a textual repreresentation of the
 ;;; component.
@@ -786,11 +793,41 @@
     (with-component-compilation ('toplevel)
       (ir-convert form (make-lvar :id "out"))
       (when normalize (ir-normalize))
-      (check-ir-consistency)
-      (print-component *component*))))
+      (/print *component*)
+      *component*)))
 
 (defmacro /ir (form)
   `(convert-toplevel-and-print ',form))
+
+
+
+;;;; Dominators
+
+(defun compute-dominators (component)
+  ;; Initialize the dominators of the entry to the component to be
+  ;; empty and the power set of the set of blocks for proper basic
+  ;; blocks in the component.
+  (let ((n (length (component-blocks component))))
+    ;; The component entry special block has not predecessors in the
+    ;; set of (proper) basic blocks.
+    (setf (block-dominators% (component-entry component))
+          (make-array n :element-type 'bit :initial-element 0))
+    (do-blocks (block component)
+      (setf (block-dominators% block) (make-array n :element-type 'bit :initial-element 1))))
+  ;; Iterate across the blocks in the component removing non domintors
+  ;; until it reaches a fixed point.tpn
+  (do ((i 0 0)
+       (changes t))
+      ((not changes))
+    (setf changes nil)
+    (do-blocks (block component)
+      (format t "Processing ~a~%" (format-block-name block))
+      (let ((new (reduce #'bit-and (mapcar #'block-dominators% (block-pred block)))))
+        (setf (aref new i) 1)
+        (setf changes (or changes (not (equal new (block-dominators% block)))))
+        (setf (block-dominators% block) new)
+        (incf i)))))
+
 
 
 ;;;; Primitives
