@@ -16,7 +16,7 @@
 (defvar *package-list* nil)
 
 (defun list-all-packages ()
-  *package-list*)
+  (copy-list *package-list*))
 
 (defun make-package (name &key use)
   (let ((package (new))
