@@ -1527,6 +1527,16 @@
 (define-builtin in (key object)
   (js!bool (code "(xstring(" key ") in (" object "))")))
 
+(define-builtin map-for-in (function object)
+  (js!selfcall
+   "var f = " function ";" *newline*
+   "var g = (typeof f === 'function' ? f : f.fvalue);" *newline*
+   "var o = " object ";" *newline*
+   "for (var key in o){" *newline*
+   (indent "g(" (if *multiple-value-p* "values" "pv") ", 1, o[key]);" *newline*)
+   "}"
+   " return " (ls-compile nil) ";" *newline*))
+
 (define-builtin functionp (x)
   (js!bool (code "(typeof " x " == 'function')")))
 

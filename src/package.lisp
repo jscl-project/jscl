@@ -140,3 +140,42 @@
   (let ((exports (%package-external-symbols package)))
     (dolist (symb symbols t)
       (oset exports (symbol-name symb) symb))))
+
+(defun %map-external-symbols (function package)
+  (map-for-in function (%package-external-symbols package)))
+
+(defun %map-symbols (function package)
+  (map-for-in function (%package-symbols package))
+  (dolist (used (package-use-list package))
+    (%map-external-symbols function used)))
+
+(defun %map-all-symbols (function)
+  (dolist (package *package-list*)
+    (map-for-in function (%package-symbols package))))
+
+(defmacro do-symbols ((var &optional (package '*package*) result-form)
+                      &body body)
+  `(block nil
+     (%map-symbols
+      (lambda (,var) ,@body)
+      (find-package ,package))
+     ,result-form))
+
+(defmacro do-external-symbols ((var &optional (package '*package*)
+                                              result-form)
+                               &body body)
+  `(block nil
+     (%map-external-symbols
+      (lambda (,var) ,@body)
+      (find-package ,package))
+     ,result-form))
+
+(defmacro do-all-symbols ((var &optional result-form) &body body)
+  `(block nil (%map-all-symbols (lambda (,var) ,@body)) ,result-form))
+
+(defun find-all-symbols (string)
+  (let (symbols)
+    (dolist (package *package-list*)
+      (multiple-value-bind (symbol status) (find-symbol string package)
+        (when status
+          (pushnew symbol symbols :test #'eq))))))
