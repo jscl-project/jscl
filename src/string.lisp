@@ -25,6 +25,17 @@
         (unless (char= (char s1 i) (char s2 i))
           (return-from string= nil))))))
 
+(defun string< (s1 s2)
+  (let ((len-1 (length s1))
+        (len-2 (length s2)))
+    (cond ((= len-2 0) nil)
+          ((= len-1 0) 0)
+          (t (dotimes (i len-1 nil)
+               (when (char< (char s1 i) (char s2 i))
+                 (return-from string< i))
+               (when (and (= i (1- len-1)) (> len-2 len-1))
+                 (return-from string< (1+ i))))))))
+
 (defun stringp (s)
   (stringp s))
 
