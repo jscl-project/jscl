@@ -19,7 +19,9 @@
         (t (char-to-string x))))
 
 (defun string= (s1 s2)
-  (let ((n (length s1)))
+  (let* ((s1 (string s1))
+         (s2 (string s2))
+         (n (length s1)))
     (when (= (length s2) n)
       (dotimes (i n t)
         (unless (char= (char s1 i) (char s2 i))
