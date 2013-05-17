@@ -719,7 +719,7 @@
                         variables)
                 ",")
           "){" *newline*
-          (let ((body (ls-compile-block body t)))
+          (let ((body (ls-compile-block body t t)))
             (indent (let-binding-wrapper dynamic-bindings body)))
           "})(" (join cvalues ",") ")")))
 
@@ -767,7 +767,7 @@
     (js!selfcall
       (let ((specials (remove-if-not #'special-variable-p (mapcar #'first bindings)))
             (body (concat (mapconcat #'let*-initialize-value bindings)
-                          (ls-compile-block body t))))
+                          (ls-compile-block body t t))))
         (let*-binding-wrapper specials body)))))
 
 
@@ -1675,13 +1675,16 @@
       (t
        (code (ls-compile `#',function) arglist)))))
 
-(defun ls-compile-block (sexps &optional return-last-p)
-  (if return-last-p
-      (code (ls-compile-block (butlast sexps))
-            "return " (ls-compile (car (last sexps)) *multiple-value-p*) ";")
-      (join-trailing
-       (remove-if #'null-or-empty-p (mapcar #'ls-compile sexps))
-       (concat ";" *newline*))))
+(defun ls-compile-block (sexps &optional return-last-p decls-allowed-p)
+  (multiple-value-bind (sexps decls)
+      (parse-body sexps :declarations decls-allowed-p)
+    (declare (ignore decls))
+    (if return-last-p
+        (code (ls-compile-block (butlast sexps) nil decls-allowed-p)
+              "return " (ls-compile (car (last sexps)) *multiple-value-p*) ";")
+        (join-trailing
+         (remove-if #'null-or-empty-p (mapcar #'ls-compile sexps))
+         (concat ";" *newline*)))))
 
 (defun ls-compile (sexp &optional multiple-value-p)
   (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
