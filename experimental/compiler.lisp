@@ -140,96 +140,6 @@
   alternative)
 
 
-;;;; Components
-;;;;
-;;;; Components are connected pieces of the control flow graph of
-;;;; basic blocks with some additional information. Components have
-;;;; well-defined entry and exit nodes. It is the toplevel
-;;;; organizational entity in the compiler. The IR translation result
-;;;; is accumulated into components incrementally.
-(defstruct (component (:print-object generic-printer))
-  (id (generate-id 'component))
-  name
-  entry
-  exit
-  functions
-  blocks)
-
-;;; The current component. We accumulate the results of the IR
-;;; conversion in this component.
-(defvar *component*)
-
-;;; Create a new component with an empty basic block, ready to start
-;;; conversion to IR. It returns the component and the basic block as
-;;; multiple values.
-(defun make-empty-component (&optional name)
-  (let ((*component* (make-component :name name)))
-    (let ((entry (make-component-entry))
-          (block (make-empty-block))
-          (exit (make-component-exit)))
-      (setf (block-succ entry) (list block)
-            (block-pred exit)  (list block)
-            (block-succ block) (list exit)
-            (block-pred block) (list entry)
-            (component-entry *component*) entry
-            (component-exit  *component*) exit)
-      (values *component* block))))
-
-;;; Prepare a new component with a current empty block ready to start
-;;; IR conversion bound in the current cursor. BODY is evaluated and
-;;; the value of the last form is returned.
-(defmacro with-component-compilation ((&optional name) &body body)
-  (with-gensyms (block)
-    `(multiple-value-bind (*component* ,block)
-         (make-empty-component ,name)
-       (let ((*cursor* (cursor :block ,block)))
-         ,@body))))
-
-;;; Call function for each block in component in post-order.
-(defun map-postorder-blocks (function component)
-  (let ((seen nil))
-    (labels ((compute-from (block)
-               (unless (or (component-exit-p block) (find block seen))
-                 (push block seen)
-                 (dolist (successor (block-succ block))
-                   (unless (component-exit-p block)
-                     (compute-from successor)))
-                 (funcall function block))))
-      (compute-from (unlist (block-succ (component-entry component))))
-      nil)))
-
-;;; Iterate across different blocks in COMPONENT.
-(defmacro do-blocks ((block component &optional result) &body body)
-  `(dolist (,block (or (component-blocks ,component)
-                       (error "Component is not normalized."))
-             ,result)
-     ,@body))
-
-(defmacro do-blocks-backward ((block component &optional result) &body body)
-  `(dolist (,block (or (reverse (component-blocks ,component))
-                       (error "component is not normalized."))
-             ,result)
-     ,@body))
-
-;;; A few consistency checks in the IR useful for catching bugs.
-(defun check-ir-consistency (&optional (component *component*))
-  (with-simple-restart (continue "Continue execution")
-    (do-blocks (block component)
-      (dolist (succ (block-succ block))
-        (unless (find block (block-pred succ))
-          (error "The block `~S' does not belong to the predecessors list of the its successor `~S'"
-                 (block-id block)
-                 (block-id succ)))
-        (unless (or (boundary-block-p succ) (find succ (component-blocks component)))
-          (error "Block `~S' is reachable but it is not in the component `~S'" succ component)))
-      (dolist (pred (block-pred block))
-        (unless (find block (block-succ pred))
-          (error "The block `~S' does not belong to the successors' list of its predecessor `~S'"
-                 (block-id block)
-                 (block-id pred)))
-        (unless (or (boundary-block-p pred) (find pred (component-blocks component)))
-          (error "Block `~S' is reachable but it is not in the component `~S'" pred component))))))
-
 
 ;;; Blocks are `basic block`. Basic blocks are organized as a control
 ;;; flow graph with some more information in omponents.
@@ -239,25 +149,23 @@
              (:predicate block-p)
              (:print-object generic-printer))
   (id (generate-id 'basic-block))
-  ;; List of successors and predecessors of this basic block.
+  ;; List of successors and predecessors of this basic block. They are
+  ;; null only for deleted blocks and component's entry and exit.
   succ pred
   ;; The sentinel nodes of the sequence.
   entry exit
-  ;; The component where this block belongs
-  (component *component*)
-  (dominators%))
+  ;; The component where the basic block belongs to.
+  component
+  ;; A bit-vector representating the set of dominators. See the
+  ;; function `compute-dominators' to know how to use it properly.
+  dominators%
+  ;; Arbitrary data which could be necessary to keep during IR
+  ;; processing.
+  data)
 
 ;;; Sentinel nodes in the control flow graph of basic blocks.
 (defstruct (component-entry (:include basic-block)))
 (defstruct (component-exit (:include basic-block)))
-
-;;; Return a fresh empty basic block.
-(defun make-empty-block ()
-  (let ((entry (make-block-entry))
-        (exit (make-block-exit)))
-    (setf (node-next entry) exit
-          (node-prev exit) entry)
-    (make-block :entry entry :exit exit)))
 
 ;;; Return T if B is an empty basic block and NIL otherwise.
 (defun empty-block-p (b)
@@ -301,6 +209,120 @@
         (node-prev to) from)
   (values))
 
+
+;;; Components are connected pieces of the control flow graph of
+;;; basic blocks with some additional information. Components have
+;;; well-defined entry and exit nodes. It is the toplevel
+;;; organizational entity in the compiler. The IR translation result
+;;; is accumulated into components incrementally.
+(defstruct (component (:print-object generic-printer))
+  (id (generate-id 'component))
+  name
+  entry
+  exit
+  functions
+  blocks)
+
+;;; The current component.
+(defvar *component*)
+
+;;; Create a new fresh empty basic block in the current component.
+(defun make-empty-block ()
+  (let ((entry (make-block-entry))
+        (exit (make-block-exit)))
+    (link-nodes entry exit)
+    (let ((block (make-block :entry entry :exit exit :component *component*)))
+      (push block (component-blocks *component*))
+      block)))
+
+;;; Create a new component with an empty basic block, ready to start
+;;; conversion to IR. It returns the component and the basic block as
+;;; multiple values.
+(defun make-empty-component (&optional name)
+  (let ((*component* (make-component :name name)))
+    (let ((entry (make-component-entry :component *component*))
+          (exit (make-component-exit :component *component*))
+          (block (make-empty-block)))
+      (setf (block-succ entry) (list block)
+            (block-pred exit)  (list block)
+            (block-succ block) (list exit)
+            (block-pred block) (list entry)
+            (component-entry *component*) entry
+            (component-exit  *component*) exit)
+      (values *component* block))))
+
+;;; A few consistency checks in the IR useful for catching bugs.
+(defun check-ir-consistency (&optional (component *component*))
+  (with-simple-restart (continue "Continue execution")
+    (dolist (block (component-blocks component))
+      (dolist (succ (block-succ block))
+        (unless (find block (block-pred succ))
+          (error "The block `~S' does not belong to the predecessors list of the its successor `~S'"
+                 block succ))
+        (unless (or (boundary-block-p succ) (find succ (component-blocks component)))
+          (error "Block `~S' is reachable from its predecessor `~S' but it is not in the component `~S'"
+                 succ block component)))
+      (dolist (pred (block-pred block))
+        (unless (find block (block-succ pred))
+          (error "The block `~S' does not belong to the successors' list of its predecessor `~S'"
+                 block pred))
+        (unless (or (boundary-block-p pred) (find pred (component-blocks component)))
+          (error "Block `~S' is reachable from its sucessor `~S' but it is not in the component `~S'"
+                 pred block component))))))
+
+;;; Prepare a new component with a current empty block ready to start
+;;; IR conversion bound in the current cursor. BODY is evaluated and
+;;; the value of the last form is returned.
+(defmacro with-component-compilation ((&optional name) &body body)
+  (with-gensyms (block)
+    `(multiple-value-bind (*component* ,block)
+         (make-empty-component ,name)
+       (let ((*cursor* (cursor :block ,block)))
+         ,@body))))
+
+;;; Call function for each reachable block in component in
+;;; post-order. The consequences are unspecified if a block is
+;;; FUNCTION modifies a block which has not been processed yet.
+(defun map-postorder-blocks (function component)
+  (let ((seen nil))
+    (labels ((compute-from (block)
+               (unless (or (component-exit-p block) (find block seen))
+                 (push block seen)
+                 (dolist (successor (block-succ block))
+                   (unless (component-exit-p block)
+                     (compute-from successor)))
+                 (funcall function block))))
+      (compute-from (unlist (block-succ (component-entry component))))
+      nil)))
+
+;;; Change all the predecessors of BLOCK to precede NEW-BLOCK
+;;; instead. As consequence, BLOCK becomes unreachable.
+(defun replace-block (block new-block)
+  (let ((predecessors (block-pred block)))
+    (setf (block-pred block) nil)
+    (dolist (pred predecessors)
+      (pushnew pred (block-pred new-block))
+      (setf (block-succ pred) (substitute new-block block (block-succ pred)))
+      (unless (component-entry-p pred)
+        (let ((last-node (node-prev (block-exit pred))))
+          (when (conditional-p last-node)
+            (macrolet ((replacef (place)
+                         `(setf ,place (if (eq block ,place) new-block ,place))))
+              (replacef (conditional-consequent last-node))
+              (replacef (conditional-alternative last-node)))))))))
+
+(defun delete-block (block)
+  (when (boundary-block-p block)
+    (error "Cannot delete entry or exit basic blocks."))
+  (unless (singlep (block-succ block))
+    (error "Cannot delete a basic block with multiple successors."))
+  (let ((successor (unlist (block-succ block))))
+    (replace-block block successor)
+    ;; At this point, block is unreachable, however we could have
+    ;; backreferences to it from its successors. Let's get rid of
+    ;; them.
+    (setf (block-pred successor) (remove block (block-pred successor)))
+    (setf (block-succ block) nil)))
 
 
 ;;;; Cursors
@@ -394,7 +416,8 @@
          (newblock (make-block :entry newentry
                                :exit exit
                                :pred (list block)
-                               :succ (block-succ block))))
+                               :succ (block-succ block)
+                               :component *component*)))
     (insert-node newexit)
     (insert-node newentry)
     (setf (node-next newexit)  nil)
@@ -404,6 +427,7 @@
     (dolist (succ (block-succ newblock))
       (setf (block-pred succ) (substitute newblock block (block-pred succ))))
     (set-cursor :block block :before newexit)
+    (push newblock (component-blocks *component*))
     newblock))
 
 ;;; Split the block at CURSOR if it is in the middle of it. The cursor
@@ -414,7 +438,6 @@
   ;; fine, we don't need to do anything.
   (unless (block-exit-p (cursor-next cursor))
     (split-block cursor)))
-
 
 
 ;;;; Lexical environment
@@ -449,10 +472,6 @@
 ;;;; that is the `ir-convert' function, which dispatches to IR
 ;;;; translators. This function ss intended to do the initial
 ;;;; conversion as well as insert new IR code during optimizations.
-;;;;
-;;;; The function `ir-normalize' will coalesce basic blocks in a
-;;;; component to generate proper maximal basic blocks, as well as
-;;;; compute reverse depth first ordering on the blocks.
 
 ;;; A alist of IR translator functions.
 (defvar *ir-translator* nil)
@@ -679,26 +698,11 @@
     (values)))
 
 
-;;; Change all the predecessors of BLOCK to precede NEW-BLOCK instead.
-(defun replace-block (block new-block)
-  (let ((predecessors (block-pred block)))
-    (setf (block-pred new-block) (union (block-pred new-block) predecessors))
-    (dolist (pred predecessors)
-      (setf (block-succ pred) (substitute new-block block (block-succ pred)))
-      (unless (component-entry-p pred)
-        (let ((last-node (node-prev (block-exit pred))))
-          (when (conditional-p last-node)
-            (macrolet ((replacef (place)
-                         `(setf ,place (if (eq block ,place) new-block ,place))))
-              (replacef (conditional-consequent last-node))
-              (replacef (conditional-alternative last-node)))))))))
-
-(defun delete-block (block)
-  (when (boundary-block-p block)
-    (error "Cannot delete entry or exit basic blocks."))
-  (unless (singlep (block-succ block))
-    (error "Cannot delete a basic block with multiple successors."))
-  (replace-block block (unlist (block-succ block))))
+;;;; IR Normalization
+;;;;
+;;;; IR as generated by `ir-convert' or after some transformations is
+;;;; not appropiated. Here, we remove unreachable and empty blocks and
+;;;; coallesce blocks when it is possible.
 
 ;;; Try to coalesce BLOCK with the successor if it is unique and block
 ;;; is its unique predecessor.
@@ -708,27 +712,107 @@
       (when (and (not (component-exit-p succ)) (singlep (block-pred succ)))
         (link-nodes (node-prev (block-exit block))
                     (node-next (block-entry succ)))
+        (setf (block-exit block) (block-exit succ))
         (setf (block-succ block) (block-succ succ))
         (dolist (next (block-succ succ))
           (setf (block-pred next) (substitute block succ (block-pred next))))
+        (setf (block-succ succ) nil
+              (block-pred succ) nil)
         t))))
 
 ;;; Normalize a component. This function must be called after a batch
 ;;; of modifications to the flowgraph of the component to make sure it
 ;;; is a valid input for the possible optimizations and the backend.
 (defun ir-normalize (&optional (component *component*))
-  (flet ((clean-and-coallesce (block)
-           (maybe-coalesce-block block)
-           (when (empty-block-p block)
-             (delete-block block)))
-         (add-to-list (block)
-           (push block (component-blocks *component*))))
-    (map-postorder-blocks #'clean-and-coallesce component)
-    (map-postorder-blocks #'add-to-list component)
-    (check-ir-consistency)))
+  ;; Initialize blocks as unreachables and remove empty basic blocks.
+  (dolist (block (component-blocks component))
+    (setf (block-data block) 'unreachable))
+  ;; Coalesce and mark blocks as reachable.
+  (map-postorder-blocks
+   (lambda (block)
+     (maybe-coalesce-block block)
+     (setf (block-data block) 'reachable))
+   component)
+  (let ((block-list nil))
+    (dolist (block (component-blocks component))
+      (cond
+        ;; If the block is unreachable, but it is predeces a reachable
+        ;; one, then break the link between them. So we discard it
+        ;; from the flowgraph.
+        ((eq (block-data block) 'unreachable)
+         (setf (block-succ block) nil)
+         (dolist (succ (block-succ block))
+           (when (eq (block-data succ) 'reachable)
+             (remove block (block-pred succ)))))
+        ;; Delete empty blocks
+        ((empty-block-p block)
+         (delete-block block))
+        ;; The rest of blocks remain in the component.
+        (t
+         (push block block-list))))
+    (setf (component-blocks component) block-list))
+  (check-ir-consistency))
 
 
-;;; IR Debugging
+;;;; IR Analysis
+;;;;
+;;;; Once IR conversion has been finished. We do some analysis of the
+;;;; component to produce information which is useful for both
+;;;; optimizations and code generation. Indeed, we provide some
+;;;; abstractions to use this information.
+
+(defun compute-reverse-post-order (component)
+  (let ((output nil))
+    (flet ((add-block-to-list (block)
+             (push block output)))
+      (map-postorder-blocks #'add-block-to-list component))
+    (setf (component-blocks component) output)))
+
+;;; Iterate across blocks in COMPONENT in reverse post order.
+(defmacro do-blocks-forward ((block component &optional result) &body body)
+  `(dolist (,block (component-blocks ,component) ,result)
+     ,@body))
+;;; Iterate across blocks in COMPONENT in post order.
+(defmacro do-blocks-backward ((block component &optional result) &body body)
+  `(dolist (,block (reverse (component-blocks ,component)) ,result)
+     ,@body))
+
+
+(defun compute-dominators (component)
+  ;; Initialize the dominators of the entry to the component to be
+  ;; empty and the power set of the set of blocks for proper basic
+  ;; blocks in the component.
+  (let ((n (length (component-blocks component))))
+    ;; The component entry special block has not predecessors in the
+    ;; set of (proper) basic blocks.
+    (setf (block-dominators% (component-entry component))
+          (make-array n :element-type 'bit :initial-element 0))
+    (dolist (block (component-blocks component))
+      (setf (block-dominators% block) (make-array n :element-type 'bit :initial-element 1))))
+  ;; Iterate across the blocks in the component removing non domintors
+  ;; until it reaches a fixed point.
+  (do ((i 0 0)
+       (iteration 0 (1+ iteration))
+       (changes t))
+      ((not changes))
+    (setf changes nil)
+    (do-blocks-forward (block component)
+      (let ((new (reduce #'bit-and (mapcar #'block-dominators% (block-pred block)))))
+        (format t "Dominators for ~a is ~S~%" (block-id block) new)
+        (setf (aref new i) 1)
+        (setf changes (or changes (not (equal new (block-dominators% block)))))
+        (setf (block-dominators% block) new)
+        (incf i)))))
+
+
+;;;; IR Debugging
+;;;;
+;;;; This section provides a function `/print' which write a textual
+;;;; representation of a component to the standard output. Also, a
+;;;; `/ir' macro is provided, which takes a form, convert it to IR and
+;;;; then print the component as above.  They are useful commands if
+;;;; you are hacking the front-end of the compiler.
+;;;; 
 
 (defun format-block-name (block)
   (cond
@@ -738,6 +822,7 @@
      (format nil "EXIT-~a" (component-id (block-component block))))
     (t
      (format nil "BLOCK ~a" (block-id block)))))
+
 
 (defun print-node (node)
   (when (node-lvar node)
@@ -783,7 +868,7 @@
 (defun /print (component &optional (stream *standard-output*))
   (format t ";;; COMPONENT ~a (~a) ~%~%" (component-name component) (component-id component))
   (let ((*standard-output* stream))
-    (do-blocks (block component)
+    (do-blocks-forward (block component)
       (print-block block)))
   (format t ";;; END COMPONENT ~a ~%~%" (component-name component))
   (let ((*standard-output* stream))
@@ -797,40 +882,12 @@
     (with-component-compilation ('toplevel)
       (ir-convert form (make-lvar :id "out"))
       (ir-normalize)
+      (compute-reverse-post-order *component*)
       (/print *component*)
       *component*)))
 
 (defmacro /ir (form)
   `(convert-toplevel-and-print ',form))
-
-
-
-;;;; Dominators
-
-(defun compute-dominators (component)
-  ;; Initialize the dominators of the entry to the component to be
-  ;; empty and the power set of the set of blocks for proper basic
-  ;; blocks in the component.
-  (let ((n (length (component-blocks component))))
-    ;; The component entry special block has not predecessors in the
-    ;; set of (proper) basic blocks.
-    (setf (block-dominators% (component-entry component))
-          (make-array n :element-type 'bit :initial-element 0))
-    (do-blocks (block component)
-      (setf (block-dominators% block) (make-array n :element-type 'bit :initial-element 1))))
-  ;; Iterate across the blocks in the component removing non domintors
-  ;; until it reaches a fixed point.tpn
-  (do ((i 0 0)
-       (changes t))
-      ((not changes))
-    (setf changes nil)
-    (do-blocks (block component)
-      (format t "Processing ~a~%" (format-block-name block))
-      (let ((new (reduce #'bit-and (mapcar #'block-dominators% (block-pred block)))))
-        (setf (aref new i) 1)
-        (setf changes (or changes (not (equal new (block-dominators% block)))))
-        (setf (block-dominators% block) new)
-        (incf i)))))
 
 
 
