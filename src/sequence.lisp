@@ -48,9 +48,11 @@
         (when (funcall predicate x)
           (return x)))))
 
-(defun position (elt sequence &key (test #'eql))
-  (do-sequence (x seq index)
-    (when (funcall test elt x)
+(defun position (elt sequence &key key (test #'eql testp)
+                     (test-not #'eql test-not-p))
+  (do-sequence (x sequence index)
+    (when (satisfies-test-p elt x :key key :test test :testp testp
+                           :test-not test-not :test-not-p test-not-p ) 
       (return index))))
 
 (defun remove (x seq)
