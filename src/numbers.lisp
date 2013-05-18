@@ -26,9 +26,22 @@
          ,init-sym))))
 
 (define-variadic-op + 0)
-(define-variadic-op - 0)
 (define-variadic-op * 1)
-(define-variadic-op / 1)
+
+;; - and / work differently from the above macro.
+;; If only one arg is given, it negates it or takes its reciprocal.
+;; Otherwise all the other args are subtracted from or divided by it.
+;; TODO: Use MACROLET when it exists
+(defmacro define-sub-or-div (operator unary-form)
+  `(defun ,operator (x &rest args)
+     (cond
+       ((null args) ,unary-form)
+       (t (dolist (y args)
+            (setq x (,operator x y)))
+          x))))
+
+(define-sub-or-div - (-   x))
+(define-sub-or-div / (/ 1 x))
 
 (defun 1+ (x) (+ x 1))
 (defun 1- (x) (- x 1))
