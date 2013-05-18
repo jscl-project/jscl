@@ -175,7 +175,7 @@
 
 (defun find-all-symbols (string)
   (let (symbols)
-    (dolist (package *package-list*)
+    (dolist (package *package-list* symbols)
       (multiple-value-bind (symbol status) (find-symbol string package)
         (when status
           (pushnew symbol symbols :test #'eq))))))
