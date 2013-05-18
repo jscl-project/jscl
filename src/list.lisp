@@ -216,9 +216,11 @@
       (setq alist (cdr alist))))
   (car alist))
 
-(defun rassoc (x alist &key (test #'eql))
+(defun rassoc (x alist &key key (test #'eql) (test #'eql testp)
+                 (test-not #'eql test-not-p))
   (while alist
-    (if (funcall test x (cdar alist))
+    (if (satisfies-test-p x (cdar alist) :key key :test test :testp testp
+                          :test-not test-not :test-not-p test-not-p)
       (return)
       (setq alist (cdr alist))))
   (car alist))
