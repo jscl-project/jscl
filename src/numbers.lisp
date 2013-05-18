@@ -15,23 +15,23 @@
 
 ;;;; Various numeric functions and constants
 
-;; Basic functions
-(defun * (x y) (* x y))
-(defun / (x y) (/ x y))
+;; TODO: Use MACROLET when it exists
+(defmacro define-variadic-op (operator initial-value)
+  (let ((init-sym   (gensym))
+        (dolist-sym (gensym)))
+    `(defun ,operator (&rest args)
+       (let ((,init-sym ,initial-value))
+         (dolist (,dolist-sym args)
+           (setq ,init-sym (,operator ,init-sym ,dolist-sym)))
+         ,init-sym))))
+
+(define-variadic-op + 0)
+(define-variadic-op - 0)
+(define-variadic-op * 1)
+(define-variadic-op / 1)
+
 (defun 1+ (x) (+ x 1))
 (defun 1- (x) (- x 1))
-
-(defun + (&rest args)
-  (let ((r 0))
-    (dolist (x args r)
-      (incf r x))))
-
-(defun - (x &rest others)
-  (if (null others)
-      (- x)
-      (let ((r x))
-        (dolist (y others r)
-          (decf r y)))))
 
 (defun truncate (x &optional (y 1))
   (floor (/ x y)))
