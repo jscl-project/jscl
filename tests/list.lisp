@@ -120,9 +120,11 @@
 
 ; TREE-EQUAL
 (test (tree-equal '(1 2 3) '(1 2 3)))
+(test (not (tree-equal '(1 2 3) '(3 2 1))))
 (test (tree-equal '(1 (2 (3 4) 5) 6) '(1 (2 (3 4) 5) 6)))
-(test (tree-equal (cons 1 2) (cons 2 3)
-                  :test (lambda (a b) (not (= a b)))))
+(test (tree-equal (cons 1 2) (cons 2 3) :test (lambda (a b) (not (= a b)))))
+(test (tree-equal '(1 . 2) '(2 . 1) :test-not #'eql))
+(test (not (tree-equal '(1 . 2) '(1 . 2) :test-not #'eql)))
 
 ; FIRST to TENTH
 (let ((nums '(1 2 3 4 5 6 7 8 9 10)))
@@ -167,13 +169,18 @@
   (test (equal (assoc  1 alist) '(1 . 2)))
   (test (equal (rassoc 2 alist) '(1 . 2)))
   (test (not   (assoc  2 alist)))
-  (test (not   (rassoc 1 alist))))
+  (test (not   (rassoc 1 alist)))
+  (test (equal (assoc  3 alist :test-not #'=) '(1 . 2)))
+  (test (equal (rassoc 4 alist :test-not #'=) '(1 . 2)))
+  (test (equal (assoc  1 alist :key (lambda (x) (/ x 3))) '(3 . 4)))
+  (test (equal (rassoc 2 alist :key (lambda (x) (/ x 2))) '(3 . 4)))) 
 
 ; MEMBER
 (test (equal (member 2 '(1 2 3)) '(2 3)))
 (test (not   (member 4 '(1 2 3))))
 (test (equal (member 4 '((1 . 2) (3 . 4)) :key #'cdr) '((3 . 4))))
 (test (member '(2) '((1) (2) (3)) :test #'equal))
+(test (member 1 '(1 2 3) :test-not #'eql))
 
 ; ADJOIN
 (test (equal (adjoin 1 '(2 3))   '(1 2 3)))

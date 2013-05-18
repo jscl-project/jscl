@@ -69,15 +69,15 @@
           multiple-value-bind multiple-value-call multiple-value-list
           multiple-value-prog1 nconc nil ninth not nreconc nth nthcdr null
           numberp or otherwise package-name package-use-list packagep pairlis
-          parse-integer plusp pop prin1-to-string print proclaim prog prog1
-          prog2 progn psetq push quote rassoc read-from-string remove remove-if
-          remove-if-not return return-from revappend reverse rplaca rplacd
-          second set setf setq seventh sixth some string string-upcase string=
-          string< stringp subseq subst symbol-function symbol-name symbol-package
-          symbol-plist symbol-value symbolp t tagbody tailp tenth third throw
-          time trace tree-equal truncate unless untrace unwind-protect values
-          values-list variable vector-push-extend warn when write-line write-string
-          zerop))
+          parse-integer plusp pop position prin1-to-string print proclaim prog
+          prog1 prog2 progn psetq push quote rassoc read-from-string remove 
+          remove-if remove-if-not return return-from revappend reverse rplaca
+          rplacd second set setf setq seventh sixth some string string-upcase
+          string= string< stringp subseq subst symbol-function symbol-name
+          symbol-package symbol-plist symbol-value symbolp t tagbody tailp
+          tenth third throw time trace tree-equal truncate unless untrace
+          unwind-protect values values-list variable vector-push-extend warn
+          when write-line write-string zerop))
 
 (setq *package* *user-package*)
 
