@@ -55,7 +55,7 @@
                            :test-not test-not :test-not-p test-not-p ) 
       (return index))))
 
-(defun remove (x seq)
+(defun remove (x seq &key key (test #'eql testp) (test-not #'eql test-not-p))
   (cond
     ((null seq)
      nil)
@@ -63,7 +63,8 @@
      (let* ((head (cons nil nil))
             (tail head))
        (do-sequence (elt seq)
-         (unless (eql x elt)
+         (unless (satisfies-test-p x elt :key key :test test :testp testp 
+                                   :test-not test-not :test-not-p test-not-p)
            (let ((new (list elt)))
              (rplacd tail new)
              (setq tail new))))
@@ -71,7 +72,8 @@
     (t
      (let (vector)
        (do-sequence (elt seq index)
-         (if (eql x elt)
+         (if (satisfies-test-p x elt :key key :test test :testp testp 
+                               :test-not test-not :test-not-p test-not-p)
              ;; Copy the beginning of the vector only when we find an element
              ;; that does not match.
              (unless vector
