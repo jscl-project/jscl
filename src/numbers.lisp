@@ -18,10 +18,9 @@
 ;; TODO: Use MACROLET when it exists
 (defmacro defcomparison (operator)
   `(defun ,operator (x &rest args)
-     (while (not (null args))
-       (if (,operator x (car args))
-         (setq x    (car args)
-               args (cdr args))
+     (dolist (y args) 
+       (if (,operator x y)
+         (setq x    (car args))
          (return-from ,operator nil)))
      t))
 
@@ -36,11 +35,8 @@
 (defun oddp  (x) (not (evenp x)))
 
 (flet ((%max-min (x xs func)
-         (while (not (null xs))
-           (setq x  (if (funcall func x (car xs))
-                      x
-                      (car xs))
-                 xs (cdr xs)))
+         (dolist (y xs) 
+           (setq x  (if (funcall func x (car xs)) x y)))
          x))
   (defun max (x &rest xs) (%max-min x xs #'>))
   (defun min (x &rest xs) (%max-min x xs #'<))) 
