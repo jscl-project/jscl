@@ -33,15 +33,6 @@
              (let ((,elt (aref ,nseq ,index)))
                ,@body))))))
 
-(define-setf-expander cdr (x)
-  (let ((cons (gensym))
-        (new-value (gensym)))
-    (values (list cons)
-            (list x)
-            (list new-value)
-            `(progn (rplacd ,cons ,new-value) ,new-value)
-            `(car ,cons))))
-
 (defun find (item seq &key key (test #'eql))
   (if key
       (do-sequence (x seq)
