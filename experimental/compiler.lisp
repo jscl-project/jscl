@@ -221,6 +221,9 @@
   entry
   exit
   functions
+  ;; TODO: Replace with a flags slot for indicate what
+  ;; analysis/transformations have been carried out.
+  reverse-post-order-p
   blocks)
 
 ;;; The current component.
@@ -766,17 +769,28 @@
     (flet ((add-block-to-list (block)
              (push block output)))
       (map-postorder-blocks #'add-block-to-list component))
+    (setf (component-reverse-post-order-p component) t)
     (setf (component-blocks component) output)))
 
 ;;; Iterate across blocks in COMPONENT in reverse post order.
 (defmacro do-blocks-forward ((block component &optional result) &body body)
-  `(dolist (,block (component-blocks ,component) ,result)
-     ,@body))
+  (with-gensyms (g!component)
+    `(let ((,g!component ,component))
+       (dolist (,block (if (component-reverse-post-order-p ,g!component)
+                           (component-blocks ,g!component)
+                           (error "reverse post order was not computed yet."))
+                 ,result)
+         ,@body))))
+
 ;;; Iterate across blocks in COMPONENT in post order.
 (defmacro do-blocks-backward ((block component &optional result) &body body)
-  `(dolist (,block (reverse (component-blocks ,component)) ,result)
-     ,@body))
-
+  (with-gensyms (g!component)
+    `(let ((,g!component ,component))
+       (dolist (,block (if (component-reverse-post-order-p ,g!component)
+                           (reverse (component-blocks ,g!component))
+                           (error "reverse post order was not computed yet."))
+                 ,result)
+         ,@body))))
 
 (defun compute-dominators (component)
   ;; Initialize the dominators of the entry to the component to be
@@ -797,11 +811,12 @@
       ((not changes))
     (setf changes nil)
     (do-blocks-forward (block component)
-      (let ((new (reduce #'bit-and (mapcar #'block-dominators% (block-pred block)))))
-        (format t "Dominators for ~a is ~S~%" (block-id block) new)
-        (setf (aref new i) 1)
-        (setf changes (or changes (not (equal new (block-dominators% block)))))
-        (setf (block-dominators% block) new)
+      (let* ((predecessors (block-pred block)))
+        (bit-and (block-dominators% block) (block-dominators% (first predecessors)) t)
+        (dolist (pred (rest predecessors))
+          (bit-and (block-dominators% block) (block-dominators% pred) t))
+        (setf (aref (block-dominators% block) i) 1)
+        (setf changes (or changes (not (equal (block-dominators% block) (block-dominators% block)))))
         (incf i)))))
 
 
