@@ -16,7 +16,6 @@
 ;;;; Various numeric functions and constants
 
 ;; Basic functions
-(defun = (x y) (= x y))
 (defun * (x y) (* x y))
 (defun / (x y) (/ x y))
 (defun 1+ (x) (+ x 1))
@@ -58,6 +57,7 @@
 
 (defcomparison >)
 (defcomparison >=)
+(defcomparison =) 
 (defcomparison <)
 (defcomparison <=)
 
