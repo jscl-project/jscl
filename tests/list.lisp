@@ -169,7 +169,9 @@
   (test (equal (assoc  1 alist) '(1 . 2)))
   (test (equal (rassoc 2 alist) '(1 . 2)))
   (test (not   (assoc  2 alist)))
-  (test (not   (rassoc 1 alist))))
+  (test (not   (rassoc 1 alist)))
+  (test (equal (assoc 3 alist :test-not #'=) '(1 . 2)))
+  (test (equal (assoc 1 alist :key (lambda (x) (/ x 3))) '(3 . 4))))
 
 ; MEMBER
 (test (equal (member 2 '(1 2 3)) '(2 3)))

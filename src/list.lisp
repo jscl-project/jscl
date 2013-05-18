@@ -208,9 +208,10 @@
     (setq list (cdr list))))
 
 
-(defun assoc (x alist &key (test #'eql))
+(defun assoc (x alist &key key (test #'eql testp) (test-not #'eql test-not-p))
   (while alist
-    (if (funcall test x (caar alist))
+    (if (satisfies-test-p x (caar alist) :key key :test test :testp testp
+                          :test-not test-not :test-not-p test-not-p)
       (return)
       (setq alist (cdr alist))))
   (car alist))
