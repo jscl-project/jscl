@@ -156,6 +156,8 @@
   entry exit
   ;; The component where the basic block belongs to.
   component
+  ;; The order in the reverse post ordering of the blocks.
+  order
   ;; A bit-vector representing the set of dominators. See the function
   ;; `compute-dominators' to know how to use it properly.
   dominators%
@@ -765,9 +767,11 @@
 ;;;; abstractions to use this information.
 
 (defun compute-reverse-post-order (component)
-  (let ((output nil))
+  (let ((output nil)
+        (count 0))
     (flet ((add-block-to-list (block)
-             (push block output)))
+             (push block output)
+             (setf (block-order block) (incf count))))
       (map-postorder-blocks #'add-block-to-list component))
     (setf (component-reverse-post-order-p component) t)
     (setf (component-blocks component) output)))
@@ -818,6 +822,11 @@
         (setf (aref (block-dominators% block) i) 1)
         (setf changes (or changes (not (equal (block-dominators% block) (block-dominators% block)))))
         (incf i)))))
+
+;;; Return T if BLOCK1 dominates BLOCK2, else return NIL.
+(defun dominate-p (block1 block2)
+  (let ((order (block-order block1)))
+    (= 1 (aref (block-dominators% block2) order))))
 
 
 ;;;; IR Debugging
