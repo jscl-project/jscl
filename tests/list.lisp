@@ -120,9 +120,11 @@
 
 ; TREE-EQUAL
 (test (tree-equal '(1 2 3) '(1 2 3)))
+(test (not (tree-equal '(1 2 3) '(3 2 1))))
 (test (tree-equal '(1 (2 (3 4) 5) 6) '(1 (2 (3 4) 5) 6)))
-(test (tree-equal (cons 1 2) (cons 2 3)
-                  :test (lambda (a b) (not (= a b)))))
+(test (tree-equal (cons 1 2) (cons 2 3) :test (lambda (a b) (not (= a b)))))
+(test (tree-equal '(1 . 2) '(2 . 1) :test-not #'eql))
+(test (not (tree-equal '(1 . 2) '(1 . 2) :test-not #'eql)))
 
 ; FIRST to TENTH
 (let ((nums '(1 2 3 4 5 6 7 8 9 10)))
