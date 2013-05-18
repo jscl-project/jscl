@@ -176,6 +176,7 @@
 (test (not   (member 4 '(1 2 3))))
 (test (equal (member 4 '((1 . 2) (3 . 4)) :key #'cdr) '((3 . 4))))
 (test (member '(2) '((1) (2) (3)) :test #'equal))
+(test (member 1 '(1 2 3) :test-not #'eql))
 
 ; ADJOIN
 (test (equal (adjoin 1 '(2 3))   '(1 2 3)))

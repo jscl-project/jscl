@@ -200,9 +200,10 @@
   (and (consp (cdr x))
        (cons (car x) (butlast (cdr x)))))
 
-(defun member (x list &key (key #'identity) (test #'eql))
+(defun member (x list &key key (test #'eql testp) (test-not #'eql test-not-p)) 
   (while list
-    (when (funcall test x (funcall key (car list)))
+    (when (satisfies-test-p x (car list) :key key :test test :testp testp
+                            :test-not test-not :test-not-p test-not-p)
       (return list))
     (setq list (cdr list))))
 
