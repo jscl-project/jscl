@@ -143,6 +143,21 @@
               ,@(cdr newval))
          ,setter))))
 
+(defmacro pushnew (x place &rest keys &key key test test-not)
+  (declare (ignore key test test-not))
+  (multiple-value-bind (dummies vals newval setter getter)
+      (get-setf-expansion place)
+    (let ((g (gensym))
+          (v (gensym)))
+      `(let* ((,g ,x)
+              ,@(mapcar #'list dummies vals)
+              ,@(cdr newval)
+              (,v ,getter))
+         (if (member ,g ,v ,@keys)
+             ,v
+             (let ((,(car newval) (cons ,g ,getter)))
+               ,setter))))))
+
 (defmacro dolist ((var list &optional result) &body body)
   (let ((g!list (gensym)))
     (unless (symbolp var) (error "`~S' is not a symbol." var))

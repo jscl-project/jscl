@@ -58,8 +58,9 @@
           cond cons consp constantly copy-alist copy-list copy-tree decf declaim
           declare defconstant define-setf-expander define-symbol-macro defmacro
           defparameter defun defvar destructuring-bind digit-char digit-char-p
-          disassemble do do* documentation dolist dotimes ecase eighth eq eql
-          equal error eval every export expt fdefinition fifth find
+          disassemble do do* documentation dolist dotimes do-all-symbols
+          do-external-symbols do-symbols ecase eighth eq eql
+          equal error eval every export expt fdefinition fifth find find-all-symbols
           find-package find-symbol first flet format fourth fboundp fset funcall
           function functionp gensym get-internal-real-time get-setf-expansion
           get-universal-time go identity if in-package incf integerp intern
@@ -70,7 +71,7 @@
           multiple-value-prog1 nconc nil ninth not nreconc nth nthcdr null
           numberp or otherwise package-name package-use-list packagep pairlis
           parse-integer plusp pop prin1-to-string print proclaim prog prog1
-          prog2 progn psetq push quote rassoc read-from-string remove remove-if
+          prog2 progn psetq push pushnew quote rassoc read-from-string remove remove-if
           remove-if-not return return-from revappend reverse rplaca rplacd
           second set setf setq seventh sixth some string string-upcase string=
           string< stringp subseq subst symbol-function symbol-name symbol-package
