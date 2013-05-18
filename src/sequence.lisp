@@ -33,14 +33,11 @@
              (let ((,elt (aref ,nseq ,index)))
                ,@body))))))
 
-(defun find (item seq &key key (test #'eql))
-  (if key
-      (do-sequence (x seq)
-        (when (funcall test (funcall key x) item)
-          (return x)))
-      (do-sequence (x seq)
-        (when (funcall test x item)
-          (return x)))))
+(defun find (item seq &key key (test #'eql testp) (test-not #'eql test-not-p))
+  (do-sequence (x seq)
+    (when (satisfies-test-p item x :key key :test test :testp testp
+                            :test-not test-not :test-not-p test-not-p)
+      (return x))))
 
 (defun find-if (predicate sequence &key key)
   (if key
