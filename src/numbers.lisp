@@ -15,6 +15,38 @@
 
 ;;;; Various numeric functions and constants
 
+;; Basic functions
+(defun = (x y) (= x y))
+(defun * (x y) (* x y))
+(defun / (x y) (/ x y))
+(defun 1+ (x) (+ x 1))
+(defun 1- (x) (- x 1))
+
+(defun + (&rest args)
+  (let ((r 0))
+    (dolist (x args r)
+      (incf r x))))
+
+(defun - (x &rest others)
+  (if (null others)
+      (- x)
+      (let ((r x))
+        (dolist (y others r)
+          (decf r y)))))
+
+(defun truncate (x &optional (y 1))
+  (floor (/ x y)))
+
+(defun integerp (x)
+  (and (numberp x) (= (floor x) x)))
+
+(defun floatp (x)
+  (and (numberp x) (not (integerp x))))
+
+(defun minusp (x) (< x 0))
+(defun zerop (x) (= x 0))
+(defun plusp (x) (< 0 x))
+
 ;; TODO: Use MACROLET when it exists
 (defmacro defcomparison (operator)
   `(defun ,operator (x &rest args)
