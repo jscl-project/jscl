@@ -156,8 +156,8 @@
   entry exit
   ;; The component where the basic block belongs to.
   component
-  ;; A bit-vector representating the set of dominators. See the
-  ;; function `compute-dominators' to know how to use it properly.
+  ;; A bit-vector representing the set of dominators. See the function
+  ;; `compute-dominators' to know how to use it properly.
   dominators%
   ;; Arbitrary data which could be necessary to keep during IR
   ;; processing.
