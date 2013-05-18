@@ -60,6 +60,7 @@
 (defcomparison =) 
 (defcomparison <)
 (defcomparison <=)
+(defcomparison /=)
 
 (defconstant pi 3.141592653589793) 
 
