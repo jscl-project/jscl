@@ -29,7 +29,7 @@
             (format t "Test `~S' passed unexpectedly!~%" ',condition))
         (incf *unexpected-passes*))
        (t
-        (format t "Test `~S' failed failed expectedly.~%" ',condition)
+        (format t "Test `~S' failed expectedly.~%" ',condition)
         (incf *expected-failures*)))
      (incf *total-tests*)))
 
