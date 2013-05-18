@@ -174,3 +174,6 @@
 
 (defun vector (&rest args)
 	(apply #'list-to-vector args))
+
+(defun vectorp (v)
+	(arrayp v))

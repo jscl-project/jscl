@@ -76,8 +76,8 @@
           stringp sublis subseq subst symbol-function symbol-name symbol-package
           symbol-plist symbol-value symbolp t tagbody tailp tenth third throw
           time trace tree-equal truncate unless untrace unwind-protect values
-          values-list variable vector vector-push-extend warn when write-line write-string
-          zerop))
+          values-list variable vector vectorp vector-push-extend warn when write-line
+					write-string zerop))
 
 (setq *package* *user-package*)
 
