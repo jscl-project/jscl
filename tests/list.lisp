@@ -70,6 +70,45 @@
 (test (equal (cdddar '((1 2 3 4))) '(4)))
 (test (equal (cddddr '(1 2 3 4 5)) '(5)))
 
+;; SUBLIS
+(test (equal (sublis '((x . 100) (z . zprime))
+                     '(plus x (minus g z x p) 4 . x))
+             '(PLUS 100 (MINUS G ZPRIME 100 P) 4 . 100)))
+(test (equal (sublis '(((+ x y) . (- x y)) ((- x y) . (+ x y)))
+                     '(* (/ (+ x y) (+ x p)) (- x y))
+                     :test #'equal)
+             '(* (/ (- X Y) (+ X P)) (+ X Y))))
+(let ((tree1 '(1 (1 2) ((1 2 3)) (((1 2 3 4))))))
+  (test (equal (sublis '((3 . "three")) tree1)
+               '(1 (1 2) ((1 2 "three")) (((1 2 "three" 4))))))
+  (test (equal (sublis '((t . "string"))
+                       (sublis '((1 . "") (4 . 44)) tree1)
+                       :key #'stringp)
+               '("string" ("string" 2) (("string" 2 3)) ((("string" 2 3 44))))))
+  (test (equal tree1 '(1 (1 2) ((1 2 3)) (((1 2 3 4)))))))
+(let ((tree2 '("one" ("one" "two") (("one" "Two" "three")))))
+  (test (equal (sublis '(("two" . 2)) tree2)
+               '("one" ("one" "two") (("one" "Two" "three")))))
+  (test (equal tree2 '("one" ("one" "two") (("one" "Two" "three")))))
+  (test (equal (sublis '(("two" . 2)) tree2 :test 'equal)
+               '("one" ("one" 2) (("one" "Two" "three"))))))
+
+;; SUBST
+(let ((tree1 '(1 (1 2) (1 2 3) (1 2 3 4))))
+  (test (equal (subst "two" 2 tree1) '(1 (1 "two") (1 "two" 3) (1 "two" 3 4))))
+  (test (equal (subst "five" 5 tree1) '(1 (1 2) (1 2 3) (1 2 3 4))))
+  (test (eq tree1 (subst "five" 5 tree1))) ; Implementation dependent
+  (test (equal tree1 '(1 (1 2) (1 2 3) (1 2 3 4)))))
+(test (equal (subst 'tempest 'hurricane
+                    '(shakespeare wrote (the hurricane)))
+             '(SHAKESPEARE WROTE (THE TEMPEST))))
+(test (equal (subst 'foo 'nil '(shakespeare wrote (twelfth night)))
+             '(SHAKESPEARE WROTE (TWELFTH NIGHT . FOO) . FOO)))
+(test (equal (subst '(a . cons) '(old . pair)
+                    '((old . spice) ((old . shoes) old . pair) (old . pair))
+                    :test #'equal)
+             '((OLD . SPICE) ((OLD . SHOES) A . CONS) (A . CONS))))
+
 ; COPY-TREE
 (test (let* ((foo (list '(1 2) '(3 4)))
              (bar (copy-tree foo)))
@@ -81,9 +120,11 @@
 
 ; TREE-EQUAL
 (test (tree-equal '(1 2 3) '(1 2 3)))
+(test (not (tree-equal '(1 2 3) '(3 2 1))))
 (test (tree-equal '(1 (2 (3 4) 5) 6) '(1 (2 (3 4) 5) 6)))
-(test (tree-equal (cons 1 2) (cons 2 3)
-                  :test (lambda (a b) (not (= a b)))))
+(test (tree-equal (cons 1 2) (cons 2 3) :test (lambda (a b) (not (= a b)))))
+(test (tree-equal '(1 . 2) '(2 . 1) :test-not #'eql))
+(test (not (tree-equal '(1 . 2) '(1 . 2) :test-not #'eql)))
 
 ; FIRST to TENTH
 (let ((nums '(1 2 3 4 5 6 7 8 9 10)))
@@ -128,13 +169,18 @@
   (test (equal (assoc  1 alist) '(1 . 2)))
   (test (equal (rassoc 2 alist) '(1 . 2)))
   (test (not   (assoc  2 alist)))
-  (test (not   (rassoc 1 alist))))
+  (test (not   (rassoc 1 alist)))
+  (test (equal (assoc  3 alist :test-not #'=) '(1 . 2)))
+  (test (equal (rassoc 4 alist :test-not #'=) '(1 . 2)))
+  (test (equal (assoc  1 alist :key (lambda (x) (/ x 3))) '(3 . 4)))
+  (test (equal (rassoc 2 alist :key (lambda (x) (/ x 2))) '(3 . 4)))) 
 
 ; MEMBER
 (test (equal (member 2 '(1 2 3)) '(2 3)))
 (test (not   (member 4 '(1 2 3))))
 (test (equal (member 4 '((1 . 2) (3 . 4)) :key #'cdr) '((3 . 4))))
 (test (member '(2) '((1) (2) (3)) :test #'equal))
+(test (member 1 '(1 2 3) :test-not #'eql))
 
 ; ADJOIN
 (test (equal (adjoin 1 '(2 3))   '(1 2 3)))
@@ -145,8 +191,6 @@
 (test (equal (intersection '(1 2) '(2 3)) '(2)))
 (test (not (intersection '(1 2 3) '(4 5 6))))
 (test (equal (intersection '((1) (2)) '((2) (3)) :test #'equal) '((2))))
-
-; SUBST
 
 ; POP
 (test (let* ((foo '(1 2 3))

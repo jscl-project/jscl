@@ -15,7 +15,7 @@
 
 ;;;; Various list functions
 
-(defun cons (x y ) (cons x y))
+(defun cons (x y) (cons x y))
 (defun consp (x) (consp x))
 
 (defun listp (x)
@@ -99,6 +99,33 @@
 (defun cdddar (x) (cdr (cddar x)))
 (defun cddddr (x) (cdr (cdddr x)))
 
+(defun sublis (alist tree &key key (test #'eql testp) (test-not #'eql test-not-p))
+  (when (and testp test-not-p)
+    (error "Both test and test-not are set"))
+  (labels ((s (tree)
+             (let* ((key-val (if key (funcall key tree) tree))
+                    (replace (if test-not-p
+                                 (assoc key-val alist :test-not test-not)
+                                 (assoc key-val alist :test test)))
+                    (x (if replace (cdr replace) tree)))
+               (if (atom x)
+                   x
+                   (cons (s (car x)) (s (cdr x)))))))
+    (s tree)))
+
+(defun subst (new old tree &key key (test #'eql testp) (test-not #'eql test-not-p))
+  (labels ((s (x)
+             (cond ((satisfies-test-p old x :key key :test test :testp testp
+                                      :test-not test-not :test-not-p test-not-p)
+                    new)
+                   ((atom x) x)
+                   (t (let ((a (s (car x)))
+                            (b (s (cdr x))))
+                        (if (and (eq a (car x))
+                                 (eq b (cdr x)))
+                            x
+                            (cons a b)))))))
+    (s tree)))
 
 (defun copy-list (x)
   (mapcar #'identity x))
@@ -109,27 +136,23 @@
           (copy-tree (cdr tree)))
     tree))
 
-(defun tree-equal (tree1 tree2 &key (test #'eql))
-  (if (atom tree1)
-    (and (atom tree2) (funcall test tree1 tree2))
-    (and (consp tree2)
-         (tree-equal (car tree1) (car tree2) :test test)
-         (tree-equal (cdr tree1) (cdr tree2) :test test))))
+(defun tree-equal (tree1 tree2 &key (test #'eql testp)
+                         (test-not #'eql test-not-p))
+  (when (and testp test-not-p) (error "Both test and test-not are set"))
+  (let ((func (if test-not-p (complement test-not) test)))
+    (labels ((%tree-equal (tree1 tree2)
+               (if (atom tree1)
+                 (and (atom tree2) (funcall func tree1 tree2))
+                 (and (consp tree2)
+                      (%tree-equal (car tree1) (car tree2))
+                      (%tree-equal (cdr tree1) (cdr tree2))))))
+      (%tree-equal tree1 tree2))))
 
 (defun tailp (object list)
   (do ((tail list (cdr tail)))
     ((atom tail) (eq object tail))
     (when (eql tail object)
       (return-from tailp t))))
-
-(defun subst (new old tree &key (key #'identity) (test #'eql))
-  (cond 
-    ((funcall test (funcall key tree) (funcall key old))
-     new) 
-    ((consp tree)
-     (cons (subst new old (car tree) :key key :test test)
-           (subst new old (cdr tree) :key key :test test))) 
-    (t tree)))
 
 (defmacro pop (place)
   (multiple-value-bind (dummies vals newval setter getter)
@@ -177,23 +200,27 @@
   (and (consp (cdr x))
        (cons (car x) (butlast (cdr x)))))
 
-(defun member (x list &key (key #'identity) (test #'eql))
+(defun member (x list &key key (test #'eql testp) (test-not #'eql test-not-p)) 
   (while list
-    (when (funcall test x (funcall key (car list)))
+    (when (satisfies-test-p x (car list) :key key :test test :testp testp
+                            :test-not test-not :test-not-p test-not-p)
       (return list))
     (setq list (cdr list))))
 
 
-(defun assoc (x alist &key (test #'eql))
+(defun assoc (x alist &key key (test #'eql testp) (test-not #'eql test-not-p))
   (while alist
-    (if (funcall test x (caar alist))
+    (if (satisfies-test-p x (caar alist) :key key :test test :testp testp
+                          :test-not test-not :test-not-p test-not-p)
       (return)
       (setq alist (cdr alist))))
   (car alist))
 
-(defun rassoc (x alist &key (test #'eql))
+(defun rassoc (x alist &key key (test #'eql) (test #'eql testp)
+                 (test-not #'eql test-not-p))
   (while alist
-    (if (funcall test x (cdar alist))
+    (if (satisfies-test-p x (cdar alist) :key key :test test :testp testp
+                          :test-not test-not :test-not-p test-not-p)
       (return)
       (setq alist (cdr alist))))
   (car alist))

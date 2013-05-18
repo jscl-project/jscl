@@ -33,14 +33,11 @@
              (let ((,elt (aref ,nseq ,index)))
                ,@body))))))
 
-(defun find (item seq &key key (test #'eql))
-  (if key
-      (do-sequence (x seq)
-        (when (funcall test (funcall key x) item)
-          (return x)))
-      (do-sequence (x seq)
-        (when (funcall test x item)
-          (return x)))))
+(defun find (item seq &key key (test #'eql testp) (test-not #'eql test-not-p))
+  (do-sequence (x seq)
+    (when (satisfies-test-p item x :key key :test test :testp testp
+                            :test-not test-not :test-not-p test-not-p)
+      (return x))))
 
 (defun find-if (predicate sequence &key key)
   (if key
@@ -51,12 +48,14 @@
         (when (funcall predicate x)
           (return x)))))
 
-(defun position (elt sequence &key (test #'eql))
-  (do-sequence (x seq index)
-    (when (funcall test elt x)
+(defun position (elt sequence &key key (test #'eql testp)
+                     (test-not #'eql test-not-p))
+  (do-sequence (x sequence index)
+    (when (satisfies-test-p elt x :key key :test test :testp testp
+                           :test-not test-not :test-not-p test-not-p ) 
       (return index))))
 
-(defun remove (x seq)
+(defun remove (x seq &key key (test #'eql testp) (test-not #'eql test-not-p))
   (cond
     ((null seq)
      nil)
@@ -64,7 +63,8 @@
      (let* ((head (cons nil nil))
             (tail head))
        (do-sequence (elt seq)
-         (unless (eql x elt)
+         (unless (satisfies-test-p x elt :key key :test test :testp testp 
+                                   :test-not test-not :test-not-p test-not-p)
            (let ((new (list elt)))
              (rplacd tail new)
              (setq tail new))))
@@ -72,7 +72,8 @@
     (t
      (let (vector)
        (do-sequence (elt seq index)
-         (if (eql x elt)
+         (if (satisfies-test-p x elt :key key :test test :testp testp 
+                               :test-not test-not :test-not-p test-not-p)
              ;; Copy the beginning of the vector only when we find an element
              ;; that does not match.
              (unless vector

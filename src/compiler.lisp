@@ -719,7 +719,7 @@
                         variables)
                 ",")
           "){" *newline*
-          (let ((body (ls-compile-block body t)))
+          (let ((body (ls-compile-block body t t)))
             (indent (let-binding-wrapper dynamic-bindings body)))
           "})(" (join cvalues ",") ")")))
 
@@ -767,7 +767,7 @@
     (js!selfcall
       (let ((specials (remove-if-not #'special-variable-p (mapcar #'first bindings)))
             (body (concat (mapconcat #'let*-initialize-value bindings)
-                          (ls-compile-block body t))))
+                          (ls-compile-block body t t))))
         (let*-binding-wrapper specials body)))))
 
 
@@ -1527,6 +1527,16 @@
 (define-builtin in (key object)
   (js!bool (code "(xstring(" key ") in (" object "))")))
 
+(define-builtin map-for-in (function object)
+  (js!selfcall
+   "var f = " function ";" *newline*
+   "var g = (typeof f === 'function' ? f : f.fvalue);" *newline*
+   "var o = " object ";" *newline*
+   "for (var key in o){" *newline*
+   (indent "g(" (if *multiple-value-p* "values" "pv") ", 1, o[key]);" *newline*)
+   "}"
+   " return " (ls-compile nil) ";" *newline*))
+
 (define-builtin functionp (x)
   (js!bool (code "(typeof " x " == 'function')")))
 
@@ -1675,13 +1685,16 @@
       (t
        (code (ls-compile `#',function) arglist)))))
 
-(defun ls-compile-block (sexps &optional return-last-p)
-  (if return-last-p
-      (code (ls-compile-block (butlast sexps))
-            "return " (ls-compile (car (last sexps)) *multiple-value-p*) ";")
-      (join-trailing
-       (remove-if #'null-or-empty-p (mapcar #'ls-compile sexps))
-       (concat ";" *newline*))))
+(defun ls-compile-block (sexps &optional return-last-p decls-allowed-p)
+  (multiple-value-bind (sexps decls)
+      (parse-body sexps :declarations decls-allowed-p)
+    (declare (ignore decls))
+    (if return-last-p
+        (code (ls-compile-block (butlast sexps) nil decls-allowed-p)
+              "return " (ls-compile (car (last sexps)) *multiple-value-p*) ";")
+        (join-trailing
+         (remove-if #'null-or-empty-p (mapcar #'ls-compile sexps))
+         (concat ";" *newline*)))))
 
 (defun ls-compile (sexp &optional multiple-value-p)
   (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
