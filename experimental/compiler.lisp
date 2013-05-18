@@ -319,15 +319,18 @@
 (defun delete-block (block)
   (when (boundary-block-p block)
     (error "Cannot delete entry or exit basic blocks."))
-  (unless (singlep (block-succ block))
+  (unless (null (cdr (block-succ block)))
     (error "Cannot delete a basic block with multiple successors."))
-  (let ((successor (unlist (block-succ block))))
-    (replace-block block successor)
-    ;; At this point, block is unreachable, however we could have
-    ;; backreferences to it from its successors. Let's get rid of
-    ;; them.
-    (setf (block-pred successor) (remove block (block-pred successor)))
-    (setf (block-succ block) nil)))
+  ;; If the block has not successors, then it is already deleted. So
+  ;; just skip it.
+  (when (block-succ block)
+    (let ((successor (unlist (block-succ block))))
+      (replace-block block successor)
+      ;; At this point, block is unreachable, however we could have
+      ;; backreferences to it from its successors. Let's get rid of
+      ;; them.
+      (setf (block-pred successor) (remove block (block-pred successor)))
+      (setf (block-succ block) nil))))
 
 
 ;;;; Cursors
