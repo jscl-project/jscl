@@ -739,11 +739,10 @@
   (dolist (block (component-blocks component))
     (setf (block-data block) 'unreachable))
   ;; Coalesce and mark blocks as reachable.
-  (map-postorder-blocks
-   (lambda (block)
-     (maybe-coalesce-block block)
-     (setf (block-data block) 'reachable))
-   component)
+  (map-postorder-blocks #'maybe-coalesce-block component)
+  (map-postorder-blocks (lambda (block)
+                          (setf (block-data block) 'reachable))
+                        component)
   (let ((block-list nil))
     (dolist (block (component-blocks component))
       (cond
