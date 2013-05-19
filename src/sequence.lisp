@@ -52,7 +52,7 @@
                      (test-not #'eql test-not-p))
   (do-sequence (x sequence index)
     (when (satisfies-test-p elt x :key key :test test :testp testp
-                           :test-not test-not :test-not-p test-not-p ) 
+                           :test-not test-not :test-not-p test-not-p )
       (return index))))
 
 (defun remove (x seq &key key (test #'eql testp) (test-not #'eql test-not-p))
@@ -63,7 +63,7 @@
      (let* ((head (cons nil nil))
             (tail head))
        (do-sequence (elt seq)
-         (unless (satisfies-test-p x elt :key key :test test :testp testp 
+         (unless (satisfies-test-p x elt :key key :test test :testp testp
                                    :test-not test-not :test-not-p test-not-p)
            (let ((new (list elt)))
              (rplacd tail new)
@@ -72,7 +72,7 @@
     (t
      (let (vector)
        (do-sequence (elt seq index)
-         (if (satisfies-test-p x elt :key key :test test :testp testp 
+         (if (satisfies-test-p x elt :key key :test test :testp testp
                                :test-not test-not :test-not-p test-not-p)
              ;; Copy the beginning of the vector only when we find an element
              ;; that does not match.
@@ -130,7 +130,7 @@
      (if b
        (let ((diff (- b a)))
          (cond
-           ((zerop  diff) ()) 
+           ((zerop  diff) ())
            ((minusp diff)
             (error "Start index must be smaller than end index"))
            (t
@@ -140,11 +140,33 @@
                 (setq pointer (cdr pointer))
                 (when (null pointer)
                   (error "Ending index larger than length of list")))
-              (rplacd pointer ()) 
+              (rplacd pointer ())
               drop-a))))
        (copy-list (nthcdr a seq))))
-    ((arrayp seq) 
+    ((arrayp seq)
      (if b
        (slice seq a b)
        (slice seq a)))
     (t (not-seq-error seq))))
+
+(defun elt (sequence index)
+	(cond
+		((not (or (listp sequence)
+							(arrayp sequence)))
+		 (error "type-error sequence is not a proper sequence"))
+		((or (not (integerp index))
+				 (>= index (length sequence)))
+		 (error "type-error index is not valid sequence index"))
+		(t
+		 (let ((i 0))
+			 (do-sequence (el sequence)
+				 (when (= i index)
+					 (return el))
+				 (incf i))))))
+
+
+(defun vector (&rest args)
+	(apply #'list-to-vector args))
+
+(defun vectorp (v)
+	(arrayp v))
