@@ -171,7 +171,8 @@
 
 ;;; Return T if B is an empty basic block and NIL otherwise.
 (defun empty-block-p (b)
-  (block-exit-p (node-next (block-entry b))))
+  (or (boundary-block-p b)
+      (block-exit-p (node-next (block-entry b)))))
 
 (defun boundary-block-p (block)
   (or (component-entry-p block)
@@ -248,6 +249,8 @@
     (let ((entry (make-component-entry :component *component*))
           (exit (make-component-exit :component *component*))
           (block (make-empty-block)))
+      (push entry (component-blocks *component*))
+      (push exit (component-blocks *component*))
       (setf (block-succ entry) (list block)
             (block-pred exit)  (list block)
             (block-succ block) (list exit)
@@ -291,13 +294,13 @@
 (defun map-postorder-blocks (function component)
   (let ((seen nil))
     (labels ((compute-from (block)
-               (unless (or (component-exit-p block) (find block seen))
+               (unless (find block seen)
                  (push block seen)
                  (dolist (successor (block-succ block))
                    (unless (component-exit-p block)
                      (compute-from successor)))
                  (funcall function block))))
-      (compute-from (unlist (block-succ (component-entry component))))
+      (compute-from (component-entry component))
       nil)))
 
 ;;; Change all the predecessors of BLOCK to precede NEW-BLOCK
@@ -715,7 +718,7 @@
 ;;; Try to coalesce BLOCK with the successor if it is unique and block
 ;;; is its unique predecessor.
 (defun maybe-coalesce-block (block)
-  (when (singlep (block-succ block))
+  (when (and (singlep (block-succ block)) (not (component-entry-p block)))
     (let ((succ (first (block-succ block))))
       (when (and (not (component-exit-p succ)) (singlep (block-pred succ)))
         (link-nodes (node-prev (block-exit block))
@@ -753,7 +756,11 @@
            (when (eq (block-data succ) 'reachable)
              (remove block (block-pred succ)))))
         ;; Delete empty blocks
-        ((empty-block-p block)
+        ((and (empty-block-p block)
+              (not (boundary-block-p block))
+              ;; We cannot delete a block if it is its own successor,
+              ;; even thought it is empty.
+              (not (member block (block-succ block))))
          (delete-block block))
         ;; The rest of blocks remain in the component.
         (t
@@ -771,33 +778,43 @@
 
 (defun compute-reverse-post-order (component)
   (let ((output nil)
-        (count 0))
+        (index (length (component-blocks component))))
     (flet ((add-block-to-list (block)
              (push block output)
-             (setf (block-order block) (incf count))))
+             (setf (block-order block) (decf index))))
       (map-postorder-blocks #'add-block-to-list component))
     (setf (component-reverse-post-order-p component) t)
     (setf (component-blocks component) output)))
 
-;;; Iterate across blocks in COMPONENT in reverse post order.
-(defmacro do-blocks-forward ((block component &optional result) &body body)
-  (with-gensyms (g!component)
-    `(let ((,g!component ,component))
-       (dolist (,block (if (component-reverse-post-order-p ,g!component)
-                           (component-blocks ,g!component)
-                           (error "reverse post order was not computed yet."))
+
+(defmacro do-blocks% ((block component &optional reverse ends result) &body body)
+  (with-gensyms (g!component g!blocks)
+    `(let* ((,g!component ,component)
+            (,g!blocks ,(if reverse
+                            `(reverse (component-blocks ,g!component))
+                            `(component-blocks ,g!component))))
+       ;; Do we have the information available?
+       (unless (component-reverse-post-order-p ,g!component)
+         (error "Reverse post order was not computed yet."))
+       (dolist (,block  ,(if (member ends '(:head :both))
+                             `,g!blocks
+                             `(cdr ,g!blocks))
                  ,result)
+         ,@(if (member ends '(:tail :both))
+               nil
+               `((if (component-exit-p ,block) (return))))
          ,@body))))
 
-;;; Iterate across blocks in COMPONENT in post order.
-(defmacro do-blocks-backward ((block component &optional result) &body body)
-  (with-gensyms (g!component)
-    `(let ((,g!component ,component))
-       (dolist (,block (if (component-reverse-post-order-p ,g!component)
-                           (reverse (component-blocks ,g!component))
-                           (error "reverse post order was not computed yet."))
-                 ,result)
-         ,@body))))
+;;; Iterate across blocks in COMPONENT in reverse post order.
+(defmacro do-blocks-forward ((block component &optional ends result) &body body)
+  `(do-blocks% (,block ,component nil ,ends ,result)
+     ,@body))
+
+;;; Iterate across blocks in COMPONENT in reverse post order.
+(defmacro do-blocks-backward ((block component &optional ends result) &body body)
+  `(do-blocks% (,block (reverse ,component) t ,ends ,result)
+     ,@body))
+
 
 (defun compute-dominators (component)
   ;; Initialize the dominators of the entry to the component to be
@@ -808,22 +825,29 @@
     ;; set of (proper) basic blocks.
     (setf (block-dominators% (component-entry component))
           (make-array n :element-type 'bit :initial-element 0))
-    (dolist (block (component-blocks component))
+    (setf (aref (block-dominators% (component-entry component)) 0) 1)
+    (do-blocks-forward (block component :tail)
       (setf (block-dominators% block) (make-array n :element-type 'bit :initial-element 1))))
   ;; Iterate across the blocks in the component removing non domintors
   ;; until it reaches a fixed point.
-  (do ((i 0 0)
-       (iteration 0 (1+ iteration))
+  (do ((i 1 1)
        (changes t))
       ((not changes))
     (setf changes nil)
-    (do-blocks-forward (block component)
-      (let* ((predecessors (block-pred block)))
-        (bit-and (block-dominators% block) (block-dominators% (first predecessors)) t)
+    (do-blocks-forward (block component :tail)
+      ;; We compute the new set of dominators for this iteration in a
+      ;; fresh set NEW-DOMINATORS. So we do NOT modify the old
+      ;; dominators. It is important because the block could predeces
+      ;; itself. Indeed, it allows us to check if the set of
+      ;; dominators changed.
+      (let* ((predecessors (block-pred block))
+             (new-dominators (copy-seq (block-dominators% (first predecessors)))))
         (dolist (pred (rest predecessors))
-          (bit-and (block-dominators% block) (block-dominators% pred) t))
-        (setf (aref (block-dominators% block) i) 1)
-        (setf changes (or changes (not (equal (block-dominators% block) (block-dominators% block)))))
+          (bit-and new-dominators (block-dominators% pred) t))
+        (setf (aref new-dominators i) 1)
+        (unless changes
+          (setq changes (not (equal (block-dominators% block) new-dominators))))
+        (setf (block-dominators% block) new-dominators)
         (incf i)))))
 
 ;;; Return T if BLOCK1 dominates BLOCK2, else return NIL.
@@ -831,6 +855,9 @@
   (let ((order (block-order block1)))
     (= 1 (aref (block-dominators% block2) order))))
 
+(defun loop-header-p (block)
+  (some (lambda (pred) (dominate-p block pred))
+        (block-pred block)))
 
 ;;;; IR Debugging
 ;;;;
@@ -886,7 +913,10 @@
   (terpri))
 
 (defun print-block (block)
-  (write-line (format-block-name block))
+  (write-string (format-block-name block))
+  (if (loop-header-p block)
+      (write-line " [LOOP_HEADER]")
+      (terpri))
   (do-nodes (node block)
     (print-node node))
   (when (singlep (block-succ block))
@@ -910,6 +940,7 @@
       (ir-convert form (make-lvar :id "out"))
       (ir-normalize)
       (compute-reverse-post-order *component*)
+      (compute-dominators *component*)
       (/print *component*)
       *component*)))
 
