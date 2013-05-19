@@ -33,6 +33,7 @@
     ("package"          :target)
     ("ffi"              :target)
     ("misc"             :target)
+    ("numbers"          :target)
     ("read"             :both)
     ("defstruct"        :both)
     ("lambda-list"      :both)
