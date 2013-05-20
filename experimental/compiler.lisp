@@ -750,10 +750,10 @@
         ;; one, then break the link between them. So we discard it
         ;; from the flowgraph.
         ((eq (block-data block) 'unreachable)
-         (setf (block-succ block) nil)
          (dolist (succ (block-succ block))
            (when (eq (block-data succ) 'reachable)
-             (remove block (block-pred succ)))))
+             (setf (block-pred succ) (remove block (block-pred succ)))))
+         (setf (block-succ block) nil))
         ;; Delete empty blocks
         ((and (empty-block-p block)
               (not (boundary-block-p block))
