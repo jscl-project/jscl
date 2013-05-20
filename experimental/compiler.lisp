@@ -854,9 +854,26 @@
   (let ((order (block-order block1)))
     (= 1 (aref (block-dominators% block2) order))))
 
+;;; Check if BLOCK is a loop header. It is to say if it dominates one
+;;; of its predecessors.
 (defun loop-header-p (block)
   (some (lambda (pred) (dominate-p block pred))
         (block-pred block)))
+
+;;; This function duplicates the block in component for each input
+;;; edge. A technique useful to make a general flowgraph reducible.
+(defun node-splitting (block)
+  (let ((predecessors (block-pred block)))
+    (when predecessors
+      (setf (block-pred block) (list (car predecessors)))
+      (dolist (pred (cdr predecessors))
+        (let ((newblock (copy-basic-block block)))
+          (setf (block-id newblock) (generate-id 'basic-block))
+          (push newblock (component-blocks (block-component block)))
+          (setf (block-pred newblock) (list pred))
+          (setf (block-succ pred) (substitute newblock block (block-succ pred))))))))
+
+
 
 ;;;; IR Debugging
 ;;;;
