@@ -1324,6 +1324,7 @@
 (define-builtin-comparison >= ">=")
 (define-builtin-comparison <= "<=")
 (define-builtin-comparison = "==")
+(define-builtin-comparison /= "!=")
 
 (define-builtin numberp (x)
   (js!bool (code "(typeof (" x ") == \"number\")")))
