@@ -493,6 +493,8 @@
                                     (integer 'integerp)
                                     (cons 'consp)
                                     (symbol 'symbolp)
+                                    (function 'functionp)
+                                    (float 'floatp)
                                     (array 'arrayp)
                                     (string 'stringp)
                                     (atom 'atom)
