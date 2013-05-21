@@ -267,6 +267,8 @@
                 (concatf res "~"))
                ((char= next #\%)
                 (concatf res *newline*))
+               ((char= next #\*)
+                (pop arguments))
                (t
                 (concatf res (format-special next (car arguments)))
                 (pop arguments))))

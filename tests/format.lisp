@@ -10,3 +10,5 @@ a" (format nil "a~%a")))
 (test (string= "this is foo" (format nil "this is ~a" "foo")))
 
 (test (string= "this is \"foo\"" (format nil "this is ~S" "foo")))
+
+(test (string= "this is 2" (format nil "this is ~*~A" 1 2)))
