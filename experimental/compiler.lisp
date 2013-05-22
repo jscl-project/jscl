@@ -612,9 +612,13 @@
               (push (cons tag (current-block)) tag-blocks))))
       ;; Convert the statements into the correct block.
       (dolist (stmt statements)
-        (if (go-tag-p stmt)
-            (set-cursor :block (cdr (assoc stmt tag-blocks)))
-            (ir-convert stmt))))))
+        (cond
+          ((go-tag-p stmt)
+           (set-cursor :block (cdr (assoc stmt tag-blocks))))
+          ((atom stmt)
+           (error "Invalid tag `~S'" stmt))
+          (t
+           (ir-convert stmt)))))))
 
 (define-ir-translator go (label)
   (let ((tag-binding
