@@ -813,7 +813,7 @@
   `(do-blocks% (,block ,component nil ,ends ,result)
      ,@body))
 
-;;; Iterate across blocks in COMPONENT in reverse post order.
+;;; Iterate across blocks in COMPONENT in post order.
 (defmacro do-blocks-backward ((block component &optional ends result) &body body)
   `(do-blocks% (,block (reverse ,component) t ,ends ,result)
      ,@body))
