@@ -630,7 +630,7 @@
       (set-cursor :block dummy))))
 
 
-(defun ir-convert-functoid (result name arguments &rest body)
+(defun convert-functional (result name arguments &rest body)
   (let ((component)
         (return-lvar (make-lvar)))
     (with-component-compilation (name)
@@ -654,7 +654,7 @@
          (let ((desc (cdr name)))
            (when (eq 'lambda (car name))
              (push nil desc))
-           (apply #'ir-convert-functoid (result-lvar) desc)))
+           (apply #'convert-functional (result-lvar) desc)))
         (setf))))
 
 (defun ir-convert-var (form result)
