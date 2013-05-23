@@ -49,6 +49,8 @@
         (prog1 1
           (push (cons class 1) *counter-alist*)))))
 
+(defmacro while (condition &body body)
+  `(do nil ((not ,condition)) ,@body))
 
 ;;;; Intermediate representation structures
 ;;;;
@@ -130,7 +132,6 @@
 (defstruct (primitive-call (:include combination))
   function)
 
-
 ;;; A conditional branch. If the LVAR is not NIL, then we will jump to
 ;;; the basic block CONSEQUENT, jumping to ALTERNATIVE otherwise. By
 ;;; definition, a conditional must appear at the end of a basic block.
@@ -138,7 +139,6 @@
   test
   consequent
   alternative)
-
 
 
 ;;; Blocks are `basic block`. Basic blocks are organized as a control
@@ -779,7 +779,7 @@
 ;;;; optimizations and code generation. Indeed, we provide some
 ;;;; abstractions to use this information.
 
-(defun compute-reverse-post-order (component)
+(defun compute-reverse-post-order (&optional (component *component*))
   (let ((output nil)
         (index (length (component-blocks component))))
     (flet ((add-block-to-list (block)
@@ -818,8 +818,7 @@
   `(do-blocks% (,block (reverse ,component) t ,ends ,result)
      ,@body))
 
-
-(defun compute-dominators (component)
+(defun compute-dominators (&optional (component *component*))
   ;; Initialize the dominators of the entry to the component to be
   ;; empty and the power set of the set of blocks for proper basic
   ;; blocks in the component.
@@ -864,18 +863,103 @@
   (some (lambda (pred) (dominate-p block pred))
         (block-pred block)))
 
-;;; This function duplicates the block in component for each input
-;;; edge. A technique useful to make a general flowgraph reducible.
-(defun node-splitting (block)
-  (let ((predecessors (block-pred block)))
-    (when predecessors
-      (setf (block-pred block) (list (car predecessors)))
-      (dolist (pred (cdr predecessors))
-        (let ((newblock (copy-basic-block block)))
-          (setf (block-id newblock) (generate-id 'basic-block))
-          (push newblock (component-blocks (block-component block)))
-          (setf (block-pred newblock) (list pred))
-          (setf (block-succ pred) (substitute newblock block (block-succ pred))))))))
+;;; Save the edges of the flow graph of the current component. Then,
+;;; execute BODY as an implicit progn and restore the edges even if
+;;; BODY exists with an abnormal exit.
+(defmacro save-component-edges (&body body)
+  (with-gensyms (edges)
+    `(let (,edges)
+       ;; Save edges
+       (dolist (block (component-blocks *component*))
+         (push (list block (block-succ block) (block-pred block)) ,edges))
+       (unwind-protect (progn ,@body)
+         ;; Restore edges
+         (dolist (entry ,edges)
+           (destructuring-bind (block succ pred) entry
+             (setf (block-succ block) succ
+                   (block-pred block) pred)))))))
+
+(defun reduce-component (&optional (component *component*))
+  (let* ((list-blocks (component-blocks component))
+         ;; A vector of the blocks in the component. Blocks are added
+         ;; and deleted always at the fill pointer of the vector.
+         (vector-blocks
+          (make-array (length list-blocks)
+                      :initial-contents (component-blocks component)
+                      :adjustable t
+                      :fill-pointer t))
+         ;; A list of nodes which have been splitted during the
+         ;; reduction of the component. We apply 
+         (nodes-to-split '()))
+    (flet (;; Remove an edge from a block to itself
+           (T1 (block)
+             (when (member block (block-succ block))
+               (setf (block-succ block) (remove block (block-succ block)))
+               (setf (block-pred block) (remove block (block-pred block)))
+               t))
+           ;; Collapse a block back into its predecessor if it is unique
+           (T2 (block)
+             (when (singlep (block-pred block))
+               (let ((pred (unlist (block-pred block))))
+                 (setf (block-succ pred) (remove block (block-succ pred)))
+                 (dolist (succ (block-succ block))
+                   (pushnew succ (block-succ pred))
+                   (setf (block-pred succ) (substitute pred block (block-pred succ)))))
+               t))
+           ;; This function duplicates the block in component for each input
+           ;; edge. A technique useful to make a general flowgraph reducible.
+           (S (block)
+             (let ((predecessors (block-pred block)))
+               (when predecessors
+                 (setf (block-pred block) (list (car predecessors)))
+                 (let ((newblocks '()))
+                   (dolist (pred (cdr predecessors) newblocks)
+                     (let ((newblock (copy-basic-block block)))
+                       (setf (block-id newblock) (generate-id 'basic-block))
+                       (setf (block-pred newblock) (list pred))
+                       (setf (block-succ pred) (substitute newblock block (block-succ pred)))
+                       (push newblock newblocks))))))))
+      ;; Reduce component using the transformations T1 and T2 as much
+      ;; as possible. Then apply the node splitting transformation (S)
+      ;; to some blocks. By now, we apply it to every block with
+      ;; multiple predecessors, but most smart policy is possible,
+      ;; see: "Making Graphs Reducible with Controlled Node
+      ;; Splitting". These transformations do not affect to the
+      ;; original component flowgraph out of the SAVE-COMPONENT-EDGES
+      ;; extent. Eventually, we will reduce the component to a single
+      ;; node and the reduction finishes.
+      (save-component-edges
+        (while (< 1 (fill-pointer vector-blocks))
+          ;; Reduce component using T1 and T2 as much as possible
+          (do ((changes t))
+              ((not changes))
+            (setf changes nil)
+            (do ((i 0 (1+ i)))
+                ((>= i (length vector-blocks)))
+              (let ((block (aref vector-blocks i)))
+                (when (T1 block)
+                  (setf changes t))
+                (when (T2 block)
+                  ;; Move the block to the end of the vector and
+                  ;; remove decrementing the fill pointer.
+                  (rotatef (aref vector-blocks i) (aref vector-blocks (1- (length vector-blocks))))
+                  (vector-pop vector-blocks)
+                  (setf changes t)))))
+          ;; TODO: Implement a better selection of the nodes in the
+          ;; flowgraph to split. Paper to study: "Making Graphs
+          ;; Reducible with Controlled Node Splitting".
+          (dotimes (i (length vector-blocks))
+            (let ((block (aref vector-blocks i)))
+              (when (S block)
+                (push block nodes-to-split))))))
+      ;; Reapply the node splitting transformation to the same nodes
+      ;; on the original component.
+      (when nodes-to-split
+        (warn "Irreducible component. Applying node splitting")
+        (dolist (block nodes-to-split)
+          (assert (member block (component-blocks component)))
+          (dolist (newblock (S block))
+            (push newblock (component-blocks component))))))))
 
 
 
@@ -959,8 +1043,9 @@
     (with-component-compilation ('toplevel)
       (ir-convert form (make-lvar :id "out"))
       (ir-normalize)
-      (compute-reverse-post-order *component*)
-      (compute-dominators *component*)
+      (reduce-component)
+      (compute-reverse-post-order)
+      (compute-dominators)
       (/print *component*)
       *component*)))
 
