@@ -185,8 +185,7 @@
                                  ":"
                                  "")
                              (escape-token name (not (eq package *js-package*)))))))
-              ((integerp form) (integer-to-string form))
-              ((floatp form) (float-to-string form))
+              ((numberp form) (sn-to-string form))
               ((characterp form)
                (concat "#\\"
                        (case form

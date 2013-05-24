@@ -398,9 +398,6 @@
 (defun char< (x y)
   (< (char-code x) (char-code y)))
 
-(defun integerp (x)
-  (and (numberp x) (= (floor x) x)))
-
 (defun floatp (x)
   (and (numberp x) (not (integerp x))))
 

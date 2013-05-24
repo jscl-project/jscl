@@ -96,3 +96,7 @@ function js_to_lisp (x) {
         });
     } else return x;
 }
+
+// Aliases for biginteger operations
+var sn = SchemeNumber
+var fn = sn.fn

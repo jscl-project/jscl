@@ -347,90 +347,14 @@
               (error "The symbol `~S' is not external in the package ~S." name package))))))
 
 (defun read-integer (string)
-  (let ((sign 1)
-        (number nil)
-        (size (length string)))
-    (dotimes (i size)
-      (let ((elt (char string i)))
-        (cond
-          ((digit-char-p elt)
-           (setq number (+ (* (or number 0) 10) (digit-char-p elt))))
-          ((zerop i)
-           (case elt
-             (#\+ nil)
-             (#\- (setq sign -1))
-             (t (return-from read-integer))))
-          ((and (= i (1- size)) (char= elt #\.)) nil)
-          (t (return-from read-integer)))))
-    (and number (* sign number))))
+  (let ((int #+jscl (string-to-sn     string)
+             #-jscl (read-from-string string)))
+    (when (integerp int) int)))
 
 (defun read-float (string)
-  (block nil
-    (let ((sign 1)
-          (integer-part nil)
-          (fractional-part nil)
-          (number 0)
-          (divisor 1)
-          (exponent-sign 1)
-          (exponent 0)
-          (size (length string))
-          (index 0))
-      (when (zerop size) (return))
-      ;; Optional sign
-      (case (char string index)
-        (#\+ (incf index))
-        (#\- (setq sign -1)
-             (incf index)))
-      (unless (< index size) (return))
-      ;; Optional integer part
-      (awhen (digit-char-p (char string index))
-        (setq integer-part t)
-        (while (and (< index size)
-                    (setq it (digit-char-p (char string index))))
-          (setq number (+ (* number 10) it))
-          (incf index)))
-      (unless (< index size) (return))
-      ;; Decimal point is mandatory if there's no integer part
-      (unless (or integer-part (char= #\. (char string index))) (return))
-      ;; Optional fractional part
-      (when (char= #\. (char string index))
-        (incf index)
-        (unless (< index size) (return))
-        (awhen (digit-char-p (char string index))
-          (setq fractional-part t)
-          (while (and (< index size)
-                      (setq it (digit-char-p (char string index))))
-            (setq number (+ (* number 10) it))
-            (setq divisor (* divisor 10))
-            (incf index))))
-      ;; Either left or right part of the dot must be present
-      (unless (or integer-part fractional-part) (return))
-      ;; Exponent is mandatory if there is no fractional part
-      (when (and (= index size) (not fractional-part)) (return))
-      ;; Optional exponent part
-      (when (< index size)
-        ;; Exponent-marker
-        (unless (find (char-upcase (char string index)) "ESFDL")
-          (return))
-        (incf index)
-        (unless (< index size) (return))
-        ;; Optional exponent sign
-        (case (char string index)
-          (#\+ (incf index))
-          (#\- (setq exponent-sign -1)
-               (incf index)))
-        (unless (< index size) (return))
-        ;; Exponent digits
-        (let ((value (digit-char-p (char string index))))
-          (unless value (return))
-          (while (and (< index size)
-                      (setq value (digit-char-p (char string index))))
-            (setq exponent (+ (* exponent 10) value))
-            (incf index))))
-      (unless (= index size) (return))
-      ;; Everything went ok, we have a float
-      ;; XXX: Use FLOAT when implemented.
-      (/ (* sign (expt 10.0 (* exponent-sign exponent)) number) divisor 1.0))))
+  (let ((float #+jscl (string-to-sn     string)
+               #-jscl (read-from-string string)))
+    (when (floatp float) float)))
 
 (defun !parse-integer (string junk-allow)
   (block nil

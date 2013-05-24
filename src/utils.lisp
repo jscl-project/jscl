@@ -67,23 +67,11 @@
   `(let ((it ,condition))
      (when it ,@body)))
 
-(defun integer-to-string (x)
-  (cond
-    ((zerop x)
-     "0")
-    ((minusp x)
-     (concat "-" (integer-to-string (- 0 x))))
-    (t
-     (let ((digits nil))
-       (while (not (zerop x))
-         (push (mod x 10) digits)
-         (setq x (truncate x 10)))
-       (mapconcat (lambda (x) (string (digit-char x)))
-		  digits)))))
+#-jscl (defun integer-to-string (x) (format nil "~D" x))
+#-jscl (defun float-to-string   (x) (format nil "~F" x))
 
-(defun float-to-string (x)
-  #+jscl (float-to-string x)
-  #-jscl (format nil "~f" x))
+#+jscl (defun float-to-string   (x) (sn-to-string x))
+#+jscl (defun integer-to-string (x) (sn-to-string x))
 
 (defun satisfies-test-p (x y &key key (test #'eql) testp (test-not #'eql) test-not-p)
   (when (and testp test-not-p)

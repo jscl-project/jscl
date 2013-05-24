@@ -554,8 +554,7 @@
 
 (defun literal (sexp &optional recursive)
   (cond
-    ((integerp sexp) (integer-to-string sexp))
-    ((floatp sexp) (float-to-string sexp))
+    ((numberp sexp) (code "sn('" (write-to-string sexp) "')"))
     ((characterp sexp) (code "\"" (escape-string (string sexp)) "\""))
     (t
      (or (cdr (assoc sexp *literal-table* :test #'eql))
@@ -1257,7 +1256,7 @@
              (push v fargs)
              (concatf prelude
                (code "var " v " = " (ls-compile x) ";" *newline*
-                     "if (typeof " v " !== 'number') throw 'Not a number!';"
+                     "if (typeof " v " !== 'SchemeNumber') throw 'Not a number!';"
                      *newline*))))))
     (js!selfcall prelude (funcall function (reverse fargs)))))
 
@@ -1269,77 +1268,62 @@
                         (lambda (,args)
                           (code "return " ,@body ";" *newline*))))
 
-(defun num-op-num (x op y)
-  (type-check (("x" "number" x) ("y" "number" y))
-    (code "x" op "y")))
-
 (define-raw-builtin + (&rest numbers)
   (if (null numbers)
-      "0"
-      (variable-arity numbers
-	(join numbers "+"))))
+    (literal 0)
+    (code "fn['+'](" (join (mapcar #'ls-compile numbers) ",") ")")))
 
 (define-raw-builtin - (x &rest others)
-  (let ((args (cons x others)))
-    (variable-arity args
-      (if (null others)
-	  (concat "-" (car args))
-	  (join args "-")))))
+  (code "fn['-'](" (join (mapcar #'ls-compile (cons x others)) ",") ")"))
 
 (define-raw-builtin * (&rest numbers)
   (if (null numbers)
-      "1"
-      (variable-arity numbers
-	(join numbers "*"))))
+    (literal 1)
+    (code "fn['*'](" (join (mapcar #'ls-compile numbers) ",") ")")))
 
 (define-raw-builtin / (x &rest others)
-  (let ((args (cons x others)))
-    (variable-arity args
-      (if (null others)
-	  (concat "1 /" (car args))
-	  (join args "/")))))
+  (code "fn['/'](" (join (mapcar #'ls-compile (cons x others)) ",") ")"))
 
-(define-builtin mod (x y) (num-op-num x "%" y))
+; Defines a builtin which is a simple wrapper around a variadic
+; SchemeNumber function
+(defmacro define-sn-builtin (builtin-name method-name)
+  `(define-raw-builtin ,builtin-name (&rest args)
+     (code "fn" ,method-name "(" (join (mapcar #'ls-compile args) ",") ")")))
 
+(define-builtin mod (x y)
+  (code "fn.mod(" x "," y ")"))
 
-(defun comparison-conjuntion (vars op)
-  (cond
-    ((null (cdr vars))
-     "true")
-    ((null (cddr vars))
-     (concat (car vars) op (cadr vars)))
-    (t
-     (concat (car vars) op (cadr vars)
-	     " && "
-	     (comparison-conjuntion (cdr vars) op)))))
-
-(defmacro define-builtin-comparison (op sym)
-  `(define-raw-builtin ,op (x &rest args)
-     (let ((args (cons x args)))
-       (variable-arity args
-	 (js!bool (comparison-conjuntion args ,sym))))))
-
-(define-builtin-comparison > ">")
-(define-builtin-comparison < "<")
-(define-builtin-comparison >= ">=")
-(define-builtin-comparison <= "<=")
-(define-builtin-comparison = "==")
+(define-sn-builtin >  "['>']")
+(define-sn-builtin <  "['<']")
+(define-sn-builtin >= "['>=']")
+(define-sn-builtin <= "['<=']")
+(define-sn-builtin =  "['==']")
 
 (define-builtin numberp (x)
-  (js!bool (code "(typeof (" x ") == \"number\")")))
+  (js!bool (code "(typeof (" x ") == 'SchemeNumber')")))
+
+(define-builtin integerp (x)
+  (js!bool (code "fn['integer?'](" x ")")))
 
 (define-builtin floor (x)
-  (type-check (("x" "number" x))
-    "Math.floor(x)"))
+  (type-check (("x" "SchemeNumber" x))
+    "fn.floor(x)"))
 
 (define-builtin expt (x y)
-  (type-check (("x" "number" x)
-               ("y" "number" y))
-    "Math.pow(x, y)"))
+  (type-check (("x" "SchemeNumber" x)
+               ("y" "SchemeNumber" y))
+    "fn.expt(x, y)"))
 
-(define-builtin float-to-string (x)
-  (type-check (("x" "number" x))
-    "make_lisp_string(x.toString())"))
+(define-builtin sn-to-string (x)
+  (type-check (("x" "SchemeNumber" x))
+    "make_lisp_string(fn['number->string'](x))"))
+
+(define-builtin string-to-sn (x)
+  (type-check (("x" "string" x))
+    (js!selfcall
+      (code "var y = sn(x);"                      *newline*
+            "if (y) return y;"                    *newline*
+            "else   return " (ls-compile nil) ";" *newline*))))
 
 (define-builtin cons (x y)
   (code "({car: " x ", cdr: " y "})"))
