@@ -1447,7 +1447,7 @@
   (js!bool
    (js!selfcall
      "var x = " x ";" *newline*
-     "return typeof(x) == 'object' && 'length' in x && x.type == 'character';")))
+     "return typeof(x) == 'object' && 'length' in x && x.stringp == 1;")))
 
 (define-builtin string-upcase (x)
   (code "make_lisp_string(xstring(" x ").toUpperCase())"))
@@ -1469,7 +1469,7 @@
 (define-builtin concat-two (string1 string2)
   (js!selfcall
     "var r = " string1 ".concat(" string2 ");" *newline*
-    "r.type = 'character';"
+    "r.stringp = 1;"
     "return r;" *newline*))
 
 (define-raw-builtin funcall (func &rest args)
