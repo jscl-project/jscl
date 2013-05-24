@@ -16,6 +16,15 @@
 ;; (defun stringp (x)
 ;;   (and (vectorp x) (eq (array-element-type x) 'character)))
 
+(defun stringp (s)
+  (stringp s))
+
+(defun make-string (n &key initial-element)
+  (make-array n :element-type 'character :initial-element initial-element))
+
+;; (defun char-to-string (x)
+;;   (make-string 1 :initial-element x))
+
 (defun string (x)
   (cond ((stringp x) x)
         ((symbolp x) (symbol-name x))
@@ -40,9 +49,6 @@
                  (return-from string< i))
                (when (and (= i (1- len-1)) (> len-2 len-1))
                  (return-from string< (1+ i))))))))
-
-(defun stringp (s)
-  (stringp s))
 
 (define-setf-expander char (string index)
   (let ((g!string (gensym))
