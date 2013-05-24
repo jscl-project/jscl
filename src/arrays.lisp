@@ -61,3 +61,15 @@
 
 (defun vectorp (x)
   (and (arrayp x) (null (cdr (array-dimensions x)))))
+
+(defun aref (array index)
+  (unless (arrayp array)
+    (error "~S is not an array." array))  
+  (storage-vector-ref array index))
+
+(defun aset (array index value)
+  (unless (arrayp array)
+    (error "~S is not an array." array))  
+  (storage-vector-set array index value))
+
+

@@ -1588,19 +1588,6 @@
     "v.push(" new ");" *newline*
     "return v;"))
 
-(define-builtin aref (array n)
-  (js!selfcall
-    "var x = " "(" array ")[" n "];" *newline*
-    "if (x === undefined) throw 'Out of range';" *newline*
-    "return x;" *newline*))
-
-(define-builtin aset (array n value)
-  (js!selfcall
-    "var x = " array ";" *newline*
-    "var i = " n ";" *newline*
-    "if (i < 0 || i >= x.length) throw 'Out of range';" *newline*
-    "return x[i] = " value ";" *newline*))
-
 (define-builtin afind (value array)
   (js!selfcall
     "var v = " value ";" *newline*
