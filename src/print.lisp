@@ -114,16 +114,16 @@
     ;; the id is changed to negative. If an object has an id < 0 then
     ;; #<-n># is printed instead of the object.
     ;;
-    ;; The processing is O(n^2) with n = number of tracked objects,
-    ;; but it should be reasonably fast because is based on afind that
-    ;; is a primitive function that compiles to [].indexOf.
+    ;; The processing is O(n^2) with n = number of tracked
+    ;; objects. Hopefully it will become good enough when the new
+    ;; compiler is available.
     (setf known-objects (make-array 100))
     (setf object-ids (make-array 100))
     (let ((n 0)
           (sz 100)
           (count 0))
       (labels ((mark (x)
-                 (let ((i (afind x known-objects)))
+                 (let ((i (position x known-objects)))
                    (if (= i -1)
                        (progn
                          (when (= n sz)
@@ -157,7 +157,7 @@
                (or (consp form)
                    (vectorp form)
                    (and form (symbolp form) (null (symbol-package form)))))
-      (let* ((ix (afind form known-objects))
+      (let* ((ix (position form known-objects))
              (id (aref object-ids ix)))
         (cond
           ((and id (> id 0))
