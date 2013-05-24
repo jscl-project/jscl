@@ -148,7 +148,6 @@
              (:constructor make-block)
              (:predicate block-p)
              (:print-object generic-printer))
-  (id (generate-id 'basic-block))
   ;; List of successors and predecessors of this basic block. They are
   ;; null only for deleted blocks and component's entry and exit.
   succ pred
@@ -158,6 +157,8 @@
   component
   ;; The order in the reverse post ordering of the blocks.
   order
+  ;; The innermost loop this block belongs to.
+  loop
   ;; A bit-vector representing the set of dominators. See the function
   ;; `compute-dominators' to know how to use it properly.
   dominators%
@@ -857,11 +858,56 @@
   (let ((order (block-order block1)))
     (= 1 (aref (block-dominators% block2) order))))
 
-;;; Check if BLOCK is a loop header. It is to say if it dominates one
-;;; of its predecessors.
+
+
+;;;; Natural Loops
+
+(defstruct natural-loop
+  parent
+  header
+  body)
+
+(defun find-natural-loops (&optional (component *component*))
+  (let ((size (length (component-blocks component))))
+    ;; We look for loop headers in reverse post order, so we will find
+    ;; outermost loop first. It makes sure we can fill the LOOP slot
+    ;; of the blocks and it will not be rewritten by an outer loop.
+    (do-blocks-forward (header component)
+      (dolist (block (block-pred header))
+        (when (dominate-p header block) ; Back edge
+          (let* ((loop
+                    ;; If header is already the header of a loop, then
+                    ;; just merge the natural loop for this back edge
+                    ;; into the same loop.
+                    (if (loop-header-p header)
+                        (block-loop header)
+                        (make-natural-loop
+                         :parent (block-loop header)
+                         :header header
+                         :body (make-array size :element-type 'bit :initial-element 0))))
+                 ;; The set of nodes which belongs to this loop.
+                 (body (natural-loop-body loop)))
+            ;; The header belongs to the loop
+            (format t "~S ~S~%" (block-order header) loop)
+            (setf (aref body (block-order header)) 1
+                  (block-loop header) loop)
+            ;; Add to the loop all the blocks which can reach the tail
+            ;; without going throught the header.
+            (labels ((explore-backward (block)
+                       (unless (= 1 (aref body (block-order block)))
+                         (setf (aref body (block-order block)) 1
+                               (block-loop block) loop)
+                         (dolist (pred (block-pred block))
+                           (explore-backward pred)))))
+              (explore-backward block))))))))
+
+;;; Check if BLOCK is a loop header.
 (defun loop-header-p (block)
-  (some (lambda (pred) (dominate-p block pred))
-        (block-pred block)))
+  (let ((loop (block-loop block)))
+    (and loop (eq (natural-loop-header loop) block))))
+
+
+
 
 ;;; Save the edges of the flow graph of the current component. Then,
 ;;; execute BODY as an implicit progn and restore the edges even if
@@ -915,7 +961,6 @@
                  (let ((newblocks '()))
                    (dolist (pred (cdr predecessors) newblocks)
                      (let ((newblock (copy-basic-block block)))
-                       (setf (block-id newblock) (generate-id 'basic-block))
                        (setf (block-pred newblock) (list pred))
                        (setf (block-succ pred) (substitute newblock block (block-succ pred)))
                        (push newblock newblocks))))))))
@@ -979,7 +1024,7 @@
     ((component-exit-p block)
      (format nil "EXIT-~a" (component-id (block-component block))))
     (t
-     (format nil "BLOCK ~a" (block-id block)))))
+     (format nil "BLOCK ~a" (block-order block)))))
 
 
 (defun print-node (node)
@@ -1046,6 +1091,7 @@
       (reduce-component)
       (compute-reverse-post-order)
       (compute-dominators)
+      (find-natural-loops)
       (/print *component*)
       *component*)))
 
