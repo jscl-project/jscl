@@ -1454,15 +1454,6 @@
     (when b (code "b = " (ls-compile b) ";" *newline*))
     "return vector.slice(a,b);" *newline*))
 
-(define-builtin char (string index)
-  (code string "[" index "]"))
-
-(define-builtin concat-two (string1 string2)
-  (js!selfcall
-    "var r = " string1 ".concat(" string2 ");" *newline*
-    "r.stringp = 1;"
-    "return r;" *newline*))
-
 (define-raw-builtin funcall (func &rest args)
   (js!selfcall
     "var f = " (ls-compile func) ";" *newline*

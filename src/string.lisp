@@ -22,6 +22,10 @@
 (defun make-string (n &key initial-element)
   (make-array n :element-type 'character :initial-element initial-element))
 
+(defun char (string index)
+  (unless (stringp string) (error "~S is not a string" string))
+  (storage-vector-ref string index))
+
 (defun string (x)
   (cond ((stringp x) x)
         ((symbolp x) (symbol-name x))
@@ -57,7 +61,8 @@
             `(aset ,g!string ,g!index ,g!value)
             `(char ,g!string ,g!index))))
 
-(defun concatenate-two (string1 string2)
+
+(defun concat-two (string1 string2)
   (let* ((len1 (length string1))
          (len2 (length string2))
          (string (make-array (+ len1 len2) :element-type 'character))
@@ -69,3 +74,6 @@
       (aset string i (char string2 j))
       (incf i))
     string))
+
+(defun concat (&rest strs)
+  (!reduce #'concat-two strs ""))
