@@ -1579,15 +1579,6 @@
     "if (i < 0 || i >= x.length) throw 'Out of range';" *newline*
     "return x[i] = " value ";" *newline*))
 
-
-;;; FIXME: should take optional min-extension.
-;;; FIXME: should use fill-pointer instead of the absolute end of array
-(define-builtin vector-push-extend (new vector)
-  (js!selfcall
-    "var v = " vector ";" *newline*
-    "v.push(" new ");" *newline*
-    "return v;"))
-
 (define-builtin afind (value array)
   (js!selfcall
     "var v = " value ";" *newline*

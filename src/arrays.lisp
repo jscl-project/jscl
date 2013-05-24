@@ -59,9 +59,6 @@
 (defun array-dimension (array axis)
   (nth axis (array-dimensions array)))
 
-(defun vectorp (x)
-  (and (arrayp x) (null (cdr (array-dimensions x)))))
-
 (defun aref (array index)
   (unless (arrayp array)
     (error "~S is not an array." array))  
@@ -73,3 +70,15 @@
   (storage-vector-set array index value))
 
 
+;;; Vectors
+
+(defun vectorp (x)
+  (and (arrayp x) (null (cdr (array-dimensions x)))))
+
+;;; FIXME: should take optional min-extension.
+;;; FIXME: should use fill-pointer instead of the absolute end of array
+(defun vector-push-extend (new vector)
+  (let ((size (storage-vector-size vector)))
+    (resize-storage-vector vector (1+ size))
+    (aset vector size new)
+    size))
