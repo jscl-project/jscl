@@ -78,6 +78,8 @@
 ;;; FIXME: should take optional min-extension.
 ;;; FIXME: should use fill-pointer instead of the absolute end of array
 (defun vector-push-extend (new vector)
+  (unless (vectorp array)
+    (error "~S is not a vector." array))  
   (let ((size (storage-vector-size vector)))
     (resize-storage-vector vector (1+ size))
     (aset vector size new)
