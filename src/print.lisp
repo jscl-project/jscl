@@ -100,6 +100,7 @@
 (defvar *print-escape* t)
 (defvar *print-circle* nil)
 
+;;; FIXME: Please, rewrite this in a more organized way.
 (defun write-to-string (form &optional known-objects object-ids)
   (when (and (not known-objects) *print-circle*)
     ;; To support *print-circle* some objects must be tracked for
@@ -127,8 +128,12 @@
                        (progn
                          (when (= n sz)
                            (setf sz (* 2 sz))
-                           (aresize known-objects sz)
-                           (aresize object-ids sz))
+                           ;; KLUDGE: storage vectors are an internal
+                           ;; object which the printer should not know
+                           ;; about. Use standard vector with fill
+                           ;; pointers instead.
+                           (resize-storage-vector known-objects sz)
+                           (resize-storage-vector object-ids sz))
                          (aset known-objects (1- (incf n)) x)
                          t)
                        (unless (aref object-ids i)
