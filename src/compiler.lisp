@@ -1446,14 +1446,6 @@
 (define-builtin string-upcase (x)
   (code "make_lisp_string(xstring(" x ").toUpperCase())"))
 
-(define-raw-builtin slice (vector a &optional b)
-  (js!selfcall
-    "var vector = " (ls-compile vector) ";" *newline*
-    "var a = " (ls-compile a) ";" *newline*
-    "var b;" *newline*
-    (when b (code "b = " (ls-compile b) ";" *newline*))
-    "return vector.slice(a,b);" *newline*))
-
 (define-raw-builtin funcall (func &rest args)
   (js!selfcall
     "var f = " (ls-compile func) ";" *newline*
