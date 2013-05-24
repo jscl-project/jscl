@@ -1544,12 +1544,41 @@
 (define-builtin write-string (x)
   (code "lisp.write(" x ")"))
 
-(define-builtin make-array (n)
+
+;;; Storage vectors. They are used to implement arrays and (in the
+;;; future) structures.
+
+(define-builtin storage-vector-p (x)
+  (js!bool
+   (js!selfcall
+     "var x = " x ";" *newline*
+     "return typeof x === 'object' && 'length' in x;")))
+
+(define-builtin make-storage-vector (n)
   (js!selfcall
     "var r = [];" *newline*
-    "for (var i = 0; i < " n "; i++)" *newline*
-    (indent "r.push(" (ls-compile nil) ");" *newline*)
+    "r.length = " n ";" *newline*
     "return r;" *newline*))
+
+(define-builtin storage-vector-size (x)
+  (code x ".length"))
+
+(define-builtin resize-storage-vector (vector new-size)
+  (code "(" vector ".length = " new-size ")"))
+
+(define-builtin storage-vector-ref (vector n)
+  (js!selfcall
+    "var x = " "(" vector ")[" n "];" *newline*
+    "if (x === undefined) throw 'Out of range';" *newline*
+    "return x;" *newline*))
+
+(define-builtin storage-vector-set (vector n value)
+  (js!selfcall
+    "var x = " vector ";" *newline*
+    "var i = " n ";" *newline*
+    "if (i < 0 || i >= x.length) throw 'Out of range';" *newline*
+    "return x[i] = " value ";" *newline*))
+
 
 ;;; FIXME: should take optional min-extension.
 ;;; FIXME: should use fill-pointer instead of the absolute end of array
@@ -1558,12 +1587,6 @@
     "var v = " vector ";" *newline*
     "v.push(" new ");" *newline*
     "return v;"))
-
-(define-builtin arrayp (x)
-  (js!bool
-   (js!selfcall
-     "var x = " x ";" *newline*
-     "return typeof x === 'object' && 'length' in x;")))
 
 (define-builtin aref (array n)
   (js!selfcall
@@ -1589,6 +1612,8 @@
     "var x = " array ";" *newline*
     "var n = " new-size ";" *newline*
     "return x.length = n;" *newline*))
+
+
 
 (define-builtin get-internal-real-time ()
   "(new Date()).getTime()")

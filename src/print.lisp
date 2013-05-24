@@ -142,7 +142,7 @@
                     (when (mark x)
                       (visit (car x))
                       (visit (cdr x))))
-                   ((arrayp x)
+                   ((vectorp x)
                     (when (mark x)
                       (dotimes (i (length x))
                         (visit (aref x i))))))))
@@ -150,7 +150,7 @@
   (let ((prefix ""))
     (when (and *print-circle*
                (or (consp form)
-                   (arrayp form)
+                   (vectorp form)
                    (and form (symbolp form) (null (symbol-package form)))))
       (let* ((ix (afind form known-objects))
              (id (aref object-ids ix)))
@@ -213,7 +213,7 @@
                                      " . "
                                      (write-to-string (cdr last) known-objects object-ids))))
                        ")"))
-              ((arrayp form)
+              ((vectorp form)
                (let ((result "#(")
                      (sep ""))
                  (dotimes (i (length form))

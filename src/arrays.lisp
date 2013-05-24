@@ -19,12 +19,45 @@
       'character
       t))
 
-(defun arrayp (x) (arrayp x))
+(defun make-array (dimensions &key element-type initial-element adjustable fill-pointer)
+  (let* ((dimensions (ensure-list dimensions))
+         (size (!reduce #'* dimensions 1))
+         (array (make-storage-vector size)))
+    ;; Upgrade type
+    (if (eq element-type 'character)
+        (setf element-type 'character
+              initial-element (or initial-element #\space))
+        (setf element-type t))
+    ;; Initialize array
+    (dotimes (i size)
+      (storage-vector-set array i initial-element))
+    ;; Record and return the object
+    (oset array "type" element-type)
+    (oset array "dimensions" dimensions)
+    array))
+
+
+(defun arrayp (x)
+  (storage-vector-p x))
 
 (defun adjustable-array-p (array)
   (unless (arrayp array)
     (error "~S is not an array." array))
   t)
 
-(defun make-array (dimensions &key element-type initial-contents adjustable fill-pointer)
-  )
+(defun array-element-type (array)
+  (unless (arrayp array)
+    (error "~S is not an array." array))
+  (oget array "type"))
+
+(defun array-dimensions (array)
+  (unless (arrayp array)
+    (error "~S is not an array." array))
+  (oget array "dimensions"))
+
+;; TODO: Error checking
+(defun array-dimension (array axis)
+  (nth axis (array-dimensions array)))
+
+(defun vectorp (x)
+  (and (arrayp x) (null (cdr (array-dimensions x)))))

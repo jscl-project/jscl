@@ -13,6 +13,9 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
+;; (defun stringp (x)
+;;   (and (vectorp x) (eq (array-element-type x) 'character)))
+
 (defun string (x)
   (cond ((stringp x) x)
         ((symbolp x) (symbol-name x))
