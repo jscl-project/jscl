@@ -1431,12 +1431,6 @@
      "var x = " x ";" *newline*
      "return (typeof(" x ") == \"string\") && x.length == 1;")))
 
-(define-builtin char-to-string (x)
-  (js!selfcall
-    "var r = [" x "];" *newline*
-    "r.type = 'character';"
-    "return r"))
-
 (define-builtin char-upcase (x)
   (code x ".toUpperCase()"))
 

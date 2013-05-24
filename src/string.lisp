@@ -19,13 +19,10 @@
 (defun make-string (n &key initial-element)
   (make-array n :element-type 'character :initial-element initial-element))
 
-;; (defun char-to-string (x)
-;;   (make-string 1 :initial-element x))
-
 (defun string (x)
   (cond ((stringp x) x)
         ((symbolp x) (symbol-name x))
-        (t (char-to-string x))))
+        (t (make-string 1 :initial-element x))))
 
 (defun string= (s1 s2)
   (let* ((s1 (string s1))
