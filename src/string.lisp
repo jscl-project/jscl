@@ -77,3 +77,14 @@
 
 (defun concat (&rest strs)
   (!reduce #'concat-two strs ""))
+
+
+(defun string-upcase (string)
+  (let ((new (make-string (length string))))
+    (dotimes (i (length string) new)
+      (aset new i (char-upcase (char string i))))))
+
+(defun string-downcase (string)
+  (let ((new (make-string (length string))))
+    (dotimes (i (length string) new)
+      (aset new i (char-downcase (char string i))))))

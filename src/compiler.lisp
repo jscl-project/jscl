@@ -1443,9 +1443,6 @@
      "var x = " x ";" *newline*
      "return typeof(x) == 'object' && 'length' in x && x.stringp == 1;")))
 
-(define-builtin string-upcase (x)
-  (code "make_lisp_string(xstring(" x ").toUpperCase())"))
-
 (define-raw-builtin funcall (func &rest args)
   (js!selfcall
     "var f = " (ls-compile func) ";" *newline*
