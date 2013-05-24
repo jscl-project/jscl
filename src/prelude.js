@@ -55,7 +55,7 @@ function QIList(){
 // Create and return a lisp string for the Javascript string STRING.
 function make_lisp_string (string){
     var array = string.split("");
-    array.type = 'character'
+    array.stringp = 1;
     return array;
 }
 
@@ -69,7 +69,7 @@ function Symbol(name, package_name){
 }
 
 function lisp_to_js (x) {
-    if (typeof x == 'object' && 'length' in x && x.type == 'character')
+    if (typeof x == 'object' && 'length' in x && x.stringp == 1)
         return xstring(x);
     else if (typeof x == 'function'){
         // Trampoline calling the Lisp function

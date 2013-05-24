@@ -25,8 +25,10 @@
          (array (make-storage-vector size)))
     ;; Upgrade type
     (if (eq element-type 'character)
-        (setf element-type 'character
-              initial-element (or initial-element #\space))
+        (progn
+          (oset array "stringp" 1)
+          (setf element-type 'character
+                initial-element (or initial-element #\space)))
         (setf element-type t))
     ;; Initialize array
     (dotimes (i size)
@@ -48,7 +50,9 @@
 (defun array-element-type (array)
   (unless (arrayp array)
     (error "~S is not an array." array))
-  (oget array "type"))
+  (if (eq (oget array "stringp") 1)
+      'character
+      (oget array "type")))
 
 (defun array-dimensions (array)
   (unless (arrayp array)

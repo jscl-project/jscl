@@ -1431,12 +1431,6 @@
      "var x = " x ";" *newline*
      "return (typeof(" x ") == \"string\") && x.length == 1;")))
 
-(define-builtin char-to-string (x)
-  (js!selfcall
-    "var r = [" x "];" *newline*
-    "r.type = 'character';"
-    "return r"))
-
 (define-builtin char-upcase (x)
   (code x ".toUpperCase()"))
 
@@ -1447,30 +1441,7 @@
   (js!bool
    (js!selfcall
      "var x = " x ";" *newline*
-     "return typeof(x) == 'object' && 'length' in x && x.type == 'character';")))
-
-(define-builtin string-upcase (x)
-  (code "make_lisp_string(xstring(" x ").toUpperCase())"))
-
-(define-builtin string-length (x)
-  (code x ".length"))
-
-(define-raw-builtin slice (vector a &optional b)
-  (js!selfcall
-    "var vector = " (ls-compile vector) ";" *newline*
-    "var a = " (ls-compile a) ";" *newline*
-    "var b;" *newline*
-    (when b (code "b = " (ls-compile b) ";" *newline*))
-    "return vector.slice(a,b);" *newline*))
-
-(define-builtin char (string index)
-  (code string "[" index "]"))
-
-(define-builtin concat-two (string1 string2)
-  (js!selfcall
-    "var r = " string1 ".concat(" string2 ");" *newline*
-    "r.type = 'character';"
-    "return r;" *newline*))
+     "return typeof(x) == 'object' && 'length' in x && x.stringp == 1;")))
 
 (define-raw-builtin funcall (func &rest args)
   (js!selfcall
