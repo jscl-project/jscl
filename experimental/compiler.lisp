@@ -888,7 +888,6 @@
                  ;; The set of nodes which belongs to this loop.
                  (body (natural-loop-body loop)))
             ;; The header belongs to the loop
-            (format t "~S ~S~%" (block-order header) loop)
             (setf (aref body (block-order header)) 1
                   (block-loop header) loop)
             ;; Add to the loop all the blocks which can reach the tail
