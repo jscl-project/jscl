@@ -319,7 +319,7 @@
       ;; No package prefix
       ((= index size)
        (setq name string)
-       (setq package *package*)
+       (setq package (package-name *package*))
        (setq internalp t))
       (t
        ;; Package prefix
