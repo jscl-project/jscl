@@ -16,6 +16,9 @@
 (defun stringp (s)
   (stringp s))
 
+(defun string-length (string)
+  (storage-vector-size string))
+
 (defun make-string (n &key initial-element)
   (make-array n :element-type 'character :initial-element initial-element))
 

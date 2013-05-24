@@ -1446,9 +1446,6 @@
 (define-builtin string-upcase (x)
   (code "make_lisp_string(xstring(" x ").toUpperCase())"))
 
-(define-builtin string-length (x)
-  (code x ".length"))
-
 (define-raw-builtin slice (vector a &optional b)
   (js!selfcall
     "var vector = " (ls-compile vector) ";" *newline*
