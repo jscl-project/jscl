@@ -28,7 +28,7 @@
     ("utils"            :both)
     ("numbers"          :target)
     ("list"             :target)
-    ("arrays"           :target)
+    ("array"            :target)
     ("string"           :target)
     ("sequence"         :target)
     ("print"            :target)
