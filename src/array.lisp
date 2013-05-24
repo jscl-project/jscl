@@ -48,7 +48,9 @@
 (defun array-element-type (array)
   (unless (arrayp array)
     (error "~S is not an array." array))
-  (oget array "type"))
+  (if (eq (oget array "stringp") 1)
+      'character
+      (oget array "type")))
 
 (defun array-dimensions (array)
   (unless (arrayp array)
