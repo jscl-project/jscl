@@ -670,7 +670,14 @@
 (define-compilation progn (&rest body)
   (if (null (cdr body))
       (ls-compile (car body) *multiple-value-p*)
-      (js!selfcall (ls-compile-block body t))))
+      (code "("
+            (join
+             (remove-if #'null-or-empty-p
+                        (append
+                         (mapcar #'ls-compile (butlast body))
+                         (list (ls-compile (car (last body)) t))))
+                  ",")
+            ")")))
 
 (defun special-variable-p (x)
   (and (claimp x 'variable 'special) t))
