@@ -80,7 +80,7 @@
   value)
 
 ;;; A lambda expression. Why do we name it `functional'? Well,
-;;; function is reserved by the ANSI, isn't it?
+;;; function is reserved by ANSI, isn't it?
 (defstruct (functional (:include leaf) (:print-object generic-printer))
   ;; The symbol which names this function in the source code or null
   ;; if we do not know or it is an anonymous function.
