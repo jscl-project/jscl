@@ -95,24 +95,12 @@
 (defun fboundp (x)
   (fboundp x))
 
-;; Basic functions
-(defun = (x y) (= x y))
-(defun * (x y) (* x y))
-(defun / (x y) (/ x y))
-(defun 1+ (x) (+ x 1))
-(defun 1- (x) (- x 1))
-(defun zerop (x) (= x 0))
-
-(defun truncate (x &optional (y 1))
-  (floor (/ x y)))
-
 (defun eq (x y) (eq x y))
 (defun eql (x y) (eq x y))
 
 (defun not (x) (if x nil t))
 
 ;; Basic macros
-
 (defmacro incf (place &optional (delta 1))
   (multiple-value-bind (dummies vals newval setter getter)
       (get-setf-expansion place)
@@ -264,18 +252,6 @@
 ;;; Go on growing the Lisp language in Ecmalisp, with more high level
 ;;; utilities as well as correct versions of other constructions.
 
-(defun + (&rest args)
-  (let ((r 0))
-    (dolist (x args r)
-      (incf r x))))
-
-(defun - (x &rest others)
-  (if (null others)
-      (- x)
-      (let ((r x))
-        (dolist (y others r)
-          (decf r y)))))
-
 (defun append-two (list1 list2)
   (if (null list1)
       list2
@@ -397,15 +373,6 @@
 
 (defun char< (x y)
   (< (char-code x) (char-code y)))
-
-(defun integerp (x)
-  (and (numberp x) (= (floor x) x)))
-
-(defun floatp (x)
-  (and (numberp x) (not (integerp x))))
-
-(defun plusp (x) (< 0 x))
-(defun minusp (x) (< x 0))
 
 (defun atom (x)
   (not (consp x)))
