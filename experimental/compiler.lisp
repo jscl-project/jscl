@@ -925,7 +925,8 @@
                    (block-pred block) pred)))))))
 
 (defun reduce-component (&optional (component *component*))
-  (let* ((list-blocks (component-blocks component))
+  (let* ((*component* component)
+         (list-blocks (component-blocks component))
          ;; A vector of the blocks in the component. Blocks are added
          ;; and deleted always at the fill pointer of the vector.
          (vector-blocks
@@ -949,7 +950,8 @@
                  (setf (block-succ pred) (remove block (block-succ pred)))
                  (dolist (succ (block-succ block))
                    (pushnew succ (block-succ pred))
-                   (setf (block-pred succ) (substitute pred block (block-pred succ)))))
+                   (setf (block-pred succ) (remove block (block-pred succ)))
+                   (pushnew pred (block-pred succ))))
                t))
            ;; This function duplicates the block in component for each input
            ;; edge. A technique useful to make a general flowgraph reducible.
