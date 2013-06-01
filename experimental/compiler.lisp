@@ -682,7 +682,7 @@
                         :arguments args-lvars
                         :lvar result))
           (progn
-            (ir-convert `(symbol-function ,function) func-lvar)
+            (ir-convert `(symbol-function ',function) func-lvar)
             (insert-node (make-call :function func-lvar
                                     :arguments args-lvars
                                     :lvar result)))))))
