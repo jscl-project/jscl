@@ -9,39 +9,39 @@
         (list more-characters (cdr list)))
        ((null list) t)
        (dolist (c list)
-	 (when (eql head c) (return-from char/= nil)))))
+         (when (eql head c) (return-from char/= nil)))))
 
 (defun char< (character &rest more-characters)
   (do* ((c character (car list))
         (list more-characters (cdr list)))
        ((null list) t)
        (unless (< (char-int c)
-		  (char-int (car list)))
-	 (return nil))))
+                  (char-int (car list)))
+         (return nil))))
 
 (defun char> (character &rest more-characters)
   (do* ((c character (car list))
         (list more-characters (cdr list)))
        ((null list) t)
        (unless (> (char-int c)
-		  (char-int (car list)))
-	 (return nil))))
+                  (char-int (car list)))
+         (return nil))))
 
 (defun char<= (character &rest more-characters)
   (do* ((c character (car list))
         (list more-characters (cdr list)))
        ((null list) t)
        (unless (<= (char-int c)
-		   (char-int (car list)))
-	 (return nil))))
+                   (char-int (car list)))
+         (return nil))))
 
 (defun char>= (character &rest more-characters)
   (do* ((c character (car list))
         (list more-characters (cdr list)))
        ((null list) t)
        (unless (>= (char-int c)
-		   (char-int (car list)))
-	 (return nil))))
+                   (char-int (car list)))
+         (return nil))))
 
 (defun equal-char-code (character)
   (char-code (char-upcase character)))
@@ -53,17 +53,17 @@
   (do ((clist more-characters (cdr clist)))
       ((null clist) t)
       (unless (two-arg-char-equal (car clist) character)
-	(return nil))))
+        (return nil))))
 
 (defun char-not-equal (character &rest more-characters)
   (do* ((head character (car list))
         (list more-characters (cdr list)))
        ((null list) t)
        (unless (do* ((l list (cdr l)))
-  		    ((null l) t)
-  		    (when (two-arg-char-equal head (car l))
-  			(return nil)))
-  	 (return nil))))
+                    ((null l) t)
+                    (when (two-arg-char-equal head (car l))
+                        (return nil)))
+         (return nil))))
 
 (defun two-arg-char-lessp (c1 c2)
   (< (equal-char-code c1) (equal-char-code c2)))
@@ -73,7 +73,7 @@
         (list more-characters (cdr list)))
        ((null list) t)
        (unless (two-arg-char-lessp c (car list))
-	 (return nil))))
+         (return nil))))
 
 (defun two-arg-char-greaterp (c1 c2)
   (> (equal-char-code c1) (equal-char-code c2)))
@@ -83,7 +83,7 @@
         (list more-characters (cdr list)))
        ((null list) t)
        (unless (two-arg-char-greaterp c (car list))
-	 (return nil))))
+         (return nil))))
 
 (defun two-arg-char-not-greaterp (c1 c2)
   (<= (equal-char-code c1) (equal-char-code c2)))
@@ -93,7 +93,7 @@
         (list more-characters (cdr list)))
        ((null list) t)
        (unless (two-arg-char-not-greaterp c (car list))
-	 (return nil))))
+         (return nil))))
 
 (defun two-arg-char-not-lessp (c1 c2)
   (>= (equal-char-code c1) (equal-char-code c2)))
@@ -103,19 +103,19 @@
         (list more-characters (cdr list)))
        ((null list) t)
        (unless (two-arg-char-not-lessp c (car list))
-	 (return nil))))
+         (return nil))))
 
 (defun character (character)
   (cond ((characterp character)
-	 character)
-	((and (stringp character)
-	      (= 1 (length character)))
-	 (char character 0))
-	((and (symbolp character)
-	      (= 1 (length (symbol-name character))))
-	 (symbol-name character))
-	(t
-	 (error "not a valid character designator"))))
+         character)
+        ((and (stringp character)
+              (= 1 (length character)))
+         (char character 0))
+        ((and (symbolp character)
+              (= 1 (length (symbol-name character))))
+         (symbol-name character))
+        (t
+         (error "not a valid character designator"))))
 
 ;; This list comes from SBCL: everything that's ALPHA-CHAR-P, but
 ;; not SB-IMPL::UCD-DECIMAL-DIGIT (to work around <https://bugs.launchpad.net/sbcl/+bug/1177986>),
@@ -219,7 +219,7 @@
   (let ((code (char-code char)))
     (dolist (alpha-pair +unicode-alphas+)
       (when (<= (car alpha-pair) code (cdr alpha-pair))
-	(return-from alpha-char-p t)))
+        (return-from alpha-char-p t)))
     nil))
 
 (defun alphanumericp (char)
@@ -240,10 +240,10 @@
 (defun unicode-digit-value (char)
   (let ((code (char-code char)))
     (if (= code 6618)
-	1  ;; it's special!
+        1  ;; it's special!
       (dolist (z +unicode-zeroes+)
-	(when (<= z code (+ z 9))
-	  (return-from unicode-digit-value (- code z)))))))
+        (when (<= z code (+ z 9))
+          (return-from unicode-digit-value (- code z)))))))
 
 ;; from SBCL/CMUCL:
 (defun digit-char (weight &optional (radix 10))
@@ -258,21 +258,21 @@ character exists."
 (defun digit-char-p (char &optional (radix 10))
   "Includes ASCII 0-9 a-z A-Z, plus Unicode HexDigit characters (fullwidth variants of 0-9 and A-F)."
   (let* ((number (unicode-digit-value char))
-	 (code (char-code char))
-	 (upper (char-upcase char))
-	 (code-upper (char-code upper))
-	 (potential (cond (number number)
-			  ((char<= #\0 char #\9)
-			   (- code (char-code #\0)))
-			  ((<= 65296 code 65305)  ;; FULLWIDTH_DIGIT_ZERO, FULLWIDTH_DIGIT_NINE
-			   (- code 65296))
-			  ((char<= #\A upper #\Z)
-			   (+ 10 (- code-upper (char-code #\A))))
-			  ((<= 65313 (char-code upper) 65318)  ;; FULLWIDTH_LATIN_CAPITAL_LETTER_A, FULLWIDTH_LATIN_CAPITAL_LETTER_F
-			   (+ 10 (- code-upper 65313)))
-			  (t nil))))
+         (code (char-code char))
+         (upper (char-upcase char))
+         (code-upper (char-code upper))
+         (potential (cond (number number)
+                          ((char<= #\0 char #\9)
+                           (- code (char-code #\0)))
+                          ((<= 65296 code 65305)  ;; FULLWIDTH_DIGIT_ZERO, FULLWIDTH_DIGIT_NINE
+                           (- code 65296))
+                          ((char<= #\A upper #\Z)
+                           (+ 10 (- code-upper (char-code #\A))))
+                          ((<= 65313 (char-code upper) 65318)  ;; FULLWIDTH_LATIN_CAPITAL_LETTER_A, FULLWIDTH_LATIN_CAPITAL_LETTER_F
+                           (+ 10 (- code-upper 65313)))
+                          (t nil))))
     (if (and potential (< potential radix))
-	potential
+        potential
       nil)))
 
 (defun graphic-char-p (char)
@@ -341,15 +341,14 @@ For the first 32 characters ('C0 controls'), the first
   ;; their "Uxxxx" convention for names I don't know, but there's
   ;; not much in FORMAT yet.  I'm only implementing ASCII names right
   ;; now, since Unicode is kind of big.
-
   (let ((code (char-code char)))
     (if (<= code 127)
-	(aref +ascii-names+ code)
+        (aref +ascii-names+ code)
       nil)))  ;; for now, no name
 
 (defun name-char (name)
   (let ((name-upcase (string-upcase (string name))))
     (dotimes (i (length +ascii-names+))
       (when (string= name-upcase (string-upcase (aref +ascii-names+ i)))  ;; poor man's STRING-EQUAL
-	(return-from name-char (code-char i))))
+        (return-from name-char (code-char i))))
     nil))
