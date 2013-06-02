@@ -88,7 +88,10 @@
 (test (null (digit-char-p #\a)))
 (test (= 10 (digit-char-p #\A 11)))
 (test (= 10 (digit-char-p #\a 11)))
-;; TODO: does the mapcar/lambda thing work here?
+;; (mapcar #'(lambda (radix)
+;;              (map 'list #'(lambda (x) (digit-char-p x radix))
+;;                   "059AaFGZ"))
+;;          '(2 8 10 16 36))
 
 ;; GRAPHIC-CHAR-P
 (test (graphic-char-p #\G))
