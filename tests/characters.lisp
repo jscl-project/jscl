@@ -37,8 +37,6 @@
 ;; (stable-sort (list #\b #\A #\B #\a #\c #\C) #'char-lessp) =>  (#\A #\a #\b #\B #\c #\C)
 ;; (stable-sort (list #\b #\A #\B #\a #\c #\C) #'char<) => implementation-dependent
 
-;; TODO: char/=, char<, etc.
-
 ;; CHARACTER
 (test (equal #\a (character #\a)))
 (test (equal #\a (character "a")))
@@ -114,7 +112,14 @@
 (test (char= (code-char 223) (char-downcase (code-char 223))))  ;; already lower case
 (test (char= (code-char 127744) (char-downcase (code-char 127744))))  ;; no lower case
 
-;; TODO: UPPER-CASE-P, LOWER-CASE-P, BOTH-CASE-P
+;; UPPER-CASE-P, LOWER-CASE-P, BOTH-CASE-P
+(test (upper-case-p #\A))
+(test (not (upper-case-p #\a)))
+(test (both-case-p #\a))
+(test (not (both-case-p #\5)))
+(test (not (lower-case-p #\5)))
+(test (not (upper-case-p #\5)))
+(test (not (upper-case-p (code-char 127744))))
 
 ;; CODE-CHAR, CHAR-CODE
 (test (char= #\A (code-char 65)))

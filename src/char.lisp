@@ -282,6 +282,15 @@ character exists."
          (or (< 31 n 127)
              (= n 10)))))
 
+(defun upper-case-p (character)
+  (char/= character (char-downcase character)))
+
+(defun lower-case-p (character)
+  (char/= character (char-upcase character)))
+
+(defun both-case-p (character)
+  (or (upper-case-p character) (lower-case-p character)))
+
 (defun char-int (character)
   ;; no implementation-defined character attributes
   (char-code character))
