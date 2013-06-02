@@ -98,64 +98,134 @@
       s))
 
 (defvar *print-escape* t)
+(defvar *print-circle* nil)
 
-(defun write-to-string (form)
-  (cond
-    ((null form) "NIL")
-    ((symbolp form)
-     (let ((name (symbol-name form))
-           (package (symbol-package form)))
-       ;; Check if the symbol is accesible from the current package. It
-       ;; is true even if the symbol's home package is not the current
-       ;; package, because it could be inherited.
-       (if (eq form (find-symbol (symbol-name form)))
-           (escape-token (symbol-name form) (not (eq package *js-package*)))
-           ;; Symbol is not accesible from *PACKAGE*, so let us prefix
-           ;; the symbol with the optional package or uninterned mark.
-           (concat (cond
-                     ((null package) "#")
-                     ((eq package (find-package "KEYWORD")) "")
-                     (t (escape-token (package-name package) t)))
-                   ":"
-                   (if (and package
-                            (eq (second (multiple-value-list
-                                         (find-symbol name package)))
-                                :internal))
-                       ":"
-                       "")
-                   (escape-token name (not (eq package *js-package*)))))))
-    ((integerp form) (integer-to-string form))
-    ((floatp form) (float-to-string form))
-    ((characterp form)
-     (concat "#\\"
-             (case form
-               (#\newline "newline")
-               (#\space "space")
-               (otherwise (string form)))))
-    ((stringp form) (if *print-escape*
-                        (concat "\"" (escape-string form) "\"")
-                        form))
-    ((functionp form)
-     (let ((name (oget form "fname")))
-       (if name
-           (concat "#<FUNCTION " name ">")
-           (concat "#<FUNCTION>"))))
-    ((listp form)
-     (concat "("
-             (join-trailing (mapcar #'write-to-string (butlast form)) " ")
-             (let ((last (last form)))
-               (if (null (cdr last))
-                   (write-to-string (car last))
-                   (concat (write-to-string (car last)) " . " (write-to-string (cdr last)))))
-             ")"))
-    ((arrayp form)
-     (concat "#" (if (zerop (length form))
-                     "()"
-                     (write-to-string (vector-to-list form)))))
-    ((packagep form)
-     (concat "#<PACKAGE " (package-name form) ">"))
-    (t
-     (concat "#<javascript object>"))))
+(defun write-to-string (form &optional known-objects object-ids)
+  (when (and (not known-objects) *print-circle*)
+    ;; To support *print-circle* some objects must be tracked for
+    ;; sharing: conses, arrays and apparently-uninterned symbols.
+    ;; These objects are placed in an array and a parallel array is
+    ;; used to mark if they're found multiple times by assining them
+    ;; an id starting from 1.
+    ;;
+    ;; After the tracking has been completed the printing phas can
+    ;; begin: if an object has an id > 0 then #<n>= is prefixed and
+    ;; the id is changed to negative. If an object has an id < 0 then
+    ;; #<-n># is printed instead of the object.
+    ;;
+    ;; The processing is O(n^2) with n = number of tracked objects,
+    ;; but it should be reasonably fast because is based on afind that
+    ;; is a primitive function that compiles to [].indexOf.
+    (setf known-objects (make-array 100))
+    (setf object-ids (make-array 100))
+    (let ((n 0)
+          (sz 100)
+          (count 0))
+      (labels ((mark (x)
+                 (let ((i (afind x known-objects)))
+                   (if (= i -1)
+                       (progn
+                         (when (= n sz)
+                           (setf sz (* 2 sz))
+                           (aresize known-objects sz)
+                           (aresize object-ids sz))
+                         (aset known-objects (1- (incf n)) x)
+                         t)
+                       (unless (aref object-ids i)
+                         (aset object-ids i (incf count))
+                         nil))))
+               (visit (x)
+                 (cond
+                   ((and x (symbolp x) (null (symbol-package x)))
+                    (mark x))
+                   ((consp x)
+                    (when (mark x)
+                      (visit (car x))
+                      (visit (cdr x))))
+                   ((arrayp x)
+                    (when (mark x)
+                      (dotimes (i (length x))
+                        (visit (aref x i))))))))
+        (visit form))))
+  (let ((prefix ""))
+    (when (and *print-circle*
+               (or (consp form)
+                   (arrayp form)
+                   (and form (symbolp form) (null (symbol-package form)))))
+      (let* ((ix (afind form known-objects))
+             (id (aref object-ids ix)))
+        (cond
+          ((and id (> id 0))
+           (setf prefix (format nil "#~S=" id))
+           (aset object-ids ix (- id)))
+          ((and id (< id 0))
+           (return-from write-to-string (format nil "#~S#" (- id)))))))
+    (concat prefix
+            (cond
+              ((null form) "NIL")
+              ((symbolp form)
+               (let ((name (symbol-name form))
+                     (package (symbol-package form)))
+                 ;; Check if the symbol is accesible from the current package. It
+                 ;; is true even if the symbol's home package is not the current
+                 ;; package, because it could be inherited.
+                 (if (eq form (find-symbol (symbol-name form)))
+                     (escape-token (symbol-name form) (not (eq package *js-package*)))
+                     ;; Symbol is not accesible from *PACKAGE*, so let us prefix
+                     ;; the symbol with the optional package or uninterned mark.
+                     (concat (cond
+                               ((null package) "#")
+                               ((eq package (find-package "KEYWORD")) "")
+                               (t (escape-token (package-name package) t)))
+                             ":"
+                             (if (and package
+                                      (eq (second (multiple-value-list
+                                                      (find-symbol name package)))
+                                          :internal))
+                                 ":"
+                                 "")
+                             (escape-token name (not (eq package *js-package*)))))))
+              ((integerp form) (integer-to-string form))
+              ((floatp form) (float-to-string form))
+              ((characterp form)
+               (concat "#\\"
+                       (case form
+                         (#\newline "newline")
+                         (#\space "space")
+                         (otherwise (string form)))))
+              ((stringp form) (if *print-escape*
+                                  (concat "\"" (escape-string form) "\"")
+                                  form))
+              ((functionp form)
+               (let ((name (oget form "fname")))
+                 (if name
+                     (concat "#<FUNCTION " name ">")
+                     (concat "#<FUNCTION>"))))
+              ((listp form)
+               (concat "("
+                       (join-trailing (mapcar (lambda (x)
+                                                (write-to-string x known-objects object-ids))
+                                              (butlast form)) " ")
+                       (let ((last (last form)))
+                         (if (null (cdr last))
+                             (write-to-string (car last) known-objects object-ids)
+                             (concat (write-to-string (car last) known-objects object-ids)
+                                     " . "
+                                     (write-to-string (cdr last) known-objects object-ids))))
+                       ")"))
+              ((arrayp form)
+               (let ((result "#(")
+                     (sep ""))
+                 (dotimes (i (length form))
+                   (setf result (concat result sep
+                                        (write-to-string (aref form i)
+                                                         known-objects
+                                                         object-ids)))
+                   (setf sep " "))
+                 (concat result ")")))
+              ((packagep form)
+               (concat "#<PACKAGE " (package-name form) ">"))
+              (t "#<javascript object>")))))
 
 (defun prin1-to-string (form)
   (let ((*print-escape* t))

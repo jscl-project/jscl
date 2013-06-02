@@ -1,7 +1,113 @@
 ;; Tests for list functions
 
-;; TODO: EQUAL doesn't compare lists correctly at the moment.
-;; Once it does the lists can be compared directly in many of these tests
+;; CONS
+(test (equal (cons 1 2) '(1 . 2)))
+(test (equal (cons 1 nil) '(1)))
+(test (equal (cons nil 2) '(NIL . 2)))
+(test (equal (cons nil nil) '(NIL)))
+(test (equal (cons 1 (cons 2 (cons 3 (cons 4 nil)))) '(1 2 3 4)))
+(test (equal (cons 'a 'b) '(A . B)))
+(test (equal (cons 'a (cons 'b (cons 'c '()))) '(A B C)))
+(test (equal (cons 'a '(b c d)) '(A B C D)))
+
+;; CONSP
+(test (not (consp 'nil)))
+(test (not (consp nil)))
+(test (not (consp ())))
+(test (not (consp '())))
+(test (consp (cons 1 2)))
+
+;; ATOM
+(test (atom 'sss))
+(test (not (atom (cons 1 2))))
+(test (atom nil))
+(test (atom '()))
+(test (atom 3))
+
+;; RPLACA
+(let ((some-list (list* 'one 'two 'three 'four)))
+  (test (equal (rplaca some-list 'uno) '(UNO TWO THREE . FOUR)))
+  (test (equal some-list '(UNO TWO THREE . FOUR))))
+
+;; RPLACD
+(let ((some-list (list* 'one 'two 'three 'four)))
+  (test (equal (rplacd (last some-list) (list 'IV)) '(THREE IV)))
+  (test (equal some-list '(ONE TWO THREE IV))))
+
+;; CAR, CDR and variants
+(test (equal (car nil) nil))
+(test (equal (cdr '(1 . 2)) 2))
+(test (equal (cdr '(1 2)) '(2)))
+(test (equal (cadr '(1 2)) 2))
+(test (equal (car '(a b c)) 'a))
+(test (equal (cdr '(a b c)) '(b c)))
+(test (equal (caar '((1 2) 3)) 1))
+(test (equal (cadr '(1 2 3)) 2))
+(test (equal (cdar '((1 2) 3)) '(2)))
+(test (equal (cddr '(1 2 3)) '(3)))
+(test (equal (caaar '(((1)))) 1))
+(test (equal (caadr '(1 (2))) 2))
+(test (equal (cadar '((1 2))) 2))
+(test (equal (caddr '(1 2 3)) 3))
+(test (equal (cdaar '(((1 2)))) '(2)))
+(test (equal (cdadr '(1 (2 3))) '(3)))
+(test (equal (cddar '((1 2 3))) '(3)))
+(test (equal (cdddr '(1 2 3 4)) '(4)))
+(test (equal (caaaar '((((1))))) 1))
+(test (equal (caaadr '(1 ((2)))) 2))
+(test (equal (caadar '((1 (2)))) 2))
+(test (equal (caaddr '(1 2 (3))) 3))
+(test (equal (cadaar '(((1 2)))) 2))
+(test (equal (cadadr '(1 (2 3))) 3))
+(test (equal (caddar '((1 2 3))) 3))
+(test (equal (cadddr '(1 2 3 4)) 4))
+(test (equal (cdaaar '((((1 2))))) '(2)))
+(test (equal (cdaadr '(1 ((2 3)))) '(3)))
+(test (equal (cdadar '((1 (2 3)))) '(3)))
+(test (equal (cdaddr '(1 2 (3 4))) '(4)))
+(test (equal (cddaar '(((1 2 3)))) '(3)))
+(test (equal (cddadr '(1 (2 3 4))) '(4)))
+(test (equal (cdddar '((1 2 3 4))) '(4)))
+(test (equal (cddddr '(1 2 3 4 5)) '(5)))
+
+;; SUBLIS
+(test (equal (sublis '((x . 100) (z . zprime))
+                     '(plus x (minus g z x p) 4 . x))
+             '(PLUS 100 (MINUS G ZPRIME 100 P) 4 . 100)))
+(test (equal (sublis '(((+ x y) . (- x y)) ((- x y) . (+ x y)))
+                     '(* (/ (+ x y) (+ x p)) (- x y))
+                     :test #'equal)
+             '(* (/ (- X Y) (+ X P)) (+ X Y))))
+(let ((tree1 '(1 (1 2) ((1 2 3)) (((1 2 3 4))))))
+  (test (equal (sublis '((3 . "three")) tree1)
+               '(1 (1 2) ((1 2 "three")) (((1 2 "three" 4))))))
+  (test (equal (sublis '((t . "string"))
+                       (sublis '((1 . "") (4 . 44)) tree1)
+                       :key #'stringp)
+               '("string" ("string" 2) (("string" 2 3)) ((("string" 2 3 44))))))
+  (test (equal tree1 '(1 (1 2) ((1 2 3)) (((1 2 3 4)))))))
+(let ((tree2 '("one" ("one" "two") (("one" "Two" "three")))))
+  (test (equal (sublis '(("two" . 2)) tree2)
+               '("one" ("one" "two") (("one" "Two" "three")))))
+  (test (equal tree2 '("one" ("one" "two") (("one" "Two" "three")))))
+  (test (equal (sublis '(("two" . 2)) tree2 :test 'equal)
+               '("one" ("one" 2) (("one" "Two" "three"))))))
+
+;; SUBST
+(let ((tree1 '(1 (1 2) (1 2 3) (1 2 3 4))))
+  (test (equal (subst "two" 2 tree1) '(1 (1 "two") (1 "two" 3) (1 "two" 3 4))))
+  (test (equal (subst "five" 5 tree1) '(1 (1 2) (1 2 3) (1 2 3 4))))
+  (test (eq tree1 (subst "five" 5 tree1))) ; Implementation dependent
+  (test (equal tree1 '(1 (1 2) (1 2 3) (1 2 3 4)))))
+(test (equal (subst 'tempest 'hurricane
+                    '(shakespeare wrote (the hurricane)))
+             '(SHAKESPEARE WROTE (THE TEMPEST))))
+(test (equal (subst 'foo 'nil '(shakespeare wrote (twelfth night)))
+             '(SHAKESPEARE WROTE (TWELFTH NIGHT . FOO) . FOO)))
+(test (equal (subst '(a . cons) '(old . pair)
+                    '((old . spice) ((old . shoes) old . pair) (old . pair))
+                    :test #'equal)
+             '((OLD . SPICE) ((OLD . SHOES) A . CONS) (A . CONS))))
 
 ; COPY-TREE
 (test (let* ((foo (list '(1 2) '(3 4)))
@@ -14,9 +120,11 @@
 
 ; TREE-EQUAL
 (test (tree-equal '(1 2 3) '(1 2 3)))
+(test (not (tree-equal '(1 2 3) '(3 2 1))))
 (test (tree-equal '(1 (2 (3 4) 5) 6) '(1 (2 (3 4) 5) 6)))
-(test (tree-equal (cons 1 2) (cons 2 3)
-                  :test (lambda (a b) (not (= a b)))))
+(test (tree-equal (cons 1 2) (cons 2 3) :test (lambda (a b) (not (= a b)))))
+(test (tree-equal '(1 . 2) '(2 . 1) :test-not #'eql))
+(test (not (tree-equal '(1 . 2) '(1 . 2) :test-not #'eql)))
 
 ; FIRST to TENTH
 (let ((nums '(1 2 3 4 5 6 7 8 9 10)))
@@ -61,13 +169,18 @@
   (test (equal (assoc  1 alist) '(1 . 2)))
   (test (equal (rassoc 2 alist) '(1 . 2)))
   (test (not   (assoc  2 alist)))
-  (test (not   (rassoc 1 alist))))
+  (test (not   (rassoc 1 alist)))
+  (test (equal (assoc  3 alist :test-not #'=) '(1 . 2)))
+  (test (equal (rassoc 4 alist :test-not #'=) '(1 . 2)))
+  (test (equal (assoc  1 alist :key (lambda (x) (/ x 3))) '(3 . 4)))
+  (test (equal (rassoc 2 alist :key (lambda (x) (/ x 2))) '(3 . 4)))) 
 
 ; MEMBER
 (test (equal (member 2 '(1 2 3)) '(2 3)))
 (test (not   (member 4 '(1 2 3))))
 (test (equal (member 4 '((1 . 2) (3 . 4)) :key #'cdr) '((3 . 4))))
 (test (member '(2) '((1) (2) (3)) :test #'equal))
+(test (member 1 '(1 2 3) :test-not #'eql))
 
 ; ADJOIN
 (test (equal (adjoin 1 '(2 3))   '(1 2 3)))
@@ -79,11 +192,17 @@
 (test (not (intersection '(1 2 3) '(4 5 6))))
 (test (equal (intersection '((1) (2)) '((2) (3)) :test #'equal) '((2))))
 
-; SUBST
-; Can't really test this until EQUAL works properly on lists
-
 ; POP
 (test (let* ((foo '(1 2 3))
              (bar (pop foo)))
         (and (= bar 1)
              (= (car foo) 2))))
+
+;; MAPCAR
+(test (equal (mapcar #'+ '(1 2) '(3) '(4 5 6)) '(8)))
+
+;; MAPC
+(test (equal (mapc #'+ '(1 2) '(3) '(4 5 6)) '(1 2)))
+(test (let (foo)
+        (mapc (lambda (x y z) (push (+ x y z) foo)) '(1 2) '(3) '(4 5 6))
+        (equal foo '(8))))

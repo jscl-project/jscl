@@ -23,18 +23,24 @@
 (in-package :jscl)
 
 (defvar *source*
-  '(("boot"      :target)
-    ("compat"    :host)
-    ("utils"     :both)
-    ("list"      :target)
-    ("string"    :target)
-    ("print"     :target)
-    ("package"   :target)
-    ("ffi"       :target)
-    ("char"      :target)
-    ("read"      :both)
-    ("compiler"  :both)
-    ("toplevel"  :target)))
+  '(("boot"             :target)
+    ("compat"           :host)
+    ("utils"            :both)
+    ("list"             :target)
+    ("string"           :target)
+    ("sequence"         :target)
+    ("print"            :target)
+    ("package"          :target)
+    ("ffi"              :target)
+    ("misc"             :target)
+    ("numbers"          :target)
+    ("char"             :target)
+    ("read"             :both)
+    ("defstruct"        :both)
+    ("lambda-list"      :both)
+    ("backquote"        :both)
+    ("compiler"         :both)
+    ("toplevel"         :target)))
 
 (defun source-pathname
     (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
@@ -77,7 +83,6 @@
               (when (plusp (length compilation))
                 (write-string compilation out)))))))
 
-
 (defun dump-global-environment (stream)
   (flet ((late-compile (form)
            (write-string (ls-compile-toplevel form) stream)))
@@ -85,7 +90,7 @@
     ;; for the compiler and it can be dumped.
     (dolist (b (lexenv-function *environment*))
       (when (eq (binding-type b) 'macro)
-        (push *magic-unquote-marker* (binding-value b))))
+        (setf (binding-value b) `(,*magic-unquote-marker* ,(binding-value b)))))
     (late-compile `(setq *environment* ',*environment*))
     ;; Set some counter variable properly, so user compiled code will
     ;; not collide with the compiler itself.
@@ -100,7 +105,8 @@
 
 
 (defun bootstrap ()
-  (let ((*package* (find-package "JSCL")))
+  (let ((*features* (cons :jscl *features*))
+        (*package* (find-package "JSCL")))
     (setq *environment* (make-lexenv))
     (setq *literal-table* nil)
     (setq *variable-counter* 0

@@ -1,4 +1,4 @@
-;;; compiler.lisp --- 
+;;; compiler.lisp ---
 
 ;; copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
@@ -68,7 +68,7 @@
         (incf index))
       output)))
 
-#+common-lisp
+#-jscl
 (defun indent (&rest string)
   (with-output-to-string (*standard-output*)
     (with-input-from-string (input (apply #'code string))
@@ -86,62 +86,6 @@
 ;;; value will be used, so we can optimize to avoid the VALUES
 ;;; function call.
 (defvar *multiple-value-p* nil)
-
-;; A very simple defstruct built on lists. It supports just slot with
-;; an optional default initform, and it will create a constructor,
-;; predicate and accessors for you.
-(defmacro def!struct (name &rest slots)
-  (unless (symbolp name)
-    (error "It is not a full defstruct implementation."))
-  (let* ((name-string (symbol-name name))
-         (slot-descriptions
-          (mapcar (lambda (sd)
-                    (cond
-                      ((symbolp sd)
-                       (list sd))
-                      ((and (listp sd) (car sd) (cddr sd))
-                       sd)
-                      (t
-                       (error "Bad slot description `~S'." sd))))
-                  slots))
-         (predicate (intern (concat name-string "-P"))))
-    `(progn
-       ;; Constructor
-       (defun ,(intern (concat "MAKE-" name-string)) (&key ,@slot-descriptions)
-         (list ',name ,@(mapcar #'car slot-descriptions)))
-       ;; Predicate
-       (defun ,predicate (x)
-         (and (consp x) (eq (car x) ',name)))
-       ;; Copier
-       (defun ,(intern (concat "COPY-" name-string)) (x)
-         (copy-list x))
-       ;; Slot accessors
-       ,@(with-collect
-          (let ((index 1))
-            (dolist (slot slot-descriptions)
-              (let* ((name (car slot))
-                     (accessor-name (intern (concat name-string "-" (string name)))))
-                (collect
-                    `(defun ,accessor-name (x)
-                       (unless (,predicate x)
-                         (error "The object `~S' is not of type `~S'" x ,name-string))
-                       (nth ,index x)))
-                ;; TODO: Implement this with a higher level
-                ;; abstraction like defsetf or (defun (setf ..))
-                (collect
-                    `(define-setf-expander ,accessor-name (x)
-                       (let ((object (gensym))
-                             (new-value (gensym)))
-                         (values (list object)
-                                 (list x)
-                                 (list new-value)
-                                 `(progn
-                                    (rplaca (nthcdr ,',index ,object) ,new-value) 
-                                    ,new-value)
-                                 `(,',accessor-name ,object)))))
-                (incf index)))))
-       ',name)))
-
 
 ;;; Environment
 
@@ -554,28 +498,36 @@
       (incf index))
     output))
 
-(defvar *literal-table* nil)
-(defvar *literal-counter* 0)
-
-;;; BOOTSTRAP MAGIC: During bootstrap, we record the macro definitions
-;;; as lists. Once everything is compiled, we want to dump the whole
-;;; global environment to the output file to reproduce it in the
+;;; BOOTSTRAP MAGIC: We record the macro definitions as lists during
+;;; the bootstrap. Once everything is compiled, we want to dump the
+;;; whole global environment to the output file to reproduce it in the
 ;;; run-time. However, the environment must contain expander functions
 ;;; rather than lists. We do not know how to dump function objects
-;;; itself, so we mark the definitions with this object and the
+;;; itself, so we mark the list definitions with this object and the
 ;;; compiler will be called when this object has to be dumped.
 ;;; Backquote/unquote does a similar magic, but this use is exclusive.
+;;;
+;;; Indeed, perhaps to compile the object other macros need to be
+;;; evaluated. For this reason we define a valid macro-function for
+;;; this symbol.
 (defvar *magic-unquote-marker* (gensym "MAGIC-UNQUOTE"))
+#-jscl
+(setf (macro-function *magic-unquote-marker*)
+      (lambda (form &optional environment)
+        (declare (ignore environment))
+        (second form)))
+
+(defvar *literal-table* nil)
+(defvar *literal-counter* 0)
 
 (defun genlit ()
   (code "l" (incf *literal-counter*)))
 
 (defun dump-symbol (symbol)
-  #+common-lisp
+  #-jscl
   (let ((package (symbol-package symbol)))
     (if (eq package (find-package "KEYWORD"))
-        (code "(new Symbol(" (dump-string (symbol-name symbol)) ", "
-              (dump-string (package-name package)) "))")
+        (code "(new Symbol(" (dump-string (symbol-name symbol)) ", " (dump-string (package-name package)) "))")
         (code "(new Symbol(" (dump-string (symbol-name symbol)) "))")))
   #+jscl
   (let ((package (symbol-package symbol)))
@@ -606,13 +558,17 @@
     ((floatp sexp) (float-to-string sexp))
     ((characterp sexp) (code "\"" (escape-string (string sexp)) "\""))
     (t
-     (or (cdr (assoc sexp *literal-table* :test #'equal))
+     (or (cdr (assoc sexp *literal-table* :test #'eql))
          (let ((dumped (typecase sexp
                          (symbol (dump-symbol sexp))
                          (string (dump-string sexp))
                          (cons
+                          ;; BOOTSTRAP MAGIC: See the root file
+                          ;; jscl.lisp and the function
+                          ;; `dump-global-environment' for futher
+                          ;; information.
                           (if (eq (car sexp) *magic-unquote-marker*)
-                              (ls-compile (cdr sexp))
+                              (ls-compile (second sexp))
                               (dump-cons sexp)))
                          (array (dump-array sexp)))))
            (if (and recursive (not (symbolp sexp)))
@@ -620,6 +576,8 @@
                (let ((jsvar (genlit)))
                  (push (cons sexp jsvar) *literal-table*)
                  (toplevel-compilation (code "var " jsvar " = " dumped))
+                 (when (keywordp sexp)
+                   (toplevel-compilation (code jsvar ".value = " jsvar)))
                  jsvar)))))))
 
 
@@ -712,7 +670,14 @@
 (define-compilation progn (&rest body)
   (if (null (cdr body))
       (ls-compile (car body) *multiple-value-p*)
-      (js!selfcall (ls-compile-block body t))))
+      (code "("
+            (join
+             (remove-if #'null-or-empty-p
+                        (append
+                         (mapcar #'ls-compile (butlast body))
+                         (list (ls-compile (car (last body)) t))))
+                  ",")
+            ")")))
 
 (defun special-variable-p (x)
   (and (claimp x 'variable 'special) t))
@@ -761,7 +726,7 @@
                         variables)
                 ",")
           "){" *newline*
-          (let ((body (ls-compile-block body t)))
+          (let ((body (ls-compile-block body t t)))
             (indent (let-binding-wrapper dynamic-bindings body)))
           "})(" (join cvalues ",") ")")))
 
@@ -809,7 +774,7 @@
     (js!selfcall
       (let ((specials (remove-if-not #'special-variable-p (mapcar #'first bindings)))
             (body (concat (mapconcat #'let*-initialize-value bindings)
-                          (ls-compile-block body t))))
+                          (ls-compile-block body t t))))
         (let*-binding-wrapper specials body)))))
 
 
@@ -994,254 +959,6 @@
     (ls-compile-block forms)
     "return args;" *newline*))
 
-
-;;; Backquote implementation.
-;;;
-;;;    Author: Guy L. Steele Jr.     Date: 27 December 1985
-;;;    Tested under Symbolics Common Lisp and Lucid Common Lisp.
-;;;    This software is in the public domain.
-
-;;;    The following are unique tokens used during processing.
-;;;    They need not be symbols; they need not even be atoms.
-(defvar *comma* 'unquote)
-(defvar *comma-atsign* 'unquote-splicing)
-
-(defvar *bq-list* (make-symbol "BQ-LIST"))
-(defvar *bq-append* (make-symbol "BQ-APPEND"))
-(defvar *bq-list** (make-symbol "BQ-LIST*"))
-(defvar *bq-nconc* (make-symbol "BQ-NCONC"))
-(defvar *bq-clobberable* (make-symbol "BQ-CLOBBERABLE"))
-(defvar *bq-quote* (make-symbol "BQ-QUOTE"))
-(defvar *bq-quote-nil* (list *bq-quote* nil))
-
-;;; BACKQUOTE is an ordinary macro (not a read-macro) that processes
-;;; the expression foo, looking for occurrences of #:COMMA,
-;;; #:COMMA-ATSIGN, and #:COMMA-DOT.  It constructs code in strict
-;;; accordance with the rules on pages 349-350 of the first edition
-;;; (pages 528-529 of this second edition).  It then optionally
-;;; applies a code simplifier.
-
-;;; If the value of *BQ-SIMPLIFY* is non-NIL, then BACKQUOTE
-;;; processing applies the code simplifier.  If the value is NIL,
-;;; then the code resulting from BACKQUOTE is exactly that
-;;; specified by the official rules.
-(defparameter *bq-simplify* t)
-
-(defmacro backquote (x)
-  (bq-completely-process x))
-
-;;; Backquote processing proceeds in three stages:
-;;;
-;;; (1) BQ-PROCESS applies the rules to remove occurrences of
-;;; #:COMMA, #:COMMA-ATSIGN, and #:COMMA-DOT corresponding to
-;;; this level of BACKQUOTE.  (It also causes embedded calls to
-;;; BACKQUOTE to be expanded so that nesting is properly handled.)
-;;; Code is produced that is expressed in terms of functions
-;;; #:BQ-LIST, #:BQ-APPEND, and #:BQ-CLOBBERABLE.  This is done
-;;; so that the simplifier will simplify only list construction
-;;; functions actually generated by BACKQUOTE and will not involve
-;;; any user code in the simplification.  #:BQ-LIST means LIST,
-;;; #:BQ-APPEND means APPEND, and #:BQ-CLOBBERABLE means IDENTITY
-;;; but indicates places where "%." was used and where NCONC may
-;;; therefore be introduced by the simplifier for efficiency.
-;;;
-;;; (2) BQ-SIMPLIFY, if used, rewrites the code produced by
-;;; BQ-PROCESS to produce equivalent but faster code.  The
-;;; additional functions #:BQ-LIST* and #:BQ-NCONC may be
-;;; introduced into the code.
-;;;
-;;; (3) BQ-REMOVE-TOKENS goes through the code and replaces
-;;; #:BQ-LIST with LIST, #:BQ-APPEND with APPEND, and so on.
-;;; #:BQ-CLOBBERABLE is simply eliminated (a call to it being
-;;; replaced by its argument).  #:BQ-LIST* is replaced by either
-;;; LIST* or CONS (the latter is used in the two-argument case,
-;;; purely to make the resulting code a tad more readable).
-
-(defun bq-completely-process (x)
-  (let ((raw-result (bq-process x)))
-    (bq-remove-tokens (if *bq-simplify*
-                          (bq-simplify raw-result)
-                          raw-result))))
-
-(defun bq-process (x)
-  (cond ((atom x)
-         (list *bq-quote* x))
-        ((eq (car x) 'backquote)
-         (bq-process (bq-completely-process (cadr x))))
-        ((eq (car x) *comma*) (cadr x))
-        ((eq (car x) *comma-atsign*)
-         (error ",@~S after `" (cadr x)))
-        ;; ((eq (car x) *comma-dot*)
-        ;;  ;; (error ",.~S after `" (cadr x))
-        ;;  (error "ill-formed"))
-        (t (do ((p x (cdr p))
-                (q '() (cons (bracket (car p)) q)))
-               ((atom p)
-                (cons *bq-append*
-                      (nreconc q (list (list *bq-quote* p)))))
-             (when (eq (car p) *comma*)
-               (unless (null (cddr p))
-                 (error "Malformed ,~S" p))
-               (return (cons *bq-append*
-                             (nreconc q (list (cadr p))))))
-             (when (eq (car p) *comma-atsign*)
-               (error "Dotted ,@~S" p))
-             ;; (when (eq (car p) *comma-dot*)
-             ;;   ;; (error "Dotted ,.~S" p)
-             ;;   (error "Dotted"))
-             ))))
-
-;;; This implements the bracket operator of the formal rules.
-(defun bracket (x)
-  (cond ((atom x)
-         (list *bq-list* (bq-process x)))
-        ((eq (car x) *comma*)
-         (list *bq-list* (cadr x)))
-        ((eq (car x) *comma-atsign*)
-         (cadr x))
-        ;; ((eq (car x) *comma-dot*)
-        ;;  (list *bq-clobberable* (cadr x)))
-        (t (list *bq-list* (bq-process x)))))
-
-;;; This auxiliary function is like MAPCAR but has two extra
-;;; purposes: (1) it handles dotted lists; (2) it tries to make
-;;; the result share with the argument x as much as possible.
-(defun maptree (fn x)
-  (if (atom x)
-      (funcall fn x)
-      (let ((a (funcall fn (car x)))
-            (d (maptree fn (cdr x))))
-        (if (and (eql a (car x)) (eql d (cdr x)))
-            x
-            (cons a d)))))
-
-;;; This predicate is true of a form that when read looked
-;;; like %@foo or %.foo.
-(defun bq-splicing-frob (x)
-  (and (consp x)
-       (or (eq (car x) *comma-atsign*)
-           ;; (eq (car x) *comma-dot*)
-           )))
-
-;;; This predicate is true of a form that when read
-;;; looked like %@foo or %.foo or just plain %foo.
-(defun bq-frob (x)
-  (and (consp x)
-       (or (eq (car x) *comma*)
-           (eq (car x) *comma-atsign*)
-           ;; (eq (car x) *comma-dot*)
-           )))
-
-;;; The simplifier essentially looks for calls to #:BQ-APPEND and
-;;; tries to simplify them.  The arguments to #:BQ-APPEND are
-;;; processed from right to left, building up a replacement form.
-;;; At each step a number of special cases are handled that,
-;;; loosely speaking, look like this:
-;;;
-;;;  (APPEND (LIST a b c) foo) => (LIST* a b c foo)
-;;;       provided a, b, c are not splicing frobs
-;;;  (APPEND (LIST* a b c) foo) => (LIST* a b (APPEND c foo))
-;;;       provided a, b, c are not splicing frobs
-;;;  (APPEND (QUOTE (x)) foo) => (LIST* (QUOTE x) foo)
-;;;  (APPEND (CLOBBERABLE x) foo) => (NCONC x foo)
-(defun bq-simplify (x)
-  (if (atom x)
-      x
-      (let ((x (if (eq (car x) *bq-quote*)
-                   x
-                   (maptree #'bq-simplify x))))
-        (if (not (eq (car x) *bq-append*))
-            x
-            (bq-simplify-args x)))))
-
-(defun bq-simplify-args (x)
-  (do ((args (reverse (cdr x)) (cdr args))
-       (result
-         nil
-         (cond ((atom (car args))
-                (bq-attach-append *bq-append* (car args) result))
-               ((and (eq (caar args) *bq-list*)
-                     (notany #'bq-splicing-frob (cdar args)))
-                (bq-attach-conses (cdar args) result))
-               ((and (eq (caar args) *bq-list**)
-                     (notany #'bq-splicing-frob (cdar args)))
-                (bq-attach-conses
-                  (reverse (cdr (reverse (cdar args))))
-                  (bq-attach-append *bq-append*
-                                    (car (last (car args)))
-                                    result)))
-               ((and (eq (caar args) *bq-quote*)
-                     (consp (cadar args))
-                     (not (bq-frob (cadar args)))
-                     (null (cddar args)))
-                (bq-attach-conses (list (list *bq-quote*
-                                              (caadar args)))
-                                  result))
-               ((eq (caar args) *bq-clobberable*)
-                (bq-attach-append *bq-nconc* (cadar args) result))
-               (t (bq-attach-append *bq-append*
-                                    (car args)
-                                    result)))))
-      ((null args) result)))
-
-(defun null-or-quoted (x)
-  (or (null x) (and (consp x) (eq (car x) *bq-quote*))))
-
-;;; When BQ-ATTACH-APPEND is called, the OP should be #:BQ-APPEND
-;;; or #:BQ-NCONC.  This produces a form (op item result) but
-;;; some simplifications are done on the fly:
-;;;
-;;;  (op '(a b c) '(d e f g)) => '(a b c d e f g)
-;;;  (op item 'nil) => item, provided item is not a splicable frob
-;;;  (op item 'nil) => (op item), if item is a splicable frob
-;;;  (op item (op a b c)) => (op item a b c)
-(defun bq-attach-append (op item result)
-  (cond ((and (null-or-quoted item) (null-or-quoted result))
-         (list *bq-quote* (append (cadr item) (cadr result))))
-        ((or (null result) (equal result *bq-quote-nil*))
-         (if (bq-splicing-frob item) (list op item) item))
-        ((and (consp result) (eq (car result) op))
-         (list* (car result) item (cdr result)))
-        (t (list op item result))))
-
-;;; The effect of BQ-ATTACH-CONSES is to produce a form as if by
-;;; `(LIST* ,@items ,result) but some simplifications are done
-;;; on the fly.
-;;;
-;;;  (LIST* 'a 'b 'c 'd) => '(a b c . d)
-;;;  (LIST* a b c 'nil) => (LIST a b c)
-;;;  (LIST* a b c (LIST* d e f g)) => (LIST* a b c d e f g)
-;;;  (LIST* a b c (LIST d e f g)) => (LIST a b c d e f g)
-(defun bq-attach-conses (items result)
-  (cond ((and (every #'null-or-quoted items)
-              (null-or-quoted result))
-         (list *bq-quote*
-               (append (mapcar #'cadr items) (cadr result))))
-        ((or (null result) (equal result *bq-quote-nil*))
-         (cons *bq-list* items))
-        ((and (consp result)
-              (or (eq (car result) *bq-list*)
-                  (eq (car result) *bq-list**)))
-         (cons (car result) (append items (cdr result))))
-        (t (cons *bq-list** (append items (list result))))))
-
-;;; Removes funny tokens and changes (#:BQ-LIST* a b) into
-;;; (CONS a b) instead of (LIST* a b), purely for readability.
-(defun bq-remove-tokens (x)
-  (cond ((eq x *bq-list*) 'list)
-        ((eq x *bq-append*) 'append)
-        ((eq x *bq-nconc*) 'nconc)
-        ((eq x *bq-list**) 'list*)
-        ((eq x *bq-quote*) 'quote)
-        ((atom x) x)
-        ((eq (car x) *bq-clobberable*)
-         (bq-remove-tokens (cadr x)))
-        ((and (eq (car x) *bq-list**)
-              (consp (cddr x))
-              (null (cdddr x)))
-         (cons 'cons (maptree #'bq-remove-tokens (cdr x))))
-        (t (maptree #'bq-remove-tokens x))))
-
 (define-transformation backquote (form)
   (bq-completely-process form))
 
@@ -1366,6 +1083,7 @@
 (define-builtin-comparison >= ">=")
 (define-builtin-comparison <= "<=")
 (define-builtin-comparison = "==")
+(define-builtin-comparison /= "!=")
 
 (define-builtin numberp (x)
   (js!bool (code "(typeof (" x ") == \"number\")")))
@@ -1431,6 +1149,9 @@
 
 (define-builtin boundp (x)
   (js!bool (code "(" x ".value !== undefined)")))
+
+(define-builtin fboundp (x)
+  (js!bool (code "(" x ".fvalue !== undefined)")))
 
 (define-builtin symbol-value (x)
   (js!selfcall
@@ -1566,6 +1287,16 @@
 (define-builtin in (key object)
   (js!bool (code "(xstring(" key ") in (" object "))")))
 
+(define-builtin map-for-in (function object)
+  (js!selfcall
+   "var f = " function ";" *newline*
+   "var g = (typeof f === 'function' ? f : f.fvalue);" *newline*
+   "var o = " object ";" *newline*
+   "for (var key in o){" *newline*
+   (indent "g(" (if *multiple-value-p* "values" "pv") ", 1, o[key]);" *newline*)
+   "}"
+   " return " (ls-compile nil) ";" *newline*))
+
 (define-builtin functionp (x)
   (js!bool (code "(typeof " x " == 'function')")))
 
@@ -1578,6 +1309,14 @@
     "for (var i = 0; i < " n "; i++)" *newline*
     (indent "r.push(" (ls-compile nil) ");" *newline*)
     "return r;" *newline*))
+
+;;; FIXME: should take optional min-extension.
+;;; FIXME: should use fill-pointer instead of the absolute end of array
+(define-builtin vector-push-extend (new vector)
+  (js!selfcall
+    "var v = " vector ";" *newline*
+    "v.push(" new ");" *newline*
+    "return v;"))
 
 (define-builtin arrayp (x)
   (js!bool
@@ -1597,6 +1336,18 @@
     "var i = " n ";" *newline*
     "if (i < 0 || i >= x.length) throw 'Out of range';" *newline*
     "return x[i] = " value ";" *newline*))
+
+(define-builtin afind (value array)
+  (js!selfcall
+    "var v = " value ";" *newline*
+    "var x = " array ";" *newline*
+    "return x.indexOf(v);" *newline*))
+
+(define-builtin aresize (array new-size)
+  (js!selfcall
+    "var x = " array ";" *newline*
+    "var n = " new-size ";" *newline*
+    "return x.length = n;" *newline*))
 
 (define-builtin get-internal-real-time ()
   "(new Date()).getTime()")
@@ -1631,7 +1382,7 @@
             `(%js-vref ,var))))
 
 
-#+common-lisp
+#-jscl
 (defvar *macroexpander-cache*
   (make-hash-table :test #'eq))
 
@@ -1642,7 +1393,7 @@
     (if (and b (eq (binding-type b) 'macro))
         (let ((expander (binding-value b)))
           (cond
-            #+common-lisp
+            #-jscl
             ((gethash b *macroexpander-cache*)
              (setq expander (gethash b *macroexpander-cache*)))
             ((listp expander)
@@ -1655,7 +1406,7 @@
                ;; function with the compiled one.
                ;;
                #+jscl (setf (binding-value b) compiled)
-               #+common-lisp (setf (gethash b *macroexpander-cache*) compiled)
+               #-jscl (setf (gethash b *macroexpander-cache*) compiled)
                (setq expander compiled))))
           expander)
         nil)))
@@ -1670,7 +1421,7 @@
     ((and (consp form) (symbolp (car form)))
      (let ((macrofun (!macro-function (car form))))
        (if macrofun
-           (values (apply macrofun (cdr form)) t)
+           (values (funcall macrofun (cdr form)) t)
            (values form nil))))
     (t
      (values form nil))))
@@ -1689,18 +1440,21 @@
        (concat (translate-function function) arglist))
       ((and (symbolp function)
             #+jscl (eq (symbol-package function) (find-package "COMMON-LISP"))
-            #+common-lisp t)
+            #-jscl t)
        (code (ls-compile `',function) ".fvalue" arglist))
       (t
        (code (ls-compile `#',function) arglist)))))
 
-(defun ls-compile-block (sexps &optional return-last-p)
-  (if return-last-p
-      (code (ls-compile-block (butlast sexps))
-            "return " (ls-compile (car (last sexps)) *multiple-value-p*) ";")
-      (join-trailing
-       (remove-if #'null-or-empty-p (mapcar #'ls-compile sexps))
-       (concat ";" *newline*))))
+(defun ls-compile-block (sexps &optional return-last-p decls-allowed-p)
+  (multiple-value-bind (sexps decls)
+      (parse-body sexps :declarations decls-allowed-p)
+    (declare (ignore decls))
+    (if return-last-p
+        (code (ls-compile-block (butlast sexps) nil decls-allowed-p)
+              "return " (ls-compile (car (last sexps)) *multiple-value-p*) ";")
+        (join-trailing
+         (remove-if #'null-or-empty-p (mapcar #'ls-compile sexps))
+         (concat ";" *newline*)))))
 
 (defun ls-compile (sexp &optional multiple-value-p)
   (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)

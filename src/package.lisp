@@ -16,7 +16,7 @@
 (defvar *package-list* nil)
 
 (defun list-all-packages ()
-  *package-list*)
+  (copy-list *package-list*))
 
 (defun make-package (name &key use)
   (let ((package (new))
@@ -84,11 +84,14 @@
           (if (in "package" symbol)
               (find-package-or-fail (oget symbol "package"))
               *common-lisp-package*))
-         (symbols (%package-symbols package)))
+         (symbols (%package-symbols package))
+         (exports (%package-external-symbols package)))
     (oset symbol "package" package)
+    (oset symbols (symbol-name symbol) symbol)
+    ;; Turn keywords self-evaluated and export them.
     (when (eq package *keyword-package*)
-      (oset symbol "value" symbol))
-    (oset symbols (symbol-name symbol) symbol)))
+      (oset symbol "value" symbol)
+      (oset exports (symbol-name symbol) symbol))))
 
 (defun find-symbol (name &optional (package *package*))
   (let* ((package (find-package-or-fail package))
@@ -137,3 +140,42 @@
   (let ((exports (%package-external-symbols package)))
     (dolist (symb symbols t)
       (oset exports (symbol-name symb) symb))))
+
+(defun %map-external-symbols (function package)
+  (map-for-in function (%package-external-symbols package)))
+
+(defun %map-symbols (function package)
+  (map-for-in function (%package-symbols package))
+  (dolist (used (package-use-list package))
+    (%map-external-symbols function used)))
+
+(defun %map-all-symbols (function)
+  (dolist (package *package-list*)
+    (map-for-in function (%package-symbols package))))
+
+(defmacro do-symbols ((var &optional (package '*package*) result-form)
+                      &body body)
+  `(block nil
+     (%map-symbols
+      (lambda (,var) ,@body)
+      (find-package ,package))
+     ,result-form))
+
+(defmacro do-external-symbols ((var &optional (package '*package*)
+                                              result-form)
+                               &body body)
+  `(block nil
+     (%map-external-symbols
+      (lambda (,var) ,@body)
+      (find-package ,package))
+     ,result-form))
+
+(defmacro do-all-symbols ((var &optional result-form) &body body)
+  `(block nil (%map-all-symbols (lambda (,var) ,@body)) ,result-form))
+
+(defun find-all-symbols (string)
+  (let (symbols)
+    (dolist (package *package-list* symbols)
+      (multiple-value-bind (symbol status) (find-symbol string package)
+        (when status
+          (pushnew symbol symbols :test #'eq))))))

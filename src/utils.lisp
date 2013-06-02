@@ -23,7 +23,7 @@
   `(setq ,variable (concat ,variable (progn ,@form))))
 
 ;;; This couple of helper functions will be defined in both Common
-;;; Lisp and in Ecmalisp.
+;;; Lisp and in JSCL
 (defun ensure-list (x)
   (if (listp x)
       x
@@ -83,4 +83,11 @@
 
 (defun float-to-string (x)
   #+jscl (float-to-string x)
-  #+common-lisp (format nil "~f" x))
+  #-jscl (format nil "~f" x))
+
+(defun satisfies-test-p (x y &key key (test #'eql) testp (test-not #'eql) test-not-p)
+  (when (and testp test-not-p)
+    (error "Both test and test-not are set"))
+  (let ((key-val (if key (funcall key y) y))
+        (fn (if test-not-p (complement test-not) test)))
+    (funcall fn x key-val)))
