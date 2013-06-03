@@ -266,9 +266,9 @@
       (js!selfcall
         "var func = " (join strs) ";" *newline*
         (when name
-          (code "func.fname = '" (escape-string name) "';" *newline*))
+          (code "func.fname = \"" (escape-string name) "\";" *newline*))
         (when docstring
-          (code "func.docstring = '" (escape-string docstring) "';" *newline*))
+          (code "func.docstring = \"" (escape-string docstring) "\";" *newline*))
         "return func;" *newline*)
       (apply #'code strs)))
 
