@@ -34,6 +34,7 @@
     ("ffi"              :target)
     ("misc"             :target)
     ("numbers"          :target)
+    ("char"             :target)
     ("read"             :both)
     ("defstruct"        :both)
     ("lambda-list"      :both)
