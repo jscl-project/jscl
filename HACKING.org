@@ -5,3 +5,11 @@
     - =(jscl:bootstrap)= will generate jscl.js
     - Add tests
     - Open tests.html in your browser to see your failed tests
+** Code organization, style, etc.
+*** Every definition should include documentation and unit tests.
+*** Definitions are organized in different files following CLHS chapters.
+*** Inside every file definition ordering should follow each CLHS dictionary index. This should make easier to find what has already been defined and what has not been defined yet.
+*** Definitions should follow CLHS naming (e. g., cons definition should be (defun cons (object-1 object-2) ...), not (defun cons (x y)) or (defun cons (obj1 obj2)).
+*** Tests should follow the same organization as definitions.
+*** CLHS examples can be used as tests.
+*** Documentation strings should not be taken from CLHS (due to license issues). It is recommended to take them from SBCL instead of reinventing them.
