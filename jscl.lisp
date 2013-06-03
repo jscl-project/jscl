@@ -38,6 +38,7 @@
     ("read"             :both)
     ("defstruct"        :both)
     ("lambda-list"      :both)
+    ("backquote"        :both)
     ("compiler"         :both)
     ("toplevel"         :target)))
 
