@@ -194,7 +194,7 @@
                          (#\space "space")
                          (otherwise (string form)))))
               ((stringp form) (if *print-escape*
-                                  (concat "\"" (escape-string form) "\"")
+                                  (escape-string form)
                                   form))
               ((functionp form)
                (let ((name (oget form "fname")))

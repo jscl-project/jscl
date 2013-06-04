@@ -266,9 +266,9 @@
       (js!selfcall
         "var func = " (join strs) ";" *newline*
         (when name
-          (code "func.fname = \"" (escape-string name) "\";" *newline*))
+          (code "func.fname = " (escape-string name) ";" *newline*))
         (when docstring
-          (code "func.docstring = \"" (escape-string docstring) "\";" *newline*))
+          (code "func.docstring = " (escape-string docstring) ";" *newline*))
         "return func;" *newline*)
       (apply #'code strs)))
 
@@ -482,21 +482,41 @@
 
 
 ;;; Compilation of literals an object dumping
-
 (defun escape-string (string)
-  (let ((output "")
-        (index 0)
-        (size (length string)))
-    (while (< index size)
-      (let ((ch (char string index)))
-        (when (or (char= ch #\") (char= ch #\\))
-          (setq output (concat output "\\")))
-        (when (or (char= ch #\newline))
-          (setq output (concat output "\\"))
-          (setq ch #\n))
-        (setq output (concat output (string ch))))
-      (incf index))
-    output))
+  (let ((index 0)
+        (size (length string))
+        (seen-single-quote nil)
+        (seen-double-quote nil))
+    (flet ((%escape-string (string escape-single-quote-p)
+             (let ((output "")
+                   (index 0))
+               (while (< index size)
+                 (let ((ch (char string index)))
+                   (when (char= ch #\\)
+                     (setq output (concat output "\\")))
+                   (when (and escape-single-quote-p (char= ch #\'))
+                     (setq output (concat output "\\")))
+                   (when (char= ch #\newline)
+                     (setq output (concat output "\\"))
+                     (setq ch #\n))
+                   (setq output (concat output (string ch))))
+                 (incf index))
+               output)))
+      ;; First, scan the string for single/double quotes
+      (while (< index size)
+        (let ((ch (char string index)))
+          (when (char= ch #\')
+            (setq seen-single-quote t))
+          (when (char= ch #\")
+            (setq seen-double-quote t)))
+        (incf index))
+      ;; Then pick the appropriate way to escape the quotes
+      (cond
+        ((not seen-single-quote)
+         (concat "'"   (%escape-string string nil) "'"))
+        ((not seen-double-quote)
+         (concat "\""  (%escape-string string nil) "\""))
+        (t (concat "'" (%escape-string string t)   "'"))))))
 
 ;;; BOOTSTRAP MAGIC: We record the macro definitions as lists during
 ;;; the bootstrap. Once everything is compiled, we want to dump the
@@ -550,13 +570,13 @@
     (concat "[" (join (mapcar #'literal elements) ", ") "]")))
 
 (defun dump-string (string)
-  (code "make_lisp_string(\"" (escape-string string) "\")"))
+  (code "make_lisp_string(" (escape-string string) ")"))
 
 (defun literal (sexp &optional recursive)
   (cond
     ((integerp sexp) (integer-to-string sexp))
     ((floatp sexp) (float-to-string sexp))
-    ((characterp sexp) (code "\"" (escape-string (string sexp)) "\""))
+    ((characterp sexp) (escape-string (string sexp)))
     (t
      (or (cdr (assoc sexp *literal-table* :test #'eql))
          (let ((dumped (typecase sexp
