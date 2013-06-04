@@ -319,7 +319,7 @@
       ;; No package prefix
       ((= index size)
        (setq name string)
-       (setq package *package*)
+       (setq package (package-name *package*))
        (setq internalp t))
       (t
        ;; Package prefix
@@ -332,7 +332,7 @@
          (incf index))
        (setq name (subseq string index))))
     ;; Canonalize symbol name and package
-    (setq name (if (equal package "JS")
+    (setq name (if (string= package "JS")
                    (setq name (unescape-token name))
                    (setq name (string-upcase-noescaped name))))
     (setq package (find-package package))
