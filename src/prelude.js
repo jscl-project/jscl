@@ -51,12 +51,55 @@ function QIList(){
     }
 }
 
+// Return a new Array of strings, each either length-1, or length-2 (a UTF-16 surrogate pair).
+function codepoints(string) {
+    return string.split(/(?![\udc00-\udfff])/);
+}
 
 // Create and return a lisp string for the Javascript string STRING.
 function make_lisp_string (string){
-    var array = string.split("");
-    array.stringp = 1;
+    var array = codepoints(string);
+    array.stringp = 1
     return array;
+}
+
+function char_to_codepoint(ch) {
+    if (ch.length == 1) {
+        return ch.charCodeAt(0);
+    } else {
+        var xh = ch.charCodeAt(0) - 0xD800;
+        var xl = ch.charCodeAt(1) - 0xDC00;
+        return 0x10000 + (xh << 10) + (xl);
+    }
+}
+
+function char_from_codepoint(x) {
+    if (x <= 0xFFFF) {
+        return String.fromCharCode(x);
+    } else {
+        x -= 0x10000;
+        var xh = x >> 10;
+        var xl = x & 0x3FF;
+        return String.fromCharCode(0xD800 + xh) + String.fromCharCode(0xDC00 + xl);
+    }
+}
+
+// if a char (JS string) has the same number of codepoints after .toUpperCase(), return that, else the original.
+function safe_char_upcase(x) {
+    var xu = x.toUpperCase();
+    if (codepoints(xu).length == 1) {
+        return xu;
+    } else {
+        return x;
+    }
+}
+function safe_char_downcase(x) {
+    var xl = x.toLowerCase();
+    if (codepoints(xl).length == 1) {
+        return xl;
+    } else {
+        return x;
+    }
 }
 
 function xstring(x){ return x.join(''); }

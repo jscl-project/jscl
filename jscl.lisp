@@ -27,6 +27,7 @@
     ("compat"           :host)
     ("utils"            :both)
     ("numbers"          :target)
+    ("char"             :target)
     ("list"             :target)
     ("array"            :target)
     ("string"           :target)

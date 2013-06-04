@@ -1178,23 +1178,23 @@
 
 (define-builtin char-code (x)
   (type-check (("x" "string" x))
-    "x.charCodeAt(0)"))
+    "char_to_codepoint(x)"))
 
 (define-builtin code-char (x)
   (type-check (("x" "number" x))
-    "String.fromCharCode(x)"))
+    "char_from_codepoint(x)"))
 
 (define-builtin characterp (x)
   (js!bool
    (js!selfcall
      "var x = " x ";" *newline*
-     "return (typeof(" x ") == \"string\") && x.length == 1;")))
+     "return (typeof(" x ") == \"string\") && (x.length == 1 || x.length == 2);")))
 
 (define-builtin char-upcase (x)
-  (code x ".toUpperCase()"))
+  (code "safe_char_upcase(" x ")"))
 
 (define-builtin char-downcase (x)
-  (code x ".toLowerCase()"))
+  (code "safe_char_downcase(" x ")"))
 
 (define-builtin stringp (x)
   (js!bool
