@@ -250,7 +250,15 @@
       (#\J
        (unless (char= (%peek-char stream) #\:)
          (error "FFI descriptor must start with a semicolon."))
-       `(oget *root* ,(subseq (read-until stream #'terminalp) 1)))
+       (let ((descriptor (subseq (read-until stream #'terminalp) 1))
+             (subdescriptors nil))
+         (do* ((start 0 (1+ end))
+               (end (position #\: (subseq descriptor start))
+                    (position #\: (subseq descriptor start))))
+              ((null end)
+               (push (subseq descriptor start) subdescriptors)
+               `(oget *root* ,@(reverse subdescriptors)))
+           (push (subseq descriptor start end) subdescriptors))))
       (otherwise
        (cond
          ((and ch (digit-char-p ch))
