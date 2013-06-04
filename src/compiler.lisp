@@ -1190,12 +1190,6 @@
      "var x = " x ";" *newline*
      "return (typeof(" x ") == \"string\") && (x.length == 1 || x.length == 2);")))
 
-(define-builtin char-to-string (x)
-  (js!selfcall
-    "var r = [" x "];" *newline*
-    "r.type = 'character';"
-    "return r"))
-
 (define-builtin char-upcase (x)
   (code "safe_char_upcase(" x ")"))
 
@@ -1206,30 +1200,7 @@
   (js!bool
    (js!selfcall
      "var x = " x ";" *newline*
-     "return typeof(x) == 'object' && 'length' in x && x.type == 'character';")))
-
-(define-builtin string-upcase (x)
-  (code "make_lisp_string(xstring(" x ").toUpperCase())"))
-
-(define-builtin string-length (x)
-  (code x ".length"))
-
-(define-raw-builtin slice (vector a &optional b)
-  (js!selfcall
-    "var vector = " (ls-compile vector) ";" *newline*
-    "var a = " (ls-compile a) ";" *newline*
-    "var b;" *newline*
-    (when b (code "b = " (ls-compile b) ";" *newline*))
-    "return vector.slice(a,b);" *newline*))
-
-(define-builtin char (string index)
-  (code string "[" index "]"))
-
-(define-builtin concat-two (string1 string2)
-  (js!selfcall
-    "var r = " string1 ".concat(" string2 ");" *newline*
-    "r.type = 'character';"
-    "return r;" *newline*))
+     "return typeof(x) == 'object' && 'length' in x && x.stringp == 1;")))
 
 (define-raw-builtin funcall (func &rest args)
   (js!selfcall
@@ -1303,51 +1274,48 @@
 (define-builtin write-string (x)
   (code "lisp.write(" x ")"))
 
-(define-builtin make-array (n)
-  (js!selfcall
-    "var r = [];" *newline*
-    "for (var i = 0; i < " n "; i++)" *newline*
-    (indent "r.push(" (ls-compile nil) ");" *newline*)
-    "return r;" *newline*))
 
-;;; FIXME: should take optional min-extension.
-;;; FIXME: should use fill-pointer instead of the absolute end of array
-(define-builtin vector-push-extend (new vector)
-  (js!selfcall
-    "var v = " vector ";" *newline*
-    "v.push(" new ");" *newline*
-    "return v;"))
+;;; Storage vectors. They are used to implement arrays and (in the
+;;; future) structures.
 
-(define-builtin arrayp (x)
+(define-builtin storage-vector-p (x)
   (js!bool
    (js!selfcall
      "var x = " x ";" *newline*
      "return typeof x === 'object' && 'length' in x;")))
 
-(define-builtin aref (array n)
+(define-builtin make-storage-vector (n)
   (js!selfcall
-    "var x = " "(" array ")[" n "];" *newline*
+    "var r = [];" *newline*
+    "r.length = " n ";" *newline*
+    "return r;" *newline*))
+
+(define-builtin storage-vector-size (x)
+  (code x ".length"))
+
+(define-builtin resize-storage-vector (vector new-size)
+  (code "(" vector ".length = " new-size ")"))
+
+(define-builtin storage-vector-ref (vector n)
+  (js!selfcall
+    "var x = " "(" vector ")[" n "];" *newline*
     "if (x === undefined) throw 'Out of range';" *newline*
     "return x;" *newline*))
 
-(define-builtin aset (array n value)
+(define-builtin storage-vector-set (vector n value)
   (js!selfcall
-    "var x = " array ";" *newline*
+    "var x = " vector ";" *newline*
     "var i = " n ";" *newline*
     "if (i < 0 || i >= x.length) throw 'Out of range';" *newline*
     "return x[i] = " value ";" *newline*))
 
-(define-builtin afind (value array)
+(define-builtin concatenate-storage-vector (sv1 sv2)
   (js!selfcall
-    "var v = " value ";" *newline*
-    "var x = " array ";" *newline*
-    "return x.indexOf(v);" *newline*))
-
-(define-builtin aresize (array new-size)
-  (js!selfcall
-    "var x = " array ";" *newline*
-    "var n = " new-size ";" *newline*
-    "return x.length = n;" *newline*))
+    "var sv1 = " sv1 ";" *newline*
+    "var r = sv1.concat(" sv2 ");" *newline*
+    "r.type = sv1.type;" *newline*
+    "r.stringp = sv1.stringp;" *newline*
+    "return r;" *newline*))
 
 (define-builtin get-internal-real-time ()
   "(new Date()).getTime()")

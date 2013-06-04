@@ -13,10 +13,23 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
+(defun stringp (s)
+  (stringp s))
+
+(defun string-length (string)
+  (storage-vector-size string))
+
+(defun make-string (n &key initial-element)
+  (make-array n :element-type 'character :initial-element initial-element))
+
+(defun char (string index)
+  (unless (stringp string) (error "~S is not a string" string))
+  (storage-vector-ref string index))
+
 (defun string (x)
   (cond ((stringp x) x)
         ((symbolp x) (symbol-name x))
-        (t (char-to-string x))))
+        (t (make-string 1 :initial-element x))))
 
 (defun string= (s1 s2)
   (let* ((s1 (string s1))
@@ -38,9 +51,6 @@
                (when (and (= i (1- len-1)) (> len-2 len-1))
                  (return-from string< (1+ i))))))))
 
-(defun stringp (s)
-  (stringp s))
-
 (define-setf-expander char (string index)
   (let ((g!string (gensym))
         (g!index (gensym))
@@ -50,3 +60,20 @@
             (list g!value)
             `(aset ,g!string ,g!index ,g!value)
             `(char ,g!string ,g!index))))
+
+
+(defun concat (&rest strs)
+  (flet ((concat-two (str1 str2)
+           (concatenate-storage-vector str1 str2)))
+    (!reduce #'concat-two strs "")))
+
+
+(defun string-upcase (string)
+  (let ((new (make-string (length string))))
+    (dotimes (i (length string) new)
+      (aset new i (char-upcase (char string i))))))
+
+(defun string-downcase (string)
+  (let ((new (make-string (length string))))
+    (dotimes (i (length string) new)
+      (aset new i (char-downcase (char string i))))))
