@@ -62,21 +62,10 @@
             `(char ,g!string ,g!index))))
 
 
-(defun concat-two (string1 string2)
-  (let* ((len1 (length string1))
-         (len2 (length string2))
-         (string (make-array (+ len1 len2) :element-type 'character))
-         (i 0))
-    (dotimes (j len1)
-      (aset string i (char string1 j))
-      (incf i))
-    (dotimes (j len2)
-      (aset string i (char string2 j))
-      (incf i))
-    string))
-
 (defun concat (&rest strs)
-  (!reduce #'concat-two strs ""))
+  (flet ((concat-two (str1 str2)
+           (concatenate-storage-vector str1 str2)))
+    (!reduce #'concat-two strs "")))
 
 
 (defun string-upcase (string)

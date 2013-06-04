@@ -87,7 +87,7 @@
 (defvar *gensym-counter* 0)
 (defun gensym (&optional (prefix "G"))
   (setq *gensym-counter* (+ *gensym-counter* 1))
-  (make-symbol (concat-two prefix (integer-to-string *gensym-counter*))))
+  (make-symbol (concat prefix (integer-to-string *gensym-counter*))))
 
 (defun boundp (x)
   (boundp x))
@@ -332,9 +332,6 @@
      (oget seq "length"))
     ((listp seq)
      (list-length seq))))
-
-(defun concat-two (s1 s2)
-  (concat-two s1 s2))
 
 (defmacro with-collect (&body body)
   (let ((head (gensym))

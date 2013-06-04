@@ -1309,7 +1309,13 @@
     "if (i < 0 || i >= x.length) throw 'Out of range';" *newline*
     "return x[i] = " value ";" *newline*))
 
-
+(define-builtin concatenate-storage-vector (sv1 sv2)
+  (js!selfcall
+    "var sv1 = " sv1 ";" *newline*
+    "var r = sv1.concat(" sv2 ");" *newline*
+    "r.type = sv1.type;" *newline*
+    "r.stringp = sv1.stringp;" *newline*
+    "return r;" *newline*))
 
 (define-builtin get-internal-real-time ()
   "(new Date()).getTime()")
