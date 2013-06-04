@@ -1242,35 +1242,6 @@
 (define-builtin %throw (string)
   (js!selfcall "throw " string ";" *newline*))
 
-(define-builtin new () "{}")
-
-(define-builtin objectp (x)
-  (js!bool (code "(typeof (" x ") === 'object')")))
-
-(define-builtin lisp-to-js (x) (code "lisp_to_js(" x ")"))
-(define-builtin js-to-lisp (x) (code "js_to_lisp(" x ")"))
-
-(define-builtin oget (object key)
-  (js!selfcall
-    "var tmp = " "(" object ")[xstring(" key ")];" *newline*
-    "return tmp == undefined? " (ls-compile nil) ": tmp ;" *newline*))
-
-(define-builtin oset (object key value)
-  (code "((" object ")[xstring(" key ")] = " value ")"))
-
-(define-builtin in (key object)
-  (js!bool (code "(xstring(" key ") in (" object "))")))
-
-(define-builtin map-for-in (function object)
-  (js!selfcall
-   "var f = " function ";" *newline*
-   "var g = (typeof f === 'function' ? f : f.fvalue);" *newline*
-   "var o = " object ";" *newline*
-   "for (var key in o){" *newline*
-   (indent "g(" (if *multiple-value-p* "values" "pv") ", 1, o[key]);" *newline*)
-   "}"
-   " return " (ls-compile nil) ";" *newline*))
-
 (define-builtin functionp (x)
   (js!bool (code "(typeof " x " == 'function')")))
 
@@ -1335,6 +1306,45 @@
 
 
 ;;; Javascript FFI
+
+(define-builtin new () "{}")
+
+(define-builtin oget* (object key)
+  (js!selfcall
+    "var tmp = " "(" object ")[xstring(" key ")];" *newline*
+    "return tmp == undefined? " (ls-compile nil) ": tmp ;" *newline*))
+
+(define-builtin oset* (object key value)
+  (code "((" object ")[xstring(" key ")] = " value ")"))
+
+(define-builtin oget (object key)
+  (js!selfcall
+    "var tmp = " "(" object ")[xstring(" key ")];" *newline*
+    "return tmp == undefined? " (ls-compile nil) ": js_to_lisp(tmp);" *newline*))
+
+(define-builtin oset (object key value)
+  (code "((" object ")[xstring(" key ")] = lisp_to_js(" value "))"))
+
+
+(define-builtin objectp (x)
+  (js!bool (code "(typeof (" x ") === 'object')")))
+
+(define-builtin lisp-to-js (x) (code "lisp_to_js(" x ")"))
+(define-builtin js-to-lisp (x) (code "js_to_lisp(" x ")"))
+
+
+(define-builtin in (key object)
+  (js!bool (code "(xstring(" key ") in (" object "))")))
+
+(define-builtin map-for-in (function object)
+  (js!selfcall
+   "var f = " function ";" *newline*
+   "var g = (typeof f === 'function' ? f : f.fvalue);" *newline*
+   "var o = " object ";" *newline*
+   "for (var key in o){" *newline*
+   (indent "g(" (if *multiple-value-p* "values" "pv") ", 1, o[key]);" *newline*)
+   "}"
+   " return " (ls-compile nil) ";" *newline*))
 
 (define-compilation %js-vref (var)
   (code "js_to_lisp(" var ")"))

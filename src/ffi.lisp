@@ -32,3 +32,5 @@
       (%define-symbol-macro symbol `(%js-vref ,(string symbol))))))
 
 (setq *intern-hook* #'ffi-intern-hook)
+
+(defvar *root* (%js-vref "window"))
