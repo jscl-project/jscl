@@ -1247,6 +1247,9 @@
 (define-builtin objectp (x)
   (js!bool (code "(typeof (" x ") === 'object')")))
 
+(define-builtin lisp-to-js (x) (code "lisp_to_js(" x ")"))
+(define-builtin js-to-lisp (x) (code "js_to_lisp(" x ")"))
+
 (define-builtin oget (object key)
   (js!selfcall
     "var tmp = " "(" object ")[xstring(" key ")];" *newline*
