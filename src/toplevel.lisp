@@ -249,6 +249,8 @@
 
 (setq *package* *user-package*)
 
+(defvar *root* (%js-vref "window"))
+
 ;;; Set some external entry point to the Lisp implementation to the
 ;;; console. It would not be necessary when FFI is finished.
 (let ((*root* #j:lisp))
