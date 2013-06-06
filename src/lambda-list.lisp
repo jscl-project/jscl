@@ -29,7 +29,7 @@
 (def!struct auxvar
   variable initform)
 
-(def!struct d-lambda-list
+(def!struct lambda-list
   wholevar
   reqvars
   optvars
@@ -104,10 +104,10 @@
 (defun parse-destructuring-lambda-list (lambda-list)
   (let (;; Destructured lambda list structure where we accumulate the
         ;; results of the parsing.
-        (d-ll (make-d-lambda-list))
+        (ll (make-lambda-list))
         ;; List of lambda list keywords which we have already seen.
         (lambda-keywords nil))
-    (flet ( ;; Check if we are in the beginning of the section NAME in
+    (flet (;; Check if we are in the beginning of the section NAME in
            ;; the lambda list. It checks also if the section is in the
            ;; proper place and it is new.
            (lambda-section (name)
@@ -128,51 +128,51 @@
       ;; &whole var
       (when (lambda-section '&whole)
         (let ((wholevar (pop lambda-list)))
-          (setf (d-lambda-list-wholevar d-ll) (var-or-pattern wholevar))))
+          (setf (lambda-list-wholevar ll) (var-or-pattern wholevar))))
       
       ;; required vars
       (while (in-section-p)
         (let ((var (pop lambda-list)))
-          (push (var-or-pattern var) (d-lambda-list-reqvars d-ll))))
-      (setf (d-lambda-list-reqvars d-ll)
-            (reverse (d-lambda-list-reqvars d-ll)))
+          (push (var-or-pattern var) (lambda-list-reqvars ll))))
+      (setf (lambda-list-reqvars ll)
+            (reverse (lambda-list-reqvars ll)))
       
       ;; optional vars
       (when (lambda-section '&optional)
         (while (in-section-p)
           (push (parse-optvar (pop lambda-list))
-                (d-lambda-list-optvars d-ll)))
-        (setf (d-lambda-list-optvars d-ll)
-              (reverse (d-lambda-list-optvars d-ll))))
+                (lambda-list-optvars ll)))
+        (setf (lambda-list-optvars ll)
+              (reverse (lambda-list-optvars ll))))
       
       ;; Dotted lambda-list and &rest/&body vars. If the lambda-list
       ;; is dotted. Convert it the tail to a &rest and finish.
       (when (and lambda-list (atom lambda-list))
-        (push lambda-list (d-lambda-list-restvar d-ll))
+        (push lambda-list (lambda-list-restvar ll))
         (setq lambda-list nil))
       (when (find (car lambda-list) '(&body &rest))
         (pop lambda-list)
-        (setf (d-lambda-list-restvar d-ll)
+        (setf (lambda-list-restvar ll)
               (var-or-pattern (pop lambda-list))))
 
       ;; Keyword arguments
       (when (lambda-section '&key)
         (while (in-section-p)
           (push (parse-keyvar (pop lambda-list))
-                (d-lambda-list-keyvars d-ll)))
-        (setf (d-lambda-list-keyvars d-ll)
-              (reverse (d-lambda-list-keyvars d-ll))))      
+                (lambda-list-keyvars ll)))
+        (setf (lambda-list-keyvars ll)
+              (reverse (lambda-list-keyvars ll))))      
       (when (lambda-section '&allow-other-keys)
-        (setf (d-lambda-list-allow-other-keys d-ll) t))
+        (setf (lambda-list-allow-other-keys ll) t))
 
       ;; Aux variables
       (when (lambda-section '&aux)
         (while (in-section-p)
           (push (parse-auxvar (pop lambda-list))
-                (d-lambda-list-auxvars d-ll)))
-        (setf (d-lambda-list-auxvars d-ll)
-              (reverse (d-lambda-list-auxvars d-ll))))
-      d-ll)))
+                (lambda-list-auxvars ll)))
+        (setf (lambda-list-auxvars ll)
+              (reverse (lambda-list-auxvars ll))))
+      ll)))
 
 
 ;;;; Destructuring
@@ -233,7 +233,7 @@
 
 
 (defun !expand-destructuring-bind (lambda-list expression &rest body)
-  (multiple-value-bind (d-ll)
+  (multiple-value-bind (ll)
       (parse-destructuring-lambda-list lambda-list)
     (let ((bindings '()))
       (labels ( ;; Return a chain of the form (CAR (CDR (CDR ... (CDR X))),
@@ -253,27 +253,27 @@
                    ((symbolp pattern)
                     (push `(,pattern ,form) bindings)
                     pattern)
-                   ((d-lambda-list-p pattern)
+                   ((lambda-list-p pattern)
                     (compute-bindings pattern form))))
                
-               ;; Compute the bindings for the full D-LAMBDA-LIST d-ll
+               ;; Compute the bindings for the full LAMBDA-LIST ll
                ;; against FORM.
-               (compute-bindings (d-ll form)
-                 (let ((reqvar-count (length (d-lambda-list-reqvars d-ll)))
-                       (optvar-count (length (d-lambda-list-optvars d-ll)))
-                       (whole (or (d-lambda-list-wholevar d-ll) (gensym))))
+               (compute-bindings (ll form)
+                 (let ((reqvar-count (length (lambda-list-reqvars ll)))
+                       (optvar-count (length (lambda-list-optvars ll)))
+                       (whole (or (lambda-list-wholevar ll) (gensym))))
                    ;; Create a binding for the whole expression
-                   ;; FORM. It will match to D-LL, so we validate the
+                   ;; FORM. It will match to LL, so we validate the
                    ;; number of elements on the result of FORM.
                    (compute-pbindings whole `(validate-reqvars ,form ,reqvar-count))
                    
                    (let ((count 0))
                      ;; Required vars
-                     (dolist (reqvar (d-lambda-list-reqvars d-ll))
+                     (dolist (reqvar (lambda-list-reqvars ll))
                        (compute-pbindings reqvar (nth-chain whole count))
                        (incf count))
                      ;; Optional vars
-                     (dolist (optvar (d-lambda-list-optvars d-ll))
+                     (dolist (optvar (lambda-list-optvars ll))
                        (when (optvar-supplied-p-parameter optvar)
                          (compute-pbindings (optvar-supplied-p-parameter optvar)
                                             `(not (null ,(nth-chain whole count t)))))
@@ -293,9 +293,9 @@
                      ;; each time. We also include validation of
                      ;; keywords if there is any.
                      (let* ((chain (nth-chain whole (+ reqvar-count optvar-count) t))
-                            (restvar (d-lambda-list-restvar d-ll))
+                            (restvar (lambda-list-restvar ll))
                             (pattern (or restvar (gensym)))
-                            (keywords (mapcar #'keyvar-keyword-name (d-lambda-list-keyvars d-ll)))
+                            (keywords (mapcar #'keyvar-keyword-name (lambda-list-keyvars ll)))
                             (rest
                              ;; Create a binding for the rest of the
                              ;; arguments. If there is keywords, then
@@ -305,12 +305,12 @@
                              ;; to say, there is no more arguments
                              ;; that we expect.
                              (cond
-                               (keywords (compute-pbindings pattern `(validate-keyvars ,chain ',keywords ,(d-lambda-list-allow-other-keys d-ll))))
+                               (keywords (compute-pbindings pattern `(validate-keyvars ,chain ',keywords ,(lambda-list-allow-other-keys ll))))
                                (restvar  (compute-pbindings pattern chain))
                                (t        (compute-pbindings pattern `(validate-max-args ,chain))))))
-                       (when (d-lambda-list-keyvars d-ll)
+                       (when (lambda-list-keyvars ll)
                          ;; Keywords
-                         (dolist (keyvar (d-lambda-list-keyvars d-ll))
+                         (dolist (keyvar (lambda-list-keyvars ll))
                            (let ((variable (keyvar-variable keyvar))
                                  (keyword (keyvar-keyword-name keyvar))
                                  (supplied (or (keyvar-supplied-p-parameter keyvar)
@@ -321,14 +321,14 @@
                                                               (keyword-lookup ,keyword ,rest)
                                                               ,(keyvar-initform keyvar)))))))
                      ;; Aux variables
-                     (dolist (auxvar (d-lambda-list-auxvars d-ll))
+                     (dolist (auxvar (lambda-list-auxvars ll))
                        (compute-pbindings (auxvar-variable auxvar) (auxvar-initform auxvar))))
                    
                    whole)))
 
         ;; Macroexpansion. Compute bindings and generate code for them
         ;; and some necessary checking.
-        (compute-bindings d-ll expression)
+        (compute-bindings ll expression)
         `(let* ,(reverse bindings)
            ,@body)))))
 
