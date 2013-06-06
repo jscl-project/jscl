@@ -1309,25 +1309,30 @@
 
 (define-builtin new () "{}")
 
-(define-builtin oget* (object key)
-  (js!selfcall
-    "var tmp = " "(" object ")[xstring(" key ")];" *newline*
-    "return tmp == undefined? " (ls-compile nil) ": tmp ;" *newline*))
-
-(define-builtin oset* (object key value)
-  (code "((" object ")[xstring(" key ")] = " value ")"))
-
-(define-raw-builtin oget (object key &rest keys)
+(define-raw-builtin oget* (object key &rest keys)
   (js!selfcall
     "var tmp = (" (ls-compile object) ")[xstring(" (ls-compile key) ")];" *newline*
     (mapconcat (lambda (key)
                  (code "if (tmp === undefined) return " (ls-compile nil) ";" *newline*)
                  (code "tmp = tmp[xstring(" (ls-compile key) ")];" *newline*))
                keys)
-    "return tmp === undefined? " (ls-compile nil) " : js_to_lisp(tmp);" *newline*))
+    "return tmp === undefined? " (ls-compile nil) " : tmp;" *newline*))
 
-(define-builtin oset (object key value)
-  (code "((" object ")[xstring(" key ")] = lisp_to_js(" value "))"))
+(define-raw-builtin oset* (value object key &rest keys)
+  (let ((keys (cons key keys)))
+    (js!selfcall
+      "var obj = " (ls-compile object) ";" *newline*
+      (mapconcat (lambda (key)
+                   "obj = obj[xstring(" (ls-compile key) ")];"
+                   "if (obj === undefined) throw 'Impossible to set Javascript property.';" *newline*)
+                 (butlast keys))
+      "obj[xstring(" (ls-compile (car (last keys))) ")] = " (ls-compile value) ";" *newline*)))
+
+(define-raw-builtin oget (object key &rest keys)
+  (code "js_to_lisp(" (ls-compile `(oget* ,object ,key ,@keys)) ")"))
+
+(define-raw-builtin oset (value object key &rest keys)
+  (ls-compile `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
 
 (define-builtin objectp (x)
   (js!bool (code "(typeof (" x ") === 'object')")))
@@ -1426,8 +1431,7 @@
             #+jscl (eq (symbol-package function) (find-package "COMMON-LISP"))
             #-jscl t)
        (code (ls-compile `',function) ".fvalue" arglist))
-      #+jscl
-      ((symbolp function)
+      #+jscl((symbolp function)
        (code (ls-compile `#',function) arglist))
       ((and (consp function) (eq (car function) 'lambda))
        (code (ls-compile `#',function) arglist))

@@ -44,7 +44,7 @@
      (declaim (special ,name))
      (declaim (constant ,name))
      (setq ,name ,value)
-     ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
+     ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
 
 (defconstant t 't)
@@ -64,13 +64,13 @@
   `(progn
      (declaim (special ,name))
      ,@(when value-p `((unless (boundp ',name) (setq ,name ,value))))
-     ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
+     ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
 
 (defmacro defparameter (name value &optional docstring)
   `(progn
      (setq ,name ,value)
-     ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
+     ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
 
 (defmacro defun (name args &rest body)
