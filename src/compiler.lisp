@@ -1326,7 +1326,8 @@
                    "obj = obj[xstring(" (ls-compile key) ")];"
                    "if (obj === undefined) throw 'Impossible to set Javascript property.';" *newline*)
                  (butlast keys))
-      "obj[xstring(" (ls-compile (car (last keys))) ")] = " (ls-compile value) ";" *newline*)))
+      "var tmp = obj[xstring(" (ls-compile (car (last keys))) ")] = " (ls-compile value) ";" *newline*
+      "return tmp === undefined? " (ls-compile nil) " : tmp;" *newline*)))
 
 (define-raw-builtin oget (object key &rest keys)
   (code "js_to_lisp(" (ls-compile `(oget* ,object ,key ,@keys)) ")"))
