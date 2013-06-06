@@ -251,12 +251,12 @@
 
 ;;; Set some external entry point to the Lisp implementation to the
 ;;; console. It would not be necessary when FFI is finished.
-(js-eval "var lisp")
-(%js-vset "lisp" (new))
-(%js-vset "lisp.read" #'ls-read-from-string)
-(%js-vset "lisp.print" #'prin1-to-string)
-(%js-vset "lisp.eval" #'eval)
-(%js-vset "lisp.compile" (lambda (s) (ls-compile-toplevel s t)))
-(%js-vset "lisp.evalString" (lambda (str) (eval (ls-read-from-string str))))
-(%js-vset "lisp.evalInput" (lambda (str) (eval-interactive (ls-read-from-string str))))
-(%js-vset "lisp.compileString" (lambda (str) (ls-compile-toplevel (ls-read-from-string str) t)))
+(let ((*root* #j:lisp))
+  (setf #j:read #'ls-read-from-string)
+  (setf #j:print #'prin1-to-string)
+  (setf #j:eval #'eval)
+  (setf #j:compile (lambda (s) (ls-compile-toplevel s t)))
+  (setf #j:evalString (lambda (str) (eval (ls-read-from-string str))))
+  (setf #j:evalInput (lambda (str) (eval-interactive (ls-read-from-string str))))
+  (setf #j:compileString (lambda (str) (ls-compile-toplevel (ls-read-from-string str) t))))
+
