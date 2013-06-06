@@ -247,7 +247,7 @@
              (ls-read stream eof-error-p eof-value t)
              (prog2 (ls-read stream)
                  (ls-read stream eof-error-p eof-value t)))))
-      (#\J
+      ((#\J #\j)
        (unless (char= (%peek-char stream) #\:)
          (error "FFI descriptor must start with a semicolon."))
        (let ((descriptor (subseq (read-until stream #'terminalp) 1))
