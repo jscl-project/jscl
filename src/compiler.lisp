@@ -1417,7 +1417,7 @@
                                            (mapcar #'ls-compile args)) ", ") ")")))
     (unless (or (symbolp function)
                 (and (consp function)
-                     (eq (car function) 'lambda)))
+                     (member (car function) '(lambda oget))))
       (error "Bad function designator `~S'" function))
     (cond
       ((translate-function function)
@@ -1426,8 +1426,15 @@
             #+jscl (eq (symbol-package function) (find-package "COMMON-LISP"))
             #-jscl t)
        (code (ls-compile `',function) ".fvalue" arglist))
+      #+jscl
+      ((symbolp function)
+       (code (ls-compile `#',function) arglist))
+      ((and (consp function) (eq (car function) 'lambda))
+       (code (ls-compile `#',function) arglist))
+      ((and (consp function) (eq (car function) 'oget))
+       (code (ls-compile function) arglist))
       (t
-       (code (ls-compile `#',function) arglist)))))
+       (error "Bad function descriptor")))))
 
 (defun ls-compile-block (sexps &optional return-last-p decls-allowed-p)
   (multiple-value-bind (sexps decls)
