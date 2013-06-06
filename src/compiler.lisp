@@ -1317,14 +1317,17 @@
 (define-builtin oset* (object key value)
   (code "((" object ")[xstring(" key ")] = " value ")"))
 
-(define-builtin oget (object key)
+(define-raw-builtin oget (object key &rest keys)
   (js!selfcall
-    "var tmp = " "(" object ")[xstring(" key ")];" *newline*
-    "return tmp == undefined? " (ls-compile nil) ": js_to_lisp(tmp);" *newline*))
+    "var tmp = (" (ls-compile object) ")[xstring(" (ls-compile key) ")];" *newline*
+    (mapconcat (lambda (key)
+                 (code "if (tmp === undefined) return " (ls-compile nil) ";" *newline*)
+                 (code "tmp = tmp[xstring(" (ls-compile key) ")];" *newline*))
+               keys)
+    "return tmp === undefined? " (ls-compile nil) " : js_to_lisp(tmp);" *newline*))
 
 (define-builtin oset (object key value)
   (code "((" object ")[xstring(" key ")] = lisp_to_js(" value "))"))
-
 
 (define-builtin objectp (x)
   (js!bool (code "(typeof (" x ") === 'object')")))
