@@ -4,6 +4,8 @@
 var window = this;
 var nil;
 
+var lisp = {};
+
 globalEval = eval;  // Just an indirect eval
 
 function pv (x) { return x==undefined? nil: x; }

@@ -132,7 +132,7 @@
 ;; CHAR-INT
 (test (= (char-int #\A) (char-int #\A)))  ;; can be pretty much anything, as long as it's consistent
 
-(test (= 1 (string-length (string (code-char 127744)))))
+(test (= 1 (length (string (code-char 127744)))))
 
 ;; CHAR-CODE-LIMIT
 (test (< 95 char-code-limit 10000000))

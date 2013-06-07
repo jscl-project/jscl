@@ -207,7 +207,7 @@
   `(push (list ',name (lambda ,args (block ,name ,@body)))
          *compilations*))
 
-(define-compilation if (condition true false)
+(define-compilation if (condition true &optional false)
   (code "(" (ls-compile condition) " !== " (ls-compile nil)
         " ? " (ls-compile true *multiple-value-p*)
         " : " (ls-compile false *multiple-value-p*)
@@ -1288,32 +1288,6 @@
 (define-builtin %throw (string)
   (js!selfcall "throw " string ";" *newline*))
 
-(define-builtin new () "{}")
-
-(define-builtin objectp (x)
-  (js!bool (code "(typeof (" x ") === 'object')")))
-
-(define-builtin oget (object key)
-  (js!selfcall
-    "var tmp = " "(" object ")[xstring(" key ")];" *newline*
-    "return tmp == undefined? " (ls-compile nil) ": tmp ;" *newline*))
-
-(define-builtin oset (object key value)
-  (code "((" object ")[xstring(" key ")] = " value ")"))
-
-(define-builtin in (key object)
-  (js!bool (code "(xstring(" key ") in (" object "))")))
-
-(define-builtin map-for-in (function object)
-  (js!selfcall
-   "var f = " function ";" *newline*
-   "var g = (typeof f === 'function' ? f : f.fvalue);" *newline*
-   "var o = " object ";" *newline*
-   "for (var key in o){" *newline*
-   (indent "g(" (if *multiple-value-p* "values" "pv") ", 1, o[key]);" *newline*)
-   "}"
-   " return " (ls-compile nil) ";" *newline*))
-
 (define-builtin functionp (x)
   (js!bool (code "(typeof " x " == 'function')")))
 
@@ -1378,6 +1352,54 @@
 
 
 ;;; Javascript FFI
+
+(define-builtin new () "{}")
+
+(define-raw-builtin oget* (object key &rest keys)
+  (js!selfcall
+    "var tmp = (" (ls-compile object) ")[xstring(" (ls-compile key) ")];" *newline*
+    (mapconcat (lambda (key)
+                 (code "if (tmp === undefined) return " (ls-compile nil) ";" *newline*)
+                 (code "tmp = tmp[xstring(" (ls-compile key) ")];" *newline*))
+               keys)
+    "return tmp === undefined? " (ls-compile nil) " : tmp;" *newline*))
+
+(define-raw-builtin oset* (value object key &rest keys)
+  (let ((keys (cons key keys)))
+    (js!selfcall
+      "var obj = " (ls-compile object) ";" *newline*
+      (mapconcat (lambda (key)
+                   "obj = obj[xstring(" (ls-compile key) ")];"
+                   "if (obj === undefined) throw 'Impossible to set Javascript property.';" *newline*)
+                 (butlast keys))
+      "var tmp = obj[xstring(" (ls-compile (car (last keys))) ")] = " (ls-compile value) ";" *newline*
+      "return tmp === undefined? " (ls-compile nil) " : tmp;" *newline*)))
+
+(define-raw-builtin oget (object key &rest keys)
+  (code "js_to_lisp(" (ls-compile `(oget* ,object ,key ,@keys)) ")"))
+
+(define-raw-builtin oset (value object key &rest keys)
+  (ls-compile `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
+
+(define-builtin objectp (x)
+  (js!bool (code "(typeof (" x ") === 'object')")))
+
+(define-builtin lisp-to-js (x) (code "lisp_to_js(" x ")"))
+(define-builtin js-to-lisp (x) (code "js_to_lisp(" x ")"))
+
+
+(define-builtin in (key object)
+  (js!bool (code "(xstring(" key ") in (" object "))")))
+
+(define-builtin map-for-in (function object)
+  (js!selfcall
+   "var f = " function ";" *newline*
+   "var g = (typeof f === 'function' ? f : f.fvalue);" *newline*
+   "var o = " object ";" *newline*
+   "for (var key in o){" *newline*
+   (indent "g(" (if *multiple-value-p* "values" "pv") ", 1, o[key]);" *newline*)
+   "}"
+   " return " (ls-compile nil) ";" *newline*))
 
 (define-compilation %js-vref (var)
   (code "js_to_lisp(" var ")"))
@@ -1447,7 +1469,7 @@
                                            (mapcar #'ls-compile args)) ", ") ")")))
     (unless (or (symbolp function)
                 (and (consp function)
-                     (eq (car function) 'lambda)))
+                     (member (car function) '(lambda oget))))
       (error "Bad function designator `~S'" function))
     (cond
       ((translate-function function)
@@ -1456,8 +1478,14 @@
             #+jscl (eq (symbol-package function) (find-package "COMMON-LISP"))
             #-jscl t)
        (code (ls-compile `',function) ".fvalue" arglist))
+      #+jscl((symbolp function)
+       (code (ls-compile `#',function) arglist))
+      ((and (consp function) (eq (car function) 'lambda))
+       (code (ls-compile `#',function) arglist))
+      ((and (consp function) (eq (car function) 'oget))
+       (code (ls-compile function) arglist))
       (t
-       (code (ls-compile `#',function) arglist)))))
+       (error "Bad function descriptor")))))
 
 (defun ls-compile-block (sexps &optional return-last-p decls-allowed-p)
   (multiple-value-bind (sexps decls)

@@ -26,7 +26,7 @@
     ;; Upgrade type
     (if (eq element-type 'character)
         (progn
-          (oset array "stringp" 1)
+          (oset 1 array "stringp")
           (setf element-type 'character
                 initial-element (or initial-element #\space)))
         (setf element-type t))
@@ -34,8 +34,8 @@
     (dotimes (i size)
       (storage-vector-set array i initial-element))
     ;; Record and return the object
-    (oset array "type" element-type)
-    (oset array "dimensions" dimensions)
+    (oset element-type array "type")
+    (oset dimensions array "dimensions")
     array))
 
 
