@@ -23,3 +23,5 @@
           (member baz symbols)))))
 
 (test (member 'car (find-all-symbols (string 'car))))
+
+(test (eq (eval '(in-package #:cl)) (find-package '#:cl)))
