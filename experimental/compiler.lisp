@@ -22,7 +22,7 @@
 
 ;;;; Utilities
 ;;;;
-;;;; Random Common Lisp code useful to use here and there. 
+;;;; Random Common Lisp code useful to use here and there.
 
 (defmacro with-gensyms ((&rest vars) &body body)
   `(let ,(mapcar (lambda (var) `(,var (gensym ,(concatenate 'string (string var) "-")))) vars)
@@ -184,7 +184,7 @@
     ((node block &optional result &key include-sentinel-p) &body body)
   `(do ((,node ,(if include-sentinel-p
                     `(block-entry ,block)
-                    `(node-next (block-entry ,block))) 
+                    `(node-next (block-entry ,block)))
                (node-next ,node)))
        (,(if include-sentinel-p
              `(null ,node)
@@ -197,7 +197,7 @@
     ((node block &optional result &key include-sentinel-p) &body body)
   `(do ((,node ,(if include-sentinel-p
                     `(block-exit ,block)
-                    `(node-prev (block-entry ,block))) 
+                    `(node-prev (block-entry ,block)))
                (node-prev ,node)))
        (,(if include-sentinel-p
              `(null ,node)
@@ -228,6 +228,8 @@
   ;; TODO: Replace with a flags slot for indicate what
   ;; analysis/transformations have been carried out.
   reverse-post-order-p
+  ;; List of natural loops in this component.
+  loops
   blocks)
 
 ;;; The current component.
@@ -889,6 +891,8 @@
                          :body (make-array size :element-type 'bit :initial-element 0))))
                  ;; The set of nodes which belongs to this loop.
                  (body (natural-loop-body loop)))
+            (unless (loop-header-p header)
+              (push loop (component-loops component)))
             ;; The header belongs to the loop
             (setf (aref body (block-order header)) 1
                   (block-loop header) loop)
@@ -937,7 +941,7 @@
                       :adjustable t
                       :fill-pointer t))
          ;; A list of nodes which have been splitted during the
-         ;; reduction of the component. We apply 
+         ;; reduction of the component. We apply
          (nodes-to-split '()))
     (flet (;; Remove an edge from a block to itself
            (T1 (block)
@@ -1019,7 +1023,7 @@
 ;;;; `/ir' macro is provided, which takes a form, convert it to IR and
 ;;;; then print the component as above.  They are useful commands if
 ;;;; you are hacking the front-end of the compiler.
-;;;; 
+;;;;
 
 (defun format-block-name (block)
   (cond
@@ -1103,6 +1107,78 @@
   `(convert-toplevel-and-print ',form))
 
 
+;;;; Backend [DRAFT]
+;;;;
+;;;; This section implements a starting point of the back-end of the
+;;;; compiler. It takes IR data as input and yield Javascript code.
+;;;; This process is conceptually comprised of several stages.
+;;;;
+;;;; Fistly, we do structural analysis on the flow graph to recover a
+;;;; set of nested or disjoint regions, which can be loops,
+;;;; conditionals and exit-point ones. It yields a list of Javascript
+;;;; statements.
+;;;;
+;;;; Then, every basic block is compiled individually in a list of
+;;;; Javascript expressions. We assume every lvar is used only once,
+;;;; so the only live lvars at the end of the basic block are
+;;;; (possibly a subset) of the toplevel lvars. In other words, no
+;;;; expression can live across basic block boundaries.
+;;;;
+
+;;; Do structural analysis of the flow graph of component to "recover"
+;;; high level control flow constructions. Particularly, it finds
+;;; loops, conditionals and forward jumps (which will be compiled to
+;;; labeled breaks).
+;;;
+;;; This information is enough to generate Javascript code. In effect,
+;;; loops are defined by back-edges, which become break/continue in
+;;; the header of the loop. Moreover, the component is reducible so
+;;; they are the only retreating edges. Therefore, the remaining graph
+;;; is acyclic. Any acyclic graph is expressable with labeled
+;;; statements and conditionals. However, the resulting structure is
+;;; nicer if we looking for natural conditionals before to avoid
+;;; unnecessary breaks.
+
+(defstruct region
+  header
+  childs)
+
+(defun natural-conditional-header-p (block)
+  ;; multiple successors and dominate some of them
+  (and (not (null (cdr (block-succ block))))
+       (some (lambda (succ) (dominate-p block succ)) (block-succ block))
+       (not (loop-header-p block))))
+
+(defun structure-component (component)
+  (let* ((entry (unlist (block-succ (component-entry component))))
+         ;; Root of the tree of regions
+         (top (make-region :header entry)))
+    ;; Process the natural loops from outermost to innermost, creating
+    ;; a hierarchy of regions for them.
+    (let ((table (make-hash-table :test #'eq)))
+      (labels ((process-loop (loop)
+                 (multiple-value-bind (region existp)
+                     (gethash loop table)
+                   (when existp (return-from process-loop region))
+                   (let* ((parent-loop (natural-loop-parent loop))
+                          (parent-region
+                           (if parent-loop
+                               (process-loop parent-loop)
+                               top)))
+                     (push (make-region :header (natural-loop-header loop))
+                           (region-childs parent-region))
+                     region))))
+        (dolist (loop (component-loops component))
+          (process-loop loop))))
+    ;; Process "natural" conditionals.
+    (dolist (block (component-blocks component))
+      (when (natural-conditional-header-p block)
+        (make-region :header block :childs nil)
+        
+        ))
+    top))
+
+
 
 ;;;; Primitives
 ;;;;
@@ -1113,7 +1189,7 @@
 ;;;; the declarations allow it, a primitive call is inserted in the
 ;;;; IR. The back-end of the compiler knows how to compile primitive
 ;;;; calls.
-;;;; 
+;;;;
 
 (defvar *primitive-function-table* nil)
 
