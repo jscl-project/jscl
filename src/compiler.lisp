@@ -207,7 +207,7 @@
   `(push (list ',name (lambda ,args (block ,name ,@body)))
          *compilations*))
 
-(define-compilation if (condition true false)
+(define-compilation if (condition true &optional false)
   (code "(" (ls-compile condition) " !== " (ls-compile nil)
         " ? " (ls-compile true *multiple-value-p*)
         " : " (ls-compile false *multiple-value-p*)
