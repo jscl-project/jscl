@@ -198,7 +198,7 @@
                          (#\space "space")
                          (otherwise (string form)))))
               ((stringp form) (if *print-escape*
-                                  (concat "\"" (escape-string form) "\"")
+                                  (lisp-escape-string form)
                                   form))
               ((functionp form)
                (let ((name (oget form "fname")))
@@ -266,6 +266,8 @@
                 (concatf res "~"))
                ((char= next #\%)
                 (concatf res *newline*))
+               ((char= next #\*)
+                (pop arguments))
                (t
                 (concatf res (format-special next (car arguments)))
                 (pop arguments))))
@@ -278,6 +280,6 @@
         res)))
 
 (defun format-special (chr arg)
-  (case chr
+  (case (char-upcase chr)
     (#\S (prin1-to-string arg))
-    (#\a (princ-to-string arg))))
+    (#\A (princ-to-string arg))))

@@ -73,9 +73,9 @@
 
 (defvar *package* *common-lisp-package*)
 
-(defmacro in-package (package-designator)
+(defmacro in-package (string-designator)
   `(eval-when-compile
-     (setq *package* (find-package-or-fail ,package-designator))))
+     (setq *package* (find-package-or-fail ',string-designator))))
 
 ;; This function is used internally to initialize the CL package
 ;; with the symbols built during bootstrap.
