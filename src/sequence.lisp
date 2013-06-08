@@ -48,12 +48,20 @@
         (when (funcall predicate x)
           (return x)))))
 
-(defun position (elt sequence &key key (test #'eql testp)
-                     (test-not #'eql test-not-p))
-  (do-sequence (x sequence index)
-    (when (satisfies-test-p elt x :key key :test test :testp testp
-                           :test-not test-not :test-not-p test-not-p ) 
-      (return index))))
+(defun position (elt sequence
+                 &key key (test #'eql testp)
+                   (test-not #'eql test-not-p)
+                   (start 0) end)
+  ;; TODO: Implement START and END efficiently for all the sequence
+  ;; functions.
+  (let ((end (or end (length sequence))))
+    (do-sequence (x sequence index)
+      (when (and (<= start index)
+                 (< index end)
+                 (satisfies-test-p elt x
+                                   :key key :test test :testp testp
+                                   :test-not test-not :test-not-p test-not-p))
+        (return index)))))
 
 (defun remove (x seq &key key (test #'eql testp) (test-not #'eql test-not-p))
   (cond
@@ -63,7 +71,7 @@
      (let* ((head (cons nil nil))
             (tail head))
        (do-sequence (elt seq)
-         (unless (satisfies-test-p x elt :key key :test test :testp testp 
+         (unless (satisfies-test-p x elt :key key :test test :testp testp
                                    :test-not test-not :test-not-p test-not-p)
            (let ((new (list elt)))
              (rplacd tail new)
@@ -72,7 +80,7 @@
     (t
      (let (vector)
        (do-sequence (elt seq index)
-         (if (satisfies-test-p x elt :key key :test test :testp testp 
+         (if (satisfies-test-p x elt :key key :test test :testp testp
                                :test-not test-not :test-not-p test-not-p)
              ;; Copy the beginning of the vector only when we find an element
              ;; that does not match.
@@ -130,7 +138,7 @@
      (if b
        (let ((diff (- b a)))
          (cond
-           ((zerop  diff) ()) 
+           ((zerop  diff) ())
            ((minusp diff)
             (error "Start index must be smaller than end index"))
            (t
@@ -140,11 +148,15 @@
                 (setq pointer (cdr pointer))
                 (when (null pointer)
                   (error "Ending index larger than length of list")))
-              (rplacd pointer ()) 
+              (rplacd pointer ())
               drop-a))))
        (copy-list (nthcdr a seq))))
-    ((arrayp seq) 
-     (if b
-       (slice seq a b)
-       (slice seq a)))
+    ((vectorp seq)
+     (let* ((b (or b (length seq)))
+            (size (- b a))
+            (new (make-array size :element-type (array-element-type seq))))
+       (do ((i 0 (1+ i))
+            (j a (1+ j)))
+           ((= j b) new)
+         (aset new i (aref seq j)))))
     (t (not-seq-error seq))))

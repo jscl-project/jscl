@@ -201,21 +201,21 @@
 (defun read-sharp (stream &optional eof-error-p eof-value)
   (%read-char stream)
   (let ((ch (%read-char stream)))
-    (cond
-      ((char= ch #\')
+    (case ch
+      (#\'
        (list 'function (ls-read stream eof-error-p eof-value t)))
-      ((char= ch #\()
+      (#\(
        (do ((elements nil)
             (result nil)
             (index 0 (1+ index)))
            ((progn (skip-whitespaces-and-comments stream)
                    (or (null (%peek-char stream))
                        (char= (%peek-char stream) #\))))
-              (discard-char stream #\))
-              (setf result (make-array index))
-              (dotimes (i index)
-                (aset result (decf index) (pop elements)))
-              result)
+            (discard-char stream #\))
+            (setf result (make-array index))
+            (dotimes (i index)
+              (aset result (decf index) (pop elements)))
+            result)
          (let* ((ix index) ; Can't just use index: the same var would be captured in all fixups
                 (*make-fixup-function* (lambda ()
                                          (lambda (obj)
@@ -223,12 +223,12 @@
                 (eof (gensym))
                 (value (ls-read stream nil eof t)))
            (push value elements))))
-      ((char= ch #\:)
+      (#\:
        (make-symbol
         (unescape-token
          (string-upcase-noescaped
           (read-escaped-until stream #'terminalp)))))
-      ((char= ch #\\)
+      (#\\
        (let ((cname
               (concat (string (%read-char stream))
                       (read-until stream #'terminalp))))
@@ -237,49 +237,62 @@
            ((string= cname "tab") #\tab)
            ((string= cname "newline") #\newline)
            (t (char cname 0)))))
-      ((or (char= ch #\+)
-           (char= ch #\-))
+      ((#\+ #\-)
        (let ((feature (let ((symbol (ls-read stream eof-error-p eof-value t)))
                         (unless (symbolp symbol)
                           (error "Invalid feature ~S" symbol))
                         (intern (string symbol) "KEYWORD"))))
          (if (eql (char= ch #\+)
                   (and (find feature *features*) t))
-              (ls-read stream eof-error-p eof-value t)
-              (prog2 (ls-read stream)
-                  (ls-read stream eof-error-p eof-value t)))))
-      ((and ch (digit-char-p ch))
-       (let ((id (digit-char-p ch)))
-         (while (and (%peek-char stream)
-                     (digit-char-p (%peek-char stream)))
-           (setf id (+ (* id 10) (digit-char-p (%read-char stream)))))
-         (ecase (%peek-char stream)
-           (#\=
-              (%read-char stream)
-              (if (find-labelled-object id)
-                  (error "Duplicated label #~S=" id)
-                  (progn
-                    (add-labelled-object id *future-value*)
-                    (let ((obj (ls-read stream eof-error-p eof-value t)))
-                      ;; FIXME: somehow the more natural
-                      ;;    (setf (cdr (find-labelled-object id)) obj)
-                      ;; doesn't work
-                      (rplacd (find-labelled-object id) obj)
-                      obj))))
-           (#\#
-              (%read-char stream)
-              (let ((cell (find-labelled-object id)))
-                (if cell
-                    (if (eq (cdr cell) *future-value*)
-                        (progn
-                          (push (cons (funcall *make-fixup-function*)
-                                      id)
-                                *fixup-locations*)
-                          *fixup-value*)
-                        (cdr cell))
-                    (error "Invalid labelled object #~S#" id)))))))
-      (t
-       (error "Invalid dispatch character after #")))))
+             (ls-read stream eof-error-p eof-value t)
+             (prog2 (ls-read stream)
+                 (ls-read stream eof-error-p eof-value t)))))
+      ((#\J #\j)
+       (unless (char= (%peek-char stream) #\:)
+         (error "FFI descriptor must start with a semicolon."))
+       (let ((descriptor (subseq (read-until stream #'terminalp) 1))
+             (subdescriptors nil))
+         (do* ((start 0 (1+ end))
+               (end (position #\: descriptor :start start)
+                    (position #\: descriptor :start start)))
+              ((null end)
+               (push (subseq descriptor start) subdescriptors)
+               `(oget *root* ,@(reverse subdescriptors)))
+           (push (subseq descriptor start end) subdescriptors))))
+      (otherwise
+       (cond
+         ((and ch (digit-char-p ch))
+          (let ((id (digit-char-p ch)))
+            (while (and (%peek-char stream)
+                        (digit-char-p (%peek-char stream)))
+              (setf id (+ (* id 10) (digit-char-p (%read-char stream)))))
+            (ecase (%peek-char stream)
+              (#\=
+               (%read-char stream)
+               (if (find-labelled-object id)
+                   (error "Duplicated label #~S=" id)
+                   (progn
+                     (add-labelled-object id *future-value*)
+                     (let ((obj (ls-read stream eof-error-p eof-value t)))
+                       ;; FIXME: somehow the more natural
+                       ;;    (setf (cdr (find-labelled-object id)) obj)
+                       ;; doesn't work
+                       (rplacd (find-labelled-object id) obj)
+                       obj))))
+              (#\#
+               (%read-char stream)
+               (let ((cell (find-labelled-object id)))
+                 (if cell
+                     (if (eq (cdr cell) *future-value*)
+                         (progn
+                           (push (cons (funcall *make-fixup-function*)
+                                       id)
+                                 *fixup-locations*)
+                           *fixup-value*)
+                         (cdr cell))
+                     (error "Invalid labelled object #~S#" id)))))))
+         (t
+          (error "Invalid dispatch character after #")))))))
 
 (defun unescape-token (x)
   (let ((result ""))
@@ -319,7 +332,7 @@
       ;; No package prefix
       ((= index size)
        (setq name string)
-       (setq package *package*)
+       (setq package (package-name *package*))
        (setq internalp t))
       (t
        ;; Package prefix
@@ -332,7 +345,7 @@
          (incf index))
        (setq name (subseq string index))))
     ;; Canonalize symbol name and package
-    (setq name (if (equal package "JS")
+    (setq name (if (string= package "JS")
                    (setq name (unescape-token name))
                    (setq name (string-upcase-noescaped name))))
     (setq package (find-package package))

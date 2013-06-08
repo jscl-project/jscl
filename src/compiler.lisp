@@ -207,7 +207,7 @@
   `(push (list ',name (lambda ,args (block ,name ,@body)))
          *compilations*))
 
-(define-compilation if (condition true false)
+(define-compilation if (condition true &optional false)
   (code "(" (ls-compile condition) " !== " (ls-compile nil)
         " ? " (ls-compile true *multiple-value-p*)
         " : " (ls-compile false *multiple-value-p*)
@@ -266,9 +266,9 @@
       (js!selfcall
         "var func = " (join strs) ";" *newline*
         (when name
-          (code "func.fname = '" (escape-string name) "';" *newline*))
+          (code "func.fname = " (js-escape-string name) ";" *newline*))
         (when docstring
-          (code "func.docstring = '" (escape-string docstring) "';" *newline*))
+          (code "func.docstring = " (js-escape-string docstring) ";" *newline*))
         "return func;" *newline*)
       (apply #'code strs)))
 
@@ -483,7 +483,53 @@
 
 ;;; Compilation of literals an object dumping
 
-(defun escape-string (string)
+;;; Two seperate functions are needed for escaping strings:
+;;;  One for producing JavaScript string literals (which are singly or
+;;;   doubly quoted)
+;;;  And one for producing Lisp strings (which are only doubly quoted)
+;;;
+;;; The same function would suffice for both, but for javascript string
+;;; literals it is neater to use either depending on the context, e.g:
+;;;  foo's => "foo's"
+;;;  "foo" => '"foo"'
+;;; which avoids having to escape quotes where possible
+(defun js-escape-string (string)
+  (let ((index 0)
+        (size (length string))
+        (seen-single-quote nil)
+        (seen-double-quote nil))
+    (flet ((%js-escape-string (string escape-single-quote-p)
+             (let ((output "")
+                   (index 0))
+               (while (< index size)
+                 (let ((ch (char string index)))
+                   (when (char= ch #\\)
+                     (setq output (concat output "\\")))
+                   (when (and escape-single-quote-p (char= ch #\'))
+                     (setq output (concat output "\\")))
+                   (when (char= ch #\newline)
+                     (setq output (concat output "\\"))
+                     (setq ch #\n))
+                   (setq output (concat output (string ch))))
+                 (incf index))
+               output)))
+      ;; First, scan the string for single/double quotes
+      (while (< index size)
+        (let ((ch (char string index)))
+          (when (char= ch #\')
+            (setq seen-single-quote t))
+          (when (char= ch #\")
+            (setq seen-double-quote t)))
+        (incf index))
+      ;; Then pick the appropriate way to escape the quotes
+      (cond
+        ((not seen-single-quote)
+         (concat "'"   (%js-escape-string string nil) "'"))
+        ((not seen-double-quote)
+         (concat "\""  (%js-escape-string string nil) "\""))
+        (t (concat "'" (%js-escape-string string t)   "'"))))))
+
+(defun lisp-escape-string (string)
   (let ((output "")
         (index 0)
         (size (length string)))
@@ -496,7 +542,7 @@
           (setq ch #\n))
         (setq output (concat output (string ch))))
       (incf index))
-    output))
+    (concat "\"" output "\"")))
 
 ;;; BOOTSTRAP MAGIC: We record the macro definitions as lists during
 ;;; the bootstrap. Once everything is compiled, we want to dump the
@@ -550,13 +596,13 @@
     (concat "[" (join (mapcar #'literal elements) ", ") "]")))
 
 (defun dump-string (string)
-  (code "make_lisp_string(\"" (escape-string string) "\")"))
+  (code "make_lisp_string(" (js-escape-string string) ")"))
 
 (defun literal (sexp &optional recursive)
   (cond
     ((integerp sexp) (integer-to-string sexp))
     ((floatp sexp) (float-to-string sexp))
-    ((characterp sexp) (code "\"" (escape-string (string sexp)) "\""))
+    ((characterp sexp) (js-escape-string (string sexp)))
     (t
      (or (cdr (assoc sexp *literal-table* :test #'eql))
          (let ((dumped (typecase sexp
@@ -1178,58 +1224,29 @@
 
 (define-builtin char-code (x)
   (type-check (("x" "string" x))
-    "x.charCodeAt(0)"))
+    "char_to_codepoint(x)"))
 
 (define-builtin code-char (x)
   (type-check (("x" "number" x))
-    "String.fromCharCode(x)"))
+    "char_from_codepoint(x)"))
 
 (define-builtin characterp (x)
   (js!bool
    (js!selfcall
      "var x = " x ";" *newline*
-     "return (typeof(" x ") == \"string\") && x.length == 1;")))
-
-(define-builtin char-to-string (x)
-  (js!selfcall
-    "var r = [" x "];" *newline*
-    "r.type = 'character';"
-    "return r"))
+     "return (typeof(" x ") == \"string\") && (x.length == 1 || x.length == 2);")))
 
 (define-builtin char-upcase (x)
-  (code x ".toUpperCase()"))
+  (code "safe_char_upcase(" x ")"))
 
 (define-builtin char-downcase (x)
-  (code x ".toLowerCase()"))
+  (code "safe_char_downcase(" x ")"))
 
 (define-builtin stringp (x)
   (js!bool
    (js!selfcall
      "var x = " x ";" *newline*
-     "return typeof(x) == 'object' && 'length' in x && x.type == 'character';")))
-
-(define-builtin string-upcase (x)
-  (code "make_lisp_string(xstring(" x ").toUpperCase())"))
-
-(define-builtin string-length (x)
-  (code x ".length"))
-
-(define-raw-builtin slice (vector a &optional b)
-  (js!selfcall
-    "var vector = " (ls-compile vector) ";" *newline*
-    "var a = " (ls-compile a) ";" *newline*
-    "var b;" *newline*
-    (when b (code "b = " (ls-compile b) ";" *newline*))
-    "return vector.slice(a,b);" *newline*))
-
-(define-builtin char (string index)
-  (code string "[" index "]"))
-
-(define-builtin concat-two (string1 string2)
-  (js!selfcall
-    "var r = " string1 ".concat(" string2 ");" *newline*
-    "r.type = 'character';"
-    "return r;" *newline*))
+     "return typeof(x) == 'object' && 'length' in x && x.stringp == 1;")))
 
 (define-raw-builtin funcall (func &rest args)
   (js!selfcall
@@ -1271,83 +1288,54 @@
 (define-builtin %throw (string)
   (js!selfcall "throw " string ";" *newline*))
 
-(define-builtin new () "{}")
-
-(define-builtin objectp (x)
-  (js!bool (code "(typeof (" x ") === 'object')")))
-
-(define-builtin oget (object key)
-  (js!selfcall
-    "var tmp = " "(" object ")[xstring(" key ")];" *newline*
-    "return tmp == undefined? " (ls-compile nil) ": tmp ;" *newline*))
-
-(define-builtin oset (object key value)
-  (code "((" object ")[xstring(" key ")] = " value ")"))
-
-(define-builtin in (key object)
-  (js!bool (code "(xstring(" key ") in (" object "))")))
-
-(define-builtin map-for-in (function object)
-  (js!selfcall
-   "var f = " function ";" *newline*
-   "var g = (typeof f === 'function' ? f : f.fvalue);" *newline*
-   "var o = " object ";" *newline*
-   "for (var key in o){" *newline*
-   (indent "g(" (if *multiple-value-p* "values" "pv") ", 1, o[key]);" *newline*)
-   "}"
-   " return " (ls-compile nil) ";" *newline*))
-
 (define-builtin functionp (x)
   (js!bool (code "(typeof " x " == 'function')")))
 
 (define-builtin write-string (x)
   (code "lisp.write(" x ")"))
 
-(define-builtin make-array (n)
-  (js!selfcall
-    "var r = [];" *newline*
-    "for (var i = 0; i < " n "; i++)" *newline*
-    (indent "r.push(" (ls-compile nil) ");" *newline*)
-    "return r;" *newline*))
 
-;;; FIXME: should take optional min-extension.
-;;; FIXME: should use fill-pointer instead of the absolute end of array
-(define-builtin vector-push-extend (new vector)
-  (js!selfcall
-    "var v = " vector ";" *newline*
-    "v.push(" new ");" *newline*
-    "return v;"))
+;;; Storage vectors. They are used to implement arrays and (in the
+;;; future) structures.
 
-(define-builtin arrayp (x)
+(define-builtin storage-vector-p (x)
   (js!bool
    (js!selfcall
      "var x = " x ";" *newline*
      "return typeof x === 'object' && 'length' in x;")))
 
-(define-builtin aref (array n)
+(define-builtin make-storage-vector (n)
   (js!selfcall
-    "var x = " "(" array ")[" n "];" *newline*
+    "var r = [];" *newline*
+    "r.length = " n ";" *newline*
+    "return r;" *newline*))
+
+(define-builtin storage-vector-size (x)
+  (code x ".length"))
+
+(define-builtin resize-storage-vector (vector new-size)
+  (code "(" vector ".length = " new-size ")"))
+
+(define-builtin storage-vector-ref (vector n)
+  (js!selfcall
+    "var x = " "(" vector ")[" n "];" *newline*
     "if (x === undefined) throw 'Out of range';" *newline*
     "return x;" *newline*))
 
-(define-builtin aset (array n value)
+(define-builtin storage-vector-set (vector n value)
   (js!selfcall
-    "var x = " array ";" *newline*
+    "var x = " vector ";" *newline*
     "var i = " n ";" *newline*
     "if (i < 0 || i >= x.length) throw 'Out of range';" *newline*
     "return x[i] = " value ";" *newline*))
 
-(define-builtin afind (value array)
+(define-builtin concatenate-storage-vector (sv1 sv2)
   (js!selfcall
-    "var v = " value ";" *newline*
-    "var x = " array ";" *newline*
-    "return x.indexOf(v);" *newline*))
-
-(define-builtin aresize (array new-size)
-  (js!selfcall
-    "var x = " array ";" *newline*
-    "var n = " new-size ";" *newline*
-    "return x.length = n;" *newline*))
+    "var sv1 = " sv1 ";" *newline*
+    "var r = sv1.concat(" sv2 ");" *newline*
+    "r.type = sv1.type;" *newline*
+    "r.stringp = sv1.stringp;" *newline*
+    "return r;" *newline*))
 
 (define-builtin get-internal-real-time ()
   "(new Date()).getTime()")
@@ -1364,6 +1352,54 @@
 
 
 ;;; Javascript FFI
+
+(define-builtin new () "{}")
+
+(define-raw-builtin oget* (object key &rest keys)
+  (js!selfcall
+    "var tmp = (" (ls-compile object) ")[xstring(" (ls-compile key) ")];" *newline*
+    (mapconcat (lambda (key)
+                 (code "if (tmp === undefined) return " (ls-compile nil) ";" *newline*)
+                 (code "tmp = tmp[xstring(" (ls-compile key) ")];" *newline*))
+               keys)
+    "return tmp === undefined? " (ls-compile nil) " : tmp;" *newline*))
+
+(define-raw-builtin oset* (value object key &rest keys)
+  (let ((keys (cons key keys)))
+    (js!selfcall
+      "var obj = " (ls-compile object) ";" *newline*
+      (mapconcat (lambda (key)
+                   "obj = obj[xstring(" (ls-compile key) ")];"
+                   "if (obj === undefined) throw 'Impossible to set Javascript property.';" *newline*)
+                 (butlast keys))
+      "var tmp = obj[xstring(" (ls-compile (car (last keys))) ")] = " (ls-compile value) ";" *newline*
+      "return tmp === undefined? " (ls-compile nil) " : tmp;" *newline*)))
+
+(define-raw-builtin oget (object key &rest keys)
+  (code "js_to_lisp(" (ls-compile `(oget* ,object ,key ,@keys)) ")"))
+
+(define-raw-builtin oset (value object key &rest keys)
+  (ls-compile `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
+
+(define-builtin objectp (x)
+  (js!bool (code "(typeof (" x ") === 'object')")))
+
+(define-builtin lisp-to-js (x) (code "lisp_to_js(" x ")"))
+(define-builtin js-to-lisp (x) (code "js_to_lisp(" x ")"))
+
+
+(define-builtin in (key object)
+  (js!bool (code "(xstring(" key ") in (" object "))")))
+
+(define-builtin map-for-in (function object)
+  (js!selfcall
+   "var f = " function ";" *newline*
+   "var g = (typeof f === 'function' ? f : f.fvalue);" *newline*
+   "var o = " object ";" *newline*
+   "for (var key in o){" *newline*
+   (indent "g(" (if *multiple-value-p* "values" "pv") ", 1, o[key]);" *newline*)
+   "}"
+   " return " (ls-compile nil) ";" *newline*))
 
 (define-compilation %js-vref (var)
   (code "js_to_lisp(" var ")"))
@@ -1433,7 +1469,7 @@
                                            (mapcar #'ls-compile args)) ", ") ")")))
     (unless (or (symbolp function)
                 (and (consp function)
-                     (eq (car function) 'lambda)))
+                     (member (car function) '(lambda oget))))
       (error "Bad function designator `~S'" function))
     (cond
       ((translate-function function)
@@ -1442,8 +1478,14 @@
             #+jscl (eq (symbol-package function) (find-package "COMMON-LISP"))
             #-jscl t)
        (code (ls-compile `',function) ".fvalue" arglist))
+      #+jscl((symbolp function)
+       (code (ls-compile `#',function) arglist))
+      ((and (consp function) (eq (car function) 'lambda))
+       (code (ls-compile `#',function) arglist))
+      ((and (consp function) (eq (car function) 'oget))
+       (code (ls-compile function) arglist))
       (t
-       (code (ls-compile `#',function) arglist)))))
+       (error "Bad function descriptor")))))
 
 (defun ls-compile-block (sexps &optional return-last-p decls-allowed-p)
   (multiple-value-bind (sexps decls)

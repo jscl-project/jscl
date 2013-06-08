@@ -44,7 +44,7 @@
      (declaim (special ,name))
      (declaim (constant ,name))
      (setq ,name ,value)
-     ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
+     ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
 
 (defconstant t 't)
@@ -64,13 +64,13 @@
   `(progn
      (declaim (special ,name))
      ,@(when value-p `((unless (boundp ',name) (setq ,name ,value))))
-     ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
+     ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
 
 (defmacro defparameter (name value &optional docstring)
   `(progn
      (setq ,name ,value)
-     ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
+     ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
 
 (defmacro defun (name args &rest body)
@@ -87,7 +87,7 @@
 (defvar *gensym-counter* 0)
 (defun gensym (&optional (prefix "G"))
   (setq *gensym-counter* (+ *gensym-counter* 1))
-  (make-symbol (concat-two prefix (integer-to-string *gensym-counter*))))
+  (make-symbol (concat prefix (integer-to-string *gensym-counter*))))
 
 (defun boundp (x)
   (boundp x))
@@ -333,9 +333,6 @@
     ((listp seq)
      (list-length seq))))
 
-(defun concat-two (s1 s2)
-  (concat-two s1 s2))
-
 (defmacro with-collect (&body body)
   (let ((head (gensym))
         (tail (gensym)))
@@ -496,6 +493,8 @@
                                     (integer 'integerp)
                                     (cons 'consp)
                                     (symbol 'symbolp)
+                                    (function 'functionp)
+                                    (float 'floatp)
                                     (array 'arrayp)
                                     (string 'stringp)
                                     (atom 'atom)
@@ -510,7 +509,7 @@
     `(let ((,g!x ,x))
        (typecase ,g!x
          ,@clausules
-         (t (error "~X fell through etypeacase expression." ,g!x))))))
+         (t (error "~X fell through etypecase expression." ,g!x))))))
 
 (defun notany (fn seq)
   (not (some fn seq)))
@@ -525,9 +524,6 @@
 
 (defun get-universal-time ()
   (+ (get-unix-time) 2208988800))
-
-(defun concat (&rest strs)
-  (!reduce #'concat-two strs ""))
 
 (defun values-list (list)
   (values-array (list-to-vector list)))

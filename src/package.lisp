@@ -21,10 +21,10 @@
 (defun make-package (name &key use)
   (let ((package (new))
         (use (mapcar #'find-package-or-fail use)))
-    (oset package "packageName" name)
-    (oset package "symbols" (new))
-    (oset package "exports" (new))
-    (oset package "use" use)
+    (setf (oget package "packageName") name)
+    (setf (oget package "symbols") (new))
+    (setf (oget package "exports") (new))
+    (setf (oget package "use") use)
     (push package *package-list*)
     package))
 
@@ -73,9 +73,9 @@
 
 (defvar *package* *common-lisp-package*)
 
-(defmacro in-package (package-designator)
+(defmacro in-package (string-designator)
   `(eval-when-compile
-     (setq *package* (find-package-or-fail ,package-designator))))
+     (setq *package* (find-package-or-fail ',string-designator))))
 
 ;; This function is used internally to initialize the CL package
 ;; with the symbols built during bootstrap.
@@ -86,12 +86,12 @@
               *common-lisp-package*))
          (symbols (%package-symbols package))
          (exports (%package-external-symbols package)))
-    (oset symbol "package" package)
-    (oset symbols (symbol-name symbol) symbol)
+    (setf (oget symbol "package") package)
+    (setf (oget symbols (symbol-name symbol)) symbol)
     ;; Turn keywords self-evaluated and export them.
     (when (eq package *keyword-package*)
-      (oset symbol "value" symbol)
-      (oset exports (symbol-name symbol) symbol))))
+      (setf (oget symbol "value") symbol)
+      (setf (oget exports (symbol-name symbol)) symbol))))
 
 (defun find-symbol (name &optional (package *package*))
   (let* ((package (find-package-or-fail package))
@@ -122,13 +122,13 @@
           (let ((symbols (%package-symbols package)))
             (oget symbols name)
             (let ((symbol (make-symbol name)))
-              (oset symbol "package" package)
+              (setf (oget symbol "package") package)
               (when (eq package *keyword-package*)
-                (oset symbol "value" symbol)
+                (setf (oget symbol "value") symbol)
                 (export (list symbol) package))
               (when *intern-hook*
                 (funcall *intern-hook* symbol))
-              (oset symbols name symbol)
+              (setf (oget symbols name) symbol)
               (values symbol nil)))))))
 
 (defun symbol-package (symbol)
@@ -139,7 +139,7 @@
 (defun export (symbols &optional (package *package*))
   (let ((exports (%package-external-symbols package)))
     (dolist (symb symbols t)
-      (oset exports (symbol-name symb) symb))))
+      (setf (oget exports (symbol-name symb)) symb))))
 
 (defun %map-external-symbols (function package)
   (map-for-in function (%package-external-symbols package)))

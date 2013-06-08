@@ -20,14 +20,13 @@
 
 ;;; Return T if the string S contains characters which need to be
 ;;; escaped to print the symbol name, NIL otherwise.
-(defun escape-symbol-name-p (s &optional uppercase)
+(defun escape-symbol-name-p (s)
   (let ((dots-only t))
     (dotimes (i (length s))
       (let ((ch (char s i)))
         (setf dots-only (and dots-only (char= ch #\.)))
         (when (or (terminalp ch)
                   (char= ch #\:)
-                  (and uppercase (not (char= ch (char (string-upcase (string ch)) 0))))
                   (char= ch #\\)
                   (char= ch #\|))
           (return-from escape-symbol-name-p t))))
@@ -80,13 +79,13 @@
 #+nil
 (mapcar #'potential-number-p '("/" "/5" "+" "1+" "1-" "foo+" "ab.cd" "_" "^" "^/-"))
 
-(defun escape-token-p (string &optional uppercase)
+(defun escape-token-p (string)
   (or (potential-number-p string)
-      (escape-symbol-name-p string uppercase)))
+      (escape-symbol-name-p string)))
 
 ;;; Returns the token in a form that can be used for reading it back.
-(defun escape-token (s &optional uppercase)
-  (if (escape-token-p s uppercase)
+(defun escape-token (s)
+  (if (escape-token-p s)
       (let ((result "|"))
         (dotimes (i (length s))
           (let ((ch (char s i)))
@@ -100,6 +99,7 @@
 (defvar *print-escape* t)
 (defvar *print-circle* nil)
 
+;;; FIXME: Please, rewrite this in a more organized way.
 (defun write-to-string (form &optional known-objects object-ids)
   (when (and (not known-objects) *print-circle*)
     ;; To support *print-circle* some objects must be tracked for
@@ -113,22 +113,26 @@
     ;; the id is changed to negative. If an object has an id < 0 then
     ;; #<-n># is printed instead of the object.
     ;;
-    ;; The processing is O(n^2) with n = number of tracked objects,
-    ;; but it should be reasonably fast because is based on afind that
-    ;; is a primitive function that compiles to [].indexOf.
+    ;; The processing is O(n^2) with n = number of tracked
+    ;; objects. Hopefully it will become good enough when the new
+    ;; compiler is available.
     (setf known-objects (make-array 100))
     (setf object-ids (make-array 100))
     (let ((n 0)
           (sz 100)
           (count 0))
       (labels ((mark (x)
-                 (let ((i (afind x known-objects)))
+                 (let ((i (position x known-objects)))
                    (if (= i -1)
                        (progn
                          (when (= n sz)
                            (setf sz (* 2 sz))
-                           (aresize known-objects sz)
-                           (aresize object-ids sz))
+                           ;; KLUDGE: storage vectors are an internal
+                           ;; object which the printer should not know
+                           ;; about. Use standard vector with fill
+                           ;; pointers instead.
+                           (resize-storage-vector known-objects sz)
+                           (resize-storage-vector object-ids sz))
                          (aset known-objects (1- (incf n)) x)
                          t)
                        (unless (aref object-ids i)
@@ -142,7 +146,7 @@
                     (when (mark x)
                       (visit (car x))
                       (visit (cdr x))))
-                   ((arrayp x)
+                   ((vectorp x)
                     (when (mark x)
                       (dotimes (i (length x))
                         (visit (aref x i))))))))
@@ -150,9 +154,9 @@
   (let ((prefix ""))
     (when (and *print-circle*
                (or (consp form)
-                   (arrayp form)
+                   (vectorp form)
                    (and form (symbolp form) (null (symbol-package form)))))
-      (let* ((ix (afind form known-objects))
+      (let* ((ix (position form known-objects))
              (id (aref object-ids ix)))
         (cond
           ((and id (> id 0))
@@ -170,13 +174,13 @@
                  ;; is true even if the symbol's home package is not the current
                  ;; package, because it could be inherited.
                  (if (eq form (find-symbol (symbol-name form)))
-                     (escape-token (symbol-name form) (not (eq package *js-package*)))
+                     (escape-token (symbol-name form))
                      ;; Symbol is not accesible from *PACKAGE*, so let us prefix
                      ;; the symbol with the optional package or uninterned mark.
                      (concat (cond
                                ((null package) "#")
                                ((eq package (find-package "KEYWORD")) "")
-                               (t (escape-token (package-name package) t)))
+                               (t (escape-token (package-name package))))
                              ":"
                              (if (and package
                                       (eq (second (multiple-value-list
@@ -184,7 +188,7 @@
                                           :internal))
                                  ":"
                                  "")
-                             (escape-token name (not (eq package *js-package*)))))))
+                             (escape-token name)))))
               ((integerp form) (integer-to-string form))
               ((floatp form) (float-to-string form))
               ((characterp form)
@@ -194,7 +198,7 @@
                          (#\space "space")
                          (otherwise (string form)))))
               ((stringp form) (if *print-escape*
-                                  (concat "\"" (escape-string form) "\"")
+                                  (lisp-escape-string form)
                                   form))
               ((functionp form)
                (let ((name (oget form "fname")))
@@ -213,7 +217,7 @@
                                      " . "
                                      (write-to-string (cdr last) known-objects object-ids))))
                        ")"))
-              ((arrayp form)
+              ((vectorp form)
                (let ((result "#(")
                      (sep ""))
                  (dotimes (i (length form))
@@ -262,10 +266,12 @@
                 (concatf res "~"))
                ((char= next #\%)
                 (concatf res *newline*))
+               ((char= next #\*)
+                (pop arguments))
                (t
                 (concatf res (format-special next (car arguments)))
                 (pop arguments))))
-            (setq res (concat res (char-to-string c))))
+            (setq res (concat res (string c))))
         (incf i)))
     (if destination
         (progn
@@ -274,6 +280,6 @@
         res)))
 
 (defun format-special (chr arg)
-  (case chr
+  (case (char-upcase chr)
     (#\S (prin1-to-string arg))
-    (#\a (princ-to-string arg))))
+    (#\A (princ-to-string arg))))
