@@ -210,3 +210,65 @@
           (if from-end
               (reduce-list function sequence key start end initial-value ivp t)
               (reduce-list function sequence key start end initial-value ivp nil))))))
+
+(defun elt (sequence index)
+  (when (< index 0)
+    (error "The index ~D is below zero." index))
+  (etypecase sequence
+    (list
+     (let ((i 0))
+       (dolist (elt sequence)
+         (when (eql index i)
+           (return-from elt elt))
+         (incf i))
+       (error "The index ~D is too large for ~A of length ~D." index 'list i)))
+    (array
+     (let ((length (length sequence)))
+       (when (>= index length)
+         (error "The index ~D is too large for ~A of length ~D." index 'vector length))
+       (aref sequence index)))))
+
+(defun mismatch (sequence1 sequence2 &key key (test #'eql testp) (test-not nil test-not-p)
+                                       (start1 0) (end1 (length sequence1))
+                                       (start2 0) (end2 (length sequence2)))
+  (let ((index1 start1)
+        (index2 start2))
+    (while (and (<= index1 end1) (<= index2 end2))
+      (when (or (eql index1 end1) (eql index2 end2))
+        (return-from mismatch (if (eql end1 end2) NIL index1)))
+      (unless (satisfies-test-p (elt sequence1 index1) (elt sequence2 index2)
+                                :key key :test test :testp testp
+                                :test-not test-not :test-not-p test-not-p)
+        (return-from mismatch index1))
+      (incf index1)
+      (incf index2))))
+
+(defun list-search (sequence1 list2 args)
+  (let ((length1 (length sequence1))
+        (position 0))
+    (while list2
+      (let ((mismatch (apply #'mismatch sequence1 list2 args)))
+        (when (or (not mismatch) (>= mismatch length1))
+          (return-from list-search position)))
+      (pop list2)
+      (incf position))))
+
+(defun vector-search (sequence1 vector2 args)
+  (let ((length1 (length sequence1)))
+    (dotimes (position (length vector2))
+      (let ((mismatch (apply #'mismatch sequence1 (subseq vector2 position) args)))
+        (when (or (not mismatch) (>= mismatch length1))
+          (return-from vector-search position))))))
+
+(defun search (sequence1 sequence2 &rest args &key key test test-not)
+  (unless (sequencep sequence1)
+    (not-seq-error sequence1))
+  (when (or (and (listp sequence1) (null sequence1))
+            (and (vectorp sequence1) (zerop (length sequence1))))
+    (return-from search 0))
+  (funcall
+   (typecase sequence2
+     (list #'list-search)
+     (array #'vector-search)
+     (t (not-seq-error sequence2)))
+   sequence1 sequence2 args))
