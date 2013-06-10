@@ -501,6 +501,8 @@
                          `((,(ecase (car c)
                                     (integer 'integerp)
                                     (cons 'consp)
+                                    (list 'listp)
+                                    (sequence 'sequencep)
                                     (symbol 'symbolp)
                                     (function 'functionp)
                                     (float 'floatp)
