@@ -304,4 +304,5 @@
 (defun format-special (chr arg)
   (case (char-upcase chr)
     (#\S (prin1-to-string arg))
-    (#\A (princ-to-string arg))))
+    (#\A (princ-to-string arg))
+    (#\D (princ-to-string arg))))
