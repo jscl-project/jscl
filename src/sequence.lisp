@@ -15,6 +15,9 @@
 
 (/debug "loading sequence.lisp!")
 
+(defun sequencep (thing)
+  (or (listp thing) (vectorp thing)))
+
 (defun not-seq-error (thing)
   (error "`~S' is not of type SEQUENCE" thing))
 
