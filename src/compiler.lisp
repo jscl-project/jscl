@@ -470,7 +470,9 @@
   (let ((result ""))
     (while t
       (cond
-	((null pairs) (return))
+	((null pairs)
+         (setq result (ls-compile nil))
+         (return))
 	((null (cdr pairs))
 	 (error "Odd pairs in SETQ"))
 	(t
