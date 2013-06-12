@@ -1362,8 +1362,8 @@
   (js!selfcall
     "var tmp = (" (ls-compile object) ")[xstring(" (ls-compile key) ")];" *newline*
     (mapconcat (lambda (key)
-                 (code "if (tmp === undefined) return " (ls-compile nil) ";" *newline*)
-                 (code "tmp = tmp[xstring(" (ls-compile key) ")];" *newline*))
+                 (code "if (tmp === undefined) return " (ls-compile nil) ";" *newline*
+                       "tmp = tmp[xstring(" (ls-compile key) ")];" *newline*))
                keys)
     "return tmp === undefined? " (ls-compile nil) " : tmp;" *newline*))
 
@@ -1372,8 +1372,8 @@
     (js!selfcall
       "var obj = " (ls-compile object) ";" *newline*
       (mapconcat (lambda (key)
-                   "obj = obj[xstring(" (ls-compile key) ")];"
-                   "if (obj === undefined) throw 'Impossible to set Javascript property.';" *newline*)
+                   (code "obj = obj[xstring(" (ls-compile key) ")];"
+                         "if (obj === undefined) throw 'Impossible to set Javascript property.';" *newline*))
                  (butlast keys))
       "var tmp = obj[xstring(" (ls-compile (car (last keys))) ")] = " (ls-compile value) ";" *newline*
       "return tmp === undefined? " (ls-compile nil) " : tmp;" *newline*)))
