@@ -96,9 +96,25 @@
                (when (and (= i (1- len-2)) (> len-1 len-2))  ;; ran off the end of s2
                  (return-from string> (+ start1 i 1))))))))
 
-;; TODO: string<=, string>=
-;; - mostly like string< / string>
-;; - if we run off the end of s1 and s2 at the same time, then it's =, so return len.
+(defun string<= (s1 s2 &key (start1 0) end1 (start2 0) end2)
+  (let* ((s1 (string s1))
+         (s2 (string s2))
+	 (end1 (or end1 (length s1)))
+	 (end2 (or end2 (length s2)))
+	 (len-1 (- end1 start1))
+	 (len-2 (- end2 start2)))
+    (dotimes (i len-1 end1)
+      (when (= i len-2)  ;; ran off the end of s2
+	(return-from string<= nil))
+      (when (char/= (char s1 (+ start1 i)) (char s2 (+ start2 i)))  ;; found a difference
+	(return-from string<=
+		     (if (char< (char s1 (+ start1 i)) (char s2 (+ start2 i)))
+			 (+ start1 i)
+		       nil)))
+      (when (and (= i (1- len-1)) (> len-2 len-1))  ;; ran off the end of s1
+	(return-from string<= (+ start1 i 1))))))
+
+;; TODO: string>=
 
 (define-setf-expander char (string index)
   (let ((g!string (gensym))
