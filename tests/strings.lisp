@@ -253,8 +253,7 @@
 (test (string-equal "foo" "Foo"))
 (test (string= "abcd" "01234abcd9012" :start2 5 :end2 9))
 (test (eql (string< "aaaa" "aaab") 3))
-;; JSCL: STRING>= doesn't exist yet, disabled
-;; (test (eql (string>= "aaaaa" "aaaa") 4))
+(test (eql (string>= "aaaaa" "aaaa") 4))
 ;; JSCL: STRING-NOT-GREATERP doesn't exist yet, disabling:
 ;; (test (eql (string-not-greaterp "Abcde" "abcdE") 5))
 ;; (test (eql (string-lessp "012AAAA789" "01aaab6"
@@ -407,38 +406,38 @@
 (test (not (string<= #\z #\a)))
 
 
-;; (test (eql (string>= "" "") 0))
-;; (test (eql (string>= "dog" "dog") 3))
-;; (test (eql (string>= " " " ") 1))
-;; (test (eql (string>= "abc" "") 0))
-;; (test (not (string>= "" "abc")))
-;; (test (not (string>= "ab" "abc")))
-;; (test (eql (string>= "abc" "ab") 2))
-;; (test (eql (string>= "aba" "aaa") 1))
-;; (test (not (string>= "aaa" "aba")))
-;; (test (eql (string>= "my cat food" "your dog food" :start1 6 :start2 8) 11))
-;; (test (eql (string>= "cat food 2 dollars" "dog food 3 dollars"
-;; 	       :start1 3 :end1 9 :start2 3 :end2 9) 9))
-;; (test (eql (string>= "xyzabcde" "abcd" :start1 3) 7))
-;; (test (not (string>= "abc" "abc" :end1 1)))
-;; (test (eql (string>= "xyzabc" "a" :start1 3 :end1 5) 4))
-;; (test (eql (string>= "xyzXYZ" "abcxyz" :start2 3) 3))
-;; (test (eql (string>= "abcxyz" "abcxyz" :end2 3) 3))
-;; (test (not (string>= "xyzXYZ" "abcxyz" :end1 2 :start2 3)))
-;; (test (eql (string>= "xyzabc" "abcdef" :start1 3 :end2 3) 6))
-;; (test (eql (string>= "z" "aaaa") 0))
-;; (test (eql (string>= "pTTTxTTTqqq" "pppTTTaTTT" :start1 1 :start2 3) 4))
-;; (test (eql (string>= "pppTTTxTTTqqq" "pTTTaTTT"
-;; 	       :start1 6 :end1 7
-;; 	       :start2 4 :end2 5) 6))
+(test (eql (string>= "" "") 0))
+(test (eql (string>= "dog" "dog") 3))
+(test (eql (string>= " " " ") 1))
+(test (eql (string>= "abc" "") 0))
+(test (not (string>= "" "abc")))
+(test (not (string>= "ab" "abc")))
+(test (eql (string>= "abc" "ab") 2))
+(test (eql (string>= "aba" "aaa") 1))
+(test (not (string>= "aaa" "aba")))
+(test (eql (string>= "my cat food" "your dog food" :start1 6 :start2 8) 11))
+(test (eql (string>= "cat food 2 dollars" "dog food 3 dollars"
+	       :start1 3 :end1 9 :start2 3 :end2 9) 9))
+(test (eql (string>= "xyzabcde" "abcd" :start1 3) 7))
+(test (not (string>= "abc" "abc" :end1 1)))
+(test (eql (string>= "xyzabc" "a" :start1 3 :end1 5) 4))
+(test (eql (string>= "xyzXYZ" "abcxyz" :start2 3) 3))
+(test (eql (string>= "abcxyz" "abcxyz" :end2 3) 3))
+(test (not (string>= "xyzXYZ" "abcxyz" :end1 2 :start2 3)))
+(test (eql (string>= "xyzabc" "abcdef" :start1 3 :end2 3) 6))
+(test (eql (string>= "z" "aaaa") 0))
+(test (eql (string>= "pTTTxTTTqqq" "pppTTTaTTT" :start1 1 :start2 3) 4))
+(test (eql (string>= "pppTTTxTTTqqq" "pTTTaTTT"
+	       :start1 6 :end1 7
+	       :start2 4 :end2 5) 6))
 ;; (test (eql (string>= (make-array 0 :element-type 'character)
 ;; 	       (make-array 0 :element-type 'base-char)) 0))
-;; (test (= (string>= 'love 'hate) 0))
-;; (test (not (string>= 'peace 'war)))
-;; (test (= (string>= 'love 'love) 4))
-;; (test (= (string>= #\a #\a) 1))
-;; (test (not (string>= #\a #\b)))
-;; (test (= (string>= #\z #\a) 0))
+(test (= (string>= 'love 'hate) 0))
+(test (not (string>= 'peace 'war)))
+(test (= (string>= 'love 'love) 4))
+(test (= (string>= #\a #\a) 1))
+(test (not (string>= #\a #\b)))
+(test (= (string>= #\z #\a) 0))
 
 
 
