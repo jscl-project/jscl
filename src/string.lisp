@@ -31,25 +31,74 @@
         ((symbolp x) (symbol-name x))
         (t (make-string 1 :initial-element x))))
 
-(defun string= (s1 s2)
+(defun string= (s1 s2 &key (start1 0) end1 (start2 0) end2)
   (let* ((s1 (string s1))
          (s2 (string s2))
-         (n (length s1)))
-    (when (= (length s2) n)
-      (dotimes (i n t)
-        (unless (char= (char s1 i) (char s2 i))
+         (n1 (length s1))
+         (n2 (length s2))
+         (end1 (or end1 n1))
+         (end2 (or end2 n2)))
+    (when (= (- end2 start2) (- end1 start1))
+      (dotimes (i (- end2 start2) t)
+        (unless (char= (char s1 (+ start1 i)) (char s2 (+ start2 i)))
           (return-from string= nil))))))
 
-(defun string< (s1 s2)
-  (let ((len-1 (length s1))
-        (len-2 (length s2)))
+(defun string/= (s1 s2 &key (start1 0) end1 (start2 0) end2)
+  (let* ((s1 (string s1))
+         (s2 (string s2))
+         (n1 (length s1))
+         (n2 (length s2))
+         (end1 (or end1 n1))
+         (end2 (or end2 n2)))
+    (dotimes (i (max (- end1 start1) (- end2 start2)) nil)
+      (when (or (>= (+ start1 i) n1)
+		(>= (+ start2 i) n2))
+	(return-from string/= (+ start1 i)))
+      (unless (char= (char s1 (+ start1 i)) (char s2 (+ start2 i)))
+	(return-from string/= (+ start1 i))))))
+
+(defun string< (s1 s2 &key (start1 0) end1 (start2 0) end2)
+  (let* ((s1 (string s1))
+         (s2 (string s2))
+	 (end1 (or end1 (length s1)))
+	 (end2 (or end2 (length s2)))
+	 (len-1 (- end1 start1))
+	 (len-2 (- end2 start2)))
     (cond ((= len-2 0) nil)
           ((= len-1 0) 0)
           (t (dotimes (i len-1 nil)
-               (when (char< (char s1 i) (char s2 i))
-                 (return-from string< i))
-               (when (and (= i (1- len-1)) (> len-2 len-1))
-                 (return-from string< (1+ i))))))))
+	       (when (= i len-2)  ;; ran off the end of s2
+		 (return-from string< nil))
+               (when (char< (char s1 (+ start1 i)) (char s2 (+ start2 i)))  ;; found a difference
+                 (return-from string< (+ start1 i)))
+               (when (char> (char s1 (+ start1 i)) (char s2 (+ start2 i)))  ;; found a difference
+                 (return-from string< nil))
+               (when (and (= i (1- len-1)) (> len-2 len-1))  ;; ran off the end of s1
+                 (return-from string< (+ start1 i 1))))))))
+
+;; just like string< but with everything flipped, except the result is still relative to s1
+(defun string> (s1 s2 &key (start1 0) end1 (start2 0) end2)
+  (let* ((s1 (string s1))
+         (s2 (string s2))
+	 (end1 (or end1 (length s1)))
+	 (end2 (or end2 (length s2)))
+	 (len-1 (- end1 start1))
+	 (len-2 (- end2 start2)))
+    (cond ((= len-1 0) nil)
+          ((= len-2 0) 0)
+          (t (dotimes (i len-2 nil)
+	       (when (= i len-1)  ;; ran off the end of s1
+		 (return-from string> nil))
+               (when (char> (char s1 (+ start1 i)) (char s2 (+ start2 i)))  ;; found a difference
+                 (return-from string> (+ start1 i)))
+               (when (char< (char s1 (+ start1 i)) (char s2 (+ start2 i)))  ;; found a difference
+                 (return-from string> nil))
+               (when (and (= i (1- len-2)) (> len-1 len-2))  ;; ran off the end of s2
+                 (return-from string> (+ start1 i 1))))))))
+
+;; TODO: string<=, string>=
+;; - mostly like string< / string>
+;; - if we run off the end of s1 and s2 at the same time, then it's =, so return len.
 
 (define-setf-expander char (string index)
   (let ((g!string (gensym))
@@ -68,12 +117,92 @@
     (!reduce #'concat-two strs "")))
 
 
-(defun string-upcase (string)
-  (let ((new (make-string (length string))))
+(defun string-upcase (string &key start end)
+  (let* ((string (string string))
+         (new (make-string (length string))))
     (dotimes (i (length string) new)
-      (aset new i (char-upcase (char string i))))))
+      (aset new i
+            (if (and (or (null start) (>= i start))
+                     (or (null end) (< i end)))
+                (char-upcase (char string i))
+              (char string i))))))
 
-(defun string-downcase (string)
-  (let ((new (make-string (length string))))
+(defun string-downcase (string &key start end)
+  (let* ((string (string string))
+         (new (make-string (length string))))
     (dotimes (i (length string) new)
-      (aset new i (char-downcase (char string i))))))
+      (aset new i
+            (if (and (or (null start) (>= i start))
+                     (or (null end) (< i end)))
+                (char-downcase (char string i))
+              (char string i))))))
+
+(defun string-capitalize (string &key start end)
+  (let* ((string (string string))
+	 (new (make-string (length string)))
+	 (just-saw-alphanum-p nil))
+    (dotimes (i (length string) new)
+      (aset new i
+	    (cond ((or (and start (< i start))
+		       (and end (> i end)))
+		   (char string i))
+		  ((or (= i (or start 0))
+		       (not just-saw-alphanum-p))
+		   (char-upcase (char string i)))
+		  (t
+		   (char-downcase (char string i)))))
+      (setq just-saw-alphanum-p (alphanumericp (char string i))))))
+
+;; TODO: NSTRING-{UPCASE,DOWNCASE,CAPITALIZE}
+;; - Q: can i just extract the above functions without the MAKE-STRING call, and then have the STRING-* variants do MAKE-STRING + NSTRING-*?
+;; - NOTE: sacla's tests depend on COPY-SEQ, which doesn't exist yet.
+
+(defun string-equal (s1 s2 &key start1 end1 start2 end2)
+  (let* ((s1 (string s1))
+         (s2 (string s2))
+         (n1 (length s1))
+         (n2 (length s2))
+         (start1 (or start1 0))
+         (end1 (or end1 n1))
+         (start2 (or start2 0))
+         (end2 (or end2 n2)))
+    (when (= (- end2 start2) (- end1 start1))
+      (dotimes (i (- end2 start2) t)
+        (unless (char-equal (char s1 (+ start1 i)) (char s2 (+ start2 i)))
+          (return-from string-equal nil))))))
+
+;; just like string/= but with char-equal instead of char=
+(defun string-not-equal (s1 s2 &key (start1 0) end1 (start2 0) end2)
+  (let* ((s1 (string s1))
+         (s2 (string s2))
+         (n1 (length s1))
+         (n2 (length s2))
+         (end1 (or end1 n1))
+         (end2 (or end2 n2)))
+    (dotimes (i (max (- end1 start1) (- end2 start2)) nil)
+      (when (or (>= (+ start1 i) n1)
+		(>= (+ start2 i) n2))
+	(return-from string-not-equal (+ start1 i)))
+      (unless (char-equal (char s1 (+ start1 i)) (char s2 (+ start2 i)))
+	(return-from string-not-equal (+ start1 i))))))
+
+;; TODO: these STRING-* functions need :FROM-END T!  can i do it some other way?  (e.g., DOTIMES to index backwards from the end)
+
+;; (defun string-trim (character-bag string)
+;;   (let* ((string (string string))
+;; 	 (n (length string))
+;; 	 (start (or (position-if-not (lambda (c) (find c character-bag)) string) n))
+;; 	 (end (or (position-if-not (lambda (c) (find c character-bag)) string :from-end t) 0)))
+;;     (subseq string start (1+ end))))
+
+(defun string-left-trim (character-bag string)
+  (let* ((string (string string))
+	 (n (length string))
+	 (start (or (position-if-not (lambda (c) (find c character-bag)) string) n)))
+    (subseq string start)))
+
+;; (defun string-right-trim (character-bag string)
+;;   (let* ((string (string string))
+;; 	 (n (length string))
+;; 	 (end (or (position-if-not (lambda (c) (find c character-bag)) string :from-end t) 0)))
+;;     (subseq string 0 (1+ end))))
