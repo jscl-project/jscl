@@ -85,23 +85,35 @@
 
 (defun string< (s1 s2 &key (start1 0) end1 (start2 0) end2)
   (compare-strings s1 s2 start1 end1 start2 end2
-		   #'char= #'char>
-		   nil t nil))
+		   #'char= #'char> nil t nil))
 
 (defun string> (s1 s2 &key (start1 0) end1 (start2 0) end2)
   (compare-strings s1 s2 start1 end1 start2 end2
-		   #'char= #'char<
-		   nil nil t))
+		   #'char= #'char< nil nil t))
 
 (defun string<= (s1 s2 &key (start1 0) end1 (start2 0) end2)
   (compare-strings s1 s2 start1 end1 start2 end2
-		   #'char= #'char>
-		   t t nil))
+		   #'char= #'char> t t nil))
   
 (defun string>= (s1 s2 &key (start1 0) end1 (start2 0) end2)
   (compare-strings s1 s2 start1 end1 start2 end2
-		   #'char= #'char<
-		   t nil t))
+		   #'char= #'char< t nil t))
+
+(defun string-lessp (s1 s2 &key (start1 0) end1 (start2 0) end2)
+  (compare-strings s1 s2 start1 end1 start2 end2
+		   #'char-equal #'char-greaterp nil t nil))
+
+(defun string-greaterp (s1 s2 &key (start1 0) end1 (start2 0) end2)
+  (compare-strings s1 s2 start1 end1 start2 end2
+		   #'char-equal #'char-lessp nil nil t))
+
+(defun string-not-greaterp (s1 s2 &key (start1 0) end1 (start2 0) end2)
+  (compare-strings s1 s2 start1 end1 start2 end2
+		   #'char-equal #'char-greaterp t t nil))
+
+(defun string-not-lessp (s1 s2 &key (start1 0) end1 (start2 0) end2)
+  (compare-strings s1 s2 start1 end1 start2 end2
+		   #'char-equal #'char-lessp t nil t))
 
 (define-setf-expander char (string index)
   (let ((g!string (gensym))
