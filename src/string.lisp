@@ -186,14 +186,8 @@
       (unless (char-equal (char s1 (+ start1 i)) (char s2 (+ start2 i)))
 	(return-from string-not-equal (+ start1 i))))))
 
-;; TODO: these STRING-* functions need :FROM-END T!  can i do it some other way?  (e.g., DOTIMES to index backwards from the end)
-
-;; (defun string-trim (character-bag string)
-;;   (let* ((string (string string))
-;; 	 (n (length string))
-;; 	 (start (or (position-if-not (lambda (c) (find c character-bag)) string) n))
-;; 	 (end (or (position-if-not (lambda (c) (find c character-bag)) string :from-end t) 0)))
-;;     (subseq string start (1+ end))))
+(defun string-trim (character-bag string)
+  (string-left-trim character-bag (string-right-trim character-bag string)))
 
 (defun string-left-trim (character-bag string)
   (let* ((string (string string))
@@ -201,8 +195,9 @@
 	 (start (or (position-if-not (lambda (c) (find c character-bag)) string) n)))
     (subseq string start)))
 
-;; (defun string-right-trim (character-bag string)
-;;   (let* ((string (string string))
-;; 	 (n (length string))
-;; 	 (end (or (position-if-not (lambda (c) (find c character-bag)) string :from-end t) 0)))
-;;     (subseq string 0 (1+ end))))
+(defun string-right-trim (character-bag string)
+  (let* ((string (string string))
+	 (n (length string)))
+    (dotimes (i n "")
+      (when (not (find (char string (- n i 1)) character-bag))
+	(return-from string-right-trim (subseq string 0 (- n i)))))))
