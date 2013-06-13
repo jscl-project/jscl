@@ -117,7 +117,7 @@
     (!reduce #'concat-two strs "")))
 
 
-(defun string-upcase (string &key start end)
+(defun string-upcase (string &key (start 0) end)
   (let* ((string (string string))
          (new (make-string (length string))))
     (dotimes (i (length string) new)
@@ -127,7 +127,13 @@
                 (char-upcase (char string i))
               (char string i))))))
 
-(defun string-downcase (string &key start end)
+(defun nstring-upcase (string &key (start 0) end)
+  (let ((end (or end (length string))))
+    (dotimes (i (- end start) string)
+      (aset string (+ start i)
+	    (char-upcase (char string (+ start i)))))))
+
+(defun string-downcase (string &key (start 0) end)
   (let* ((string (string string))
          (new (make-string (length string))))
     (dotimes (i (length string) new)
@@ -137,7 +143,13 @@
                 (char-downcase (char string i))
               (char string i))))))
 
-(defun string-capitalize (string &key start end)
+(defun nstring-downcase (string &key (start 0) end)
+  (let ((end (or end (length string))))
+    (dotimes (i (- end start) string)
+      (aset string (+ start i)
+	    (char-downcase (char string (+ start i)))))))
+
+(defun string-capitalize (string &key (start 0) end)
   (let* ((string (string string))
 	 (new (make-string (length string)))
 	 (just-saw-alphanum-p nil))
@@ -146,16 +158,23 @@
 	    (cond ((or (and start (< i start))
 		       (and end (> i end)))
 		   (char string i))
-		  ((or (= i (or start 0))
+		  ((or (= i start)
 		       (not just-saw-alphanum-p))
 		   (char-upcase (char string i)))
 		  (t
 		   (char-downcase (char string i)))))
       (setq just-saw-alphanum-p (alphanumericp (char string i))))))
 
-;; TODO: NSTRING-{UPCASE,DOWNCASE,CAPITALIZE}
-;; - Q: can i just extract the above functions without the MAKE-STRING call, and then have the STRING-* variants do MAKE-STRING + NSTRING-*?
-;; - NOTE: sacla's tests depend on COPY-SEQ, which doesn't exist yet.
+(defun nstring-capitalize (string &key (start 0) end)
+  (let ((end (or end (length string)))
+	(just-saw-alphanum-p nil))
+    (dotimes (i (- end start) string)
+      (aset string (+ start i)
+	    (if (or (zerop i)
+		    (not just-saw-alphanum-p))
+		(char-upcase (char string (+ start i)))
+	      (char-downcase (char string (+ start i)))))
+      (setq just-saw-alphanum-p (alphanumericp (char string (+ start i)))))))
 
 (defun string-equal (s1 s2 &key start1 end1 start2 end2)
   (let* ((s1 (string s1))
