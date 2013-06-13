@@ -291,7 +291,9 @@
 
 (defmacro do (varlist endlist &body body)
   `(block nil
-     (let ,(mapcar (lambda (x) (list (first x) (second x))) varlist)
+     (let ,(mapcar (lambda (x) (if (symbolp x)
+                                   (list x nil)
+                                 (list (first x) (second x)))) varlist)
        (while t
          (when ,(car endlist)
            (return (progn ,@(cdr endlist))))
@@ -299,13 +301,16 @@
          (psetq
           ,@(apply #'append
                    (mapcar (lambda (v)
-                             (and (consp (cddr v))
+                             (and (listp v)
+                                  (consp (cddr v))
                                   (list (first v) (third v))))
                            varlist)))))))
 
 (defmacro do* (varlist endlist &body body)
   `(block nil
-     (let* ,(mapcar (lambda (x) (list (first x) (second x))) varlist)
+     (let* ,(mapcar (lambda (x1) (if (symbolp x1)
+                                     (list x1 nil)
+                                   (list (first x1) (second x1)))) varlist)
        (while t
          (when ,(car endlist)
            (return (progn ,@(cdr endlist))))
@@ -313,7 +318,8 @@
          (setq
           ,@(apply #'append
                    (mapcar (lambda (v)
-                             (and (consp (cddr v))
+                             (and (listp v)
+                                  (consp (cddr v))
                                   (list (first v) (third v))))
                            varlist)))))))
 
