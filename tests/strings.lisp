@@ -130,12 +130,6 @@
 (test (string= (string-capitalize "pipe 13a, foo16c") "Pipe 13a, Foo16c"))
 (test (string= (string-capitalize "a fool" :start 2 :end nil) "a Fool"))
 
-;; JSCL HACK: a simple COPY-SEQ for testing string functions, since we don't have a real one yet -- remove me
-(defun copy-seq (string)
-  (let ((copy (make-string (length string))))
-    (dotimes (i (length string) copy)
-      (aset copy i (char string i)))))
-
 (test (let ((str (copy-seq "0123ABCD890a")))
   (and (string= (nstring-downcase str :start 5 :end 7) "0123AbcD890a")
        (string= str "0123AbcD890a"))))
