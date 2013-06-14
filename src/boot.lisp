@@ -472,14 +472,15 @@
     ((null (cddr pairs))
      (let ((place (!macroexpand-1 (first pairs)))
            (value (second pairs)))
-       (multiple-value-bind (vars vals store-vars writer-form)
+       (multiple-value-bind (vars vals store-vars writer-form reader-form)
            (get-setf-expansion place)
          ;; TODO: Optimize the expansion a little bit to avoid let*
          ;; or multiple-value-bind when unnecesary.
          `(let* ,(mapcar #'list vars vals)
             (multiple-value-bind ,store-vars
                 ,value
-              ,writer-form)))))
+              ,writer-form
+              ,reader-form)))))
     (t
      `(progn
         ,@(do ((pairs pairs (cddr pairs))

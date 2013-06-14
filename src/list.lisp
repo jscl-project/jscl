@@ -259,7 +259,7 @@
             (list x)
             (list new-value)
             `(progn (rplacd ,cons ,new-value) ,new-value)
-            `(car ,cons))))
+            `(cdr ,cons))))
 
 
 ;; The NCONC function is based on the SBCL's one.
