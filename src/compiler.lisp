@@ -377,7 +377,7 @@
                            " && ")
                      ")" *newline*
                      (indent
-                      "throw 'Unknown keyword argument ' + xstring(arguments[i].name);" *newline*))
+                      "throw 'Unknown keyword argument ' + xstring(arguments[i+2].name);" *newline*))
              "}" *newline*)))))
 
 (defun parse-lambda-list (ll)
