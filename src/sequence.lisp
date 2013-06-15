@@ -63,6 +63,22 @@
                                    :test-not test-not :test-not-p test-not-p))
         (return index)))))
 
+;; TODO: need to support &key from-end
+(defun position-if (predicate sequence
+                 &key key (start 0) end)
+  ;; TODO: Implement START and END efficiently for all the sequence
+  ;; functions.
+  (let ((end (or end (length sequence))))
+    (do-sequence (x sequence index)
+      (when (and (<= start index)
+                 (< index end)
+                 (funcall predicate (if key (funcall key x) x)))
+        (return index)))))
+
+(defun position-if-not (predicate sequence
+                 &key key (start 0) end)
+  (position-if (complement predicate) sequence :key key :start start :end end))
+
 (defun remove (x seq &key key (test #'eql testp) (test-not #'eql test-not-p))
   (cond
     ((null seq)
