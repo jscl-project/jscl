@@ -468,9 +468,12 @@
 
 (define-compilation setq (&rest pairs)
   (let ((result ""))
+    (when (null pairs)
+      (return-from setq (ls-compile nil)))
     (while t
       (cond
-	((null pairs) (return))
+	((null pairs)
+         (return))
 	((null (cdr pairs))
 	 (error "Odd pairs in SETQ"))
 	(t
