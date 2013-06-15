@@ -368,8 +368,11 @@
                (mapconcat #'parse-keyword keyword-arguments))))
      ;; Check for unknown keywords
      (when keyword-arguments
-       (code "for (i=" (+ n-required-arguments n-optional-arguments)
-             "; i<nargs; i+=2){" *newline*
+       (code "var start = " (+ n-required-arguments n-optional-arguments) ";" *newline*
+             "if ((nargs - start) % 2 == 1){" *newline*
+             (indent "throw 'Odd number of keyword arguments';" *newline*)
+             "}" *newline*
+             "for (i = start; i<nargs; i+=2){" *newline*
              (indent "if ("
                      (join (mapcar (lambda (x)
                                      (concat "arguments[i+2] !== " (ls-compile (caar x))))
