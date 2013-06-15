@@ -15,33 +15,30 @@
 
 ;;;; Various numeric functions and constants
 
-;; TODO: Use MACROLET when it exists
-(defmacro define-variadic-op (operator initial-value)
-  (let ((init-sym   (gensym))
-        (dolist-sym (gensym)))
-    `(defun ,operator (&rest args)
-       (let ((,init-sym ,initial-value))
-         (dolist (,dolist-sym args)
-           (setq ,init-sym (,operator ,init-sym ,dolist-sym)))
-         ,init-sym))))
-
-(define-variadic-op + 0)
-(define-variadic-op * 1)
+(macrolet ((def (operator initial-value)
+             (let ((init-sym   (gensym))
+                   (dolist-sym (gensym)))
+               `(defun ,operator (&rest args)
+                  (let ((,init-sym ,initial-value))
+                    (dolist (,dolist-sym args)
+                      (setq ,init-sym (,operator ,init-sym ,dolist-sym)))
+                    ,init-sym)))))
+  (def + 0)
+  (def * 1))
 
 ;; - and / work differently from the above macro.
 ;; If only one arg is given, it negates it or takes its reciprocal.
 ;; Otherwise all the other args are subtracted from or divided by it.
-;; TODO: Use MACROLET when it exists
-(defmacro define-sub-or-div (operator unary-form)
-  `(defun ,operator (x &rest args)
-     (cond
-       ((null args) ,unary-form)
-       (t (dolist (y args)
-            (setq x (,operator x y)))
-          x))))
+(macrolet ((def (operator unary-form)
+             `(defun ,operator (x &rest args)
+                (cond
+                  ((null args) ,unary-form)
+                  (t (dolist (y args)
+                       (setq x (,operator x y)))
+                     x)))))
+  (def - (-   x))
+  (def / (/ 1 x)))
 
-(define-sub-or-div - (-   x))
-(define-sub-or-div / (/ 1 x))
 
 (defun 1+ (x) (+ x 1))
 (defun 1- (x) (- x 1))
@@ -59,21 +56,19 @@
 (defun zerop (x) (= x 0))
 (defun plusp (x) (< 0 x))
 
-;; TODO: Use MACROLET when it exists
-(defmacro defcomparison (operator)
-  `(defun ,operator (x &rest args)
-     (dolist (y args) 
-       (if (,operator x y)
-         (setq x    (car args))
-         (return-from ,operator nil)))
-     t))
-
-(defcomparison >)
-(defcomparison >=)
-(defcomparison =) 
-(defcomparison <)
-(defcomparison <=)
-(defcomparison /=)
+(macrolet ((def (operator)
+             `(defun ,operator (x &rest args)
+                (dolist (y args) 
+                  (if (,operator x y)
+                      (setq x    (car args))
+                      (return-from ,operator nil)))
+                t)))
+  (def >)
+  (def >=)
+  (def =) 
+  (def <)
+  (def <=)
+  (def /=))
 
 (defconstant pi 3.141592653589793) 
 
