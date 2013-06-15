@@ -728,6 +728,19 @@
                   ",")
             ")")))
 
+(define-compilation macrolet (definitions &rest body)
+  (let ((*environment* (copy-lexenv *environment*)))
+    (dolist (def definitions)
+      (destructuring-bind (name lambda-list &body body) def
+        (let ((binding (make-binding :name name :type 'macro :value
+                                     (let ((g!form (gensym)))
+                                       `(lambda (,g!form)
+                                          (destructuring-bind ,lambda-list ,g!form
+                                            ,@body))))))
+          (push-to-lexenv binding  *environment* 'function))))
+    (ls-compile `(progn ,@body) *multiple-value-p*)))
+
+
 (defun special-variable-p (x)
   (and (claimp x 'variable 'special) t))
 
