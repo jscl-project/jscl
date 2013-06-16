@@ -75,12 +75,14 @@
 (defun evenp (x) (= (mod x 2) 0))
 (defun oddp  (x) (not (evenp x)))
 
-(flet ((%max-min (x xs func)
-         (dolist (y xs) 
-           (setq x  (if (funcall func x (car xs)) x y)))
-         x))
-  (defun max (x &rest xs) (%max-min x xs #'>))
-  (defun min (x &rest xs) (%max-min x xs #'<))) 
+(macrolet ((def (name comparison)
+             `(defun ,name (x &rest xs)
+                (dolist (y xs) 
+                  (unless (,comparison x (car xs))
+                    (setq x y)))
+                x)))
+  (def max >)
+  (def min <))
 
 (defun abs (x) (if (> x 0) x (- x)))
 
