@@ -150,19 +150,18 @@
     (t (not-seq-error seq))))
 
 (defun elt (sequence index)
-	(cond
-		((not (or (listp sequence)
-							(arrayp sequence)))
-		 (error "type-error sequence is not a proper sequence"))
-		((or (not (integerp index))
-				 (>= index (length sequence)))
-		 (error "type-error index is not valid sequence index"))
-		(t
-		 (let ((i 0))
-			 (do-sequence (el sequence)
-				 (when (= i index)
-					 (return el))
-				 (incf i))))))
+  (when (or (not (integerp index))
+            (< index 0))
+    (error "type-error index is not valid sequence index"))
+	(typecase sequence
+    (cons  (progn (while (and (plusp index) sequence)
+                    (setq index (1- index))
+                    (setq sequence (cdr sequence)))
+                  (if sequence
+                      (car sequence)
+                      (error "type-error index is not valid sequence index"))))
+    (array (aref sequence index))
+		(t    (not-seq-error sequence))))
 
 
 (defun vector (&rest args)

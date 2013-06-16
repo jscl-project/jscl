@@ -54,12 +54,11 @@
 
 ; ELT
 (test (eq 1 (elt (vector '(1 2 3)) 0)))
+(test (eq 2 (elt '(1 2 3) 1)))
 (test (eq 1 (elt '(1 2 3) 0)))
 
 ; VECTOR
 (test (arrayp (vector '(1 2))))
-(test (not (arrayp (vector (list 1 2)))))
 
 ; VECTORP
 (test (vectorp (vector '(1 2))))
-(test (vectorp (list 1 2)))
