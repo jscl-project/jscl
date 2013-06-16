@@ -317,6 +317,6 @@
 (defun intersection (list1 list2 &key (test #'eql) (key #'identity))
   (let ((new-list ()))
     (dolist (x list1)
-      (when (member x list2 :test test :key key)
+      (when (member (funcall key x) list2 :test test :key key)
         (push x new-list)))
     new-list))

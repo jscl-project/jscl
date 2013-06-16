@@ -191,6 +191,9 @@
 (test (equal (intersection '(1 2) '(2 3)) '(2)))
 (test (not (intersection '(1 2 3) '(4 5 6))))
 (test (equal (intersection '((1) (2)) '((2) (3)) :test #'equal) '((2))))
+(test (equal '((1 . 2))
+             (intersection '((1 . 2) (2 . 3)) '((9 . 2) (9 . 4))
+                           :test #'equal :key #'cdr)))
 
 ; POP
 (test (let* ((foo '(1 2 3))
