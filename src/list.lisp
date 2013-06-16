@@ -68,6 +68,16 @@
 (defun nth (n list)
   (car (nthcdr n list)))
 
+(define-setf-expander nth (n list)
+  (let ((g!list (gensym))
+        (g!index (gensym))
+        (g!value (gensym)))
+    (values (list g!list g!index)
+            (list list n)
+            (list g!value)
+            `(rplaca (nthcdr ,g!index ,g!list) ,g!value)
+            `(nth ,g!index ,g!list))))
+
 (defun caar (x) (car (car x)))
 (defun cadr (x) (car (cdr x)))
 (defun cdar (x) (cdr (car x)))

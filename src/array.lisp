@@ -73,6 +73,16 @@
     (error "~S is not an array." array))  
   (storage-vector-set array index value))
 
+(define-setf-expander aref (array index)
+  (let ((g!array (gensym))
+        (g!index (gensym))
+        (g!value (gensym)))
+    (values (list g!array g!index)
+            (list array index)
+            (list g!value)
+            `(aset ,g!array ,g!index ,g!value)
+            `(aref ,g!array ,g!index))))
+
 
 ;;; Vectors
 
