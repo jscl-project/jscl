@@ -167,7 +167,7 @@
               (rplacd pointer ())
               drop-a))))
        (copy-list (nthcdr a seq))))
-    ((vectorp seq)
+    ((or (vectorp seq) (arrayp seq))
      (let* ((b (or b (length seq)))
             (size (- b a))
             (new (make-array size :element-type (array-element-type seq))))
@@ -176,3 +176,17 @@
            ((= j b) new)
          (aset new i (aref seq j)))))
     (t (not-seq-error seq))))
+
+(defun elt (sequence index)
+  (when (or (not (integerp index))
+            (< index 0))
+    (error "type-error index is not valid sequence index"))
+	(typecase sequence
+    (cons  (progn (while (and (plusp index) sequence)
+                    (setq index (1- index))
+                    (setq sequence (cdr sequence)))
+                  (if sequence
+                      (car sequence)
+                      (error "type-error index is not valid sequence index"))))
+    (array (aref sequence index))
+		(t    (not-seq-error sequence))))

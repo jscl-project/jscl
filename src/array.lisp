@@ -65,12 +65,12 @@
 
 (defun aref (array index)
   (unless (arrayp array)
-    (error "~S is not an array." array))  
+    (error "~S is not an array." array))
   (storage-vector-ref array index))
 
 (defun aset (array index value)
   (unless (arrayp array)
-    (error "~S is not an array." array))  
+    (error "~S is not an array." array))
   (storage-vector-set array index value))
 
 
@@ -79,11 +79,14 @@
 (defun vectorp (x)
   (and (arrayp x) (null (cdr (array-dimensions x)))))
 
+(defun vector (&rest args)
+	(apply #'list-to-vector args))
+
 ;;; FIXME: should take optional min-extension.
 ;;; FIXME: should use fill-pointer instead of the absolute end of array
 (defun vector-push-extend (new vector)
   (unless (vectorp vector)
-    (error "~S is not a vector." vector))  
+    (error "~S is not a vector." vector))
   (let ((size (storage-vector-size vector)))
     (resize-storage-vector vector (1+ size))
     (aset vector size new)
