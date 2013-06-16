@@ -207,7 +207,7 @@
   `(push (list ',name (lambda ,args (block ,name ,@body)))
          *compilations*))
 
-(define-compilation if (condition true false)
+(define-compilation if (condition true &optional false)
   (code "(" (ls-compile condition) " !== " (ls-compile nil)
         " ? " (ls-compile true *multiple-value-p*)
         " : " (ls-compile false *multiple-value-p*)
@@ -266,9 +266,9 @@
       (js!selfcall
         "var func = " (join strs) ";" *newline*
         (when name
-          (code "func.fname = '" (escape-string name) "';" *newline*))
+          (code "func.fname = " (js-escape-string name) ";" *newline*))
         (when docstring
-          (code "func.docstring = '" (escape-string docstring) "';" *newline*))
+          (code "func.docstring = " (js-escape-string docstring) ";" *newline*))
         "return func;" *newline*)
       (apply #'code strs)))
 
@@ -368,8 +368,11 @@
                (mapconcat #'parse-keyword keyword-arguments))))
      ;; Check for unknown keywords
      (when keyword-arguments
-       (code "for (i=" (+ n-required-arguments n-optional-arguments)
-             "; i<nargs; i+=2){" *newline*
+       (code "var start = " (+ n-required-arguments n-optional-arguments) ";" *newline*
+             "if ((nargs - start) % 2 == 1){" *newline*
+             (indent "throw 'Odd number of keyword arguments';" *newline*)
+             "}" *newline*
+             "for (i = start; i<nargs; i+=2){" *newline*
              (indent "if ("
                      (join (mapcar (lambda (x)
                                      (concat "arguments[i+2] !== " (ls-compile (caar x))))
@@ -377,7 +380,7 @@
                            " && ")
                      ")" *newline*
                      (indent
-                      "throw 'Unknown keyword argument ' + xstring(arguments[i].name);" *newline*))
+                      "throw 'Unknown keyword argument ' + xstring(arguments[i+2].name);" *newline*))
              "}" *newline*)))))
 
 (defun parse-lambda-list (ll)
@@ -468,9 +471,12 @@
 
 (define-compilation setq (&rest pairs)
   (let ((result ""))
+    (when (null pairs)
+      (return-from setq (ls-compile nil)))
     (while t
       (cond
-	((null pairs) (return))
+	((null pairs)
+         (return))
 	((null (cdr pairs))
 	 (error "Odd pairs in SETQ"))
 	(t
@@ -483,7 +489,53 @@
 
 ;;; Compilation of literals an object dumping
 
-(defun escape-string (string)
+;;; Two seperate functions are needed for escaping strings:
+;;;  One for producing JavaScript string literals (which are singly or
+;;;   doubly quoted)
+;;;  And one for producing Lisp strings (which are only doubly quoted)
+;;;
+;;; The same function would suffice for both, but for javascript string
+;;; literals it is neater to use either depending on the context, e.g:
+;;;  foo's => "foo's"
+;;;  "foo" => '"foo"'
+;;; which avoids having to escape quotes where possible
+(defun js-escape-string (string)
+  (let ((index 0)
+        (size (length string))
+        (seen-single-quote nil)
+        (seen-double-quote nil))
+    (flet ((%js-escape-string (string escape-single-quote-p)
+             (let ((output "")
+                   (index 0))
+               (while (< index size)
+                 (let ((ch (char string index)))
+                   (when (char= ch #\\)
+                     (setq output (concat output "\\")))
+                   (when (and escape-single-quote-p (char= ch #\'))
+                     (setq output (concat output "\\")))
+                   (when (char= ch #\newline)
+                     (setq output (concat output "\\"))
+                     (setq ch #\n))
+                   (setq output (concat output (string ch))))
+                 (incf index))
+               output)))
+      ;; First, scan the string for single/double quotes
+      (while (< index size)
+        (let ((ch (char string index)))
+          (when (char= ch #\')
+            (setq seen-single-quote t))
+          (when (char= ch #\")
+            (setq seen-double-quote t)))
+        (incf index))
+      ;; Then pick the appropriate way to escape the quotes
+      (cond
+        ((not seen-single-quote)
+         (concat "'"   (%js-escape-string string nil) "'"))
+        ((not seen-double-quote)
+         (concat "\""  (%js-escape-string string nil) "\""))
+        (t (concat "'" (%js-escape-string string t)   "'"))))))
+
+(defun lisp-escape-string (string)
   (let ((output "")
         (index 0)
         (size (length string)))
@@ -496,7 +548,7 @@
           (setq ch #\n))
         (setq output (concat output (string ch))))
       (incf index))
-    output))
+    (concat "\"" output "\"")))
 
 ;;; BOOTSTRAP MAGIC: We record the macro definitions as lists during
 ;;; the bootstrap. Once everything is compiled, we want to dump the
@@ -550,13 +602,13 @@
     (concat "[" (join (mapcar #'literal elements) ", ") "]")))
 
 (defun dump-string (string)
-  (code "make_lisp_string(\"" (escape-string string) "\")"))
+  (code "make_lisp_string(" (js-escape-string string) ")"))
 
 (defun literal (sexp &optional recursive)
   (cond
     ((integerp sexp) (integer-to-string sexp))
     ((floatp sexp) (float-to-string sexp))
-    ((characterp sexp) (code "\"" (escape-string (string sexp)) "\""))
+    ((characterp sexp) (js-escape-string (string sexp)))
     (t
      (or (cdr (assoc sexp *literal-table* :test #'eql))
          (let ((dumped (typecase sexp
@@ -670,7 +722,27 @@
 (define-compilation progn (&rest body)
   (if (null (cdr body))
       (ls-compile (car body) *multiple-value-p*)
-      (js!selfcall (ls-compile-block body t))))
+      (code "("
+            (join
+             (remove-if #'null-or-empty-p
+                        (append
+                         (mapcar #'ls-compile (butlast body))
+                         (list (ls-compile (car (last body)) t))))
+                  ",")
+            ")")))
+
+(define-compilation macrolet (definitions &rest body)
+  (let ((*environment* (copy-lexenv *environment*)))
+    (dolist (def definitions)
+      (destructuring-bind (name lambda-list &body body) def
+        (let ((binding (make-binding :name name :type 'macro :value
+                                     (let ((g!form (gensym)))
+                                       `(lambda (,g!form)
+                                          (destructuring-bind ,lambda-list ,g!form
+                                            ,@body))))))
+          (push-to-lexenv binding  *environment* 'function))))
+    (ls-compile `(progn ,@body) *multiple-value-p*)))
+
 
 (defun special-variable-p (x)
   (and (claimp x 'variable 'special) t))
@@ -952,254 +1024,6 @@
     (ls-compile-block forms)
     "return args;" *newline*))
 
-
-;;; Backquote implementation.
-;;;
-;;;    Author: Guy L. Steele Jr.     Date: 27 December 1985
-;;;    Tested under Symbolics Common Lisp and Lucid Common Lisp.
-;;;    This software is in the public domain.
-
-;;;    The following are unique tokens used during processing.
-;;;    They need not be symbols; they need not even be atoms.
-(defvar *comma* 'unquote)
-(defvar *comma-atsign* 'unquote-splicing)
-
-(defvar *bq-list* (make-symbol "BQ-LIST"))
-(defvar *bq-append* (make-symbol "BQ-APPEND"))
-(defvar *bq-list** (make-symbol "BQ-LIST*"))
-(defvar *bq-nconc* (make-symbol "BQ-NCONC"))
-(defvar *bq-clobberable* (make-symbol "BQ-CLOBBERABLE"))
-(defvar *bq-quote* (make-symbol "BQ-QUOTE"))
-(defvar *bq-quote-nil* (list *bq-quote* nil))
-
-;;; BACKQUOTE is an ordinary macro (not a read-macro) that processes
-;;; the expression foo, looking for occurrences of #:COMMA,
-;;; #:COMMA-ATSIGN, and #:COMMA-DOT.  It constructs code in strict
-;;; accordance with the rules on pages 349-350 of the first edition
-;;; (pages 528-529 of this second edition).  It then optionally
-;;; applies a code simplifier.
-
-;;; If the value of *BQ-SIMPLIFY* is non-NIL, then BACKQUOTE
-;;; processing applies the code simplifier.  If the value is NIL,
-;;; then the code resulting from BACKQUOTE is exactly that
-;;; specified by the official rules.
-(defparameter *bq-simplify* t)
-
-(defmacro backquote (x)
-  (bq-completely-process x))
-
-;;; Backquote processing proceeds in three stages:
-;;;
-;;; (1) BQ-PROCESS applies the rules to remove occurrences of
-;;; #:COMMA, #:COMMA-ATSIGN, and #:COMMA-DOT corresponding to
-;;; this level of BACKQUOTE.  (It also causes embedded calls to
-;;; BACKQUOTE to be expanded so that nesting is properly handled.)
-;;; Code is produced that is expressed in terms of functions
-;;; #:BQ-LIST, #:BQ-APPEND, and #:BQ-CLOBBERABLE.  This is done
-;;; so that the simplifier will simplify only list construction
-;;; functions actually generated by BACKQUOTE and will not involve
-;;; any user code in the simplification.  #:BQ-LIST means LIST,
-;;; #:BQ-APPEND means APPEND, and #:BQ-CLOBBERABLE means IDENTITY
-;;; but indicates places where "%." was used and where NCONC may
-;;; therefore be introduced by the simplifier for efficiency.
-;;;
-;;; (2) BQ-SIMPLIFY, if used, rewrites the code produced by
-;;; BQ-PROCESS to produce equivalent but faster code.  The
-;;; additional functions #:BQ-LIST* and #:BQ-NCONC may be
-;;; introduced into the code.
-;;;
-;;; (3) BQ-REMOVE-TOKENS goes through the code and replaces
-;;; #:BQ-LIST with LIST, #:BQ-APPEND with APPEND, and so on.
-;;; #:BQ-CLOBBERABLE is simply eliminated (a call to it being
-;;; replaced by its argument).  #:BQ-LIST* is replaced by either
-;;; LIST* or CONS (the latter is used in the two-argument case,
-;;; purely to make the resulting code a tad more readable).
-
-(defun bq-completely-process (x)
-  (let ((raw-result (bq-process x)))
-    (bq-remove-tokens (if *bq-simplify*
-                          (bq-simplify raw-result)
-                          raw-result))))
-
-(defun bq-process (x)
-  (cond ((atom x)
-         (list *bq-quote* x))
-        ((eq (car x) 'backquote)
-         (bq-process (bq-completely-process (cadr x))))
-        ((eq (car x) *comma*) (cadr x))
-        ((eq (car x) *comma-atsign*)
-         (error ",@~S after `" (cadr x)))
-        ;; ((eq (car x) *comma-dot*)
-        ;;  ;; (error ",.~S after `" (cadr x))
-        ;;  (error "ill-formed"))
-        (t (do ((p x (cdr p))
-                (q '() (cons (bracket (car p)) q)))
-               ((atom p)
-                (cons *bq-append*
-                      (nreconc q (list (list *bq-quote* p)))))
-             (when (eq (car p) *comma*)
-               (unless (null (cddr p))
-                 (error "Malformed ,~S" p))
-               (return (cons *bq-append*
-                             (nreconc q (list (cadr p))))))
-             (when (eq (car p) *comma-atsign*)
-               (error "Dotted ,@~S" p))
-             ;; (when (eq (car p) *comma-dot*)
-             ;;   ;; (error "Dotted ,.~S" p)
-             ;;   (error "Dotted"))
-             ))))
-
-;;; This implements the bracket operator of the formal rules.
-(defun bracket (x)
-  (cond ((atom x)
-         (list *bq-list* (bq-process x)))
-        ((eq (car x) *comma*)
-         (list *bq-list* (cadr x)))
-        ((eq (car x) *comma-atsign*)
-         (cadr x))
-        ;; ((eq (car x) *comma-dot*)
-        ;;  (list *bq-clobberable* (cadr x)))
-        (t (list *bq-list* (bq-process x)))))
-
-;;; This auxiliary function is like MAPCAR but has two extra
-;;; purposes: (1) it handles dotted lists; (2) it tries to make
-;;; the result share with the argument x as much as possible.
-(defun maptree (fn x)
-  (if (atom x)
-      (funcall fn x)
-      (let ((a (funcall fn (car x)))
-            (d (maptree fn (cdr x))))
-        (if (and (eql a (car x)) (eql d (cdr x)))
-            x
-            (cons a d)))))
-
-;;; This predicate is true of a form that when read looked
-;;; like %@foo or %.foo.
-(defun bq-splicing-frob (x)
-  (and (consp x)
-       (or (eq (car x) *comma-atsign*)
-           ;; (eq (car x) *comma-dot*)
-           )))
-
-;;; This predicate is true of a form that when read
-;;; looked like %@foo or %.foo or just plain %foo.
-(defun bq-frob (x)
-  (and (consp x)
-       (or (eq (car x) *comma*)
-           (eq (car x) *comma-atsign*)
-           ;; (eq (car x) *comma-dot*)
-           )))
-
-;;; The simplifier essentially looks for calls to #:BQ-APPEND and
-;;; tries to simplify them.  The arguments to #:BQ-APPEND are
-;;; processed from right to left, building up a replacement form.
-;;; At each step a number of special cases are handled that,
-;;; loosely speaking, look like this:
-;;;
-;;;  (APPEND (LIST a b c) foo) => (LIST* a b c foo)
-;;;       provided a, b, c are not splicing frobs
-;;;  (APPEND (LIST* a b c) foo) => (LIST* a b (APPEND c foo))
-;;;       provided a, b, c are not splicing frobs
-;;;  (APPEND (QUOTE (x)) foo) => (LIST* (QUOTE x) foo)
-;;;  (APPEND (CLOBBERABLE x) foo) => (NCONC x foo)
-(defun bq-simplify (x)
-  (if (atom x)
-      x
-      (let ((x (if (eq (car x) *bq-quote*)
-                   x
-                   (maptree #'bq-simplify x))))
-        (if (not (eq (car x) *bq-append*))
-            x
-            (bq-simplify-args x)))))
-
-(defun bq-simplify-args (x)
-  (do ((args (reverse (cdr x)) (cdr args))
-       (result
-         nil
-         (cond ((atom (car args))
-                (bq-attach-append *bq-append* (car args) result))
-               ((and (eq (caar args) *bq-list*)
-                     (notany #'bq-splicing-frob (cdar args)))
-                (bq-attach-conses (cdar args) result))
-               ((and (eq (caar args) *bq-list**)
-                     (notany #'bq-splicing-frob (cdar args)))
-                (bq-attach-conses
-                  (reverse (cdr (reverse (cdar args))))
-                  (bq-attach-append *bq-append*
-                                    (car (last (car args)))
-                                    result)))
-               ((and (eq (caar args) *bq-quote*)
-                     (consp (cadar args))
-                     (not (bq-frob (cadar args)))
-                     (null (cddar args)))
-                (bq-attach-conses (list (list *bq-quote*
-                                              (caadar args)))
-                                  result))
-               ((eq (caar args) *bq-clobberable*)
-                (bq-attach-append *bq-nconc* (cadar args) result))
-               (t (bq-attach-append *bq-append*
-                                    (car args)
-                                    result)))))
-      ((null args) result)))
-
-(defun null-or-quoted (x)
-  (or (null x) (and (consp x) (eq (car x) *bq-quote*))))
-
-;;; When BQ-ATTACH-APPEND is called, the OP should be #:BQ-APPEND
-;;; or #:BQ-NCONC.  This produces a form (op item result) but
-;;; some simplifications are done on the fly:
-;;;
-;;;  (op '(a b c) '(d e f g)) => '(a b c d e f g)
-;;;  (op item 'nil) => item, provided item is not a splicable frob
-;;;  (op item 'nil) => (op item), if item is a splicable frob
-;;;  (op item (op a b c)) => (op item a b c)
-(defun bq-attach-append (op item result)
-  (cond ((and (null-or-quoted item) (null-or-quoted result))
-         (list *bq-quote* (append (cadr item) (cadr result))))
-        ((or (null result) (equal result *bq-quote-nil*))
-         (if (bq-splicing-frob item) (list op item) item))
-        ((and (consp result) (eq (car result) op))
-         (list* (car result) item (cdr result)))
-        (t (list op item result))))
-
-;;; The effect of BQ-ATTACH-CONSES is to produce a form as if by
-;;; `(LIST* ,@items ,result) but some simplifications are done
-;;; on the fly.
-;;;
-;;;  (LIST* 'a 'b 'c 'd) => '(a b c . d)
-;;;  (LIST* a b c 'nil) => (LIST a b c)
-;;;  (LIST* a b c (LIST* d e f g)) => (LIST* a b c d e f g)
-;;;  (LIST* a b c (LIST d e f g)) => (LIST a b c d e f g)
-(defun bq-attach-conses (items result)
-  (cond ((and (every #'null-or-quoted items)
-              (null-or-quoted result))
-         (list *bq-quote*
-               (append (mapcar #'cadr items) (cadr result))))
-        ((or (null result) (equal result *bq-quote-nil*))
-         (cons *bq-list* items))
-        ((and (consp result)
-              (or (eq (car result) *bq-list*)
-                  (eq (car result) *bq-list**)))
-         (cons (car result) (append items (cdr result))))
-        (t (cons *bq-list** (append items (list result))))))
-
-;;; Removes funny tokens and changes (#:BQ-LIST* a b) into
-;;; (CONS a b) instead of (LIST* a b), purely for readability.
-(defun bq-remove-tokens (x)
-  (cond ((eq x *bq-list*) 'list)
-        ((eq x *bq-append*) 'append)
-        ((eq x *bq-nconc*) 'nconc)
-        ((eq x *bq-list**) 'list*)
-        ((eq x *bq-quote*) 'quote)
-        ((atom x) x)
-        ((eq (car x) *bq-clobberable*)
-         (bq-remove-tokens (cadr x)))
-        ((and (eq (car x) *bq-list**)
-              (consp (cddr x))
-              (null (cdddr x)))
-         (cons 'cons (maptree #'bq-remove-tokens (cdr x))))
-        (t (maptree #'bq-remove-tokens x))))
-
 (define-transformation backquote (form)
   (bq-completely-process form))
 
@@ -1324,6 +1148,7 @@
 (define-builtin-comparison >= ">=")
 (define-builtin-comparison <= "<=")
 (define-builtin-comparison = "==")
+(define-builtin-comparison /= "!=")
 
 (define-builtin numberp (x)
   (js!bool (code "(typeof (" x ") == \"number\")")))
@@ -1418,58 +1243,29 @@
 
 (define-builtin char-code (x)
   (type-check (("x" "string" x))
-    "x.charCodeAt(0)"))
+    "char_to_codepoint(x)"))
 
 (define-builtin code-char (x)
   (type-check (("x" "number" x))
-    "String.fromCharCode(x)"))
+    "char_from_codepoint(x)"))
 
 (define-builtin characterp (x)
   (js!bool
    (js!selfcall
      "var x = " x ";" *newline*
-     "return (typeof(" x ") == \"string\") && x.length == 1;")))
-
-(define-builtin char-to-string (x)
-  (js!selfcall
-    "var r = [" x "];" *newline*
-    "r.type = 'character';"
-    "return r"))
+     "return (typeof(" x ") == \"string\") && (x.length == 1 || x.length == 2);")))
 
 (define-builtin char-upcase (x)
-  (code x ".toUpperCase()"))
+  (code "safe_char_upcase(" x ")"))
 
 (define-builtin char-downcase (x)
-  (code x ".toLowerCase()"))
+  (code "safe_char_downcase(" x ")"))
 
 (define-builtin stringp (x)
   (js!bool
    (js!selfcall
      "var x = " x ";" *newline*
-     "return typeof(x) == 'object' && 'length' in x && x.type == 'character';")))
-
-(define-builtin string-upcase (x)
-  (code "make_lisp_string(xstring(" x ").toUpperCase())"))
-
-(define-builtin string-length (x)
-  (code x ".length"))
-
-(define-raw-builtin slice (vector a &optional b)
-  (js!selfcall
-    "var vector = " (ls-compile vector) ";" *newline*
-    "var a = " (ls-compile a) ";" *newline*
-    "var b;" *newline*
-    (when b (code "b = " (ls-compile b) ";" *newline*))
-    "return vector.slice(a,b);" *newline*))
-
-(define-builtin char (string index)
-  (code string "[" index "]"))
-
-(define-builtin concat-two (string1 string2)
-  (js!selfcall
-    "var r = " string1 ".concat(" string2 ");" *newline*
-    "r.type = 'character';"
-    "return r;" *newline*))
+     "return typeof(x) == 'object' && 'length' in x && x.stringp == 1;")))
 
 (define-raw-builtin funcall (func &rest args)
   (js!selfcall
@@ -1511,83 +1307,54 @@
 (define-builtin %throw (string)
   (js!selfcall "throw " string ";" *newline*))
 
-(define-builtin new () "{}")
-
-(define-builtin objectp (x)
-  (js!bool (code "(typeof (" x ") === 'object')")))
-
-(define-builtin oget (object key)
-  (js!selfcall
-    "var tmp = " "(" object ")[xstring(" key ")];" *newline*
-    "return tmp == undefined? " (ls-compile nil) ": tmp ;" *newline*))
-
-(define-builtin oset (object key value)
-  (code "((" object ")[xstring(" key ")] = " value ")"))
-
-(define-builtin in (key object)
-  (js!bool (code "(xstring(" key ") in (" object "))")))
-
-(define-builtin map-for-in (function object)
-  (js!selfcall
-   "var f = " function ";" *newline*
-   "var g = (typeof f === 'function' ? f : f.fvalue);" *newline*
-   "var o = " object ";" *newline*
-   "for (var key in o){" *newline*
-   (indent "g(" (if *multiple-value-p* "values" "pv") ", 1, o[key]);" *newline*)
-   "}"
-   " return " (ls-compile nil) ";" *newline*))
-
 (define-builtin functionp (x)
   (js!bool (code "(typeof " x " == 'function')")))
 
 (define-builtin write-string (x)
   (code "lisp.write(" x ")"))
 
-(define-builtin make-array (n)
-  (js!selfcall
-    "var r = [];" *newline*
-    "for (var i = 0; i < " n "; i++)" *newline*
-    (indent "r.push(" (ls-compile nil) ");" *newline*)
-    "return r;" *newline*))
 
-;;; FIXME: should take optional min-extension.
-;;; FIXME: should use fill-pointer instead of the absolute end of array
-(define-builtin vector-push-extend (new vector)
-  (js!selfcall
-    "var v = " vector ";" *newline*
-    "v.push(" new ");" *newline*
-    "return v;"))
+;;; Storage vectors. They are used to implement arrays and (in the
+;;; future) structures.
 
-(define-builtin arrayp (x)
+(define-builtin storage-vector-p (x)
   (js!bool
    (js!selfcall
      "var x = " x ";" *newline*
      "return typeof x === 'object' && 'length' in x;")))
 
-(define-builtin aref (array n)
+(define-builtin make-storage-vector (n)
   (js!selfcall
-    "var x = " "(" array ")[" n "];" *newline*
+    "var r = [];" *newline*
+    "r.length = " n ";" *newline*
+    "return r;" *newline*))
+
+(define-builtin storage-vector-size (x)
+  (code x ".length"))
+
+(define-builtin resize-storage-vector (vector new-size)
+  (code "(" vector ".length = " new-size ")"))
+
+(define-builtin storage-vector-ref (vector n)
+  (js!selfcall
+    "var x = " "(" vector ")[" n "];" *newline*
     "if (x === undefined) throw 'Out of range';" *newline*
     "return x;" *newline*))
 
-(define-builtin aset (array n value)
+(define-builtin storage-vector-set (vector n value)
   (js!selfcall
-    "var x = " array ";" *newline*
+    "var x = " vector ";" *newline*
     "var i = " n ";" *newline*
     "if (i < 0 || i >= x.length) throw 'Out of range';" *newline*
     "return x[i] = " value ";" *newline*))
 
-(define-builtin afind (value array)
+(define-builtin concatenate-storage-vector (sv1 sv2)
   (js!selfcall
-    "var v = " value ";" *newline*
-    "var x = " array ";" *newline*
-    "return x.indexOf(v);" *newline*))
-
-(define-builtin aresize (array new-size)
-  (js!selfcall
-    "var x = " array ";" *newline*
-    "var n = " new-size ";" *newline*
-    "return x.length = n;" *newline*))
+    "var sv1 = " sv1 ";" *newline*
+    "var r = sv1.concat(" sv2 ");" *newline*
+    "r.type = sv1.type;" *newline*
+    "r.stringp = sv1.stringp;" *newline*
+    "return r;" *newline*))
 
 (define-builtin get-internal-real-time ()
   "(new Date()).getTime()")
@@ -1604,6 +1371,54 @@
 
 
 ;;; Javascript FFI
+
+(define-builtin new () "{}")
+
+(define-raw-builtin oget* (object key &rest keys)
+  (js!selfcall
+    "var tmp = (" (ls-compile object) ")[xstring(" (ls-compile key) ")];" *newline*
+    (mapconcat (lambda (key)
+                 (code "if (tmp === undefined) return " (ls-compile nil) ";" *newline*
+                       "tmp = tmp[xstring(" (ls-compile key) ")];" *newline*))
+               keys)
+    "return tmp === undefined? " (ls-compile nil) " : tmp;" *newline*))
+
+(define-raw-builtin oset* (value object key &rest keys)
+  (let ((keys (cons key keys)))
+    (js!selfcall
+      "var obj = " (ls-compile object) ";" *newline*
+      (mapconcat (lambda (key)
+                   (code "obj = obj[xstring(" (ls-compile key) ")];"
+                         "if (obj === undefined) throw 'Impossible to set Javascript property.';" *newline*))
+                 (butlast keys))
+      "var tmp = obj[xstring(" (ls-compile (car (last keys))) ")] = " (ls-compile value) ";" *newline*
+      "return tmp === undefined? " (ls-compile nil) " : tmp;" *newline*)))
+
+(define-raw-builtin oget (object key &rest keys)
+  (code "js_to_lisp(" (ls-compile `(oget* ,object ,key ,@keys)) ")"))
+
+(define-raw-builtin oset (value object key &rest keys)
+  (ls-compile `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
+
+(define-builtin objectp (x)
+  (js!bool (code "(typeof (" x ") === 'object')")))
+
+(define-builtin lisp-to-js (x) (code "lisp_to_js(" x ")"))
+(define-builtin js-to-lisp (x) (code "js_to_lisp(" x ")"))
+
+
+(define-builtin in (key object)
+  (js!bool (code "(xstring(" key ") in (" object "))")))
+
+(define-builtin map-for-in (function object)
+  (js!selfcall
+   "var f = " function ";" *newline*
+   "var g = (typeof f === 'function' ? f : f.fvalue);" *newline*
+   "var o = " object ";" *newline*
+   "for (var key in o){" *newline*
+   (indent "g(" (if *multiple-value-p* "values" "pv") ", 1, o[key]);" *newline*)
+   "}"
+   " return " (ls-compile nil) ";" *newline*))
 
 (define-compilation %js-vref (var)
   (code "js_to_lisp(" var ")"))
@@ -1673,7 +1488,7 @@
                                            (mapcar #'ls-compile args)) ", ") ")")))
     (unless (or (symbolp function)
                 (and (consp function)
-                     (eq (car function) 'lambda)))
+                     (member (car function) '(lambda oget))))
       (error "Bad function designator `~S'" function))
     (cond
       ((translate-function function)
@@ -1682,8 +1497,14 @@
             #+jscl (eq (symbol-package function) (find-package "COMMON-LISP"))
             #-jscl t)
        (code (ls-compile `',function) ".fvalue" arglist))
+      #+jscl((symbolp function)
+       (code (ls-compile `#',function) arglist))
+      ((and (consp function) (eq (car function) 'lambda))
+       (code (ls-compile `#',function) arglist))
+      ((and (consp function) (eq (car function) 'oget))
+       (code (ls-compile function) arglist))
       (t
-       (code (ls-compile `#',function) arglist)))))
+       (error "Bad function descriptor")))))
 
 (defun ls-compile-block (sexps &optional return-last-p decls-allowed-p)
   (multiple-value-bind (sexps decls)

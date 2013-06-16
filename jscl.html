@@ -69,7 +69,9 @@
       $(function () {
         var jqconsole = $('#console').jqconsole('Welcome to JSCL!\n\n', '');
         jqconsole.RegisterMatching('(', ')', 'parents');
-
+        if (localStorage.getItem("jqhist"))
+           jqconsole.SetHistory(JSON.parse(localStorage.getItem("jqhist")));
+      
         lisp.write = function(str){
            jqconsole.Write(xstring(str), 'jqconsole-output', false);
            return str;
@@ -85,6 +87,7 @@
                     var vs = lisp.evalInput(input);
                     // for (var i=0; i<vs.length; i++){
                        jqconsole.Write(lisp.print(vs) + '\n', 'jqconsole-return');
+                       localStorage.setItem("jqhist", JSON.stringify(jqconsole.GetHistory()));
                     // }
                 } catch(error) {
                     var msg = error.message || error || 'Unknown error';

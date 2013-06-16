@@ -48,12 +48,36 @@
         (when (funcall predicate x)
           (return x)))))
 
-(defun position (elt sequence &key key (test #'eql testp)
-                     (test-not #'eql test-not-p))
-  (do-sequence (x sequence index)
-    (when (satisfies-test-p elt x :key key :test test :testp testp
-                           :test-not test-not :test-not-p test-not-p )
-      (return index))))
+(defun position (elt sequence
+                 &key key (test #'eql testp)
+                   (test-not #'eql test-not-p)
+                   (start 0) end)
+  ;; TODO: Implement START and END efficiently for all the sequence
+  ;; functions.
+  (let ((end (or end (length sequence))))
+    (do-sequence (x sequence index)
+      (when (and (<= start index)
+                 (< index end)
+                 (satisfies-test-p elt x
+                                   :key key :test test :testp testp
+                                   :test-not test-not :test-not-p test-not-p))
+        (return index)))))
+
+;; TODO: need to support &key from-end
+(defun position-if (predicate sequence
+                 &key key (start 0) end)
+  ;; TODO: Implement START and END efficiently for all the sequence
+  ;; functions.
+  (let ((end (or end (length sequence))))
+    (do-sequence (x sequence index)
+      (when (and (<= start index)
+                 (< index end)
+                 (funcall predicate (if key (funcall key x) x)))
+        (return index)))))
+
+(defun position-if-not (predicate sequence
+                 &key key (start 0) end)
+  (position-if (complement predicate) sequence :key key :start start :end end))
 
 (defun remove (x seq &key key (test #'eql testp) (test-not #'eql test-not-p))
   (cond
@@ -143,10 +167,14 @@
               (rplacd pointer ())
               drop-a))))
        (copy-list (nthcdr a seq))))
-    ((arrayp seq)
-     (if b
-       (slice seq a b)
-       (slice seq a)))
+    ((or (vectorp seq) (arrayp seq))
+     (let* ((b (or b (length seq)))
+            (size (- b a))
+            (new (make-array size :element-type (array-element-type seq))))
+       (do ((i 0 (1+ i))
+            (j a (1+ j)))
+           ((= j b) new)
+         (aset new i (aref seq j)))))
     (t (not-seq-error seq))))
 
 (defun elt (sequence index)
@@ -162,10 +190,3 @@
                       (error "type-error index is not valid sequence index"))))
     (array (aref sequence index))
 		(t    (not-seq-error sequence))))
-
-
-(defun vector (&rest args)
-	(apply #'list-to-vector args))
-
-(defun vectorp (v)
-	(arrayp v))

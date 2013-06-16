@@ -44,7 +44,7 @@
      (declaim (special ,name))
      (declaim (constant ,name))
      (setq ,name ,value)
-     ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
+     ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
 
 (defconstant t 't)
@@ -64,13 +64,13 @@
   `(progn
      (declaim (special ,name))
      ,@(when value-p `((unless (boundp ',name) (setq ,name ,value))))
-     ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
+     ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
 
 (defmacro defparameter (name value &optional docstring)
   `(progn
      (setq ,name ,value)
-     ,@(when (stringp docstring) `((oset ',name "vardoc" ,docstring)))
+     ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
 
 (defmacro defun (name args &rest body)
@@ -87,7 +87,7 @@
 (defvar *gensym-counter* 0)
 (defun gensym (&optional (prefix "G"))
   (setq *gensym-counter* (+ *gensym-counter* 1))
-  (make-symbol (concat-two prefix (integer-to-string *gensym-counter*))))
+  (make-symbol (concat prefix (integer-to-string *gensym-counter*))))
 
 (defun boundp (x)
   (boundp x))
@@ -95,24 +95,12 @@
 (defun fboundp (x)
   (fboundp x))
 
-;; Basic functions
-(defun = (x y) (= x y))
-(defun * (x y) (* x y))
-(defun / (x y) (/ x y))
-(defun 1+ (x) (+ x 1))
-(defun 1- (x) (- x 1))
-(defun zerop (x) (= x 0))
-
-(defun truncate (x &optional (y 1))
-  (floor (/ x y)))
-
 (defun eq (x y) (eq x y))
 (defun eql (x y) (eq x y))
 
 (defun not (x) (if x nil t))
 
 ;; Basic macros
-
 (defmacro incf (place &optional (delta 1))
   (multiple-value-bind (dummies vals newval setter getter)
       (get-setf-expansion place)
@@ -264,18 +252,6 @@
 ;;; Go on growing the Lisp language in Ecmalisp, with more high level
 ;;; utilities as well as correct versions of other constructions.
 
-(defun + (&rest args)
-  (let ((r 0))
-    (dolist (x args r)
-      (incf r x))))
-
-(defun - (x &rest others)
-  (if (null others)
-      (- x)
-      (let ((r x))
-        (dolist (y others r)
-          (decf r y)))))
-
 (defun append-two (list1 list2)
   (if (null list1)
       list2
@@ -315,7 +291,9 @@
 
 (defmacro do (varlist endlist &body body)
   `(block nil
-     (let ,(mapcar (lambda (x) (list (first x) (second x))) varlist)
+     (let ,(mapcar (lambda (x) (if (symbolp x)
+                                   (list x nil)
+                                 (list (first x) (second x)))) varlist)
        (while t
          (when ,(car endlist)
            (return (progn ,@(cdr endlist))))
@@ -323,13 +301,16 @@
          (psetq
           ,@(apply #'append
                    (mapcar (lambda (v)
-                             (and (consp (cddr v))
+                             (and (listp v)
+                                  (consp (cddr v))
                                   (list (first v) (third v))))
                            varlist)))))))
 
 (defmacro do* (varlist endlist &body body)
   `(block nil
-     (let* ,(mapcar (lambda (x) (list (first x) (second x))) varlist)
+     (let* ,(mapcar (lambda (x1) (if (symbolp x1)
+                                     (list x1 nil)
+                                   (list (first x1) (second x1)))) varlist)
        (while t
          (when ,(car endlist)
            (return (progn ,@(cdr endlist))))
@@ -337,7 +318,8 @@
          (setq
           ,@(apply #'append
                    (mapcar (lambda (v)
-                             (and (consp (cddr v))
+                             (and (listp v)
+                                  (consp (cddr v))
                                   (list (first v) (third v))))
                            varlist)))))))
 
@@ -356,9 +338,6 @@
      (oget seq "length"))
     ((listp seq)
      (list-length seq))))
-
-(defun concat-two (s1 s2)
-  (concat-two s1 s2))
 
 (defmacro with-collect (&body body)
   (let ((head (gensym))
@@ -397,15 +376,6 @@
 
 (defun char< (x y)
   (< (char-code x) (char-code y)))
-
-(defun integerp (x)
-  (and (numberp x) (= (floor x) x)))
-
-(defun floatp (x)
-  (and (numberp x) (not (integerp x))))
-
-(defun plusp (x) (< 0 x))
-(defun minusp (x) (< x 0))
 
 (defun atom (x)
   (not (consp x)))
@@ -524,11 +494,13 @@
        (cond
          ,@(mapcar (lambda (c)
                      (if (eq (car c) t)
-                         `((t ,@(rest c)))
+                         `(t ,@(rest c))
                          `((,(ecase (car c)
                                     (integer 'integerp)
                                     (cons 'consp)
                                     (symbol 'symbolp)
+                                    (function 'functionp)
+                                    (float 'floatp)
                                     (array 'arrayp)
                                     (string 'stringp)
                                     (atom 'atom)
@@ -543,7 +515,7 @@
     `(let ((,g!x ,x))
        (typecase ,g!x
          ,@clausules
-         (t (error "~X fell through etypeacase expression." ,g!x))))))
+         (t (error "~X fell through etypecase expression." ,g!x))))))
 
 (defun notany (fn seq)
   (not (some fn seq)))
@@ -558,9 +530,6 @@
 
 (defun get-universal-time ()
   (+ (get-unix-time) 2208988800))
-
-(defun concat (&rest strs)
-  (!reduce #'concat-two strs ""))
 
 (defun values-list (list)
   (values-array (list-to-vector list)))

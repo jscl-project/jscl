@@ -13,22 +13,33 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-(defvar *js-package*
-  (make-package "JS"))
+(define-setf-expander oget (object key &rest keys)
+  (let* ((keys (cons key keys))
+         (g!object (gensym))
+         (g!keys (mapcar (lambda (s)
+                           (declare (ignore s))
+                           (gensym))
+                         keys))
+         (g!value (gensym)))
+    (values `(,g!object ,@g!keys)
+            `(,object ,@keys)
+            `(,g!value)
+            `(oset ,g!value ,g!object ,@g!keys)
+            `(oget ,g!object ,@g!keys))))
 
-(defun ffi-intern-hook (symbol)
-  (when (eq (symbol-package symbol) *js-package*)
-    (let ((sym-name (symbol-name symbol))
-          (args (gensym)))
-      ;; Generate a trampoline to call the JS function
-      ;; properly. This trampoline is very inefficient,
-      ;; but it still works. Ideas to optimize this are
-      ;; provide a special lambda keyword
-      ;; cl::&rest-vector to avoid list argument
-      ;; consing, as well as allow inline declarations.
-      (fset symbol (eval `(%js-vref ,sym-name)))
-      ;; Define it as a symbol macro to access to the
-      ;; Javascript variable literally.
-      (%define-symbol-macro symbol `(%js-vref ,(string symbol))))))
+(define-setf-expander oget* (object key &rest keys)
+  (let* ((keys (cons key keys))
+         (g!object (gensym))
+         (g!keys (mapcar (lambda (s)
+                           (declare (ignore s))
+                           (gensym))
+                         keys))
+         (g!value (gensym)))
+    (values `(,g!object ,@g!keys)
+            `(,object ,@keys)
+            `(,g!value)
+            `(oset* ,g!value ,g!object ,@g!keys)
+            `(oget* ,g!object ,@g!keys))))
 
-(setq *intern-hook* #'ffi-intern-hook)
+
+

@@ -37,6 +37,10 @@
 (test (= (position 1 #(1 1 3) :test-not #'=) 2))
 (test (= (position 1 '(1 1 3) :test-not #'=) 2))
 
+;; POSITION-IF, POSITION-IF-NOT
+(test (= 2 (position-if #'oddp '((1) (2) (3) (4)) :start 1 :key #'car)))
+(test (= 4 (position-if-not #'integerp '(1 2 3 4 X))))  ;; (hyperspec example used "5.0", but we don't have a full numeric tower yet!)
+
 ; REMOVE-IF
 (test (equal (remove-if     #'zerop '(1 0 2 0 3)) '(1 2 3)))
 (test (equal (remove-if-not #'zerop '(1 0 2 0 3)) '(0 0)))
