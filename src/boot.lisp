@@ -495,7 +495,7 @@
        (cond
          ,@(mapcar (lambda (c)
                      (if (eq (car c) t)
-                         `((t ,@(rest c)))
+                         `(t ,@(rest c))
                          `((,(ecase (car c)
                                     (integer 'integerp)
                                     (cons 'consp)

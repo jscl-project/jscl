@@ -368,8 +368,11 @@
                (mapconcat #'parse-keyword keyword-arguments))))
      ;; Check for unknown keywords
      (when keyword-arguments
-       (code "for (i=" (+ n-required-arguments n-optional-arguments)
-             "; i<nargs; i+=2){" *newline*
+       (code "var start = " (+ n-required-arguments n-optional-arguments) ";" *newline*
+             "if ((nargs - start) % 2 == 1){" *newline*
+             (indent "throw 'Odd number of keyword arguments';" *newline*)
+             "}" *newline*
+             "for (i = start; i<nargs; i+=2){" *newline*
              (indent "if ("
                      (join (mapcar (lambda (x)
                                      (concat "arguments[i+2] !== " (ls-compile (caar x))))
@@ -377,7 +380,7 @@
                            " && ")
                      ")" *newline*
                      (indent
-                      "throw 'Unknown keyword argument ' + xstring(arguments[i].name);" *newline*))
+                      "throw 'Unknown keyword argument ' + xstring(arguments[i+2].name);" *newline*))
              "}" *newline*)))))
 
 (defun parse-lambda-list (ll)
@@ -727,6 +730,19 @@
                          (list (ls-compile (car (last body)) t))))
                   ",")
             ")")))
+
+(define-compilation macrolet (definitions &rest body)
+  (let ((*environment* (copy-lexenv *environment*)))
+    (dolist (def definitions)
+      (destructuring-bind (name lambda-list &body body) def
+        (let ((binding (make-binding :name name :type 'macro :value
+                                     (let ((g!form (gensym)))
+                                       `(lambda (,g!form)
+                                          (destructuring-bind ,lambda-list ,g!form
+                                            ,@body))))))
+          (push-to-lexenv binding  *environment* 'function))))
+    (ls-compile `(progn ,@body) *multiple-value-p*)))
+
 
 (defun special-variable-p (x)
   (and (claimp x 'variable 'special) t))
@@ -1362,8 +1378,8 @@
   (js!selfcall
     "var tmp = (" (ls-compile object) ")[xstring(" (ls-compile key) ")];" *newline*
     (mapconcat (lambda (key)
-                 (code "if (tmp === undefined) return " (ls-compile nil) ";" *newline*)
-                 (code "tmp = tmp[xstring(" (ls-compile key) ")];" *newline*))
+                 (code "if (tmp === undefined) return " (ls-compile nil) ";" *newline*
+                       "tmp = tmp[xstring(" (ls-compile key) ")];" *newline*))
                keys)
     "return tmp === undefined? " (ls-compile nil) " : tmp;" *newline*))
 
@@ -1372,8 +1388,8 @@
     (js!selfcall
       "var obj = " (ls-compile object) ";" *newline*
       (mapconcat (lambda (key)
-                   "obj = obj[xstring(" (ls-compile key) ")];"
-                   "if (obj === undefined) throw 'Impossible to set Javascript property.';" *newline*)
+                   (code "obj = obj[xstring(" (ls-compile key) ")];"
+                         "if (obj === undefined) throw 'Impossible to set Javascript property.';" *newline*))
                  (butlast keys))
       "var tmp = obj[xstring(" (ls-compile (car (last keys))) ")] = " (ls-compile value) ";" *newline*
       "return tmp === undefined? " (ls-compile nil) " : tmp;" *newline*)))
