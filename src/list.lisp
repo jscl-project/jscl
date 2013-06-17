@@ -194,6 +194,24 @@
                (rplaca tail (cdar tail)))
              (collect (apply func elems))))))))
 
+(defun mapn (func list)
+  (with-collect
+    (while list
+      (collect (funcall func list))
+      (setq list (cdr list)))))
+
+(defun maplist (func list &rest lists)
+  (let ((lists (cons list lists)))
+    (with-collect
+      (block loop
+        (loop
+           (let ((elems (mapn #'car lists)))
+             (do ((tail lists (cdr tail)))
+                 ((null tail))
+               (when (null (car tail)) (return-from loop))
+               (rplaca tail (cdar tail)))
+             (collect (apply func elems))))))))
+
 (defun mapc (func &rest lists)
   (do* ((elems (map1 #'car lists) (map1 #'car lists-rest))
         (lists-rest (map1 #'cdr lists) (map1 #'cdr lists-rest)))
