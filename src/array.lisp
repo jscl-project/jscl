@@ -73,11 +73,29 @@
     (error "~S is not an array." array))  
   (storage-vector-set array index value))
 
+(define-setf-expander aref (array index)
+  (let ((g!array (gensym))
+        (g!index (gensym))
+        (g!value (gensym)))
+    (values (list g!array g!index)
+            (list array index)
+            (list g!value)
+            `(aset ,g!array ,g!index ,g!value)
+            `(aref ,g!array ,g!index))))
+
 
 ;;; Vectors
 
 (defun vectorp (x)
   (and (arrayp x) (null (cdr (array-dimensions x)))))
+
+(defun vector (&rest objects)
+  (let* ((length (length objects))
+	 (array (make-array length :element-type t))
+	 (i 0))
+    (dolist (element objects array)  ;; poor-man's :initial-contents
+      (aset array i element)
+      (incf i))))
 
 ;;; FIXME: should take optional min-extension.
 ;;; FIXME: should use fill-pointer instead of the absolute end of array

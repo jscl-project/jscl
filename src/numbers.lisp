@@ -56,6 +56,9 @@
 (defun zerop (x) (= x 0))
 (defun plusp (x) (< 0 x))
 
+(defun signum (x)
+  (if (zerop x) x (/ x (abs x))))
+
 (macrolet ((def (operator)
              `(defun ,operator (x &rest args)
                 (dolist (y args) 
@@ -88,3 +91,33 @@
 
 (defun expt (base power) (expt base              power))
 (defun exp  (power)      (expt 2.718281828459045 power))
+
+(defun gcd-2 (a b)
+  (if (zerop b)
+      (abs a)
+    (gcd-2 b (mod a b))))
+
+(defun gcd (&rest integers)
+  (cond ((null integers)
+	 0)
+	((null (cdr integers))
+	 (abs (first integers)))
+	((null (cddr integers))
+	 (gcd-2 (first integers) (second integers)))
+	(t
+	 (apply #'gcd (gcd (first integers) (second integers)) (nthcdr 2 integers)))))
+
+(defun lcm-2 (a b)
+  (if (or (zerop a) (zerop b))
+      0
+    (/ (abs (* a b)) (gcd a b))))
+
+(defun lcm (&rest integers)
+  (cond ((null integers)
+	 1)
+	((null (cdr integers))
+	 (abs (first integers)))
+	((null (cddr integers))
+	 (lcm-2 (first integers) (second integers)))
+	(t
+	 (apply #'lcm (lcm (first integers) (second integers)) (nthcdr 2 integers)))))

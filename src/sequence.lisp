@@ -176,3 +176,6 @@
            ((= j b) new)
          (aset new i (aref seq j)))))
     (t (not-seq-error seq))))
+
+(defun copy-seq (sequence)
+  (subseq sequence 0))

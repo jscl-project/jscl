@@ -191,6 +191,9 @@
 (test (equal (intersection '(1 2) '(2 3)) '(2)))
 (test (not (intersection '(1 2 3) '(4 5 6))))
 (test (equal (intersection '((1) (2)) '((2) (3)) :test #'equal) '((2))))
+(test (equal '((1 . 2))
+             (intersection '((1 . 2) (2 . 3)) '((9 . 2) (9 . 4))
+                           :test #'equal :key #'cdr)))
 
 ; POP
 (test (let* ((foo '(1 2 3))
@@ -200,6 +203,14 @@
 
 ;; MAPCAR
 (test (equal (mapcar #'+ '(1 2) '(3) '(4 5 6)) '(8)))
+
+;; MAPLIST
+(test (equal '((1 2 3 4 1 2 1 2 3) (2 3 4 2 2 3))
+	     (maplist #'append '(1 2 3 4) '(1 2) '(1 2 3))))
+(test (equal '((FOO A B C D) (FOO B C D) (FOO C D) (FOO D))
+	     (maplist #'(lambda (x) (cons 'foo x)) '(a b c d))))
+(test (equal '(0 0 1 0 1 1 1)
+	     (maplist #'(lambda (x) (if (member (car x) (cdr x)) 0 1)) '(a b a c d b c))))
 
 ;; MAPC
 (test (equal (mapc #'+ '(1 2) '(3) '(4 5 6)) '(1 2)))
