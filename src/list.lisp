@@ -68,6 +68,16 @@
 (defun nth (n list)
   (car (nthcdr n list)))
 
+(define-setf-expander nth (n list)
+  (let ((g!list (gensym))
+        (g!index (gensym))
+        (g!value (gensym)))
+    (values (list g!list g!index)
+            (list list n)
+            (list g!value)
+            `(rplaca (nthcdr ,g!index ,g!list) ,g!value)
+            `(nth ,g!index ,g!list))))
+
 (defun caar (x) (car (car x)))
 (defun cadr (x) (car (cdr x)))
 (defun cdar (x) (cdr (car x)))
@@ -184,6 +194,24 @@
                (rplaca tail (cdar tail)))
              (collect (apply func elems))))))))
 
+(defun mapn (func list)
+  (with-collect
+    (while list
+      (collect (funcall func list))
+      (setq list (cdr list)))))
+
+(defun maplist (func list &rest lists)
+  (let ((lists (cons list lists)))
+    (with-collect
+      (block loop
+        (loop
+           (let ((elems (mapn #'car lists)))
+             (do ((tail lists (cdr tail)))
+                 ((null tail))
+               (when (null (car tail)) (return-from loop))
+               (rplaca tail (cdar tail)))
+             (collect (apply func elems))))))))
+
 (defun mapc (func &rest lists)
   (do* ((elems (map1 #'car lists) (map1 #'car lists-rest))
         (lists-rest (map1 #'cdr lists) (map1 #'cdr lists-rest)))
@@ -259,7 +287,7 @@
             (list x)
             (list new-value)
             `(progn (rplacd ,cons ,new-value) ,new-value)
-            `(car ,cons))))
+            `(cdr ,cons))))
 
 
 ;; The NCONC function is based on the SBCL's one.
@@ -307,6 +335,6 @@
 (defun intersection (list1 list2 &key (test #'eql) (key #'identity))
   (let ((new-list ()))
     (dolist (x list1)
-      (when (member x list2 :test test :key key)
+      (when (member (funcall key x) list2 :test test :key key)
         (push x new-list)))
     new-list))
