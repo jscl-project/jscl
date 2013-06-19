@@ -318,7 +318,7 @@
              (binary-op >>=        ">>="          13    right :lvalue t)
              (binary-op >>>=       ">>>="         13    right :lvalue t)
 
-             (WHEN (member op '(? if))
+             (when (member op '(? if))
                (with-operator (12 'right)
                  (js-expr (first args))
                  (js-format "?")
