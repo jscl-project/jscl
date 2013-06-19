@@ -414,4 +414,5 @@
          (js-format ";")))))
 
 (defun js (&rest stmts)
-  (mapc #'js-stmt stmts))
+  (mapc #'js-stmt stmts)
+  nil)
