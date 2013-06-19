@@ -274,7 +274,7 @@
            (unary-op pre--       "--"            1    right :lvalue t)
            (unary-op post++      "++"            1    right :lvalue t :post t)
            (unary-op post--      "--"            1    right :lvalue t :post t)
-           (unary-op not--       "!"             1    right)
+           (unary-op not         "!"             1    right)
            (unary-op unary+      "+"             1    right)
            (unary-op unary-      "-"             1    right)
            (unary-op delete      "delete "       1    right)
