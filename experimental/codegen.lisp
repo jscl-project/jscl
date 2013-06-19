@@ -348,31 +348,38 @@
         (js-format ";"))
       (case (car form)
         (label
-         (destructuring-bind (label &body body) form
+         (destructuring-bind (label &body body) (cdr form)
            (js-identifier label)
            (js-format ":")
            (js-stmt `(progn ,@body))))
         (break
-         (destructuring-bind (label) form
+         (destructuring-bind (label) (cdr form)
            (js-format "break ")
            (js-identifier label)
            (js-format ";")))
         (return
-          (destructuring-bind (value) form
+          (destructuring-bind (value) (cdr form)
             (js-format "return ")
             (js-expr value)
             (js-format ";")))
         (var
-         (destructuring-bind (var &rest vars) (cdr form)
-           (js-format "var ")
-           (js-identifier var)
-           (dolist (var vars)
-             (js-format ",")
-             (js-identifier var))
-           (js-format ";")))
+         (flet ((js-var (spec)
+                  (destructuring-bind (variable &optional initial)
+                      (ensure-list spec)
+                    (js-identifier variable)
+                    (when initial
+                      (js-format "=")
+                      (js-expr initial)))))
+           (destructuring-bind (var &rest vars) (cdr form)
+             (let ((*js-operator-precedence* 12))
+               (js-format "var ")
+               (js-var var)
+               (dolist (var vars)
+                 (js-format ",")
+                 (js-var var))
+               (js-format ";")))))
         (if
-         (destructuring-bind (condition true &optional false)
-             (cdr form)
+         (destructuring-bind (condition true &optional false) (cdr form)
            (js-format "if (")
            (js-expr condition)
            (js-format ") ")
