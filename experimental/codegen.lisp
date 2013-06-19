@@ -169,12 +169,15 @@
          (case (length (cdr form))
            (1 `(unary- ,(cadr form)))
            (t (reduce (lambda (x y) `(- ,x ,y)) (cdr form)))))
+        ((progn comma)
+         (reduce (lambda (x y) `(comma ,x ,y)) (cdr form) :from-end t))
         (t form))
       form))
 
 ;; Initialized to any value larger than any operator precedence
 (defvar *js-operator-precedence* 1000)
 (defvar *js-operator-associativity* 'left)
+(defvar *js-operand-order* 'left)
 
 ;; Format an expression optionally wrapped with parenthesis if the
 ;; precedence rules require it.
@@ -186,26 +189,24 @@
              (cond
                ((> ,g!precedence *js-operator-precedence*))
                ((< ,g!precedence *js-operator-precedence*) nil)
+               ;; Same precedence. Let us consider associativity.
                (t
-                t)))
+                (not (eq *js-operand-order* *js-operator-associativity*)))))
             (*js-operator-precedence* ,g!precedence)
-            (*js-operator-associativity* ,associativity))
+            (*js-operator-associativity* ,associativity)
+            (*js-operand-order* 'left))
        (when ,g!parens (js-format "("))
        (progn ,@body)
        (when ,g!parens (js-format ")")))))
+
+(defun js-operator (string)
+  (js-format "~a" string)
+  (setq *js-operand-order* 'right))
 
 (defun js-operator-expression (op args)
   (let ((op1 (car args))
         (op2 (cadr args)))
     (case op
-      ;; Comma (,)
-      ((progn comma)
-       (with-operator (14 'left)
-         (js-expr (car args))
-         (dolist (operand (cdr args))
-           (let ((*js-output* t))
-             (js-format ",")
-             (js-expr operand)))))
       ;; Function call
       (call
        (js-expr (car args))
@@ -250,9 +251,9 @@
                     (cond
                       (post
                        (js-expr op1)
-                       (js-format string))
+                       (js-operator string))
                       (t
-                       (js-format string)
+                       (js-operator string)
                        (js-expr op1))))
                   (return-from js-operator-expression)))
               (%binary-op (operator string precedence associativity lvalue)
@@ -260,7 +261,7 @@
                   (when lvalue (check-lvalue op1))
                   (with-operator (precedence associativity)
                     (js-expr op1)
-                    (js-format string)
+                    (js-operator string)
                     (js-expr op2))
                   (return-from js-operator-expression))))
 
@@ -319,14 +320,16 @@
            (binary-op >>=        ">>="          13    right :lvalue t)
            (binary-op >>>=       ">>>="         13    right :lvalue t)
 
+           (binary-op comma      ","            13    right)
+           (binary-op progn      ","            13    right)
+
            (when (member op '(? if))
              (with-operator (12 'right)
                (js-expr (first args))
-               (js-format "?")
+               (js-operator "?")
                (js-expr (second args))
                (js-format ":")
                (js-expr (third args))))))))))
-
 
 (defun js-expr (form)
   (let ((form (js-expand-expr form)))
@@ -337,7 +340,6 @@
        (js-vector-initializer form))
       (t
        (js-operator-expression (car form) (cdr form))))))
-
 
 (defun js-stmt (form)
   (if (atom form)
