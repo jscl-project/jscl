@@ -275,6 +275,7 @@
            (unary-op post++      "++"            1    right :lvalue t :post t)
            (unary-op post--      "--"            1    right :lvalue t :post t)
            (unary-op not         "!"             1    right)
+           (unary-op bit-not     "~"             1    right)
            (unary-op unary+      "+"             1    right)
            (unary-op unary-      "-"             1    right)
            (unary-op delete      "delete "       1    right)
@@ -329,7 +330,10 @@
                (js-operator "?")
                (js-expr (second args))
                (js-format ":")
-               (js-expr (third args))))))))))
+               (js-expr (third args)))
+             (return-from js-operator-expression))
+
+           (error "Unknown operator `~S'" op)))))))
 
 (defun js-expr (form)
   (let ((form (js-expand-expr form)))
