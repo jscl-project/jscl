@@ -8,11 +8,13 @@
 (test (= (max 1)     1))
 (test (= (max 1 2 3) 3))
 (test (= (max 3 2 1) 3))
+(test (= (max 1 2 3 4 5) 5))
 
 ;;; MIN
 (test (= (min 1)     1))
 (test (= (min 1 2 3) 1))
 (test (= (min 3 2 1) 1))
+(test (= (min 9 3 8 7 6 3 3) 3))
 
 ;;; EVENP
 (test      (evenp  2))
