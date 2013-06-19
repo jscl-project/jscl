@@ -97,7 +97,9 @@
 (defun js-primary-expr (form)
   (cond
     ((numberp form)
-     (js-format "~a" form))
+     (if (<= 0 form)
+         (js-format "~a" form)
+         (js-expr `(- ,(abs form)))))
     ((stringp form)
      (js-format "~a" (js-escape-string form)))
     ((symbolp form)
@@ -276,8 +278,11 @@
            (unary-op post--      "--"            1    right :lvalue t :post t)
            (unary-op not         "!"             1    right)
            (unary-op bit-not     "~"             1    right)
-           (unary-op unary+      "+"             1    right)
-           (unary-op unary-      "-"             1    right)
+           ;; Note that the leading space is necessary because it
+           ;; could break with post++, for example. TODO: Avoid
+           ;; leading space when it's possible.
+           (unary-op unary+      " +"            1    right)
+           (unary-op unary-      " -"            1    right)
            (unary-op delete      "delete "       1    right)
            (unary-op void        "void "         1    right)
            (unary-op typeof      "typeof "       1    right)
