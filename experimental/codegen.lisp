@@ -1,4 +1,4 @@
-;;; Naive Javascript code generator
+;;; Naive Javascript unparser
 ;;;
 ;;; This code generator takes as input a S-expression representation
 ;;; of the Javascript AST and generates Javascript code without
@@ -108,58 +108,43 @@
       (case (car form)
         (+
          (case (length (cdr form))
-           (1 `(unitary+ ,(cadr form)))
+           (1 `(unary+ ,(cadr form)))
            (t (reduce (lambda (x y) `(+ ,x ,y)) (cdr form)))))
         (-
          (case (length (cdr form))
-           (1 `(unitary- ,(cadr form)))
+           (1 `(unary- ,(cadr form)))
            (t (reduce (lambda (x y) `(- ,x ,y)) (cdr form)))))
         (t form))
       form))
 
-(defvar *js-expression-precedence* 1000)
+;; Initialized to any value larger than any operator precedence
+(defvar *js-operator-precedence* 1000)
+(defvar *js-operator-associativity* 'left)
 
 (defun js-operator-expression (op args)
   (macrolet (;; Format an expression optionally wrapped with
              ;; parenthesis if the precedence rules require it.
-             (with-precedence (level &body body)
+             (with-operator ((level associativity) &body body)
                (let ((g!parens (gensym))
                      (g!level (gensym)))
                  `(let* ((,g!level ,level)
-                         (,g!parens (> ,g!level *js-expression-precedence*))
-                         (*js-expression-precedence* ,g!level))
+                         (,g!parens
+                          (cond
+                            ((> ,g!level *js-operator-precedence*))
+                            ((< ,g!level *js-operator-precedence*) nil)
+                            (t
+                             t)))
+                         (*js-operator-precedence* ,g!level)
+                         (*js-operator-associativity* ,associativity))
                     (when ,g!parens (js-format "("))
                     (progn ,@body)
                     (when ,g!parens (js-format ")"))))))
-    (let ((arity (length args))
-          (op1 (car args))
-          (op2 (cadr args))
-          (op3 (cadr args)))
+    (let ((op1 (car args))
+          (op2 (cadr args)))
       (case op
-        (+
-         (cond
-           ((= arity 1)
-            (with-precedence 1
-              (js-format "+")
-              (js-expr op1)))
-           (t
-            (with-precedence 3
-              (js-expr op1)
-              (js-format "+")
-              (js-expr op2)))))
-        (-
-         (cond
-           ((cdr args)
-            (with-precedence 3
-              (js-expr op1)
-              (js-format "-")
-              (js-expr op2)))
-           (t
-            (with-precedence 1
-              (js-format "-")
-              (js-expr op1)))))
+        ;; Comma (,)
         ((progn comma)
-         (with-precedence 14
+         (with-operator (14 'left)
            (js-expr (car args))
            (dolist (operand (cdr args))
              (let ((*js-output* t))
@@ -170,7 +155,7 @@
          (js-expr (car args))
          (js-format "(")
          (when (cdr args)
-           (with-precedence 13
+           (with-operator (13 'left)
              (js-expr (cadr args))
              (dolist (operand (cddr args))
                (let ((*js-output* t))
@@ -202,9 +187,9 @@
          (apply #'js-function args)
          (js-format ")"))
         (t
-         (flet ((unary-op (operator string precedence &key post lvalue)
-                  (when (member op (ensure-list operator))
-                    (with-precedence precedence
+         (flet ((%unary-op (operator string precedence associativity post lvalue)
+                  (when (eq op operator)
+                    (with-operator (precedence associativity)
                       (when lvalue (check-lvalue op1))
                       (cond
                         (post
@@ -214,76 +199,77 @@
                          (js-format string)
                          (js-expr op1))))
                     (return-from js-operator-expression)))
-                (binary-op (operator string precedence &key lvalue)
-                  (when (member op (ensure-list operator))
+                (%binary-op (operator string precedence associativity lvalue)
+                  (when (eq op operator)
                     (when lvalue (check-lvalue op1))
-                    (with-precedence precedence
+                    (with-operator (precedence associativity)
                       (js-expr op1)
                       (js-format string)
                       (js-expr op2))
                     (return-from js-operator-expression))))
 
-           (unary-op 'pre++     "++"    1 :lvalue t)
-           (unary-op 'pre--     "--"    1 :lvalue t)
-           (unary-op 'post++    "++"    1 :lvalue t :post t)
-           (unary-op 'post--    "--"    1 :lvalue t :post t)
-           (unary-op 'not--     "!"     1)
+           (macrolet ((unary-op (operator string precedence associativity &key post lvalue)
+                        `(%unary-op ',operator ',string ',precedence ',associativity ',post ',lvalue))
+                      (binary-op (operator string precedence associativity &key lvalue)
+                        `(%binary-op ',operator ',string ',precedence ',associativity ',lvalue)))
 
-           (unary-op 'unitary+  "+"     1)
-           (unary-op 'unitary-  "-"     1)
+             (unary-op pre++       "++"            1    right :lvalue t)
+             (unary-op pre--       "--"            1    right :lvalue t)
+             (unary-op post++      "++"            1    right :lvalue t :post t)
+             (unary-op post--      "--"            1    right :lvalue t :post t)
+             (unary-op not--       "!"             1    right)
+             (unary-op unary+      "+"             1    right)
+             (unary-op unary-      "-"             1    right)
+             (unary-op delete      "delete "       1    right)
+             (unary-op void        "void "         1    right)
+             (unary-op typeof      "typeof "       1    right)
+             (unary-op new         "new "          1    right)
 
-           (unary-op 'delete    "delete "       1)
-           (unary-op 'delete    "void "         1)
-           (unary-op 'delete    "typeof "       1)
+             (binary-op *          "*"             2    left)
+             (binary-op /          "/"             2    left)
+             (binary-op mod        "%"             2    left)
+             (binary-op %          "%"             2    left)
+             (binary-op +          "+"             3    left)
+             (binary-op -          "-"             3    left)
+             (binary-op <<         "<<"            4    left)
+             (binary-op >>         "<<"            4    left)
+             (binary-op >>>        ">>>"           4    left)
+             (binary-op <=         "<="            5    left)
+             (binary-op <          "<"             5    left)
+             (binary-op >          ">"             5    left)
+             (binary-op >=         ">="            5    left)
+             (binary-op instanceof " instanceof "  5    left)
+             (binary-op in         " in "          5    left)
+             (binary-op ==         "=="            6    left)
+             (binary-op !=         "!="            6    left)
+             (binary-op ===        "==="           6    left)
+             (binary-op !==        "!=="           6    left)
+             (binary-op bit-and    "&"             7    left)
+             (binary-op bit-xor    "^"             8    left)
+             (binary-op bit-or     "|"             9    left)
+             (binary-op and        "&&"           10    left)
+             (binary-op or         "||"           11    left)
+             (binary-op =          "="            13    right :lvalue t)
+             (binary-op +=         "+="           13    right :lvalue t)
+             (binary-op incf       "+="           13    right :lvalue t)
+             (binary-op -=         "-="           13    right :lvalue t)
+             (binary-op decf       "-="           13    right :lvalue t)
+             (binary-op *=         "*="           13    right :lvalue t)
+             (binary-op /=         "*="           13    right :lvalue t)
+             (binary-op bit-xor=   "^="           13    right :lvalue t)
+             (binary-op bit-and=   "&="           13    right :lvalue t)
+             (binary-op bit-or=    "|="           13    right :lvalue t)
+             (binary-op <<=        "<<="          13    right :lvalue t)
+             (binary-op >>=        ">>="          13    right :lvalue t)
+             (binary-op >>>=       ">>>="         13    right :lvalue t)
 
-           (binary-op '*        "*"     2)
-           (binary-op '/        "/"     2)
-           (binary-op '(mod %)  "%"     2)
-
-           (binary-op '+        "+"     3)
-           (binary-op '-        "-"     3)
-
-           (binary-op '<<       "<<"    4)
-           (binary-op '>>       "<<"    4)
-           (binary-op '>>>      ">>>"   4)
-           (binary-op '<=       "<="    5)
-           (binary-op '<        "<"     5)
-           (binary-op '>        ">"     5)
-           (binary-op '>=       ">="    5)
-
-           (binary-op 'instanceof " instanceof " 5)
-           (binary-op 'in         " in "         5)
-
-           (binary-op '==       "=="    6)
-           (binary-op '!=       "!="    6)
-           (binary-op '===      "==="   6)
-           (binary-op '!==      "!=="   6)
-
-           (binary-op 'bit-and  "&"     7)
-           (binary-op 'bit-xor  "^"     8)
-           (binary-op 'bit-or   "|"     9)
-           (binary-op 'and      "&&"    10)
-           (binary-op 'or       "||"    11)
-
-           (binary-op '=         "="    13      :lvalue t)
-           (binary-op '(+= incf) "+="   13      :lvalue t)
-           (binary-op '(-= decf) "-="   13      :lvalue t)
-           (binary-op '*=       "*="    13      :lvalue t)
-           (binary-op '/=       "*="    13      :lvalue t)
-           (binary-op 'bit-xor= "^="    13      :lvalue t)
-           (binary-op 'bit-and= "&="    13      :lvalue t)
-           (binary-op 'bit-or=  "|="    13      :lvalue t)
-           (binary-op '<<=      "<<="   13      :lvalue t)
-           (binary-op '>>=      ">>="   13      :lvalue t)
-           (binary-op '>>>=     ">>>="  13      :lvalue t)
-
-           (when (member op '(? if))
-             (with-precedence 12
-               (js-expr op1)
-               (js-format "?")
-               (js-expr op2)
-               (js-format ":")
-               (js-expr op3)))))))))
+             (WHEN (member op '(? if))
+               (with-operator (12 'right)
+                 (js-expr (first args))
+                 (js-format "?")
+                 (js-expr (second args))
+                 (js-format ":")
+                 (js-expr (third args)))))))))))
 
 
 (defun js-expr (form)
