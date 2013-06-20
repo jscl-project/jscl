@@ -32,6 +32,7 @@
     ("array"            :target)
     ("string"           :target)
     ("sequence"         :target)
+    ("stream"           :target)
     ("print"            :target)
     ("package"          :target)
     ("misc"             :target)
