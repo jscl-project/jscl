@@ -180,26 +180,28 @@
 (defun copy-seq (sequence)
   (subseq sequence 0))
 
-;;; Based on the SBCL's reduce implementation
+
+;;; Reduce (based on SBCL's version)
+
 (defun reduce (function sequence &key key from-end (start 0) end (initial-value nil ivp))
   (let ((key (or key #'identity))
         (end (or end (length sequence))))
     (if (= end start)
         (if ivp initial-value (funcall function))
-        (if from-end
-            (let ((sequence (nthcdr (- (length sequence) end) (reverse sequence))))
-              (do ((count (if ivp start (1+ start))
-                          (1+ count))
-                   (sequence (if ivp sequence (cdr sequence))
-                             (cdr sequence))
-                   (value (if ivp initial-value (funcall key (car sequence)))
-                          (funcall function (funcall key (car sequence)) value)))
-                  ((>= count end) value)))
-            (let ((sequence (nthcdr start sequence)))
-              (do ((count (if ivp start (1+ start))
-                          (1+ count))
-                   (sequence (if ivp sequence (cdr sequence))
-                             (cdr sequence))
-                   (value (if ivp initial-value (funcall key (car sequence)))
-                          (funcall function value (funcall key (car sequence)))))
-                  ((>= count end) value)))))))
+        (macrolet ((reduce-list (function sequence key start end initial-value ivp from-end)
+                     `(let ((sequence
+                             ,(if from-end
+                                  `(reverse (nthcdr ,start ,sequence))
+                                  `(nthcdr ,start ,sequence))))
+                        (do ((count (if ,ivp ,start (1+ ,start))
+                                    (1+ count))
+                             (sequence (if ,ivp sequence (cdr sequence))
+                                       (cdr sequence))
+                             (value (if ,ivp ,initial-value (funcall ,key (car sequence)))
+                                    ,(if from-end
+                                         `(funcall ,function (funcall ,key (car sequence)) value)
+                                         `(funcall ,function value (funcall ,key (car sequence))))))
+                            ((>= count ,end) value)))))
+          (if from-end
+              (reduce-list function sequence key start end initial-value ivp t)
+              (reduce-list function sequence key start end initial-value ivp nil))))))
