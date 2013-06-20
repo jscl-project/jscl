@@ -55,3 +55,25 @@
   (test (equal (subseq nums 2 4) '(3 4)))
   ; Test that nums hasn't been altered: SUBSEQ should construct fresh lists
   (test (equal nums '(1 2 3 4 5))))
+
+;;; REDUCE
+(test (equal (reduce (lambda (x y) `(+ ,x ,y))
+                     '(1 2 3 4))
+             '(+ (+ (+ 1 2) 3) 4)))
+
+(test (equal (reduce (lambda (x y) `(+ ,x ,y))
+                     '(1 2 3 4)
+                     :from-end t)
+             '(+ 1 (+ 2 (+ 3 4)))))
+
+(test (equal (reduce #'+ nil)  0))
+(test (equal (reduce #'+ '(1)) 1))
+(test (equal (reduce #'+ nil :initial-value 1) 1))
+
+(test (equal (reduce #'+ '()
+                     :key #'1+
+                     :initial-value 100)
+             100))
+
+(test (equal (reduce #'+ '(100) :key #'1+)
+             101))
