@@ -1249,7 +1249,7 @@
 (define-builtin functionp (x)
   (js!bool (code "(typeof " x " == 'function')")))
 
-(define-builtin write-string (x)
+(define-builtin %write-string (x)
   (code "lisp.write(" x ")"))
 
 
