@@ -416,6 +416,11 @@
               (js-expr condition)
               (js-format ")")
               (js-stmt `(group ,@body))))
+        (throw
+            (destructuring-bind (object) (cdr form)
+              (js-format "throw ")
+              (js-expr object)
+              (js-format ";")))
         (t
          (js-expr form)
          (js-format ";")))))
