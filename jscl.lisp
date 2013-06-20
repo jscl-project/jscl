@@ -40,6 +40,7 @@
     ("defstruct"        :both)
     ("lambda-list"      :both)
     ("backquote"        :both)
+    ("compiler-codegen" :both)
     ("compiler"         :both)
     ("toplevel"         :target)))
 
