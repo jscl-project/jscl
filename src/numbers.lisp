@@ -81,7 +81,7 @@
 (macrolet ((def (name comparison)
              `(defun ,name (x &rest xs)
                 (dolist (y xs) 
-                  (unless (,comparison x (car xs))
+                  (when (,comparison y x)
                     (setq x y)))
                 x)))
   (def max >)
