@@ -18,6 +18,21 @@
 
 ;;; Printer
 
+(defun lisp-escape-string (string)
+  (let ((output "")
+        (index 0)
+        (size (length string)))
+    (while (< index size)
+      (let ((ch (char string index)))
+        (when (or (char= ch #\") (char= ch #\\))
+          (setq output (concat output "\\")))
+        (when (or (char= ch #\newline))
+          (setq output (concat output "\\"))
+          (setq ch #\n))
+        (setq output (concat output (string ch))))
+      (incf index))
+    (concat "\"" output "\"")))
+
 ;;; Return T if the string S contains characters which need to be
 ;;; escaped to print the symbol name, NIL otherwise.
 (defun escape-symbol-name-p (s)

@@ -489,21 +489,6 @@
 
 ;;; Compilation of literals an object dumping
 
-(defun lisp-escape-string (string)
-  (let ((output "")
-        (index 0)
-        (size (length string)))
-    (while (< index size)
-      (let ((ch (char string index)))
-        (when (or (char= ch #\") (char= ch #\\))
-          (setq output (concat output "\\")))
-        (when (or (char= ch #\newline))
-          (setq output (concat output "\\"))
-          (setq ch #\n))
-        (setq output (concat output (string ch))))
-      (incf index))
-    (concat "\"" output "\"")))
-
 ;;; BOOTSTRAP MAGIC: We record the macro definitions as lists during
 ;;; the bootstrap. Once everything is compiled, we want to dump the
 ;;; whole global environment to the output file to reproduce it in the
