@@ -489,52 +489,6 @@
 
 ;;; Compilation of literals an object dumping
 
-;;; Two seperate functions are needed for escaping strings:
-;;;  One for producing JavaScript string literals (which are singly or
-;;;   doubly quoted)
-;;;  And one for producing Lisp strings (which are only doubly quoted)
-;;;
-;;; The same function would suffice for both, but for javascript string
-;;; literals it is neater to use either depending on the context, e.g:
-;;;  foo's => "foo's"
-;;;  "foo" => '"foo"'
-;;; which avoids having to escape quotes where possible
-(defun js-escape-string (string)
-  (let ((index 0)
-        (size (length string))
-        (seen-single-quote nil)
-        (seen-double-quote nil))
-    (flet ((%js-escape-string (string escape-single-quote-p)
-             (let ((output "")
-                   (index 0))
-               (while (< index size)
-                 (let ((ch (char string index)))
-                   (when (char= ch #\\)
-                     (setq output (concat output "\\")))
-                   (when (and escape-single-quote-p (char= ch #\'))
-                     (setq output (concat output "\\")))
-                   (when (char= ch #\newline)
-                     (setq output (concat output "\\"))
-                     (setq ch #\n))
-                   (setq output (concat output (string ch))))
-                 (incf index))
-               output)))
-      ;; First, scan the string for single/double quotes
-      (while (< index size)
-        (let ((ch (char string index)))
-          (when (char= ch #\')
-            (setq seen-single-quote t))
-          (when (char= ch #\")
-            (setq seen-double-quote t)))
-        (incf index))
-      ;; Then pick the appropriate way to escape the quotes
-      (cond
-        ((not seen-single-quote)
-         (concat "'"   (%js-escape-string string nil) "'"))
-        ((not seen-double-quote)
-         (concat "\""  (%js-escape-string string nil) "\""))
-        (t (concat "'" (%js-escape-string string t)   "'"))))))
-
 (defun lisp-escape-string (string)
   (let ((output "")
         (index 0)
