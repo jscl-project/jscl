@@ -358,7 +358,7 @@
      (destructuring-bind (&body body) (cdr form)
        (cond
          ((null body)           '(empty))
-         ((null (cdr body))     (car body))
+         ((null (cdr body))     (js-expand-stmt (car body)))
          (t                     `(group ,@(cdr form))))))
     (t
      form)))
@@ -415,7 +415,9 @@
                  (js-format " else ")
                  (js-stmt false))))
             (group
-             (let ((in-group-p (and (consp parent) (eq (car parent) 'group))))
+             (let ((in-group-p
+                    (or (null parent)
+                        (and (consp parent) (eq (car parent) 'group)))))
                (unless  in-group-p (js-format "{"))
                (mapc #'js-stmt (cdr form))
                (unless in-group-p (js-format "}"))))
