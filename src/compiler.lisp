@@ -117,11 +117,8 @@
 (defun toplevel-compilation (string)
   (push string *toplevel-compilations*))
 
-(defun null-or-empty-p (x)
-  (zerop (length x)))
-
 (defun get-toplevel-compilations ()
-  (reverse (remove-if #'null-or-empty-p *toplevel-compilations*)))
+  (reverse *toplevel-compilations*))
 
 (defun %compile-defmacro (name lambda)
   (toplevel-compilation (ls-compile `',name))
@@ -622,7 +619,7 @@
   (if *compiling-file*
       (progn
         (eval (cons 'progn body))
-        nil)
+        (ls-compile 0))
       (ls-compile `(progn ,@body))))
 
 (defmacro define-transformation (name args form)
@@ -634,10 +631,9 @@
       (ls-compile (car body) *multiple-value-p*)
       (code "("
             (join
-             (remove-if #'null-or-empty-p
-                        (append
-                         (mapcar #'ls-compile (butlast body))
-                         (list (ls-compile (car (last body)) t))))
+             (append
+              (mapcar #'ls-compile (butlast body))
+              (list (ls-compile (car (last body)) t)))
                   ",")
             ")")))
 
@@ -1424,7 +1420,7 @@
         (code (ls-compile-block (butlast sexps) nil decls-allowed-p)
               "return " (ls-compile (car (last sexps)) *multiple-value-p*) ";")
         (join-trailing
-         (remove-if #'null-or-empty-p (mapcar #'ls-compile sexps))
+         (mapcar #'ls-compile sexps)
          (concat ";" *newline*)))))
 
 (defun ls-compile (sexp &optional multiple-value-p)
@@ -1479,7 +1475,7 @@
        (let ((subs (mapcar (lambda (s)
                              (ls-compile-toplevel s t))
                            (cdr sexp))))
-         (join (remove-if #'null-or-empty-p subs))))
+         (join subs)))
       (t
        (when *compile-print-toplevels*
          (let ((form-string (prin1-to-string sexp)))
