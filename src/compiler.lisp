@@ -1495,14 +1495,13 @@
                (min width (length string)))))
     (subseq string 0 n)))
 
-(defun ls-compile-toplevel (sexp &optional multiple-value-p)
+(defun convert-toplevel (sexp &optional multiple-value-p)
   (let ((*toplevel-compilations* nil))
     (cond
       ((and (consp sexp) (eq (car sexp) 'progn))
-       (let ((subs (mapcar (lambda (s)
-                             (ls-compile-toplevel s t))
-                           (cdr sexp))))
-         (join subs)))
+       (mapcar (lambda (s)
+                 (ls-compile-toplevel s t))
+               (cdr sexp)))
       (t
        (when *compile-print-toplevels*
          (let ((form-string (prin1-to-string sexp)))
@@ -1511,4 +1510,7 @@
          `(code
            ,@(interleave (get-toplevel-compilations) ";" t)
            ,(when code
-             `(code ,code ";"))))))))
+                  `(code ,code ";"))))))))
+
+(defun ls-compile-toplevel (sexp &optional multiple-value-p)
+  (js (convert-toplevel sexp multiple-value-p)))
