@@ -211,6 +211,8 @@
   (let ((op1 (car args))
         (op2 (cadr args)))
     (case op
+      (code
+       (js-format "~a" (apply #'code args)))
       ;; Function call
       (call
        (js-expr (car args))
@@ -371,6 +373,8 @@
             (js-expr form)
             (js-format ";"))
           (case (car form)
+            (code
+             (js-format "~a" (apply #'code (cdr form))))
             (empty
              (unless (and (consp parent) (eq (car parent) 'group))
                (js-format ";")))
