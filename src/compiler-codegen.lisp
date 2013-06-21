@@ -154,7 +154,7 @@
       (js-format ",")
       (js-identifier arg)))
   (js-format ")")
-  (js-stmt `(group ,@body)))
+  (js-stmt `(group ,@body) t))
 
 (defun check-lvalue (x)
   (unless (or (symbolp x)
@@ -362,9 +362,12 @@
     ((and (consp form) (eq (car form) 'progn))
      (destructuring-bind (&body body) (cdr form)
        (cond
-         ((null body)           '(empty))
-         ((null (cdr body))     (js-expand-stmt (car body)))
-         (t                     `(group ,@(cdr form))))))
+         ((null body)
+          '(empty))
+         ((null (cdr body))
+          (js-expand-stmt (car body)))
+         (t
+          `(group ,@(cdr form))))))
     (t
      form)))
 
