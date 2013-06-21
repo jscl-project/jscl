@@ -116,7 +116,7 @@
 
 (defun gvarname (symbol)
   (declare (ignore symbol))
-  (format nil "v~d" (incf *variable-counter*)))
+  (code "v" (incf *variable-counter*)))
 
 (defun translate-variable (symbol)
   (awhen (lookup-in-lexenv symbol *environment* 'variable)
@@ -497,7 +497,7 @@
 (defvar *literal-counter* 0)
 
 (defun genlit ()
-  (format nil "l~d" (incf *literal-counter*)))
+  (code "l" (incf *literal-counter*)))
 
 (defun dump-symbol (symbol)
   #-jscl
@@ -1005,7 +1005,7 @@
       (cond
         ((floatp x) (push (float-to-string x) fargs))
         ((numberp x) (push (integer-to-string x) fargs))
-        (t (let ((v (format nil "x~d" (incf counter))))
+        (t (let ((v (code "x" (incf counter))))
              (push v fargs)
              (push `(code "var " ,v " = " ,(ls-compile x) ";"
                           "if (typeof " ,v " !== 'number') throw 'Not a number!';")

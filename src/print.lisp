@@ -289,7 +289,8 @@
                 (concatf res (format-special next (car arguments)))
                 (pop arguments))))
             (setq res (concat res (string c))))
-        (incf i)))
+        (incf i))
+      (/debug res))
     (if destination
         (progn
           (write-string res)
