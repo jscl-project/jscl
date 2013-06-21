@@ -16,6 +16,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
+(/debug "loading toplevel.lisp!")
 
 (defun eval (x)
   (js-eval (ls-compile-toplevel x t)))

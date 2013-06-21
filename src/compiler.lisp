@@ -18,6 +18,8 @@
 
 ;;;; Compiler
 
+(/debug "loading compiler.lisp!")
+
 ;;; Translate the Lisp code to Javascript. It will compile the special
 ;;; forms. Some primitive functions are compiled as special forms
 ;;; too. The respective real functions are defined in the target (see
@@ -933,8 +935,8 @@
         ,@(mapcar (lambda (form)
                     `(code "vs = " ,(ls-compile form t) ";"
                            "if (typeof vs === 'object' && 'multiple-value' in vs)"
-                           (code "args = args.concat(vs);" )
-                           "else"
+                           (code " args = args.concat(vs);" )
+                           " else "
                            (code "args.push(vs);" )))
                   forms))
       "args[1] = args.length-2;"
@@ -1006,8 +1008,7 @@
         (t (let ((v (format nil "x~d" (incf counter))))
              (push v fargs)
              (push `(code "var " ,v " = " ,(ls-compile x) ";"
-                          "if (typeof " v " !== 'number') throw 'Not a number!';"
-                          )
+                          "if (typeof " ,v " !== 'number') throw 'Not a number!';")
                    prelude)))))
     (js!selfcall
       `(code ,@(reverse prelude))
@@ -1242,6 +1243,9 @@
 
 (define-builtin %write-string (x)
   `(code "lisp.write(" ,x ")"))
+
+(define-builtin /debug (x)
+  `(code "console.log(xstring(" ,x "))"))
 
 
 ;;; Storage vectors. They are used to implement arrays and (in the

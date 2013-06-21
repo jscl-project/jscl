@@ -22,6 +22,8 @@
 ;;; It is intended to be used with the new compiler. However, it is
 ;;; quite independent so it has been integrated early in JSCL.
 
+(/debug "loading compiler-codegen.lisp!")
+
 (defvar *js-output* t)
 
 ;;; Two seperate functions are needed for escaping strings:

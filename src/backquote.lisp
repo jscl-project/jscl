@@ -13,6 +13,8 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
+(/debug "loading backquote.lisp!")
+
 ;;; Backquote implementation.
 ;;;
 ;;;    Author: Guy L. Steele Jr.     Date: 27 December 1985

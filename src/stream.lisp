@@ -19,6 +19,8 @@
 ;;; TODO: Use structures to represent streams, but we would need
 ;;; inheritance.
 
+(/debug "loading stream.lisp!")
+
 (defvar *standard-output*
   (vector 'stream
           (lambda (ch) (%write-string (string ch)))
