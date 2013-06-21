@@ -211,6 +211,7 @@
   (let ((op1 (car args))
         (op2 (cadr args)))
     (case op
+      ;; Transactional compatible operator
       (code
        (js-format "~a" (apply #'code args)))
       ;; Function call

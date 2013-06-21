@@ -88,7 +88,8 @@
 
 (defun dump-global-environment (stream)
   (flet ((late-compile (form)
-           (write-string (ls-compile-toplevel form) stream)))
+           (let ((*standard-output* stream))
+             (write-string (ls-compile-toplevel form)))))
     ;; We assume that environments have a friendly list representation
     ;; for the compiler and it can be dumped.
     (dolist (b (lexenv-function *environment*))
@@ -99,8 +100,8 @@
     ;; not collide with the compiler itself.
     (late-compile
      `(progn
-        ,@(mapcar (lambda (s) `(%intern-symbol (%js-vref ,(cdr s))))
-                  (remove-if-not #'symbolp *literal-table* :key #'car))
+        (progn ,@(mapcar (lambda (s) `(%intern-symbol (%js-vref ,(cdr s))))
+                         (remove-if-not #'symbolp *literal-table* :key #'car)))
         (setq *literal-table* ',*literal-table*)
         (setq *variable-counter* ,*variable-counter*)
         (setq *gensym-counter* ,*gensym-counter*)))
