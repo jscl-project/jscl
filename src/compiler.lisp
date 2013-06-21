@@ -44,40 +44,11 @@
 ;;; It could be defined as function, but we could do some
 ;;; preprocessing in the future.
 (defmacro js!selfcall (&body body)
-  `(code "(function(){" *newline* (indent ,@body) "})()"))
+  `(code "(function(){" *newline* (code ,@body) "})()"))
 
 ;;; Like CODE, but prefix each line with four spaces. Two versions
 ;;; of this function are available, because the Ecmalisp version is
 ;;; very slow and bootstraping was annoying.
-
-#+jscl
-(defun indent (&rest string)
-  (let ((input (apply #'code string)))
-    (let ((output "")
-          (index 0)
-          (size (length input)))
-      (when (plusp (length input)) (concatf output "    "))
-      (while (< index size)
-        (let ((str
-               (if (and (char= (char input index) #\newline)
-                        (< index (1- size))
-                        (not (char= (char input (1+ index)) #\newline)))
-                   (concat (string #\newline) "    ")
-                   (string (char input index)))))
-          (concatf output str))
-        (incf index))
-      output)))
-
-#-jscl
-(defun indent (&rest string)
-  (with-output-to-string (*standard-output*)
-    (with-input-from-string (input (apply #'code string))
-      (loop
-         for line = (read-line input nil)
-         while line
-         do (write-string "    ")
-         do (write-line line)))))
-
 
 ;;; A Form can return a multiple values object calling VALUES, like
 ;;; values(arg1, arg2, ...). It will work in any context, as well as
@@ -301,14 +272,14 @@
                 (while (< idx n-optional-arguments)
                   (let ((arg (nth idx optional-arguments)))
                     (push (code "case " (+ idx n-required-arguments) ":" *newline*
-                                (indent (translate-variable (car arg))
-                                        "="
-                                        (ls-compile (cadr arg)) ";" *newline*)
+                                (code (translate-variable (car arg))
+                                      "="
+                                      (ls-compile (cadr arg)) ";" *newline*)
                                 (when (third arg)
-                                  (indent (translate-variable (third arg))
-                                          "="
-                                          (ls-compile nil)
-                                          ";" *newline*)))
+                                  (code (translate-variable (third arg))
+                                        "="
+                                        (ls-compile nil)
+                                        ";" *newline*)))
                           cases)
                     (incf idx)))
                 (push (code "default: break;" *newline*) cases)
@@ -324,7 +295,7 @@
         (code "var " js!rest "= " (ls-compile nil) ";" *newline*
               "for (var i = nargs-1; i>=" (+ n-required-arguments n-optional-arguments)
               "; i--)" *newline*
-              (indent js!rest " = {car: arguments[i+2], cdr: " js!rest "};" *newline*))))))
+              (code js!rest " = {car: arguments[i+2], cdr: " js!rest "};" *newline*))))))
 
 (defun compile-lambda-parse-keywords (ll)
   (let ((n-required-arguments
@@ -348,20 +319,20 @@
 	      ;; ((keyword-name var) init-form)
 	      (code "for (i=" (+ n-required-arguments n-optional-arguments)
                     "; i<nargs; i+=2){" *newline*
-                    (indent
+                    (code
                      "if (arguments[i+2] === " (ls-compile (caar keyarg)) "){" *newline*
-                     (indent (translate-variable (cadr (car keyarg)))
-                             " = arguments[i+3];"
-                             *newline*
-                             (let ((svar (third keyarg)))
-                               (when svar
-                                 (code (translate-variable svar) " = " (ls-compile t) ";" *newline*)))
-                             "break;" *newline*)
+                     (code (translate-variable (cadr (car keyarg)))
+                           " = arguments[i+3];"
+                           *newline*
+                           (let ((svar (third keyarg)))
+                             (when svar
+                               (code (translate-variable svar) " = " (ls-compile t) ";" *newline*)))
+                           "break;" *newline*)
                      "}" *newline*)
                     "}" *newline*
                     ;; Default value
                     "if (i == nargs){" *newline*
-                    (indent (translate-variable (cadr (car keyarg))) " = " (ls-compile (cadr keyarg)) ";" *newline*)
+                    (code (translate-variable (cadr (car keyarg))) " = " (ls-compile (cadr keyarg)) ";" *newline*)
                     "}" *newline*)))
        (when keyword-arguments
          (code "var i;" *newline*
@@ -370,17 +341,17 @@
      (when keyword-arguments
        (code "var start = " (+ n-required-arguments n-optional-arguments) ";" *newline*
              "if ((nargs - start) % 2 == 1){" *newline*
-             (indent "throw 'Odd number of keyword arguments';" *newline*)
+             (code "throw 'Odd number of keyword arguments';" *newline*)
              "}" *newline*
              "for (i = start; i<nargs; i+=2){" *newline*
-             (indent "if ("
-                     (join (mapcar (lambda (x)
-                                     (concat "arguments[i+2] !== " (ls-compile (caar x))))
-                                   keyword-arguments)
-                           " && ")
-                     ")" *newline*
-                     (indent
-                      "throw 'Unknown keyword argument ' + xstring(arguments[i+2].name);" *newline*))
+             (code "if ("
+                   (join (mapcar (lambda (x)
+                                   (concat "arguments[i+2] !== " (ls-compile (caar x))))
+                                 keyword-arguments)
+                         " && ")
+                   ")" *newline*
+                   (code
+                    "throw 'Unknown keyword argument ' + xstring(arguments[i+2].name);" *newline*))
              "}" *newline*)))))
 
 (defun parse-lambda-list (ll)
@@ -440,7 +411,7 @@
                               (append required-arguments optional-arguments)))
                ",")
          "){" *newline*
-         (indent
+         (code
           ;; Check number of arguments
           (lambda-check-argument-count n-required-arguments
                                        n-optional-arguments
@@ -578,7 +549,7 @@
 (define-compilation %while (pred &rest body)
   (js!selfcall
     "while(" (ls-compile pred) " !== " (ls-compile nil) "){" *newline*
-    (indent (ls-compile-block body))
+    (code (ls-compile-block body))
     "}"
     "return " (ls-compile nil) ";" *newline*))
 
@@ -627,7 +598,7 @@
           (join (mapcar #'translate-function fnames) ",")
           "){" *newline*
           (let ((body (ls-compile-block body t)))
-            (indent body))
+            (code body))
           "})(" (join cfuncs ",") ")")))
 
 (define-compilation labels (definitions &rest body)
@@ -696,7 +667,7 @@
     (return-from let-binding-wrapper body))
   (code
    "try {" *newline*
-   (indent "var tmp;" *newline*
+   (code "var tmp;" *newline*
            (mapconcat
             (lambda (b)
               (let ((s (ls-compile `(quote ,(car b)))))
@@ -707,7 +678,7 @@
            body *newline*)
    "}" *newline*
    "finally {"  *newline*
-   (indent
+   (code
     (mapconcat (lambda (b)
                  (let ((s (ls-compile `(quote ,(car b)))))
                    (code s ".value" " = " (cdr b) ";" *newline*)))
@@ -731,7 +702,7 @@
                 ",")
           "){" *newline*
           (let ((body (ls-compile-block body t t)))
-            (indent (let-binding-wrapper dynamic-bindings body)))
+            (code (let-binding-wrapper dynamic-bindings body)))
           "})(" (join cvalues ",") ")")))
 
 
@@ -757,7 +728,7 @@
                        (remove-if-not #'special-variable-p symbols))))
     (code
      "try {" *newline*
-     (indent
+     (code
       (mapconcat (lambda (b)
                    (let ((s (ls-compile `(quote ,(car b)))))
                      (code "var " (cdr b) " = " s ".value;" *newline*)))
@@ -765,7 +736,7 @@
       body)
      "}" *newline*
      "finally {" *newline*
-     (indent
+     (code
       (mapconcat (lambda (b)
                    (let ((s (ls-compile `(quote ,(car b)))))
                      (code s ".value" " = " (cdr b) ";" *newline*)))
@@ -799,7 +770,7 @@
           (js!selfcall
             "try {" *newline*
             "var " idvar " = [];" *newline*
-            (indent cbody)
+            (code cbody)
             "}" *newline*
             "catch (cf){" *newline*
             "    if (cf.type == 'block' && cf.id == " idvar ")" *newline*
@@ -835,7 +806,7 @@
   (js!selfcall
     "var id = " (ls-compile id) ";" *newline*
     "try {" *newline*
-    (indent (ls-compile-block body t)) *newline*
+    (code (ls-compile-block body t)) *newline*
     "}" *newline*
     "catch (cf){" *newline*
     "    if (cf.type == 'catch' && cf.id == id)" *newline*
@@ -891,14 +862,14 @@
         "var " tbidx " = [];" *newline*
         "tbloop:" *newline*
         "while (true) {" *newline*
-        (indent "try {" *newline*
-                (indent (let ((content ""))
+        (code "try {" *newline*
+                (code (let ((content ""))
                           (code "switch(" branch "){" *newline*
                                 "case " initag ":" *newline*
                                 (dolist (form (cdr body) content)
                                   (concatf content
                                     (if (not (go-tag-p form))
-                                        (indent (ls-compile form) ";" *newline*)
+                                        (code (ls-compile form) ";" *newline*)
                                         (let ((b (lookup-in-lexenv form *environment* 'gotag)))
                                           (code "case " (second (binding-value b)) ":" *newline*)))))
                                 "default:" *newline*
@@ -933,9 +904,9 @@
   (js!selfcall
     "var ret = " (ls-compile nil) ";" *newline*
     "try {" *newline*
-    (indent "ret = " (ls-compile form) ";" *newline*)
+    (code "ret = " (ls-compile form) ";" *newline*)
     "} finally {" *newline*
-    (indent (ls-compile-block clean-up))
+    (code (ls-compile-block clean-up))
     "}" *newline*
     "return ret;" *newline*))
 
@@ -950,9 +921,9 @@
       (mapconcat (lambda (form)
                    (code "vs = " (ls-compile form t) ";" *newline*
                          "if (typeof vs === 'object' && 'multiple-value' in vs)" *newline*
-                         (indent "args = args.concat(vs);" *newline*)
+                         (code "args = args.concat(vs);" *newline*)
                          "else" *newline*
-                         (indent "args.push(vs);" *newline*)))
+                         (code "args.push(vs);" *newline*)))
                  forms)
       "args[1] = args.length-2;" *newline*
       "return func.apply(window, args);" *newline*) ";" *newline*))
@@ -991,7 +962,7 @@
                decls)
      ,@(mapcar (lambda (decl)
                  `(code "if (typeof " ,(first decl) " != '" ,(second decl) "')" *newline*
-                        (indent "throw 'The value ' + "
+                        (code "throw 'The value ' + "
                                 ,(first decl)
                                 " + ' is not a type "
                                 ,(second decl)
@@ -1355,7 +1326,7 @@
    "var g = (typeof f === 'function' ? f : f.fvalue);" *newline*
    "var o = " object ";" *newline*
    "for (var key in o){" *newline*
-   (indent "g(" (if *multiple-value-p* "values" "pv") ", 1, o[key]);" *newline*)
+   (code "g(" (if *multiple-value-p* "values" "pv") ", 1, o[key]);" *newline*)
    "}"
    " return " (ls-compile nil) ";" *newline*))
 
