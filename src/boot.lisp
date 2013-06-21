@@ -22,6 +22,8 @@
 ;;; Lisp world from scratch. This code has to define enough language
 ;;; to the compiler to be able to run.
 
+(/debug "loading boot.lisp!")
+
 (eval-when-compile
   (let ((defmacro-macroexpander
          '#'(lambda (form)

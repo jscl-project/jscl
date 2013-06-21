@@ -22,6 +22,8 @@
 ;;; It is intended to be used with the new compiler. However, it is
 ;;; quite independent so it has been integrated early in JSCL.
 
+(/debug "loading compiler-codegen.lisp!")
+
 (defvar *js-output* t)
 
 ;;; Two seperate functions are needed for escaping strings:
@@ -211,6 +213,9 @@
   (let ((op1 (car args))
         (op2 (cadr args)))
     (case op
+      ;; Transactional compatible operator
+      (code
+       (js-format "~a" (apply #'code args)))
       ;; Function call
       (call
        (js-expr (car args))
@@ -358,7 +363,7 @@
      (destructuring-bind (&body body) (cdr form)
        (cond
          ((null body)           '(empty))
-         ((null (cdr body))     (car body))
+         ((null (cdr body))     (js-expand-stmt (car body)))
          (t                     `(group ,@(cdr form))))))
     (t
      form)))
@@ -371,6 +376,8 @@
             (js-expr form)
             (js-format ";"))
           (case (car form)
+            (code
+             (js-format "~a" (apply #'code (cdr form))))
             (empty
              (unless (and (consp parent) (eq (car parent) 'group))
                (js-format ";")))
@@ -415,7 +422,9 @@
                  (js-format " else ")
                  (js-stmt false))))
             (group
-             (let ((in-group-p (and (consp parent) (eq (car parent) 'group))))
+             (let ((in-group-p
+                    (or (null parent)
+                        (and (consp parent) (eq (car parent) 'group)))))
                (unless  in-group-p (js-format "{"))
                (mapc #'js-stmt (cdr form))
                (unless in-group-p (js-format "}"))))

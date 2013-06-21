@@ -44,3 +44,6 @@
 (eval-when-compile
   (defun concat (&rest strs)
     (apply #'concatenate 'string strs)))
+
+(defun /debug (x)
+  (write-line x))

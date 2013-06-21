@@ -16,6 +16,8 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
+(/debug "loading print.lisp!")
+
 ;;; Printer
 
 (defun lisp-escape-string (string)
@@ -287,7 +289,8 @@
                 (concatf res (format-special next (car arguments)))
                 (pop arguments))))
             (setq res (concat res (string c))))
-        (incf i)))
+        (incf i))
+      (/debug res))
     (if destination
         (progn
           (write-string res)
