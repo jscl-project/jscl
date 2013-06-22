@@ -363,7 +363,7 @@
      (destructuring-bind (&body body) (cdr form)
        (cond
          ((null body)
-          '(empty))
+          nil)
          ((null (cdr body))
           (js-expand-stmt (car body)))
          (t
@@ -374,77 +374,80 @@
 (defun js-stmt (form &optional parent)
   (let ((form (js-expand-stmt form)))
     (flet ((js-stmt (x) (js-stmt x form)))
-      (if (atom form)
-          (progn
+      (cond
+        ((null form)
+         (unless (or (and (consp parent) (eq (car parent) 'group))
+                     (null parent))
+           (js-format ";")))
+        ((atom form)
+         (progn
+           (js-expr form)
+           (js-format ";")))
+        (t
+         (case (car form)
+           (code
+            (js-format "~a" (apply #'code (cdr form))))
+           (label
+            (destructuring-bind (label &body body) (cdr form)
+              (js-identifier label)
+              (js-format ":")
+              (js-stmt `(progn ,@body))))
+           (break
+            (destructuring-bind (label) (cdr form)
+              (js-format "break ")
+              (js-identifier label)
+              (js-format ";")))
+           (return
+             (destructuring-bind (value) (cdr form)
+               (js-format "return ")
+               (js-expr value)
+               (js-format ";")))
+           (var
+            (flet ((js-var (spec)
+                     (destructuring-bind (variable &optional initial)
+                         (ensure-list spec)
+                       (js-identifier variable)
+                       (when initial
+                         (js-format "=")
+                         (js-expr initial)))))
+              (destructuring-bind (var &rest vars) (cdr form)
+                (let ((*js-operator-precedence* 12))
+                  (js-format "var ")
+                  (js-var var)
+                  (dolist (var vars)
+                    (js-format ",")
+                    (js-var var))
+                  (js-format ";")))))
+           (if
+            (destructuring-bind (condition true &optional false) (cdr form)
+              (js-format "if (")
+              (js-expr condition)
+              (js-format ") ")
+              (js-stmt true)
+              (when false
+                (js-format " else ")
+                (js-stmt false))))
+           (group
+            (let ((in-group-p
+                   (or (null parent)
+                       (and (consp parent) (eq (car parent) 'group)))))
+              (unless  in-group-p (js-format "{"))
+              (mapc #'js-stmt (cdr form))
+              (unless in-group-p (js-format "}"))))
+           (while
+               (destructuring-bind (condition &body body) (cdr form)
+                 (js-format "while (")
+                 (js-expr condition)
+                 (js-format ")")
+                 (js-stmt `(progn ,@body))))
+           (throw
+               (destructuring-bind (object) (cdr form)
+                 (js-format "throw ")
+                 (js-expr object)
+                 (js-format ";")))
+           (t
             (js-expr form)
-            (js-format ";"))
-          (case (car form)
-            (code
-             (js-format "~a" (apply #'code (cdr form))))
-            (empty
-             (unless (and (consp parent) (eq (car parent) 'group))
-               (js-format ";")))
-            (label
-             (destructuring-bind (label &body body) (cdr form)
-               (js-identifier label)
-               (js-format ":")
-               (js-stmt `(progn ,@body))))
-            (break
-             (destructuring-bind (label) (cdr form)
-               (js-format "break ")
-               (js-identifier label)
-               (js-format ";")))
-            (return
-              (destructuring-bind (value) (cdr form)
-                (js-format "return ")
-                (js-expr value)
-                (js-format ";")))
-            (var
-             (flet ((js-var (spec)
-                      (destructuring-bind (variable &optional initial)
-                          (ensure-list spec)
-                        (js-identifier variable)
-                        (when initial
-                          (js-format "=")
-                          (js-expr initial)))))
-               (destructuring-bind (var &rest vars) (cdr form)
-                 (let ((*js-operator-precedence* 12))
-                   (js-format "var ")
-                   (js-var var)
-                   (dolist (var vars)
-                     (js-format ",")
-                     (js-var var))
-                   (js-format ";")))))
-            (if
-             (destructuring-bind (condition true &optional false) (cdr form)
-               (js-format "if (")
-               (js-expr condition)
-               (js-format ") ")
-               (js-stmt true)
-               (when false
-                 (js-format " else ")
-                 (js-stmt false))))
-            (group
-             (let ((in-group-p
-                    (or (null parent)
-                        (and (consp parent) (eq (car parent) 'group)))))
-               (unless  in-group-p (js-format "{"))
-               (mapc #'js-stmt (cdr form))
-               (unless in-group-p (js-format "}"))))
-            (while
-                (destructuring-bind (condition &body body) (cdr form)
-                  (js-format "while (")
-                  (js-expr condition)
-                  (js-format ")")
-                  (js-stmt `(progn ,@body))))
-            (throw
-                (destructuring-bind (object) (cdr form)
-                  (js-format "throw ")
-                  (js-expr object)
-                  (js-format ";")))
-            (t
-             (js-expr form)
-             (js-format ";")))))))
+            (js-format ";"))))))))
 
 (defun js (&rest stmts)
   (mapc #'js-stmt stmts)
