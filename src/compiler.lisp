@@ -612,7 +612,7 @@
            ,@(interleave (mapcar #'translate-function fnames) ",")
            "){"
            ,(ls-compile-block body t)
-           "})(" ,@cfuncs ")")))
+           "})(" ,@(interleave cfuncs ",") ")")))
 
 (define-compilation labels (definitions &rest body)
   (let* ((fnames (mapcar #'car definitions))
