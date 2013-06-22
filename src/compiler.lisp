@@ -50,7 +50,7 @@
 ;;; Wrap X with a Javascript code to convert the result from
 ;;; Javascript generalized booleans to T or NIL.
 (defun js!bool (x)
-  `(code "(" ,x "?" ,(ls-compile t) ": " ,(ls-compile nil) ")"))
+  `(if ,x ,(ls-compile t) ,(ls-compile nil)))
 
 ;;; Concatenate the arguments and wrap them with a self-calling
 ;;; Javascript anonymous function. It is used to make some Javascript
@@ -58,10 +58,7 @@
 ;;; It could be defined as function, but we could do some
 ;;; preprocessing in the future.
 (defmacro js!selfcall (&body body)
-  ``(code "(function(){" ,*newline*
-          (code ,,@body)
-          ,*newline*
-          "})()"))
+  ``(call (function nil (code ,,@body))))
 
 ;;; Like CODE, but prefix each line with four spaces. Two versions
 ;;; of this function are available, because the Ecmalisp version is
