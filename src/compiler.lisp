@@ -812,30 +812,30 @@
       "})")))
 
 (define-compilation catch (id &rest body)
-  (js!selfcall
-    "var id = " (ls-compile id) ";"
-    "try {"
-    `(code ,(ls-compile-block body t))
-    "}"
-    "catch (cf){"
-    "    if (cf.type == 'catch' && cf.id == id)"
-    (if *multiple-value-p*
-        "        return values.apply(this, forcemv(cf.values));"
-        "        return pv.apply(this, forcemv(cf.values));")
-
-    "    else"
-    "        throw cf;"
-    "}" ))
+  (js!selfcall*
+    `(var (|id| ,(ls-compile id)))
+    `(try
+      ,(ls-compile-block body t))
+    `(catch (|cf|)
+       (if (and (== (get |cf| |type|) "catch")
+                (== (get |cf| |id|) |id|))
+           ,(if *multiple-value-p*
+                `(return (call (get |values| |apply|)
+                               this
+                               (call |forcemv| (get |cf| |values|))))
+                `(return (call (get |pv| |apply|)
+                               this
+                               (call |forcemv| (get |cf| |values|)))))
+           (throw |cf|)))))
 
 (define-compilation throw (id value)
-  (js!selfcall
-    "var values = mv;"
-    "throw ({"
-    "type: 'catch', "
-    "id: " (ls-compile id) ", "
-    "values: " (ls-compile value t) ", "
-    "message: 'Throw uncatched.'"
-    "})"))
+  (js!selfcall*
+    `(var (|values| |mv|))
+    `(throw (object
+             |type| "catch"
+             |id| ,(ls-compile id)
+             |values| ,(ls-compile value t)
+             |message| "Throw uncatched."))))
 
 (defun go-tag-p (x)
   (or (integerp x) (symbolp x)))
