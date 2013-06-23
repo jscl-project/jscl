@@ -521,10 +521,11 @@
 
 (defun dump-array (array)
   (let ((elements (vector-to-list array)))
-    `(code "[" ,(join (mapcar #'literal elements) ", ") "]")))
+    (list-to-vector (mapcar (lambda (x) `(code ,(literal x)))
+                            elements))))
 
 (defun dump-string (string)
-  `(code "make_lisp_string(" ,(js-escape-string string) ")"))
+  `(call |make_lisp_string| ,string))
 
 (defun literal (sexp &optional recursive)
   (cond
