@@ -559,11 +559,13 @@
   (literal sexp))
 
 (define-compilation %while (pred &rest body)
-  (js!selfcall
-    "while(" (ls-compile pred) " !== " (ls-compile nil) "){" *newline*
-    `(code ,(ls-compile-block body))
-    "}" *newline*
-    "return " (ls-compile nil) ";" *newline*))
+  (js!selfcall*
+    `(while (!== ,(ls-compile pred) ,(ls-compile nil))
+       0                                ; TODO: Force
+                                        ; braces. Unnecesary when code
+                                        ; is gone
+       (code ,(ls-compile-block body)))
+   `(return ,(ls-compile nil))))
 
 (define-compilation function (x)
   (cond
