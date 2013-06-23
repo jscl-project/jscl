@@ -910,14 +910,13 @@
       "})" )))
 
 (define-compilation unwind-protect (form &rest clean-up)
-  (js!selfcall
-    "var ret = " (ls-compile nil) ";"
-    "try {"
-    `(code "ret = " ,(ls-compile form) ";" )
-    "} finally {"
-    `(code ,(ls-compile-block clean-up))
-    "}"
-    "return ret;" ))
+  (js!selfcall*
+    `(var (|ret| ,(ls-compile nil)))
+    `(try
+       (= |ret| ,(ls-compile form)))
+    `(finally
+      ,(ls-compile-block clean-up))
+    `(return |ret|)))
 
 (define-compilation multiple-value-call (func-form &rest forms)
   (js!selfcall
