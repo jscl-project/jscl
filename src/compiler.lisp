@@ -1335,11 +1335,11 @@
   (js!bool `(=== (typeof ,x) "object")))
 
 (define-builtin lisp-to-js (x) `(call lisp_to_js ,x))
-(define-builtin js-to-lisp (x) `(code js_to_lisp ,x))
+(define-builtin js-to-lisp (x) `(call js_to_lisp ,x))
 
 
 (define-builtin in (key object)
-  (js!bool `(code "(xstring(" ,key ") in (" ,object "))")))
+  (js!bool `(in (call xstring ,key) ,object)))
 
 (define-builtin map-for-in (function object)
   (js!selfcall
