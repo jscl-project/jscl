@@ -501,12 +501,12 @@
   #-jscl
   (let ((package (symbol-package symbol)))
     (if (eq package (find-package "KEYWORD"))
-        `(code "(new Symbol(" ,(dump-string (symbol-name symbol)) ", " ,(dump-string (package-name package)) "))")
-        `(code "(new Symbol(" ,(dump-string (symbol-name symbol)) "))")))
+        `(new (call |Symbol| ,(dump-string (symbol-name symbol)) ,(dump-string (package-name package))))
+        `(new (call |Symbol| ,(dump-string (symbol-name symbol))))))
   #+jscl
   (let ((package (symbol-package symbol)))
     (if (null package)
-        `(code "(new Symbol(" ,(dump-string (symbol-name symbol)) "))")
+        `(new (call |Symbol| ,(dump-string (symbol-name symbol))))
         (ls-compile `(intern ,(symbol-name symbol) ,(package-name package))))))
 
 (defun dump-cons (cons)
