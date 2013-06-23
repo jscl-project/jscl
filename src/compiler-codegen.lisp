@@ -78,7 +78,7 @@
 
 (defun valid-js-identifier (string-designator)
   (let ((string (typecase string-designator
-                  (symbol (string-downcase (symbol-name string-designator)))
+                  (symbol (symbol-name string-designator))
                   (string string-designator)
                   (t
                    (return-from valid-js-identifier (values nil nil))))))

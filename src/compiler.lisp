@@ -60,6 +60,10 @@
 (defmacro js!selfcall (&body body)
   ``(call (function nil (code ,,@body))))
 
+(defmacro js!selfcall* (&body body)
+  ``(call (function nil ,,@body)))
+
+
 ;;; Like CODE, but prefix each line with four spaces. Two versions
 ;;; of this function are available, because the Ecmalisp version is
 ;;; very slow and bootstraping was annoying.
@@ -1326,7 +1330,7 @@
       "return tmp === undefined? " (ls-compile nil) " : tmp;" )))
 
 (define-raw-builtin oget (object key &rest keys)
-  `(call js_to_lisp ,(ls-compile `(oget* ,object ,key ,@keys))))
+  `(call |js_to_lisp| ,(ls-compile `(oget* ,object ,key ,@keys))))
 
 (define-raw-builtin oset (value object key &rest keys)
   (ls-compile `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
@@ -1334,12 +1338,12 @@
 (define-builtin objectp (x)
   (js!bool `(=== (typeof ,x) "object")))
 
-(define-builtin lisp-to-js (x) `(call lisp_to_js ,x))
-(define-builtin js-to-lisp (x) `(call js_to_lisp ,x))
+(define-builtin lisp-to-js (x) `(call |lisp_to_js| ,x))
+(define-builtin js-to-lisp (x) `(call |js_to_lisp| ,x))
 
 
 (define-builtin in (key object)
-  (js!bool `(in (call xstring ,key) ,object)))
+  (js!bool `(in (call |xstring| ,key) ,object)))
 
 (define-builtin map-for-in (function object)
   (js!selfcall
