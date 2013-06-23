@@ -1138,18 +1138,20 @@
   (js!bool `(!== (get ,x "fvalue") undefined)))
 
 (define-builtin symbol-value (x)
-  (js!selfcall
-    "var symbol = " x ";"
-    "var value = symbol.value;"
-    "if (value === undefined) throw \"Variable `\" + xstring(symbol.name) + \"' is unbound.\";"
-    "return value;" ))
+  (js!selfcall*
+    `(var (symbol ,x)
+          (value (get symbol "value")))
+    `(if (=== value undefined)
+         (throw (+ "Variable `" (call |xstring| (get symbol "name")) "' is unbound.")))
+    `(return value)))
 
 (define-builtin symbol-function (x)
-  (js!selfcall
-    "var symbol = " x ";"
-    "var func = symbol.fvalue;"
-    "if (func === undefined) throw \"Function `\" + xstring(symbol.name) + \"' is undefined.\";"
-    "return func;" ))
+  (js!selfcall*
+    `(var (symbol ,x)
+          (func (get symbol "fvalue")))
+    `(if (=== func undefined)
+         (throw (+ "Function `" (call |xstring| (get symbol "name")) "' is undefined.")))
+    `(return func)))
 
 (define-builtin symbol-plist (x)
   `(code "((" ,x ").plist || " ,(ls-compile nil) ")"))
