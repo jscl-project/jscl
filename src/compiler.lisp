@@ -644,12 +644,9 @@
 (define-compilation progn (&rest body)
   (if (null (cdr body))
       (ls-compile (car body) *multiple-value-p*)
-      `(code "("
-             ,@(interleave
-                (append (mapcar #'ls-compile (butlast body))
-                        (list (ls-compile (car (last body)) t)))
-                ",")
-             ")")))
+      `(progn
+         ,@(append (mapcar #'ls-compile (butlast body))
+                   (list (ls-compile (car (last body)) t))))))
 
 (define-compilation macrolet (definitions &rest body)
   (let ((*environment* (copy-lexenv *environment*)))
