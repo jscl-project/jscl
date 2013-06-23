@@ -1245,42 +1245,43 @@
 
 (define-builtin storage-vector-p (x)
   (js!bool
-   (js!selfcall
-     "var x = " x ";"
-     "return typeof x === 'object' && 'length' in x;")))
+   (js!selfcall*
+     `(var (x ,x))
+     `(return (and (=== (typeof x) "object") (in "length" x))))))
 
 (define-builtin make-storage-vector (n)
-  (js!selfcall
-    "var r = [];"
-    "r.length = " n ";"
-    "return r;" ))
+  (js!selfcall*
+    `(var (r #()))
+    `(= (get r "length") ,n)
+    `(return r)))
 
 (define-builtin storage-vector-size (x)
-  `(code ,x ".length"))
+  `(get ,x "length"))
 
 (define-builtin resize-storage-vector (vector new-size)
-  `(code "(" ,vector ".length = " ,new-size ")"))
+  `(= (get ,vector "length") ,new-size))
 
 (define-builtin storage-vector-ref (vector n)
-  (js!selfcall
-    "var x = " "(" vector ")[" n "];"
-    "if (x === undefined) throw 'Out of range';"
-    "return x;" ))
+  (js!selfcall*
+    `(var (x (get ,vector ,n)))
+    `(if (=== x undefined) (throw "Out of range."))
+    `(return x)))
 
 (define-builtin storage-vector-set (vector n value)
-  (js!selfcall
-    "var x = " vector ";"
-    "var i = " n ";"
-    "if (i < 0 || i >= x.length) throw 'Out of range';"
-    "return x[i] = " value ";" ))
+  (js!selfcall*
+    `(var (x ,vector))
+    `(var (i ,n))
+    `(if (or (< i 0) (>= i (get x "length")))
+         (throw "Out of range."))
+    `(return (= (property x i) ,value))))
 
 (define-builtin concatenate-storage-vector (sv1 sv2)
-  (js!selfcall
-    "var sv1 = " sv1 ";"
-    "var r = sv1.concat(" sv2 ");"
-    "r.type = sv1.type;"
-    "r.stringp = sv1.stringp;"
-    "return r;" ))
+  (js!selfcall*
+    `(var (sv1 ,sv1))
+    `(var (r (call (get sv1 "concat") ,sv2)))
+    `(= (get r "type") (get sv1 "type"))
+    `(= (get r "stringp") (get sv1 "stringp"))
+    `(return r)))
 
 (define-builtin get-internal-real-time ()
   "(new Date()).getTime()")

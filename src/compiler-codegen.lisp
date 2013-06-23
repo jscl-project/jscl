@@ -161,7 +161,7 @@
   (unless (or (symbolp x)
               (nth-value 1 (valid-js-identifier x))
               (and (consp x)
-                   (member (car x) '(get =))))
+                   (member (car x) '(get = property))))
     (error "Bad Javascript lvalue ~S" x)))
 
 ;;; Process the Javascript AST to reduce some syntax sugar.
@@ -230,6 +230,11 @@
                (js-expr operand)))))
        (js-format ")"))
       ;; Accessors
+      (property
+       (js-expr (car args))
+       (js-format "[")
+       (js-expr (cadr args))
+       (js-format "]"))
       (get
        (multiple-value-bind (identifier identifierp)
            (valid-js-identifier (car args))
