@@ -1132,10 +1132,10 @@
   `(= (get ,symbol "fvalue") ,value))
 
 (define-builtin boundp (x)
-  (js!bool `(code "(" ,x ".value !== undefined)")))
+  (js!bool `(!== (get ,x "value") undefined)))
 
 (define-builtin fboundp (x)
-  (js!bool `(code "(" ,x ".fvalue !== undefined)")))
+  (js!bool `(!== (get ,x "fvalue") undefined)))
 
 (define-builtin symbol-value (x)
   (js!selfcall
