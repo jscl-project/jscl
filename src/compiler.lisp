@@ -1326,16 +1326,16 @@
       "return tmp === undefined? " (ls-compile nil) " : tmp;" )))
 
 (define-raw-builtin oget (object key &rest keys)
-  `(code "js_to_lisp(" ,(ls-compile `(oget* ,object ,key ,@keys)) ")"))
+  `(call js_to_lisp ,(ls-compile `(oget* ,object ,key ,@keys))))
 
 (define-raw-builtin oset (value object key &rest keys)
   (ls-compile `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
 
 (define-builtin objectp (x)
-  (js!bool `(code "(typeof (" ,x ") === 'object')")))
+  (js!bool `(=== (typeof ,x) "object")))
 
-(define-builtin lisp-to-js (x) `(code "lisp_to_js(" ,x ")"))
-(define-builtin js-to-lisp (x) `(code "js_to_lisp(" ,x ")"))
+(define-builtin lisp-to-js (x) `(call lisp_to_js ,x))
+(define-builtin js-to-lisp (x) `(code js_to_lisp ,x))
 
 
 (define-builtin in (key object)
