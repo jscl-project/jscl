@@ -445,7 +445,9 @@
             (eq (binding-type b) 'variable)
             (not (member 'special (binding-declarations b)))
             (not (member 'constant (binding-declarations b))))
-       `(code ,(binding-value b) " = " ,(ls-compile val)))
+       ;; TODO: Unnecesary make-symbol when codegen migration is
+       ;; finished.
+       `(= ,(make-symbol (binding-value b)) ,(ls-compile val)))
       ((and b (eq (binding-type b) 'macro))
        (ls-compile `(setf ,var ,val)))
       (t
@@ -463,11 +465,9 @@
 	((null (cdr pairs))
 	 (error "Odd pairs in SETQ"))
 	(t
-         (push `(code ,(setq-pair (car pairs) (cadr pairs))
-                      ,(if (null (cddr pairs)) "" ", "))
-               result)
+         (push `,(setq-pair (car pairs) (cadr pairs)) result)
 	 (setq pairs (cddr pairs)))))
-    `(code "(" ,@(reverse result) ")")))
+    `(progn ,@(reverse result))))
 
 
 ;;; Compilation of literals an object dumping
