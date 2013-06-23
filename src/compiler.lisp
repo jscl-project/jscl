@@ -1160,7 +1160,7 @@
   `(call |make_lisp_string| (call (get ,x "toString"))))
 
 (define-builtin eq (x y)
-  (js!bool `(code "(" ,x " === " ,y ")")))
+  (js!bool `(=== ,x ,y)))
 
 (define-builtin char-code (x)
   (type-check (("x" "string" x))
@@ -1177,10 +1177,10 @@
      "return (typeof(" x ") == \"string\") && (x.length == 1 || x.length == 2);")))
 
 (define-builtin char-upcase (x)
-  `(code "safe_char_upcase(" ,x ")"))
+  `(call |safe_char_upcase| ,x))
 
 (define-builtin char-downcase (x)
-  `(code "safe_char_downcase(" ,x ")"))
+  `(call |safe_char_downcase| ,x))
 
 (define-builtin stringp (x)
   (js!bool
