@@ -1506,7 +1506,10 @@
 (defun convert-toplevel (sexp &optional multiple-value-p)
   (let ((*toplevel-compilations* nil))
     (cond
-      ((and (consp sexp) (eq (car sexp) 'progn))
+      ;; Non-empty toplevel progn
+      ((and (consp sexp)
+            (eq (car sexp) 'progn)
+            (cdr sexp))
        `(progn
           ,@(mapcar (lambda (s) (convert-toplevel s t))
                     (cdr sexp))))
