@@ -1117,13 +1117,13 @@
     `(code "(x.cdr = " ,new ", x)")))
 
 (define-builtin symbolp (x)
-  (js!bool `(code "(" ,x " instanceof Symbol)")))
+  (js!bool `(instanceof ,x |Symbol|)))
 
 (define-builtin make-symbol (name)
-  `(code "(new Symbol(" ,name "))"))
+  `(new (call |Symbol| ,name)))
 
 (define-builtin symbol-name (x)
-  `(code "(" ,x ").name"))
+  `(get ,x "name"))
 
 (define-builtin set (symbol value)
   `(code "(" ,symbol ").value = " ,value))
