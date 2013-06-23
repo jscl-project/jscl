@@ -1126,10 +1126,10 @@
   `(get ,x "name"))
 
 (define-builtin set (symbol value)
-  `(code "(" ,symbol ").value = " ,value))
+  `(= (get ,symbol "value") ,value))
 
 (define-builtin fset (symbol value)
-  `(code "(" ,symbol ").fvalue = " ,value))
+  `(= (get ,symbol "fvalue") ,value))
 
 (define-builtin boundp (x)
   (js!bool `(code "(" ,x ".value !== undefined)")))
