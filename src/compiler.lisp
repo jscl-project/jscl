@@ -563,7 +563,7 @@
        0                                ; TODO: Force
                                         ; braces. Unnecesary when code
                                         ; is gone
-       (code ,(ls-compile-block body)))
+       ,(ls-compile-block body))
    `(return ,(ls-compile nil))))
 
 (define-compilation function (x)
