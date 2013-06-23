@@ -998,9 +998,8 @@
         (prelude '()))
     (dolist (x args)
       (cond
-        ((floatp x) (push (float-to-string x) fargs))
-        ((numberp x) (push (integer-to-string x) fargs))
-        (t (let ((v (code "x" (incf counter))))
+        ((or (floatp x) (numberp x)) (push x fargs))
+        (t (let ((v (make-symbol (code "x" (incf counter)))))
              (push v fargs)
              (push `(code "var " ,v " = " ,(ls-compile x) ";"
                           "if (typeof " ,v " !== 'number') throw 'Not a number!';")
@@ -1023,29 +1022,26 @@
 
 (define-raw-builtin + (&rest numbers)
   (if (null numbers)
-      "0"
+      0
       (variable-arity numbers
-        `(code ,@(interleave numbers "+")))))
+        `(+ ,@numbers))))
 
 (define-raw-builtin - (x &rest others)
   (let ((args (cons x others)))
-    (variable-arity args
-      (if (null others)
-	  `(code "-" ,(car args))
-	  `(code ,@(interleave args "-"))))))
+    (variable-arity args `(- ,@args))))
 
 (define-raw-builtin * (&rest numbers)
   (if (null numbers)
-      "1"
-      (variable-arity numbers
-	`(code ,@(interleave numbers "*")))))
+      1
+      (variable-arity numbers `(* ,@numbers))))
 
 (define-raw-builtin / (x &rest others)
   (let ((args (cons x others)))
     (variable-arity args
       (if (null others)
-          `(code "1 /" ,(car args))
-	  `(code ,@(interleave args "/"))))))
+          `(/ 1 ,(car args))
+          (reduce (lambda (x y) `(/ ,x ,y))
+                  args)))))
 
 (define-builtin mod (x y) (num-op-num x "%" y))
 
@@ -1053,29 +1049,28 @@
 (defun comparison-conjuntion (vars op)
   (cond
     ((null (cdr vars))
-     "true")
+     'true)
     ((null (cddr vars))
-     `(code ,(car vars) ,op ,(cadr vars)))
+     `(,op ,(car vars) ,(cadr vars)))
     (t
-     `(code ,(car vars) ,op ,(cadr vars)
-            " && "
-            ,(comparison-conjuntion (cdr vars) op)))))
+     `(and (,op ,(car vars) ,(cadr vars))
+           ,(comparison-conjuntion (cdr vars) op)))))
 
 (defmacro define-builtin-comparison (op sym)
   `(define-raw-builtin ,op (x &rest args)
      (let ((args (cons x args)))
        (variable-arity args
-	 (js!bool (comparison-conjuntion args ,sym))))))
+	 (js!bool (comparison-conjuntion args ',sym))))))
 
-(define-builtin-comparison > ">")
-(define-builtin-comparison < "<")
-(define-builtin-comparison >= ">=")
-(define-builtin-comparison <= "<=")
-(define-builtin-comparison = "==")
-(define-builtin-comparison /= "!=")
+(define-builtin-comparison > >)
+(define-builtin-comparison < <)
+(define-builtin-comparison >= >=)
+(define-builtin-comparison <= <=)
+(define-builtin-comparison = ==)
+(define-builtin-comparison /= !=)
 
 (define-builtin numberp (x)
-  (js!bool `(code "(typeof (" ,x ") == \"number\")")))
+  (js!bool `(== (typeof ,x) "number")))
 
 (define-builtin floor (x)
   (type-check (("x" "number" x))
