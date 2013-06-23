@@ -1154,7 +1154,7 @@
     `(return func)))
 
 (define-builtin symbol-plist (x)
-  `(code "((" ,x ").plist || " ,(ls-compile nil) ")"))
+  `(or (get ,x "plist") ,(ls-compile nil)))
 
 (define-builtin lambda-code (x)
   `(code "make_lisp_string((" ,x ").toString())"))
