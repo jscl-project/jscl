@@ -190,10 +190,9 @@
          *compilations*))
 
 (define-compilation if (condition true &optional false)
-  `(code "(" ,(ls-compile condition) " !== " ,(ls-compile nil)
-         " ? " ,(ls-compile true *multiple-value-p*)
-         " : " ,(ls-compile false *multiple-value-p*)
-         ")"))
+  `(if (!== ,(ls-compile condition) ,(ls-compile nil))
+       ,(ls-compile true *multiple-value-p*)
+       ,(ls-compile false *multiple-value-p*)))
 
 (defvar *ll-keywords* '(&optional &rest &key))
 
