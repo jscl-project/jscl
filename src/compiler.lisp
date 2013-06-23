@@ -246,16 +246,14 @@
           (ll-optional-arguments-canonical lambda-list))))
     (remove nil (mapcar #'third args))))
 
-(defun lambda-name/docstring-wrapper (name docstring &rest code)
+(defun lambda-name/docstring-wrapper (name docstring code)
   (if (or name docstring)
-      (js!selfcall
-        "var func = " `(code ,@code) ";"
-        (when name
-          `(code "func.fname = " ,(js-escape-string name) ";"))
-        (when docstring
-          `(code "func.docstring = " ,(js-escape-string docstring) ";"))
-        "return func;")
-      `(code ,@code)))
+      (js!selfcall*
+        `(var (func ,code))
+        (when name      `(= (get func |fname|) ,name))
+        (when docstring `(= (get func |docstring|) ,docstring))
+        `(return func))
+      `(code ,code)))
 
 (defun lambda-check-argument-count
     (n-required-arguments n-optional-arguments rest-p)
