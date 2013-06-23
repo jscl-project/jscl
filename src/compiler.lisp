@@ -1086,7 +1086,7 @@
     "make_lisp_string(x.toString())"))
 
 (define-builtin cons (x y)
-  `(code "({car: " ,x ", cdr: " ,y "})"))
+  `(object "car" ,x "cdr" ,y))
 
 (define-builtin consp (x)
   (js!bool
