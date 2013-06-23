@@ -108,10 +108,11 @@
      (js-format "~a" (js-escape-string form)))
     ((symbolp form)
      (case form
-       (true  (js-format "true"))
-       (false (js-format "false"))
-       (null  (js-format "null"))
-       (this  (js-format "this"))
+       (true      (js-format "true"))
+       (false     (js-format "false"))
+       (null      (js-format "null"))
+       (this      (js-format "this"))
+       (undefined (js-format "undefined"))
        (otherwise
         (js-identifier form))))
     (t
