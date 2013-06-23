@@ -1157,7 +1157,7 @@
   `(or (get ,x "plist") ,(ls-compile nil)))
 
 (define-builtin lambda-code (x)
-  `(code "make_lisp_string((" ,x ").toString())"))
+  `(call |make_lisp_string| (call (get ,x "toString"))))
 
 (define-builtin eq (x y)
   (js!bool `(code "(" ,x " === " ,y ")")))
