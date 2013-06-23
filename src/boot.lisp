@@ -542,3 +542,8 @@
 
 (defun error (fmt &rest args)
   (%throw (apply #'format nil fmt args)))
+
+(defmacro nth-value (n form)
+  `(multiple-value-call (lambda (&rest values)
+                          (nth ,n values))
+     ,form))
