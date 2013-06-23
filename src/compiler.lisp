@@ -1228,16 +1228,16 @@
       `(code "globalEval(xstring(" ,string "))")))
 
 (define-builtin %throw (string)
-  (js!selfcall "throw " string ";" ))
+  (js!selfcall* `(throw ,string)))
 
 (define-builtin functionp (x)
-  (js!bool `(code "(typeof " ,x " == 'function')")))
+  (js!bool `(=== (typeof ,x) "function")))
 
 (define-builtin %write-string (x)
-  `(code "lisp.write(" ,x ")"))
+  `(call (get |lisp| "write") ,x))
 
 (define-builtin /debug (x)
-  `(code "console.log(xstring(" ,x "))"))
+  `(call (get |console| "log") (call |xstring| ,x)))
 
 
 ;;; Storage vectors. They are used to implement arrays and (in the
