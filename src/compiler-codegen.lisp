@@ -440,6 +440,20 @@
                  (js-expr condition)
                  (js-format ")")
                  (js-stmt `(progn ,@body))))
+           (try
+            (destructuring-bind (&rest body) (cdr form)
+              (js-format "try")
+              (js-stmt `(group ,@body))))
+           (catch
+               (destructuring-bind ((var) &rest body) (cdr form)
+                 (js-format "catch (")
+                 (js-identifier var)
+                 (js-format ")")
+                 (js-stmt `(group ,@body))))
+           (finally
+            (destructuring-bind (&rest body) (cdr form)
+              (js-format "finally")
+              (js-stmt `(group ,@body))))
            (throw
                (destructuring-bind (object) (cdr form)
                  (js-format "throw ")
