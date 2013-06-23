@@ -1095,18 +1095,18 @@
      "return (typeof tmp == 'object' && 'car' in tmp);" )))
 
 (define-builtin car (x)
-  (js!selfcall
-    "var tmp = " x ";"
-    "return tmp === " (ls-compile nil)
-    "? " (ls-compile nil)
-    ": tmp.car;" ))
+  (js!selfcall*
+    `(var (tmp ,x))
+    `(return (if (=== tmp ,(ls-compile nil))
+                 ,(ls-compile nil)
+                 (get tmp "car")))))
 
 (define-builtin cdr (x)
-  (js!selfcall
-    "var tmp = " x ";"
-    "return tmp === " (ls-compile nil) "? "
-    (ls-compile nil)
-    ": tmp.cdr;" ))
+  (js!selfcall*
+    `(var (tmp ,x))
+    `(return (if (=== tmp ,(ls-compile nil))
+                 ,(ls-compile nil)
+                 (get tmp "cdr")))))
 
 (define-builtin rplaca (x new)
   (type-check (("x" "object" x))
