@@ -117,7 +117,8 @@
 
 (defun gvarname (symbol)
   (declare (ignore symbol))
-  (code "v" (incf *variable-counter*)))
+  (incf *variable-counter*)
+  (concat "v" (integer-to-string *variable-counter*)))
 
 (defun translate-variable (symbol)
   (awhen (lookup-in-lexenv symbol *environment* 'variable)
@@ -253,7 +254,7 @@
         (when name      `(= (get func |fname|) ,name))
         (when docstring `(= (get func |docstring|) ,docstring))
         `(return func))
-      `(code ,code)))
+      code))
 
 (defun lambda-check-argument-count
     (n-required-arguments n-optional-arguments rest-p)
@@ -495,7 +496,8 @@
 (defvar *literal-counter* 0)
 
 (defun genlit ()
-  (code "l" (incf *literal-counter*)))
+  (incf *literal-counter*)
+  (concat "l" (integer-to-string *literal-counter*)))
 
 (defun dump-symbol (symbol)
   #-jscl
