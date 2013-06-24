@@ -1288,7 +1288,7 @@
     `(return r)))
 
 (define-builtin get-internal-real-time ()
-  `(call (get (new (call Date)) "getTime")))
+  `(call (get (new (call |Date|)) "getTime")))
 
 (define-builtin values-array (array)
   (if *multiple-value-p*
