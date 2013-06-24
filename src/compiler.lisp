@@ -1317,14 +1317,21 @@
 
 (define-raw-builtin oset* (value object key &rest keys)
   (let ((keys (cons key keys)))
-    (js!selfcall
-      "var obj = " (ls-compile object) ";"
-      `(code ,@(mapcar (lambda (key)
-                         `(code "obj = obj[xstring(" ,(ls-compile key) ")];"
-                                "if (obj === undefined) throw 'Impossible to set Javascript property.';" ))
-                       (butlast keys)))
-      "var tmp = obj[xstring(" (ls-compile (car (last keys))) ")] = " (ls-compile value) ";"
-      "return tmp === undefined? " (ls-compile nil) " : tmp;" )))
+    (js!selfcall*
+      `(progn
+         (var (obj ,(ls-compile object)))
+         ,@(mapcar (lambda (key)
+                     `(progn
+                        (= obj (get obj (call |xstring| ,(ls-compile key))))
+                        (if (=== object undefined)
+                            (throw "Impossible to set object property."))))
+                   (butlast keys))
+         (var (tmp
+               (= (get obj (call |xstring| ,(ls-compile (car (last keys)))))
+                  ,(ls-compile value))))
+         (return (if (=== tmp undefined)
+                     ,(ls-compile nil)
+                     tmp))))))
 
 (define-raw-builtin oget (object key &rest keys)
   `(call |js_to_lisp| ,(ls-compile `(oget* ,object ,key ,@keys))))
