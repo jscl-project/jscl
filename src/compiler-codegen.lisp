@@ -456,6 +456,14 @@
               (js-expr step)
               (js-format ")")
               (js-stmt `(progn ,@body))))
+           (for-in
+            (destructuring-bind ((x object) &body body) (cdr form)
+              (js-format "for (")
+              (js-identifier x)
+              (js-format " in ")
+              (js-expr object)
+              (js-format ")")
+              (js-stmt `(progn ,@body))))
            (try
             (destructuring-bind (&rest body) (cdr form)
               (js-format "try")
