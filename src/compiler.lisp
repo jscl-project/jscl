@@ -1184,9 +1184,11 @@
 
 (define-builtin stringp (x)
   (js!bool
-   (js!selfcall
-     "var x = " x ";"
-     "return typeof(x) == 'object' && 'length' in x && x.stringp == 1;")))
+   (js!selfcall*
+     `(var (x ,x))
+     `(return (and (and (===(typeof x) "object")
+                        (in "length" x))
+                   (== (get x "stringp") 1))))))
 
 (define-raw-builtin funcall (func &rest args)
   (js!selfcall
