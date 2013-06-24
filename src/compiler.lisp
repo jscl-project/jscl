@@ -1224,10 +1224,10 @@
 
 (define-builtin js-eval (string)
   (if *multiple-value-p*
-      (js!selfcall
-        "var v = globalEval(xstring(" string "));"
-        "return values.apply(this, forcemv(v));" )
-      `(code "globalEval(xstring(" ,string "))")))
+      (js!selfcall*
+        `(var (v (call |globalEval| (call |xstring| ,string))))
+        `(return (call (get |values| "apply") this (call |forcemv| v))))
+      `(call |globalEval| (call |xstring| ,string))))
 
 (define-builtin %throw (string)
   (js!selfcall* `(throw ,string)))
