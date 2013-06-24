@@ -222,7 +222,7 @@
        (js-expr (car args))
        (js-format "(")
        (when (cdr args)
-         (with-operator (13 'left)
+         (with-operator (12 'left)
            (js-expr (cadr args))
            (dolist (operand (cddr args))
              (let ((*js-output* t))
