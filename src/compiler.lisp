@@ -1301,7 +1301,8 @@
 
 ;;; Javascript FFI
 
-(define-builtin new () "{}")
+(define-builtin new ()
+  '(object))
 
 (define-raw-builtin oget* (object key &rest keys)
   (js!selfcall
