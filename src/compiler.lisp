@@ -1350,14 +1350,13 @@
   (js!bool `(in (call |xstring| ,key) ,object)))
 
 (define-builtin map-for-in (function object)
-  (js!selfcall
-   "var f = " function ";"
-   "var g = (typeof f === 'function' ? f : f.fvalue);"
-   "var o = " object ";"
-   "for (var key in o){"
-   `(code "g(" ,(if *multiple-value-p* "values" "pv") ", 1, o[key]);" )
-   "}"
-   " return " (ls-compile nil) ";" ))
+  (js!selfcall*
+    `(var (f ,function)
+          (g (if (=== (typeof f) "function") f (get f "fvalue")))
+          (o ,object))
+    `(for-in (key o)
+       (call g ,(if *multiple-value-p* '|values| '|pv|) 1 (get o "key")))
+    `(return ,(ls-compile nil))))
 
 (define-compilation %js-vref (var)
   `(code "js_to_lisp(" ,var ")"))
