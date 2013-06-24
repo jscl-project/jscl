@@ -1305,14 +1305,15 @@
   '(object))
 
 (define-raw-builtin oget* (object key &rest keys)
-  (js!selfcall
-    "var tmp = (" (ls-compile object) ")[xstring(" (ls-compile key) ")];"
-    `(code
-      ,@(mapcar (lambda (key)
-                  `(code "if (tmp === undefined) return " ,(ls-compile nil) ";"
-                         "tmp = tmp[xstring(" ,(ls-compile key) ")];" ))
-                keys))
-    "return tmp === undefined? " (ls-compile nil) " : tmp;" ))
+  (js!selfcall*
+    `(progn
+       (var (tmp (get ,(ls-compile object) (call |xstring| ,(ls-compile key)))))
+       ,@(mapcar (lambda (key)
+                   `(progn
+                      (if (=== tmp undefined) (return ,(ls-compile nil)))
+                      (= tmp (get tmp (call |xstring| ,(ls-compile key))))))
+                 keys))
+    `(return (if (=== tmp undefined) ,(ls-compile nil) tmp))))
 
 (define-raw-builtin oset* (value object key &rest keys)
   (let ((keys (cons key keys)))
