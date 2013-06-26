@@ -1361,10 +1361,10 @@
     `(return ,(ls-compile nil))))
 
 (define-compilation %js-vref (var)
-  `(code "js_to_lisp(" ,var ")"))
+  `(call |js_to_lisp| ,(make-symbol var)))
 
 (define-compilation %js-vset (var val)
-  `(code "(" ,var " = lisp_to_js(" ,(ls-compile val) "))"))
+  `(= ,(make-symbol var) (call |lisp_to_js| ,(ls-compile val))))
 
 (define-setf-expander %js-vref (var)
   (let ((new-value (gensym)))
