@@ -1174,9 +1174,11 @@
 
 (define-builtin characterp (x)
   (js!bool
-   (js!selfcall
-     "var x = " x ";"
-     "return (typeof(" x ") == \"string\") && (x.length == 1 || x.length == 2);")))
+   (js!selfcall*
+     `(var (x ,x))
+     `(return (and (== (typeof x) "string")
+                   (or (== (get x "length") 1)
+                       (== (get x "length") 2)))))))
 
 (define-builtin char-upcase (x)
   `(call |safe_char_upcase| ,x))
