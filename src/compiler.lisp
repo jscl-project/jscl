@@ -1195,15 +1195,14 @@
                    (== (get x "stringp") 1))))))
 
 (define-raw-builtin funcall (func &rest args)
-  (js!selfcall
-    "var f = " (ls-compile func) ";"
-    "return (typeof f === 'function'? f: f.fvalue)("
-    `(code
-     ,@(interleave (list* (if *multiple-value-p* "values" "pv")
-                          (integer-to-string (length args))
-                          (mapcar #'ls-compile args))
-                   ", "))
-    ")"))
+  (js!selfcall*
+    `(var (f ,(ls-compile func)))
+    `(return (call (if (=== (typeof f) "function")
+                       f
+                       (get f "fvalue"))
+                   ,@(list* (if *multiple-value-p* '|values| '|pv|)
+                            (length args)
+                            (mapcar #'ls-compile args))))))
 
 (define-raw-builtin apply (func &rest args)
   (if (null args)
