@@ -219,7 +219,12 @@
        (js-format "~a" (apply #'code args)))
       ;; Function call
       (call
-       (js-expr (car args))
+       (if (symbolp (car args))
+           (js-expr (car args))
+           (progn
+             (js-format "(")
+             (js-expr (car args))
+             (js-format ")")))
        (js-format "(")
        (when (cdr args)
          (with-operator (12 'left)
