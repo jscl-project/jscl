@@ -28,6 +28,7 @@
         (when (or (terminalp ch)
                   (char= ch #\:)
                   (char= ch #\\)
+                  (not (char= ch (char-upcase ch)))
                   (char= ch #\|))
           (return-from escape-symbol-name-p t))))
     dots-only))
