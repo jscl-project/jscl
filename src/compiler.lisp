@@ -695,20 +695,16 @@
          (cvalues (mapcar #'ls-compile (mapcar #'second bindings)))
          (*environment* (extend-local-env (remove-if #'special-variable-p variables)))
          (dynamic-bindings))
-    `(code "(function("
-           ,@(interleave
-              (mapcar (lambda (x)
-                        (if (special-variable-p x)
-                            (let ((v (gvarname x)))
-                              (push (cons x v) dynamic-bindings)
-                              v)
-                            (translate-variable x)))
-                      variables)
-              ",")
-           "){"
-           ,(let ((body (ls-compile-block body t t)))
-             `(code ,(let-binding-wrapper dynamic-bindings body)))
-           "})(" ,@(interleave cvalues ",") ")")))
+    `(call (function ,(mapcar (lambda (x)
+                                (if (special-variable-p x)
+                                    (let ((v (gvarname x)))
+                                      (push (cons x v) dynamic-bindings)
+                                      (make-symbol v))
+                                    (make-symbol (translate-variable x))))
+                              variables)
+                     ,(let ((body (ls-compile-block body t t)))
+                           `(code ,(let-binding-wrapper dynamic-bindings body))))
+           ,@cvalues)))
 
 
 ;;; Return the code to initialize BINDING, and push it extending the
