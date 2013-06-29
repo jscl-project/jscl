@@ -615,13 +615,13 @@
           (extend-lexenv (mapcar #'make-function-binding fnames)
                          *environment*
                          'function)))
-    (js!selfcall
-      `(code ,@(mapcar (lambda (func)
-                         `(code "var " ,(translate-function (car func))
-                                " = " ,(compile-lambda (cadr func)
-                                                       `((block ,(car func) ,@(cddr func))))
-                                ";" ))
-                       definitions))
+    (js!selfcall*
+      `(progn
+         ,@(mapcar (lambda (func)
+                     `(var (,(make-symbol (translate-function (car func)))
+                             ,(compile-lambda (cadr func)
+                                              `((block ,(car func) ,@(cddr func)))))))
+                   definitions))
       (ls-compile-block body t))))
 
 
