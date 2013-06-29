@@ -24,6 +24,8 @@
 
 (/debug "loading compiler-codegen.lisp!")
 
+(defconstant no-comma 12)
+
 (defvar *js-output* t)
 
 ;;; Two seperate functions are needed for escaping strings:
@@ -124,10 +126,10 @@
     (dotimes (i (1- size))
       (let ((elt (aref vector i)))
         (unless (eq elt 'null)
-          (js-expr elt))
+          (js-expr elt no-comma))
         (js-format ",")))
     (when (plusp size)
-      (js-expr (aref vector (1- size))))
+      (js-expr (aref vector (1- size)) no-comma))
     (js-format "]")))
 
 (defun js-object-initializer (plist)
@@ -140,9 +142,9 @@
         (declare (ignore identifier))
         (if identifier-p
             (js-identifier key)
-            (js-expr (string key))))
+            (js-expr (string key) no-comma)))
       (js-format ": ")
-      (js-expr value)
+      (js-expr value no-comma)
       (unless (null (cddr tail))
         (js-format ","))))
   (js-format "}"))
@@ -181,64 +183,18 @@
         (t form))
       form))
 
-;; Initialized to any value larger than any operator precedence
-(defvar *js-operator-precedence* 1000)
-(defvar *js-operator-associativity* 'left)
-(defvar *js-operand-order* 'left)
-
-;; Format an expression optionally wrapped with parenthesis if the
-;; precedence rules require it.
-(defmacro with-operator ((precedence associativity) &body body)
-  (let ((g!parens (gensym))
-        (g!precedence (gensym)))
-    `(let* ((,g!precedence ,precedence)
-            (,g!parens
-             (cond
-               ((> ,g!precedence *js-operator-precedence*))
-               ((< ,g!precedence *js-operator-precedence*) nil)
-               ;; Same precedence. Let us consider associativity.
-               (t
-                (not (eq *js-operand-order* *js-operator-associativity*)))))
-            (*js-operator-precedence* ,g!precedence)
-            (*js-operator-associativity* ,associativity)
-            (*js-operand-order* 'left))
-       (when ,g!parens (js-format "("))
-       (progn ,@body)
-       (when ,g!parens (js-format ")")))))
-
-(defun js-operator (string)
-  (js-format "~a" string)
-  (setq *js-operand-order* 'right))
-
-(defun js-operator-expression (op args)
+(defun js-operator-expression (op args precedence associativity operand-order)
   (let ((op1 (car args))
         (op2 (cadr args)))
     (case op
       ;; Transactional compatible operator
       (code
        (js-format "~a" (apply #'code args)))
-      ;; Function call
-      (call
-       (if (symbolp (car args))
-           (js-expr (car args))
-           (progn
-             (js-format "(")
-             (js-expr (car args))
-             (js-format ")")))
-       (js-format "(")
-       (let ((*js-operator-precedence* 12))
-         (when (cdr args)
-           (js-expr (cadr args))
-           (dolist (operand (cddr args))
-             (let ((*js-output* t))
-               (js-format ",")
-               (js-expr operand)))))
-       (js-format ")"))
       ;; Accessors
       (property
        (js-expr (car args))
        (js-format "[")
-       (js-expr (cadr args))
+       (js-expr (cadr args) no-comma)
        (js-format "]"))
       (get
        (multiple-value-bind (identifier identifierp)
@@ -254,7 +210,17 @@
               (js-expr (car args))
               (js-format "[")
               (js-expr (cadr args))
-              (js-format "]"))))))
+              (js-format "]"))))))      
+      ;; Function call
+      (call
+       (js-expr (car args) 1)
+       (js-format "(")
+       (when (cdr args)
+         (js-expr (cadr args) no-comma)
+         (dolist (operand (cddr args))
+           (js-format ",")
+           (js-expr operand no-comma)))
+       (js-format ")"))
       ;; Object syntax
       (object
        (js-object-initializer args))
@@ -264,72 +230,81 @@
        (apply #'js-function args)
        (js-format ")"))
       (t
-       (flet ((%unary-op (operator string precedence associativity post lvalue)
-                (when (eq op operator)
-                  (with-operator (precedence associativity)
+       (labels ((low-precedence-p (op-precedence)
+                  (cond
+                    ((> op-precedence precedence))
+                    ((< op-precedence precedence) nil)
+                    (t (not (eq operand-order associativity)))))
+                
+                (%unary-op (operator string operator-precedence operator-associativity post lvalue)
+                  (when (eq op operator)
                     (when lvalue (check-lvalue op1))
+                    (when (low-precedence-p operator-precedence) (js-format "("))
                     (cond
                       (post
-                       (js-expr op1)
-                       (js-operator string))
+                       (js-expr op1 operator-precedence operator-associativity 'left)
+                       (js-format "~a" string))
                       (t
-                       (js-operator string)
-                       (js-expr op1))))
-                  (return-from js-operator-expression)))
-              (%binary-op (operator string precedence associativity lvalue)
-                (when (eq op operator)
-                  (when lvalue (check-lvalue op1))
-                  (with-operator (precedence associativity)
-                    (js-expr op1)
-                    (js-operator string)
-                    (js-expr op2))
-                  (return-from js-operator-expression))))
+                       (js-format "~a" string)
+                       (js-expr op1 operator-precedence operator-associativity 'right)))
+                    (when (low-precedence-p operator-precedence) (js-format ")"))
+                    (return-from js-operator-expression)))
+                
+                (%binary-op (operator string operator-precedence operator-associativity lvalue)
+                  (when (eq op operator)
+                    (when lvalue (check-lvalue op1))
+                    (when (low-precedence-p operator-precedence) (js-format "("))
+                    (js-expr op1 operator-precedence operator-associativity 'left)
+                    (js-format "~a" string)
+                    (js-expr op2 operator-precedence operator-associativity 'right)
+                    (when (low-precedence-p operator-precedence) (js-format ")"))
+                    (return-from js-operator-expression))))
 
          (macrolet ((unary-op (operator string precedence associativity &key post lvalue)
                       `(%unary-op ',operator ',string ',precedence ',associativity ',post ',lvalue))
                     (binary-op (operator string precedence associativity &key lvalue)
                       `(%binary-op ',operator ',string ',precedence ',associativity ',lvalue)))
 
-           (unary-op pre++       "++"            1    right :lvalue t)
-           (unary-op pre--       "--"            1    right :lvalue t)
-           (unary-op post++      "++"            1    right :lvalue t :post t)
-           (unary-op post--      "--"            1    right :lvalue t :post t)
-           (unary-op not         "!"             1    right)
-           (unary-op bit-not     "~"             1    right)
+           (unary-op pre++       "++"            2    right :lvalue t)
+           (unary-op pre--       "--"            2    right :lvalue t)
+           (unary-op post++      "++"            2    right :lvalue t :post t)
+           (unary-op post--      "--"            2    right :lvalue t :post t)
+           (unary-op not         "!"             2    right)
+           (unary-op bit-not     "~"             2    right)
            ;; Note that the leading space is necessary because it
            ;; could break with post++, for example. TODO: Avoid
            ;; leading space when it's possible.
-           (unary-op unary+      " +"            1    right)
-           (unary-op unary-      " -"            1    right)
-           (unary-op delete      "delete "       1    right)
-           (unary-op void        "void "         1    right)
-           (unary-op typeof      "typeof "       1    right)
-           (unary-op new         "new "          1    right)
+           (unary-op unary+      " +"            2    right)
+           (unary-op unary-      " -"            2    right)
+           (unary-op delete      "delete "       2    right)
+           (unary-op void        "void "         2    right)
+           (unary-op typeof      "typeof "       2    right)
+           (unary-op new         "new "          2    right)
 
-           (binary-op *          "*"             2    left)
-           (binary-op /          "/"             2    left)
-           (binary-op mod        "%"             2    left)
-           (binary-op %          "%"             2    left)
-           (binary-op +          "+"             3    left)
-           (binary-op -          "-"             3    left)
-           (binary-op <<         "<<"            4    left)
-           (binary-op >>         "<<"            4    left)
-           (binary-op >>>        ">>>"           4    left)
-           (binary-op <=         "<="            5    left)
-           (binary-op <          "<"             5    left)
-           (binary-op >          ">"             5    left)
-           (binary-op >=         ">="            5    left)
-           (binary-op instanceof " instanceof "  5    left)
-           (binary-op in         " in "          5    left)
-           (binary-op ==         "=="            6    left)
-           (binary-op !=         "!="            6    left)
-           (binary-op ===        "==="           6    left)
-           (binary-op !==        "!=="           6    left)
-           (binary-op bit-and    "&"             7    left)
-           (binary-op bit-xor    "^"             8    left)
-           (binary-op bit-or     "|"             9    left)
-           (binary-op and        "&&"           10    left)
-           (binary-op or         "||"           11    left)
+           (binary-op *          "*"             3    left)
+           (binary-op /          "/"             3    left)
+           (binary-op mod        "%"             3    left)
+           (binary-op %          "%"             3    left)
+           (binary-op +          "+"             4    left)
+           (binary-op -          "-"             5    left)
+           (binary-op <<         "<<"            5    left)
+           (binary-op >>         "<<"            5    left)
+           (binary-op >>>        ">>>"           5    left)
+           (binary-op <=         "<="            6    left)
+           (binary-op <          "<"             6    left)
+           (binary-op >          ">"             6    left)
+           (binary-op >=         ">="            6    left)
+           (binary-op instanceof " instanceof "  6    left)
+           (binary-op in         " in "          6    left)
+           (binary-op ==         "=="            7    left)
+           (binary-op !=         "!="            7    left)
+           (binary-op ===        "==="           7    left)
+           (binary-op !==        "!=="           7    left)
+           (binary-op bit-and    "&"             8    left)
+           (binary-op bit-xor    "^"             9    left)
+           (binary-op bit-or     "|"            10    left)
+           (binary-op and        "&&"           11    left)
+           (binary-op or         "||"           12    left)
            (binary-op =          "="            13    right :lvalue t)
            (binary-op +=         "+="           13    right :lvalue t)
            (binary-op incf       "+="           13    right :lvalue t)
@@ -348,17 +323,18 @@
            (binary-op progn      ","            13    right)
 
            (when (member op '(? if))
-             (with-operator (12 'right)
-               (js-expr (first args))
-               (js-operator "?")
-               (js-expr (second args))
-               (js-format ":")
-               (js-expr (third args)))
+             (when (low-precedence-p 12) (js-format "("))
+             (js-expr (first args) 12 'right 'left)
+             (js-format "?")
+             (js-expr (second args) 12 'right 'right)
+             (js-format ":")
+             (js-expr (third args) 12 'right 'right)
+             (when (low-precedence-p 12) (js-format ")"))
              (return-from js-operator-expression))
 
            (error "Unknown operator `~S'" op)))))))
 
-(defun js-expr (form)
+(defun js-expr (form &optional (precedence 1000) associativity operand-order)
   (let ((form (js-expand-expr form)))
     (cond
       ((or (symbolp form) (numberp form) (stringp form))
@@ -366,7 +342,7 @@
       ((vectorp form)
        (js-vector-initializer form))
       (t
-       (js-operator-expression (car form) (cdr form))))))
+       (js-operator-expression (car form) (cdr form) precedence associativity operand-order)))))
 
 (defun js-expand-stmt (form)
   (cond
@@ -420,15 +396,14 @@
                        (js-identifier variable)
                        (when initial
                          (js-format "=")
-                         (js-expr initial)))))
+                         (js-expr initial no-comma)))))
               (destructuring-bind (var &rest vars) (cdr form)
-                (let ((*js-operator-precedence* 12))
-                  (js-format "var ")
-                  (js-var var)
-                  (dolist (var vars)
-                    (js-format ",")
-                    (js-var var))
-                  (js-format ";")))))
+                (js-format "var ")
+                (js-var var)
+                (dolist (var vars)
+                  (js-format ",")
+                  (js-var var))
+                (js-format ";"))))
            (if
             (destructuring-bind (condition true &optional false) (cdr form)
               (js-format "if (")
