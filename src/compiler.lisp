@@ -1293,14 +1293,13 @@
 
 (define-builtin values-array (array)
   (if *multiple-value-p*
-      `(code "values.apply(this, " ,array ")")
-      `(code "pv.apply(this, " ,array ")")))
+      `(call (get |values| "apply") this ,array)
+      `(call (get |pv| "apply") this ,array)))
 
 (define-raw-builtin values (&rest args)
   (if *multiple-value-p*
-      `(code "values(" ,@(interleave (mapcar #'ls-compile args) ",") ")")
-      `(code "pv(" ,@(interleave (mapcar #'ls-compile args) ", ") ")")))
-
+      `(call |values| ,@(mapcar #'ls-compile args))
+      `(call |pv| ,@(mapcar #'ls-compile args))))
 
 ;;; Javascript FFI
 
