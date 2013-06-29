@@ -573,11 +573,7 @@
     ((and (listp x) (eq (car x) 'lambda))
      (compile-lambda (cadr x) (cddr x)))
     ((and (listp x) (eq (car x) 'named-lambda))
-     ;; TODO: destructuring-bind now! Do error checking manually is
-     ;; very annoying.
-     (let ((name (cadr x))
-           (ll (caddr x))
-           (body (cdddr x)))
+     (destructuring-bind (name ll &rest body) (cdr x)
        (compile-lambda ll body
                        :name (symbol-name name)
                        :block name)))
