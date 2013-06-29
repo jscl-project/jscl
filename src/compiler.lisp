@@ -605,11 +605,9 @@
           (extend-lexenv (mapcar #'make-function-binding fnames)
                          *environment*
                          'function)))
-    `(code "(function("
-           ,@(interleave (mapcar #'translate-function fnames) ",")
-           "){"
-           ,(ls-compile-block body t)
-           "})(" ,@(interleave cfuncs ",") ")")))
+    `(call (function ,(mapcar #'make-symbol (mapcar #'translate-function fnames))
+                ,(ls-compile-block body t))
+           ,@cfuncs)))
 
 (define-compilation labels (definitions &rest body)
   (let* ((fnames (mapcar #'car definitions))
