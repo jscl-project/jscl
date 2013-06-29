@@ -251,8 +251,8 @@
   (if (or name docstring)
       (js!selfcall*
         `(var (func ,code))
-        (when name      `(= (get func |fname|) ,name))
-        (when docstring `(= (get func |docstring|) ,docstring))
+        (when name      `(= (get func "fname") ,name))
+        (when docstring `(= (get func "docstring") ,docstring))
         `(return func))
       code))
 
@@ -819,15 +819,15 @@
     `(try
       ,(ls-compile-block body t))
     `(catch (|cf|)
-       (if (and (== (get |cf| |type|) "catch")
-                (== (get |cf| |id|) |id|))
+       (if (and (== (get |cf| "type") "catch")
+                (== (get |cf| "id") |id|))
            ,(if *multiple-value-p*
-                `(return (call (get |values| |apply|)
+                `(return (call (get |values| "apply")
                                this
-                               (call |forcemv| (get |cf| |values|))))
-                `(return (call (get |pv| |apply|)
+                               (call |forcemv| (get |cf| "values"))))
+                `(return (call (get |pv| "apply")
                                this
-                               (call |forcemv| (get |cf| |values|)))))
+                               (call |forcemv| (get |cf| "values")))))
            (throw |cf|)))))
 
 (define-compilation throw (id value)
@@ -1268,7 +1268,7 @@
 
 (define-builtin storage-vector-ref (vector n)
   (js!selfcall*
-    `(var (x (get ,vector ,n)))
+    `(var (x (property ,vector ,n)))
     `(if (=== x undefined) (throw "Out of range."))
     `(return x)))
 
@@ -1310,11 +1310,11 @@
 (define-raw-builtin oget* (object key &rest keys)
   (js!selfcall*
     `(progn
-       (var (tmp (get ,(ls-compile object) (call |xstring| ,(ls-compile key)))))
+       (var (tmp (property ,(ls-compile object) (call |xstring| ,(ls-compile key)))))
        ,@(mapcar (lambda (key)
                    `(progn
                       (if (=== tmp undefined) (return ,(ls-compile nil)))
-                      (= tmp (get tmp (call |xstring| ,(ls-compile key))))))
+                      (= tmp (property tmp (call |xstring| ,(ls-compile key))))))
                  keys))
     `(return (if (=== tmp undefined) ,(ls-compile nil) tmp))))
 
@@ -1325,12 +1325,12 @@
          (var (obj ,(ls-compile object)))
          ,@(mapcar (lambda (key)
                      `(progn
-                        (= obj (get obj (call |xstring| ,(ls-compile key))))
+                        (= obj (property obj (call |xstring| ,(ls-compile key))))
                         (if (=== object undefined)
                             (throw "Impossible to set object property."))))
                    (butlast keys))
          (var (tmp
-               (= (get obj (call |xstring| ,(ls-compile (car (last keys)))))
+               (= (property obj (call |xstring| ,(ls-compile (car (last keys)))))
                   ,(ls-compile value))))
          (return (if (=== tmp undefined)
                      ,(ls-compile nil)

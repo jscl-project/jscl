@@ -192,25 +192,18 @@
        (js-format "~a" (apply #'code args)))
       ;; Accessors
       (property
-       (js-expr (car args))
+       (js-expr (car args) 0)
        (js-format "[")
        (js-expr (cadr args) no-comma)
        (js-format "]"))
       (get
-       (multiple-value-bind (identifier identifierp)
-           (valid-js-identifier (car args))
-         (multiple-value-bind (accessor accessorp)
-             (valid-js-identifier (cadr args))
-           (cond
-             ((and identifierp accessorp)
-              (js-identifier identifier)
-              (js-format ".")
-              (js-identifier accessor))
-             (t
-              (js-expr (car args))
-              (js-format "[")
-              (js-expr (cadr args))
-              (js-format "]"))))))      
+       (multiple-value-bind (accessor accessorp)
+           (valid-js-identifier (cadr args))
+         (unless accessorp
+           (error "Invalid accessor ~S" (cadr args)))
+         (js-expr (car args) 0)
+         (js-format ".")
+         (js-identifier accessor)))      
       ;; Function call
       (call
        (js-expr (car args) 1)
