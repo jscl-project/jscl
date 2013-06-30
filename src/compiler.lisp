@@ -668,26 +668,20 @@
 (defun let-binding-wrapper (bindings body)
   (when (null bindings)
     (return-from let-binding-wrapper body))
-  `(code
-    "try {"
-    (code "var tmp;"
-          ,@(mapcar
-             (lambda (b)
-               (let ((s (ls-compile `(quote ,(car b)))))
-                 `(code "tmp = " ,s ".value;"
-                        ,s ".value = " ,(cdr b) ";"
-                        ,(cdr b) " = tmp;" )))
-             bindings)
-          ,body
-          )
-    "}"
-    "finally {"
-    (code
-     ,@(mapcar (lambda (b)
-                 (let ((s (ls-compile `(quote ,(car b)))))
-                   `(code ,s ".value" " = " ,(cdr b) ";" )))
-               bindings))
-    "}" ))
+  `(progn
+     (try (var tmp)
+          ,@(with-collect
+             (dolist (b bindings)
+               (let ((s (ls-compile `',(car b))))
+                 (collect `(= tmp (get ,s "value")))
+                 (collect `(= (get ,s "value") ,(cdr b)))
+                 (collect `(= ,(cdr b) tmp)))))
+          ,body)
+     (finally
+      ,@(with-collect
+         (dolist (b bindings)
+           (let ((s (ls-compile `(quote ,(car b)))))
+             (collect `(= (get ,s "value") ,(cdr b)))))))))
 
 (define-compilation let (bindings &rest body)
   (let* ((bindings (mapcar #'ensure-list bindings))
@@ -698,12 +692,12 @@
     `(call (function ,(mapcar (lambda (x)
                                 (if (special-variable-p x)
                                     (let ((v (gvarname x)))
-                                      (push (cons x v) dynamic-bindings)
+                                      (push (cons x (make-symbol v)) dynamic-bindings)
                                       (make-symbol v))
                                     (make-symbol (translate-variable x))))
                               variables)
                      ,(let ((body (ls-compile-block body t t)))
-                           `(code ,(let-binding-wrapper dynamic-bindings body))))
+                           `,(let-binding-wrapper dynamic-bindings body)))
            ,@cvalues)))
 
 
