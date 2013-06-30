@@ -302,11 +302,15 @@
 	(n-optional-arguments (length (ll-optional-arguments ll)))
 	(rest-argument (ll-rest-argument ll)))
     (when rest-argument
-      (let ((js!rest (translate-variable rest-argument)))
-        `(code "var " ,js!rest "= " ,(ls-compile nil) ";"
-               "for (var i = nargs-1; i>=" ,(+ n-required-arguments n-optional-arguments)
-               "; i--)"
-               (code ,js!rest " = {car: arguments[i+2], cdr: " ,js!rest "};"))))))
+      (let ((js!rest (make-symbol (translate-variable rest-argument))))
+        `(progn
+           (var (,js!rest ,(ls-compile nil)))
+           (var i)
+           (for ((= i (- |nargs| 1))
+                 (>= i ,(+ n-required-arguments n-optional-arguments))
+                 (post-- i))
+                (= ,js!rest (object "car" (property |arguments| (+ i 2))
+                                    "cdr" ,js!rest))))))))
 
 (defun compile-lambda-parse-keywords (ll)
   (let ((n-required-arguments
@@ -423,8 +427,9 @@
                                                   n-optional-arguments
                                                   (or rest-argument keyword-arguments))
                     (code
-                     ,(compile-lambda-optional ll)
-                     ,(compile-lambda-rest ll)
+                     ,(compile-lambda-optional ll))
+                    ,(compile-lambda-rest ll)
+                    (code
                      ,(compile-lambda-parse-keywords ll))
 
                     ,(let ((*multiple-value-p* t))
