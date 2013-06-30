@@ -276,26 +276,17 @@
 	 (n-required-arguments (length (ll-required-arguments ll)))
 	 (n-optional-arguments (length optional-arguments)))
     (when optional-arguments
-      `(code "switch(nargs){"
-             ,(let ((cases nil)
-                    (idx 0))
-                   (progn
-                     (while (< idx n-optional-arguments)
-                       (let ((arg (nth idx optional-arguments)))
-                         (push `(code "case " ,(+ idx n-required-arguments) ":"
-                                      (code ,(translate-variable (car arg))
-                                            "="
-                                            ,(ls-compile (cadr arg)) ";")
-                                      ,(when (third arg)
-                                         `(code ,(translate-variable (third arg))
-                                                "="
-                                                ,(ls-compile nil)
-                                                ";")))
-                               cases)
-                         (incf idx)))
-                     (push `(code "default: break;") cases)
-                     `(code ,@(reverse cases))))
-             "}"))))
+      `(switch |nargs|
+               ,@(with-collect
+                  (dotimes (idx n-optional-arguments)
+                    (let ((arg (nth idx optional-arguments)))
+                      (collect `(,(+ idx n-required-arguments)
+                                  (= ,(make-symbol (translate-variable (car arg)))
+                                     ,(ls-compile (cadr arg)))
+                                  ,(when (third arg)
+                                         `(= ,(make-symbol (translate-variable (third arg)))
+                                             ,(ls-compile nil)))))))
+                  (collect `(default (break))))))))
 
 (defun compile-lambda-rest (ll)
   (let ((n-required-arguments (length (ll-required-arguments ll)))
@@ -426,8 +417,7 @@
                     ,(lambda-check-argument-count n-required-arguments
                                                   n-optional-arguments
                                                   (or rest-argument keyword-arguments))
-                    (code
-                     ,(compile-lambda-optional ll))
+                    ,(compile-lambda-optional ll)
                     ,(compile-lambda-rest ll)
                     (code
                      ,(compile-lambda-parse-keywords ll))
