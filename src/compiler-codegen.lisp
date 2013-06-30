@@ -373,9 +373,11 @@
               (js-format ":")
               (js-stmt `(progn ,@body))))
            (break
-            (destructuring-bind (label) (cdr form)
-              (js-format "break ")
-              (js-identifier label)
+            (destructuring-bind (&optional label) (cdr form)
+              (js-format "break")
+              (when label
+                (js-format " ")
+                (js-identifier label))
               (js-format ";")))
            (return
              (destructuring-bind (value) (cdr form)
@@ -419,6 +421,23 @@
                  (js-expr condition)
                  (js-format ")")
                  (js-stmt `(progn ,@body))))
+           (switch
+            (destructuring-bind (value &rest cases) (cdr form)
+              (js-format "switch(")
+              (js-expr value)
+              (js-format "){")
+              (dolist (case cases)
+                (destructuring-bind (x &body body) case
+                  (if (eq x 'default)
+                      (js-format "default: ")
+                      (progn
+                        (unless (or (stringp x) (numberp x))
+                          (error "Non-constant switch case `~S'." (car cases)))
+                        (js-format "case ")
+                        (js-expr x)
+                        (js-format ":")))
+                  (mapc #'js-stmt body)))
+              (js-format "}")))
            (for
             (destructuring-bind ((start condition step) &body body) (cdr form)
               (js-format "for (")
