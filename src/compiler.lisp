@@ -265,13 +265,11 @@
     (block nil
       ;; Special case: a positive exact number of arguments.
       (when (and (< 0 min) (eql min max))
-        (return `(code "checkArgs(nargs, " ,min ");")))
+        (return `(call |checkArgs| |nargs| ,min)))
       ;; General case:
-      `(code
-        ,(when (< 0 min)
-           `(code "checkArgsAtLeast(nargs, " ,min ");"))
-        ,(when (numberp max)
-           `(code "checkArgsAtMost(nargs, " ,max ");"))))))
+      `(progn
+         ,(when (< 0 min)     `(call |checkArgsAtLeast| |nargs| ,min))
+         ,(when (numberp max) `(call |checkArgsAtMost|  |nargs| ,max))))))
 
 (defun compile-lambda-optional (ll)
   (let* ((optional-arguments (ll-optional-arguments-canonical ll))
@@ -417,26 +415,22 @@
                                     keyword-arguments
                                     (ll-svars ll)))))
         (lambda-name/docstring-wrapper name documentation
-         `(code
-           "(function ("
-           ,(join (list* "values"
-                         "nargs"
-                         (mapcar #'translate-variable
-                                 (append required-arguments optional-arguments)))
-                  ",")
-           "){"
-           ;; Check number of arguments
-           ,(lambda-check-argument-count n-required-arguments
-                                         n-optional-arguments
-                                         (or rest-argument keyword-arguments))
-           ,(compile-lambda-optional ll)
-           ,(compile-lambda-rest ll)
-           ,(compile-lambda-parse-keywords ll)
-           ,(let ((*multiple-value-p* t))
-                 (if block
-                     (ls-compile-block `((block ,block ,@body)) t)
-                     (ls-compile-block body t)))
-           "})"))))))
+         `(function (|values| |nargs| ,@(mapcar (lambda (x)
+                                                  (make-symbol (translate-variable x)))
+                                                (append required-arguments optional-arguments)))
+                     ;; Check number of arguments
+                    ,(lambda-check-argument-count n-required-arguments
+                                                  n-optional-arguments
+                                                  (or rest-argument keyword-arguments))
+                    (code
+                     ,(compile-lambda-optional ll)
+                     ,(compile-lambda-rest ll)
+                     ,(compile-lambda-parse-keywords ll))
+
+                    ,(let ((*multiple-value-p* t))
+                          (if block
+                              (ls-compile-block `((block ,block ,@body)) t)
+                              (ls-compile-block body t)))))))))
 
 
 (defun setq-pair (var val)
