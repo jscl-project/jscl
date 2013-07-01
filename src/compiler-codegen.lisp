@@ -178,6 +178,8 @@
          (case (length (cdr form))
            (1 `(unary- ,(cadr form)))
            (t (reduce (lambda (x y) `(- ,x ,y)) (cdr form)))))
+        ((and or)
+         (reduce (lambda (x y) `(,(car form) ,x ,y)) (cdr form)))
         ((progn comma)
          (reduce (lambda (x y) `(comma ,x ,y)) (cdr form) :from-end t))
         (t form))

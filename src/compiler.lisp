@@ -228,7 +228,7 @@
   (flet ((canonicalize (keyarg)
 	   ;; Build a canonical keyword argument descriptor, filling
 	   ;; the optional fields. The result is a list of the form
-	   ;; ((keyword-name var) init-form).
+	   ;; ((keyword-name var) init-form svar).
            (let ((arg (ensure-list keyarg)))
              (cons (if (listp (car arg))
                        (car arg)
@@ -310,55 +310,62 @@
 	 (length (ll-optional-arguments ll)))
 	(keyword-arguments
 	 (ll-keyword-arguments-canonical ll)))
-    `(code
-      ;; Declare variables
-      ,@(mapcar (lambda (arg)
-                  (let ((var (second (car arg))))
-                    `(code "var " ,(translate-variable var) "; "
-                           ,(when (third arg)
-                              `(code "var " ,(translate-variable (third arg))
-                                     " = " ,(ls-compile nil)
-                                     ";" )))))
-                keyword-arguments)
-      ;; Parse keywords
-      ,(flet ((parse-keyword (keyarg)
-               ;; ((keyword-name var) init-form)
-               `(code "for (i=" ,(+ n-required-arguments n-optional-arguments)
-                      "; i<nargs; i+=2){"
-                      "if (arguments[i+2] === " ,(ls-compile (caar keyarg)) "){"
-                      ,(translate-variable (cadr (car keyarg)))
-                      " = arguments[i+3];"
-                      ,(let ((svar (third keyarg)))
-                            (when svar
-                              `(code ,(translate-variable svar) " = " ,(ls-compile t) ";" )))
-                      "break;"
-                      "}"
-                      "}"
-                      ;; Default value
-                      "if (i == nargs){"
-                      ,(translate-variable (cadr (car keyarg)))
-                      " = "
-                      ,(ls-compile (cadr keyarg))
-                      ";"
-                      "}")))
-        (when keyword-arguments
-          `(code "var i;"
-                 ,@(mapcar #'parse-keyword keyword-arguments))))
-      ;; Check for unknown keywords
-      ,(when keyword-arguments
-        `(code "var start = " ,(+ n-required-arguments n-optional-arguments) ";"
-               "if ((nargs - start) % 2 == 1){"
-               "throw 'Odd number of keyword arguments';" 
-               "}"
-               "for (i = start; i<nargs; i+=2){"
-               "if ("
-               ,@(interleave (mapcar (lambda (x)
-                                       `(code "arguments[i+2] !== " ,(ls-compile (caar x))))
-                                     keyword-arguments)
-                            " && ")
-               ")"
-               "throw 'Unknown keyword argument ' + xstring(arguments[i+2].name);" 
-               "}" )))))
+    `(progn
+       ;; Declare variables
+       ,@(with-collect
+          (dolist (keyword-argument keyword-arguments)
+            (destructuring-bind ((keyword-name var) &optional initform svar)
+                keyword-argument
+              (declare (ignore keyword-name initform))
+              (collect `(var ,(make-symbol (translate-variable var))))
+              (when svar
+                (collect
+                    `(var (,(make-symbol (translate-variable svar))
+                            ,(ls-compile nil))))))))
+       
+       ;; Parse keywords
+       ,(flet ((parse-keyword (keyarg)
+                (destructuring-bind ((keyword-name var) &optional initform svar) keyarg
+                  ;; ((keyword-name var) init-form svar)
+                  `(progn
+                     (for ((= i ,(+ n-required-arguments n-optional-arguments))
+                           (< i |nargs|)
+                           (+= i 2))
+                          ;; ....
+                          (if (=== (property |arguments| (+ i 2))
+                                   ,(ls-compile keyword-name))
+                              (progn
+                                (= ,(make-symbol (translate-variable var))
+                                   (property |arguments| (+ i 3)))
+                                ,(when svar `(= ,(make-symbol (translate-variable svar))
+                                                ,(ls-compile t)))
+                                (break))))
+                     (if (== i |nargs|)
+                         (= ,(make-symbol (translate-variable var))
+                            ,(ls-compile initform)))))))
+         (when keyword-arguments
+           `(progn
+              (var i)
+              ,@(mapcar #'parse-keyword keyword-arguments))))
+       
+       ;; Check for unknown keywords
+       ,(when keyword-arguments
+         `(progn
+            (var (start ,(+ n-required-arguments n-optional-arguments)))
+            (if (== (% (- |nargs| start) 2) 1)
+                (throw "Odd number of keyword arguments."))
+            (for ((= i start) (< i |nargs|) (+= i 2))
+                 (if (and ,@(mapcar (lambda (keyword-argument)
+                                 (destructuring-bind ((keyword-name var) &optional initform svar)
+                                     keyword-argument
+                                   (declare (ignore var initform svar))
+                                   `(!== (property |arguments| (+ i 2)) ,(ls-compile keyword-name))))
+                               keyword-arguments))
+                     (throw (+ "Unknown keyword argument "
+                               (call |xstring|
+                                     (property
+                                      (property |arguments| (+ i 2))
+                                      "name")))))))))))
 
 (defun parse-lambda-list (ll)
   (values (ll-required-arguments ll)
@@ -419,8 +426,7 @@
                                                   (or rest-argument keyword-arguments))
                     ,(compile-lambda-optional ll)
                     ,(compile-lambda-rest ll)
-                    (code
-                     ,(compile-lambda-parse-keywords ll))
+                    ,(compile-lambda-parse-keywords ll)
 
                     ,(let ((*multiple-value-p* t))
                           (if block
