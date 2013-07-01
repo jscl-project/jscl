@@ -783,14 +783,15 @@
     ;; unique identifier of the block as exception. We can't use the
     ;; variable name itself, because it could not to be unique, so we
     ;; capture it in a closure.
-    (js!selfcall
-      (when multiple-value-p `(code "var values = mv;" ))
-      "throw ({"
-      "type: 'block', "
-      "id: " (binding-value b) ", "
-      "values: " (ls-compile value multiple-value-p) ", "
-      "message: 'Return from unknown block " (symbol-name name) ".'"
-      "})")))
+    (js!selfcall*
+      (when multiple-value-p
+        `(var (|values| |mv|)))
+      `(throw
+           (object
+            "type" "block"
+            "id" ,(make-symbol (binding-value b))
+            "values" ,(ls-compile value multiple-value-p)
+            "message" ,(concat "Return from unknown block '" (symbol-name name) "'."))))))
 
 (define-compilation catch (id &rest body)
   (js!selfcall*
