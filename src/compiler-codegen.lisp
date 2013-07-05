@@ -429,16 +429,18 @@
               (js-expr value)
               (js-format "){")
               (dolist (case cases)
-                (destructuring-bind (x &body body) case
-                  (if (eq x 'default)
-                      (js-format "default: ")
-                      (progn
-                        (unless (or (stringp x) (numberp x))
-                          (error "Non-constant switch case `~S'." (car cases)))
-                        (js-format "case ")
-                        (js-expr x)
-                        (js-format ":")))
-                  (mapc #'js-stmt body)))
+                (cond
+                  ((and (consp case) (eq (car case) 'case))
+                   (js-format "case ")
+                   (let ((value (cadr case)))
+                     (unless (or (stringp value) (integerp value))
+                       (error "Non-constant switch case `~S'." value))
+                     (js-expr value))
+                   (js-format ":"))
+                  ((eq case 'default)
+                   (js-format "default:"))
+                  (t
+                   (js-stmt case))))
               (js-format "}")))
            (for
             (destructuring-bind ((start condition step) &body body) (cdr form)
