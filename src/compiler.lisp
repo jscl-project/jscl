@@ -41,18 +41,6 @@
       (when after-last-p
         (collect element)))))
 
-(defun code (&rest args)
-  (mapconcat (lambda (arg)
-               (cond
-                 ((null arg) "")
-                 ((integerp arg) (integer-to-string arg))
-                 ((floatp arg) (float-to-string arg))
-                 ((stringp arg) arg)
-                 (t
-                  (with-output-to-string (*standard-output*)
-                    (js-expr arg)))))
-             args))
-
 ;;; Like CODE, but prefix each line with four spaces. Two versions
 ;;; of this function are available, because the Ecmalisp version is
 ;;; very slow and bootstraping was annoying.
@@ -1446,8 +1434,7 @@
        (let ((code (ls-compile sexp multiple-value-p)))
          `(progn
             ,@(get-toplevel-compilations)
-            (code ,code ";
-")))))))
+            ,code))))))
 
 (defun ls-compile-toplevel (sexp &optional multiple-value-p)
   (with-output-to-string (*standard-output*)

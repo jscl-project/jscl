@@ -211,9 +211,6 @@
   (let ((op1 (car args))
         (op2 (cadr args)))
     (case op
-      ;; Transactional compatible operator
-      (code
-       (js-format "~a" (apply #'code args)))
       ;; Accessors
       (property
        (js-expr (car args) 0)
@@ -389,8 +386,6 @@
            (js-format ";")))
         (t
          (case (car form)
-           (code
-            (js-format "~a" (apply #'code (cdr form))))
            (label
             (destructuring-bind (label &body body) (cdr form)
               (js-identifier label)
