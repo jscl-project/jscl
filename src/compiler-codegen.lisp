@@ -24,6 +24,27 @@
 
 (/debug "loading compiler-codegen.lisp!")
 
+(defvar *js-macros* nil)
+(defmacro define-js-macro (name lambda-list &body body)
+  (let ((form (gensym)))
+    `(push (cons ',name
+                 (lambda (,form)
+                   (block ,name
+                     (destructuring-bind ,lambda-list ,form
+                       ,@body))))
+           *js-macros*)))
+
+(defun js-macroexpand (js)
+  (if (and (consp js) (assoc (car js) *js-macros*))
+      (let ((expander (cdr (assoc (car js) *js-macros*))))
+        (multiple-value-bind (expansion expand-more-p)
+            (funcall expander (cdr js))
+          (if expand-more-p
+              (js-macroexpand expansion)
+              expansion)))
+      js))
+
+
 (defconstant no-comma 12)
 
 (defvar *js-output* t)
@@ -182,7 +203,8 @@
          (reduce (lambda (x y) `(,(car form) ,x ,y)) (cdr form)))
         ((progn comma)
          (reduce (lambda (x y) `(comma ,x ,y)) (cdr form) :from-end t))
-        (t form))
+        (t
+         (js-macroexpand form)))
       form))
 
 (defun js-operator-expression (op args precedence associativity operand-order)
@@ -351,7 +373,7 @@
          (t
           `(group ,@(cdr form))))))
     (t
-     form)))
+     (js-macroexpand form))))
 
 (defun js-stmt (form &optional parent)
   (let ((form (js-expand-stmt form)))
