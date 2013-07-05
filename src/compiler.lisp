@@ -1071,9 +1071,10 @@
 
 (define-builtin consp (x)
   (js!bool
-   (js!selfcall
-     "var tmp = " x ";"
-     "return (typeof tmp == 'object' && 'car' in tmp);" )))
+   (js!selfcall*
+     `(var (tmp ,x))
+     `(return (and (== (typeof tmp) "object")
+                   (in "car" tmp))))))
 
 (define-builtin car (x)
   (js!selfcall*
