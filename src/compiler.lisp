@@ -848,34 +848,28 @@
           initag)
       (let ((b (lookup-in-lexenv (first body) *environment* 'gotag)))
         (setq initag (second (binding-value b))))
-      (js!selfcall
+      (js!selfcall*
         ;; TAGBODY branch to take
-        "var " branch " = " initag ";"
-        "var " tbidx " = [];"
-        "tbloop:"
-        "while (true) {"
-        `(code "try {"
-               ,(let ((content nil))
-                  `(code "switch(" ,branch "){"
-                        "case " ,initag ":"
-                        ,@(dolist (form (cdr body) (reverse content))
-                          (push (if (not (go-tag-p form))
-                                    `(code ,(ls-compile form) ";" )
+        `(var (,(make-symbol branch) ,initag))
+        `(var (,(make-symbol tbidx) #()))
+        `(label tbloop
+                (while true
+                  (try
+                   (switch ,(make-symbol branch)
+                           ,@(with-collect
+                              (dolist (form (cdr body))
+                                (if (go-tag-p form)
                                     (let ((b (lookup-in-lexenv form *environment* 'gotag)))
-                                      `(code "case " ,(second (binding-value b)) ":" )))
-                                content))
-                           "default:"
-                           "    break tbloop;"
-                           "}" ))
-               "}"
-               "catch (jump) {"
-               "    if (jump.type == 'tagbody' && jump.id == " ,tbidx ")"
-               "        " ,branch " = jump.label;"
-               "    else"
-               "        throw(jump);"
-               "}" )
-        "}"
-        "return " (ls-compile nil) ";" ))))
+                                      (collect `(case ,(second (binding-value b)))))
+                                    (collect (ls-compile form)))))
+                           default
+                           (break tbloop)))
+                  (catch (jump)
+                    (if (and (== (get jump "type") "tagbody")
+                             (== (get jump "id") ,(make-symbol tbidx)))
+                        (= ,(make-symbol branch) (get jump "label"))
+                        (throw jump)))))
+        `(return ,(ls-compile nil))))))
 
 (define-compilation go (label)
   (let ((b (lookup-in-lexenv label *environment* 'gotag))
