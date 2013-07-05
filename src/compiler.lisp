@@ -54,11 +54,6 @@
                     (js-expr arg)))))
              args))
 
-;;; Wrap X with a Javascript code to convert the result from
-;;; Javascript generalized booleans to T or NIL.
-(defun js!bool (x)
-  `(if ,x ,(ls-compile t) ,(ls-compile nil)))
-
 ;;; Concatenate the arguments and wrap them with a self-calling
 ;;; Javascript anonymous function. It is used to make some Javascript
 ;;; statements valid expressions and provide a private scope as well.
@@ -1021,7 +1016,7 @@
   `(define-raw-builtin ,op (x &rest args)
      (let ((args (cons x args)))
        (variable-arity args
-	 (js!bool (comparison-conjuntion args ',sym))))))
+	 `(bool ,(comparison-conjuntion args ',sym))))))
 
 (define-builtin-comparison > >)
 (define-builtin-comparison < <)
