@@ -919,10 +919,13 @@
          `(return (call (get func "apply") |window| args))))))
 
 (define-compilation multiple-value-prog1 (first-form &rest forms)
-  (js!selfcall
-    "var args = " (ls-compile first-form *multiple-value-p*) ";"
-    (ls-compile-block forms)
-    "return args;" ))
+  (js!selfcall*
+    `(var (args ,(ls-compile first-form *multiple-value-p*)))
+    ;; TODO: Interleave is temporal
+    `(progn ,@(interleave (mapcar #'ls-compile forms)
+                          '(code ";")
+                          t))
+    `(return args)))
 
 (define-transformation backquote (form)
   (bq-completely-process form))
