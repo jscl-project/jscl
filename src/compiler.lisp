@@ -1358,10 +1358,10 @@
            (return ,(convert (car (last sexps)) *multiple-value-p*)))
         `(progn ,@(mapcar #'convert sexps)))))
 
-(defun convert* (sexp &optional multiple-value-p)
+(defun convert (sexp &optional multiple-value-p)
   (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
     (when expandedp
-      (return-from convert* (convert sexp multiple-value-p)))
+      (return-from convert (convert sexp multiple-value-p)))
     ;; The expression has been macroexpanded. Now compile it!
     (let ((*multiple-value-p* multiple-value-p))
       (cond
@@ -1394,9 +1394,6 @@
               (compile-funcall name args)))))
         (t
          (error "How should I compile `~S'?" sexp))))))
-
-(defun convert (sexp &optional multiple-value-p)
-  (convert* sexp multiple-value-p))
 
 
 (defvar *compile-print-toplevels* nil)
