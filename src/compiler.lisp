@@ -26,6 +26,9 @@
 (define-js-macro bool (expr)
   `(if ,expr ,(convert t) ,(convert nil)))
 
+(define-js-macro method-call (x method &rest args)
+  `(call (get ,x ,method) ,@args))
+
 ;;; Translate the Lisp code to Javascript. It will compile the special
 ;;; forms. Some primitive functions are compiled as special forms
 ;;; too. The respective real functions are defined in the target (see
@@ -737,7 +740,7 @@
               (if (and (== (get cf "type") "block")
                        (== (get cf "id") ,idvar))
                   ,(if *multiple-value-p*
-                       `(return (call (get |values| "apply") this (call |forcemv| (get cf "values"))))
+                       `(return (method-call |values| "apply" this (call |forcemv| (get cf "values"))))
                        `(return (get cf "values")))
                   (throw cf))))
           ;; TODO: is selfcall necessary here?
@@ -771,12 +774,8 @@
       (if (and (== (get |cf| "type") "catch")
                (== (get |cf| "id") |id|))
           ,(if *multiple-value-p*
-               `(return (call (get |values| "apply")
-                              this
-                              (call |forcemv| (get |cf| "values"))))
-               `(return (call (get |pv| "apply")
-                              this
-                              (call |forcemv| (get |cf| "values")))))
+               `(return (method-call |values| "apply" this (call |forcemv| (get |cf| "values"))))
+               `(return (method-call |pv|     "apply" this (call |forcemv| (get |cf| "values")))))
           (throw |cf|)))))
 
 (define-compilation throw (id value)
@@ -878,10 +877,10 @@
               (collect `(= vs ,(convert form t)))
               (collect `(if (and (=== (typeof vs) "object")
                                  (in "multiple-value" vs))
-                            (= args (call (get args "concat") vs))
-                            (call (get args "push") vs))))))
+                            (= args (method-call args "concat" vs))
+                            (method-call args "push" vs))))))
        (= (property args 1) (- (property args "length") 2))
-       (return (call (get func "apply") |window| args))))))
+       (return (method-call func "apply" |window| args))))))
 
 (define-compilation multiple-value-prog1 (first-form &rest forms)
   `(selfcall
@@ -995,13 +994,13 @@
   `(bool (== (typeof ,x) "number")))
 
 (define-builtin floor (x)
-  `(call (get |Math| |floor|) ,x))
+  `(method-call |Math| "floor" ,x))
 
 (define-builtin expt (x y)
-  `(call (get |Math| |pow|) ,x ,y))
+  `(method-call |Math| "pow" ,x ,y))
 
 (define-builtin float-to-string (x)
-  `(call |make_lisp_string| (call (get ,x |toString|))))
+  `(call |make_lisp_string| (method-call ,x |toString|)))
 
 (define-builtin cons (x y)
   `(object "car" ,x "cdr" ,y))
@@ -1073,7 +1072,7 @@
   `(or (get ,x "plist") ,(convert nil)))
 
 (define-builtin lambda-code (x)
-  `(call |make_lisp_string| (call (get ,x "toString"))))
+  `(call |make_lisp_string| (method-call ,x "toString")))
 
 (define-builtin eq (x y)
   `(bool (=== ,x ,y)))
@@ -1129,21 +1128,21 @@
                                (mapcar #'convert args)))))
            (var (tail ,(convert last)))
            (while (!= tail ,(convert nil))
-             (call (get args "push") (get tail "car"))
+             (method-call args "push" (get tail "car"))
              (post++ (property args 1))
              (= tail (get tail "cdr")))
-           (return (call (get (if (=== (typeof f) "function")
-                                  f
-                                  (get f "fvalue"))
-                              "apply")
-                         this
-                         args))))))
+           (return (method-call (if (=== (typeof f) "function")
+                                    f
+                                    (get f "fvalue"))
+                                "apply"
+                                this
+                                args))))))
 
 (define-builtin js-eval (string)
   (if *multiple-value-p*
       `(selfcall
         (var (v (call |globalEval| (call |xstring| ,string))))
-        (return (call (get |values| "apply") this (call |forcemv| v))))
+        (return (method-call |values| "apply" this (call |forcemv| v))))
       `(call |globalEval| (call |xstring| ,string))))
 
 (define-builtin %throw (string)
@@ -1153,10 +1152,10 @@
   `(bool (=== (typeof ,x) "function")))
 
 (define-builtin %write-string (x)
-  `(call (get |lisp| "write") ,x))
+  `(method-call |lisp| "write" ,x))
 
 (define-builtin /debug (x)
-  `(call (get |console| "log") (call |xstring| ,x)))
+  `(method-call |console| "log" (call |xstring| ,x)))
 
 
 ;;; Storage vectors. They are used to implement arrays and (in the
@@ -1196,18 +1195,18 @@
 (define-builtin concatenate-storage-vector (sv1 sv2)
   `(selfcall
      (var (sv1 ,sv1))
-     (var (r (call (get sv1 "concat") ,sv2)))
+     (var (r (method-call sv1 "concat" ,sv2)))
      (= (get r "type") (get sv1 "type"))
      (= (get r "stringp") (get sv1 "stringp"))
      (return r)))
 
 (define-builtin get-internal-real-time ()
-  `(call (get (new (call |Date|)) "getTime")))
+  `(method-call (new (call |Date|)) "getTime"))
 
 (define-builtin values-array (array)
   (if *multiple-value-p*
-      `(call (get |values| "apply") this ,array)
-      `(call (get |pv| "apply") this ,array)))
+      `(method-call |values| "apply" this ,array)
+      `(method-call |pv| "apply" this ,array)))
 
 (define-raw-builtin values (&rest args)
   (if *multiple-value-p*
@@ -1348,7 +1347,7 @@
       ((and (symbolp function)
             #+jscl (eq (symbol-package function) (find-package "COMMON-LISP"))
             #-jscl t)
-       `(call (get ,(convert `',function) "fvalue") ,@arglist))
+       `(method-call ,(convert `',function) "fvalue" ,@arglist))
       #+jscl((symbolp function)
              `(call ,(convert `#',function) ,@arglist))
       ((and (consp function) (eq (car function) 'lambda))
