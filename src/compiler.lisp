@@ -947,33 +947,11 @@
      (let ,(mapcar (lambda (arg) `(,arg (ls-compile ,arg))) args)
        ,@body)))
 
-;;; DECLS is a list of (JSVARNAME TYPE LISPFORM) declarations.
-(defmacro type-check (decls &body body)
-  `(js!selfcall
-     ,@(mapcar (lambda (decl)
-                 `(let ((name ,(first decl))
-                        (value ,(third decl)))
-                    `(code "var " ,name " = " ,value ";" )))
-               decls)
-     ,@(mapcar (lambda (decl)
-                 `(let ((name ,(first decl))
-                        (type ,(second decl)))
-                    `(code "if (typeof " ,name " != '" ,type "')"
-                           (code "throw 'The value ' + "
-                                 ,name
-                                 " + ' is not a type "
-                                 ,type
-                                 ".';"
-                                 ))))
-               decls)
-     `(code "return " ,,@body ";" )))
-
 ;;; VARIABLE-ARITY compiles variable arity operations. ARGS stands for
 ;;; a variable which holds a list of forms. It will compile them and
 ;;; store the result in some Javascript variables. BODY is evaluated
 ;;; with ARGS bound to the list of these variables to generate the
 ;;; code which performs the transformation on these variables.
-
 (defun variable-arity-call (args function)
   (unless (consp args)
     (error "ARGS must be a non-empty list"))
@@ -1000,10 +978,6 @@
     (error "`~S' is not a symbol." args))
   `(variable-arity-call ,args (lambda (,args) `(return  ,,@body))))
 
-(defun num-op-num (x op y)
-  (type-check (("x" "number" x) ("y" "number" y))
-    `(code "x" ,op "y")))
-
 (define-raw-builtin + (&rest numbers)
   (if (null numbers)
       0
@@ -1027,7 +1001,8 @@
           (reduce (lambda (x y) `(/ ,x ,y))
                   args)))))
 
-(define-builtin mod (x y) (num-op-num x "%" y))
+(define-builtin mod (x y)
+  `(% ,x ,y))
 
 
 (defun comparison-conjuntion (vars op)
@@ -1057,17 +1032,13 @@
   (js!bool `(== (typeof ,x) "number")))
 
 (define-builtin floor (x)
-  (type-check (("x" "number" x))
-    "Math.floor(x)"))
+  `(call (get |Math| |floor|) ,x))
 
 (define-builtin expt (x y)
-  (type-check (("x" "number" x)
-               ("y" "number" y))
-    "Math.pow(x, y)"))
+  `(call (get |Math| |pow|) ,x ,y))
 
 (define-builtin float-to-string (x)
-  (type-check (("x" "number" x))
-    "make_lisp_string(x.toString())"))
+  `(call |make_lisp_string| (call (get ,x |toString|))))
 
 (define-builtin cons (x y)
   `(object "car" ,x "cdr" ,y))
@@ -1094,12 +1065,10 @@
                  (get tmp "cdr")))))
 
 (define-builtin rplaca (x new)
-  (type-check (("x" "object" x))
-    `(code "(x.car = " ,new ", x)")))
+  `(= (get ,x "car") ,new))
 
 (define-builtin rplacd (x new)
-  (type-check (("x" "object" x))
-    `(code "(x.cdr = " ,new ", x)")))
+  `(= (get ,x "cdr") ,new))
 
 (define-builtin symbolp (x)
   (js!bool `(instanceof ,x |Symbol|)))
@@ -1148,12 +1117,10 @@
   (js!bool `(=== ,x ,y)))
 
 (define-builtin char-code (x)
-  (type-check (("x" "string" x))
-    "char_to_codepoint(x)"))
+  `(call |char_to_codepoint| ,x))
 
 (define-builtin code-char (x)
-  (type-check (("x" "number" x))
-    "char_from_codepoint(x)"))
+  `(call |char_from_codepoint| ,x))
 
 (define-builtin characterp (x)
   (js!bool
