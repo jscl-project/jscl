@@ -26,7 +26,6 @@
 (define-js-macro bool (expr)
   `(if ,expr ,(ls-compile t) ,(ls-compile nil)))
 
-
 ;;; Translate the Lisp code to Javascript. It will compile the special
 ;;; forms. Some primitive functions are compiled as special forms
 ;;; too. The respective real functions are defined in the target (see
@@ -111,7 +110,6 @@
 
 
 (defvar *environment* (make-lexenv))
-
 (defvar *variable-counter* 0)
 
 (defun gvarname (symbol)
@@ -481,6 +479,7 @@
 ;;; evaluated. For this reason we define a valid macro-function for
 ;;; this symbol.
 (defvar *magic-unquote-marker* (gensym "MAGIC-UNQUOTE"))
+
 #-jscl
 (setf (macro-function *magic-unquote-marker*)
       (lambda (form &optional environment)
@@ -576,9 +575,8 @@
     ((symbolp x)
      (let ((b (lookup-in-lexenv x *environment* 'function)))
        (if b
-	   (binding-value b)
+	   (make-symbol (binding-value b))
 	   (ls-compile `(symbol-function ',x)))))))
-
 
 (defun make-function-binding (fname)
   (make-binding :name fname :type 'function :value (gvarname fname)))
@@ -702,10 +700,10 @@
   (let ((var (first binding))
         (value (second binding)))
     (if (special-variable-p var)
-        `(code ,(ls-compile `(setq ,var ,value)) ";" )
+        (ls-compile `(setq ,var ,value))
         (let* ((v (gvarname var))
                (b (make-binding :name var :type 'variable :value v)))
-          (prog1 `(code "var " ,v " = " ,(ls-compile value) ";" )
+          (prog1 `(var (,(make-symbol v) ,(ls-compile value)))
             (push-to-lexenv b *environment* 'variable))))))
 
 ;;; Wrap BODY to restore the symbol values of SYMBOLS after body. It
@@ -716,31 +714,27 @@
     (return-from let*-binding-wrapper body))
   (let ((store (mapcar (lambda (s) (cons s (gvarname s)))
                        (remove-if-not #'special-variable-p symbols))))
-    `(code
-      "try {"
-      (code
-       ,@(mapcar (lambda (b)
-                   (let ((s (ls-compile `(quote ,(car b)))))
-                     `(code "var " ,(cdr b) " = " ,s ".value;" )))
-                 store)
-       ,body)
-      "}"
-      "finally {"
-      (code
-       ,@(mapcar (lambda (b)
-                   (let ((s (ls-compile `(quote ,(car b)))))
-                     `(code ,s ".value" " = " ,(cdr b) ";" )))
-                 store))
-      "}" )))
+    `(progn
+       (try
+        ,@(mapcar (lambda (b)
+                    (let ((s (ls-compile `(quote ,(car b)))))
+                      `(var (,(make-symbol (cdr b)) (get ,s "value")))))
+                  store)
+        ,body)
+       (finally
+        ,@(mapcar (lambda (b)
+                    (let ((s (ls-compile `(quote ,(car b)))))
+                      `(= (get ,s "value") ,(make-symbol (cdr b)))))
+                  store)))))
 
 (define-compilation let* (bindings &rest body)
   (let ((bindings (mapcar #'ensure-list bindings))
         (*environment* (copy-lexenv *environment*)))
-    (js!selfcall
-      (let ((specials (remove-if-not #'special-variable-p (mapcar #'first bindings)))
-            (body `(code ,@(mapcar #'let*-initialize-value bindings)
-                         ,(ls-compile-block body t t))))
-        (let*-binding-wrapper specials body)))))
+    (let ((specials (remove-if-not #'special-variable-p (mapcar #'first bindings)))
+          (body `(progn
+                   ,@(mapcar #'let*-initialize-value bindings)
+                   ,(ls-compile-block body t t))))
+      `(selfcall ,(let*-binding-wrapper specials body)))))
 
 
 (define-compilation block (name &rest body)
@@ -757,21 +751,19 @@
     (let* ((*environment* (extend-lexenv (list b) *environment* 'block))
            (cbody (ls-compile-block body t)))
       (if (member 'used (binding-declarations b))
-          (js!selfcall
-            "try {"
-            "var " idvar " = [];"
-            `(code ,cbody)
-            "}"
-            "catch (cf){"
-            "    if (cf.type == 'block' && cf.id == " idvar ")"
-            (if *multiple-value-p*
-                "        return values.apply(this, forcemv(cf.values));"
-                "        return cf.values;")
-
-            "    else"
-            "        throw cf;"
-            "}" )
-          (js!selfcall cbody)))))
+          `(selfcall
+            (try
+             (var (,(make-symbol idvar) #()))
+             ,cbody)
+            (catch (cf)
+              (if (and (== (get cf "type") "block")
+                       (== (get cf "id") ,(make-symbol idvar)))
+                  ,(if *multiple-value-p*
+                       `(return (call (get |values| "apply") this (call |forcemv| (get cf "values"))))
+                       `(return (get cf "values")))
+                  (throw cf))))
+          ;; TODO: is selfcall necessary here?
+          `(selfcall ,cbody)))))
 
 (define-compilation return-from (name &optional value)
   (let* ((b (lookup-in-lexenv name *environment* 'block))
@@ -860,10 +852,7 @@
                                (if (go-tag-p form)
                                    (let ((b (lookup-in-lexenv form *environment* 'gotag)))
                                      (collect `(case ,(second (binding-value b)))))
-                                   (progn
-                                     (collect (ls-compile form))
-                                     ;; TEMPORAL!
-                                     (collect '(code ";"))))))
+                                   (collect (ls-compile form)))))
                           default
                           (break tbloop)))
                  (catch (jump)
@@ -920,9 +909,7 @@
   `(selfcall
     (var (args ,(ls-compile first-form *multiple-value-p*)))
     ;; TODO: Interleave is temporal
-    (progn ,@(interleave (mapcar #'ls-compile forms)
-                         '(code ";")
-                         t))
+    (progn ,@(mapcar #'ls-compile forms))
     (return args)))
 
 (define-transformation backquote (form)
@@ -1398,12 +1385,10 @@
       (parse-body sexps :declarations decls-allowed-p)
     (declare (ignore decls))
     (if return-last-p
-        `(code ,(ls-compile-block (butlast sexps) nil decls-allowed-p)
-               "return " ,(ls-compile (car (last sexps)) *multiple-value-p*) ";")
-        `(code
-          ,@(interleave (mapcar #'ls-compile sexps) ";
-" *newline*)
-          ";" ,*newline*))))
+        `(progn
+           ,@(mapcar #'ls-compile (butlast sexps))
+           (return ,(ls-compile (car (last sexps)) *multiple-value-p*)))
+        `(progn ,@(mapcar #'ls-compile sexps)))))
 
 (defun ls-compile* (sexp &optional multiple-value-p)
   (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
@@ -1416,7 +1401,7 @@
          (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
            (cond
              ((and b (not (member 'special (binding-declarations b))))
-              (binding-value b))
+              (make-symbol (binding-value b)))
              ((or (keywordp sexp)
                   (and b (member 'constant (binding-declarations b))))
               `(get ,(ls-compile `',sexp) "value"))
@@ -1443,7 +1428,7 @@
          (error "How should I compile `~S'?" sexp))))))
 
 (defun ls-compile (sexp &optional multiple-value-p)
-  `(code "(" ,(ls-compile* sexp multiple-value-p) ")"))
+  (ls-compile* sexp multiple-value-p))
 
 
 (defvar *compile-print-toplevels* nil)
@@ -1469,9 +1454,9 @@
            (format t "Compiling ~a..." (truncate-string form-string))))
        (let ((code (ls-compile sexp multiple-value-p)))
          `(progn
-            ,@(interleave (get-toplevel-compilations) '(code ";
-") t)
-            (code ,code ";")))))))
+            ,@(get-toplevel-compilations)
+            (code ,code ";
+")))))))
 
 (defun ls-compile-toplevel (sexp &optional multiple-value-p)
   (with-output-to-string (*standard-output*)
