@@ -736,7 +736,6 @@
                        `(return (method-call |values| "apply" this (call |forcemv| (get cf "values"))))
                        `(return (get cf "values")))
                   (throw cf))))
-          ;; TODO: is selfcall necessary here?
           `(selfcall ,cbody)))))
 
 (define-compilation return-from (name &optional value)
