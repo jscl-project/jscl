@@ -545,9 +545,9 @@
                dumped
                (let ((jsvar (genlit)))
                  (push (cons sexp jsvar) *literal-table*)
-                 (toplevel-compilation `(code "var " ,jsvar " = " ,dumped))
+                 (toplevel-compilation `(var (,(make-symbol jsvar) ,dumped)))
                  (when (keywordp sexp)
-                   (toplevel-compilation `(code ,jsvar ".value = " ,jsvar)))
+                   (toplevel-compilation `(= ,(get (make-symbol jsvar) "value") ,(make-symbol jsvar))))
                  jsvar)))))))
 
 
