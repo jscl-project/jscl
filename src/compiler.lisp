@@ -998,9 +998,7 @@
 (defmacro variable-arity (args &body body)
   (unless (symbolp args)
     (error "`~S' is not a symbol." args))
-  `(variable-arity-call ,args
-                        (lambda (,args)
-                          `(code "return " ,,@body ";" ))))
+  `(variable-arity-call ,args (lambda (,args) `(return  ,,@body))))
 
 (defun num-op-num (x op y)
   (type-check (("x" "number" x) ("y" "number" y))
