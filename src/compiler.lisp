@@ -53,15 +53,6 @@
                     (js-expr arg)))))
              args))
 
-;;; Concatenate the arguments and wrap them with a self-calling
-;;; Javascript anonymous function. It is used to make some Javascript
-;;; statements valid expressions and provide a private scope as well.
-;;; It could be defined as function, but we could do some
-;;; preprocessing in the future.
-(defmacro js!selfcall (&body body)
-  ``(call (function nil (code ,,@body))))
-
-
 ;;; Like CODE, but prefix each line with four spaces. Two versions
 ;;; of this function are available, because the Ecmalisp version is
 ;;; very slow and bootstraping was annoying.
