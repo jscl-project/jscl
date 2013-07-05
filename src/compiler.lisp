@@ -23,6 +23,10 @@
 (define-js-macro selfcall (&body body)
   `(call (function () ,@body)))
 
+(define-js-macro bool (expr)
+  `(if ,expr ,(ls-compile t) ,(ls-compile nil)))
+
+
 ;;; Translate the Lisp code to Javascript. It will compile the special
 ;;; forms. Some primitive functions are compiled as special forms
 ;;; too. The respective real functions are defined in the target (see
@@ -1027,7 +1031,7 @@
 (define-builtin-comparison /= !=)
 
 (define-builtin numberp (x)
-  (js!bool `(== (typeof ,x) "number")))
+  `(bool (== (typeof ,x) "number")))
 
 (define-builtin floor (x)
   `(call (get |Math| |floor|) ,x))
@@ -1042,11 +1046,10 @@
   `(object "car" ,x "cdr" ,y))
 
 (define-builtin consp (x)
-  (js!bool
-   `(selfcall
-     (var (tmp ,x))
-     (return (and (== (typeof tmp) "object")
-                  (in "car" tmp))))))
+  `(selfcall
+    (var (tmp ,x))
+    (return (bool (and (== (typeof tmp) "object")
+                       (in "car" tmp))))))
 
 (define-builtin car (x)
   `(selfcall
@@ -1069,7 +1072,7 @@
   `(= (get ,x "cdr") ,new))
 
 (define-builtin symbolp (x)
-  (js!bool `(instanceof ,x |Symbol|)))
+  `(bool (instanceof ,x |Symbol|)))
 
 (define-builtin make-symbol (name)
   `(new (call |Symbol| ,name)))
@@ -1084,10 +1087,10 @@
   `(= (get ,symbol "fvalue") ,value))
 
 (define-builtin boundp (x)
-  (js!bool `(!== (get ,x "value") undefined)))
+  `(bool (!== (get ,x "value") undefined)))
 
 (define-builtin fboundp (x)
-  (js!bool `(!== (get ,x "fvalue") undefined)))
+  `(bool (!== (get ,x "fvalue") undefined)))
 
 (define-builtin symbol-value (x)
   `(selfcall
@@ -1112,7 +1115,7 @@
   `(call |make_lisp_string| (call (get ,x "toString"))))
 
 (define-builtin eq (x y)
-  (js!bool `(=== ,x ,y)))
+  `(bool (=== ,x ,y)))
 
 (define-builtin char-code (x)
   `(call |char_to_codepoint| ,x))
@@ -1121,10 +1124,10 @@
   `(call |char_from_codepoint| ,x))
 
 (define-builtin characterp (x)
-  (js!bool
-   `(selfcall
-     (var (x ,x))
-     (return (and (== (typeof x) "string")
+  `(selfcall
+    (var (x ,x))
+    (return (bool
+             (and (== (typeof x) "string")
                   (or (== (get x "length") 1)
                       (== (get x "length") 2)))))))
 
@@ -1135,10 +1138,10 @@
   `(call |safe_char_downcase| ,x))
 
 (define-builtin stringp (x)
-  (js!bool
-   `(selfcall
-     (var (x ,x))
-     (return (and (and (===(typeof x) "object")
+  `(selfcall
+    (var (x ,x))
+    (return (bool
+             (and (and (===(typeof x) "object")
                        (in "length" x))
                   (== (get x "stringp") 1))))))
 
@@ -1186,7 +1189,7 @@
   `(selfcall (throw ,string)))
 
 (define-builtin functionp (x)
-  (js!bool `(=== (typeof ,x) "function")))
+  `(bool (=== (typeof ,x) "function")))
 
 (define-builtin %write-string (x)
   `(call (get |lisp| "write") ,x))
@@ -1199,10 +1202,9 @@
 ;;; future) structures.
 
 (define-builtin storage-vector-p (x)
-  (js!bool
-   `(selfcall
-     (var (x ,x))
-     (return (and (=== (typeof x) "object") (in "length" x))))))
+  `(selfcall
+    (var (x ,x))
+    (return (bool (and (=== (typeof x) "object") (in "length" x))))))
 
 (define-builtin make-storage-vector (n)
   `(selfcall
@@ -1292,14 +1294,14 @@
   (ls-compile `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
 
 (define-builtin objectp (x)
-  (js!bool `(=== (typeof ,x) "object")))
+  `(bool (=== (typeof ,x) "object")))
 
 (define-builtin lisp-to-js (x) `(call |lisp_to_js| ,x))
 (define-builtin js-to-lisp (x) `(call |js_to_lisp| ,x))
 
 
 (define-builtin in (key object)
-  (js!bool `(in (call |xstring| ,key) ,object)))
+  `(bool (in (call |xstring| ,key) ,object)))
 
 (define-builtin map-for-in (function object)
   `(selfcall
