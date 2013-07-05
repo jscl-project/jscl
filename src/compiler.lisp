@@ -826,7 +826,7 @@
   (let* ((go-tag-counter 0)
          (bindings
           (mapcar (lambda (label)
-                    (let ((tagidx (integer-to-string (incf go-tag-counter))))
+                    (let ((tagidx (incf go-tag-counter)))
                       (make-binding :name label :type 'gotag :value (list tbidx tagidx))))
                   (remove-if-not #'go-tag-p body))))
     (extend-lexenv bindings *environment* 'gotag)))
@@ -883,13 +883,13 @@
              ((integerp label) (integer-to-string label)))))
     (when (null b)
       (error "Unknown tag `~S'" label))
-    (js!selfcall
-      "throw ({"
-      "type: 'tagbody', "
-      "id: " (first (binding-value b)) ", "
-      "label: " (second (binding-value b)) ", "
-      "message: 'Attempt to GO to non-existing tag " n "'"
-      "})" )))
+    (js!selfcall*
+      `(throw
+           (object
+            "type" "tagbody"
+            "id" ,(make-symbol (first (binding-value b)))
+            "label" ,(second (binding-value b))
+            "message" ,(concat "Attempt to GO to non-existing tag " n))))))
 
 (define-compilation unwind-protect (form &rest clean-up)
   (js!selfcall*
