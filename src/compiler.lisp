@@ -94,7 +94,7 @@
 (defun gvarname (symbol)
   (declare (ignore symbol))
   (incf *variable-counter*)
-  (concat "v" (integer-to-string *variable-counter*)))
+  (make-symbol (concat "v" (integer-to-string *variable-counter*))))
 
 (defun translate-variable (symbol)
   (awhen (lookup-in-lexenv symbol *environment* 'variable)
@@ -257,10 +257,10 @@
                   (dotimes (idx n-optional-arguments)
                     (let ((arg (nth idx optional-arguments)))
                       (collect `(case ,(+ idx n-required-arguments)))
-                      (collect `(= ,(make-symbol (translate-variable (car arg)))
+                      (collect `(= ,(translate-variable (car arg))
                                    ,(convert (cadr arg))))
                       (collect (when (third arg)
-                                 `(= ,(make-symbol (translate-variable (third arg)))
+                                 `(= ,(translate-variable (third arg))
                                      ,(convert nil))))))
                   (collect 'default)
                   (collect '(break)))))))
@@ -270,7 +270,7 @@
 	(n-optional-arguments (length (ll-optional-arguments ll)))
 	(rest-argument (ll-rest-argument ll)))
     (when rest-argument
-      (let ((js!rest (make-symbol (translate-variable rest-argument))))
+      (let ((js!rest (translate-variable rest-argument)))
         `(progn
            (var (,js!rest ,(convert nil)))
            (var i)
@@ -294,10 +294,10 @@
             (destructuring-bind ((keyword-name var) &optional initform svar)
                 keyword-argument
               (declare (ignore keyword-name initform))
-              (collect `(var ,(make-symbol (translate-variable var))))
+              (collect `(var ,(translate-variable var)))
               (when svar
                 (collect
-                    `(var (,(make-symbol (translate-variable svar))
+                    `(var (,(translate-variable svar)
                             ,(convert nil))))))))
        
        ;; Parse keywords
@@ -312,14 +312,13 @@
                           (if (=== (property |arguments| (+ i 2))
                                    ,(convert keyword-name))
                               (progn
-                                (= ,(make-symbol (translate-variable var))
+                                (= ,(translate-variable var)
                                    (property |arguments| (+ i 3)))
-                                ,(when svar `(= ,(make-symbol (translate-variable svar))
+                                ,(when svar `(= ,(translate-variable svar)
                                                 ,(convert t)))
                                 (break))))
                      (if (== i |nargs|)
-                         (= ,(make-symbol (translate-variable var))
-                            ,(convert initform)))))))
+                         (= ,(translate-variable var) ,(convert initform)))))))
          (when keyword-arguments
            `(progn
               (var i)
@@ -395,7 +394,7 @@
                                     (ll-svars ll)))))
         (lambda-name/docstring-wrapper name documentation
          `(function (|values| |nargs| ,@(mapcar (lambda (x)
-                                                  (make-symbol (translate-variable x)))
+                                                  (translate-variable x))
                                                 (append required-arguments optional-arguments)))
                      ;; Check number of arguments
                     ,(lambda-check-argument-count n-required-arguments
@@ -420,7 +419,7 @@
             (not (member 'constant (binding-declarations b))))
        ;; TODO: Unnecesary make-symbol when codegen migration is
        ;; finished.
-       `(= ,(make-symbol (binding-value b)) ,(convert val)))
+       `(= ,(binding-value b) ,(convert val)))
       ((and b (eq (binding-type b) 'macro))
        (convert `(setf ,var ,val)))
       (t
@@ -470,7 +469,7 @@
 
 (defun genlit ()
   (incf *literal-counter*)
-  (concat "l" (integer-to-string *literal-counter*)))
+  (make-symbol (concat "l" (integer-to-string *literal-counter*))))
 
 (defun dump-symbol (symbol)
   #-jscl
@@ -523,11 +522,11 @@
            (if (and recursive (not (symbolp sexp)))
                dumped
                (let ((jsvar (genlit)))
-                 (push (cons sexp (make-symbol jsvar)) *literal-table*)
-                 (toplevel-compilation `(var (,(make-symbol jsvar) ,dumped)))
+                 (push (cons sexp jsvar) *literal-table*)
+                 (toplevel-compilation `(var (,jsvar ,dumped)))
                  (when (keywordp sexp)
-                   (toplevel-compilation `(= ,(get (make-symbol jsvar) "value") ,(make-symbol jsvar))))
-                 (make-symbol jsvar))))))))
+                   (toplevel-compilation `(= ,(get jsvar "value") ,jsvar)))
+                 jsvar)))))))
 
 
 (define-compilation quote (sexp)
@@ -554,7 +553,7 @@
     ((symbolp x)
      (let ((b (lookup-in-lexenv x *environment* 'function)))
        (if b
-	   (make-symbol (binding-value b))
+	   (binding-value b)
 	   (convert `(symbol-function ',x)))))))
 
 (defun make-function-binding (fname)
@@ -578,7 +577,7 @@
           (extend-lexenv (mapcar #'make-function-binding fnames)
                          *environment*
                          'function)))
-    `(call (function ,(mapcar #'make-symbol (mapcar #'translate-function fnames))
+    `(call (function ,(mapcar #'translate-function fnames)
                 ,(convert-block body t))
            ,@cfuncs)))
 
@@ -590,7 +589,7 @@
                          'function)))
     `(selfcall
       ,@(mapcar (lambda (func)
-                  `(var (,(make-symbol (translate-function (car func)))
+                  `(var (,(translate-function (car func))
                           ,(compile-lambda (cadr func)
                                            `((block ,(car func) ,@(cddr func)))))))
                 definitions)
@@ -664,9 +663,9 @@
     `(call (function ,(mapcar (lambda (x)
                                 (if (special-variable-p x)
                                     (let ((v (gvarname x)))
-                                      (push (cons x (make-symbol v)) dynamic-bindings)
-                                      (make-symbol v))
-                                    (make-symbol (translate-variable x))))
+                                      (push (cons x v) dynamic-bindings)
+                                      v)
+                                    (translate-variable x)))
                               variables)
                      ,(let ((body (convert-block body t t)))
                            `,(let-binding-wrapper dynamic-bindings body)))
@@ -682,7 +681,7 @@
         (convert `(setq ,var ,value))
         (let* ((v (gvarname var))
                (b (make-binding :name var :type 'variable :value v)))
-          (prog1 `(var (,(make-symbol v) ,(convert value)))
+          (prog1 `(var (,v ,(convert value)))
             (push-to-lexenv b *environment* 'variable))))))
 
 ;;; Wrap BODY to restore the symbol values of SYMBOLS after body. It
@@ -697,13 +696,13 @@
        (try
         ,@(mapcar (lambda (b)
                     (let ((s (convert `(quote ,(car b)))))
-                      `(var (,(make-symbol (cdr b)) (get ,s "value")))))
+                      `(var (,(cdr b) (get ,s "value")))))
                   store)
         ,body)
        (finally
         ,@(mapcar (lambda (b)
                     (let ((s (convert `(quote ,(car b)))))
-                      `(= (get ,s "value") ,(make-symbol (cdr b)))))
+                      `(= (get ,s "value") ,(cdr b))))
                   store)))))
 
 (define-compilation let* (bindings &rest body)
@@ -732,11 +731,11 @@
       (if (member 'used (binding-declarations b))
           `(selfcall
             (try
-             (var (,(make-symbol idvar) #()))
+             (var (,idvar #()))
              ,cbody)
             (catch (cf)
               (if (and (== (get cf "type") "block")
-                       (== (get cf "id") ,(make-symbol idvar)))
+                       (== (get cf "id") ,idvar))
                   ,(if *multiple-value-p*
                        `(return (call (get |values| "apply") this (call |forcemv| (get cf "values"))))
                        `(return (get cf "values")))
@@ -759,7 +758,7 @@
       (throw
           (object
            "type" "block"
-           "id" ,(make-symbol (binding-value b))
+           "id" ,(binding-value b)
            "values" ,(convert value multiple-value-p)
            "message" ,(concat "Return from unknown block '" (symbol-name name) "'."))))))
 
@@ -819,12 +818,12 @@
         (setq initag (second (binding-value b))))
       `(selfcall
         ;; TAGBODY branch to take
-        (var (,(make-symbol branch) ,initag))
-        (var (,(make-symbol tbidx) #()))
+        (var (,branch ,initag))
+        (var (,tbidx #()))
         (label tbloop
                (while true
                  (try
-                  (switch ,(make-symbol branch)
+                  (switch ,branch
                           ,@(with-collect
                              (collect `(case ,initag))
                              (dolist (form (cdr body))
@@ -836,8 +835,8 @@
                           (break tbloop)))
                  (catch (jump)
                    (if (and (== (get jump "type") "tagbody")
-                            (== (get jump "id") ,(make-symbol tbidx)))
-                       (= ,(make-symbol branch) (get jump "label"))
+                            (== (get jump "id") ,tbidx))
+                       (= ,branch (get jump "label"))
                        (throw jump)))))
         (return ,(convert nil))))))
 
@@ -852,7 +851,7 @@
       (throw
           (object
            "type" "tagbody"
-           "id" ,(make-symbol (first (binding-value b)))
+           "id" ,(first (binding-value b))
            "label" ,(second (binding-value b))
            "message" ,(concat "Attempt to GO to non-existing tag " n))))))
 
@@ -1345,7 +1344,7 @@
       (error "Bad function designator `~S'" function))
     (cond
       ((translate-function function)
-       `(call ,(make-symbol (translate-function function)) ,@arglist))
+       `(call ,(translate-function function) ,@arglist))
       ((and (symbolp function)
             #+jscl (eq (symbol-package function) (find-package "COMMON-LISP"))
             #-jscl t)
@@ -1380,7 +1379,7 @@
          (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
            (cond
              ((and b (not (member 'special (binding-declarations b))))
-              (make-symbol (binding-value b)))
+              (binding-value b))
              ((or (keywordp sexp)
                   (and b (member 'constant (binding-declarations b))))
               `(get ,(convert `',sexp) "value"))
