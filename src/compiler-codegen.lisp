@@ -37,11 +37,11 @@
 (defun js-macroexpand (js)
   (if (and (consp js) (assoc (car js) *js-macros*))
       (let ((expander (cdr (assoc (car js) *js-macros*))))
-        (multiple-value-bind (expansion expand-more-p)
+        (multiple-value-bind (expansion stop-expand-p)
             (funcall expander (cdr js))
-          (if expand-more-p
-              (js-macroexpand expansion)
-              expansion)))
+          (if stop-expand-p
+              expansion
+              (js-macroexpand expansion))))
       js))
 
 
