@@ -1186,24 +1186,26 @@
 
 (define-raw-builtin apply (func &rest args)
   (if (null args)
-      `(code "(" ,(ls-compile func) ")()")
+      (ls-compile func)
       (let ((args (butlast args))
             (last (car (last args))))
-        (js!selfcall
-          "var f = " (ls-compile func) ";"
-          "var args = [" `(code
-                           ,@(interleave (list* (if *multiple-value-p* "values" "pv")
-                                                (integer-to-string (length args))
-                                                (mapcar #'ls-compile args))
-                                         ", "))
-          "];"
-          "var tail = (" (ls-compile last) ");"
-          "while (tail != " (ls-compile nil) "){"
-          "    args.push(tail.car);"
-          "    args[1] += 1;"
-          "    tail = tail.cdr;"
-          "}"
-          "return (typeof f === 'function'? f : f.fvalue).apply(this, args);" ))))
+        (js!selfcall*
+          `(var (f ,(ls-compile func)))
+          `(var (args ,(list-to-vector
+                        (list* (if *multiple-value-p* '|values| '|pv|)
+                               (length args)
+                               (mapcar #'ls-compile args)))))
+          `(var (tail ,(ls-compile last)))
+          `(while (!= tail ,(ls-compile nil))
+             (call (get args "push") (get tail "car"))
+             (post++ (property args 1))
+             (= tail (get tail "cdr")))
+          `(return (call (get (if (=== (typeof f) "function")
+                                  f
+                                  (get f "fvalue"))
+                              "apply")
+                         this
+                         args))))))
 
 (define-builtin js-eval (string)
   (if *multiple-value-p*
