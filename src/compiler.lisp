@@ -901,22 +901,22 @@
 
 (define-compilation multiple-value-call (func-form &rest forms)
   (js!selfcall*
-    `(var (func ,(ls-compile func-form))
-          (args ,(vector (if *multiple-value-p* '|values| '|pv|) 0))
-          (|values| |mv|)
-          vs)
-    `(progn
-       ,@(mapcar (lambda (form)
-                   `(progn
-                      (= vs ,(ls-compile form t))
-                      (if (and (=== (typeof vs) "object")
-                               (in "multiple-value" vs))
-                          (= args (call (get args "concat") vs))
-                          (call (get args "push") vs))))
-                 forms))
-    `(= (property args 1) (- (get args "length") 2))
-    `(return (call (get func "apply") |window| args))))
-
+    `(var (func ,(ls-compile func-form)))
+    `(var (args ,(vector (if *multiple-value-p* '|values| '|pv|) 0)))
+    `(return
+       ,(js!selfcall*
+         `(var (|values| |mv|))
+         `(var vs)
+         `(progn
+            ,@(with-collect
+               (dolist (form forms)
+                 (collect `(= vs ,(ls-compile form t)))
+                 (collect `(if (and (=== (typeof vs) "object")
+                                    (in "multiple-value" vs))
+                               (= args (call (get args "concat") vs))
+                               (call (get args "push") vs))))))
+         `(= (property args 1) (- (property args "length") 2))
+         `(return (call (get func "apply") |window| args))))))
 
 (define-compilation multiple-value-prog1 (first-form &rest forms)
   (js!selfcall
