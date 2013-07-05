@@ -24,7 +24,7 @@
   `(call (function () ,@body)))
 
 (define-js-macro bool (expr)
-  `(if ,expr ,(ls-compile t) ,(ls-compile nil)))
+  `(if ,expr ,(convert t) ,(convert nil)))
 
 ;;; Translate the Lisp code to Javascript. It will compile the special
 ;;; forms. Some primitive functions are compiled as special forms
@@ -116,7 +116,7 @@
   (reverse *toplevel-compilations*))
 
 (defun %compile-defmacro (name lambda)
-  (toplevel-compilation (ls-compile `',name))
+  (toplevel-compilation (convert `',name))
   (let ((binding (make-binding :name name :type 'macro :value lambda)))
     (push-to-lexenv binding  *environment* 'function))
   name)
@@ -171,9 +171,9 @@
          *compilations*))
 
 (define-compilation if (condition true &optional false)
-  `(if (!== ,(ls-compile condition) ,(ls-compile nil))
-       ,(ls-compile true *multiple-value-p*)
-       ,(ls-compile false *multiple-value-p*)))
+  `(if (!== ,(convert condition) ,(convert nil))
+       ,(convert true *multiple-value-p*)
+       ,(convert false *multiple-value-p*)))
 
 (defvar *ll-keywords* '(&optional &rest &key))
 
@@ -258,10 +258,10 @@
                     (let ((arg (nth idx optional-arguments)))
                       (collect `(case ,(+ idx n-required-arguments)))
                       (collect `(= ,(make-symbol (translate-variable (car arg)))
-                                   ,(ls-compile (cadr arg))))
+                                   ,(convert (cadr arg))))
                       (collect (when (third arg)
                                  `(= ,(make-symbol (translate-variable (third arg)))
-                                     ,(ls-compile nil))))))
+                                     ,(convert nil))))))
                   (collect 'default)
                   (collect '(break)))))))
 
@@ -272,7 +272,7 @@
     (when rest-argument
       (let ((js!rest (make-symbol (translate-variable rest-argument))))
         `(progn
-           (var (,js!rest ,(ls-compile nil)))
+           (var (,js!rest ,(convert nil)))
            (var i)
            (for ((= i (- |nargs| 1))
                  (>= i ,(+ n-required-arguments n-optional-arguments))
@@ -298,7 +298,7 @@
               (when svar
                 (collect
                     `(var (,(make-symbol (translate-variable svar))
-                            ,(ls-compile nil))))))))
+                            ,(convert nil))))))))
        
        ;; Parse keywords
        ,(flet ((parse-keyword (keyarg)
@@ -310,16 +310,16 @@
                            (+= i 2))
                           ;; ....
                           (if (=== (property |arguments| (+ i 2))
-                                   ,(ls-compile keyword-name))
+                                   ,(convert keyword-name))
                               (progn
                                 (= ,(make-symbol (translate-variable var))
                                    (property |arguments| (+ i 3)))
                                 ,(when svar `(= ,(make-symbol (translate-variable svar))
-                                                ,(ls-compile t)))
+                                                ,(convert t)))
                                 (break))))
                      (if (== i |nargs|)
                          (= ,(make-symbol (translate-variable var))
-                            ,(ls-compile initform)))))))
+                            ,(convert initform)))))))
          (when keyword-arguments
            `(progn
               (var i)
@@ -336,7 +336,7 @@
                                  (destructuring-bind ((keyword-name var) &optional initform svar)
                                      keyword-argument
                                    (declare (ignore var initform svar))
-                                   `(!== (property |arguments| (+ i 2)) ,(ls-compile keyword-name))))
+                                   `(!== (property |arguments| (+ i 2)) ,(convert keyword-name))))
                                keyword-arguments))
                      (throw (+ "Unknown keyword argument "
                                (call |xstring|
@@ -407,8 +407,8 @@
 
                     ,(let ((*multiple-value-p* t))
                           (if block
-                              (ls-compile-block `((block ,block ,@body)) t)
-                              (ls-compile-block body t)))))))))
+                              (convert-block `((block ,block ,@body)) t)
+                              (convert-block body t)))))))))
 
 
 (defun setq-pair (var val)
@@ -420,17 +420,17 @@
             (not (member 'constant (binding-declarations b))))
        ;; TODO: Unnecesary make-symbol when codegen migration is
        ;; finished.
-       `(= ,(make-symbol (binding-value b)) ,(ls-compile val)))
+       `(= ,(make-symbol (binding-value b)) ,(convert val)))
       ((and b (eq (binding-type b) 'macro))
-       (ls-compile `(setf ,var ,val)))
+       (convert `(setf ,var ,val)))
       (t
-       (ls-compile `(set ',var ,val))))))
+       (convert `(set ',var ,val))))))
 
 
 (define-compilation setq (&rest pairs)
   (let ((result nil))
     (when (null pairs)
-      (return-from setq (ls-compile nil)))
+      (return-from setq (convert nil)))
     (while t
       (cond
 	((null pairs)
@@ -482,7 +482,7 @@
   (let ((package (symbol-package symbol)))
     (if (null package)
         `(new (call |Symbol| ,(dump-string (symbol-name symbol))))
-        (ls-compile `(intern ,(symbol-name symbol) ,(package-name package))))))
+        (convert `(intern ,(symbol-name symbol) ,(package-name package))))))
 
 (defun dump-cons (cons)
   (let ((head (butlast cons))
@@ -517,7 +517,7 @@
                           ;; `dump-global-environment' for futher
                           ;; information.
                           (if (eq (car sexp) *magic-unquote-marker*)
-                              (ls-compile (second sexp))
+                              (convert (second sexp))
                               (dump-cons sexp)))
                          (array (dump-array sexp)))))
            (if (and recursive (not (symbolp sexp)))
@@ -535,12 +535,12 @@
 
 (define-compilation %while (pred &rest body)
   `(selfcall
-    (while (!== ,(ls-compile pred) ,(ls-compile nil))
+    (while (!== ,(convert pred) ,(convert nil))
       0                                 ; TODO: Force
                                         ; braces. Unnecesary when code
                                         ; is gone
-      ,(ls-compile-block body))
-    (return ,(ls-compile nil))))
+      ,(convert-block body))
+    (return ,(convert nil))))
 
 (define-compilation function (x)
   (cond
@@ -555,7 +555,7 @@
      (let ((b (lookup-in-lexenv x *environment* 'function)))
        (if b
 	   (make-symbol (binding-value b))
-	   (ls-compile `(symbol-function ',x)))))))
+	   (convert `(symbol-function ',x)))))))
 
 (defun make-function-binding (fname)
   (make-binding :name fname :type 'function :value (gvarname fname)))
@@ -579,7 +579,7 @@
                          *environment*
                          'function)))
     `(call (function ,(mapcar #'make-symbol (mapcar #'translate-function fnames))
-                ,(ls-compile-block body t))
+                ,(convert-block body t))
            ,@cfuncs)))
 
 (define-compilation labels (definitions &rest body)
@@ -594,7 +594,7 @@
                           ,(compile-lambda (cadr func)
                                            `((block ,(car func) ,@(cddr func)))))))
                 definitions)
-      ,(ls-compile-block body t))))
+      ,(convert-block body t))))
 
 
 (defvar *compiling-file* nil)
@@ -602,19 +602,19 @@
   (if *compiling-file*
       (progn
         (eval (cons 'progn body))
-        (ls-compile 0))
-      (ls-compile `(progn ,@body))))
+        (convert 0))
+      (convert `(progn ,@body))))
 
 (defmacro define-transformation (name args form)
   `(define-compilation ,name ,args
-     (ls-compile ,form)))
+     (convert ,form)))
 
 (define-compilation progn (&rest body)
   (if (null (cdr body))
-      (ls-compile (car body) *multiple-value-p*)
+      (convert (car body) *multiple-value-p*)
       `(progn
-         ,@(append (mapcar #'ls-compile (butlast body))
-                   (list (ls-compile (car (last body)) t))))))
+         ,@(append (mapcar #'convert (butlast body))
+                   (list (convert (car (last body)) t))))))
 
 (define-compilation macrolet (definitions &rest body)
   (let ((*environment* (copy-lexenv *environment*)))
@@ -626,7 +626,7 @@
                                           (destructuring-bind ,lambda-list ,g!form
                                             ,@body))))))
           (push-to-lexenv binding  *environment* 'function))))
-    (ls-compile `(progn ,@body) *multiple-value-p*)))
+    (convert `(progn ,@body) *multiple-value-p*)))
 
 
 (defun special-variable-p (x)
@@ -644,7 +644,7 @@
      (try (var tmp)
           ,@(with-collect
              (dolist (b bindings)
-               (let ((s (ls-compile `',(car b))))
+               (let ((s (convert `',(car b))))
                  (collect `(= tmp (get ,s "value")))
                  (collect `(= (get ,s "value") ,(cdr b)))
                  (collect `(= ,(cdr b) tmp)))))
@@ -652,13 +652,13 @@
      (finally
       ,@(with-collect
          (dolist (b bindings)
-           (let ((s (ls-compile `(quote ,(car b)))))
+           (let ((s (convert `(quote ,(car b)))))
              (collect `(= (get ,s "value") ,(cdr b)))))))))
 
 (define-compilation let (bindings &rest body)
   (let* ((bindings (mapcar #'ensure-list bindings))
          (variables (mapcar #'first bindings))
-         (cvalues (mapcar #'ls-compile (mapcar #'second bindings)))
+         (cvalues (mapcar #'convert (mapcar #'second bindings)))
          (*environment* (extend-local-env (remove-if #'special-variable-p variables)))
          (dynamic-bindings))
     `(call (function ,(mapcar (lambda (x)
@@ -668,7 +668,7 @@
                                       (make-symbol v))
                                     (make-symbol (translate-variable x))))
                               variables)
-                     ,(let ((body (ls-compile-block body t t)))
+                     ,(let ((body (convert-block body t t)))
                            `,(let-binding-wrapper dynamic-bindings body)))
            ,@cvalues)))
 
@@ -679,10 +679,10 @@
   (let ((var (first binding))
         (value (second binding)))
     (if (special-variable-p var)
-        (ls-compile `(setq ,var ,value))
+        (convert `(setq ,var ,value))
         (let* ((v (gvarname var))
                (b (make-binding :name var :type 'variable :value v)))
-          (prog1 `(var (,(make-symbol v) ,(ls-compile value)))
+          (prog1 `(var (,(make-symbol v) ,(convert value)))
             (push-to-lexenv b *environment* 'variable))))))
 
 ;;; Wrap BODY to restore the symbol values of SYMBOLS after body. It
@@ -696,13 +696,13 @@
     `(progn
        (try
         ,@(mapcar (lambda (b)
-                    (let ((s (ls-compile `(quote ,(car b)))))
+                    (let ((s (convert `(quote ,(car b)))))
                       `(var (,(make-symbol (cdr b)) (get ,s "value")))))
                   store)
         ,body)
        (finally
         ,@(mapcar (lambda (b)
-                    (let ((s (ls-compile `(quote ,(car b)))))
+                    (let ((s (convert `(quote ,(car b)))))
                       `(= (get ,s "value") ,(make-symbol (cdr b)))))
                   store)))))
 
@@ -712,7 +712,7 @@
     (let ((specials (remove-if-not #'special-variable-p (mapcar #'first bindings)))
           (body `(progn
                    ,@(mapcar #'let*-initialize-value bindings)
-                   ,(ls-compile-block body t t))))
+                   ,(convert-block body t t))))
       `(selfcall ,(let*-binding-wrapper specials body)))))
 
 
@@ -728,7 +728,7 @@
     (when *multiple-value-p*
       (push 'multiple-value (binding-declarations b)))
     (let* ((*environment* (extend-lexenv (list b) *environment* 'block))
-           (cbody (ls-compile-block body t)))
+           (cbody (convert-block body t)))
       (if (member 'used (binding-declarations b))
           `(selfcall
             (try
@@ -760,14 +760,14 @@
           (object
            "type" "block"
            "id" ,(make-symbol (binding-value b))
-           "values" ,(ls-compile value multiple-value-p)
+           "values" ,(convert value multiple-value-p)
            "message" ,(concat "Return from unknown block '" (symbol-name name) "'."))))))
 
 (define-compilation catch (id &rest body)
   `(selfcall
-    (var (|id| ,(ls-compile id)))
+    (var (|id| ,(convert id)))
     (try
-     ,(ls-compile-block body t))
+     ,(convert-block body t))
     (catch (|cf|)
       (if (and (== (get |cf| "type") "catch")
                (== (get |cf| "id") |id|))
@@ -785,8 +785,8 @@
     (var (|values| |mv|))
     (throw (object
             |type| "catch"
-            |id| ,(ls-compile id)
-            |values| ,(ls-compile value t)
+            |id| ,(convert id)
+            |values| ,(convert value t)
             |message| "Throw uncatched."))))
 
 (defun go-tag-p (x)
@@ -806,7 +806,7 @@
   ;; because 1) it is easy and 2) many built-in forms expand to a
   ;; implicit tagbody, so we save some space.
   (unless (some #'go-tag-p body)
-    (return-from tagbody (ls-compile `(progn ,@body nil))))
+    (return-from tagbody (convert `(progn ,@body nil))))
   ;; The translation assumes the first form in BODY is a label
   (unless (go-tag-p (car body))
     (push (gensym "START") body))
@@ -831,7 +831,7 @@
                                (if (go-tag-p form)
                                    (let ((b (lookup-in-lexenv form *environment* 'gotag)))
                                      (collect `(case ,(second (binding-value b)))))
-                                   (collect (ls-compile form)))))
+                                   (collect (convert form)))))
                           default
                           (break tbloop)))
                  (catch (jump)
@@ -839,7 +839,7 @@
                             (== (get jump "id") ,(make-symbol tbidx)))
                        (= ,(make-symbol branch) (get jump "label"))
                        (throw jump)))))
-        (return ,(ls-compile nil))))))
+        (return ,(convert nil))))))
 
 (define-compilation go (label)
   (let ((b (lookup-in-lexenv label *environment* 'gotag))
@@ -858,16 +858,16 @@
 
 (define-compilation unwind-protect (form &rest clean-up)
   `(selfcall
-    (var (|ret| ,(ls-compile nil)))
+    (var (|ret| ,(convert nil)))
     (try
-     (= |ret| ,(ls-compile form)))
+     (= |ret| ,(convert form)))
     (finally
-     ,(ls-compile-block clean-up))
+     ,(convert-block clean-up))
     (return |ret|)))
 
 (define-compilation multiple-value-call (func-form &rest forms)
   `(selfcall
-    (var (func ,(ls-compile func-form)))
+    (var (func ,(convert func-form)))
     (var (args ,(vector (if *multiple-value-p* '|values| '|pv|) 0)))
     (return
       (selfcall
@@ -876,7 +876,7 @@
        (progn
          ,@(with-collect
             (dolist (form forms)
-              (collect `(= vs ,(ls-compile form t)))
+              (collect `(= vs ,(convert form t)))
               (collect `(if (and (=== (typeof vs) "object")
                                  (in "multiple-value" vs))
                             (= args (call (get args "concat") vs))
@@ -886,9 +886,9 @@
 
 (define-compilation multiple-value-prog1 (first-form &rest forms)
   `(selfcall
-    (var (args ,(ls-compile first-form *multiple-value-p*)))
+    (var (args ,(convert first-form *multiple-value-p*)))
     ;; TODO: Interleave is temporal
-    (progn ,@(mapcar #'ls-compile forms))
+    (progn ,@(mapcar #'convert forms))
     (return args)))
 
 (define-transformation backquote (form)
@@ -908,7 +908,7 @@
 
 (defmacro define-builtin (name args &body body)
   `(define-raw-builtin ,name ,args
-     (let ,(mapcar (lambda (arg) `(,arg (ls-compile ,arg))) args)
+     (let ,(mapcar (lambda (arg) `(,arg (convert ,arg))) args)
        ,@body)))
 
 ;;; VARIABLE-ARITY compiles variable arity operations. ARGS stands for
@@ -927,7 +927,7 @@
           (push x fargs)
           (let ((v (make-symbol (concat "x" (integer-to-string (incf counter))))))
             (push v fargs)
-            (push `(var (,v ,(ls-compile x)))
+            (push `(var (,v ,(convert x)))
                   prelude)
             (push `(if (!= (typeof ,v) "number")
                        (throw "Not a number!"))
@@ -1016,15 +1016,15 @@
 (define-builtin car (x)
   `(selfcall
     (var (tmp ,x))
-    (return (if (=== tmp ,(ls-compile nil))
-                ,(ls-compile nil)
+    (return (if (=== tmp ,(convert nil))
+                ,(convert nil)
                 (get tmp "car")))))
 
 (define-builtin cdr (x)
   `(selfcall
     (var (tmp ,x))
-    (return (if (=== tmp ,(ls-compile nil))
-                ,(ls-compile nil)
+    (return (if (=== tmp ,(convert nil))
+                ,(convert nil)
                 (get tmp "cdr")))))
 
 (define-builtin rplaca (x new)
@@ -1071,7 +1071,7 @@
     (return func)))
 
 (define-builtin symbol-plist (x)
-  `(or (get ,x "plist") ,(ls-compile nil)))
+  `(or (get ,x "plist") ,(convert nil)))
 
 (define-builtin lambda-code (x)
   `(call |make_lisp_string| (call (get ,x "toString"))))
@@ -1109,27 +1109,27 @@
 
 (define-raw-builtin funcall (func &rest args)
   `(selfcall
-    (var (f ,(ls-compile func)))
+    (var (f ,(convert func)))
     (return (call (if (=== (typeof f) "function")
                       f
                       (get f "fvalue"))
                   ,@(list* (if *multiple-value-p* '|values| '|pv|)
                            (length args)
-                           (mapcar #'ls-compile args))))))
+                           (mapcar #'convert args))))))
 
 (define-raw-builtin apply (func &rest args)
   (if (null args)
-      (ls-compile func)
+      (convert func)
       (let ((args (butlast args))
             (last (car (last args))))
         `(selfcall
-           (var (f ,(ls-compile func)))
+           (var (f ,(convert func)))
            (var (args ,(list-to-vector
                         (list* (if *multiple-value-p* '|values| '|pv|)
                                (length args)
-                               (mapcar #'ls-compile args)))))
-           (var (tail ,(ls-compile last)))
-           (while (!= tail ,(ls-compile nil))
+                               (mapcar #'convert args)))))
+           (var (tail ,(convert last)))
+           (while (!= tail ,(convert nil))
              (call (get args "push") (get tail "car"))
              (post++ (property args 1))
              (= tail (get tail "cdr")))
@@ -1212,8 +1212,8 @@
 
 (define-raw-builtin values (&rest args)
   (if *multiple-value-p*
-      `(call |values| ,@(mapcar #'ls-compile args))
-      `(call |pv| ,@(mapcar #'ls-compile args))))
+      `(call |values| ,@(mapcar #'convert args))
+      `(call |pv| ,@(mapcar #'convert args))))
 
 ;;; Javascript FFI
 
@@ -1223,37 +1223,37 @@
 (define-raw-builtin oget* (object key &rest keys)
   `(selfcall
     (progn
-      (var (tmp (property ,(ls-compile object) (call |xstring| ,(ls-compile key)))))
+      (var (tmp (property ,(convert object) (call |xstring| ,(convert key)))))
       ,@(mapcar (lambda (key)
                   `(progn
-                     (if (=== tmp undefined) (return ,(ls-compile nil)))
-                     (= tmp (property tmp (call |xstring| ,(ls-compile key))))))
+                     (if (=== tmp undefined) (return ,(convert nil)))
+                     (= tmp (property tmp (call |xstring| ,(convert key))))))
                 keys))
-    (return (if (=== tmp undefined) ,(ls-compile nil) tmp))))
+    (return (if (=== tmp undefined) ,(convert nil) tmp))))
 
 (define-raw-builtin oset* (value object key &rest keys)
   (let ((keys (cons key keys)))
     `(selfcall
       (progn
-        (var (obj ,(ls-compile object)))
+        (var (obj ,(convert object)))
         ,@(mapcar (lambda (key)
                     `(progn
-                       (= obj (property obj (call |xstring| ,(ls-compile key))))
+                       (= obj (property obj (call |xstring| ,(convert key))))
                        (if (=== object undefined)
                            (throw "Impossible to set object property."))))
                   (butlast keys))
         (var (tmp
-              (= (property obj (call |xstring| ,(ls-compile (car (last keys)))))
-                 ,(ls-compile value))))
+              (= (property obj (call |xstring| ,(convert (car (last keys)))))
+                 ,(convert value))))
         (return (if (=== tmp undefined)
-                    ,(ls-compile nil)
+                    ,(convert nil)
                     tmp))))))
 
 (define-raw-builtin oget (object key &rest keys)
-  `(call |js_to_lisp| ,(ls-compile `(oget* ,object ,key ,@keys))))
+  `(call |js_to_lisp| ,(convert `(oget* ,object ,key ,@keys))))
 
 (define-raw-builtin oset (value object key &rest keys)
-  (ls-compile `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
+  (convert `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
 
 (define-builtin objectp (x)
   `(bool (=== (typeof ,x) "object")))
@@ -1272,13 +1272,13 @@
          (o ,object))
     (for-in (key o)
             (call g ,(if *multiple-value-p* '|values| '|pv|) 1 (get o "key")))
-    (return ,(ls-compile nil))))
+    (return ,(convert nil))))
 
 (define-compilation %js-vref (var)
   `(call |js_to_lisp| ,(make-symbol var)))
 
 (define-compilation %js-vset (var val)
-  `(= ,(make-symbol var) (call |lisp_to_js| ,(ls-compile val))))
+  `(= ,(make-symbol var) (call |lisp_to_js| ,(convert val))))
 
 (define-setf-expander %js-vref (var)
   (let ((new-value (gensym)))
@@ -1338,7 +1338,7 @@
 (defun compile-funcall (function args)
   (let* ((arglist (list* (if *multiple-value-p* '|values| '|pv|)
                          (length args)
-                         (mapcar #'ls-compile args))))
+                         (mapcar #'convert args))))
     (unless (or (symbolp function)
                 (and (consp function)
                      (member (car function) '(lambda oget))))
@@ -1349,30 +1349,30 @@
       ((and (symbolp function)
             #+jscl (eq (symbol-package function) (find-package "COMMON-LISP"))
             #-jscl t)
-       `(call (get ,(ls-compile `',function) "fvalue") ,@arglist))
+       `(call (get ,(convert `',function) "fvalue") ,@arglist))
       #+jscl((symbolp function)
-             `(call ,(ls-compile `#',function) ,@arglist))
+             `(call ,(convert `#',function) ,@arglist))
       ((and (consp function) (eq (car function) 'lambda))
-       `(call ,(ls-compile `#',function) ,@arglist))
+       `(call ,(convert `#',function) ,@arglist))
       ((and (consp function) (eq (car function) 'oget))
-       `(call ,(ls-compile function) ,@arglist))
+       `(call ,(convert function) ,@arglist))
       (t
        (error "Bad function descriptor")))))
 
-(defun ls-compile-block (sexps &optional return-last-p decls-allowed-p)
+(defun convert-block (sexps &optional return-last-p decls-allowed-p)
   (multiple-value-bind (sexps decls)
       (parse-body sexps :declarations decls-allowed-p)
     (declare (ignore decls))
     (if return-last-p
         `(progn
-           ,@(mapcar #'ls-compile (butlast sexps))
-           (return ,(ls-compile (car (last sexps)) *multiple-value-p*)))
-        `(progn ,@(mapcar #'ls-compile sexps)))))
+           ,@(mapcar #'convert (butlast sexps))
+           (return ,(convert (car (last sexps)) *multiple-value-p*)))
+        `(progn ,@(mapcar #'convert sexps)))))
 
-(defun ls-compile* (sexp &optional multiple-value-p)
+(defun convert* (sexp &optional multiple-value-p)
   (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
     (when expandedp
-      (return-from ls-compile* (ls-compile sexp multiple-value-p)))
+      (return-from convert* (convert sexp multiple-value-p)))
     ;; The expression has been macroexpanded. Now compile it!
     (let ((*multiple-value-p* multiple-value-p))
       (cond
@@ -1383,9 +1383,9 @@
               (make-symbol (binding-value b)))
              ((or (keywordp sexp)
                   (and b (member 'constant (binding-declarations b))))
-              `(get ,(ls-compile `',sexp) "value"))
+              `(get ,(convert `',sexp) "value"))
              (t
-              (ls-compile `(symbol-value ',sexp))))))
+              (convert `(symbol-value ',sexp))))))
         ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp))
          (literal sexp))
         ((listp sexp)
@@ -1406,8 +1406,8 @@
         (t
          (error "How should I compile `~S'?" sexp))))))
 
-(defun ls-compile (sexp &optional multiple-value-p)
-  (ls-compile* sexp multiple-value-p))
+(defun convert (sexp &optional multiple-value-p)
+  (convert* sexp multiple-value-p))
 
 
 (defvar *compile-print-toplevels* nil)
@@ -1431,11 +1431,11 @@
        (when *compile-print-toplevels*
          (let ((form-string (prin1-to-string sexp)))
            (format t "Compiling ~a..." (truncate-string form-string))))
-       (let ((code (ls-compile sexp multiple-value-p)))
+       (let ((code (convert sexp multiple-value-p)))
          `(progn
             ,@(get-toplevel-compilations)
             ,code))))))
 
-(defun ls-compile-toplevel (sexp &optional multiple-value-p)
+(defun compile-toplevel (sexp &optional multiple-value-p)
   (with-output-to-string (*standard-output*)
     (js (convert-toplevel sexp multiple-value-p))))

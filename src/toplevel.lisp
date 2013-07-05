@@ -19,7 +19,7 @@
 (/debug "loading toplevel.lisp!")
 
 (defun eval (x)
-  (js-eval (ls-compile-toplevel x t)))
+  (js-eval (compile-toplevel x t)))
 
 (defvar * nil)
 (defvar ** nil)
@@ -258,8 +258,8 @@
   (setf #j:read #'ls-read-from-string)
   (setf #j:print #'prin1-to-string)
   (setf #j:eval #'eval)
-  (setf #j:compile (lambda (s) (ls-compile-toplevel s t)))
+  (setf #j:compile (lambda (s) (compile-toplevel s t)))
   (setf #j:evalString (lambda (str) (eval (ls-read-from-string str))))
   (setf #j:evalInput (lambda (str) (eval-interactive (ls-read-from-string str))))
-  (setf #j:compileString (lambda (str) (ls-compile-toplevel (ls-read-from-string str) t))))
+  (setf #j:compileString (lambda (str) (compile-toplevel (ls-read-from-string str) t))))
 
