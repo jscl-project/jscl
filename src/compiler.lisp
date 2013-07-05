@@ -857,11 +857,15 @@
                   (try
                    (switch ,(make-symbol branch)
                            ,@(with-collect
+                              (collect `(case ,initag))
                               (dolist (form (cdr body))
                                 (if (go-tag-p form)
                                     (let ((b (lookup-in-lexenv form *environment* 'gotag)))
                                       (collect `(case ,(second (binding-value b)))))
-                                    (collect (ls-compile form)))))
+                                    (progn
+                                      (collect (ls-compile form))
+                                      ;; TEMPORAL!
+                                      (collect '(code ";"))))))
                            default
                            (break tbloop)))
                   (catch (jump)
