@@ -1470,11 +1470,10 @@
          (let ((form-string (prin1-to-string sexp)))
            (format t "Compiling ~a..." (truncate-string form-string))))
        (let ((code (ls-compile sexp multiple-value-p)))
-         `(code
-           ,@(interleave (get-toplevel-compilations) ";
-" t)
-           ,(when code
-                  `(code ,code ";"))))))))
+         `(progn
+            ,@(interleave (get-toplevel-compilations) '(code ";
+") t)
+            (code ,code ";")))))))
 
 (defun ls-compile-toplevel (sexp &optional multiple-value-p)
   (with-output-to-string (*standard-output*)
