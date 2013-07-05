@@ -1,6 +1,6 @@
 ;;; compiler.lisp ---
 
-;; copyright (C) 2012, 2013 David Vazquez
+;; Copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
 
 ;; JSCL is free software: you can redistribute it and/or
@@ -510,23 +510,24 @@
   (let ((head (butlast cons))
         (tail (last cons)))
     `(call |QIList|
-           ,@(mapcar (lambda (x) `(code ,(literal x t))) head)
-           (code ,(literal (car tail) t))
-           (code ,(literal (cdr tail) t)))))
+           ,@(mapcar (lambda (x) (literal x t)) head)
+           ,(literal (car tail) t)
+           ,(literal (cdr tail) t))))
 
 (defun dump-array (array)
   (let ((elements (vector-to-list array)))
-    (list-to-vector (mapcar (lambda (x) `(code ,(literal x)))
-                            elements))))
+    (list-to-vector (mapcar #'literal elements))))
 
 (defun dump-string (string)
   `(call |make_lisp_string| ,string))
 
 (defun literal (sexp &optional recursive)
   (cond
-    ((integerp sexp) (integer-to-string sexp))
-    ((floatp sexp) (float-to-string sexp))
-    ((characterp sexp) (js-escape-string (string sexp)))
+    ((integerp sexp) sexp)
+    ((floatp sexp) sexp)
+    ((characterp sexp)
+     ;; TODO: Remove selfcall after migration
+     `(selfcall (return ,(string sexp))))
     (t
      (or (cdr (assoc sexp *literal-table* :test #'eql))
          (let ((dumped (typecase sexp
@@ -544,11 +545,11 @@
            (if (and recursive (not (symbolp sexp)))
                dumped
                (let ((jsvar (genlit)))
-                 (push (cons sexp jsvar) *literal-table*)
+                 (push (cons sexp (make-symbol jsvar)) *literal-table*)
                  (toplevel-compilation `(var (,(make-symbol jsvar) ,dumped)))
                  (when (keywordp sexp)
                    (toplevel-compilation `(= ,(get (make-symbol jsvar) "value") ,(make-symbol jsvar))))
-                 jsvar)))))))
+                 (make-symbol jsvar))))))))
 
 
 (define-compilation quote (sexp)
