@@ -1426,7 +1426,7 @@
               (binding-value b))
              ((or (keywordp sexp)
                   (and b (member 'constant (binding-declarations b))))
-              `(code ,(ls-compile `',sexp) ".value"))
+              `(get ,(ls-compile `',sexp) "value"))
              (t
               (ls-compile `(symbol-value ',sexp))))))
         ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp))
