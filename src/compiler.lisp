@@ -420,8 +420,6 @@
             (eq (binding-type b) 'variable)
             (not (member 'special (binding-declarations b)))
             (not (member 'constant (binding-declarations b))))
-       ;; TODO: Unnecesary make-symbol when codegen migration is
-       ;; finished.
        `(= ,(binding-value b) ,(convert val)))
       ((and b (eq (binding-type b) 'macro))
        (convert `(setf ,var ,val)))
@@ -505,9 +503,7 @@
   (cond
     ((integerp sexp) sexp)
     ((floatp sexp) sexp)
-    ((characterp sexp)
-     ;; TODO: Remove selfcall after migration
-     `(selfcall (return ,(string sexp))))
+    ((characterp sexp) (string sexp))
     (t
      (or (cdr (assoc sexp *literal-table* :test #'eql))
          (let ((dumped (typecase sexp
@@ -538,9 +534,6 @@
 (define-compilation %while (pred &rest body)
   `(selfcall
     (while (!== ,(convert pred) ,(convert nil))
-      0                                 ; TODO: Force
-                                        ; braces. Unnecesary when code
-                                        ; is gone
       ,(convert-block body))
     (return ,(convert nil))))
 
@@ -885,7 +878,6 @@
 (define-compilation multiple-value-prog1 (first-form &rest forms)
   `(selfcall
     (var (args ,(convert first-form *multiple-value-p*)))
-    ;; TODO: Interleave is temporal
     (progn ,@(mapcar #'convert forms))
     (return args)))
 
