@@ -20,6 +20,9 @@
 
 (/debug "loading compiler.lisp!")
 
+(define-js-macro selfcall (&body body)
+  `(call (function () ,@body)))
+
 ;;; Translate the Lisp code to Javascript. It will compile the special
 ;;; forms. Some primitive functions are compiled as special forms
 ;;; too. The respective real functions are defined in the target (see
@@ -59,9 +62,6 @@
 ;;; preprocessing in the future.
 (defmacro js!selfcall (&body body)
   ``(call (function nil (code ,,@body))))
-
-(defmacro js!selfcall* (&body body)
-  ``(call (function nil ,,@body)))
 
 
 ;;; Like CODE, but prefix each line with four spaces. Two versions
@@ -249,11 +249,11 @@
 
 (defun lambda-name/docstring-wrapper (name docstring code)
   (if (or name docstring)
-      (js!selfcall*
-        `(var (func ,code))
-        (when name      `(= (get func "fname") ,name))
-        (when docstring `(= (get func "docstring") ,docstring))
-        `(return func))
+      `(selfcall
+        (var (func ,code))
+        ,(when name `(= (get func "fname") ,name))
+        ,(when docstring `(= (get func "docstring") ,docstring))
+        (return func))
       code))
 
 (defun lambda-check-argument-count
@@ -556,13 +556,13 @@
   (literal sexp))
 
 (define-compilation %while (pred &rest body)
-  (js!selfcall*
-    `(while (!== ,(ls-compile pred) ,(ls-compile nil))
-       0                                ; TODO: Force
+  `(selfcall
+    (while (!== ,(ls-compile pred) ,(ls-compile nil))
+      0                                 ; TODO: Force
                                         ; braces. Unnecesary when code
                                         ; is gone
-       ,(ls-compile-block body))
-   `(return ,(ls-compile nil))))
+      ,(ls-compile-block body))
+    (return ,(ls-compile nil))))
 
 (define-compilation function (x)
   (cond
@@ -611,14 +611,13 @@
           (extend-lexenv (mapcar #'make-function-binding fnames)
                          *environment*
                          'function)))
-    (js!selfcall*
-      `(progn
-         ,@(mapcar (lambda (func)
-                     `(var (,(make-symbol (translate-function (car func)))
-                             ,(compile-lambda (cadr func)
-                                              `((block ,(car func) ,@(cddr func)))))))
-                   definitions))
-      (ls-compile-block body t))))
+    `(selfcall
+      ,@(mapcar (lambda (func)
+                  `(var (,(make-symbol (translate-function (car func)))
+                          ,(compile-lambda (cadr func)
+                                           `((block ,(car func) ,@(cddr func)))))))
+                definitions)
+      ,(ls-compile-block body t))))
 
 
 (defvar *compiling-file* nil)
@@ -784,41 +783,40 @@
     ;; unique identifier of the block as exception. We can't use the
     ;; variable name itself, because it could not to be unique, so we
     ;; capture it in a closure.
-    (js!selfcall*
-      (when multiple-value-p
-        `(var (|values| |mv|)))
-      `(throw
-           (object
-            "type" "block"
-            "id" ,(make-symbol (binding-value b))
-            "values" ,(ls-compile value multiple-value-p)
-            "message" ,(concat "Return from unknown block '" (symbol-name name) "'."))))))
+    `(selfcall
+      ,(when multiple-value-p `(var (|values| |mv|)))
+      (throw
+          (object
+           "type" "block"
+           "id" ,(make-symbol (binding-value b))
+           "values" ,(ls-compile value multiple-value-p)
+           "message" ,(concat "Return from unknown block '" (symbol-name name) "'."))))))
 
 (define-compilation catch (id &rest body)
-  (js!selfcall*
-    `(var (|id| ,(ls-compile id)))
-    `(try
-      ,(ls-compile-block body t))
-    `(catch (|cf|)
-       (if (and (== (get |cf| "type") "catch")
-                (== (get |cf| "id") |id|))
-           ,(if *multiple-value-p*
-                `(return (call (get |values| "apply")
-                               this
-                               (call |forcemv| (get |cf| "values"))))
-                `(return (call (get |pv| "apply")
-                               this
-                               (call |forcemv| (get |cf| "values")))))
-           (throw |cf|)))))
+  `(selfcall
+    (var (|id| ,(ls-compile id)))
+    (try
+     ,(ls-compile-block body t))
+    (catch (|cf|)
+      (if (and (== (get |cf| "type") "catch")
+               (== (get |cf| "id") |id|))
+          ,(if *multiple-value-p*
+               `(return (call (get |values| "apply")
+                              this
+                              (call |forcemv| (get |cf| "values"))))
+               `(return (call (get |pv| "apply")
+                              this
+                              (call |forcemv| (get |cf| "values")))))
+          (throw |cf|)))))
 
 (define-compilation throw (id value)
-  (js!selfcall*
-    `(var (|values| |mv|))
-    `(throw (object
-             |type| "catch"
-             |id| ,(ls-compile id)
-             |values| ,(ls-compile value t)
-             |message| "Throw uncatched."))))
+  `(selfcall
+    (var (|values| |mv|))
+    (throw (object
+            |type| "catch"
+            |id| ,(ls-compile id)
+            |values| ,(ls-compile value t)
+            |message| "Throw uncatched."))))
 
 (defun go-tag-p (x)
   (or (integerp x) (symbolp x)))
@@ -848,32 +846,32 @@
           initag)
       (let ((b (lookup-in-lexenv (first body) *environment* 'gotag)))
         (setq initag (second (binding-value b))))
-      (js!selfcall*
+      `(selfcall
         ;; TAGBODY branch to take
-        `(var (,(make-symbol branch) ,initag))
-        `(var (,(make-symbol tbidx) #()))
-        `(label tbloop
-                (while true
-                  (try
-                   (switch ,(make-symbol branch)
-                           ,@(with-collect
-                              (collect `(case ,initag))
-                              (dolist (form (cdr body))
-                                (if (go-tag-p form)
-                                    (let ((b (lookup-in-lexenv form *environment* 'gotag)))
-                                      (collect `(case ,(second (binding-value b)))))
-                                    (progn
-                                      (collect (ls-compile form))
-                                      ;; TEMPORAL!
-                                      (collect '(code ";"))))))
-                           default
-                           (break tbloop)))
-                  (catch (jump)
-                    (if (and (== (get jump "type") "tagbody")
-                             (== (get jump "id") ,(make-symbol tbidx)))
-                        (= ,(make-symbol branch) (get jump "label"))
-                        (throw jump)))))
-        `(return ,(ls-compile nil))))))
+        (var (,(make-symbol branch) ,initag))
+        (var (,(make-symbol tbidx) #()))
+        (label tbloop
+               (while true
+                 (try
+                  (switch ,(make-symbol branch)
+                          ,@(with-collect
+                             (collect `(case ,initag))
+                             (dolist (form (cdr body))
+                               (if (go-tag-p form)
+                                   (let ((b (lookup-in-lexenv form *environment* 'gotag)))
+                                     (collect `(case ,(second (binding-value b)))))
+                                   (progn
+                                     (collect (ls-compile form))
+                                     ;; TEMPORAL!
+                                     (collect '(code ";"))))))
+                          default
+                          (break tbloop)))
+                 (catch (jump)
+                   (if (and (== (get jump "type") "tagbody")
+                            (== (get jump "id") ,(make-symbol tbidx)))
+                       (= ,(make-symbol branch) (get jump "label"))
+                       (throw jump)))))
+        (return ,(ls-compile nil))))))
 
 (define-compilation go (label)
   (let ((b (lookup-in-lexenv label *environment* 'gotag))
@@ -882,50 +880,50 @@
              ((integerp label) (integer-to-string label)))))
     (when (null b)
       (error "Unknown tag `~S'" label))
-    (js!selfcall*
-      `(throw
-           (object
-            "type" "tagbody"
-            "id" ,(make-symbol (first (binding-value b)))
-            "label" ,(second (binding-value b))
-            "message" ,(concat "Attempt to GO to non-existing tag " n))))))
+    `(selfcall
+      (throw
+          (object
+           "type" "tagbody"
+           "id" ,(make-symbol (first (binding-value b)))
+           "label" ,(second (binding-value b))
+           "message" ,(concat "Attempt to GO to non-existing tag " n))))))
 
 (define-compilation unwind-protect (form &rest clean-up)
-  (js!selfcall*
-    `(var (|ret| ,(ls-compile nil)))
-    `(try
-       (= |ret| ,(ls-compile form)))
-    `(finally
-      ,(ls-compile-block clean-up))
-    `(return |ret|)))
+  `(selfcall
+    (var (|ret| ,(ls-compile nil)))
+    (try
+     (= |ret| ,(ls-compile form)))
+    (finally
+     ,(ls-compile-block clean-up))
+    (return |ret|)))
 
 (define-compilation multiple-value-call (func-form &rest forms)
-  (js!selfcall*
-    `(var (func ,(ls-compile func-form)))
-    `(var (args ,(vector (if *multiple-value-p* '|values| '|pv|) 0)))
-    `(return
-       ,(js!selfcall*
-         `(var (|values| |mv|))
-         `(var vs)
-         `(progn
-            ,@(with-collect
-               (dolist (form forms)
-                 (collect `(= vs ,(ls-compile form t)))
-                 (collect `(if (and (=== (typeof vs) "object")
-                                    (in "multiple-value" vs))
-                               (= args (call (get args "concat") vs))
-                               (call (get args "push") vs))))))
-         `(= (property args 1) (- (property args "length") 2))
-         `(return (call (get func "apply") |window| args))))))
+  `(selfcall
+    (var (func ,(ls-compile func-form)))
+    (var (args ,(vector (if *multiple-value-p* '|values| '|pv|) 0)))
+    (return
+      (selfcall
+       (var (|values| |mv|))
+       (var vs)
+       (progn
+         ,@(with-collect
+            (dolist (form forms)
+              (collect `(= vs ,(ls-compile form t)))
+              (collect `(if (and (=== (typeof vs) "object")
+                                 (in "multiple-value" vs))
+                            (= args (call (get args "concat") vs))
+                            (call (get args "push") vs))))))
+       (= (property args 1) (- (property args "length") 2))
+       (return (call (get func "apply") |window| args))))))
 
 (define-compilation multiple-value-prog1 (first-form &rest forms)
-  (js!selfcall*
-    `(var (args ,(ls-compile first-form *multiple-value-p*)))
+  `(selfcall
+    (var (args ,(ls-compile first-form *multiple-value-p*)))
     ;; TODO: Interleave is temporal
-    `(progn ,@(interleave (mapcar #'ls-compile forms)
-                          '(code ";")
-                          t))
-    `(return args)))
+    (progn ,@(interleave (mapcar #'ls-compile forms)
+                         '(code ";")
+                         t))
+    (return args)))
 
 (define-transformation backquote (form)
   (bq-completely-process form))
@@ -968,9 +966,9 @@
             (push `(if (!= (typeof ,v) "number")
                        (throw "Not a number!"))
                   prelude))))
-    (js!selfcall*
-      `(progn ,@(reverse prelude))
-      (funcall function (reverse fargs)))))
+    `(selfcall
+      (progn ,@(reverse prelude))
+      ,(funcall function (reverse fargs)))))
 
 
 (defmacro variable-arity (args &body body)
@@ -1045,24 +1043,24 @@
 
 (define-builtin consp (x)
   (js!bool
-   (js!selfcall*
-     `(var (tmp ,x))
-     `(return (and (== (typeof tmp) "object")
-                   (in "car" tmp))))))
+   `(selfcall
+     (var (tmp ,x))
+     (return (and (== (typeof tmp) "object")
+                  (in "car" tmp))))))
 
 (define-builtin car (x)
-  (js!selfcall*
-    `(var (tmp ,x))
-    `(return (if (=== tmp ,(ls-compile nil))
-                 ,(ls-compile nil)
-                 (get tmp "car")))))
+  `(selfcall
+    (var (tmp ,x))
+    (return (if (=== tmp ,(ls-compile nil))
+                ,(ls-compile nil)
+                (get tmp "car")))))
 
 (define-builtin cdr (x)
-  (js!selfcall*
-    `(var (tmp ,x))
-    `(return (if (=== tmp ,(ls-compile nil))
-                 ,(ls-compile nil)
-                 (get tmp "cdr")))))
+  `(selfcall
+    (var (tmp ,x))
+    (return (if (=== tmp ,(ls-compile nil))
+                ,(ls-compile nil)
+                (get tmp "cdr")))))
 
 (define-builtin rplaca (x new)
   `(= (get ,x "car") ,new))
@@ -1092,20 +1090,20 @@
   (js!bool `(!== (get ,x "fvalue") undefined)))
 
 (define-builtin symbol-value (x)
-  (js!selfcall*
-    `(var (symbol ,x)
-          (value (get symbol "value")))
-    `(if (=== value undefined)
-         (throw (+ "Variable `" (call |xstring| (get symbol "name")) "' is unbound.")))
-    `(return value)))
+  `(selfcall
+    (var (symbol ,x)
+         (value (get symbol "value")))
+    (if (=== value undefined)
+        (throw (+ "Variable `" (call |xstring| (get symbol "name")) "' is unbound.")))
+    (return value)))
 
 (define-builtin symbol-function (x)
-  (js!selfcall*
-    `(var (symbol ,x)
-          (func (get symbol "fvalue")))
-    `(if (=== func undefined)
-         (throw (+ "Function `" (call |xstring| (get symbol "name")) "' is undefined.")))
-    `(return func)))
+  `(selfcall
+    (var (symbol ,x)
+         (func (get symbol "fvalue")))
+    (if (=== func undefined)
+        (throw (+ "Function `" (call |xstring| (get symbol "name")) "' is undefined.")))
+    (return func)))
 
 (define-builtin symbol-plist (x)
   `(or (get ,x "plist") ,(ls-compile nil)))
@@ -1124,11 +1122,11 @@
 
 (define-builtin characterp (x)
   (js!bool
-   (js!selfcall*
-     `(var (x ,x))
-     `(return (and (== (typeof x) "string")
-                   (or (== (get x "length") 1)
-                       (== (get x "length") 2)))))))
+   `(selfcall
+     (var (x ,x))
+     (return (and (== (typeof x) "string")
+                  (or (== (get x "length") 1)
+                      (== (get x "length") 2)))))))
 
 (define-builtin char-upcase (x)
   `(call |safe_char_upcase| ,x))
@@ -1138,39 +1136,39 @@
 
 (define-builtin stringp (x)
   (js!bool
-   (js!selfcall*
-     `(var (x ,x))
-     `(return (and (and (===(typeof x) "object")
-                        (in "length" x))
-                   (== (get x "stringp") 1))))))
+   `(selfcall
+     (var (x ,x))
+     (return (and (and (===(typeof x) "object")
+                       (in "length" x))
+                  (== (get x "stringp") 1))))))
 
 (define-raw-builtin funcall (func &rest args)
-  (js!selfcall*
-    `(var (f ,(ls-compile func)))
-    `(return (call (if (=== (typeof f) "function")
-                       f
-                       (get f "fvalue"))
-                   ,@(list* (if *multiple-value-p* '|values| '|pv|)
-                            (length args)
-                            (mapcar #'ls-compile args))))))
+  `(selfcall
+    (var (f ,(ls-compile func)))
+    (return (call (if (=== (typeof f) "function")
+                      f
+                      (get f "fvalue"))
+                  ,@(list* (if *multiple-value-p* '|values| '|pv|)
+                           (length args)
+                           (mapcar #'ls-compile args))))))
 
 (define-raw-builtin apply (func &rest args)
   (if (null args)
       (ls-compile func)
       (let ((args (butlast args))
             (last (car (last args))))
-        (js!selfcall*
-          `(var (f ,(ls-compile func)))
-          `(var (args ,(list-to-vector
+        `(selfcall
+           (var (f ,(ls-compile func)))
+           (var (args ,(list-to-vector
                         (list* (if *multiple-value-p* '|values| '|pv|)
                                (length args)
                                (mapcar #'ls-compile args)))))
-          `(var (tail ,(ls-compile last)))
-          `(while (!= tail ,(ls-compile nil))
+           (var (tail ,(ls-compile last)))
+           (while (!= tail ,(ls-compile nil))
              (call (get args "push") (get tail "car"))
              (post++ (property args 1))
              (= tail (get tail "cdr")))
-          `(return (call (get (if (=== (typeof f) "function")
+           (return (call (get (if (=== (typeof f) "function")
                                   f
                                   (get f "fvalue"))
                               "apply")
@@ -1179,13 +1177,13 @@
 
 (define-builtin js-eval (string)
   (if *multiple-value-p*
-      (js!selfcall*
-        `(var (v (call |globalEval| (call |xstring| ,string))))
-        `(return (call (get |values| "apply") this (call |forcemv| v))))
+      `(selfcall
+        (var (v (call |globalEval| (call |xstring| ,string))))
+        (return (call (get |values| "apply") this (call |forcemv| v))))
       `(call |globalEval| (call |xstring| ,string))))
 
 (define-builtin %throw (string)
-  (js!selfcall* `(throw ,string)))
+  `(selfcall (throw ,string)))
 
 (define-builtin functionp (x)
   (js!bool `(=== (typeof ,x) "function")))
@@ -1202,15 +1200,15 @@
 
 (define-builtin storage-vector-p (x)
   (js!bool
-   (js!selfcall*
-     `(var (x ,x))
-     `(return (and (=== (typeof x) "object") (in "length" x))))))
+   `(selfcall
+     (var (x ,x))
+     (return (and (=== (typeof x) "object") (in "length" x))))))
 
 (define-builtin make-storage-vector (n)
-  (js!selfcall*
-    `(var (r #()))
-    `(= (get r "length") ,n)
-    `(return r)))
+  `(selfcall
+    (var (r #()))
+    (= (get r "length") ,n)
+    (return r)))
 
 (define-builtin storage-vector-size (x)
   `(get ,x "length"))
@@ -1219,26 +1217,26 @@
   `(= (get ,vector "length") ,new-size))
 
 (define-builtin storage-vector-ref (vector n)
-  (js!selfcall*
-    `(var (x (property ,vector ,n)))
-    `(if (=== x undefined) (throw "Out of range."))
-    `(return x)))
+  `(selfcall
+    (var (x (property ,vector ,n)))
+    (if (=== x undefined) (throw "Out of range."))
+    (return x)))
 
 (define-builtin storage-vector-set (vector n value)
-  (js!selfcall*
-    `(var (x ,vector))
-    `(var (i ,n))
-    `(if (or (< i 0) (>= i (get x "length")))
-         (throw "Out of range."))
-    `(return (= (property x i) ,value))))
+  `(selfcall
+    (var (x ,vector))
+    (var (i ,n))
+    (if (or (< i 0) (>= i (get x "length")))
+        (throw "Out of range."))
+    (return (= (property x i) ,value))))
 
 (define-builtin concatenate-storage-vector (sv1 sv2)
-  (js!selfcall*
-    `(var (sv1 ,sv1))
-    `(var (r (call (get sv1 "concat") ,sv2)))
-    `(= (get r "type") (get sv1 "type"))
-    `(= (get r "stringp") (get sv1 "stringp"))
-    `(return r)))
+  `(selfcall
+     (var (sv1 ,sv1))
+     (var (r (call (get sv1 "concat") ,sv2)))
+     (= (get r "type") (get sv1 "type"))
+     (= (get r "stringp") (get sv1 "stringp"))
+     (return r)))
 
 (define-builtin get-internal-real-time ()
   `(call (get (new (call |Date|)) "getTime")))
@@ -1259,33 +1257,33 @@
   '(object))
 
 (define-raw-builtin oget* (object key &rest keys)
-  (js!selfcall*
-    `(progn
-       (var (tmp (property ,(ls-compile object) (call |xstring| ,(ls-compile key)))))
-       ,@(mapcar (lambda (key)
-                   `(progn
-                      (if (=== tmp undefined) (return ,(ls-compile nil)))
-                      (= tmp (property tmp (call |xstring| ,(ls-compile key))))))
-                 keys))
-    `(return (if (=== tmp undefined) ,(ls-compile nil) tmp))))
+  `(selfcall
+    (progn
+      (var (tmp (property ,(ls-compile object) (call |xstring| ,(ls-compile key)))))
+      ,@(mapcar (lambda (key)
+                  `(progn
+                     (if (=== tmp undefined) (return ,(ls-compile nil)))
+                     (= tmp (property tmp (call |xstring| ,(ls-compile key))))))
+                keys))
+    (return (if (=== tmp undefined) ,(ls-compile nil) tmp))))
 
 (define-raw-builtin oset* (value object key &rest keys)
   (let ((keys (cons key keys)))
-    (js!selfcall*
-      `(progn
-         (var (obj ,(ls-compile object)))
-         ,@(mapcar (lambda (key)
-                     `(progn
-                        (= obj (property obj (call |xstring| ,(ls-compile key))))
-                        (if (=== object undefined)
-                            (throw "Impossible to set object property."))))
-                   (butlast keys))
-         (var (tmp
-               (= (property obj (call |xstring| ,(ls-compile (car (last keys)))))
-                  ,(ls-compile value))))
-         (return (if (=== tmp undefined)
-                     ,(ls-compile nil)
-                     tmp))))))
+    `(selfcall
+      (progn
+        (var (obj ,(ls-compile object)))
+        ,@(mapcar (lambda (key)
+                    `(progn
+                       (= obj (property obj (call |xstring| ,(ls-compile key))))
+                       (if (=== object undefined)
+                           (throw "Impossible to set object property."))))
+                  (butlast keys))
+        (var (tmp
+              (= (property obj (call |xstring| ,(ls-compile (car (last keys)))))
+                 ,(ls-compile value))))
+        (return (if (=== tmp undefined)
+                    ,(ls-compile nil)
+                    tmp))))))
 
 (define-raw-builtin oget (object key &rest keys)
   `(call |js_to_lisp| ,(ls-compile `(oget* ,object ,key ,@keys))))
@@ -1304,13 +1302,13 @@
   (js!bool `(in (call |xstring| ,key) ,object)))
 
 (define-builtin map-for-in (function object)
-  (js!selfcall*
-    `(var (f ,function)
-          (g (if (=== (typeof f) "function") f (get f "fvalue")))
-          (o ,object))
-    `(for-in (key o)
-       (call g ,(if *multiple-value-p* '|values| '|pv|) 1 (get o "key")))
-    `(return ,(ls-compile nil))))
+  `(selfcall
+    (var (f ,function)
+         (g (if (=== (typeof f) "function") f (get f "fvalue")))
+         (o ,object))
+    (for-in (key o)
+            (call g ,(if *multiple-value-p* '|values| '|pv|) 1 (get o "key")))
+    (return ,(ls-compile nil))))
 
 (define-compilation %js-vref (var)
   `(call |js_to_lisp| ,(make-symbol var)))
