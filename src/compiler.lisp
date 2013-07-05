@@ -981,15 +981,17 @@
         (fargs '())
         (prelude '()))
     (dolist (x args)
-      (cond
-        ((or (floatp x) (numberp x)) (push x fargs))
-        (t (let ((v (make-symbol (code "x" (incf counter)))))
-             (push v fargs)
-             (push `(code "var " ,v " = " ,(ls-compile x) ";"
-                          "if (typeof " ,v " !== 'number') throw 'Not a number!';")
-                   prelude)))))
-    (js!selfcall
-      `(code ,@(reverse prelude))
+      (if (or (floatp x) (numberp x))
+          (push x fargs)
+          (let ((v (make-symbol (concat "x" (integer-to-string (incf counter))))))
+            (push v fargs)
+            (push `(var (,v ,(ls-compile x)))
+                  prelude)
+            (push `(if (!= (typeof ,v) "number")
+                       (throw "Not a number!"))
+                  prelude))))
+    (js!selfcall*
+      `(progn ,@(reverse prelude))
       (funcall function (reverse fargs)))))
 
 
