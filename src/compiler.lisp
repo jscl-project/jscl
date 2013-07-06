@@ -759,12 +759,12 @@
 
 (define-compilation catch (id &rest body)
   `(selfcall
-    (var (|id| ,(convert id)))
+    (var (id ,(convert id)))
     (try
      ,(convert-block body t))
     (catch (|cf|)
       (if (and (== (get |cf| "type") "catch")
-               (== (get |cf| "id") |id|))
+               (== (get |cf| "id") id))
           ,(if *multiple-value-p*
                `(return (method-call |values| "apply" this (call |forcemv| (get |cf| "values"))))
                `(return (method-call |pv|     "apply" this (call |forcemv| (get |cf| "values")))))
@@ -774,10 +774,10 @@
   `(selfcall
     (var (|values| |mv|))
     (throw (object
-            |type| "catch"
-            |id| ,(convert id)
-            |values| ,(convert value t)
-            |message| "Throw uncatched."))))
+            "type" "catch"
+            "id" ,(convert id)
+            "values" ,(convert value t)
+            "message" "Throw uncatched."))))
 
 (defun go-tag-p (x)
   (or (integerp x) (symbolp x)))
@@ -848,12 +848,12 @@
 
 (define-compilation unwind-protect (form &rest clean-up)
   `(selfcall
-    (var (|ret| ,(convert nil)))
+    (var (ret ,(convert nil)))
     (try
-     (= |ret| ,(convert form)))
+     (= ret ,(convert form)))
     (finally
      ,(convert-block clean-up))
-    (return |ret|)))
+    (return ret)))
 
 (define-compilation multiple-value-call (func-form &rest forms)
   `(selfcall
