@@ -20,6 +20,11 @@
 
 (/debug "loading compiler.lisp!")
 
+;;; Translate the Lisp code to Javascript. It will compile the special
+;;; forms. Some primitive functions are compiled as special forms
+;;; too. The respective real functions are defined in the target (see
+;;; the beginning of this file) as well as some primitive functions.
+
 (define-js-macro selfcall (&body body)
   `(call (function () ,@body)))
 
@@ -28,25 +33,6 @@
 
 (define-js-macro method-call (x method &rest args)
   `(call (get ,x ,method) ,@args))
-
-;;; Translate the Lisp code to Javascript. It will compile the special
-;;; forms. Some primitive functions are compiled as special forms
-;;; too. The respective real functions are defined in the target (see
-;;; the beginning of this file) as well as some primitive functions.
-
-(defun interleave (list element &optional after-last-p)
-  (unless (null list)
-    (with-collect
-      (collect (car list))
-      (dolist (x (cdr list))
-        (collect element)
-        (collect x))
-      (when after-last-p
-        (collect element)))))
-
-;;; Like CODE, but prefix each line with four spaces. Two versions
-;;; of this function are available, because the Ecmalisp version is
-;;; very slow and bootstraping was annoying.
 
 ;;; A Form can return a multiple values object calling VALUES, like
 ;;; values(arg1, arg2, ...). It will work in any context, as well as
