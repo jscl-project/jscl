@@ -16,7 +16,24 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
+(/debug "loading print.lisp!")
+
 ;;; Printer
+
+(defun lisp-escape-string (string)
+  (let ((output "")
+        (index 0)
+        (size (length string)))
+    (while (< index size)
+      (let ((ch (char string index)))
+        (when (or (char= ch #\") (char= ch #\\))
+          (setq output (concat output "\\")))
+        (when (or (char= ch #\newline))
+          (setq output (concat output "\\"))
+          (setq ch #\n))
+        (setq output (concat output (string ch))))
+      (incf index))
+    (concat "\"" output "\"")))
 
 ;;; Return T if the string S contains characters which need to be
 ;;; escaped to print the symbol name, NIL otherwise.

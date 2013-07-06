@@ -13,6 +13,8 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
+(/debug "loading defstruct.lisp!")
+
 ;; A very simple defstruct built on lists. It supports just slot with
 ;; an optional default initform, and it will create a constructor,
 ;; predicate and accessors for you.
