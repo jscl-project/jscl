@@ -1003,10 +1003,16 @@
                 (get tmp "cdr")))))
 
 (define-builtin rplaca (x new)
-  `(= (get ,x "car") ,new))
+  `(selfcall
+     (var (tmp ,x))
+     (= (get tmp "car") ,new)
+     (return tmp)))
 
 (define-builtin rplacd (x new)
-  `(= (get ,x "cdr") ,new))
+  `(selfcall
+     (var (tmp ,x))
+     (= (get tmp "cdr") ,new)
+     (return tmp)))
 
 (define-builtin symbolp (x)
   `(bool (instanceof ,x |Symbol|)))
