@@ -259,7 +259,7 @@
 
 (defun write-line (x)
   (write-string x)
-  (write-string *newline*)
+  (write-char #\newline)
   x)
 
 (defun warn (string)
