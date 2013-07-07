@@ -13,6 +13,8 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
+(/debug "loading list.lisp!")
+
 ;;;; Various list functions
 
 (defun cons (x y) (cons x y))

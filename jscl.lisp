@@ -32,6 +32,7 @@
     ("array"            :target)
     ("string"           :target)
     ("sequence"         :target)
+    ("stream"           :target)
     ("print"            :target)
     ("package"          :target)
     ("misc"             :target)
@@ -40,6 +41,7 @@
     ("defstruct"        :both)
     ("lambda-list"      :both)
     ("backquote"        :both)
+    ("compiler-codegen" :both)
     ("compiler"         :both)
     ("toplevel"         :target)))
 
@@ -70,7 +72,7 @@
       (read-sequence seq in)
       seq)))
 
-(defun ls-compile-file (filename out &key print)
+(defun !compile-file (filename out &key print)
   (let ((*compiling-file* t)
         (*compile-print-toplevels* print))
     (let* ((source (read-whole-file filename))
@@ -80,13 +82,14 @@
          with eof-mark = (gensym)
          for x = (ls-read in nil eof-mark)
          until (eq x eof-mark)
-         do (let ((compilation (ls-compile-toplevel x)))
+         do (let ((compilation (compile-toplevel x)))
               (when (plusp (length compilation))
                 (write-string compilation out)))))))
 
 (defun dump-global-environment (stream)
   (flet ((late-compile (form)
-           (write-string (ls-compile-toplevel form) stream)))
+           (let ((*standard-output* stream))
+             (write-string (compile-toplevel form)))))
     ;; We assume that environments have a friendly list representation
     ;; for the compiler and it can be dumped.
     (dolist (b (lexenv-function *environment*))
@@ -97,8 +100,8 @@
     ;; not collide with the compiler itself.
     (late-compile
      `(progn
-        ,@(mapcar (lambda (s) `(%intern-symbol (%js-vref ,(cdr s))))
-                  (remove-if-not #'symbolp *literal-table* :key #'car))
+        (progn ,@(mapcar (lambda (s) `(%intern-symbol (%js-vref ,(string (cdr s)))))
+                         (remove-if-not #'symbolp *literal-table* :key #'car)))
         (setq *literal-table* ',*literal-table*)
         (setq *variable-counter* ,*variable-counter*)
         (setq *gensym-counter* ,*gensym-counter*)))
@@ -117,14 +120,14 @@
       (write-string (read-whole-file (source-pathname "prelude.js")) out)
       (dolist (input *source*)
         (when (member (cadr input) '(:target :both))
-          (ls-compile-file (source-pathname (car input) :type "lisp") out)))
+          (!compile-file (source-pathname (car input) :type "lisp") out)))
       (dump-global-environment out))
     ;; Tests
     (with-open-file (out "tests.js" :direction :output :if-exists :supersede)
       (dolist (input (append (directory "tests.lisp")
                              (directory "tests/*.lisp")
                              (directory "tests-report.lisp")))
-        (ls-compile-file input out)))))
+        (!compile-file input out)))))
 
 
 ;;; Run the tests in the host Lisp implementation. It is a quick way

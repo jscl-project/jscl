@@ -66,8 +66,9 @@
     <script src="jquery.js" type="text/javascript" charset="utf-8"></script>
     <script src="jqconsole.min.js" type="text/javascript" charset="utf-8"></script>
     <script>
+      var jqconsole;
       $(function () {
-        var jqconsole = $('#console').jqconsole('Welcome to JSCL!\n\n', '');
+        jqconsole = $('#console').jqconsole('Welcome to JSCL!\n\n', '');
         jqconsole.RegisterMatching('(', ')', 'parents');
         if (localStorage.getItem("jqhist"))
            jqconsole.SetHistory(JSON.parse(localStorage.getItem("jqhist")));
