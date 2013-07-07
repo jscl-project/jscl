@@ -283,7 +283,7 @@
                ((char= next #\~)
                 (concatf res "~"))
                ((char= next #\%)
-                (concatf res *newline*))
+                (concatf res (string #\newline)))
                ((char= next #\*)
                 (pop arguments))
                (t

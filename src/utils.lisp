@@ -18,9 +18,6 @@
 
 (/debug "loading utils.lisp!")
 
-(defvar *newline* "
-")
-
 (defmacro concatf (variable &body form)
   `(setq ,variable (concat ,variable (progn ,@form))))
 
