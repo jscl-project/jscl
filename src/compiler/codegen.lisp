@@ -224,7 +224,7 @@
            (error "Invalid accessor ~S" (cadr args)))
          (js-expr (car args) 0)
          (js-format ".")
-         (js-identifier accessor)))      
+         (js-identifier accessor)))
       ;; Function call
       (call
        (js-expr (car args) 1)
@@ -249,7 +249,7 @@
                     ((> op-precedence precedence))
                     ((< op-precedence precedence) nil)
                     (t (not (eq operand-order associativity)))))
-                
+
                 (%unary-op (operator string operator-precedence operator-associativity post lvalue)
                   (when (eq op operator)
                     (when lvalue (check-lvalue op1))
@@ -263,7 +263,7 @@
                        (js-expr op1 operator-precedence operator-associativity 'right)))
                     (when (low-precedence-p operator-precedence) (js-format ")"))
                     (return-from js-operator-expression)))
-                
+
                 (%binary-op (operator string operator-precedence operator-associativity lvalue)
                   (when (eq op operator)
                     (when lvalue (check-lvalue op1))
