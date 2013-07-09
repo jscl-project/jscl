@@ -22,28 +22,67 @@
 
 (in-package :jscl)
 
+;;; List of all the source files that need to be compiled, and whether they
+;;; are to be compiled just by the host, by the target JSCL, or by both.
+;;; All files have a `.lisp' extension, and
+;;; are relative to src/
+;;; Subdirectories are indicated by the presence of a list rather than a
+;;; keyword in the second element of the list. For example, this list:
+;;;  (("foo"    :target)
+;;;   ("bar"
+;;;     ("baz"  :host)
+;;;     ("quux" :both)))
+;;; Means that src/foo.lisp and src/bar/quux.lisp need to be compiled in the
+;;; target, and that src/bar/baz.lisp and src/bar/quux.lisp need to be
+;;; compiled in the host
 (defvar *source*
-  '(("boot"             :target)
-    ("compat"           :host)
-    ("utils"            :both)
-    ("numbers"          :target)
-    ("char"             :target)
-    ("list"             :target)
-    ("array"            :target)
-    ("string"           :target)
-    ("sequence"         :target)
-    ("stream"           :target)
-    ("print"            :target)
-    ("package"          :target)
-    ("misc"             :target)
-    ("ffi"              :both)
-    ("read"             :both)
-    ("defstruct"        :both)
-    ("lambda-list"      :both)
-    ("backquote"        :both)
-    ("compiler-codegen" :both)
-    ("compiler"         :both)
-    ("toplevel"         :target)))
+  '(("boot"        :target)
+    ("compat"      :host)
+    ("utils"       :both)
+    ("numbers"     :target)
+    ("char"        :target)
+    ("list"        :target)
+    ("array"       :target)
+    ("string"      :target)
+    ("sequence"    :target)
+    ("stream"      :target)
+    ("print"       :target)
+    ("package"     :target)
+    ("misc"        :target)
+    ("ffi"         :both)
+    ("read"        :both)
+    ("defstruct"   :both)
+    ("lambda-list" :both)
+    ("backquote"   :both)
+    ("compiler"
+     ("codegen"    :both)
+     ("compiler"   :both))
+    ("toplevel"    :target)))
+
+(defun get-files (file-list type dir)
+  "Traverse FILE-LIST and retrieve a list of the files within which match
+   either TYPE or :BOTH, processing subdirectories."
+  (let ((file (car file-list)))
+    (cond
+      ((null file-list)
+       ())
+      ((listp (cadr file))
+       (append
+         (get-files (cdr file)      type (append dir (list (car file))))
+         (get-files (cdr file-list) type dir)))
+      ((member (cadr file) (list type :both))
+       (cons (source-pathname (car file) :directory dir :type "lisp")
+             (get-files (cdr file-list) type dir)))
+      (t
+       (get-files (cdr file-list) type dir)))))
+
+(defmacro do-source (name type &body body)
+  "Iterate over all the source files that need to be compiled in the host or
+   the target, depending on the TYPE argument."
+  (unless (member type '(:host :target))
+    (error "TYPE must be one of :HOST or :TARGET, not ~S" type))
+  `(dolist (,name (get-files *source* ,type '(:relative "src")))
+     ,@body))
 
 (defun source-pathname
     (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
@@ -53,18 +92,15 @@
 
 ;;; Compile jscl into the host
 (with-compilation-unit ()
-  (dolist (input *source*)
-    (when (member (cadr input) '(:host :both))
-      (let ((fname (source-pathname (car input))))
-        (multiple-value-bind (fasl warn fail) (compile-file fname)
-          (declare (ignore fasl warn))
-          (when fail
-            (error "Compilation of ~A failed." fname)))))))
+  (do-source input :host
+    (multiple-value-bind (fasl warn fail) (compile-file input)
+      (declare (ignore fasl warn))
+      (when fail
+        (error "Compilation of ~A failed." input)))))
 
 ;;; Load jscl into the host
-(dolist (input *source*)
-  (when (member (cadr input) '(:host :both))
-    (load (source-pathname (car input)))))
+(do-source input :host
+  (load input))
 
 (defun read-whole-file (filename)
   (with-open-file (in filename)
@@ -77,7 +113,7 @@
         (*compile-print-toplevels* print))
     (let* ((source (read-whole-file filename))
            (in (make-string-stream source)))
-      (format t "Compiling ~a...~%" filename)
+      (format t "Compiling ~a...~%" (enough-namestring filename))
       (loop
          with eof-mark = (gensym)
          for x = (ls-read in nil eof-mark)
@@ -118,9 +154,8 @@
           *literal-counter* 0)
     (with-open-file (out "jscl.js" :direction :output :if-exists :supersede)
       (write-string (read-whole-file (source-pathname "prelude.js")) out)
-      (dolist (input *source*)
-        (when (member (cadr input) '(:target :both))
-          (!compile-file (source-pathname (car input) :type "lisp") out)))
+      (do-source input :target
+        (!compile-file input out))
       (dump-global-environment out))
     ;; Tests
     (with-open-file (out "tests.js" :direction :output :if-exists :supersede)
