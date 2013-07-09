@@ -288,7 +288,7 @@
                 (collect
                     `(var (,(translate-variable svar)
                             ,(convert nil))))))))
-       
+
        ;; Parse keywords
        ,(flet ((parse-keyword (keyarg)
                 (destructuring-bind ((keyword-name var) &optional initform svar) keyarg
@@ -312,7 +312,7 @@
            `(progn
               (var i)
               ,@(mapcar #'parse-keyword keyword-arguments))))
-       
+
        ;; Check for unknown keywords
        ,(when keyword-arguments
          `(progn
