@@ -45,6 +45,15 @@
     ("compiler"         :both)
     ("toplevel"         :target)))
 
+(defmacro do-source (name type &body body)
+  (unless (member type '(:host :target))
+    (error "TYPE should be one of :HOST or :TARGET"))
+  (let ((file (gensym)))
+    `(dolist (,file *source*)
+       (when (member (cadr ,file) (list :both ,type))
+         (let ((,name (source-pathname (car ,file) :type "lisp")))
+           ,@body)))))
+
 (defun source-pathname
     (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
   (if type
@@ -53,18 +62,15 @@
 
 ;;; Compile jscl into the host
 (with-compilation-unit ()
-  (dolist (input *source*)
-    (when (member (cadr input) '(:host :both))
-      (let ((fname (source-pathname (car input))))
-        (multiple-value-bind (fasl warn fail) (compile-file fname)
-          (declare (ignore fasl warn))
-          (when fail
-            (error "Compilation of ~A failed." fname)))))))
+  (do-source input :host
+    (multiple-value-bind (fasl warn fail) (compile-file input)
+      (declare (ignore fasl warn))
+      (when fail
+        (error "Compilation of ~A failed." input)))))
 
 ;;; Load jscl into the host
-(dolist (input *source*)
-  (when (member (cadr input) '(:host :both))
-    (load (source-pathname (car input)))))
+(do-source input :host
+  (load input))
 
 (defun read-whole-file (filename)
   (with-open-file (in filename)
@@ -118,9 +124,8 @@
           *literal-counter* 0)
     (with-open-file (out "jscl.js" :direction :output :if-exists :supersede)
       (write-string (read-whole-file (source-pathname "prelude.js")) out)
-      (dolist (input *source*)
-        (when (member (cadr input) '(:target :both))
-          (!compile-file (source-pathname (car input) :type "lisp") out)))
+      (do-source input :target
+        (!compile-file input out))
       (dump-global-environment out))
     ;; Tests
     (with-open-file (out "tests.js" :direction :output :if-exists :supersede)
