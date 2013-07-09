@@ -113,7 +113,7 @@
         (*compile-print-toplevels* print))
     (let* ((source (read-whole-file filename))
            (in (make-string-stream source)))
-      (format t "Compiling ~a...~%" filename)
+      (format t "Compiling ~a...~%" (enough-namestring filename))
       (loop
          with eof-mark = (gensym)
          for x = (ls-read in nil eof-mark)
