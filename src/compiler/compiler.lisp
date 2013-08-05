@@ -288,7 +288,7 @@
                 (collect
                     `(var (,(translate-variable svar)
                             ,(convert nil))))))))
-       
+
        ;; Parse keywords
        ,(flet ((parse-keyword (keyarg)
                 (destructuring-bind ((keyword-name var) &optional initform svar) keyarg
@@ -312,7 +312,7 @@
            `(progn
               (var i)
               ,@(mapcar #'parse-keyword keyword-arguments))))
-       
+
        ;; Check for unknown keywords
        ,(when keyword-arguments
          `(progn
@@ -1003,10 +1003,16 @@
                 (get tmp "cdr")))))
 
 (define-builtin rplaca (x new)
-  `(= (get ,x "car") ,new))
+  `(selfcall
+     (var (tmp ,x))
+     (= (get tmp "car") ,new)
+     (return tmp)))
 
 (define-builtin rplacd (x new)
-  `(= (get ,x "cdr") ,new))
+  `(selfcall
+     (var (tmp ,x))
+     (= (get tmp "cdr") ,new)
+     (return tmp)))
 
 (define-builtin symbolp (x)
   `(bool (instanceof ,x |Symbol|)))
