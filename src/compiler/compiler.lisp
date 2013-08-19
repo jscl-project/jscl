@@ -1252,7 +1252,7 @@
          (g (if (=== (typeof f) "function") f (get f "fvalue")))
          (o ,object))
     (for-in (key o)
-            (call g ,(if *multiple-value-p* '|values| '|pv|) 1 (get o "key")))
+            (call g ,(if *multiple-value-p* '|values| '|pv|) 1 (property o key)))
     (return ,(convert nil))))
 
 (define-compilation %js-vref (var)
