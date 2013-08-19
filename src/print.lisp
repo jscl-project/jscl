@@ -257,9 +257,13 @@
   (let ((*print-escape* nil))
     (write-to-string form)))
 
+(defun terpri ()
+  (write-char #\newline)
+  (values))
+
 (defun write-line (x)
   (write-string x)
-  (write-char #\newline)
+  (terpri)
   x)
 
 (defun warn (string)
