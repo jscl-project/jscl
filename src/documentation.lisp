@@ -2,25 +2,29 @@
 
 ;;; APROPOS and friends
 
-(defun map-apropos-symbols (function string package)
+(defun map-apropos-symbols (function string package external-only)
   (flet ((handle-symbol (symbol)
            ;; TODO: it's implementation-dependent, though CHAR-EQUAL seems
            ;; more reasonable nevertheless
            (when (search string (symbol-name symbol) :test #'char=)
              (funcall function symbol))))
     (if package
-        (do-symbols (symbol package) (handle-symbol symbol))
-        (do-all-symbols (symbol) (handle-symbol symbol)))))
+        (if external-only
+            (do-external-symbols (symbol package) (handle-symbol symbol))
+            (do-symbols (symbol package) (handle-symbol symbol)))
+        (if external-only
+            (do-all-external-symbols (symbol) (handle-symbol symbol))
+            (do-all-symbols (symbol) (handle-symbol symbol))))))
 
-(defun apropos-list (string &optional package)
+(defun apropos-list (string &optional package external-only)
   (let (symbols)
     (map-apropos-symbols
      (lambda (symbol)
        (pushnew symbol symbols :test #'eq))
-     string package)
+     string package external-only)
     symbols))
 
-(defun apropos (string &optional package)
+(defun apropos (string &optional package external-only)
   (map-apropos-symbols
    (lambda (symbol)
      (format t "~S" symbol)
@@ -29,7 +33,7 @@
      (when (fboundp symbol)
        (format t " (fbound)"))
      (terpri))
-   string package))
+   string package external-only))
 
 ;;; DESCRIBE
 
