@@ -306,4 +306,7 @@
   (case (char-upcase chr)
     (#\S (prin1-to-string arg))
     (#\A (princ-to-string arg))
-    (#\D (princ-to-string arg))))
+    (#\D (princ-to-string arg))
+    (t
+     (warn "~S is not implemented yet, using ~~S instead" chr)
+     (prin1-to-string arg))))
