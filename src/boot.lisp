@@ -520,7 +520,7 @@
     `(let ((,g!x ,x))
        (typecase ,g!x
          ,@clausules
-         (t (error "~X fell through etypecase expression." ,g!x))))))
+         (t (error "~S fell through etypecase expression." ,g!x))))))
 
 (defun notany (fn seq)
   (not (some fn seq)))
