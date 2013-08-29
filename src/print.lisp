@@ -266,9 +266,10 @@
   (terpri)
   x)
 
-(defun warn (string)
+(defun warn (fmt &rest args)
   (write-string "WARNING: ")
-  (write-line string))
+  (apply #'format t fmt args)
+  (terpri))
 
 (defun print (x)
   (write-line (prin1-to-string x))
@@ -304,4 +305,8 @@
 (defun format-special (chr arg)
   (case (char-upcase chr)
     (#\S (prin1-to-string arg))
-    (#\A (princ-to-string arg))))
+    (#\A (princ-to-string arg))
+    (#\D (princ-to-string arg))
+    (t
+     (warn "~S is not implemented yet, using ~~S instead" chr)
+     (prin1-to-string arg))))

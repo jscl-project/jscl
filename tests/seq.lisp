@@ -77,3 +77,18 @@
 
 (test (equal (reduce #'+ '(100) :key #'1+)
              101))
+
+; MISMATCH
+(test (= (mismatch '(1 2 3) '(1 2 3 4 5 6)) 3))
+(test (= (mismatch '(1 2 3) #(1 2 3 4 5 6)) 3))
+(test (= (mismatch #(1 2 3) '(1 2 3 4 5 6)) 3))
+(test (= (mismatch #(1 2 3) #(1 2 3 4 5 6)) 3))
+
+; SEARCH
+(test (= (search '(1 2 3) '(4 5 6 1 2 3)) 3))
+(test (= (search '(1 2 3) #(4 5 6 1 2 3)) 3))
+(test (= (search #(1 2 3) '(4 5 6 1 2 3)) 3))
+(test (= (search #(1 2 3) #(4 5 6 1 2 3)) 3))
+(test (not (search '(foo) '(1 2 3))))
+(test (= (search '(1) '(4 5 6 1 2 3)) 3))
+(test (= (search #(1) #(4 5 6 1 2 3)) 3))

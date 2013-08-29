@@ -155,6 +155,10 @@
   (dolist (package *package-list*)
     (map-for-in function (%package-symbols package))))
 
+(defun %map-all-external-symbols (function)
+  (dolist (package *package-list*)
+    (map-for-in function (%package-external-symbols package))))
+
 (defmacro do-symbols ((var &optional (package '*package*) result-form)
                       &body body)
   `(block nil
@@ -175,9 +179,12 @@
 (defmacro do-all-symbols ((var &optional result-form) &body body)
   `(block nil (%map-all-symbols (lambda (,var) ,@body)) ,result-form))
 
-(defun find-all-symbols (string)
+(defmacro do-all-external-symbols ((var &optional result-form) &body body)
+  `(block nil (%map-all-external-symbols (lambda (,var) ,@body)) ,result-form))
+
+(defun find-all-symbols (string &optional external-only)
   (let (symbols)
     (dolist (package *package-list* symbols)
       (multiple-value-bind (symbol status) (find-symbol string package)
-        (when status
+        (when (if external-only (eq status :external) status)
           (pushnew symbol symbols :test #'eq))))))
