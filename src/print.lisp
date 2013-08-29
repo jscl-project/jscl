@@ -118,7 +118,7 @@
 (defvar *print-circle* nil)
 
 ;;; FIXME: Please, rewrite this in a more organized way.
-(defun write-to-string (form &optional known-objects object-ids)
+(defun !write-to-string (form &optional known-objects object-ids)
   (when (and (not known-objects) *print-circle*)
     ;; To support *print-circle* some objects must be tracked for
     ;; sharing: conses, arrays and apparently-uninterned symbols.
@@ -181,7 +181,7 @@
            (setf prefix (format nil "#~S=" id))
            (aset object-ids ix (- id)))
           ((and id (< id 0))
-           (return-from write-to-string (format nil "#~S#" (- id)))))))
+           (return-from !write-to-string (format nil "#~S#" (- id)))))))
     (concat prefix
             (cond
               ((null form) "NIL")
@@ -202,7 +202,7 @@
                              ":"
                              (if (and package
                                       (eq (second (multiple-value-list
-                                                      (find-symbol name package)))
+                                                   (find-symbol name package)))
                                           :internal))
                                  ":"
                                  "")
@@ -219,35 +219,40 @@
                                   (lisp-escape-string form)
                                   form))
               ((functionp form)
-               (let ((name (oget form "fname")))
+               (let ((name #+jscl (oget form "fname")
+                           #-jscl "noname"))
                  (if name
                      (concat "#<FUNCTION " name ">")
                      (concat "#<FUNCTION>"))))
               ((listp form)
                (concat "("
                        (join-trailing (mapcar (lambda (x)
-                                                (write-to-string x known-objects object-ids))
+                                                (!write-to-string x known-objects object-ids))
                                               (butlast form)) " ")
                        (let ((last (last form)))
                          (if (null (cdr last))
-                             (write-to-string (car last) known-objects object-ids)
-                             (concat (write-to-string (car last) known-objects object-ids)
+                             (!write-to-string (car last) known-objects object-ids)
+                             (concat (!write-to-string (car last) known-objects object-ids)
                                      " . "
-                                     (write-to-string (cdr last) known-objects object-ids))))
+                                     (!write-to-string (cdr last) known-objects object-ids))))
                        ")"))
               ((vectorp form)
                (let ((result "#(")
                      (sep ""))
                  (dotimes (i (length form))
                    (setf result (concat result sep
-                                        (write-to-string (aref form i)
-                                                         known-objects
-                                                         object-ids)))
+                                        (!write-to-string (aref form i)
+                                                          known-objects
+                                                          object-ids)))
                    (setf sep " "))
                  (concat result ")")))
               ((packagep form)
                (concat "#<PACKAGE " (package-name form) ">"))
               (t "#<javascript object>")))))
+
+#+jscl
+(fset 'write-to-string (fdefinition '!write-to-string))
+
 
 (defun prin1-to-string (form)
   (let ((*print-escape* t))
