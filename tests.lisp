@@ -7,31 +7,43 @@
 (defvar *use-html-output-p* t)
 (defvar *timestamp* nil)
 
+(defun test-fn (condition form)
+  (cond
+    (condition
+     (format t "Test `~S' passed~%" form)
+     (incf *passed-tests*))
+    (t
+     (if *use-html-output-p*
+         (format t "<font color='red'>Test `~S' failed.</font>~%" form)
+         (format t "Test `~S' failed.~%" form))
+     (incf *failed-tests*)))
+  (incf *total-tests*))
+
+(defun expected-failure-fn (condition form)
+  (cond
+    (condition
+     (if *use-html-output-p*
+         (format t "<font color='orange'>Test `~S' passed unexpectedly!</font>~%" form)
+         (format t "Test `~S' passed unexpectedly!~%" form))
+     (incf *unexpected-passes*))
+    (t
+     (format t "Test `~S' failed expectedly.~%" form)
+     (incf *expected-failures*)))
+  (incf *total-tests*))
+
+
+#+jscl
 (defmacro test (condition)
-  `(progn
-     (cond
-       (,condition
-        (format t "Test `~S' passed~%" ',condition)
-        (incf *passed-tests*))
-       (t
-        (if *use-html-output-p*
-            (format t "<font color='red'>Test `~S' failed.</font>~%" ',condition)
-            (format t "Test `~S' failed.~%" ',condition))
-        (incf *failed-tests*)))
-     (incf *total-tests*)))
+  `(funcall (oget *root* "setTimeout")
+            (lambda ()
+              (test-fn ,condition ',condition))
+            0))
+#-jscl
+(defmacro test (condition)
+  `(test-fn ,condition ',condition))
 
 (defmacro expected-failure (condition)
-  `(progn
-     (cond
-       (,condition
-        (if *use-html-output-p*
-            (format t "<font color='orange'>Test `~S' passed unexpectedly!</font>~%" ',condition)
-            (format t "Test `~S' passed unexpectedly!~%" ',condition))
-        (incf *unexpected-passes*))
-       (t
-        (format t "Test `~S' failed expectedly.~%" ',condition)
-        (incf *expected-failures*)))
-     (incf *total-tests*)))
+  `(expected-failure-fn ,condition ',condition))
 
 (defmacro test-equal (form value)
   `(test (equal ,form, value)))

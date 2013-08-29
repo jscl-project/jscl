@@ -211,7 +211,7 @@
            ;; the symbol with the optional package or uninterned mark.
            (progn
              (cond
-               ((null package) (write-char #\#))
+               ((null package) (write-char #\# stream))
                ((eq package (find-package "KEYWORD")))
                (t (write-char (escape-token (package-name package)) stream)))
              (write-char #\: stream)
