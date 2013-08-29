@@ -24,13 +24,13 @@
 
 (/debug "loading boot.lisp!")
 
-(eval-when-compile
+(eval-when (:compile-toplevel)
   (let ((defmacro-macroexpander
          '#'(lambda (form)
               (destructuring-bind (name args &body body)
                   form
                 (let ((whole (gensym)))
-                  `(eval-when-compile
+                  `(eval-when (:compile-toplevel :execute)
                      (%compile-defmacro ',name
                                         '#'(lambda (,whole)
                                              (destructuring-bind ,args ,whole
