@@ -46,5 +46,6 @@
     (apply #'concatenate 'string strs)))
 
 (defun /debug (x)
+  (declare (ignorable x))
   ;; (write-line x)
   )
