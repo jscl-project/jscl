@@ -1,5 +1,18 @@
 ;;; documentation.lisp --- Accessing DOCUMENTATION
 
+;;; Documentation.
+(defun documentation (x type)
+  "Return the documentation of X. TYPE must be the symbol VARIABLE or FUNCTION."
+  (ecase type
+    (function
+     (let ((func (fdefinition x)))
+       (oget func "docstring")))
+    (variable
+     (unless (symbolp x)
+       (error "The type of documentation `~S' is not a symbol." type))
+     (oget x "vardoc"))))
+
+
 ;;; APROPOS and friends
 
 (defun map-apropos-symbols (function string package external-only)

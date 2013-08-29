@@ -419,17 +419,6 @@
   (write-line (lambda-code (fdefinition function)))
   nil)
 
-(defun documentation (x type)
-  "Return the documentation of X. TYPE must be the symbol VARIABLE or FUNCTION."
-  (ecase type
-    (function
-     (let ((func (fdefinition x)))
-       (oget func "docstring")))
-    (variable
-     (unless (symbolp x)
-       (error "The type of documentation `~S' is not a symbol." type))
-     (oget x "vardoc"))))
-
 (defmacro multiple-value-bind (variables value-from &body body)
   `(multiple-value-call (lambda (&optional ,@variables &rest ,(gensym))
                           ,@body)
