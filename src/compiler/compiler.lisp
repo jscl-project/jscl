@@ -42,6 +42,12 @@
 ;;; function call.
 (defvar *multiple-value-p* nil)
 
+;;; It is bound dinamically to the number of nested calls to
+;;; `convert'. Therefore, a form is being compiled as toplevel if it
+;;; is zero.
+(defvar *convert-level* -1)
+
+
 ;;; Environment
 
 (def!struct binding
@@ -578,7 +584,29 @@
       ,(convert-block body t))))
 
 
+;;; Was the compiler invoked from !compile-file?
 (defvar *compiling-file* nil)
+
+;;; NOTE: It is probably wrong in many cases but we will not use this
+;;; heavily. Please, do not rely on wrong cases of this
+;;; implementation.
+(define-compilation eval-when (situations &rest body)
+  ;; TODO: Error checking
+  (cond
+    ;; Toplevel form compiled by !compile-file.
+    ((and *compiling-file* (zerop *convert-level*))
+     ;; If the situation `compile-toplevel' is given. The form is
+     ;; evaluated at compilation-time.
+     (when (find :compile-toplevel situations)
+       (eval (cons 'progn body)))
+     ;; `load-toplevel' is given, then just compile the subforms as usual.
+     (if (find :load-toplevel situations)
+         (convert `(progn ,@body))))
+    ((find :execute situations)
+     (convert `(progn ,@body) *multiple-value-p*))
+    (t
+     (convert nil))))
+
 (define-compilation eval-when-compile (&rest body)
   (if *compiling-file*
       (progn
@@ -1361,7 +1389,8 @@
     (when expandedp
       (return-from convert (convert sexp multiple-value-p)))
     ;; The expression has been macroexpanded. Now compile it!
-    (let ((*multiple-value-p* multiple-value-p))
+    (let ((*multiple-value-p* multiple-value-p)
+          (*convert-level* (1+ *convert-level*)))
       (cond
         ((symbolp sexp)
          (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
