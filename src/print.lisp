@@ -215,7 +215,7 @@
                ((eq package (find-package "KEYWORD")))
                (t (write-char (escape-token (package-name package)) stream)))
              (write-char #\: stream)
-             (let ((symbtype (second (multiple-value-list (find-symbol name package)))))
+             (let ((symbtype (and package (second (multiple-value-list (find-symbol name package))))))
                (when (and package (eq symbtype :internal))
                  (write-char #\: stream)))
              (write-string (escape-token name) stream)))))
