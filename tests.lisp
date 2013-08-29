@@ -32,13 +32,6 @@
   (incf *total-tests*))
 
 
-#+jscl
-(defmacro test (condition)
-  `(funcall (oget *root* "setTimeout")
-            (lambda ()
-              (test-fn ,condition ',condition))
-            0))
-#-jscl
 (defmacro test (condition)
   `(test-fn ,condition ',condition))
 
@@ -47,7 +40,6 @@
 
 (defmacro test-equal (form value)
   `(test (equal ,form, value)))
-
 
 (format t "Running tests...~%~%")
 (setq *timestamp* (get-internal-real-time))
