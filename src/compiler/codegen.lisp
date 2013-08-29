@@ -49,6 +49,8 @@
 
 (defvar *js-output* t)
 
+(defvar *js-pretty-print* t)
+
 ;;; Two seperate functions are needed for escaping strings:
 ;;;  One for producing JavaScript string literals (which are singly or
 ;;;   doubly quoted)
@@ -372,6 +374,11 @@
     (t
      (js-macroexpand form))))
 
+(defun js-end-stmt ()
+  (js-format ";")
+  (when *js-pretty-print*
+    (js-format "~%")))
+
 (defun js-stmt (form &optional parent)
   (let ((form (js-expand-stmt form)))
     (flet ((js-stmt (x) (js-stmt x form)))
@@ -379,11 +386,11 @@
         ((null form)
          (unless (or (and (consp parent) (eq (car parent) 'group))
                      (null parent))
-           (js-format ";")))
+           (js-end-stmt)))
         ((atom form)
          (progn
            (js-expr form)
-           (js-format ";")))
+           (js-end-stmt)))
         (t
          (case (car form)
            (label
@@ -397,12 +404,12 @@
               (when label
                 (js-format " ")
                 (js-identifier label))
-              (js-format ";")))
+              (js-end-stmt)))
            (return
              (destructuring-bind (value) (cdr form)
                (js-format "return ")
                (js-expr value)
-               (js-format ";")))
+               (js-end-stmt)))
            (var
             (flet ((js-var (spec)
                      (destructuring-bind (variable &optional initial)
@@ -417,7 +424,7 @@
                 (dolist (var vars)
                   (js-format ",")
                   (js-var var))
-                (js-format ";"))))
+                (js-end-stmt))))
            (if
             (destructuring-bind (condition true &optional false) (cdr form)
               (js-format "if (")
@@ -495,10 +502,10 @@
                (destructuring-bind (object) (cdr form)
                  (js-format "throw ")
                  (js-expr object)
-                 (js-format ";")))
+                 (js-end-stmt)))
            (t
             (js-expr form)
-            (js-format ";"))))))))
+            (js-end-stmt))))))))
 
 (defun js (&rest stmts)
   (mapc #'js-stmt stmts)
