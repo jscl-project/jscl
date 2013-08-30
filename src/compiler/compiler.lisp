@@ -600,8 +600,8 @@
      (when (find :compile-toplevel situations)
        (eval (cons 'progn body)))
      ;; `load-toplevel' is given, then just compile the subforms as usual.
-     (if (find :load-toplevel situations)
-         (convert `(progn ,@body))))
+     (when (find :load-toplevel situations)
+       (convert `(progn ,@body))))
     ((find :execute situations)
      (convert `(progn ,@body) *multiple-value-p*))
     (t
@@ -1431,6 +1431,11 @@
     (subseq string 0 n)))
 
 (defun convert-toplevel (sexp &optional multiple-value-p)
+  ;; Macroexpand sexp as much as possible
+  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
+    (when expandedp
+      (return-from convert-toplevel (convert-toplevel sexp multiple-value-p))))
+  ;; Process as toplevel
   (let ((*toplevel-compilations* nil))
     (cond
       ;; Non-empty toplevel progn
