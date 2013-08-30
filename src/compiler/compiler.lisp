@@ -607,13 +607,6 @@
     (t
      (convert nil))))
 
-(define-compilation eval-when-compile (&rest body)
-  (if *compiling-file*
-      (progn
-        (eval (cons 'progn body))
-        (convert 0))
-      (convert `(progn ,@body))))
-
 (defmacro define-transformation (name args form)
   `(define-compilation ,name ,args
      (convert ,form)))
