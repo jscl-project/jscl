@@ -61,6 +61,13 @@
                ((null (cddr x)) (rplacd x (cadr x))))
            (cons arg others))))
 
+(defun list-length (list)
+  (let ((l 0))
+    (while (not (null list))
+      (incf l)
+      (setq list (cdr list)))
+    l))
+
 (defun nthcdr (n list)
   (while (and (plusp n) list)
     (setq n (1- n))
@@ -110,6 +117,24 @@
 (defun cddadr (x) (cdr (cdadr x)))
 (defun cdddar (x) (cdr (cddar x)))
 (defun cddddr (x) (cdr (cdddr x)))
+
+(defun append-two (list1 list2)
+  (if (null list1)
+      list2
+      (cons (car list1)
+            (append (cdr list1) list2))))
+
+(defun append (&rest lists)
+  (!reduce #'append-two lists nil))
+
+(defun revappend (list1 list2)
+  (while list1
+    (push (car list1) list2)
+    (setq list1 (cdr list1)))
+  list2)
+
+(defun reverse (list)
+  (revappend list '()))
 
 (defun sublis (alist tree &key key (test #'eql testp) (test-not #'eql test-not-p))
   (when (and testp test-not-p)
@@ -165,18 +190,6 @@
     ((atom tail) (eq object tail))
     (when (eql tail object)
       (return-from tailp t))))
-
-(defmacro pop (place)
-  (multiple-value-bind (dummies vals newval setter getter)
-    (get-setf-expansion place)
-    (let ((head (gensym)))
-      `(let* (,@(mapcar #'list dummies vals) 
-              (,head ,getter)
-              (,(car newval) (cdr ,head))
-              ,@(cdr newval)) 
-         ,setter
-         (car ,head)))))
-
 
 (defun map1 (func list)
   (with-collect

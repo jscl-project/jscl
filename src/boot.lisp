@@ -103,50 +103,6 @@
 (defun not (x) (if x nil t))
 
 ;; Basic macros
-(defmacro incf (place &optional (delta 1))
-  (multiple-value-bind (dummies vals newval setter getter)
-      (get-setf-expansion place)
-    (let ((d (gensym)))
-      `(let* (,@(mapcar #'list dummies vals)
-              (,d ,delta)
-                (,(car newval) (+ ,getter ,d))
-                ,@(cdr newval))
-         ,setter))))
-
-(defmacro decf (place &optional (delta 1))
-  (multiple-value-bind (dummies vals newval setter getter)
-      (get-setf-expansion place)
-    (let ((d (gensym)))
-      `(let* (,@(mapcar #'list dummies vals)
-              (,d ,delta)
-              (,(car newval) (- ,getter ,d))
-              ,@(cdr newval))
-         ,setter))))
-
-(defmacro push (x place)
-  (multiple-value-bind (dummies vals newval setter getter)
-      (get-setf-expansion place)
-    (let ((g (gensym)))
-      `(let* ((,g ,x)
-              ,@(mapcar #'list dummies vals)
-              (,(car newval) (cons ,g ,getter))
-              ,@(cdr newval))
-         ,setter))))
-
-(defmacro pushnew (x place &rest keys &key key test test-not)
-  (declare (ignore key test test-not))
-  (multiple-value-bind (dummies vals newval setter getter)
-      (get-setf-expansion place)
-    (let ((g (gensym))
-          (v (gensym)))
-      `(let* ((,g ,x)
-              ,@(mapcar #'list dummies vals)
-              ,@(cdr newval)
-              (,v ,getter))
-         (if (member ,g ,v ,@keys)
-             ,v
-             (let ((,(car newval) (cons ,g ,getter)))
-               ,setter))))))
 
 (defmacro dolist ((var list &optional result) &body body)
   (let ((g!list (gensym)))
@@ -250,28 +206,6 @@
          ,@decls
          (tagbody ,@forms)))))
 
-
-;;; Go on growing the Lisp language in Ecmalisp, with more high level
-;;; utilities as well as correct versions of other constructions.
-
-(defun append-two (list1 list2)
-  (if (null list1)
-      list2
-      (cons (car list1)
-            (append (cdr list1) list2))))
-
-(defun append (&rest lists)
-  (!reduce #'append-two lists nil))
-
-(defun revappend (list1 list2)
-  (while list1
-    (push (car list1) list2)
-    (setq list1 (cdr list1)))
-  list2)
-
-(defun reverse (list)
-  (revappend list '()))
-
 (defmacro psetq (&rest pairs)
   (let (;; For each pair, we store here a list of the form
         ;; (VARIABLE GENSYM VALUE).
@@ -324,22 +258,6 @@
                                   (consp (cddr v))
                                   (list (first v) (third v))))
                            varlist)))))))
-
-(defun list-length (list)
-  (let ((l 0))
-    (while (not (null list))
-      (incf l)
-      (setq list (cdr list)))
-    l))
-
-(defun length (seq)
-  (cond
-    ((stringp seq)
-     (string-length seq))
-    ((arrayp seq)
-     (oget seq "length"))
-    ((listp seq)
-     (list-length seq))))
 
 (defmacro with-collect (&body body)
   (let ((head (gensym))
@@ -479,6 +397,64 @@
               ((null pairs)
                (reverse result)))))))
 
+(defmacro incf (place &optional (delta 1))
+  (multiple-value-bind (dummies vals newval setter getter)
+      (get-setf-expansion place)
+    (let ((d (gensym)))
+      `(let* (,@(mapcar #'list dummies vals)
+              (,d ,delta)
+                (,(car newval) (+ ,getter ,d))
+                ,@(cdr newval))
+         ,setter))))
+
+(defmacro decf (place &optional (delta 1))
+  (multiple-value-bind (dummies vals newval setter getter)
+      (get-setf-expansion place)
+    (let ((d (gensym)))
+      `(let* (,@(mapcar #'list dummies vals)
+              (,d ,delta)
+              (,(car newval) (- ,getter ,d))
+              ,@(cdr newval))
+         ,setter))))
+
+(defmacro push (x place)
+  (multiple-value-bind (dummies vals newval setter getter)
+      (get-setf-expansion place)
+    (let ((g (gensym)))
+      `(let* ((,g ,x)
+              ,@(mapcar #'list dummies vals)
+              (,(car newval) (cons ,g ,getter))
+              ,@(cdr newval))
+         ,setter))))
+
+(defmacro pop (place)
+  (multiple-value-bind (dummies vals newval setter getter)
+    (get-setf-expansion place)
+    (let ((head (gensym)))
+      `(let* (,@(mapcar #'list dummies vals)
+              (,head ,getter)
+              (,(car newval) (cdr ,head))
+              ,@(cdr newval))
+         ,setter
+         (car ,head)))))
+
+(defmacro pushnew (x place &rest keys &key key test test-not)
+  (declare (ignore key test test-not))
+  (multiple-value-bind (dummies vals newval setter getter)
+      (get-setf-expansion place)
+    (let ((g (gensym))
+          (v (gensym)))
+      `(let* ((,g ,x)
+              ,@(mapcar #'list dummies vals)
+              ,@(cdr newval)
+              (,v ,getter))
+         (if (member ,g ,v ,@keys)
+             ,v
+             (let ((,(car newval) (cons ,g ,getter)))
+               ,setter))))))
+
+
+
 ;; Incorrect typecase, but used in NCONC.
 (defmacro typecase (x &rest clausules)
   (let ((value (gensym)))
@@ -517,7 +493,7 @@
 (defun notany (fn seq)
   (not (some fn seq)))
 
-(defconstant internal-time-units-per-second 1000) 
+(defconstant internal-time-units-per-second 1000)
 
 (defun get-internal-real-time ()
   (get-internal-real-time))

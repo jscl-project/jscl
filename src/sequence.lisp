@@ -15,6 +15,15 @@
 
 (/debug "loading sequence.lisp!")
 
+(defun length (seq)
+  (cond
+    ((stringp seq)
+     (string-length seq))
+    ((arrayp seq)
+     (oget seq "length"))
+    ((listp seq)
+     (list-length seq))))
+
 (defun sequencep (thing)
   (or (listp thing) (vectorp thing)))
 
