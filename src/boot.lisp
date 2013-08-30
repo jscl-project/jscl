@@ -369,9 +369,10 @@
 (defmacro define-setf-expander (access-fn lambda-list &body body)
   (unless (symbolp access-fn)
     (error "ACCESS-FN `~S' must be a symbol." access-fn))
-  `(progn (push (cons ',access-fn (lambda ,lambda-list ,@body))
-                *setf-expanders*)
-          ',access-fn))
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
+     (push (cons ',access-fn (lambda ,lambda-list ,@body))
+           *setf-expanders*)
+     ',access-fn))
 
 (defmacro setf (&rest pairs)
   (cond
