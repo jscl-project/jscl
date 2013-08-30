@@ -601,7 +601,7 @@
        (eval (cons 'progn body)))
      ;; `load-toplevel' is given, then just compile the subforms as usual.
      (when (find :load-toplevel situations)
-       (convert `(progn ,@body))))
+       (convert-toplevel `(progn ,@body) *multiple-value-p*)))
     ((find :execute situations)
      (convert `(progn ,@body) *multiple-value-p*))
     (t
@@ -1429,7 +1429,8 @@
     (when expandedp
       (return-from convert-toplevel (convert-toplevel sexp multiple-value-p))))
   ;; Process as toplevel
-  (let ((*toplevel-compilations* nil))
+  (let ((*convert-level* -1)
+        (*toplevel-compilations* nil))
     (cond
       ;; Non-empty toplevel progn
       ((and (consp sexp)

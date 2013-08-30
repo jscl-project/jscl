@@ -348,22 +348,23 @@
 
 ;;; Generalized references (SETF)
 
-(defvar *setf-expanders* nil)
-
-(defun get-setf-expansion (place)
-  (if (symbolp place)
-      (let ((value (gensym)))
-        (values nil
-                nil
-                `(,value)
-                `(setq ,place ,value)
-                place))
-      (let ((place (!macroexpand-1 place)))
-        (let* ((access-fn (car place))
-               (expander (cdr (assoc access-fn *setf-expanders*))))
-          (when (null expander)
-            (error "Unknown generalized reference."))
-          (apply expander (cdr place))))))
+(eval-when(:compile-toplevel :load-toplevel :execute)
+  (defvar *setf-expanders* nil)
+  (defun !get-setf-expansion (place)
+    (if (symbolp place)
+        (let ((value (gensym)))
+          (values nil
+                  nil
+                  `(,value)
+                  `(setq ,place ,value)
+                  place))
+        (let ((place (!macroexpand-1 place)))
+          (let* ((access-fn (car place))
+                 (expander (cdr (assoc access-fn *setf-expanders*))))
+            (when (null expander)
+              (error "Unknown generalized reference."))
+            (apply expander (cdr place)))))))
+(fset 'get-setf-expansion (fdefinition '!get-setf-expansion))
 
 (defmacro define-setf-expander (access-fn lambda-list &body body)
   (unless (symbolp access-fn)
@@ -382,7 +383,7 @@
      (let ((place (!macroexpand-1 (first pairs)))
            (value (second pairs)))
        (multiple-value-bind (vars vals store-vars writer-form reader-form)
-           (get-setf-expansion place)
+           (!get-setf-expansion place)
          ;; TODO: Optimize the expansion a little bit to avoid let*
          ;; or multiple-value-bind when unnecesary.
          `(let* ,(mapcar #'list vars vals)
@@ -399,7 +400,7 @@
 
 (defmacro incf (place &optional (delta 1))
   (multiple-value-bind (dummies vals newval setter getter)
-      (get-setf-expansion place)
+      (!get-setf-expansion place)
     (let ((d (gensym)))
       `(let* (,@(mapcar #'list dummies vals)
               (,d ,delta)
@@ -409,7 +410,7 @@
 
 (defmacro decf (place &optional (delta 1))
   (multiple-value-bind (dummies vals newval setter getter)
-      (get-setf-expansion place)
+      (!get-setf-expansion place)
     (let ((d (gensym)))
       `(let* (,@(mapcar #'list dummies vals)
               (,d ,delta)
@@ -419,7 +420,7 @@
 
 (defmacro push (x place)
   (multiple-value-bind (dummies vals newval setter getter)
-      (get-setf-expansion place)
+      (!get-setf-expansion place)
     (let ((g (gensym)))
       `(let* ((,g ,x)
               ,@(mapcar #'list dummies vals)
@@ -429,7 +430,7 @@
 
 (defmacro pop (place)
   (multiple-value-bind (dummies vals newval setter getter)
-    (get-setf-expansion place)
+    (!get-setf-expansion place)
     (let ((head (gensym)))
       `(let* (,@(mapcar #'list dummies vals)
               (,head ,getter)
@@ -441,7 +442,7 @@
 (defmacro pushnew (x place &rest keys &key key test test-not)
   (declare (ignore key test test-not))
   (multiple-value-bind (dummies vals newval setter getter)
-      (get-setf-expansion place)
+      (!get-setf-expansion place)
     (let ((g (gensym))
           (v (gensym)))
       `(let* ((,g ,x)
