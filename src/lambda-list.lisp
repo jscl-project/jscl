@@ -346,7 +346,7 @@
   (apply #'!expand-destructuring-bind lambda-list expression body))
 
 #+jscl
-(eval-when-compile
+(eval-when (:compile-toplevel)
   (let ((macroexpander
          '#'(lambda (form &optional environment)
               (declare (ignore environment))

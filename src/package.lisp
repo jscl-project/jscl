@@ -76,7 +76,7 @@
 (defvar *package* *common-lisp-package*)
 
 (defmacro in-package (string-designator)
-  `(eval-when-compile
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
      (setq *package* (find-package-or-fail ',string-designator))))
 
 ;; This function is used internally to initialize the CL package
