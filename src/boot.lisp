@@ -38,7 +38,7 @@
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
 (defmacro declaim (&rest decls)
-  `(eval-when-compile
+  `(eval-when (:compile-toplevel :execute)
      ,@(mapcar (lambda (decl) `(!proclaim ',decl)) decls)))
 
 (defmacro defconstant (name value &optional docstring)
