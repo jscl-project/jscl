@@ -102,6 +102,12 @@
 
 (defun not (x) (if x nil t))
 
+(defun funcall (function &rest args)
+  (apply function args))
+
+(defun apply (function arg &rest args)
+  (apply function (apply #'list* arg args)))
+
 ;; Basic macros
 
 (defmacro dolist ((var list &optional result) &body body)
