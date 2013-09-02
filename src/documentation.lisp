@@ -17,9 +17,7 @@
 
 (defun map-apropos-symbols (function string package external-only)
   (flet ((handle-symbol (symbol)
-           ;; TODO: it's implementation-dependent, though CHAR-EQUAL seems
-           ;; more reasonable nevertheless
-           (when (search string (symbol-name symbol) :test #'char=)
+           (when (search string (symbol-name symbol) :test #'char-equal)
              (funcall function symbol))))
     (if package
         (if external-only
@@ -46,7 +44,7 @@
      (when (fboundp symbol)
        (format t " (fbound)"))
      (terpri))
-   string package external-only))
+   (string string) package external-only))
 
 ;;; DESCRIBE
 
