@@ -20,15 +20,25 @@
 (defun list-all-packages ()
   (copy-list *package-list*))
 
-(defun make-package (name &key use)
-  (let ((package (new))
-        (use (mapcar #'find-package-or-fail use)))
-    (setf (oget package "packageName") (string name))
+(defun %make-package (name use)
+  (let ((package (new)))
+    (setf (oget package "packageName") name)
     (setf (oget package "symbols") (new))
     (setf (oget package "exports") (new))
     (setf (oget package "use") use)
     (push package *package-list*)
     package))
+
+(defun resolve-package-list (packages)
+  (let (result)
+    (dolist (package (mapcar #'find-package-or-fail packages))
+      (pushnew package result :test #'eq))
+    (reverse result)))
+
+(defun make-package (name &key use)
+  (%make-package
+   (string name)
+   (resolve-package-list use)))
 
 (defun packagep (x)
   (and (objectp x) (in "symbols" x)))
@@ -78,6 +88,26 @@
 (defmacro in-package (string-designator)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (setq *package* (find-package-or-fail ',string-designator))))
+
+(defmacro defpackage (package &rest options)
+  (let (use)
+    (dolist (option options)
+      (ecase (car option)
+       (:use
+        (setf use (append use (cdr option))))))
+    `(eval-when (:compile-toplevel :load-toplevel :execute)
+       (%defpackage ',(string package) ',use))))
+
+(defun redefine-package (package use)
+  (setf (oget package "use") use)
+  package)
+
+(defun %defpackage (name use)
+  (let ((package (find-package name))
+        (use (resolve-package-list use)))
+    (if package
+        (redefine-package package use)
+        (%make-package name use))))
 
 ;; This function is used internally to initialize the CL package
 ;; with the symbols built during bootstrap.
