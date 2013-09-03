@@ -217,3 +217,14 @@
 (test (let (foo)
         (mapc (lambda (x y z) (push (+ x y z) foo)) '(1 2) '(3) '(4 5 6))
         (equal foo '(8))))
+
+;; GETF
+(test (eq (getf '(a b c d) 'a) 'b))
+(test (null (getf '(a b c d) 'e)))
+(test (equal (let ((x (list 'a 1))) (setf (getf x 'a) 3) x) '(a 3)))
+(test (equal (let ((x (list 'a 1))) (incf (getf x 'a)) x) '(a 2)))
+
+;; GET-PROPERTIES
+(test (equal (multiple-value-list (get-properties '(a b c d) '(b d e))) '(NIL NIL NIL)))
+(test (equal (multiple-value-list (get-properties '(a b c d) '(b a c))) '(a b (a b c d))))
+(test (equal (multiple-value-list (get-properties '(a b c d) '(b c a))) '(a b (a b c d))))
