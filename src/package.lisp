@@ -23,7 +23,7 @@
 (defun make-package (name &key use)
   (let ((package (new))
         (use (mapcar #'find-package-or-fail use)))
-    (setf (oget package "packageName") name)
+    (setf (oget package "packageName") (string name))
     (setf (oget package "symbols") (new))
     (setf (oget package "exports") (new))
     (setf (oget package "use") use)
