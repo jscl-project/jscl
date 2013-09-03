@@ -39,6 +39,12 @@
 
 (defun cdr (x) (cdr x))
 
+(defun rplaca (cons x)
+  (rplaca cons x))
+
+(defun rplacd (cons x)
+  (rplacd cons x))
+
 (defun first   (x) (car    x))
 (defun second  (x) (cadr   x))
 (defun third   (x) (caddr  x))
