@@ -516,7 +516,7 @@
                  (push (cons sexp jsvar) *literal-table*)
                  (toplevel-compilation `(var (,jsvar ,dumped)))
                  (when (keywordp sexp)
-                   (toplevel-compilation `(= ,(get jsvar "value") ,jsvar)))
+                   (toplevel-compilation `(= (get ,jsvar "value") ,jsvar)))
                  jsvar)))))))
 
 
