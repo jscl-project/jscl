@@ -1241,7 +1241,7 @@
         ,@(mapcar (lambda (key)
                     `(progn
                        (= obj (property obj (call |xstring| ,(convert key))))
-                       (if (=== object undefined)
+                       (if (=== obj undefined)
                            (throw "Impossible to set object property."))))
                   (butlast keys))
         (var (tmp
