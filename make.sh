@@ -1,3 +1,5 @@
 #!/bin/sh
 
-sbcl --load 'jscl.lisp' --eval '(jscl:bootstrap)' --eval '(quit)'
+BASE=`dirname $0`
+
+sbcl --load "$BASE/jscl.lisp" --eval '(jscl:bootstrap)' --eval '(quit)'

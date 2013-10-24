@@ -22,6 +22,9 @@
 
 (in-package :jscl)
 
+(defvar *base-directory*
+  (or #.*load-pathname* *default-pathname-defaults*))
+
 ;;; List of all the source files that need to be compiled, and whether they
 ;;; are to be compiled just by the host, by the target JSCL, or by both.
 ;;; All files have a `.lisp' extension, and
@@ -86,11 +89,12 @@
   `(dolist (,name (get-files *source* ,type '(:relative "src")))
      ,@body))
 
-(defun source-pathname
-    (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
-  (if type
-      (make-pathname :type type :directory directory :defaults defaults)
-      (make-pathname            :directory directory :defaults defaults)))
+(defun source-pathname (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
+  (merge-pathnames
+   (if type
+       (make-pathname :type type :directory directory :defaults defaults)
+       (make-pathname            :directory directory :defaults defaults))
+   *base-directory*))
 
 ;;; Compile jscl into the host
 (with-compilation-unit ()
@@ -154,13 +158,13 @@
     (setq *variable-counter* 0
           *gensym-counter* 0
           *literal-counter* 0)
-    (with-open-file (out "jscl.js" :direction :output :if-exists :supersede)
+    (with-open-file (out (merge-pathnames "jscl.js" *base-directory*) :direction :output :if-exists :supersede)
       (write-string (read-whole-file (source-pathname "prelude.js")) out)
       (do-source input :target
         (!compile-file input out))
       (dump-global-environment out))
     ;; Tests
-    (with-open-file (out "tests.js" :direction :output :if-exists :supersede)
+    (with-open-file (out (merge-pathnames "tests.js" *base-directory*) :direction :output :if-exists :supersede)
       (dolist (input (append (directory "tests.lisp")
                              (directory "tests/*.lisp")
                              (directory "tests-report.lisp")))
