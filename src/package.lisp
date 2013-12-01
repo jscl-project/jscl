@@ -26,7 +26,9 @@
     (setf (oget package "symbols") (new))
     (setf (oget package "exports") (new))
     (setf (oget package "use") use)
-    (push package *package-list*)
+    (if (find name *package-list* :key (lambda (s) (oget s "packageName")) :test #'equal)
+        (error "A package namded `~a' already exists." name)
+        (push package *package-list*))
     package))
 
 (defun resolve-package-list (packages)
