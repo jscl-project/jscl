@@ -1,6 +1,6 @@
 ;;; compiler-codege.lisp --- Naive Javascript unparser
 
-;; copyright (C) 2013 David Vazquez
+;; Copyright (C) 2013, 2014 David Vazquez
 
 ;; JSCL is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -15,6 +15,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
+
 ;;; This code generator takes as input a S-expression representation
 ;;; of the Javascript AST and generates Javascript code without
 ;;; redundant syntax constructions like extra parenthesis.
@@ -23,6 +24,7 @@
 ;;; quite independent so it has been integrated early in JSCL.
 
 (/debug "loading compiler-codegen.lisp!")
+
 
 (defvar *js-macros* nil)
 (defmacro define-js-macro (name lambda-list &body body)
@@ -101,6 +103,9 @@
 (defun js-format (fmt &rest args)
   (apply #'format *js-output* fmt args))
 
+;;; Check if STRING-DESIGNATOR is valid as a Javascript identifier. It
+;;; returns a couple of values. The identifier itself as a string and
+;;; a boolean value with the result of this check.
 (defun valid-js-identifier (string-designator)
   (let ((string (typecase string-designator
                   (symbol (symbol-name string-designator))
@@ -113,8 +118,14 @@
                (if (plusp (length string))
                    (not (digit-char-p (char string 0)))
                    t))
-          (values (format nil "~a" string) t)
+          (values string t)
           (values nil nil)))))
+
+
+;;; Expression generators
+;;;
+;;; `js-expr' and the following auxiliary functions are the
+;;; responsible for generating Javascript expression.
 
 (defun js-identifier (string-designator)
   (multiple-value-bind (string valid)
@@ -213,6 +224,10 @@
          (js-macroexpand form)))
       form))
 
+;;; It is the more complicated function of the generator. It takes a
+;;; operator expression and generate Javascript for it. It will
+;;; consider associativity and precedence in order not to generate
+;;; unnecessary parenthesis.
 (defun js-operator-expression (op args precedence associativity operand-order)
   (let ((op1 (car args))
         (op2 (cadr args)))
@@ -364,6 +379,15 @@
       (t
        (js-operator-expression (car form) (cdr form) precedence associativity operand-order)))))
 
+
+
+;;; Statements generators
+;;; 
+;;; `js-stmt' generates code for Javascript statements. A form is
+;;; provided to label statements. Remember that in particular,
+;;; expressions can be used as statements (semicolon suffixed).
+;;; 
+
 (defun js-expand-stmt (form)
   (cond
     ((and (consp form) (eq (car form) 'progn))
@@ -511,6 +535,8 @@
             (js-expr form)
             (js-end-stmt))))))))
 
+
+;;; It is intended to be the entry point to the code generator. 
 (defun js (&rest stmts)
   (mapc #'js-stmt stmts)
   nil)
