@@ -228,3 +228,19 @@
 (test (equal (multiple-value-list (get-properties '(a b c d) '(b d e))) '(NIL NIL NIL)))
 (test (equal (multiple-value-list (get-properties '(a b c d) '(b a c))) '(a b (a b c d))))
 (test (equal (multiple-value-list (get-properties '(a b c d) '(b c a))) '(a b (a b c d))))
+
+;; BUTLAST
+(test (equal (butlast '()) ()))
+(test (equal (butlast '(1)) ()))
+(test (equal (butlast '(1 2)) '(1)))
+(test (equal (butlast '(1 2 3 4 5)) '(1 2 3 4)))
+(test (equal '(1 2 3 4) (butlast '(1 2 3 4 5))))
+(test (equal (let ((thing '(1 2 3 4 5))) (butlast thing)) '(1 2 3 4)))
+(test (equal (let ((thing '(1 2 3 4 5))) (butlast thing) thing) '(1 2 3 4 5)))
+
+(test (equal (let ((thing '(1 2 3 4 5))) (butlast thing 0)) '(1 2 3 4 5)))
+(test (equal (let ((thing '(1 2 3 4 5))) (butlast thing 1)) '(1 2 3 4)))
+(test (equal (let ((thing '(1 2 3 4 5))) (butlast thing 2)) '(1 2 3)))
+(test (equal (let ((thing '())) (butlast thing 2)) '()))
+(test (equal (let ((thing '(1 2))) (butlast thing 2)) '()))
+(test (equal (let ((thing '())) (butlast thing 0)) '()))
