@@ -244,3 +244,7 @@
 (test (equal (let ((thing '())) (butlast thing 2)) '()))
 (test (equal (let ((thing '(1 2))) (butlast thing 2)) '()))
 (test (equal (let ((thing '())) (butlast thing 0)) '()))
+
+;; MAKE-LIST
+(test (equal (make-list 5) '(nil nil nil nil nil)))
+(test (equal (make-list 3 :initial-element 'rah) '(rah rah rah)))

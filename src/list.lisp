@@ -197,6 +197,17 @@
     (when (eql tail object)
       (return-from tailp t))))
 
+(defun make-list (size &key (initial-element nil))
+  "Create a list of size `size` of `initial-element`s."
+  (when (< size 0)
+    (error "Size must be non-negative"))
+  (let ((newlist))
+    (do ((i 0))
+        ((= i size))
+      (push initial-element newlist)
+      (incf i))
+    newlist))
+
 (defun map1 (func list)
   (with-collect
     (while list
