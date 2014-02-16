@@ -13,21 +13,20 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-;;; Javascript dictionaries are the natural way to implement Common
+;;; Plain Javascript objects are the natural way to implement Common
 ;;; Lisp hash tables. However, there is a big differences betweent
-;;; them which we need to work around. Javascript dictionaries require
-;;; the keys to be strings. To solve that, we map Lisp objects to
-;;; strings such that "equivalent" values map to the same string,
-;;; regarding the equality predicate used (one of `eq', `eql', `equal'
-;;; and `equalp').
+;;; them which we need to work around. Javascript objects require the
+;;; keys to be strings. To solve that, we map Lisp objects to strings
+;;; such that "equivalent" values map to the same string, regarding
+;;; the equality predicate used (one of `eq', `eql', `equal' and
+;;; `equalp').
 ;;;
 
 
 ;;; If a hash table has `eq' as test, we need to generate unique
 ;;; strings for each Lisp object. To do this, we tag the objects with
-;;; a `$$jscl_id' property. As a special case, numbers are not
-;;; objects, but they can be used for indexin a Javascript dictionary,
-;;; we do not need to tag them.
+;;; a `$$jscl_id' property. As a special case, numbers do not need to
+;;; be tagged, as they can be used to index Javascript objects.
 (defvar *eq-hash-counter* 0)
 (defun eq-hash (x)
   (cond
