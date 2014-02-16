@@ -13,4 +13,10 @@
   (test (equal (gethash "foo" ht) 10)))
 
 
+(let ((ht (make-hash-table :test #'equal)))
+  (setf (gethash "foo" ht) 10)
+  (test (eq (remhash "foo" ht) t))
+  (test (eq (remhash "foo" ht) nil))
+  (test (null (gethash "foo" ht))))
+
 
