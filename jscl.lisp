@@ -49,6 +49,7 @@
     ("string"        :target)
     ("sequence"      :target)
     ("stream"        :target)
+    ("hash-table"    :target)
     ("print"         :target)
     ("documentation" :target)
     ("misc"          :target)
