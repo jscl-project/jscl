@@ -1267,6 +1267,10 @@
 (define-builtin in (key object)
   `(bool (in (call |xstring| ,key) ,object)))
 
+(define-builtin delete-property (key object)
+  `(selfcall
+    (delete (property ,object (call |xstring| ,key)))))
+
 (define-builtin map-for-in (function object)
   `(selfcall
     (var (f ,function)

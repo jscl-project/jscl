@@ -100,3 +100,10 @@
                ,g!new-value)              
             `(gethash ,g!new-value ,g!key ,g!hash-table)    ; accessing form
             )))
+
+
+(defun remhash (key hash-table)
+  (let ((obj (caddr hash-table))
+        (hash (funcall (cadr hash-table) key)))
+    (prog1 (in hash obj)
+      (delete-property hash obj))))
