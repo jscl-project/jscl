@@ -261,45 +261,23 @@
 (defun nbutlast (x &optional (n 1))
   "Destructively returns x, less the n last elements in the list."
   (cond
-    ((not (and (integerp n)
-               (>= n 0)))
+    ((not (and (integerp n) (>= n 0)))
      ;; TODO: turn this error into a type error, per CLHS spec.
      (error "n must be a non-negative integer"))
-
     ;; trivial optimizations
     ((zerop n) x)
-
     (t
      ;; O(n) walk of the linked list, trimming out the link where appropriate
-     (let*
-         ((head x)
-          (trailing x))
-
-       ;; find n in...
-       (do ((i 0 (1+ i)))
-           ((or ( >= i (1- n))
-                (not head)
-                (not (consp (cdr head)))))
-         (setf head (cdr head)))
-
-       (when (consp (cdr head))
-
-       (setf trailing x)
-       (setf head (cdr head))
-
-       ;; walk until the end
-       (do ()
-           ((or
-             (not (consp head))
-             (not (cdr head))))
-
-         (setf head (cdr head))
-         (setf trailing (cdr trailing)))
-
-       ;; snip
-       (rplacd trailing nil)
-
-       x)))))
+     (let* ((head x)
+            (trailing (nthcdr n x)))
+       ;; If there are enough conses
+       (when (consp trailing)
+         (while (consp (cdr trailing))
+           (setq head (cdr head))
+           (setq trailing (cdr trailing)))
+         ;; snip
+         (rplacd head nil)
+         x)))))
 
 (defun member (x list &key key (test #'eql testp) (test-not #'eql test-not-p))
   (while list
