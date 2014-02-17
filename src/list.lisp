@@ -197,6 +197,14 @@
     (when (eql tail object)
       (return-from tailp t))))
 
+(defun make-list (size &key (initial-element nil))
+  "Create a list of size `size` of `initial-element`s."
+  (when (< size 0)
+    (error "Size must be non-negative"))
+  (let ((newlist))
+    (dotimes (i size newlist)
+      (push initial-element newlist))))
+
 (defun map1 (func list)
   (with-collect
     (while list
@@ -246,11 +254,54 @@
     (setq x (cdr x)))
   x)
 
-(defun butlast (x)
-  (and (consp (cdr x))
-       (cons (car x) (butlast (cdr x)))))
+(defun butlast (x &optional (n 1))
+  "Returns x, less the n last elements in the list."
+  (nbutlast (copy-list x) n))
 
-(defun member (x list &key key (test #'eql testp) (test-not #'eql test-not-p)) 
+(defun nbutlast (x &optional (n 1))
+  "Destructively returns x, less the n last elements in the list."
+  (cond
+    ((not (and (integerp n)
+               (>= n 0)))
+     ;; TODO: turn this error into a type error, per CLHS spec.
+     (error "n must be a non-negative integer"))
+
+    ;; trivial optimizations
+    ((zerop n) x)
+
+    (t
+     ;; O(n) walk of the linked list, trimming out the link where appropriate
+     (let*
+         ((head x)
+          (trailing x))
+
+       ;; find n in...
+       (do ((i 0 (1+ i)))
+           ((or ( >= i (1- n))
+                (not head)
+                (not (consp (cdr head)))))
+         (setf head (cdr head)))
+
+       (when (consp (cdr head))
+
+       (setf trailing x)
+       (setf head (cdr head))
+
+       ;; walk until the end
+       (do ()
+           ((or
+             (not (consp head))
+             (not (cdr head))))
+
+         (setf head (cdr head))
+         (setf trailing (cdr trailing)))
+
+       ;; snip
+       (rplacd trailing nil)
+
+       x)))))
+
+(defun member (x list &key key (test #'eql testp) (test-not #'eql test-not-p))
   (while list
     (when (satisfies-test-p x (car list) :key key :test test :testp testp
                             :test-not test-not :test-not-p test-not-p)
