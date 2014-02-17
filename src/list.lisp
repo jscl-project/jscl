@@ -256,27 +256,50 @@
 
 (defun butlast (x &optional (n 1))
   "Returns x, less the n last elements in the list."
+  (nbutlast (copy-list x) n))
+
+(defun nbutlast (x &optional (n 1))
+  "Destructively returns x, less the n last elements in the list."
   (cond
-      ;; trivial optimizations
-    ((not x) x)
+    ((not (and (integerp n)
+               (>= n 0)))
+     ;; TODO: turn this error into a type error, per CLHS spec.
+     (error "n must be a non-negative integer"))
+
+    ;; trivial optimizations
     ((zerop n) x)
 
-    ;; Base case
-    ((= n 1)
-     (and (consp (cdr x))
-          (cons (car x)
-                (butlast (cdr x) n))))
-    ;; O(n * (length x)) butlast for n > 1.
     (t
-     (let ((temp x))
-       (do
-        ((iter 0))
-        ;; quit when we reach the top or we ran out
-        ((or (= iter n)
-             (not temp)))
-         (setf temp (butlast temp 1))
-         (incf iter))
-       temp))))
+     ;; O(n) walk of the linked list, trimming out the link where appropriate
+     (let*
+         ((head x)
+          (trailing x))
+
+       ;; find n in...
+       (do ((i 0 (1+ i)))
+           ((or ( >= i (1- n))
+                (not head)
+                (not (consp (cdr head)))))
+         (setf head (cdr head)))
+
+       (when (consp (cdr head))
+
+       (setf trailing x)
+       (setf head (cdr head))
+
+       ;; walk until the end
+       (do ()
+           ((or
+             (not (consp head))
+             (not (cdr head))))
+
+         (setf head (cdr head))
+         (setf trailing (cdr trailing)))
+
+       ;; snip
+       (rplacd trailing nil)
+
+       x)))))
 
 (defun member (x list &key key (test #'eql testp) (test-not #'eql test-not-p))
   (while list
