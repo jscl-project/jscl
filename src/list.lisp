@@ -202,11 +202,8 @@
   (when (< size 0)
     (error "Size must be non-negative"))
   (let ((newlist))
-    (do ((i 0))
-        ((= i size))
-      (push initial-element newlist)
-      (incf i))
-    newlist))
+    (dotimes (i size newlist)
+      (push initial-element newlist))))
 
 (defun map1 (func list)
   (with-collect
