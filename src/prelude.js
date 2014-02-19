@@ -2,6 +2,8 @@
 // contain runtime code that jscl assumes to exist.
 
 var window = this;
+
+var t;
 var nil;
 
 var lisp = {};
@@ -116,6 +118,10 @@ function Symbol(name, package_name){
 function lisp_to_js (x) {
     if (typeof x == 'object' && 'length' in x && x.stringp == 1)
         return xstring(x);
+    else if (x === t)
+      return true;
+    else if (x === nil)
+      return false;
     else if (typeof x == 'function'){
         // Trampoline calling the Lisp function
         return (function(){
@@ -131,6 +137,10 @@ function lisp_to_js (x) {
 function js_to_lisp (x) {
     if (typeof x == 'string')
         return make_lisp_string(x);
+    else if (x === true)
+        return t;
+    else if (x === false)
+        return nil;
     else if (typeof x == 'function'){
         // Trampoline calling the JS function
         return (function(values, nargs){
