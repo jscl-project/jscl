@@ -1359,14 +1359,14 @@
       #+jscl((symbolp function)
              `(call ,(convert `#',function) ,@arglist))
       ((and (consp function) (eq (car function) 'lambda))
-       `(call ,(convert `#',function) ,@arglist))
+       `(call ,(convert `(function ,function)) ,@arglist))
       ((and (consp function) (eq (car function) 'oget))
        `(call |js_to_lisp|
               (call ,(reduce (lambda (obj p)
                                `(property ,obj (call |xstring| ,p)))
                              (mapcar #'convert (cdr function)))
                     ,@(mapcar (lambda (s)
-                                `(call |lisp_to_js| ,s))
+                                `(call |lisp_to_js| ,(convert s)))
                               args))))
       (t
        (error "Bad function descriptor")))))
