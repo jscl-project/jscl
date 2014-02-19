@@ -1072,9 +1072,6 @@
         (throw (+ "Function `" (call |xstring| (get symbol "name")) "' is undefined.")))
     (return func)))
 
-(define-builtin symbol-plist (x)
-  `(or (get ,x "plist") ,(convert nil)))
-
 (define-builtin lambda-code (x)
   `(call |make_lisp_string| (method-call ,x "toString")))
 

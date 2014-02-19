@@ -1,0 +1,37 @@
+;;; symbols --- 
+
+;; JSCL is free software: you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation, either version 3 of the
+;; License, or (at your option) any later version.
+;;
+;; JSCL is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;; General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+
+(defun symbol-plist (x)
+  (cond
+    ((symbolp x) (error "`~a' is not a symbol." x))
+    ((in "plist" x) (oget* x "plist"))))
+
+(defun set-symbol-plist (new-value x)
+  (if (symbolp x)
+      (oset* new-value x "plist")
+      (error "`~a' is not a symbol." x)))
+
+(define-setf-expander symbol-plist (x)
+  (let ((g!x (gensym))
+        (g!value (gensym)))
+    (list (list g!x)
+          (list x)
+          (list g!value)
+          `(set-symbol-plist ,g!value ,g!x)
+          `(symbol-plist ,g!value))))
+
+(defun get (symbol indicator &optional default)
+  (getf (symbol-plist symbol) indicator default))
+

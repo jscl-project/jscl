@@ -54,8 +54,8 @@
     ("documentation" :target)
     ("misc"          :target)
     ("ffi"           :target)
+    ("symbol"        :target)
     ("package"       :target)
-
     ("read"          :both)
     ("defstruct"     :both)
     ("lambda-list"   :both)
