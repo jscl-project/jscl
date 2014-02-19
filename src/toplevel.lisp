@@ -252,14 +252,35 @@
 
 (defvar *root* (%js-vref "window"))
 
-;;; Set some external entry point to the Lisp implementation to the
-;;; console. It would not be necessary when FFI is finished.
-(let ((*root* #j:lisp))
-  (setf #j:read #'ls-read-from-string)
-  (setf #j:print #'prin1-to-string)
-  (setf #j:eval #'eval)
-  (setf #j:compile (lambda (s) (compile-toplevel s t)))
-  (setf #j:evalString (lambda (str) (eval (ls-read-from-string str))))
-  (setf #j:evalInput (lambda (str) (eval-interactive (ls-read-from-string str))))
-  (setf #j:compileString (lambda (str) (compile-toplevel (ls-read-from-string str) t))))
 
+(defun load-history ()
+  (#j:jqconsole:SetHistory (#j:JSON:parse (#j:localStorage:getItem "jqhist"))))
+
+(defun save-history ()
+  (#j:localStorage:setItem "jqhist" (#j:JSON:stringify (#j:jqconsole:GetHistory))))
+
+(defun toplevel ()
+  (let ((prompt (format nil "~a> " (package-name *package*))))
+    (#j:jqconsole:Write prompt "jqconsole-prompt"))
+  (flet ((process-input (input)
+           (let* ((form (read-from-string input))
+                  (result (multiple-value-list (eval-interactive form))))
+             (dolist (x result)
+               (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return"))
+             (save-history)) 
+           (toplevel)))
+    (#j:jqconsole:Prompt t #'process-input)))
+
+
+;;; KLUDGE: I tried
+;;; 
+;;;   (#j:document.addEventListener "load" #'topevel nil)
+;;; 
+;;; but it is not working. So I am using this temporarily to wait
+;;; until the DOM is ready before starting the REPL.
+
+(#j:setTimeout (lambda ()
+                 (#j:jqconsole:RegisterMatching "(" ")" "parents")
+                 (load-history)
+                 (toplevel))
+               0)

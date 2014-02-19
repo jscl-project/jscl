@@ -21,6 +21,9 @@
 
 (/debug "loading stream.lisp!")
 
+(defun %write-string (string)
+  (#j:jqconsole:Write string "jqconsole-output"))
+
 (defvar *standard-output*
   (vector 'stream
           (lambda (ch) (%write-string (string ch)))

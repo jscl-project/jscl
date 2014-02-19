@@ -1155,9 +1155,6 @@
 (define-builtin functionp (x)
   `(bool (=== (typeof ,x) "function")))
 
-(define-builtin %write-string (x)
-  `(method-call |lisp| "write" ,x))
-
 (define-builtin /debug (x)
   `(method-call |console| "log" (call |xstring| ,x)))
 
