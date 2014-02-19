@@ -10,3 +10,5 @@
 
 (unless (zerop *unexpected-passes*)
   (format t "~a test(s) passed unexpectedly.~%" *unexpected-passes*))
+
+(terpri)
