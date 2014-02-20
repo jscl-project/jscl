@@ -15,8 +15,10 @@
 
 (defun symbol-plist (x)
   (cond
-    ((symbolp x) (error "`~a' is not a symbol." x))
-    ((in "plist" x) (oget* x "plist"))))
+    ((not (symbolp x))
+     (error "`~a' is not a symbol." x))
+    ((in "plist" x)
+     (oget* x "plist"))))
 
 (defun set-symbol-plist (new-value x)
   (if (symbolp x)
@@ -26,12 +28,11 @@
 (define-setf-expander symbol-plist (x)
   (let ((g!x (gensym))
         (g!value (gensym)))
-    (list (list g!x)
-          (list x)
-          (list g!value)
-          `(set-symbol-plist ,g!value ,g!x)
-          `(symbol-plist ,g!value))))
+    (values (list g!x)
+            (list x)
+            (list g!value)
+            `(set-symbol-plist ,g!value ,g!x)
+            `(symbol-plist ,g!x))))
 
 (defun get (symbol indicator &optional default)
   (getf (symbol-plist symbol) indicator default))
-
