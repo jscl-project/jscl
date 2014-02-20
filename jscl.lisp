@@ -41,6 +41,7 @@
 (defvar *source*
   '(("boot"          :target)
     ("compat"        :host)
+    ("setf"          :target)
     ("utils"         :both)
     ("numbers"       :target)
     ("char"          :target)
