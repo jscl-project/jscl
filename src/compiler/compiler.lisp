@@ -440,12 +440,14 @@
 
 
 (defun setq-pair (var val)
+  (unless (symbolp var)
+    (error "~a is not a symbol" var))
   (let ((b (lookup-in-lexenv var *environment* 'variable)))
     (cond
       ((and b
-            (eq (binding-type b) 'variable)
-            (not (member 'special (binding-declarations b)))
-            (not (member 'constant (binding-declarations b))))
+	    (eq (binding-type b) 'variable)
+	    (not (member 'special (binding-declarations b)))
+	    (not (member 'constant (binding-declarations b))))
        `(= ,(binding-value b) ,(convert val)))
       ((and b (eq (binding-type b) 'macro))
        (convert `(setf ,var ,val)))
