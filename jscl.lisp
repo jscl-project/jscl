@@ -160,17 +160,22 @@
     (setq *variable-counter* 0
           *gensym-counter* 0
           *literal-counter* 0)
-    (with-open-file (out (merge-pathnames "jscl.js" *base-directory*) :direction :output :if-exists :supersede)
+    (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
+                         :direction :output
+                         :if-exists :supersede)
       (write-string (read-whole-file (source-pathname "prelude.js")) out)
       (do-source input :target
         (!compile-file input out))
       (dump-global-environment out))
     ;; Tests
-    (with-open-file (out (merge-pathnames "tests.js" *base-directory*) :direction :output :if-exists :supersede)
+    (with-open-file (out (merge-pathnames "tests.js" *base-directory*)
+                         :direction :output
+                         :if-exists :supersede)
       (dolist (input (append (directory "tests.lisp")
                              (directory "tests/*.lisp")
                              (directory "tests-report.lisp")))
-        (!compile-file input out)))))
+        (!compile-file input out)))
+    (report-undefined-functions)))
 
 
 ;;; Run the tests in the host Lisp implementation. It is a quick way

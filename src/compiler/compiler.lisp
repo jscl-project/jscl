@@ -154,6 +154,40 @@
   `(%define-symbol-macro ',name ',expansion))
 
 
+
+;;; Report functions which are called but not defined
+
+(defvar *fn-info* '())
+
+(def!struct fn-info
+  symbol
+  defined
+  called)
+
+(defun find-fn-info (symbol)
+  (let ((entry (find symbol *fn-info* :key #'fn-info-symbol)))
+    (unless entry
+      (setq entry (make-fn-info :symbol symbol))
+      (push entry *fn-info*))
+    entry))
+
+(defun fn-info (symbol &key defined called)
+  (let ((info (find-fn-info symbol)))
+    (when defined
+      (setf (fn-info-defined info) defined))
+    (when called
+      (setf (fn-info-called info) called))))
+
+(defun report-undefined-functions ()
+  (dolist (info *fn-info*)
+    (let ((symbol (fn-info-symbol info)))
+      (when (and (fn-info-called info)
+                 (not (fn-info-defined info)))
+        (warn "The function `~a' is undefined.~%" symbol))))
+  (setq *fn-info* nil))
+
+
+
 ;;; Special forms
 
 (defvar *compilations* nil)
@@ -1349,9 +1383,11 @@
       ((and (symbolp function)
             #+jscl (eq (symbol-package function) (find-package "COMMON-LISP"))
             #-jscl t)
+       (fn-info function :called t)
        `(method-call ,(convert `',function) "fvalue" ,@arglist))
-      #+jscl((symbolp function)
-             `(call ,(convert `#',function) ,@arglist))
+      #+jscl
+      ((symbolp function)
+       `(call ,(convert `#',function) ,@arglist))
       ((and (consp function) (eq (car function) 'lambda))
        `(call ,(convert `(function ,function)) ,@arglist))
       ((and (consp function) (eq (car function) 'oget))

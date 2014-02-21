@@ -78,6 +78,8 @@
 
 (defmacro defun (name args &rest body)
   `(progn
+     (eval-when (:compile-toplevel)
+       (fn-info ',name :defined t))
      (fset ',name #'(named-lambda ,name ,args ,@body))
      ',name))
 
