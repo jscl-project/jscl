@@ -801,26 +801,21 @@
            "message" ,(concat "Return from unknown block '" (symbol-name name) "'."))))))
 
 (define-compilation catch (id &rest body)
-  `(selfcall
-    (var (id ,(convert id)))
-    (try
-     ,(convert-block body t))
-    (catch (|cf|)
-      (if (and (== (get |cf| "type") "catch")
-               (== (get |cf| "id") id))
-          ,(if *multiple-value-p*
-               `(return (method-call |values| "apply" this (call |forcemv| (get |cf| "values"))))
-               `(return (method-call |pv|     "apply" this (call |forcemv| (get |cf| "values")))))
-          (throw |cf|)))))
+  (let ((values (if *multiple-value-p* '|values| '|pv|)))
+    `(selfcall
+      (var (id ,(convert id)))
+      (try
+       ,(convert-block body t))
+      (catch (cf)
+        (if (and (instanceof cf |CatchNLX|) (== (get cf "id") id))
+            (return (method-call ,values "apply" this (call |forcemv| (get cf "values"))))
+            (throw cf))))))
 
 (define-compilation throw (id value)
   `(selfcall
     (var (|values| |mv|))
-    (throw (object
-            "type" "catch"
-            "id" ,(convert id)
-            "values" ,(convert value t)
-            "message" "Throw uncatched."))))
+    (throw (new (call |CatchNLX| ,(convert id) ,(convert value t))))))
+
 
 (defun go-tag-p (x)
   (or (integerp x) (symbolp x)))
