@@ -773,8 +773,7 @@
              (var (,idvar #()))
              ,cbody)
             (catch (cf)
-              (if (and (== (get cf "type") "block")
-                       (== (get cf "id") ,idvar))
+              (if (and (instanceof cf |BlockNLX|) (== (get cf "id") ,idvar))
                   ,(if *multiple-value-p*
                        `(return (method-call |values| "apply" this (call |forcemv| (get cf "values"))))
                        `(return (get cf "values")))
@@ -793,12 +792,10 @@
     ;; capture it in a closure.
     `(selfcall
       ,(when multiple-value-p `(var (|values| |mv|)))
-      (throw
-          (object
-           "type" "block"
-           "id" ,(binding-value b)
-           "values" ,(convert value multiple-value-p)
-           "message" ,(concat "Return from unknown block '" (symbol-name name) "'."))))))
+      (throw (new (call |BlockNLX|
+                        ,(binding-value b)
+                        ,(convert value multiple-value-p)
+                        ,(symbol-name name)))))))
 
 (define-compilation catch (id &rest body)
   (let ((values (if *multiple-value-p* '|values| '|pv|)))
