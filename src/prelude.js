@@ -165,3 +165,8 @@ function CatchNLX (id, values){
   this.id = id;
   this.values = values;
 }
+
+function TagNLX (id, label){
+  this.id = id;
+  this.label = label;
+}

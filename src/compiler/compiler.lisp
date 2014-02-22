@@ -860,26 +860,19 @@
                           default
                           (break tbloop)))
                  (catch (jump)
-                   (if (and (== (get jump "type") "tagbody")
-                            (== (get jump "id") ,tbidx))
+                   (if (and (instanceof jump |TagNLX|) (== (get jump "id") ,tbidx))
                        (= ,branch (get jump "label"))
                        (throw jump)))))
         (return ,(convert nil))))))
 
 (define-compilation go (label)
-  (let ((b (lookup-in-lexenv label *environment* 'gotag))
-        (n (cond
-             ((symbolp label) (symbol-name label))
-             ((integerp label) (integer-to-string label)))))
+  (let ((b (lookup-in-lexenv label *environment* 'gotag)))
     (when (null b)
       (error "Unknown tag `~S'" label))
     `(selfcall
-      (throw
-          (object
-           "type" "tagbody"
-           "id" ,(first (binding-value b))
-           "label" ,(second (binding-value b))
-           "message" ,(concat "Attempt to GO to non-existing tag " n))))))
+      (throw (new (call |TagNLX|
+                        ,(first (binding-value b))
+                        ,(second (binding-value b))))))))
 
 (define-compilation unwind-protect (form &rest clean-up)
   `(selfcall
