@@ -264,9 +264,23 @@
     (#j:jqconsole:Write prompt "jqconsole-prompt"))
   (flet ((process-input (input)
            (let* ((form (read-from-string input))
-                  (result (multiple-value-list (eval-interactive form))))
-             (dolist (x result)
-               (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return"))
+                  (successp nil)
+                  result)
+             ;; Capture errors. We evaluate the form and set successp
+             ;; to T. However, if a non-local exist happens, we cancel
+             ;; it, so it is not propagated more.
+             (block nil
+               (unwind-protect
+                    (progn
+                      (setq result (multiple-value-list (eval-interactive form)))
+                      (setq successp t))
+                 (return)))
+
+             (if successp
+                 (dolist (x result)
+                   (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return"))
+                 (#j:jqconsole:Write (format nil "Error occurred~%") "jqconsole-error"))
+             
              (save-history)) 
            (toplevel)))
     (#j:jqconsole:Prompt t #'process-input)))
