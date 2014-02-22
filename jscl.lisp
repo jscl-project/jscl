@@ -22,6 +22,8 @@
 
 (in-package :jscl)
 
+(defvar *version* "0.0.2")
+
 (defvar *base-directory*
   (or #.*load-pathname* *default-pathname-defaults*))
 
