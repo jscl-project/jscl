@@ -94,6 +94,8 @@
 (defun expt (base power) (expt base              power))
 (defun exp  (power)      (expt 2.718281828459045 power))
 
+(defun sqrt (x) (sqrt x))
+
 (defun gcd-2 (a b)
   (if (zerop b)
       (abs a)

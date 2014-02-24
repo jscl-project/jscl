@@ -1018,6 +1018,9 @@
 (define-builtin expt (x y)
   `(method-call |Math| "pow" ,x ,y))
 
+(define-builtin sqrt (x)
+  `(method-call |Math| "sqrt" ,x))
+
 (define-builtin float-to-string (x)
   `(call |make_lisp_string| (method-call ,x |toString|)))
 
