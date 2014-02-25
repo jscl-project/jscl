@@ -106,3 +106,12 @@
         (hash (funcall (cadr hash-table) key)))
     (prog1 (in hash obj)
       (delete-property hash obj))))
+
+
+(defun hash-table-count (hash-table)
+  (let ((count 0))
+    (map-for-in (lambda (x)
+                  (declare (ignore x))
+                  (incf count))
+                (caddr hash-table))
+    count))
