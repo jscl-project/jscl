@@ -20,3 +20,36 @@
   (test (null (gethash "foo" ht))))
 
 
+;;; MAPHASH
+
+(let ((ht (make-hash-table))
+      (count 0))
+  (maphash (lambda (key value)
+	     (declare (ignore key value))
+	     (inct count))
+	   ht)
+  (test (zerop count)))
+
+(let ((ht (make-hash-table))
+      (count 0))
+  (setf (gethash :x ht) 10)
+  (maphash (lambda (key value)
+	     (setq count (1+ count)))
+	   ht)
+  (test (= count 1)))
+
+(let ((ht (make-hash-table)))
+  (setf (gethash :x ht) 10)
+  (setf (gethash :y ht) 20)
+  (maphash (lambda (key value)
+	     (when (eq key :x)
+	       (test (= value 10)))
+	     (when (eq key :y)
+	       (test (= value 20))))
+	   ht))
+
+(let ((ht (make-hash-table)))
+  (test
+   (eq nil (maphash (lambda (key value)
+		      (declare (ignore key value)))
+		    ht))))

@@ -22,6 +22,10 @@
 ;;; `equalp').
 ;;;
 
+;;; Additionally, we want to iterate across the hash table
+;;; key-values. So we use a cons (key  . value)
+;;; as value in the Javascript object. It implicitly gives the
+;;; inverse mapping of strings to our objects.
 
 ;;; If a hash table has `eq' as test, we need to generate unique
 ;;; strings for each Lisp object. To do this, we tag the objects with
@@ -73,15 +77,17 @@
     `(hash-table ,hash-fn ,(new))))
 
 (defun gethash (key hash-table &optional default)
-  (let ((obj (caddr hash-table))
-        (hash (funcall (cadr hash-table) key)))
-    (values (oget obj hash)
-            (in hash obj))))
+  (let* ((obj (caddr hash-table))
+	 (hash (funcall (cadr hash-table) key))
+	 (exists (in hash obj)))
+    (if exists
+	(values (cdr (oget obj hash)) t)
+	(values default nil))))
 
 (defun sethash (new-value key hash-table)
   (let ((obj (caddr hash-table))
         (hash (funcall (cadr hash-table) key)))
-    (oset new-value obj hash)
+    (oset (cons key new-value) obj hash)
     new-value))
 
 
@@ -115,3 +121,10 @@
                   (incf count))
                 (caddr hash-table))
     count))
+
+
+(defun maphash (function hash-table)
+  (map-for-in (lambda (x)
+		(funcall function (car x) (cdr x)))
+	      (caddr hash-table))
+  nil)
