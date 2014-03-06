@@ -7,29 +7,34 @@
 (defvar *use-html-output-p* t)
 (defvar *timestamp* nil)
 
+(defmacro async (&body body)
+  `(#j:setTimeout (lambda () ,@body)))
+
 (defun test-fn (condition form)
-  (cond
-    (condition
-     (format t "Test `~S' passed~%" form)
-     (incf *passed-tests*))
-    (t
-     (if *use-html-output-p*
-         (format t "<font color='red'>Test `~S' failed.</font>~%" form)
-         (format t "Test `~S' failed.~%" form))
-     (incf *failed-tests*)))
-  (incf *total-tests*))
+  (async
+   (cond
+     (condition
+      (format t "Test `~S' passed~%" form)
+      (incf *passed-tests*))
+     (t
+      (if *use-html-output-p*
+          (format t "<font color='red'>Test `~S' failed.</font>~%" form)
+          (format t "Test `~S' failed.~%" form))
+      (incf *failed-tests*)))
+   (incf *total-tests*)))
 
 (defun expected-failure-fn (condition form)
-  (cond
-    (condition
-     (if *use-html-output-p*
-         (format t "<font color='orange'>Test `~S' passed unexpectedly!</font>~%" form)
-         (format t "Test `~S' passed unexpectedly!~%" form))
-     (incf *unexpected-passes*))
-    (t
-     (format t "Test `~S' failed expectedly.~%" form)
-     (incf *expected-failures*)))
-  (incf *total-tests*))
+  (async
+   (cond
+     (condition
+      (if *use-html-output-p*
+          (format t "<font color='orange'>Test `~S' passed unexpectedly!</font>~%" form)
+          (format t "Test `~S' passed unexpectedly!~%" form))
+      (incf *unexpected-passes*))
+     (t
+      (format t "Test `~S' failed expectedly.~%" form)
+      (incf *expected-failures*)))
+   (incf *total-tests*)))
 
 
 (defmacro test (condition)
