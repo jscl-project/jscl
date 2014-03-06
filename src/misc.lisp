@@ -20,6 +20,9 @@
 (defun lisp-implementation-type ()
   "JSCL")
 
+(defun lisp-implementation-version ()
+  #.*version*)
+
 (defmacro time (form)
   (let ((start (gensym))
         (end (gensym)))
