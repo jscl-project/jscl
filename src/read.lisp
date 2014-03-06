@@ -205,6 +205,8 @@
     (case ch
       (#\'
        (list 'function (ls-read stream eof-error-p eof-value t)))
+      (#\.
+       (eval (ls-read stream)))
       (#\(
        (do ((elements nil)
             (result nil)
