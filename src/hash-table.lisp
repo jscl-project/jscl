@@ -78,11 +78,11 @@
 
 (defun gethash (key hash-table &optional default)
   (let* ((obj (caddr hash-table))
-	 (hash (funcall (cadr hash-table) key))
-	 (exists (in hash obj)))
+         (hash (funcall (cadr hash-table) key))
+         (exists (in hash obj)))
     (if exists
-	(values (cdr (oget obj hash)) t)
-	(values default nil))))
+        (values (cdr (oget obj hash)) t)
+        (values default nil))))
 
 (defun sethash (new-value key hash-table)
   (let ((obj (caddr hash-table))
