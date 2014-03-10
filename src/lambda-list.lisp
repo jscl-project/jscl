@@ -105,13 +105,13 @@
                     :initform initform)))))
 
 (defun parse-destructuring-lambda-list (lambda-list)
-  (let (;; Destructured lambda list structure where we accumulate the
+  (let (;; Destructure lambda list structure where we accumulate the
         ;; results of the parsing.
         (ll (make-lambda-list))
         ;; List of lambda list keywords which we have already seen.
         (lambda-keywords nil))
     (flet (;; Check if we are in the beginning of the section NAME in
-           ;; the lambda list. It checks also if the section is in the
+           ;; the lambda list. It also checks if the section is in the
            ;; proper place and it is new.
            (lambda-section (name)
              (let ((section (first lambda-list)))
