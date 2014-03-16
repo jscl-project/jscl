@@ -25,9 +25,9 @@
 (let ((ht (make-hash-table))
       (count 0))
   (maphash (lambda (key value)
-	     (declare (ignore key value))
-	     (inct count))
-	   ht)
+             (declare (ignore key value))
+             (setq count (1+ count)))
+           ht)
   (test (zerop count)))
 
 (let ((ht (make-hash-table))
