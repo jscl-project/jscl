@@ -68,6 +68,14 @@
      ("compiler"     :both))
     ("toplevel"      :target)))
 
+
+(defun source-pathname (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
+  (merge-pathnames
+   (if type
+       (make-pathname :type type :directory directory :defaults defaults)
+       (make-pathname            :directory directory :defaults defaults))
+   *base-directory*))
+
 (defun get-files (file-list type dir)
   "Traverse FILE-LIST and retrieve a list of the files within which match
    either TYPE or :BOTH, processing subdirectories."
@@ -92,13 +100,6 @@
     (error "TYPE must be one of :HOST or :TARGET, not ~S" type))
   `(dolist (,name (get-files *source* ,type '(:relative "src")))
      ,@body))
-
-(defun source-pathname (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
-  (merge-pathnames
-   (if type
-       (make-pathname :type type :directory directory :defaults defaults)
-       (make-pathname            :directory directory :defaults defaults))
-   *base-directory*))
 
 ;;; Compile jscl into the host
 (with-compilation-unit ()
