@@ -1275,6 +1275,9 @@
 (define-raw-builtin oset (value object key &rest keys)
   (convert `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
 
+(define-builtin js-null-p (x)
+  `(bool (=== ,x null)))
+
 (define-builtin objectp (x)
   `(bool (=== (typeof ,x) "object")))
 

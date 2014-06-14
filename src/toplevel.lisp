@@ -254,7 +254,9 @@
 
 
 (defun load-history ()
-  (#j:jqconsole:SetHistory (#j:JSON:parse (#j:localStorage:getItem "jqhist"))))
+  (let ((raw (#j:localStorage:getItem "jqhist")))
+    (unless (js-null-p raw)
+      (#j:jqconsole:SetHistory (#j:JSON:parse raw)))))
 
 (defun save-history ()
   (#j:localStorage:setItem "jqhist" (#j:JSON:stringify (#j:jqconsole:GetHistory))))
