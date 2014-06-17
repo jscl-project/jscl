@@ -263,6 +263,15 @@
                    month)
               year)))
 
+(when (string/= (%js-typeof |module|) "undefined")
+  (push :node *features*))
+
+;;; --------------------------------------------------------------------------------
+;;; Web REPL
+;;; --------------------------------------------------------------------------------
+
+(defun %write-string (string)
+  (#j:jqconsole:Write string "jqconsole-output"))
 
 (defun load-history ()
   (let ((raw (#j:localStorage:getItem "jqhist")))
@@ -309,6 +318,8 @@
 
 
 (defun toplevel ()
+  (#j:jqconsole:RegisterMatching "(" ")" "parents")
+
   (let ((prompt (format nil "~a> " (package-name *package*))))
     (#j:jqconsole:Write prompt "jqconsole-prompt"))
   (flet ((process-input (input)
@@ -338,22 +349,29 @@
     (#j:jqconsole:Prompt t #'process-input #'indent-level)))
 
 
-(defun init (&rest args)
-  (when #j:jqconsole
-    (#j:jqconsole:RegisterMatching "(" ")" "parents"))
+(defun web-init ()
+  (setq *root* (%js-vref "window"))
+  (setq *standard-output*
+        (vector 'stream
+                (lambda (ch) (%write-string (string ch)))
+                (lambda (string) (%write-string string))))
 
-  (format t "Welcome to ~a ~a (~a)~%~%"
-          (lisp-implementation-type)
-          (lisp-implementation-version)
-          (compilation-notice))
-
-  (format t "JSCL is a Common Lisp implementation on Javascript.~%")
-  (%write-string
-   (format nil "For more information, visit the project page at <a href=\"https://github.com/davazp/jscl\">GitHub</a>.~%~%"))
-
-  (when #j:jqconsole
-    (load-history)
-    (toplevel)))
+  (load-history)
+  (#j:window:addEventListener "load" (lambda (&rest args) (toplevel))))
 
 
-(#j:window:addEventListener "load" #'init)
+
+;;; ----------------------------------------------------------------------
+;;; Node REPL
+
+(defun node-init ()
+  (setq *root* (%js-vref "global"))
+  (setq *standard-output*
+        (vector 'stream
+                (lambda (ch) (#j:console:log (string ch)))
+                (lambda (string) (#j:console:log string)))))
+
+
+(if (find :node *features*)
+    (node-init)
+    (web-init))

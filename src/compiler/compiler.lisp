@@ -1349,6 +1349,10 @@
             `(%js-vset ,var ,new-value)
             `(%js-vref ,var))))
 
+(define-compilation %js-typeof (x)
+  `(call |js_to_lisp| (typeof ,x)))
+
+
 
 ;; Catch any Javascript exception. Note that because all non-local
 ;; exit are based on try-catch-finally, it will also catch them. We
