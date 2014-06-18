@@ -283,3 +283,7 @@ window.onload = (function () {
 		}
 	}
 });
+
+// Node Readline
+if (typeof module !== 'undefine' && typeof global !== 'undefined')
+  global.readline = require('readline');

@@ -363,14 +363,26 @@
 
 ;;; ----------------------------------------------------------------------
 ;;; Node REPL
+;;; ----------------------------------------------------------------------
+
+(defvar *rl*)
 
 (defun node-init ()
   (setq *root* (%js-vref "global"))
   (setq *standard-output*
         (vector 'stream
-                (lambda (ch) (#j:console:log (string ch)))
-                (lambda (string) (#j:console:log string)))))
-
+                (lambda (ch)
+                  (#j:process:stdout:write (string ch)))
+                (lambda (string)
+                  (#j:process:stdout:write string))))
+  (setq *rl* (#j:readline:createInterface #j:process:stdin #j:process:stdout))
+  (let ((*root* *rl*))
+    (#j:setPrompt "CL-USER> ")
+    (#j:prompt)
+    (#j:on "line"
+           (lambda (line)
+             (print (eval-interactive (read-from-string line)))
+             ((oget *rl* "prompt"))))))
 
 (if (find :node *features*)
     (node-init)
