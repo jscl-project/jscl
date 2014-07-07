@@ -461,13 +461,13 @@
       (return-from setq (convert nil)))
     (while t
       (cond
-	((null pairs)
+        ((null pairs)
          (return))
-	((null (cdr pairs))
-	 (error "Odd pairs in SETQ"))
-	(t
+        ((null (cdr pairs))
+         (error "Odd pairs in SETQ"))
+        (t
          (push `,(setq-pair (car pairs) (cadr pairs)) result)
-	 (setq pairs (cddr pairs)))))
+         (setq pairs (cddr pairs)))))
     `(progn ,@(reverse result))))
 
 
@@ -540,7 +540,7 @@
                          (cons
                           ;; BOOTSTRAP MAGIC: See the root file
                           ;; jscl.lisp and the function
-                          ;; `dump-global-environment' for futher
+                          ;; `dump-global-environment' for further
                           ;; information.
                           (if (eq (car sexp) *magic-unquote-marker*)
                               (convert (second sexp))

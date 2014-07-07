@@ -171,7 +171,13 @@
     (s tree)))
 
 (defun copy-list (x)
-  (mapcar #'identity x))
+  (let* ((new-list (list (car x)))
+         (last-cell new-list))
+    (do ((orig (cdr x) (cdr orig)))
+        ((atom orig) (rplacd last-cell orig))
+      (rplacd last-cell (cons (car orig) nil))
+      (setq last-cell (cdr last-cell)))
+    new-list))
 
 (defun copy-tree (tree)
   (if (consp tree)
