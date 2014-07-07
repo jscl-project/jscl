@@ -167,7 +167,7 @@
     (js-format "]")))
 
 (defun js-object-initializer (plist)
-  (js-format "{")
+  (js-format "({")
   (do* ((tail plist (cddr tail)))
        ((null tail))
     (let ((key (car tail))
@@ -181,7 +181,7 @@
       (js-expr value no-comma)
       (unless (null (cddr tail))
         (js-format ","))))
-  (js-format "}"))
+  (js-format "})"))
 
 (defun js-function (arguments &rest body)
   (js-format "function(")
