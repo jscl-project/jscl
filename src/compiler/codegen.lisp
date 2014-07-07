@@ -167,7 +167,7 @@
     (js-format "]")))
 
 (defun js-object-initializer (plist)
-  (js-format "{")
+  (js-format "({")
   (do* ((tail plist (cddr tail)))
        ((null tail))
     (let ((key (car tail))
@@ -181,7 +181,7 @@
       (js-expr value no-comma)
       (unless (null (cddr tail))
         (js-format ","))))
-  (js-format "}"))
+  (js-format "})"))
 
 (defun js-function (arguments &rest body)
   (js-format "function(")
@@ -382,11 +382,11 @@
 
 
 ;;; Statements generators
-;;; 
+;;;
 ;;; `js-stmt' generates code for Javascript statements. A form is
 ;;; provided to label statements. Remember that in particular,
 ;;; expressions can be used as statements (semicolon suffixed).
-;;; 
+;;;
 
 (defun js-expand-stmt (form)
   (cond
@@ -536,7 +536,7 @@
             (js-end-stmt))))))))
 
 
-;;; It is intended to be the entry point to the code generator. 
+;;; It is intended to be the entry point to the code generator.
 (defun js (&rest stmts)
   (mapc #'js-stmt stmts)
   nil)
