@@ -166,7 +166,9 @@
       (js-expr (aref vector (1- size)) no-comma))
     (js-format "]")))
 
-(defun js-object-initializer (plist)
+(defun js-object-initializer (plist &optional wrap-p)
+  (when wrap-p
+    (js-format "("))
   (js-format "{")
   (do* ((tail plist (cddr tail)))
        ((null tail))
@@ -181,7 +183,9 @@
       (js-expr value no-comma)
       (unless (null (cddr tail))
         (js-format ","))))
-  (js-format "}"))
+  (js-format "}")
+  (when wrap-p
+    (js-format ")")))
 
 (defun js-function (arguments &rest body)
   (js-format "function(")
@@ -382,11 +386,11 @@
 
 
 ;;; Statements generators
-;;; 
+;;;
 ;;; `js-stmt' generates code for Javascript statements. A form is
 ;;; provided to label statements. Remember that in particular,
 ;;; expressions can be used as statements (semicolon suffixed).
-;;; 
+;;;
 
 (defun js-expand-stmt (form)
   (cond
@@ -531,12 +535,17 @@
                  (js-format "throw ")
                  (js-expr object)
                  (js-end-stmt)))
+           (object
+            ;; wrap ourselves within a pair of parens, in case JS EVAL
+            ;; interprets us as a block of code
+            (js-object-initializer (cdr form) t)
+            (js-end-stmt))
            (t
             (js-expr form)
             (js-end-stmt))))))))
 
 
-;;; It is intended to be the entry point to the code generator. 
+;;; It is intended to be the entry point to the code generator.
 (defun js (&rest stmts)
   (mapc #'js-stmt stmts)
   nil)
