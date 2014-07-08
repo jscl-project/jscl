@@ -166,8 +166,10 @@
       (js-expr (aref vector (1- size)) no-comma))
     (js-format "]")))
 
-(defun js-object-initializer (plist)
-  (js-format "({")
+(defun js-object-initializer (plist &optional wrap-p)
+  (when wrap-p
+    (js-format "("))
+  (js-format "{")
   (do* ((tail plist (cddr tail)))
        ((null tail))
     (let ((key (car tail))
@@ -181,7 +183,9 @@
       (js-expr value no-comma)
       (unless (null (cddr tail))
         (js-format ","))))
-  (js-format "})"))
+  (js-format "}")
+  (when wrap-p
+    (js-format ")")))
 
 (defun js-function (arguments &rest body)
   (js-format "function(")
@@ -531,6 +535,11 @@
                  (js-format "throw ")
                  (js-expr object)
                  (js-end-stmt)))
+           (object
+            ;; wrap ourselves within a pair of parens, in case JS EVAL
+            ;; interprets us as a block of code
+            (js-object-initializer (cdr form) t)
+            (js-end-stmt))
            (t
             (js-expr form)
             (js-end-stmt))))))))
