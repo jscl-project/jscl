@@ -20,6 +20,10 @@
 
 ;;;; Reader
 
+;;; If it is not NIL, we do not want to read the expression but just
+;;; ignore it. For example, it is used in conditional reads #+.
+(defvar *read-skip-p* nil)
+
 ;;; The Lisp reader, parse strings and return Lisp objects. The main
 ;;; entry points are `ls-read' and `ls-read-from-string'.
 
@@ -248,7 +252,8 @@
          (if (eql (char= ch #\+)
                   (and (find feature *features*) t))
              (ls-read stream eof-error-p eof-value t)
-             (prog2 (ls-read stream)
+             (prog2 (let ((*read-skip-p* t))
+                      (ls-read stream))
                  (ls-read stream eof-error-p eof-value t)))))
       ((#\J #\j)
        (unless (char= (%peek-char stream) #\:)
@@ -535,7 +540,8 @@
                (read-sharp stream eof-error-p eof-value))
               (t
                (let ((string (read-escaped-until stream #'terminalp)))
-                 (interpret-token string))))))
+                 (unless *read-skip-p*
+                   (interpret-token string)))))))
       (unless recursive-p
         (fixup-backrefs)
         (setf *labelled-objects* save-labelled-objects)
