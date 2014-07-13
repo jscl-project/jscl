@@ -203,6 +203,27 @@
       (setq ch (%read-char stream)))
     string))
 
+
+
+(defun eval-feature-expression (expression)
+  (etypecase expression
+    (keyword
+     (and (find expression *features*) t))
+    (list
+     ;; Macrocharacters for conditional reading #+ and #- bind the
+     ;; current package to KEYWORD so features are correctly
+     ;; interned. For this reason, AND, OR and NOT symbols will be
+     ;; also keyword in feature expressions.
+     (ecase (first expression)
+       (:and
+        (every #'eval-feature-expression (rest expression)))
+       (:or
+        (some #'eval-feature-expression (rest expression)))
+       (:not
+        (destructuring-bind (subexpr) (rest expression)
+          (not (eval-feature-expression subexpr))))))))
+
+
 (defun read-sharp (stream &optional eof-error-p eof-value)
   (%read-char stream)
   (let ((ch (%read-char stream)))
@@ -245,12 +266,11 @@
            ((string= cname "newline") #\newline)
            (t (char cname 0)))))
       ((#\+ #\-)
-       (let ((feature (let ((symbol (ls-read stream eof-error-p eof-value t)))
-                        (unless (symbolp symbol)
-                          (error "Invalid feature ~S" symbol))
-                        (intern (string symbol) "KEYWORD"))))
-         (if (eql (char= ch #\+)
-                  (and (find feature *features*) t))
+       (let* ((expression
+               (let ((*package* (find-package :keyword)))
+                 (ls-read stream eof-error-p eof-value t))))
+         
+         (if (eql (char= ch #\+) (eval-feature-expression expression))
              (ls-read stream eof-error-p eof-value t)
              (prog2 (let ((*read-skip-p* t))
                       (ls-read stream))

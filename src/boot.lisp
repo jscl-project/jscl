@@ -371,6 +371,7 @@
                                     (character 'characterp)
                                     (sequence 'sequencep)
                                     (symbol 'symbolp)
+                                    (keyword 'keywordp)
                                     (function 'functionp)
                                     (float 'floatp)
                                     (array 'arrayp)
