@@ -101,17 +101,14 @@
   `(dolist (,name (get-files *source* ,type '(:relative "src")))
      ,@body))
 
-;;; Compile jscl into the host
+;;; Compile and load jscl into the host
 (with-compilation-unit ()
   (do-source input :host
     (multiple-value-bind (fasl warn fail) (compile-file input)
-      (declare (ignore fasl warn))
+      (declare (ignore warn))
       (when fail
-        (error "Compilation of ~A failed." input)))))
-
-;;; Load jscl into the host
-(do-source input :host
-  (load input))
+        (error "Compilation of ~A failed." input))
+      (load fasl))))
 
 (defun read-whole-file (filename)
   (with-open-file (in filename)
