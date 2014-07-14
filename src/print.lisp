@@ -353,9 +353,13 @@
                  (pop arguments))))
             (setq res (concat res (string c))))
         (incf i)))
-    (if destination
-        (progn
-          (write-string res)
-          nil)
-        res)))
+
+    (case destination
+      ((t)
+       (write-string res)
+       nil)
+      ((nil)
+       res)
+      (t
+       (write-string res destination)))))
 #+jscl (fset 'format (fdefinition '!format))
