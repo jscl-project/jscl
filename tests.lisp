@@ -8,7 +8,8 @@
 (defvar *timestamp* nil)
 
 (defmacro async (&body body)
-  `(#j:setTimeout (lambda () ,@body)))
+  #+jscl `(#j:setTimeout (lambda () ,@body))
+  #-jscl `(progn ,@body))
 
 (defun test-fn (condition form)
   (async

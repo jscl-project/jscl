@@ -13,5 +13,6 @@
    (format t "~a test(s) passed unexpectedly.~%" *unexpected-passes*))
 
  (terpri)
-
- (init))
+ 
+ #+jscl (init)
+ )
