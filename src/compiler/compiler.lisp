@@ -1469,12 +1469,12 @@
       (t
        (when *compile-print-toplevels*
          (let ((form-string (prin1-to-string sexp)))
-           (format t "Compiling ~a..." (truncate-string form-string))))
+           (format t "Compiling ~a...~%" (truncate-string form-string))))
        (let ((code (convert sexp multiple-value-p)))
          `(progn
             ,@(get-toplevel-compilations)
             ,code))))))
 
 (defun compile-toplevel (sexp &optional multiple-value-p)
-  (with-output-to-string (*standard-output*)
+  (with-output-to-string (*js-output*)
     (js (convert-toplevel sexp multiple-value-p))))

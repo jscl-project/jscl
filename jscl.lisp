@@ -23,7 +23,6 @@
 (in-package :jscl)
 
 (defvar *version* "0.0.2")
-(defvar *verbose* nil)
 
 (defvar *base-directory*
   (or #.*load-pathname* *default-pathname-defaults*))
@@ -130,8 +129,6 @@
          with eof-mark = (gensym)
          for x = (ls-read in nil eof-mark)
          until (eq x eof-mark)
-         when (and *verbose* (typep x 'list))
-           do (format t "  Compiling (~S ~S ...)~%" (first x) (second x))
          do (let ((compilation (compile-toplevel x)))
               (when (plusp (length compilation))
                 (write-string compilation out)))))))
@@ -158,7 +155,7 @@
     (late-compile `(setq *literal-counter* ,*literal-counter*))))
 
 
-(defun bootstrap ()
+(defun bootstrap (&optional verbose)
   (let ((*features* (cons :jscl *features*))
         (*package* (find-package "JSCL")))
     (setq *environment* (make-lexenv))
@@ -171,7 +168,7 @@
                          :if-exists :supersede)
       (write-string (read-whole-file (source-pathname "prelude.js")) out)
       (do-source input :target
-        (!compile-file input out))
+        (!compile-file input out :print verbose))
       (dump-global-environment out))
     ;; Tests
     (with-open-file (out (merge-pathnames "tests.js" *base-directory*)
