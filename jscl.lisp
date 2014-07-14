@@ -23,6 +23,7 @@
 (in-package :jscl)
 
 (defvar *version* "0.0.2")
+(defvar *verbose* nil)
 
 (defvar *base-directory*
   (or #.*load-pathname* *default-pathname-defaults*))
@@ -129,6 +130,8 @@
          with eof-mark = (gensym)
          for x = (ls-read in nil eof-mark)
          until (eq x eof-mark)
+         when (and *verbose* (typep x 'list))
+           do (format t "  Compiling (~S ~S ...)~%" (first x) (second x))
          do (let ((compilation (compile-toplevel x)))
               (when (plusp (length compilation))
                 (write-string compilation out)))))))
