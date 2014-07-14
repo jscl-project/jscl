@@ -109,6 +109,11 @@
                     :test #'equal)
              '((OLD . SPICE) ((OLD . SHOES) A . CONS) (A . CONS))))
 
+; COPY-LIST
+(test (eql   (copy-list nil)          nil))
+(test (equal (copy-list (list nil))   (list nil)))
+(test (equal (copy-list (list 1 2 3)) (list 1 2 3)))
+
 ; COPY-TREE
 (test (let* ((foo (list '(1 2) '(3 4)))
              (bar (copy-tree foo)))
