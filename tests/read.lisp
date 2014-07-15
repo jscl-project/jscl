@@ -42,3 +42,9 @@
              (eql (nth 3 x) 5)
              (eq (nth 4 x) (nth 2 x)))))
 
+; SHARPSIGN VERTICAL-BAR
+(test (= (read-from-string "#||# 2")         2))
+(test (= (read-from-string "#||#2")          2))
+(test (= (read-from-string "#| #| |# |# 2")  2))
+(test (= (read-from-string "#|#$#%^&*&|# 2") 2))
+(test (= (read-from-string "#|||# 2")        2))
