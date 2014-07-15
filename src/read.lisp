@@ -287,6 +287,16 @@
                (push (subseq descriptor start) subdescriptors)
                `(oget *root* ,@(reverse subdescriptors)))
            (push (subseq descriptor start end) subdescriptors))))
+      (#\|
+       (labels ((read-til-bar-sharpsign ()
+                  (do ((ch (%read-char stream) (%read-char stream)))
+                    ((and (char= ch #\|) (char= (%peek-char stream) #\#))
+                     (%read-char stream))
+                    (when (and (char= ch #\#) (char= (%peek-char stream) #\|))
+                      (%read-char stream)
+                      (read-til-bar-sharpsign)))))
+         (read-til-bar-sharpsign)
+         (ls-read stream eof-error-p eof-value t)))
       (otherwise
        (cond
          ((and ch (digit-char-p ch))
