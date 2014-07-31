@@ -1036,16 +1036,22 @@
 (define-builtin car (x)
   `(selfcall
     (var (tmp ,x))
-    (return (if (=== tmp ,(convert nil))
-                ,(convert nil)
-                (get tmp "car")))))
+    (if (=== tmp ,(convert nil))
+        (return ,(convert nil))
+        (if (and (== (typeof tmp) "object")
+                 (in "car" tmp))
+            (return (get tmp "car"))
+            (throw "CAR called on non-list argument")))))
 
 (define-builtin cdr (x)
   `(selfcall
     (var (tmp ,x))
-    (return (if (=== tmp ,(convert nil))
-                ,(convert nil)
-                (get tmp "cdr")))))
+    (if (=== tmp ,(convert nil))
+        (return ,(convert nil))
+        (if (and (== (typeof tmp) "object")
+                 (in "cdr" tmp))
+            (return (get tmp "cdr"))
+            (throw "CDR called on non-list argument")))))
 
 (define-builtin rplaca (x new)
   `(selfcall
