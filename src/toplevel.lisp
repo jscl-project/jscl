@@ -274,24 +274,60 @@
 (defun save-history ()
   (#j:localStorage:setItem "jqhist" (#j:JSON:stringify (#j:jqconsole:GetHistory))))
 
+
+;;; Decides wheater the input the user has entered is completed or we
+;;; should accept one more line.
+(defun indent-level (string)
+  (let ((i 0)
+        (stringp nil)
+        (s (length string))
+        (depth 0))
+
+    (while (< i s)
+      (cond
+        (stringp
+         (case (char string i)
+           (#\\
+            (incf i))
+           (#\"
+            (setq stringp nil)
+            (decf depth))))
+        (t
+         (case (char string i)
+           (#\( (incf depth))
+           (#\) (decf depth))
+           (#\"
+            (incf depth)
+            (setq stringp t)))))
+      (incf i))
+
+    (if (and (zerop depth))
+        nil
+        ;; We should use something based on DEPTH in order to make
+        ;; edition nice, but the behaviour is a bit weird with
+        ;; jqconsole.
+        0)))
+
+
+
 (defun toplevel ()
   (let ((prompt (format nil "~a> " (package-name *package*))))
     (#j:jqconsole:Write prompt "jqconsole-prompt"))
   (flet ((process-input (input)
-           (let* ((form (read-from-string input)))
-             ;; Capture errors. We evaluate the form and set successp
-             ;; to T. However, if a non-local exit happens, we cancel
-             ;; it, so it is not propagated more.
-             (%js-try
-              (let ((results (multiple-value-list (eval-interactive form))))
-                (dolist (x results)
-                  (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return")))
-              (catch (err)
-                (#j:jqconsole:Write (format nil "ERROR: ~a~%" err) "jqconsole-error")))
-             
-             (save-history))
+           ;; Capture errors. We evaluate the form and set successp
+           ;; to T. However, if a non-local exit happens, we cancel
+           ;; it, so it is not propagated more.
+           (%js-try
+            (let* ((form (read-from-string input))
+                   (results (multiple-value-list (eval-interactive form))))
+              (dolist (x results)
+                (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return")))
+            (catch (err)
+              (#j:jqconsole:Write (format nil "ERROR: ~a~%" err) "jqconsole-error")))
+           
+           (save-history)
            (toplevel)))
-    (#j:jqconsole:Prompt t #'process-input)))
+    (#j:jqconsole:Prompt t #'process-input #'indent-level)))
 
 
 (defun init (&rest args)
