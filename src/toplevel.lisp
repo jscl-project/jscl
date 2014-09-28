@@ -250,6 +250,19 @@
 
 (setq *package* *user-package*)
 
+
+(defun compilation-notice ()
+  #.(multiple-value-bind (second minute hour date month year)
+        (get-decoded-time)
+      (declare (ignore second minute hour))
+      (format nil "Built on ~d ~a ~d"
+              date
+              (elt #("January" "February" "March" "April" "May" "June"
+                     "July" "August" "September" "October" "November"
+                     "December")
+                   month)
+              year)))
+
 (defvar *root* (%js-vref "window"))
 
 
@@ -283,6 +296,7 @@
 
 (defun init (&rest args)
   (#j:jqconsole:RegisterMatching "(" ")" "parents")
+  (format t ";; Welcome to JSCL (~a)~%~%" (compilation-notice))
   (load-history)
   (toplevel))
 
