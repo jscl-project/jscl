@@ -190,14 +190,15 @@
 
 ;;; Special forms
 
-(defvar *compilations* nil)
+(defvar *compilations*
+  (make-hash-table))
 
 (defmacro define-compilation (name args &body body)
   ;; Creates a new primitive `name' with parameters args and
   ;; @body. The body can access to the local environment through the
   ;; variable *ENVIRONMENT*.
-  `(push (list ',name (lambda ,args (block ,name ,@body)))
-         *compilations*))
+  `(setf (gethash ',name *compilations*)
+         (lambda ,args (block ,name ,@body))))
 
 (define-compilation if (condition true &optional false)
   `(if (!== ,(convert condition) ,(convert nil))
@@ -1474,8 +1475,8 @@
                (args (cdr sexp)))
            (cond
              ;; Special forms
-             ((assoc name *compilations*)
-              (let ((comp (second (assoc name *compilations*))))
+             ((gethash name *compilations*)
+              (let ((comp (gethash name *compilations*)))
                 (apply comp args)))
              ;; Built-in functions
              ((and (assoc name *builtins*)
