@@ -1,6 +1,6 @@
 ;;; toplevel.lisp ---
 
-;; Copyright (C) 2012, 2013 David Vazquez
+;; Copyright (C) 2012, 2013, 2014 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
 
 ;; JSCL is free software: you can redistribute it and/or
@@ -255,7 +255,7 @@
   #.(multiple-value-bind (second minute hour date month year)
         (get-decoded-time)
       (declare (ignore second minute hour))
-      (format nil "Built on ~d ~a ~d"
+      (format nil "built on ~d ~a ~d"
               date
               (elt #("January" "February" "March" "April" "May" "June"
                      "July" "August" "September" "October" "November"
@@ -332,7 +332,16 @@
 
 (defun init (&rest args)
   (#j:jqconsole:RegisterMatching "(" ")" "parents")
-  (format t ";; Welcome to JSCL (~a)~%~%" (compilation-notice))
+
+  (format t "Welcome to ~a ~a (~a)~%~%"
+          (lisp-implementation-type)
+          (lisp-implementation-version)
+          (compilation-notice))
+
+  (format t "JSCL is a Common Lisp implementation on Javascript.~%")
+  (%write-string
+   (format nil "For more information, visit the project page at <a href=\"https://github.com/davazp/jscl\">GitHub</a>.~%~%"))
+
   (load-history)
   (toplevel))
 
