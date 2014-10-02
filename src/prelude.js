@@ -170,3 +170,21 @@ function TagNLX (id, label){
   this.id = id;
   this.label = label;
 }
+
+
+// Packages
+
+var packages = {};
+
+// function make_package (name) {
+//   if (packages[name])
+//     return packages[name];
+//   else {
+//     var pkg = {
+//       "packageName": name,
+//       "symbols": {},
+//       "exports": {},
+//       "use": {}
+//     }
+//   }
+// }

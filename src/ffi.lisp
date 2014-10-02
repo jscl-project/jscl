@@ -15,6 +15,8 @@
 
 (/debug "loading ffi.lisp!")
 
+(defvar *root* (%js-vref "window"))
+
 (define-setf-expander oget (object key &rest keys)
   (let* ((keys (cons key keys))
          (g!object (gensym))

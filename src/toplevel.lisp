@@ -263,8 +263,6 @@
                    month)
               year)))
 
-(defvar *root* (%js-vref "window"))
-
 
 (defun load-history ()
   (let ((raw (#j:localStorage:getItem "jqhist")))

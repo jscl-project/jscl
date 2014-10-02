@@ -1,3 +1,5 @@
+(test (listp (list-all-packages)))
+
 (test (not (eq (list-all-packages) (list-all-packages))))
 
 (test (equal (multiple-value-list (do-symbols (symbol *package* (values 1 2)))) '(1 2)))
