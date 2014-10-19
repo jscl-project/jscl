@@ -368,10 +368,9 @@
                                    `(!== (property |arguments| (+ i 2)) ,(convert keyword-name))))
                                keyword-arguments))
                      (throw (+ "Unknown keyword argument "
-                               (call |xstring|
-                                     (property
-                                      (property |arguments| (+ i 2))
-                                      "name")))))))))))
+                               (property
+                                (property |arguments| (+ i 2))
+                                "name"))))))))))
 
 (defun parse-lambda-list (ll)
   (values (ll-required-arguments ll)
@@ -1092,7 +1091,7 @@
     (var (symbol ,x)
          (value (get symbol "value")))
     (if (=== value undefined)
-        (throw (+ "Variable `" (call |xstring| (get symbol "name")) "' is unbound.")))
+        (throw (+ "Variable `" (get symbol "name") "' is unbound.")))
     (return value)))
 
 (define-builtin symbol-function (x)
@@ -1100,7 +1099,7 @@
     (var (symbol ,x)
          (func (get symbol "fvalue")))
     (if (=== func undefined)
-        (throw (+ "Function `" (call |xstring| (get symbol "name")) "' is undefined.")))
+        (throw (+ "Function `" (get symbol "name") "' is undefined.")))
     (return func)))
 
 (define-builtin lambda-code (x)
