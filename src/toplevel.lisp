@@ -321,6 +321,7 @@
               (dolist (x results)
                 (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return")))
             (catch (err)
+              (#j:console:log err)
               (#j:jqconsole:Write (format nil "ERROR: ~a~%" err) "jqconsole-error")))
            
            (save-history)
