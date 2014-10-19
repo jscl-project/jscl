@@ -505,12 +505,12 @@
   #-jscl
   (let ((package (symbol-package symbol)))
     (if (eq package (find-package "KEYWORD"))
-        `(new (call |Symbol| ,(dump-string (symbol-name symbol)) ,(dump-string (package-name package))))
-        `(new (call |Symbol| ,(dump-string (symbol-name symbol))))))
+        `(call |intern| ,(symbol-name symbol) ,(package-name package))
+        `(call |intern| ,(symbol-name symbol))))
   #+jscl
   (let ((package (symbol-package symbol)))
     (if (null package)
-        `(new (call |Symbol| ,(dump-string (symbol-name symbol))))
+        `(new (call |Symbol| ,(symbol-name symbol)))
         (convert `(intern ,(symbol-name symbol) ,(package-name package))))))
 
 (defun dump-cons (cons)
@@ -1070,10 +1070,10 @@
   `(bool (instanceof ,x |Symbol|)))
 
 (define-builtin make-symbol (name)
-  `(new (call |Symbol| ,name)))
+  `(new (call |Symbol| (call |lisp_to_js| ,name))))
 
-(define-builtin symbol-name (x)
-  `(get ,x "name"))
+(define-compilation symbol-name (x)
+  (convert `(oget ,x "name")))
 
 (define-builtin set (symbol value)
   `(= (get ,symbol "value") ,value))

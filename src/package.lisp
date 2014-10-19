@@ -73,19 +73,16 @@
   (let ((package (find-package-or-fail package-designator)))
     (oget package "exports")))
 
-(defvar *common-lisp-package*
-  (make-package "CL"))
-
 (defvar *user-package*
-  (make-package "CL-USER" :use (list *common-lisp-package*)))
+  (make-package "CL-USER" :use (list (find-package "CL"))))
 
 (defvar *keyword-package*
-  (make-package "KEYWORD"))
+  (find-package "KEYWORD"))
 
 (defun keywordp (x)
   (and (symbolp x) (eq (symbol-package x) *keyword-package*)))
 
-(defvar *package* *common-lisp-package*)
+(defvar *package* (find-package "CL"))
 
 (defmacro in-package (string-designator)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
@@ -110,22 +107,6 @@
     (if package
         (redefine-package package use)
         (%make-package name use))))
-
-;; This function is used internally to initialize the CL package
-;; with the symbols built during bootstrap.
-(defun %intern-symbol (symbol)
-  (let* ((package
-          (if (in "package" symbol)
-              (find-package-or-fail (oget symbol "package"))
-              *common-lisp-package*))
-         (symbols (%package-symbols package))
-         (exports (%package-external-symbols package)))
-    (setf (oget symbol "package") package)
-    (setf (oget symbols (symbol-name symbol)) symbol)
-    ;; Turn keywords self-evaluated and export them.
-    (when (eq package *keyword-package*)
-      (setf (oget symbol "value") symbol)
-      (setf (oget exports (symbol-name symbol)) symbol))))
 
 (defun find-symbol (name &optional (package *package*))
   (let* ((package (find-package-or-fail package))

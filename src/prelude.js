@@ -109,12 +109,6 @@ function safe_char_downcase(x) {
 function xstring(x){ return x.join(''); }
 
 
-function Symbol(name, package_name){
-  this.name = name;
-  if (package_name)
-    this['package'] = package_name;
-}
-
 function lisp_to_js (x) {
   if (typeof x == 'object' && 'length' in x && x.stringp == 1)
     return xstring(x);
@@ -172,19 +166,38 @@ function TagNLX (id, label){
 }
 
 
-// Packages
+// Packages & Symbols
 
 var packages = {};
 
-// function make_package (name) {
-//   if (packages[name])
-//     return packages[name];
-//   else {
-//     var pkg = {
-//       "packageName": name,
-//       "symbols": {},
-//       "exports": {},
-//       "use": {}
-//     }
-//   }
-// }
+packages.CL = {
+  packageName: 'COMMON-LISP',
+  symbols: {},
+  exports: {},
+  use: false                    // NIL
+};
+
+packages.KEYWORD = {
+  packageName: 'KEYWORD',
+  symbols: {},
+  exports: {},
+  use: false                    // NIL
+};
+
+function Symbol(name, package_name){
+  this.name = name;
+  if (package_name)
+    this['package'] = package_name;
+}
+
+function intern (name, package_name){
+  package_name = package_name || "CL";
+  var lisp_package = packages[package_name];
+  if (!lisp_package)
+    throw "No package " + package_name;
+
+  if (!lisp_package.symbols[name])
+    lisp_package.symbols[name] = new Symbol(name, lisp_package);
+
+  return lisp_package.symbols[name];
+}
