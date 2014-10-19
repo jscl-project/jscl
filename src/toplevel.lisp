@@ -257,7 +257,7 @@
       (declare (ignore second minute hour))
       (format nil "built on ~d ~a ~d"
               date
-              (elt #("January" "February" "March" "April" "May" "June"
+              (elt #("" "January" "February" "March" "April" "May" "June"
                      "July" "August" "September" "October" "November"
                      "December")
                    month)
