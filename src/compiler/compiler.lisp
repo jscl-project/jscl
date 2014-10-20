@@ -501,16 +501,20 @@
   (make-symbol (concat "l" (integer-to-string *literal-counter*))))
 
 (defun dump-symbol (symbol)
-  #-jscl
   (let ((package (symbol-package symbol)))
-    (if (eq package (find-package "KEYWORD"))
-        `(call |intern| ,(symbol-name symbol) ,(package-name package))
-        `(call |intern| ,(symbol-name symbol))))
-  #+jscl
-  (let ((package (symbol-package symbol)))
-    (if (null package)
-        `(new (call |Symbol| ,(symbol-name symbol)))
-        (convert `(intern ,(symbol-name symbol) ,(package-name package))))))
+    (cond
+      ;; Uninterned symbol
+      ((null package)
+       `(new (call |Symbol| ,(symbol-name symbol))))
+      ;; Special case for bootstrap. For now, we just load all the
+      ;; code with JSCL as the current package. We will compile the
+      ;; JSCL package as CL in the target.
+      #-jscl
+      ((eq package (find-package "JSCL"))
+       `(call |intern| ,(symbol-name symbol)))
+      ;; Interned symbol
+      (t
+       `(call |intern| ,(symbol-name symbol))))))
 
 (defun dump-cons (cons)
   (let ((head (butlast cons))
