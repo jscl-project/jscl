@@ -196,8 +196,13 @@ function intern (name, package_name){
   if (!lisp_package)
     throw "No package " + package_name;
 
-  if (!lisp_package.symbols[name])
-    lisp_package.symbols[name] = new Symbol(name, lisp_package);
+  var symbol = lisp_package.symbols[name];
+  if (!symbol)
+    symbol = lisp_package.symbols[name] = new Symbol(name, lisp_package);
 
-  return lisp_package.symbols[name];
+  // Auto-export symbol if it is the KEYWORD package.
+  if (lisp_package === packages.KEYWORD)
+    lisp_package.exports[name] = symbol;
+    
+  return symbol;
 }
