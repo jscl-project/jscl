@@ -174,14 +174,14 @@ packages.CL = {
   packageName: 'CL',
   symbols: {},
   exports: {},
-  use: false                    // NIL
+  use: nil
 };
 
 packages.KEYWORD = {
   packageName: 'KEYWORD',
   symbols: {},
   exports: {},
-  use: false                    // NIL
+  use: nil
 };
 
 function Symbol(name, package_name){
