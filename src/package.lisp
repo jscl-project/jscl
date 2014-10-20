@@ -53,10 +53,6 @@
 (defun packagep (x)
   (and (objectp x) (in "symbols" x)))
 
-(defun find-package-or-fail (package-designator)
-  (or (find-package package-designator)
-      (error "The name `~S' does not designate any package." package-designator)))
-
 (defun package-name (package-designator)
   (let ((package (find-package-or-fail package-designator)))
     (oget package "packageName")))

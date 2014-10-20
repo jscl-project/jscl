@@ -386,7 +386,7 @@
     (setq name (if (string= package "JS")
                    (setq name (unescape-token name))
                    (setq name (string-upcase-noescaped name))))
-    (setq package (find-package package))
+    (setq package (find-package-or-fail package))
     (if (or internalp
             (eq package (find-package "KEYWORD"))
             (eq package (find-package "JS")))

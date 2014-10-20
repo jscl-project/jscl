@@ -101,3 +101,8 @@
         (collect x))
       (when after-last-p
         (collect element)))))
+
+
+(defun find-package-or-fail (package-designator)
+  (or (find-package package-designator)
+      (error "The name `~S' does not designate any package." package-designator)))
