@@ -171,7 +171,7 @@ function TagNLX (id, label){
 var packages = {};
 
 packages.CL = {
-  packageName: 'COMMON-LISP',
+  packageName: 'CL',
   symbols: {},
   exports: {},
   use: false                    // NIL
