@@ -510,11 +510,12 @@
       ;; code with JSCL as the current package. We will compile the
       ;; JSCL package as CL in the target.
       #-jscl
-      ((eq package (find-package "JSCL"))
+      ((or (eq package (find-package "JSCL"))
+           (eq package (find-package "CL")))
        `(call |intern| ,(symbol-name symbol)))
       ;; Interned symbol
       (t
-       `(call |intern| ,(symbol-name symbol))))))
+       `(call |intern| ,(symbol-name symbol) ,(package-name package))))))
 
 (defun dump-cons (cons)
   (let ((head (butlast cons))
