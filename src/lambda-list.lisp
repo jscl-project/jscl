@@ -114,7 +114,7 @@
            ;; the lambda list. It also checks if the section is in the
            ;; proper place and it is new.
            (lambda-section (name)
-             (let ((section (first lambda-list)))
+             (let ((section (and (consp lambda-list) (first lambda-list))))
                (when (find section lambda-keywords)
                  (error "Bad placed ~a in the lambda-list ~S." section lambda-list))
                (when (eq name section)
