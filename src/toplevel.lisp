@@ -312,17 +312,25 @@
   (let ((prompt (format nil "~a> " (package-name *package*))))
     (#j:jqconsole:Write prompt "jqconsole-prompt"))
   (flet ((process-input (input)
-           ;; Capture errors. We evaluate the form and set successp
-           ;; to T. However, if a non-local exit happens, we cancel
-           ;; it, so it is not propagated more.
+           ;; Capture unhandled Javascript exceptions. We evaluate the
+           ;; form and set successp to T. However, if a non-local exit
+           ;; happens, we cancel it, so it is not propagated more.
            (%js-try
-            (let* ((form (read-from-string input))
-                   (results (multiple-value-list (eval-interactive form))))
-              (dolist (x results)
-                (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return")))
+
+            ;; Capture unhandled Lisp conditeions.
+            (handler-case
+                (let* ((form (read-from-string input))
+                       (results (multiple-value-list (eval-interactive form))))
+                  (dolist (x results)
+                    (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return")))
+              (error (err)
+                (#j:jqconsole:Write "ERROR: " "jqconsole-error")
+                (#j:jqconsole:Write (apply #'format nil (!condition-args err)) "jqconsole-error")
+                (#j:jqconsole:Write (string #\newline) "jqconsole-error")))
+            
             (catch (err)
               (#j:console:log err)
-              (#j:jqconsole:Write (format nil "ERROR: ~a~%" err) "jqconsole-error")))
+              (#j:jqconsole:Write (format nil "ERROR[!]: ~a~%" err) "jqconsole-error")))
            
            (save-history)
            (toplevel)))

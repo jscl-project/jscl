@@ -314,11 +314,6 @@
     (terpri)
     x)
   
-  (defun warn (fmt &rest args)
-    (write-string "WARNING: ")
-    (apply #'format t fmt args)
-    (terpri))
-  
   (defun print (x)
     (write-line (prin1-to-string x))
     x))

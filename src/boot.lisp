@@ -412,6 +412,7 @@
 (defun values (&rest args)
   (values-list args))
 
+;;; Early error definition.
 (defun error (fmt &rest args)
   (%throw (apply #'format nil fmt args)))
 
