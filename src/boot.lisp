@@ -33,8 +33,9 @@
                   `(eval-when (:compile-toplevel :execute)
                      (%compile-defmacro ',name
                                         '#'(lambda (,whole)
-                                             (destructuring-bind ,args ,whole
-                                               ,@body)))))))))
+                                             (block ,name
+                                               (destructuring-bind ,args ,whole
+                                                 ,@body))))))))))
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
 (defmacro declaim (&rest decls)
