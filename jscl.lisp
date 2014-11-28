@@ -62,6 +62,7 @@
     ("read"          :both)
     ("defstruct"     :both)
     ("lambda-list"   :both)
+    ("conditions"    :both)
     ("backquote"     :both)
     ("compiler"
      ("codegen"      :both)
