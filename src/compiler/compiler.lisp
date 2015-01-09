@@ -1017,8 +1017,11 @@
 (define-builtin numberp (x)
   `(bool (== (typeof ,x) "number")))
 
-(define-builtin floor (x)
+(define-builtin %floor (x)
   `(method-call |Math| "floor" ,x))
+
+(define-builtin %ceiling (x)
+  `(method-call |Math| "ceil" ,x))
 
 (define-builtin expt (x y)
   `(method-call |Math| "pow" ,x ,y))

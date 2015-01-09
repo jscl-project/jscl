@@ -45,8 +45,18 @@
 (defun 1+ (x) (+ x 1))
 (defun 1- (x) (- x 1))
 
+
+(defun floor (x &optional (y 1))
+  (%floor (/ x y)))
+
+(defun ceiling (x &optional (y 1))
+  (%ceiling (/ x y)))
+
 (defun truncate (x &optional (y 1))
-  (floor (/ x y)))
+  (let ((z (/ x y)))
+    (if (> z 0)
+        (%floor z)
+        (%ceiling z))))
 
 (defun integerp (x)
   (and (numberp x) (= (floor x) x)))

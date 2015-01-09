@@ -86,3 +86,36 @@
 (test (= 70 (lcm 14 35)))
 (test (= 0 (lcm 0 5)))
 (test (= 60 (lcm 1 2 3 4 5 6)))
+
+
+;;; Floor, Ceil, Truncate and Round
+
+(test (= (floor 0) 0))
+(test (= (floor 1) 1))
+(test (= (floor -1) -1))
+(test (= (floor 1.2) 1))
+(test (= (floor -1.2) -2))
+(test (= (floor 4 3) 1))
+(test (= (floor -4 3) -2))
+(test (= (floor 4 -3) -2))
+(test (= (floor -4 -3) 1))
+
+(test (= (ceiling 0) 0))
+(test (= (ceiling 1) 1))
+(test (= (ceiling -1) -1))
+(test (= (ceiling 1.2) 2))
+(test (= (ceiling -1.2) -1))
+(test (= (ceiling 4 3) 2))
+(test (= (ceiling -4 3) -1))
+(test (= (ceiling 4 -3) -1))
+(test (= (ceiling -4 -3) 2))
+
+(test (= (truncate 0) 0))
+(test (= (truncate 1) 1))
+(test (= (truncate -1) -1))
+(test (= (truncate 1.2) 1))
+(test (= (truncate -1.2) -1))
+(test (= (truncate 4 3) 1))
+(test (= (truncate -4 3) -1))
+(test (= (truncate 4 -3) -1))
+(test (= (truncate -4 -3) 1))
