@@ -55,6 +55,17 @@ function QIList(){
   }
 }
 
+// Arithmetic
+
+function handled_division (x, y) {
+  if (y == 0) throw "Division by zero";
+  return x/y;
+}
+
+
+// Chars and Strings
+
+
 // Return a new Array of strings, each either length-1, or length-2 (a UTF-16 surrogate pair).
 function codepoints(string) {
   return string.split(/(?![\udc00-\udfff])/);

@@ -983,12 +983,15 @@
   (let ((args (cons x others)))
     (variable-arity args
       (if (null others)
-          `(/ 1 ,(car args))
-          (reduce (lambda (x y) `(/ ,x ,y))
+          `(call |handled_division| 1 ,(car args))
+          (reduce (lambda (x y) `(call |handled_division| ,x ,y))
                   args)))))
 
 (define-builtin mod (x y)
-  `(% ,x ,y))
+  `(selfcall
+    (if (== ,y 0)
+        (throw "Division by zero"))
+    (return (% ,x ,y))))
 
 
 (defun comparison-conjuntion (vars op)
