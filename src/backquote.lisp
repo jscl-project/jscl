@@ -50,6 +50,13 @@
 (defmacro backquote (x)
   (bq-completely-process x))
 
+;;; The BACKQUOTE macro should remove all occurences of UNQUOTE and
+;;; UNQUOTE-SPLICING from the source before we reach them. If we ever reach
+;;; one, it must have occurred outside a BACKQUOTE form, so we signal the
+;;; appropriate error.
+(defmacro unquote (x) (error "Comma not inside a backquote: ,~S" x))
+(defmacro unquote-splicing (x) (error "Comma-atsign not inside a backquote: ,@~S" x))
+
 ;;; Backquote processing proceeds in three stages:
 ;;;
 ;;; (1) BQ-PROCESS applies the rules to remove occurrences of
