@@ -149,8 +149,11 @@
 ;;;; Random Macros
 
 (defmacro loop-simple-error (unquoted-message &optional (datum nil datump))
-  `(error ,(if datump "LOOP:  ~S ~A" "LOOP:  ~A")
-	  ',unquoted-message ,@(and datump (list datum))))
+  `(error ,(if datump
+               "LOOP:  ~S ~A"
+               "LOOP:  ~A")
+	  ',unquoted-message
+          ,@(and datump (list datum))))
 
 
 (defmacro loop-warn (unquoted-message &optional (datum nil datump))
@@ -160,7 +163,8 @@
       `(warn ',(concatenate 'string "LOOP: " unquoted-message))))
 
 
-(defmacro loop-pop-source () '(pop loop-source-code))
+(defmacro loop-pop-source ()
+  '(pop loop-source-code))
 
 (defmacro loop-gentemp (&optional (pref ''loopvar-))
   `(gentemp (symbol-name ,pref)))
