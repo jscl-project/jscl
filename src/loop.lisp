@@ -95,6 +95,7 @@
 
 (defpackage jscl.loop
   (:use :cl)
+  (:shadow :loop :loop-finish)
   (:export :loop
            :loop-finish
            :define-loop-macro
@@ -113,6 +114,17 @@
            :loop-sequence-elements-path)
   (:documentation "Internals of the LOOP implementaton."))
 (in-package :jscl.loop)
+
+;;; Utilities
+
+(defun initial-value (x)
+  x
+  nil)
+
+(defun variable-declarations (type &rest vars)
+  type
+  vars
+  nil)
 
 ;;;; Macro Environment Setup
 
@@ -242,13 +254,13 @@
     (summing loop-do-collect sum)
     (maximize loop-do-collect max)
     (minimize loop-do-collect min)
-    (always loop-do-always nil) ;Normal, do always
-    (never loop-do-always t)    ; Negate the test on always.
+    (always loop-do-always nil)             ; Normal, do always
+    (never loop-do-always t)                ; Negate the test on always.
     (thereis loop-do-thereis)
     (while loop-do-while nil while)	    ; Normal, do while
     (until loop-do-while t until)	    ; Negate the test on while
     (when loop-do-when nil when)	    ; Normal, do when
-    (if loop-do-when nil if)    ; synonymous
+    (if loop-do-when nil if)                ; synonymous
     (unless loop-do-when t unless)	    ; Negate the test on when
     (with loop-do-with)))
 
@@ -1470,7 +1482,4 @@ of the sequence."
       )
 
 
-(pushnew 'loop *features*)  ;; Common-Lisp says this is correct.
-
-(defun initial-value (x) x nil)
-(defun variable-declarations (type &rest vars) type vars nil)
+(pushnew 'loop *features*)
