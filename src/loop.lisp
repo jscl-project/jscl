@@ -105,24 +105,17 @@
 ;;;; Macro Environment Setup
 
 
-; Hack up the stuff for data-types.  DATA-TYPE? will always be a macro
-; so that it will not require the data-type package at run time if
-; all uses of the other routines are conditionalized upon that value.
-(eval-when (:compile-toplevel :execute)
-  ; Crock for DATA-TYPE? derives from DTDCL.  We just copy it rather
-  ; than load it in, which requires knowing where it comes from (sigh).
-  ; 
-  (defmacro data-type? (frob)
-    (let ((foo (gensym)))
-      `((lambda (,foo)
-	  ;; NIL croaks if nil given to GET...  No it doesn't any more!  But:
-	  ;; Every Lisp should (but doesn't) croak if randomness given to GET
-	  ;; LISPM croaks (of course) if randomness given to get-pname
-	  (and (symbolp ,foo)
-	       (or (get ,foo ':data-type)
-		   (and (setq ,foo (find-symbol (symbol-name ,foo) 'keyword))
-			(get ,foo ':data-type)))))
-	,frob))))
+(defmacro data-type? (frob)
+  (let ((foo (gensym)))
+    `((lambda (,foo)
+        ;; NIL croaks if nil given to GET...  No it doesn't any more!  But:
+        ;; Every Lisp should (but doesn't) croak if randomness given to GET
+        ;; LISPM croaks (of course) if randomness given to get-pname
+        (and (symbolp ,foo)
+             (or (get ,foo ':data-type)
+                 (and (setq ,foo (find-symbol (symbol-name ,foo) 'keyword))
+                      (get ,foo ':data-type)))))
+      ,frob)))
 
 
 ;;; The uses of this macro are retained in the CL version of loop, in case they are
