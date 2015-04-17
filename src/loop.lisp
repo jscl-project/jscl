@@ -91,30 +91,6 @@
 
 (/debug "loading loop.lisp!")
 
-;;; Packages
-
-(defpackage jscl.loop
-  (:use :cl)
-  (:shadow :loop :loop-finish)
-  (:export :loop
-           :loop-finish
-           :define-loop-macro
-           :define-loop-path
-           :define-loop-sequence-pat)
-  (:export :h)
-  (:export :loop-tequal
-           :loop-tassoc
-           :loop-tmember
-           :loop-use-system-destructuring?
-           :loop-named-variable
-           :loop-simple-error
-           :loop-simplep
-           :loop-simplep-1
-           :loop-sequencer
-           :loop-sequence-elements-path)
-  (:documentation "Internals of the LOOP implementaton."))
-(in-package :jscl.loop)
-
 ;;; Utilities
 
 (defun initial-value (x)

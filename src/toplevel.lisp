@@ -32,12 +32,6 @@
 (defvar +++ nil)
 (defvar - nil)
 
-(defmacro loop (&rest forms)
-  `(jscl.loop:loop ,@forms))
-
-(defmacro loop-finish ()
-  `(jscl.loop:loop-finish))
-
 (defun eval-interactive (x)
   (setf - x)
   (let ((results (multiple-value-list (eval x))))
