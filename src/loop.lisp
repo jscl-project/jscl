@@ -120,7 +120,7 @@
 ; Hack up the stuff for data-types.  DATA-TYPE? will always be a macro
 ; so that it will not require the data-type package at run time if
 ; all uses of the other routines are conditionalized upon that value.
-(eval-when (eval compile)
+(eval-when (:compile-toplevel :execute)
   ; Crock for DATA-TYPE? derives from DTDCL.  We just copy it rather
   ; than load it in, which requires knowing where it comes from (sigh).
   ; 
