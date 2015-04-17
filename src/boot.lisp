@@ -281,10 +281,6 @@
          ,@body)
        (cdr ,head))))
 
-
-(defmacro loop (&body body)
-  `(while t ,@body))
-
 (defun identity (x) x)
 
 (defun complement (x)
