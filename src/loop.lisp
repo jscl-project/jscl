@@ -174,46 +174,37 @@
 ; macros, especially in the PDP10 version.
 
 (defun loop-make-psetq (frobs)
-    (and frobs
-	 (loop-make-setq
-	    (list (car frobs)
-		  (if (null (cddr frobs)) (cadr frobs)
-		      `(prog1 ,(cadr frobs)
-			      ,(loop-make-psetq (cddr frobs))))))))
+  (and frobs
+       (loop-make-setq
+        (list (car frobs)
+              (if (null (cddr frobs)) (cadr frobs)
+                  `(prog1 ,(cadr frobs)
+                     ,(loop-make-psetq (cddr frobs))))))))
 
 
 (defvar loop-use-system-destructuring?
-    nil)
+  nil)
 
 (defvar loop-desetq-temporary)
 
-; Do we want this???  It is, admittedly, useful...
-;(defmacro loop-desetq (&rest x)
-;  (let ((loop-desetq-temporary nil))
-;     (let ((setq-form (loop-make-desetq x)))
-;	(if loop-desetq-temporary
-;	    `((lambda (,loop-desetq-temporary) ,setq-form) nil)
-;	    setq-form))))
-
-
 (defun loop-make-desetq (x)
-   (if loop-use-system-destructuring?
-       (cons (do ((l x (cddr l))) ((null l) 'setq)
-	       (or (and (not (null (car l))) (symbolp (car l)))
-		   (return 'desetq)))
-	     x)
-       (do ((x x (cddr x)) (r nil) (var) (val))
-	   ((null x) (and r (cons 'setq r)))
-	 (setq var (car x) val (cadr x))
-	 (cond ((and (not (atom var))
-		     (not (atom val))
-		     (not (and (member (car val) '(car cdr cadr cddr caar cdar))
-			       (atom (cadr val)))))
-		  (setq x (list* (or loop-desetq-temporary
-				     (setq loop-desetq-temporary
-					   (loop-gentemp 'loop-desetq-)))
-				 val var loop-desetq-temporary (cddr x)))))
-	 (setq r (nconc r (loop-desetq-internal (car x) (cadr x)))))))
+  (if loop-use-system-destructuring?
+      (cons (do ((l x (cddr l))) ((null l) 'setq)
+              (or (and (not (null (car l))) (symbolp (car l)))
+                  (return 'desetq)))
+            x)
+      (do ((x x (cddr x)) (r nil) (var) (val))
+          ((null x) (and r (cons 'setq r)))
+        (setq var (car x) val (cadr x))
+        (cond ((and (not (atom var))
+                    (not (atom val))
+                    (not (and (member (car val) '(car cdr cadr cddr caar cdar))
+                              (atom (cadr val)))))
+               (setq x (list* (or loop-desetq-temporary
+                                  (setq loop-desetq-temporary
+                                        (loop-gentemp 'loop-desetq-)))
+                              val var loop-desetq-temporary (cddr x)))))
+        (setq r (nconc r (loop-desetq-internal (car x) (cadr x)))))))
 
 
 (defun loop-desetq-internal (var val)
@@ -224,57 +215,57 @@
 
 
 (defun loop-make-setq (pairs)
-    (and pairs (loop-make-desetq pairs)))
+  (and pairs (loop-make-desetq pairs)))
 
 
-(defparameter loop-keyword-alist			;clause introducers
-     '(	(named loop-do-named)
-	(initially loop-do-initially)
-	(finally loop-do-finally)
-	(nodeclare loop-nodeclare)
-	(do loop-do-do)
-	(doing loop-do-do)
-	(return loop-do-return)
-	(collect loop-do-collect list)
-	(collecting loop-do-collect list)
-	(append loop-do-collect append)
-	(appending loop-do-collect append)
-	(nconc loop-do-collect nconc)
-	(nconcing loop-do-collect nconc)
-	(count loop-do-collect count)
-	(counting loop-do-collect count)
-	(sum loop-do-collect sum)
-	(summing loop-do-collect sum)
-	(maximize loop-do-collect max)
-	(minimize loop-do-collect min)
-	(always loop-do-always nil) ;Normal, do always
-	(never loop-do-always t)    ; Negate the test on always.
-	(thereis loop-do-thereis)
-	(while loop-do-while nil while)	    ; Normal, do while
-	(until loop-do-while t until)	    ; Negate the test on while
-	(when loop-do-when nil when)	    ; Normal, do when
-	(if loop-do-when nil if)    ; synonymous
- 	(unless loop-do-when t unless)	    ; Negate the test on when
-	(with loop-do-with)))
+(defparameter loop-keyword-alist
+  '((named loop-do-named)
+    (initially loop-do-initially)
+    (finally loop-do-finally)
+    (nodeclare loop-nodeclare)
+    (do loop-do-do)
+    (doing loop-do-do)
+    (return loop-do-return)
+    (collect loop-do-collect list)
+    (collecting loop-do-collect list)
+    (append loop-do-collect append)
+    (appending loop-do-collect append)
+    (nconc loop-do-collect nconc)
+    (nconcing loop-do-collect nconc)
+    (count loop-do-collect count)
+    (counting loop-do-collect count)
+    (sum loop-do-collect sum)
+    (summing loop-do-collect sum)
+    (maximize loop-do-collect max)
+    (minimize loop-do-collect min)
+    (always loop-do-always nil) ;Normal, do always
+    (never loop-do-always t)    ; Negate the test on always.
+    (thereis loop-do-thereis)
+    (while loop-do-while nil while)	    ; Normal, do while
+    (until loop-do-while t until)	    ; Negate the test on while
+    (when loop-do-when nil when)	    ; Normal, do when
+    (if loop-do-when nil if)    ; synonymous
+    (unless loop-do-when t unless)	    ; Negate the test on when
+    (with loop-do-with)))
 
 
 (defparameter loop-iteration-keyword-alist
-    `((for loop-do-for)
-      (as loop-do-for)
-      (repeat loop-do-repeat)))
+  `((for loop-do-for)
+    (as loop-do-for)
+    (repeat loop-do-repeat)))
 
 
-(defparameter loop-for-keyword-alist			;Types of FOR
-     '( (= loop-for-equals)
-        (first loop-for-first)
-	(in loop-list-stepper car)
-	(on loop-list-stepper nil)
-	(from loop-for-arithmetic from)
-	(downfrom loop-for-arithmetic downfrom)
-	(upfrom loop-for-arithmetic upfrom)
-	(below loop-for-arithmetic below)
-	(to loop-for-arithmetic to)
-	(being loop-for-being)))
+(defparameter loop-for-keyword-alist
+  '((= loop-for-equals)
+    (first loop-for-first)
+    (in loop-list-stepper car)
+    (on loop-list-stepper nil)
+    (from loop-for-arithmetic from)
+    (downfrom loop-for-arithmetic downfrom)
+    (upfrom loop-for-arithmetic upfrom)
+    (below loop-for-arithmetic below)
+    (to loop-for-arithmetic to)
+    (being loop-for-being)))
 
 (defvar loop-prog-names)
 
@@ -299,13 +290,12 @@
 (defvar loop-epilogue)				;..
 (defvar loop-after-epilogue)			;So COLLECT's RETURN comes after FINALLY
 (defvar loop-conditionals)			;If non-NIL, condition for next form in body
-  ;The above is actually a list of entries of the form
-  ;(cond (condition forms...))
-  ;When it is output, each successive condition will get
-  ;nested inside the previous one, but it is not built up
-  ;that way because you wouldn't be able to tell a WHEN-generated
-  ;COND from a user-generated COND.
-  ;When ELSE is used, each cond can get a second clause
+
+;;; The above is actually a list of entries of the form (cond (condition
+;;; forms...))  When it is output, each successive condition will get nested
+;;; inside the previous one, but it is not built up that way because you
+;;; wouldn't be able to tell a WHEN-generated COND from a user-generated
+;;; COND. When ELSE is used, each cond can get a second clause
 
 (defvar loop-when-it-variable)			;See LOOP-DO-WHEN
 (defvar loop-never-stepped-variable)		; see LOOP-FOR-FIRST
@@ -328,8 +318,8 @@
 
 ;;;; Token Hackery
 
-;Compare two "tokens".  The first is the frob out of LOOP-SOURCE-CODE,
-;the second a symbol to check against.
+;; Compare two "tokens".  The first is the frob out of LOOP-SOURCE-CODE, the
+;; second a symbol to check against.
 
 (defun loop-tequal (x1 x2)
   (and (symbolp x1) (string= x1 x2)))
@@ -555,12 +545,12 @@ collected result will be returned as the value of the LOOP."
 
 
 (defun loop-bind-block ()
-   (cond ((not (null loop-variables))
-	    (push loop-variables loop-variable-stack)
-	    (push loop-declarations loop-declaration-stack)
-	    (setq loop-variables nil loop-declarations nil)
-	    (push loop-desetq-crocks loop-desetq-stack)
-	    (setq loop-desetq-crocks nil))))
+  (cond ((not (null loop-variables))
+         (push loop-variables loop-variable-stack)
+         (push loop-declarations loop-declaration-stack)
+         (setq loop-variables nil loop-declarations nil)
+         (push loop-desetq-crocks loop-desetq-stack)
+         (setq loop-desetq-crocks nil))))
 
 
 ;Get FORM argument to a keyword.  Read up to atom.  PROGNify if necessary.
@@ -588,9 +578,10 @@ The offending clause"
 	     (cons 'progn forms)))))
 
 
-;;;This function takes a substitutable expression containing generic arithmetic
-;;; of some form or another, and a data type name, and substitutes for the function
-;;; any type-specific functions for that type in the implementation.
+;;; This function takes a substitutable expression containing generic arithmetic
+;;; of some form or another, and a data type name, and substitutes for the
+;;; function any type-specific functions for that type in the implementation.
+
 (defun loop-typed-arith (substitutable-expression data-type)
   (declare (ignore data-type))
   substitutable-expression)
