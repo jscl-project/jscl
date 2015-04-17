@@ -337,7 +337,7 @@ function name."
       (loop-tassoc keyword loop-iteration-keyword-alist)
       (loop-simple-error "not a loop keyword - define-loop-macro" keyword))
   `(defmacro ,keyword (&whole whole-form &rest keywords-and-forms &environment env)
-     (declare (ignore keywords-and-forms))
+     ;(declare (ignore keywords-and-forms)) ;; TODO: Uncomment when we support declare
      (loop-translate whole-form env)))
 
 
@@ -575,7 +575,7 @@ The offending clause"
 ;;; function any type-specific functions for that type in the implementation.
 
 (defun loop-typed-arith (substitutable-expression data-type)
-  (declare (ignore data-type))
+  ;(declare (ignore data-type)) ;; TODO: Uncomment when JSCL supports declare
   substitutable-expression)
 
 (defvar loop-floating-point-types
@@ -865,7 +865,7 @@ The offending clause"
 	 (if (zerop size) form
 	     (list (cond ((= size 1) 'cdr) ((= size 2) 'cddr) (t 'cdddr))
 		   form)))
-      (declare (type fixnum size))
+      ;(declare (type fixnum size)) ;; TODO: Uncomment when JSCL supports declare
       (setq form (list 'cddddr form))))
 
 
@@ -937,7 +937,7 @@ The offending clause"
     (if (null expr) 0
       (catch 'loop-simplep
 	(let ((ans (loop-simplep-1 expr)))
-	  (declare (fixnum ans))
+	  ;(declare (fixnum ans)) ;; TODO: Uncomment when JSCL supports declare
 	  (and (< ans 20.) ans)))))
 
 (defvar loop-simplep
@@ -945,7 +945,7 @@ The offending clause"
 
 (defun loop-simplep-1 (x)
   (let ((z 0))
-    (declare (fixnum z))
+    ;(declare (fixnum z)) ;; TODO: Uncomment when JSCL supports declare
     (cond ((loop-constantp x) 0)
 	  ((atom x) 1)
 	  ((eq (car x) 'cond)
