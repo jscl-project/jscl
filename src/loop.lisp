@@ -47,7 +47,6 @@
 ;;; That revised documentation can be reissued as a revised technical memo
 ;;; if there is sufficient demand.
 ;;;
-
 
 ;;;; Change History
 
@@ -94,14 +93,26 @@
 
 ;;; Packages
 
-(in-package 'loop)
-
-(export '(loop loop-finish define-loop-macro define-loop-path
-	       define-loop-sequence-path))
-
-(export '(loop-tequal loop-tassoc loop-tmember loop-use-system-destructuring?
-	  loop-named-variable loop-simple-error loop-simplep loop-simplep-1
-	  loop-sequencer loop-sequence-elements-path))
+(defpackage jscl.loop
+  (:use :cl)
+  (:export :loop
+           :loop-finish
+           :define-loop-macro
+           :define-loop-path
+           :define-loop-sequence-pat)
+  (:export :h)
+  (:export :loop-tequal
+           :loop-tassoc
+           :loop-tmember
+           :loop-use-system-destructuring?
+           :loop-named-variable
+           :loop-simple-error
+           :loop-simplep
+           :loop-simplep-1
+           :loop-sequencer
+           :loop-sequence-elements-path)
+  (:documentation "Internals of the LOOP implementaton."))
+(in-package :jscl.loop)
 
 ;;;; Macro Environment Setup
 
