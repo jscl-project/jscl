@@ -1302,7 +1302,7 @@ they are passed on to PATH-FUNCTION as a list."
   (setq names (if (atom names) (list names) names))
   (let ((forms (mapcar #'(lambda (name) `(loop-add-path ',name ',cruft))
 		       names)))
-    `(eval-when (eval load compile) ,@forms)))
+    `(eval-when (:execute :load-toplevel :compile-toplevel) ,@forms)))
 
 (defun loop-sequencer (indexv indexv-type
 			  variable? vtype?
