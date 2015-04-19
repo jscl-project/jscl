@@ -686,11 +686,11 @@ implemented and tested.
 *** TODO Function APROPOS, APROPOS-LIST
 *** TODO Function DESCRIBE
 *** TODO Standard Generic Function DESCRIBE-OBJECT
-*** TODO Macro TRACE, UNTRACE
+*** DONE Macro TRACE, UNTRACE
 *** TODO Macro STEP
-*** TODO Macro TIME
+*** DONE Macro TIME
 *** TODO Constant Variable INTERNAL-TIME-UNITS-PER-SECOND
-*** TODO Function GET-INTERNAL-REAL-TIME
+*** DONE Function GET-INTERNAL-REAL-TIME
 *** TODO Function GET-INTERNAL-RUN-TIME
 *** TODO Function DISASSEMBLE
 *** TODO Standard Generic Function DOCUMENTATION, (SETF DOCUMENTATION)
@@ -698,14 +698,14 @@ implemented and tested.
 *** TODO Function ED
 *** TODO Function INSPECT
 *** TODO Function DRIBBLE
-*** TODO Variable -
-*** TODO Variable +, ++, +++
-*** TODO Variable *, **, ***
-*** TODO Variable /, //, ///
-*** TODO Function LISP-IMPLEMENTATION-TYPE, LISP-IMPLEMENTATION-VERSION
-*** TODO Function SHORT-SITE-NAME, LONG-SITE-NAME
-*** TODO Function MACHINE-INSTANCE
-*** TODO Function MACHINE-TYPE
-*** TODO Function MACHINE-VERSION
-*** TODO Function SOFTWARE-TYPE, SOFTWARE-VERSION
+*** DONE Variable -
+*** DONE Variable +, ++, +++
+*** DONE Variable *, **, ***
+*** DONE Variable /, //, ///
+*** DONE Function LISP-IMPLEMENTATION-TYPE, LISP-IMPLEMENTATION-VERSION
+*** DONE Function SHORT-SITE-NAME, LONG-SITE-NAME
+*** DONE Function MACHINE-INSTANCE
+*** DONE Function MACHINE-TYPE
+*** DONE Function MACHINE-VERSION
+*** DONE Function SOFTWARE-TYPE, SOFTWARE-VERSION
 *** TODO Function USER-HOMEDIR-PATHNAME
