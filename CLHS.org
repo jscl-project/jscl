@@ -4,7 +4,7 @@ Current JSCL implementation status, taking Common Lisp Hyper Spec Dictionaries
 as a base. DONE status will be achieved whenever a feature is fully
 implemented and tested.
 
-* Implementation status [4/678][0%]
+* Implementation status [74/678][10%]
   :PROPERTIES:
        :COOKIE_DATA: todo recursive
        :END:
@@ -63,13 +63,13 @@ implemented and tested.
 *** TODO Function TYPE-ERROR-DATUM, TYPE-ERROR-EXPECTED-TYPE
 *** TODO Condition Type SIMPLE-TYPE-ERROR
 ** [0/69][0%] Data and Control Flow
-*** TODO Function APPLY
-*** TODO Macro DEFUN
+*** DONE Function APPLY
+*** DONE Macro DEFUN
 *** TODO Accessor FDEFINITION
-*** TODO Function FBOUNDP
+*** DONE Function FBOUNDP
 *** TODO Function FMAKUNBOUND
 *** TODO Special Operator FLET, LABELS, MACROLET
-*** TODO Function FUNCALL
+*** DONE Function FUNCALL
 *** TODO Special Operator FUNCTION
 *** TODO Function FUNCTION-LAMBDA-EXPRESSION
 *** TODO Function FUNCTIONP
@@ -77,8 +77,8 @@ implemented and tested.
 *** TODO Constant Variable CALL-ARGUMENTS-LIMIT
 *** TODO Constant Variable LAMBDA-LIST-KEYWORDS
 *** TODO Constant Variable LAMBDA-PARAMETERS-LIMIT
-*** TODO Macro DEFCONSTANT
-*** TODO Macro DEFPARAMETER, DEFVAR
+*** DONE Macro DEFCONSTANT
+*** DONE Macro DEFPARAMETER, DEFVAR
 *** TODO Macro DESTRUCTURING-BIND
 *** TODO Special Operator LET, LET*
 *** TODO Special Operator PROGV
@@ -93,11 +93,11 @@ implemented and tested.
 *** TODO Special Operator THROW
 *** TODO Special Operator UNWIND-PROTECT
 *** TODO Constant Variable NIL
-*** TODO Function NOT
+*** DONE Function NOT
 *** TODO Constant Variable T
-*** TODO Function EQ
-*** TODO Function EQL
-*** TODO Function EQUAL
+*** DONE Function EQ
+*** DONE Function EQL
+*** DONE Function EQUAL
 *** TODO Function EQUALP
 *** TODO Function IDENTITY
 *** TODO Function COMPLEMENT
@@ -107,7 +107,7 @@ implemented and tested.
 *** TODO Macro COND
 *** TODO Special Operator IF
 *** TODO Macro OR
-*** TODO Macro WHEN, UNLESS
+*** DONE Macro WHEN, UNLESS
 *** TODO Macro CASE, CCASE, ECASE
 *** TODO Macro TYPECASE, CTYPECASE, ETYPECASE
 *** TODO Macro MULTIPLE-VALUE-BIND
@@ -115,10 +115,10 @@ implemented and tested.
 *** TODO Macro MULTIPLE-VALUE-LIST
 *** TODO Special Operator MULTIPLE-VALUE-PROG1
 *** TODO Macro MULTIPLE-VALUE-SETQ
-*** TODO Accessor VALUES
-*** TODO Function VALUES-LIST
+*** DONE Accessor VALUES
+*** DONE Function VALUES-LIST
 *** TODO Constant Variable MULTIPLE-VALUES-LIMIT
-*** TODO Macro NTH-VALUE
+*** DONE Macro NTH-VALUE
 *** TODO Macro PROG, PROG*
 *** TODO Macro PROG1, PROG2
 *** TODO Special Operator PROGN
@@ -133,9 +133,9 @@ implemented and tested.
 *** TODO Condition Type PROGRAM-ERROR
 *** TODO Condition Type UNDEFINED-FUNCTION
 ** [0/5][0%] Iteration
-*** TODO Macro DO, DO*
-*** TODO Macro DOTIMES
-*** TODO Macro DOLIST
+*** DONE Macro DO, DO*
+*** DONE Macro DOTIMES
+*** DONE Macro DOLIST
 *** TODO Macro LOOP
 *** TODO Local Macro LOOP-FINISH
 ** [0/41][0%] Objects
@@ -203,7 +203,7 @@ implemented and tested.
 *** TODO Function SIGNAL
 *** TODO Condition Type SIMPLE-CONDITION
 *** TODO Function SIMPLE-CONDITION-FORMAT-CONTROL, SIMPLE-CONDITION-FORMAT-ARGUMENTS
-*** TODO Function WARN
+*** DONE Function WARN
 *** TODO Condition Type SIMPLE-WARNING
 *** TODO Function INVOKE-DEBUGGER
 *** TODO Function BREAK
@@ -372,23 +372,23 @@ implemented and tested.
 *** TODO Type BASE-CHAR
 *** TODO Type STANDARD-CHAR
 *** TODO Type EXTENDED-CHAR
-*** TODO Function CHAR=, CHAR/=, CHAR<, CHAR>, CHAR<=, CHAR>=, CHAR-EQUAL, CHAR-NOT-EQUAL, CHAR-LESSP, CHAR-GREATERP, CHAR-NOT-GREATERP, CHAR-NOT-LESSP
-*** TODO Function CHARACTER
+*** DONE Function CHAR=, CHAR/=, CHAR<, CHAR>, CHAR<=, CHAR>=, CHAR-EQUAL, CHAR-NOT-EQUAL, CHAR-LESSP, CHAR-GREATERP, CHAR-NOT-GREATERP, CHAR-NOT-LESSP
+*** DONE Function CHARACTER
 *** TODO Function CHARACTERP
-*** TODO Function ALPHA-CHAR-P
-*** TODO Function ALPHANUMERICP
-*** TODO Function DIGIT-CHAR
-*** TODO Function DIGIT-CHAR-P
-*** TODO Function GRAPHIC-CHAR-P
-*** TODO Function STANDARD-CHAR-P
+*** DONE Function ALPHA-CHAR-P
+*** DONE Function ALPHANUMERICP
+*** DONE Function DIGIT-CHAR
+*** DONE Function DIGIT-CHAR-P
+*** DONE Function GRAPHIC-CHAR-P
+*** DONE Function STANDARD-CHAR-P
 *** TODO Function CHAR-UPCASE, CHAR-DOWNCASE
-*** TODO Function UPPER-CASE-P, LOWER-CASE-P, BOTH-CASE-P
+*** DONE Function UPPER-CASE-P, LOWER-CASE-P, BOTH-CASE-P
 *** TODO Function CHAR-CODE
 *** TODO Function CHAR-INT
 *** TODO Function CODE-CHAR
 *** TODO Constant Variable CHAR-CODE-LIMIT
-*** TODO Function CHAR-NAME
-*** TODO Function NAME-CHAR
+*** DONE Function CHAR-NAME
+*** DONE Function NAME-CHAR
 ** [4/49][8%] Conses
 *** TODO System Class LIST
 *** TODO System Class NULL
@@ -398,39 +398,39 @@ implemented and tested.
 *** DONE Function CONSP
 *** DONE Function ATOM
 *** DONE Function RPLACA, RPLACD
-*** DOING Accessor CAR, CDR, CAAR, CADR, CDAR, CDDR, CAAAR, CAADR, CADAR, CADDR, CDAAR, CDADR, CDDAR, CDDDR, CAAAAR, CAAADR, CAADAR, CAADDR, CADAAR, CADADR, CADDAR, CADDDR, CDAAAR, CDAADR, CDADAR, CDADDR, CDDAAR, CDDADR, CDDDAR, CDDDDR
-*** TODO Function COPY-TREE
+*** DONE Accessor CAR, CDR, CAAR, CADR, CDAR, CDDR, CAAAR, CAADR, CADAR, CADDR, CDAAR, CDADR, CDDAR, CDDDR, CAAAAR, CAAADR, CAADAR, CAADDR, CADAAR, CADADR, CADDAR, CADDDR, CDAAAR, CDAADR, CDADAR, CDADDR, CDDAAR, CDDADR, CDDDAR, CDDDDR
+*** DONE Function COPY-TREE
 *** DOING Function SUBLIS, NSUBLIS
 *** DOING Function SUBST, SUBST-IF, SUBST-IF-NOT, NSUBST, NSUBST-IF, NSUBST-IF-NOT
-*** TODO Function TREE-EQUAL
-*** TODO Function COPY-LIST
-*** TODO Function LIST, LIST*
-*** TODO Function LIST-LENGTH
-*** TODO Function LISTP
-*** TODO Function MAKE-LIST
+*** DONE Function TREE-EQUAL
+*** DONE Function COPY-LIST
+*** DONE Function LIST, LIST*
+*** DONE Function LIST-LENGTH
+*** DONE Function LISTP
+*** DONE Function MAKE-LIST
 *** TODO Macro PUSH
 *** TODO Macro POP
-*** DOING Accessor FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH, EIGHTH, NINTH, TENTH
-*** TODO Accessor NTH
-*** TODO Function ENDP
-*** TODO Function NULL
-*** TODO Function NCONC
-*** TODO Function APPEND
-*** TODO Function REVAPPEND, NRECONC
-*** TODO Function BUTLAST, NBUTLAST
-*** TODO Function LAST
+*** DONE Accessor FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH, EIGHTH, NINTH, TENTH
+*** DONE Accessor NTH
+*** DONE Function ENDP
+*** DONE Function NULL
+*** DONE Function NCONC
+*** DONE Function APPEND
+*** DONE Function REVAPPEND, NRECONC
+*** DONE Function BUTLAST, NBUTLAST
+*** DONE Function LAST
 *** TODO Function LDIFF, TAILP
-*** TODO Function NTHCDR
-*** TODO Accessor REST
+*** DONE Function NTHCDR
+*** DONE Accessor REST
 *** TODO Function MEMBER, MEMBER-IF, MEMBER-IF-NOT
 *** TODO Function MAPC, MAPCAR, MAPCAN, MAPL, MAPLIST, MAPCON
-*** TODO Function ACONS
+*** DONE Function ACONS
 *** TODO Function ASSOC, ASSOC-IF, ASSOC-IF-NOT
 *** TODO Function COPY-ALIST
-*** TODO Function PAIRLIS
+*** DONE Function PAIRLIS
 *** TODO Function RASSOC, RASSOC-IF, RASSOC-IF-NOT
 *** TODO Function GET-PROPERTIES
-*** TODO Accessor GETF
+*** DONE Accessor GETF
 *** TODO Macro REMF
 *** TODO Function INTERSECTION, NINTERSECTION
 *** TODO Function ADJOIN
@@ -483,12 +483,12 @@ implemented and tested.
 *** TODO Type SIMPLE-BASE-STRING
 *** TODO Function SIMPLE-STRING-P
 *** TODO Accessor CHAR, SCHAR
-*** TODO Function STRING
-*** TODO Function STRING-UPCASE, STRING-DOWNCASE, STRING-CAPITALIZE, NSTRING-UPCASE, NSTRING-DOWNCASE, NSTRING-CAPITALIZE
-*** TODO Function STRING-TRIM, STRING-LEFT-TRIM, STRING-RIGHT-TRIM
-*** TODO Function STRING=, STRING/=, STRING<, STRING>, STRING<=, STRING>=, STRING-EQUAL, STRING-NOT-EQUAL, STRING-LESSP, STRING-GREATERP, STRING-NOT-GREATERP, STRING-NOT-LESSP
-*** TODO Function STRINGP
-*** TODO Function MAKE-STRING
+*** DONE Function STRING
+*** DONE Function STRING-UPCASE, STRING-DOWNCASE, STRING-CAPITALIZE, NSTRING-UPCASE, NSTRING-DOWNCASE, NSTRING-CAPITALIZE
+*** DONE Function STRING-TRIM, STRING-LEFT-TRIM, STRING-RIGHT-TRIM
+*** DONE Function STRING=, STRING/=, STRING<, STRING>, STRING<=, STRING>=, STRING-EQUAL, STRING-NOT-EQUAL, STRING-LESSP, STRING-GREATERP, STRING-NOT-GREATERP, STRING-NOT-LESSP
+*** DONE Function STRINGP
+*** DONE Function MAKE-STRING
 ** [0/23][0%] Sequences
 *** TODO System Class SEQUENCE
 *** TODO Function COPY-SEQ
@@ -686,11 +686,11 @@ implemented and tested.
 *** TODO Function APROPOS, APROPOS-LIST
 *** TODO Function DESCRIBE
 *** TODO Standard Generic Function DESCRIBE-OBJECT
-*** TODO Macro TRACE, UNTRACE
+*** DONE Macro TRACE, UNTRACE
 *** TODO Macro STEP
-*** TODO Macro TIME
+*** DONE Macro TIME
 *** TODO Constant Variable INTERNAL-TIME-UNITS-PER-SECOND
-*** TODO Function GET-INTERNAL-REAL-TIME
+*** DONE Function GET-INTERNAL-REAL-TIME
 *** TODO Function GET-INTERNAL-RUN-TIME
 *** TODO Function DISASSEMBLE
 *** TODO Standard Generic Function DOCUMENTATION, (SETF DOCUMENTATION)
@@ -698,14 +698,14 @@ implemented and tested.
 *** TODO Function ED
 *** TODO Function INSPECT
 *** TODO Function DRIBBLE
-*** TODO Variable -
-*** TODO Variable +, ++, +++
-*** TODO Variable *, **, ***
-*** TODO Variable /, //, ///
-*** TODO Function LISP-IMPLEMENTATION-TYPE, LISP-IMPLEMENTATION-VERSION
-*** TODO Function SHORT-SITE-NAME, LONG-SITE-NAME
-*** TODO Function MACHINE-INSTANCE
-*** TODO Function MACHINE-TYPE
-*** TODO Function MACHINE-VERSION
-*** TODO Function SOFTWARE-TYPE, SOFTWARE-VERSION
+*** DONE Variable -
+*** DONE Variable +, ++, +++
+*** DONE Variable *, **, ***
+*** DONE Variable /, //, ///
+*** DONE Function LISP-IMPLEMENTATION-TYPE, LISP-IMPLEMENTATION-VERSION
+*** DONE Function SHORT-SITE-NAME, LONG-SITE-NAME
+*** DONE Function MACHINE-INSTANCE
+*** DONE Function MACHINE-TYPE
+*** DONE Function MACHINE-VERSION
+*** DONE Function SOFTWARE-TYPE, SOFTWARE-VERSION
 *** TODO Function USER-HOMEDIR-PATHNAME
