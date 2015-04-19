@@ -23,6 +23,12 @@
 (defun lisp-implementation-version ()
   #.*version*)
 
+(defun short-site-name ()
+  nil)
+
+(defun long-site-name ()
+  nil)
+
 ;;; Javascript has not access to the hardware. Would it make sense to
 ;;; have the browser data as machine abstraction instead?
 
@@ -35,6 +41,13 @@
 (defun machine-type ()
   nil)
 
+;;; Return browser information here?
+
+(defun software-type ()
+  nil)
+
+(defun software-version ()
+  nil)
 
 (defmacro time (form)
   (let ((start (gensym))
