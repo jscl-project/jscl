@@ -340,6 +340,9 @@
 (defun init (&rest args)
   (#j:jqconsole:RegisterMatching "(" ")" "parents")
 
+  (%write-string
+   (format nil "For more information, visit the project page at <a href=\"https://github.com/davazp/jscl\">GitHub</a>.~%~%"))
+
   (format t "Welcome to ~a ~a (~a)~%~%"
           (lisp-implementation-type)
           (lisp-implementation-version)

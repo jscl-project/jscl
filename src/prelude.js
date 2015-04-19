@@ -133,7 +133,7 @@ function lisp_to_js (x) {
       var args = Array.prototype.slice.call(arguments);
       for (var i in args)
         args[i] = js_to_lisp(args[i]);
-      return lisp_to_js(x.apply(this, [pv, arguments.length].concat(args)));
+      return lisp_to_js(x.apply(this, [pv].concat(args)));
     });
   }
   else return x;
@@ -148,8 +148,8 @@ function js_to_lisp (x) {
     return nil;
   else if (typeof x == 'function'){
     // Trampoline calling the JS function
-    return (function(values, nargs){
-      var args = Array.prototype.slice.call(arguments, 2);
+    return (function(values){
+      var args = Array.prototype.slice.call(arguments, 1);
       for (var i in args)
         args[i] = lisp_to_js(args[i]);
       return values(js_to_lisp(x.apply(this, args)));
