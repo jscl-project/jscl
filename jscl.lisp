@@ -59,6 +59,7 @@
     ("ffi"           :target)
     ("symbol"        :target)
     ("package"       :target)
+    ("loop"          :target)
     ("read"          :both)
     ("defstruct"     :both)
     ("lambda-list"   :both)
