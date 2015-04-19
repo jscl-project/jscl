@@ -34,6 +34,13 @@
 (define-js-macro method-call (x method &rest args)
   `(call (get ,x ,method) ,@args))
 
+(define-js-macro nargs ()
+  `(- (get |arguments| |length|) 2))
+
+(define-js-macro arg (n)
+  `(property |arguments| (+ ,n 2)))
+
+
 ;;; A Form can return a multiple values object calling VALUES, like
 ;;; values(arg1, arg2, ...). It will work in any context, as well as
 ;;; returning an individual object. However, if the special variable
@@ -271,18 +278,18 @@
     (block nil
       ;; Special case: a positive exact number of arguments.
       (when (and (< 0 min) (eql min max))
-        (return `(call |checkArgs| |nargs| ,min)))
+        (return `(call |checkArgs| (nargs) ,min)))
       ;; General case:
       `(progn
-         ,(when (< 0 min)     `(call |checkArgsAtLeast| |nargs| ,min))
-         ,(when (numberp max) `(call |checkArgsAtMost|  |nargs| ,max))))))
+         ,(when (< 0 min)     `(call |checkArgsAtLeast| (nargs) ,min))
+         ,(when (numberp max) `(call |checkArgsAtMost|  (nargs) ,max))))))
 
 (defun compile-lambda-optional (ll)
   (let* ((optional-arguments (ll-optional-arguments-canonical ll))
 	 (n-required-arguments (length (ll-required-arguments ll)))
 	 (n-optional-arguments (length optional-arguments)))
     (when optional-arguments
-      `(switch |nargs|
+      `(switch (nargs)
                ,@(with-collect
                   (dotimes (idx n-optional-arguments)
                     (let ((arg (nth idx optional-arguments)))
@@ -304,10 +311,10 @@
         `(progn
            (var (,js!rest ,(convert nil)))
            (var i)
-           (for ((= i (- |nargs| 1))
+           (for ((= i (- (nargs) 1))
                  (>= i ,(+ n-required-arguments n-optional-arguments))
                  (post-- i))
-                (= ,js!rest (object "car" (property |arguments| (+ i 2))
+                (= ,js!rest (object "car" (arg i)
                                     "cdr" ,js!rest))))))))
 
 (defun compile-lambda-parse-keywords (ll)
@@ -336,7 +343,7 @@
                   ;; ((keyword-name var) init-form svar)
                   `(progn
                      (for ((= i ,(+ n-required-arguments n-optional-arguments))
-                           (< i |nargs|)
+                           (< i (nargs))
                            (+= i 2))
                           ;; ....
                           (if (=== (property |arguments| (+ i 2))
@@ -347,7 +354,7 @@
                                 ,(when svar `(= ,(translate-variable svar)
                                                 ,(convert t)))
                                 (break))))
-                     (if (== i |nargs|)
+                     (if (== i (nargs))
                          (= ,(translate-variable var) ,(convert initform)))))))
          (when keyword-arguments
            `(progn
@@ -358,9 +365,9 @@
        ,(when keyword-arguments
          `(progn
             (var (start ,(+ n-required-arguments n-optional-arguments)))
-            (if (== (% (- |nargs| start) 2) 1)
+            (if (== (% (- (nargs) start) 2) 1)
                 (throw "Odd number of keyword arguments."))
-            (for ((= i start) (< i |nargs|) (+= i 2))
+            (for ((= i start) (< i (nargs)) (+= i 2))
                  (if (and ,@(mapcar (lambda (keyword-argument)
                                  (destructuring-bind ((keyword-name var) &optional initform svar)
                                      keyword-argument
