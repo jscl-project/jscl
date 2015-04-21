@@ -45,5 +45,5 @@
             `(oset* ,g!value ,g!object ,@g!keys)
             `(oget* ,g!object ,@g!keys))))
 
-
+(setf #j:eval_in_lisp (lambda (form) (eval (read-from-string form))))
 
