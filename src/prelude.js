@@ -217,3 +217,16 @@ function intern (name, package_name){
     
   return symbol;
 }
+
+/* execute all script tags with type of x-common-lisp */
+window.onload = (function () {
+	var scripts = document.scripts;
+	for (var i = 0; i < scripts.length; ++i) {
+		var script = scripts[i];
+
+		/* TODO: what about errors? */
+		if (script.type == "text/x-common-lisp") {
+			eval_in_lisp(script.text);
+		}
+	}
+});
