@@ -22,7 +22,9 @@
 (/debug "loading stream.lisp!")
 
 (defun %write-string (string &optional (escape t))
-  (#j:jqconsole:Write string "jqconsole-output" "" escape))
+  (if #j:jqconsole
+      (#j:jqconsole:Write string "jqconsole-output" "" escape)
+      (#j:console:log string)))
 
 (defvar *standard-output*
   (vector 'stream

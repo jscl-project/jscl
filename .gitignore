@@ -5,3 +5,5 @@
 \#*
 jscl.js
 tests.js
+.tmp/
+

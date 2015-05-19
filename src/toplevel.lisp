@@ -338,7 +338,8 @@
 
 
 (defun init (&rest args)
-  (#j:jqconsole:RegisterMatching "(" ")" "parents")
+  (when #j:jqconsole
+    (#j:jqconsole:RegisterMatching "(" ")" "parents"))
 
   (%write-string
    (format nil "For more information, visit the project page at <a href=\"https://github.com/davazp/jscl\">GitHub</a>.~%~%"))
@@ -352,7 +353,9 @@
   (%write-string
    (format nil "For more information, visit the project page at <a href=\"https://github.com/davazp/jscl\">GitHub</a>.~%~%"))
 
-  (load-history)
-  (toplevel))
+  (when #j:jqconsole
+    (load-history)
+    (toplevel)))
+
 
 (#j:window:addEventListener "load" #'init)
