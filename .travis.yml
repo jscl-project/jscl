@@ -3,13 +3,10 @@ language: lisp
 env:
   matrix:
     - LISP=sbcl
-    - LISP=clisp
-
-before_install:
-  - curl -L https://github.com/luismbo/cl-travis/raw/master/install.sh | sh
 
 install:
-  - ./make.sh
+  - curl -L https://github.com/luismbo/cl-travis/raw/master/install.sh | sh
 
-scripts:
+script:
+  - ./make.sh
   - ./run-tests.sh
