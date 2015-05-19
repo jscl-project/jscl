@@ -49,8 +49,15 @@ functions and macros. In particular:
 The compiler is very verbose, some simple optimizations or
 *minification* could help to deal with it.
 
-Most of the above features are incomplete. The two major features that are still missing are a `loop` implementation
-[[http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/code/iter/loop/mit/0.html]], a `format`
-implementation, and `CLOS` [[http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/oop/0.html]].
+Most of the above features are incomplete. The major features that are still missing are:
+
+- The `format` function
+
+- A loop implementation 
+  (http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/code/iter/loop/mit/0.html)
+
+- CLOS 
+  (http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/oop/0.html)
+
 
 *Feel free to hack it yourself*
