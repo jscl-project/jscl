@@ -9,4 +9,7 @@ TESTFILE="$TMPDIR/output.js"
 PHANTOMJS=phantomjs
 
 cat jscl.js tests.js > $TESTFILE
+echo >> $TESTFILE
+echo '' >> $TESTFILE
+
 $PHANTOMJS $TESTFILE
