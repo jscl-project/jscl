@@ -414,7 +414,7 @@
   (let* ((gvar (gvarname 'this))
          (binding (make-binding :name 'this :type 'variable :value gvar)))
     (push-to-lexenv binding *environment* 'variable)
-    `(= ,gvar |this|)))
+    `(var (,gvar |this|))))
 
 ;;; Compile a lambda function with lambda list LL and body BODY. If
 ;;; NAME is given, it should be a constant string and it will become
