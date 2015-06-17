@@ -309,35 +309,39 @@
 
 (defun make-list-collector ()
   (let* (the-list tail)
-    (lambda (item)
-      (if   (null the-list)
-	    (setf the-list (list item)
-		  tail the-list)
-	    (setf (cdr tail) (list item)
-		  tail (cdr tail)))
+    (lambda (&rest item)
+      (cond ((and item (null the-list))
+	     (setf the-list item
+		   tail item))
+	    (item (setf (cdr tail) item
+			tail (cdr tail))))
       the-list)))
 
 (defun make-vector-collector (&key (element-type t))
   (let* ((the-vector (make-array 0 :adjustable t :element-type element-type :fill-pointer 0)))
-    (lambda (item)
-      (vector-push-extend item the-vector)
+    (lambda (&rest item)
+      (when item
+	(vector-push-extend (first item) the-vector))
       the-vector)))
+
+(defun make-collector (type)
+  (case type
+    (list (make-list-collector))
+    (string (make-vector-collector :element-type 'character))
+    (vector (make-vector-collector))
+    (t
+     (when (and (listp type)
+		(eql 'vector (first type)))
+       (make-vector-collector :element-type (or (second type) t))))))
+  
 
 (defun map (result-type function &rest sequences)
   (let ((iterators (mapcar #'make-iterator sequences))
-	(result nil)
-	(result-collector
-	 (case result-type
-	   (list (make-list-collector))
-	   (vector (make-vector-collector))
-	   (string (make-vector-collector :element-type 'character))
-	   (t (when (and (listp result-type)
-			 (eql 'vector (first result-type)))
-		(make-vector-collector :element-type (or (second result-type) t)))))))
+	(result-collector (make-collector result-type)))
     (do ((args (mapcar #'funcall iterators) (mapcar #'funcall iterators)))
-	((find *iterator-done* args) result)
+	((find *iterator-done* args)
+	 (when result-type (funcall result-collector)))
       (if result-type
-	  (setf result
-		(funcall result-collector (apply function args)))
+	  (funcall result-collector (apply function args))
 	  (apply function args)))))
 

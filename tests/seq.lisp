@@ -146,9 +146,6 @@
  (map '(vector character) (lambda (c) (char-upcase c)) "abc")
  "ABC")
 
-; No EQUALP function for VECTOR item-wise equality currently
-
-
 (test-equal
  (let ((v (map 'vector #'list '(1 2 3))))
    (and (vectorp v)
@@ -203,9 +200,8 @@
 
 
 (test-equal
- (let ((acc nil)
-       (result 'something))
-   (setf result (map nil (lambda (x) (push x acc)) '(1 2 3)))
+ (let* ((acc '())
+	(result (null (map nil (lambda (x) (push x acc)) '(1 2 3)))))
    (list acc result))
- '((3 2 1) nil))
-   
+ '((3 2 1) t))
+ 

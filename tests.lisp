@@ -45,7 +45,7 @@
   `(expected-failure-fn ,condition ',condition))
 
 (defmacro test-equal (form value)
-  `(test (equal ,form, value)))
+  `(test (equal ,form ,value)))
 
 (setq *timestamp* (get-internal-real-time))
 
