@@ -92,3 +92,116 @@
 (test (not (search '(foo) '(1 2 3))))
 (test (= (search '(1) '(4 5 6 1 2 3)) 3))
 (test (= (search #(1) #(4 5 6 1 2 3)) 3))
+
+;;; MAP
+
+(test-equal
+ (map 'list #'list '())
+ nil)
+
+(test-equal
+ (let ((v (map 'vector #'list '())))
+   (and (vectorp v)
+	(zerop (length v))))
+ t)
+
+(test-equal
+ (map 'string #'code-char '())
+ "")
+
+(test-equal
+ (map 'list #'list '(1 2 3))
+ '((1) (2) (3)))
+
+(test-equal
+ (map 'list #'list #(1 2 3))
+ '((1) (2) (3)))
+
+(test-equal
+ (map 'list #'list "123")
+ '((#\1) (#\2) (#\3)))
+
+; CHAR-UPCASE cannot be sharp-quoted currently
+(test-equal
+ (map 'string (lambda (c) (char-upcase c)) '(#\a #\b #\c))
+ "ABC")
+
+(test-equal
+ (map 'string (lambda (c) (char-upcase c)) #(#\a #\b #\c))
+ "ABC")
+
+(test-equal
+ (map 'string (lambda (c) (char-upcase c)) "abc")
+ "ABC")
+
+(test-equal
+ (map '(vector character) (lambda (c) (char-upcase c)) '(#\a #\b #\c))
+ "ABC")
+
+(test-equal
+ (map '(vector character) (lambda (c) (char-upcase c)) #(#\a #\b #\c))
+ "ABC")
+
+(test-equal
+ (map '(vector character) (lambda (c) (char-upcase c)) "abc")
+ "ABC")
+
+(test-equal
+ (let ((v (map 'vector #'list '(1 2 3))))
+   (and (vectorp v)
+	(equal '(1) (aref v 0))
+	(equal '(2) (aref v 1))
+	(equal '(3) (aref v 2))))
+ t)
+
+(test-equal
+ (let ((v (map 'vector #'list #(1 2 3))))
+   (and (vectorp v)
+	(equal '(1) (aref v 0))
+	(equal '(2) (aref v 1))
+	(equal '(3) (aref v 2))))
+ t)
+
+(test-equal
+ (let ((v (map 'vector #'list "123")))
+   (and (vectorp v)
+	(equal '(#\1) (aref v 0))
+	(equal '(#\2) (aref v 1))
+	(equal '(#\3) (aref v 2))))
+ t)
+
+(test-equal
+ (let ((v (map '(vector) #'list '(1 2 3))))
+   (and (vectorp v)
+	(equal '(1) (aref v 0))
+	(equal '(2) (aref v 1))
+	(equal '(3) (aref v 2))))
+ t)
+
+(test-equal
+ (let ((v (map '(vector) #'list #(1 2 3))))
+   (and (vectorp v)
+	(equal '(1) (aref v 0))
+	(equal '(2) (aref v 1))
+	(equal '(3) (aref v 2))))
+ t)
+
+(test-equal
+ (let ((v (map '(vector) #'list "123")))
+   (and (vectorp v)
+	(equal '(#\1) (aref v 0))
+	(equal '(#\2) (aref v 1))
+	(equal '(#\3) (aref v 2))))
+ t)
+
+(test-equal
+ (map 'list #'list '(a b c) #(1 2 3) "xyz")
+ '((a 1 #\x) (b 2 #\y) (c 3 #\z)))
+
+
+(test-equal
+ (let* ((acc '())
+	(result (null (map nil (lambda (x) (push x acc)) '(1 2 3)))))
+   (list acc result))
+ '((3 2 1) t))
+ 

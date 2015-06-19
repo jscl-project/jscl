@@ -281,3 +281,67 @@
      (array #'vector-search)
      (t (not-seq-error sequence2)))
    sequence1 sequence2 args))
+
+(defparameter *iterator-done* (gensym))
+
+(defun make-list-iterator (the-list)
+  (let ((tail the-list))
+    (lambda ()
+      (if (null tail)
+	  *iterator-done*
+	  (pop tail)))))
+
+(defun make-vector-iterator (the-vector)
+  (let ((i 0)
+	(len (length the-vector)))
+    (lambda ()
+      (if (= i len)
+	  *iterator-done*
+	  (let ((item (aref the-vector i)))
+	    (incf i)
+	    item)))))
+
+(defun make-iterator (sequence)
+  (funcall (cond ((listp sequence) #'make-list-iterator)
+		 ((vectorp sequence) #'make-vector-iterator)
+		 (t (error "Not of type SEQUENCE")))
+	   sequence))
+
+(defun make-list-collector ()
+  (let* (the-list tail)
+    (lambda (&rest item)
+      (cond ((and item (null the-list))
+	     (setf the-list item
+		   tail item))
+	    (item (setf (cdr tail) item
+			tail (cdr tail))))
+      the-list)))
+
+(defun make-vector-collector (&key (element-type t))
+  (let* ((the-vector (make-array 0 :adjustable t :element-type element-type :fill-pointer 0)))
+    (lambda (&rest item)
+      (when item
+	(vector-push-extend (first item) the-vector))
+      the-vector)))
+
+(defun make-collector (type)
+  (case type
+    (list (make-list-collector))
+    (string (make-vector-collector :element-type 'character))
+    (vector (make-vector-collector))
+    (t
+     (when (and (listp type)
+		(eql 'vector (first type)))
+       (make-vector-collector :element-type (or (second type) t))))))
+  
+
+(defun map (result-type function &rest sequences)
+  (let ((iterators (mapcar #'make-iterator sequences))
+	(result-collector (make-collector result-type)))
+    (do ((args (mapcar #'funcall iterators) (mapcar #'funcall iterators)))
+	((find *iterator-done* args)
+	 (when result-type (funcall result-collector)))
+      (if result-type
+	  (funcall result-collector (apply function args))
+	  (apply function args)))))
+
