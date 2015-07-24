@@ -673,7 +673,6 @@
           (push-to-lexenv binding  *environment* 'function))))
     (convert `(progn ,@body) *multiple-value-p*)))
 
-
 (defun special-variable-p (x)
   (and (claimp x 'variable 'special) t))
 
@@ -1338,7 +1337,7 @@
 ;; exit are based on try-catch-finally, it will also catch them. We
 ;; could provide a JS function to detect it, so the user could rethrow
 ;; the error.
-;; 
+;;
 ;; (%js-try
 ;;  (progn
 ;;    )
@@ -1346,7 +1345,7 @@
 ;;    )
 ;;  (finally
 ;;   ))
-;; 
+;;
 (define-compilation %js-try (form &optional catch-form finally-form)
   (let ((catch-compilation
          (and catch-form
@@ -1358,7 +1357,7 @@
                   `(catch (,tvar)
                      (= ,tvar (call |js_to_lisp| ,tvar))
                      ,(convert-block body t))))))
-        
+
         (finally-compilation
          (and finally-form
               (destructuring-bind (finally &body body) finally-form
@@ -1371,7 +1370,6 @@
       (try (return ,(convert form)))
       ,catch-compilation
       ,finally-compilation)))
-
 
 #-jscl
 (defvar *macroexpander-cache*
@@ -1416,6 +1414,13 @@
            (values form nil))))
     (t
      (values form nil))))
+
+#-jscl
+(define-compilation loop (&rest forms)
+  (let ((end-tag (gensym)))
+    (convert `(macrolet ((loop-finish ()
+                           `(go ,',end-tag)))
+                ,(sicl-loop::expand-body forms end-tag)))))
 
 (defun compile-funcall (function args)
   (let* ((arglist (cons (if *multiple-value-p* '|values| '|pv|)

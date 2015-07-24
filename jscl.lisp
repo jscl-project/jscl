@@ -27,6 +27,10 @@
 (defvar *base-directory*
   (or #.*load-pathname* *default-pathname-defaults*))
 
+;;; Load SICL modules
+
+(asdf:load-system :sicl-loop-support)
+
 ;;; List of all the source files that need to be compiled, and whether they
 ;;; are to be compiled just by the host, by the target JSCL, or by both.
 ;;; All files have a `.lisp' extension, and

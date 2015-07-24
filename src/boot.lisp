@@ -282,8 +282,8 @@
        (cdr ,head))))
 
 
-(defmacro loop (&body body)
-  `(while t ,@body))
+;(defmacro loop (&body body)
+; `(while t ,@body))
 
 (defun identity (x) x)
 
