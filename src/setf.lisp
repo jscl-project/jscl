@@ -59,7 +59,12 @@
 
 
 (defmacro long-defsetf (access-fn lambda-list (&rest store-variables) &body body)
-  )
+  ;; TODO: Write me. But you will need to hack lambda-list.lisp to
+  ;; support defsetf lambda lists.
+  ;;
+  ;;     http://www.lispworks.com/documentation/HyperSpec/Body/03_dg.htm
+  ;;
+  (error "The long form of defsetf is not implemented"))
 
 (defmacro defsetf (&whole args first second &rest others)
   (declare (ignore others))
