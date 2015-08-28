@@ -42,6 +42,33 @@
            *setf-expanders*)
      ',access-fn))
 
+
+(defmacro short-defsetf (access-fn update-fn &optional documentation)
+  (declare (ignore documentation))
+  `(define-setf-expander ,access-fn (&rest args)
+     (let ((g!new (gensym))
+           (g!args (mapcar (lambda (s)
+                             (declare (ignore s))
+                             (gensym))
+                           args)))
+       (values g!args
+               args
+               (list g!new)
+               (cons ',update-fn (append g!args (list g!new)))
+               (cons ',access-fn g!args)))))
+
+
+(defmacro long-defsetf (access-fn lambda-list (&rest store-variables) &body body)
+  )
+
+(defmacro defsetf (&whole args first second &rest others)
+  (declare (ignore others))
+  (if (consp second)
+      `(long-defsetf ,@args)
+      `(short-defsetf ,@args)))
+
+
+
 (defmacro setf (&rest pairs)
   (cond
     ((null pairs)
