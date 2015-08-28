@@ -61,13 +61,32 @@
                (cons ',access-fn g!args)))))
 
 
-(defmacro long-defsetf (access-fn lambda-list (&rest store-variables) &body body)
-  ;; TODO: Write me. But you will need to hack lambda-list.lisp to
-  ;; support defsetf lambda lists.
+(defmacro long-defsetf (access-fn (&rest args) (&rest store-variables) &body body)
+  ;; TODO: This supports just a lambda-list made of required variable
+  ;; names, no any keyword support. You will need to hack
+  ;; lambda-list.lisp to support defsetf lambda lists.
   ;;
   ;;     http://www.lispworks.com/documentation/HyperSpec/Body/03_dg.htm
   ;;
-  (error "The long form of defsetf is not implemented"))
+  (let ((g!new-values (mapcar (lambda (s)
+                                (declare (ignore s))
+                                (gensym "NEW-VALUE"))
+                              store-variables))
+
+        (g!args (mapcar (lambda (s)
+                          (declare (ignore s))
+                          (gensym "ARG"))
+                        args)))
+
+    `(define-setf-expander ,access-fn (,@args)
+       (values ',g!args
+               (list ,@args)
+               ',g!new-values
+               `(let (,@(mapcar #'list ',store-variables ',g!new-values)
+                      ,@(mapcar #'list ',args ',g!args))
+                  ,@',body)
+               `(,',access-fn ,',@g!args)))))
+
 
 (defmacro defsetf (&whole args first second &rest others)
   (declare (ignore others))
