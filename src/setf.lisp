@@ -37,10 +37,45 @@
 (defmacro define-setf-expander (access-fn lambda-list &body body)
   (unless (symbolp access-fn)
     (error "ACCESS-FN `~S' must be a symbol." access-fn))
-  `(eval-when (:compile-toplevel :load-toplevel :execute)
-     (push (cons ',access-fn (lambda ,lambda-list ,@body))
-           *setf-expanders*)
-     ',access-fn))
+  (let ((g!args (gensym)))
+    `(eval-when (:compile-toplevel :load-toplevel :execute)
+       (push (cons ',access-fn (lambda (&rest ,g!args)
+                                 (destructuring-bind ,lambda-list ,g!args
+                                   ,@body)))
+             *setf-expanders*)
+       ',access-fn)))
+
+
+(defmacro short-defsetf (access-fn update-fn &optional documentation)
+  (declare (ignore documentation))
+  `(define-setf-expander ,access-fn (&rest args)
+     (let ((g!new (gensym))
+           (g!args (mapcar (lambda (s)
+                             (declare (ignore s))
+                             (gensym))
+                           args)))
+       (values g!args
+               args
+               (list g!new)
+               (cons ',update-fn (append g!args (list g!new)))
+               (cons ',access-fn g!args)))))
+
+
+(defmacro long-defsetf (access-fn lambda-list (&rest store-variables) &body body)
+  ;; TODO: Write me. But you will need to hack lambda-list.lisp to
+  ;; support defsetf lambda lists.
+  ;;
+  ;;     http://www.lispworks.com/documentation/HyperSpec/Body/03_dg.htm
+  ;;
+  (error "The long form of defsetf is not implemented"))
+
+(defmacro defsetf (&whole args first second &rest others)
+  (declare (ignore others))
+  (if (consp second)
+      `(long-defsetf ,@args)
+      `(short-defsetf ,@args)))
+
+
 
 (defmacro setf (&rest pairs)
   (cond
