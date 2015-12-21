@@ -327,9 +327,8 @@
       (<= (char-code #\A) (char-code x) (char-code #\Z))))
 
 (defun digit-char-p (x)
-  (if (and (<= (char-code #\0) (char-code x) (char-code #\9)))
-      (- (char-code x) (char-code #\0))
-      nil))
+  (and (<= (char-code #\0) (char-code x) (char-code #\9))
+       (- (char-code x) (char-code #\0))))
 
 (defun digit-char (weight)
   (and (<= 0 weight 9)
