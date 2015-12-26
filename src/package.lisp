@@ -28,13 +28,13 @@
       package-designator
       (oget *package-table* (string package-designator))))
 
-(defun %make-package (name use)
+(defun %make-package (name use exports)
   (when (find-package name)
     (error "A package namded `~a' already exists." name))
   (let ((package (new)))
     (setf (oget package "packageName") name)
     (setf (oget package "symbols") (new))
-    (setf (oget package "exports") (new))
+    (setf (oget package "exports") exports)
     (setf (oget package "use") use)
     (setf (oget *package-table* name) package)
     package))
@@ -45,10 +45,11 @@
       (pushnew package result :test #'eq))
     (reverse result)))
 
-(defun make-package (name &key use)
+(defun make-package (name &key use exports)
   (%make-package
    (string name)
-   (resolve-package-list use)))
+   (resolve-package-list use)
+   exports))
 
 (defun packagep (x)
   (and (objectp x) (in "symbols" x)))
@@ -85,24 +86,28 @@
      (setq *package* (find-package-or-fail ',string-designator))))
 
 (defmacro defpackage (package &rest options)
-  (let (use)
+  (let ((use)
+        (export))
     (dolist (option options)
       (ecase (car option)
-       (:use
-        (setf use (append use (cdr option))))))
+        (:use
+         (setf use (append use (rest option))))
+        (:export
+         (setf export (append export (rest option))))))
     `(eval-when (:compile-toplevel :load-toplevel :execute)
-       (%defpackage ',(string package) ',use))))
+       (%defpackage ',(string package) ',use ',export))))
 
-(defun redefine-package (package use)
+(defun redefine-package (package use export)
   (setf (oget package "use") use)
+  (setf (oget package "export") export)
   package)
 
-(defun %defpackage (name use)
+(defun %defpackage (name use export)
   (let ((package (find-package name))
         (use (resolve-package-list use)))
     (if package
-        (redefine-package package use)
-        (%make-package name use))))
+        (redefine-package package use export)
+        (%make-package name use export))))
 
 (defun find-symbol (name &optional (package *package*))
   (let* ((package (find-package-or-fail package))
