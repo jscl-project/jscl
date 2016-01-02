@@ -152,7 +152,7 @@
   (let ((ch (%peek-char stream)))
     (cond
       ((null ch)
-       (error "Unspected EOF"))
+       (error "Unexpected EOF"))
       ((char= ch #\))
        (discard-char stream #\))
        nil)
