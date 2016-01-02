@@ -44,6 +44,8 @@
   '(("boot"          :target)
     ("compat"        :host)
     ("setf"          :target)
+    ("defstruct"     :both)
+    ("lambda-list"   :both)
     ("utils"         :both)
     ("numbers"       :target)
     ("char"          :target)
@@ -60,8 +62,6 @@
     ("symbol"        :target)
     ("package"       :target)
     ("read"          :both)
-    ("defstruct"     :both)
-    ("lambda-list"   :both)
     ("conditions"    :both)
     ("backquote"     :both)
     ("compiler"
