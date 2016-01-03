@@ -15,6 +15,12 @@
 
 (/debug "loading sequence.lisp!")
 
+(defun sequencep (thing)
+  (or (listp thing) (vectorp thing)))
+
+(defun not-seq-error (thing)
+  (error "`~S' is not of type SEQUENCE" thing))
+
 (defun length (seq)
   (cond
     ((stringp seq)
@@ -22,13 +28,9 @@
     ((arrayp seq)
      (oget seq "length"))
     ((listp seq)
-     (list-length seq))))
-
-(defun sequencep (thing)
-  (or (listp thing) (vectorp thing)))
-
-(defun not-seq-error (thing)
-  (error "`~S' is not of type SEQUENCE" thing))
+     (list-length seq))
+    (t
+     (not-seq-error seq))))
 
 (defmacro do-sequence ((elt seq &optional (index (gensym "i") index-p)) &body body)
   (let ((nseq (gensym "seq")))
