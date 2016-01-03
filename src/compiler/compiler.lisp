@@ -109,7 +109,7 @@
         (push-to-lexenv b new 'variable)))))
 
 ;;; Toplevel compilations
-(defvar *toplevel-compilations* nil)
+(defvar *toplevel-compilations*)
 
 (defun toplevel-compilation (string)
   (push string *toplevel-compilations*))
