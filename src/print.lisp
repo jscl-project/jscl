@@ -215,11 +215,12 @@
                ((eq package (find-package "KEYWORD")))
                (t (write-string (escape-token (package-name package)) stream)))
              (write-char #\: stream)
-             (multiple-value-bind (symbol type)
-                 (find-symbol name package)
-               (when (and package (eq type :internal))
-                 (write-char #\: stream))
-               (write-string (escape-token name) stream))))))
+             (when package
+               (multiple-value-bind (symbol type)
+                   (find-symbol name package)
+                 (when (eq type :internal)
+                   (write-char #\: stream))))
+             (write-string (escape-token name) stream)))))
 
     ;; Integers
     (integer
