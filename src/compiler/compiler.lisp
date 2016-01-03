@@ -29,7 +29,7 @@
   `(call (function () ,@body)))
 
 (define-js-macro bool (expr)
-  `(if ,expr ,(convert t) ,(convert nil)))
+  `(if ,expr |t| |nil|))
 
 (define-js-macro method-call (x method &rest args)
   `(call (get ,x ,method) ,@args))
