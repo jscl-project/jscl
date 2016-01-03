@@ -145,6 +145,7 @@
     ;; not collide with the compiler itself.
     (late-compile
      `(progn
+        (setq *literal-table* ',*literal-table*)
         (setq *variable-counter* ,*variable-counter*)
         (setq *gensym-counter* ,*gensym-counter*)))
     (late-compile `(setq *literal-counter* ,*literal-counter*))))
