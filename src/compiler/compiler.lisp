@@ -29,7 +29,7 @@
   `(call (function () ,@body)))
 
 (define-js-macro bool (expr)
-  `(if ,expr ,(convert t) ,(convert nil)))
+  `(if ,expr |t| |nil|))
 
 (define-js-macro method-call (x method &rest args)
   `(call (get ,x ,method) ,@args))
@@ -109,7 +109,7 @@
         (push-to-lexenv b new 'variable)))))
 
 ;;; Toplevel compilations
-(defvar *toplevel-compilations* nil)
+(defvar *toplevel-compilations*)
 
 (defun toplevel-compilation (string)
   (push string *toplevel-compilations*))
