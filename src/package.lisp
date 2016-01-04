@@ -28,6 +28,19 @@
       package-designator
       (oget *package-table* (string package-designator))))
 
+(defun package-designator-package (package-designator)
+  "Return a package named by the package-designator."
+  (etypecase package-designator
+    (package package-designator)
+    ;; XXX: Merge cases when etypecase supports type specifiers, currently it
+    ;; only supports types
+    (string (find-package package-designator))
+    (symbol (find-package package-designator))))
+
+(defun delete-package (package-designator)
+  (delete-property (package-name (package-designator-package package-designator))
+                   *package-table*))
+
 (defun %make-package (name use)
   (when (find-package name)
     (error "A package namded `~a' already exists." name))
