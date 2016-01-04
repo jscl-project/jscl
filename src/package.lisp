@@ -33,7 +33,7 @@
   ;; name a package.
   ;; TODO: Implement unuse-package and remove the deleted package from packages
   ;; that use it.
-  (delete-property (package-name (find-package package-designator))
+  (delete-property (package-name (find-package-or-fail package-designator))
                    *package-table*))
 
 (defun %make-package (name use)
