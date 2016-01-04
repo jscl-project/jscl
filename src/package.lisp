@@ -28,17 +28,12 @@
       package-designator
       (oget *package-table* (string package-designator))))
 
-(defun package-designator-package (package-designator)
-  "Return a package named by the package-designator."
-  (etypecase package-designator
-    (package package-designator)
-    ;; XXX: Merge cases when etypecase supports type specifiers, currently it
-    ;; only supports types
-    (string (find-package package-designator))
-    (symbol (find-package package-designator))))
-
 (defun delete-package (package-designator)
-  (delete-property (package-name (package-designator-package package-designator))
+  ;; TODO: Signal a correctlable error in case the package-designator does not
+  ;; name a package.
+  ;; TODO: Implement unuse-package and remove the deleted package from packages
+  ;; that use it.
+  (delete-property (package-name (find-package package-designator))
                    *package-table*))
 
 (defun %make-package (name use)
