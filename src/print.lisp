@@ -218,6 +218,7 @@
              (when package
                (multiple-value-bind (symbol type)
                    (find-symbol name package)
+                 (declare (ignorable symbol))
                  (when (eq type :internal)
                    (write-char #\: stream))))
              (write-string (escape-token name) stream)))))
