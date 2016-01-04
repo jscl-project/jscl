@@ -340,44 +340,40 @@
 
 ;;; Format
 
-(defun format-special (chr arg)
+(defun format-special (destination chr arg)
   (case (char-upcase chr)
-    (#\S (prin1-to-string arg))
-    (#\A (princ-to-string arg))
-    (#\D (princ-to-string arg))
+    (#\S (prin1 arg destination))
+    (#\A (princ arg destination))
+    (#\D (princ arg destination))
+    (#\~ (write-char #\~ destination))
+    (#\% (write-char #\newline destination))
     (t
      (warn "~S is not implemented yet, using ~~S instead" chr)
-     (prin1-to-string arg))))
+     (prin1 arg destination))))
 
 (defun !format (destination fmt &rest args)
-  (let ((len (length fmt))
-        (i 0)
-        (res "")
-        (arguments args))
-    (while (< i len)
-      (let ((c (char fmt i)))
-        (if (char= c #\~)
-            (let ((next (char fmt (incf i))))
-              (cond
-                ((char= next #\~)
-                 (concatf res "~"))
-                ((char= next #\%)
-                 (concatf res (string #\newline)))
-                ((char= next #\*)
-                 (pop arguments))
-                (t
-                 (concatf res (format-special next (car arguments)))
-                 (pop arguments))))
-            (setq res (concat res (string c))))
-        (incf i)))
-
-    (case destination
-      ((t)
-       (write-string res)
-       nil)
-      ((nil)
-       res)
-      (t
-       (write-string res destination)))))
+  (cond
+    ((null destination)
+     (with-output-to-string (output)
+       (apply #'!format output fmt args)))
+    ((eq destination t)
+     (apply #'!format *standard-output* fmt args))
+    (t
+     (let ((len (length fmt))
+           (i 0)
+           (arguments args))
+       (while (< i len)
+         (let ((c (char fmt i)))
+           (if (char= c #\~)
+               (let ((next (char fmt (incf i))))
+                 (cond
+                   ((char= next #\*)
+                    (pop arguments))
+                   (t
+                    (format-special destination next (car arguments))
+                    (pop arguments))))
+               (write-char c destination))
+           (incf i)))
+       nil))))
 
 #+jscl (fset 'format (fdefinition '!format))
