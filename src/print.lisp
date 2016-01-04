@@ -287,18 +287,18 @@
 
 #+jscl
 (defun write (form &key (stream *standard-output*))
-  (write-aux form stream))
+  (multiple-value-bind (objs ids)
+      (scan-multiple-referenced-objects form)
+    (write-aux form stream objs ids)
+    form))
 
-(defun !write-to-string (form)
+#+jscl
+(defun write-to-string (form)
   (with-output-to-string (output)
-    (multiple-value-bind (objs ids)
-        (scan-multiple-referenced-objects form)
-      (write-aux form output objs ids))))
-#+jscl (fset 'write-to-string (fdefinition '!write-to-string))
+    (write form :stream output)))
 
 #+jscl
 (progn
-  
   (defun prin1-to-string (form)
     (let ((*print-escape* t))
       (write-to-string form)))
