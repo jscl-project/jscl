@@ -14,6 +14,7 @@
 
  (terpri)
 
+ #+jscl
  (when #j:phantom
    (#j:phantom:exit *failed-tests*))
 
