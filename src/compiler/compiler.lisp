@@ -677,45 +677,61 @@
 (defun special-variable-p (x)
   (and (claimp x 'variable 'special) t))
 
+
+(defun normalize-bindings (arg)
+  (destructuring-bind (name &optional value)
+      (ensure-list arg)
+    (list name value)))
+
+
+;;; Given a let-like description of bindings, return:
+;;;
+;;; 1. A list of lexical
+;;; 2. A list of values to bind to the lexical variables
+;;; 3. A alist of (special-variable . lexical-variable) to bind.
+;;;
+(defun process-bindings (bindings)
+  (let ((bindings (mapcar #'normalize-bindings bindings))
+        (special-bindings nil))
+    (values
+     ;; Lexical Variables
+     (mapcar (lambda (var)
+               (if (special-variable-p var)
+                   (let ((lexvar (gensym)))
+                     (push (cons var lexvar) special-bindings)
+                     lexvar)
+                   var))
+             (mapcar #'car bindings))
+     ;; Values
+     (mapcar #'cadr bindings)
+     ;; Binding special variables to lexical variables
+     special-bindings)))
+
+
 ;;; Wrap CODE to restore the symbol values of the dynamic
 ;;; bindings. BINDINGS is a list of pairs of the form
 ;;; (SYMBOL . PLACE),  where PLACE is a Javascript variable
 ;;; name to initialize the symbol value and where to stored
 ;;; the old value.
-(defun let-binding-wrapper (bindings body)
-  (when (null bindings)
-    (return-from let-binding-wrapper body))
-  `(progn
-     (try (var tmp)
-          ,@(with-collect
-             (dolist (b bindings)
-               (let ((s (convert `',(car b))))
-                 (collect `(= tmp (get ,s "value")))
-                 (collect `(= (get ,s "value") ,(cdr b)))
-                 (collect `(= ,(cdr b) tmp)))))
-          ,body)
-     (finally
-      ,@(with-collect
-         (dolist (b bindings)
-           (let ((s (convert `(quote ,(car b)))))
-             (collect `(= (get ,s "value") ,(cdr b)))))))))
+(defun let-bind-dynamic-vars (special-bindings body)
+  (if (null special-bindings)
+      (convert-block body t t)
+      (let ((special-variables (mapcar #'car special-bindings))
+            (lexical-variables (mapcar #'cdr special-bindings)))
+        `(return (call |bindSpecialBindings|
+                       ,(list-to-vector (mapcar #'literal special-variables))
+                       ,(list-to-vector (mapcar #'translate-variable lexical-variables))
+                       (function () ,(convert-block body t t)))))))
+
 
 (define-compilation let (bindings &rest body)
-  (let* ((bindings (mapcar #'ensure-list bindings))
-         (variables (mapcar #'first bindings))
-         (cvalues (mapcar #'convert (mapcar #'second bindings)))
-         (*environment* (extend-local-env (remove-if #'special-variable-p variables)))
-         (dynamic-bindings))
-    `(call (function ,(mapcar (lambda (x)
-                                (if (special-variable-p x)
-                                    (let ((v (gvarname x)))
-                                      (push (cons x v) dynamic-bindings)
-                                      v)
-                                    (translate-variable x)))
-                              variables)
-                     ,(let ((body (convert-block body t t)))
-                           `,(let-binding-wrapper dynamic-bindings body)))
-           ,@cvalues)))
+  (multiple-value-bind (lexical-variables values special-bindings)
+      (process-bindings bindings)
+    (let ((compiled-values (mapcar #'convert values))
+          (*environment* (extend-local-env lexical-variables)))
+      `(call (function ,(mapcar #'translate-variable lexical-variables)
+                       ,(let-bind-dynamic-vars special-bindings body))
+             ,@compiled-values))))
 
 
 ;;; Return the code to initialize BINDING, and push it extending the
@@ -1338,7 +1354,7 @@
 ;; exit are based on try-catch-finally, it will also catch them. We
 ;; could provide a JS function to detect it, so the user could rethrow
 ;; the error.
-;; 
+;;
 ;; (%js-try
 ;;  (progn
 ;;    )
@@ -1346,7 +1362,7 @@
 ;;    )
 ;;  (finally
 ;;   ))
-;; 
+;;
 (define-compilation %js-try (form &optional catch-form finally-form)
   (let ((catch-compilation
          (and catch-form
@@ -1358,7 +1374,7 @@
                   `(catch (,tvar)
                      (= ,tvar (call |js_to_lisp| ,tvar))
                      ,(convert-block body t))))))
-        
+
         (finally-compilation
          (and finally-form
               (destructuring-bind (finally &body body) finally-form

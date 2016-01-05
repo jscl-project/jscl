@@ -226,6 +226,21 @@ function Symbol(name, package_name){
     this['package'] = package_name;
 }
 
+function bindSpecialBindings (symbols, values, callback){
+  try {
+    symbols.forEach(function(s, i){
+      s.stack = s.stack || [];
+      s.stack.push(s.value);
+      s.value = values[i];
+    });
+    return callback();
+  } finally {
+    symbols.forEach(function(s, i){
+      s.value = s.stack.pop();
+    });
+  }
+}
+
 function intern (name, package_name){
   package_name = package_name || "CL";
   var lisp_package = packages[package_name];
