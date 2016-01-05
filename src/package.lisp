@@ -28,6 +28,14 @@
       package-designator
       (oget *package-table* (string package-designator))))
 
+(defun delete-package (package-designator)
+  ;; TODO: Signal a correctlable error in case the package-designator does not
+  ;; name a package.
+  ;; TODO: Implement unuse-package and remove the deleted package from packages
+  ;; that use it.
+  (delete-property (package-name (find-package-or-fail package-designator))
+                   *package-table*))
+
 (defun %make-package (name use)
   (when (find-package name)
     (error "A package namded `~a' already exists." name))

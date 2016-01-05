@@ -4,6 +4,19 @@
 
 (test (equal (multiple-value-list (do-symbols (symbol *package* (values 1 2)))) '(1 2)))
 
+(make-package 'fubar)
+(test (find-package 'fubar))
+(delete-package "FUBAR")
+(test (null (find-package 'fubar)))
+(make-package 'fubar)
+(delete-package 'fubar)
+(test (null (find-package 'fubar)))
+(make-package 'fubar)
+(delete-package (find-package 'fubar))
+(test (null (find-package 'fubar)))
+
+(when (find-package 'foo)
+     (delete-package (find-package 'foo)))
 (test
  (let ((package (make-package 'foo :use '(cl)))
        foo-symbols
@@ -15,6 +28,8 @@
    (and (not (null foo-symbols))
         (equal foo-symbols cl-symbols))))
 
+(when (find-package 'bar)
+   (delete-package (find-package 'bar)))
 (test
  (let* ((package (make-package 'bar))
         (baz (intern (string 'baz) package)))
