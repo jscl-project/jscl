@@ -221,7 +221,7 @@ packages.KEYWORD = {
 };
 
 function unboundFunction () {
-  throw new Error("Function undefined");
+  throw new Error("Function '" + this.name + "'undefined");
 }
 
 function Symbol(name, package_name){
@@ -234,7 +234,7 @@ function Symbol(name, package_name){
 function symbolFunction (symbol){
   var fn = symbol.fvalue;
   if (fn === unboundFunction)
-    unboundFunction();
+    symbol.fvalue();
   return fn;
 }
 
