@@ -330,7 +330,8 @@
             
             (catch (err)
               (#j:console:log err)
-              (#j:jqconsole:Write (format nil "ERROR[!]: ~a~%" err) "jqconsole-error")))
+              (let ((message (or (oget err "message") err)))
+                (#j:jqconsole:Write (format nil "ERROR[!]: ~a~%" message) "jqconsole-error"))))
            
            (save-history)
            (toplevel)))
