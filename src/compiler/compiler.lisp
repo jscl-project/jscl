@@ -1123,12 +1123,7 @@
     (return value)))
 
 (define-builtin symbol-function (x)
-  `(selfcall
-    (var (symbol ,x)
-         (func (get symbol "fvalue")))
-    (if (=== func undefined)
-        (throw (+ "Function `" (get symbol "name") "' is undefined.")))
-    (return func)))
+  `(call |symbolFunction| ,x))
 
 (define-builtin lambda-code (x)
   `(call |make_lisp_string| (method-call ,x "toString")))
@@ -1443,14 +1438,12 @@
     (cond
       ((translate-function function)
        `(call ,(translate-function function) ,@arglist))
-      ((and (symbolp function)
-            #+jscl (eq (symbol-package function) (find-package "COMMON-LISP"))
-            #-jscl t)
-       (fn-info function :called t)
-       `(method-call ,(convert `',function) "fvalue" ,@arglist))
-      #+jscl
       ((symbolp function)
-       `(call ,(convert `#',function) ,@arglist))
+       (fn-info function :called t)
+       ;; This code will work even if the symbol-function is unbound,
+       ;; as it is represented by a function that throws the expected
+       ;; error.
+       `(method-call ,(convert `',function) "fvalue" ,@arglist))
       ((and (consp function) (eq (car function) 'lambda))
        `(call ,(convert `(function ,function)) ,@arglist))
       ((and (consp function) (eq (car function) 'oget))
