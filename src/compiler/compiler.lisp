@@ -936,14 +936,16 @@
 
 ;;; Primitives
 
-(defvar *builtins* nil)
+(defvar *builtins*
+  (make-hash-table))
 
 (defmacro define-raw-builtin (name args &body body)
   ;; Creates a new primitive function `name' with parameters args and
   ;; @body. The body can access to the local environment through the
   ;; variable *ENVIRONMENT*.
-  `(push (list ',name (lambda ,args (block ,name ,@body)))
-         *builtins*))
+  `(setf (gethash ',name *builtins*)
+         (lambda ,args
+           (block ,name ,@body))))
 
 (defmacro define-builtin (name args &body body)
   `(define-raw-builtin ,name ,args
@@ -1496,10 +1498,9 @@
               (let ((comp (gethash name *compilations*)))
                 (apply comp args)))
              ;; Built-in functions
-             ((and (assoc name *builtins*)
+             ((and (gethash name *builtins*)
                    (not (claimp name 'function 'notinline)))
-              (let ((comp (second (assoc name *builtins*))))
-                (apply comp args)))
+              (apply (gethash name *builtins*) args))
              (t
               (compile-funcall name args)))))
         (t
