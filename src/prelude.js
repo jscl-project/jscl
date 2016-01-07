@@ -220,11 +220,24 @@ packages.KEYWORD = {
   use: nil
 };
 
+function unboundFunction () {
+  throw new Error("Function '" + this.name + "'undefined");
+}
+
 function Symbol(name, package_name){
   this.name = name;
-  if (package_name)
-    this['package'] = package_name;
+  this.package = package_name;
+  this.value = undefined;
+  this.fvalue = unboundFunction;
 }
+
+function symbolFunction (symbol){
+  var fn = symbol.fvalue;
+  if (fn === unboundFunction)
+    symbol.fvalue();
+  return fn;
+}
+
 
 function bindSpecialBindings (symbols, values, callback){
   try {
