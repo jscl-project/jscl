@@ -218,6 +218,7 @@
              (when package
                (multiple-value-bind (symbol type)
                    (find-symbol name package)
+                 (declare (ignorable symbol))
                  (when (eq type :internal)
                    (write-char #\: stream))))
              (write-string (escape-token name) stream)))))
@@ -284,27 +285,44 @@
      (write-string "#<javascript object>" stream))))
 
 
+(defun output-stream-designator (x)
+  ;; TODO: signal error if X is not a stream designator
+  (cond
+    ((eq x nil) *standard-output*)
+    ((eq x t)   *standard-output*       ; *terminal-io*
+     )
+    (t x)))
+
 #+jscl
 (defun write (form &key (stream *standard-output*))
-  (write-aux form stream))
-
-(defun !write-to-string (form)
-  (with-output-to-string (output)
+  (let ((stream (output-stream-designator stream)))
     (multiple-value-bind (objs ids)
         (scan-multiple-referenced-objects form)
-      (write-aux form output objs ids))))
-#+jscl (fset 'write-to-string (fdefinition '!write-to-string))
+      (write-aux form stream objs ids)
+      form)))
+
+#+jscl
+(defun write-to-string (form)
+  (with-output-to-string (output)
+    (write form :stream output)))
 
 #+jscl
 (progn
-  
-  (defun prin1-to-string (form)
+  (defun prin1 (form &optional stream)
     (let ((*print-escape* t))
-      (write-to-string form)))
+      (write form :stream stream)))
+
+  (defun prin1-to-string (form)
+    (with-output-to-string (output)
+      (prin1 form output)))
+
+  (defun princ (form &optional stream)
+    (let ((*print-escape* nil))
+      (write form :stream stream)))
 
   (defun princ-to-string (form)
-    (let ((*print-escape* nil))
-      (write-to-string form)))
+    (with-output-to-string (output)
+      (princ form output)))
 
   (defun terpri ()
     (write-char #\newline)
@@ -316,8 +334,9 @@
     x)
   
   (defun print (x)
-    (write-line (prin1-to-string x))
-    x))
+    (prog1 (prin1 x)
+      (terpri))))
+
 
 ;;; Format
 
@@ -352,7 +371,6 @@
             (setq res (concat res (string c))))
         (incf i)))
 
-
     (case destination
       ((t)
        (write-string res)
@@ -361,4 +379,5 @@
        res)
       (t
        (write-string res destination)))))
+
 #+jscl (fset 'format (fdefinition '!format))
