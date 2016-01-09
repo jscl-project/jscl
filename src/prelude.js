@@ -264,7 +264,7 @@ internals.bindSpecialBindings = function (symbols, values, callback){
   }
 };
 
-function intern (name, package_name){
+internals.intern = function (name, package_name){
   package_name = package_name || "CL";
   var lisp_package = packages[package_name];
   if (!lisp_package)
@@ -279,7 +279,7 @@ function intern (name, package_name){
     lisp_package.exports[name] = symbol;
 
   return symbol;
-}
+};
 
 /* execute all script tags with type of x-common-lisp */
 window.onload = (function () {
