@@ -75,7 +75,7 @@ internals.checkArgs = function(args, n){
 };
 
 // Improper list constructor (like LIST*)
-function QIList(){
+internals.QIList = function(){
   if (arguments.length == 1)
     return arguments[0];
   else {
@@ -86,7 +86,7 @@ function QIList(){
     }
     return r;
   }
-}
+};
 
 // Arithmetic
 

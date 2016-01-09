@@ -530,10 +530,10 @@
 (defun dump-cons (cons)
   (let ((head (butlast cons))
         (tail (last cons)))
-    `(call |QIList|
-           ,@(mapcar (lambda (x) (literal x t)) head)
-           ,(literal (car tail) t)
-           ,(literal (cdr tail) t))))
+    `(call-internal |QIList|
+                    ,@(mapcar (lambda (x) (literal x t)) head)
+                    ,(literal (car tail) t)
+                    ,(literal (cdr tail) t))))
 
 (defun dump-array (array)
   (let ((elements (vector-to-list array)))
