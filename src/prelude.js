@@ -155,7 +155,7 @@ internals.xstring = function(x){
 };
 
 
-function lisp_to_js (x) {
+internals.lisp_to_js = function (x) {
   if (typeof x == 'object' && 'length' in x && x.stringp == 1)
     return internals.xstring(x);
   else if (x === t)
@@ -172,9 +172,9 @@ function lisp_to_js (x) {
     });
   }
   else return x;
-}
+};
 
-function js_to_lisp (x) {
+internals.js_to_lisp = function (x) {
   if (typeof x == 'string')
     return internals.make_lisp_string(x);
   else if (x === true)
@@ -190,7 +190,7 @@ function js_to_lisp (x) {
       return values(js_to_lisp(x.apply(this, args)));
     });
   } else return x;
-}
+};
 
 
 // Non-local exits

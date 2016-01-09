@@ -1109,7 +1109,7 @@
   `(bool (instanceof ,x |Symbol|)))
 
 (define-builtin make-symbol (name)
-  `(new (call |Symbol| (call |lisp_to_js| ,name))))
+  `(new (call |Symbol| (call-internal |lisp_to_js| ,name))))
 
 (define-compilation symbol-name (x)
   (convert `(oget ,x "name")))
@@ -1311,7 +1311,7 @@
                     tmp))))))
 
 (define-raw-builtin oget (object key &rest keys)
-  `(call |js_to_lisp| ,(convert `(oget* ,object ,key ,@keys))))
+  `(call-internal |js_to_lisp| ,(convert `(oget* ,object ,key ,@keys))))
 
 (define-raw-builtin oset (value object key &rest keys)
   (convert `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
@@ -1322,8 +1322,8 @@
 (define-builtin objectp (x)
   `(bool (=== (typeof ,x) "object")))
 
-(define-builtin lisp-to-js (x) `(call |lisp_to_js| ,x))
-(define-builtin js-to-lisp (x) `(call |js_to_lisp| ,x))
+(define-builtin lisp-to-js (x) `(call-internal |lisp_to_js| ,x))
+(define-builtin js-to-lisp (x) `(call-internal |js_to_lisp| ,x))
 
 
 (define-builtin in (key object)
@@ -1344,10 +1344,10 @@
     (return ,(convert nil))))
 
 (define-compilation %js-vref (var)
-  `(call |js_to_lisp| ,(make-symbol var)))
+  `(call-internal |js_to_lisp| ,(make-symbol var)))
 
 (define-compilation %js-vset (var val)
-  `(= ,(make-symbol var) (call |lisp_to_js| ,(convert val))))
+  `(= ,(make-symbol var) (call-internal |lisp_to_js| ,(convert val))))
 
 (define-setf-expander %js-vref (var)
   (let ((new-value (gensym)))
@@ -1360,7 +1360,7 @@
             `(%js-vref ,var))))
 
 (define-compilation %js-typeof (x)
-  `(call |js_to_lisp| (typeof ,x)))
+  `(call-internal |js_to_lisp| (typeof ,x)))
 
 
 
@@ -1386,7 +1386,7 @@
                 (let* ((*environment* (extend-local-env (list var)))
                        (tvar (translate-variable var)))
                   `(catch (,tvar)
-                     (= ,tvar (call |js_to_lisp| ,tvar))
+                     (= ,tvar (call-internal |js_to_lisp| ,tvar))
                      ,(convert-block body t))))))
 
         (finally-compilation
@@ -1466,12 +1466,12 @@
       ((and (consp function) (eq (car function) 'lambda))
        `(call ,(convert `(function ,function)) ,@arglist))
       ((and (consp function) (eq (car function) 'oget))
-       `(call |js_to_lisp|
+       `(call-internal |js_to_lisp|
               (call ,(reduce (lambda (obj p)
                                `(property ,obj (call-internal |xstring| ,p)))
                              (mapcar #'convert (cdr function)))
                     ,@(mapcar (lambda (s)
-                                `(call |lisp_to_js| ,(convert s)))
+                                `(call-internal |lisp_to_js| ,(convert s)))
                               args))))
       (t
        (error "Bad function descriptor")))))
