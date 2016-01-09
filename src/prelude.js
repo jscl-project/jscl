@@ -90,28 +90,28 @@ internals.QIList = function(){
 
 // Arithmetic
 
-function handled_division (x, y) {
+internals.handled_division = function (x, y) {
   if (y == 0) throw "Division by zero";
   return x/y;
-}
+};
 
 
 // Chars and Strings
 
 
 // Return a new Array of strings, each either length-1, or length-2 (a UTF-16 surrogate pair).
-function codepoints(string) {
+function codepoints (string) {
   return string.split(/(?![\udc00-\udfff])/);
-}
+};
 
 // Create and return a lisp string for the Javascript string STRING.
-function make_lisp_string (string){
+internals.make_lisp_string = function (string){
   var array = codepoints(string);
-  array.stringp = 1
+  array.stringp = 1;
   return array;
-}
+};
 
-function char_to_codepoint(ch) {
+internals.char_to_codepoint = function(ch) {
   if (ch.length == 1) {
     return ch.charCodeAt(0);
   } else {
@@ -119,9 +119,9 @@ function char_to_codepoint(ch) {
     var xl = ch.charCodeAt(1) - 0xDC00;
     return 0x10000 + (xh << 10) + (xl);
   }
-}
+};
 
-function char_from_codepoint(x) {
+internals.char_from_codepoint = function(x) {
   if (x <= 0xFFFF) {
     return String.fromCharCode(x);
   } else {
@@ -130,32 +130,34 @@ function char_from_codepoint(x) {
     var xl = x & 0x3FF;
     return String.fromCharCode(0xD800 + xh) + String.fromCharCode(0xDC00 + xl);
   }
-}
+};
 
 // if a char (JS string) has the same number of codepoints after .toUpperCase(), return that, else the original.
-function safe_char_upcase(x) {
+internals.safe_char_upcase = function(x) {
   var xu = x.toUpperCase();
   if (codepoints(xu).length == 1) {
     return xu;
   } else {
     return x;
   }
-}
-function safe_char_downcase(x) {
+};
+internals.safe_char_downcase = function(x) {
   var xl = x.toLowerCase();
   if (codepoints(xl).length == 1) {
     return xl;
   } else {
     return x;
   }
-}
+};
 
-function xstring(x){ return x.join(''); }
+internals.xstring = function(x){
+  return x.join('');
+};
 
 
 function lisp_to_js (x) {
   if (typeof x == 'object' && 'length' in x && x.stringp == 1)
-    return xstring(x);
+    return internals.xstring(x);
   else if (x === t)
     return true;
   else if (x === nil)
@@ -174,7 +176,7 @@ function lisp_to_js (x) {
 
 function js_to_lisp (x) {
   if (typeof x == 'string')
-    return make_lisp_string(x);
+    return internals.make_lisp_string(x);
   else if (x === true)
     return t;
   else if (x === false)

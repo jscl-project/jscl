@@ -540,7 +540,7 @@
     (list-to-vector (mapcar #'literal elements))))
 
 (defun dump-string (string)
-  `(call |make_lisp_string| ,string))
+  `(call-internal |make_lisp_string| ,string))
 
 (defun literal (sexp &optional recursive)
   (cond
@@ -1012,8 +1012,8 @@
   (let ((args (cons x others)))
     (variable-arity args
       (if (null others)
-          `(call |handled_division| 1 ,(car args))
-          (reduce (lambda (x y) `(call |handled_division| ,x ,y))
+          `(call-internal |handled_division| 1 ,(car args))
+          (reduce (lambda (x y) `(call-internal |handled_division| ,x ,y))
                   args)))))
 
 (define-builtin mod (x y)
@@ -1062,7 +1062,7 @@
   `(method-call |Math| "sqrt" ,x))
 
 (define-builtin float-to-string (x)
-  `(call |make_lisp_string| (method-call ,x |toString|)))
+  `(call-internal |make_lisp_string| (method-call ,x |toString|)))
 
 (define-builtin cons (x y)
   `(object "car" ,x "cdr" ,y))
@@ -1138,16 +1138,16 @@
   `(call |symbolFunction| ,x))
 
 (define-builtin lambda-code (x)
-  `(call |make_lisp_string| (method-call ,x "toString")))
+  `(call-internal |make_lisp_string| (method-call ,x "toString")))
 
 (define-builtin eq (x y)
   `(bool (=== ,x ,y)))
 
 (define-builtin char-code (x)
-  `(call |char_to_codepoint| ,x))
+  `(call-internal |char_to_codepoint| ,x))
 
 (define-builtin code-char (x)
-  `(call |char_from_codepoint| ,x))
+  `(call-internal |char_from_codepoint| ,x))
 
 (define-builtin characterp (x)
   `(selfcall
@@ -1158,10 +1158,10 @@
                       (== (get x "length") 2)))))))
 
 (define-builtin char-upcase (x)
-  `(call |safe_char_upcase| ,x))
+  `(call-internal |safe_char_upcase| ,x))
 
 (define-builtin char-downcase (x)
-  `(call |safe_char_downcase| ,x))
+  `(call-internal |safe_char_downcase| ,x))
 
 (define-builtin stringp (x)
   `(selfcall
@@ -1204,9 +1204,9 @@
 (define-builtin js-eval (string)
   (if *multiple-value-p*
       `(selfcall
-        (var (v (call-internal |globalEval| (call |xstring| ,string))))
+        (var (v (call-internal |globalEval| (call-internal |xstring| ,string))))
         (return (method-call |values| "apply" this (call-internal |forcemv| v))))
-      `(call-internal |globalEval| (call |xstring| ,string))))
+      `(call-internal |globalEval| (call-internal |xstring| ,string))))
 
 (define-builtin %throw (string)
   `(selfcall (throw ,string)))
@@ -1215,7 +1215,7 @@
   `(bool (=== (typeof ,x) "function")))
 
 (define-builtin /debug (x)
-  `(method-call |console| "log" (call |xstring| ,x)))
+  `(method-call |console| "log" (call-internal |xstring| ,x)))
 
 (define-builtin /log (x)
   `(method-call |console| "log" ,x))
@@ -1284,11 +1284,11 @@
 (define-raw-builtin oget* (object key &rest keys)
   `(selfcall
     (progn
-      (var (tmp (property ,(convert object) (call |xstring| ,(convert key)))))
+      (var (tmp (property ,(convert object) (call-internal |xstring| ,(convert key)))))
       ,@(mapcar (lambda (key)
                   `(progn
                      (if (=== tmp undefined) (return ,(convert nil)))
-                     (= tmp (property tmp (call |xstring| ,(convert key))))))
+                     (= tmp (property tmp (call-internal |xstring| ,(convert key))))))
                 keys))
     (return (if (=== tmp undefined) ,(convert nil) tmp))))
 
@@ -1299,12 +1299,12 @@
         (var (obj ,(convert object)))
         ,@(mapcar (lambda (key)
                     `(progn
-                       (= obj (property obj (call |xstring| ,(convert key))))
+                       (= obj (property obj (call-internal |xstring| ,(convert key))))
                        (if (=== obj undefined)
                            (throw "Impossible to set object property."))))
                   (butlast keys))
         (var (tmp
-              (= (property obj (call |xstring| ,(convert (car (last keys)))))
+              (= (property obj (call-internal |xstring| ,(convert (car (last keys)))))
                  ,(convert value))))
         (return (if (=== tmp undefined)
                     ,(convert nil)
@@ -1327,11 +1327,11 @@
 
 
 (define-builtin in (key object)
-  `(bool (in (call |xstring| ,key) ,object)))
+  `(bool (in (call-internal |xstring| ,key) ,object)))
 
 (define-builtin delete-property (key object)
   `(selfcall
-    (delete (property ,object (call |xstring| ,key)))))
+    (delete (property ,object (call-internal |xstring| ,key)))))
 
 (define-builtin map-for-in (function object)
   `(selfcall
@@ -1468,7 +1468,7 @@
       ((and (consp function) (eq (car function) 'oget))
        `(call |js_to_lisp|
               (call ,(reduce (lambda (obj p)
-                               `(property ,obj (call |xstring| ,p)))
+                               `(property ,obj (call-internal |xstring| ,p)))
                              (mapcar #'convert (cdr function)))
                     ,@(mapcar (lambda (s)
                                 `(call |lisp_to_js| ,(convert s)))
