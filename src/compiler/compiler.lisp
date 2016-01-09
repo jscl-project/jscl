@@ -798,7 +798,8 @@
             (catch (cf)
               (if (and (instanceof cf |BlockNLX|) (== (get cf "id") ,idvar))
                   ,(if *multiple-value-p*
-                       `(return (method-call |values| "apply" this (call |forcemv| (get cf "values"))))
+                       `(return (method-call |values| "apply" this
+                                             (method-call |internals| |forcemv| (get cf "values"))))
                        `(return (get cf "values")))
                   (throw cf))))
           `(selfcall ,cbody)))))
@@ -814,26 +815,27 @@
     ;; variable name itself, because it could not to be unique, so we
     ;; capture it in a closure.
     `(selfcall
-      ,(when multiple-value-p `(var (|values| |mv|)))
+      ,(when multiple-value-p `(var (|values| (get |internals| |mv|))))
       (throw (new (call |BlockNLX|
                         ,(binding-value b)
                         ,(convert value multiple-value-p)
                         ,(symbol-name name)))))))
 
 (define-compilation catch (id &rest body)
-  (let ((values (if *multiple-value-p* '|values| '|pv|)))
+  (let ((values (if *multiple-value-p* '|values| '(get |internals| |pv|))))
     `(selfcall
       (var (id ,(convert id)))
       (try
        ,(convert-block body t))
       (catch (cf)
         (if (and (instanceof cf |CatchNLX|) (== (get cf "id") id))
-            (return (method-call ,values "apply" this (call |forcemv| (get cf "values"))))
+            (return (method-call ,values "apply" this
+                                 (method-call |internals| |forcemv| (get cf "values"))))
             (throw cf))))))
 
 (define-compilation throw (id value)
   `(selfcall
-    (var (|values| |mv|))
+    (var (|values| (get |internals| |mv|)))
     (throw (new (call |CatchNLX| ,(convert id) ,(convert value t))))))
 
 
@@ -909,10 +911,10 @@
 (define-compilation multiple-value-call (func-form &rest forms)
   `(selfcall
     (var (func ,(convert func-form)))
-    (var (args ,(vector (if *multiple-value-p* '|values| '|pv|))))
+    (var (args ,(vector (if *multiple-value-p* '|values| '(get |internals| |pv|)))))
     (return
       (selfcall
-       (var (|values| |mv|))
+       (var (|values| (get |internals| |mv|)))
        (var vs)
        (progn
          ,@(with-collect
@@ -1167,7 +1169,7 @@
     (return (call (if (=== (typeof f) "function")
                       f
                       (get f "fvalue"))
-                  ,@(cons (if *multiple-value-p* '|values| '|pv|)
+                  ,@(cons (if *multiple-value-p* '|values| '(get |internals| |pv|))
 			  (mapcar #'convert args))))))
 
 (define-raw-builtin apply (func &rest args)
@@ -1178,7 +1180,7 @@
         `(selfcall
 	  (var (f ,(convert func)))
 	  (var (args ,(list-to-vector
-		       (cons (if *multiple-value-p* '|values| '|pv|)
+		       (cons (if *multiple-value-p* '|values| '(get |internals| |pv|))
 			     (mapcar #'convert args)))))
 	  (var (tail ,(convert last)))
 	  (while (!= tail ,(convert nil))
@@ -1195,7 +1197,7 @@
   (if *multiple-value-p*
       `(selfcall
         (var (v (method-call |internals| |globalEval| (call |xstring| ,string))))
-        (return (method-call |values| "apply" this (call |forcemv| v))))
+        (return (method-call |values| "apply" this (method-call |internals| |forcemv| v))))
       `(method-call |internals| |globalEval| (call |xstring| ,string))))
 
 (define-builtin %throw (string)
@@ -1259,12 +1261,12 @@
 (define-builtin values-array (array)
   (if *multiple-value-p*
       `(method-call |values| "apply" this ,array)
-      `(method-call |pv| "apply" this ,array)))
+      `(method-call (get |internals| |pv|) "apply" this ,array)))
 
 (define-raw-builtin values (&rest args)
   (if *multiple-value-p*
       `(call |values| ,@(mapcar #'convert args))
-      `(call |pv| ,@(mapcar #'convert args))))
+      `(call (get |internals| |pv|) ,@(mapcar #'convert args))))
 
 ;;; Javascript FFI
 
@@ -1329,7 +1331,7 @@
          (g (if (=== (typeof f) "function") f (get f "fvalue")))
          (o ,object))
     (for-in (key o)
-            (call g ,(if *multiple-value-p* '|values| '|pv|)
+            (call g ,(if *multiple-value-p* '|values| '(get |internals| |pv|))
 		  (property o key)))
     (return ,(convert nil))))
 
@@ -1438,7 +1440,7 @@
      (values form nil))))
 
 (defun compile-funcall (function args)
-  (let* ((arglist (cons (if *multiple-value-p* '|values| '|pv|)
+  (let* ((arglist (cons (if *multiple-value-p* '|values| '(get |internals| |pv|))
 			(mapcar #'convert args))))
     (unless (or (symbolp function)
                 (and (consp function)

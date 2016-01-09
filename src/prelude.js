@@ -37,27 +37,29 @@ var internals = lisp.internals = {};
 var globalEval = eval;          // Just an indirect eval
 
 internals.globalEval = function(code){
-  return globalEval('(function(values){ ' + code + '; })(mv)');
+  return globalEval('(function(values){ ' + code + '; })(internals.mv)');
 };
 
 
-function pv (x) { return x==undefined? nil: x; }
+internals.pv = function(x) {
+  return x==undefined? nil: x;
+};
 
-function mv(){
+internals.mv = function(){
   var r = [].slice.call(arguments);
   r['multiple-value'] = true;
   return r;
-}
+};
 
-function forcemv (x) {
-  return typeof x == 'object' && 'multiple-value' in x? x: mv(x);
-}
+internals.forcemv = function(x) {
+  return typeof x == 'object' && 'multiple-value' in x? x: internals.mv(x);
+};
 
 // NOTE: Define VALUES to be MV for toplevel forms. It is because
 // `eval' compiles the forms and execute the Javascript code at
 // toplevel with `js-eval', so it is necessary to return multiple
 // values from the eval function.
-var values = mv;
+var values = internals.mv;
 
 function checkArgsAtLeast(args, n){
   if (args < n) throw 'too few arguments';
@@ -164,7 +166,7 @@ function lisp_to_js (x) {
       var args = Array.prototype.slice.call(arguments);
       for (var i in args)
         args[i] = js_to_lisp(args[i]);
-      return lisp_to_js(x.apply(this, [pv].concat(args)));
+      return lisp_to_js(x.apply(this, [internals.pv].concat(args)));
     });
   }
   else return x;
