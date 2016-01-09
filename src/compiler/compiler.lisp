@@ -1207,6 +1207,9 @@
 (define-builtin /debug (x)
   `(method-call |console| "log" (call |xstring| ,x)))
 
+(define-builtin /log (x)
+  `(method-call |console| "log" ,x))
+
 
 ;;; Storage vectors. They are used to implement arrays and (in the
 ;;; future) structures.
