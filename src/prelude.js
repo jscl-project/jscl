@@ -61,18 +61,18 @@ internals.forcemv = function(x) {
 // values from the eval function.
 var values = internals.mv;
 
-function checkArgsAtLeast(args, n){
+internals.checkArgsAtLeast = function(args, n){
   if (args < n) throw 'too few arguments';
-}
+};
 
-function checkArgsAtMost(args, n){
+internals.checkArgsAtMost = function(args, n){
   if (args > n) throw 'too many arguments';
-}
+};
 
-function checkArgs(args, n){
-  checkArgsAtLeast(args, n);
-  checkArgsAtMost(args, n);
-}
+internals.checkArgs = function(args, n){
+  internals.checkArgsAtLeast(args, n);
+  internals.checkArgsAtMost(args, n);
+};
 
 // Improper list constructor (like LIST*)
 function QIList(){

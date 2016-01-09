@@ -286,11 +286,11 @@
     (block nil
       ;; Special case: a positive exact number of arguments.
       (when (and (< 0 min) (eql min max))
-        (return `(call |checkArgs| (nargs) ,min)))
+        (return `(call-internal |checkArgs| (nargs) ,min)))
       ;; General case:
       `(progn
-         ,(when (< 0 min)     `(call |checkArgsAtLeast| (nargs) ,min))
-         ,(when (numberp max) `(call |checkArgsAtMost|  (nargs) ,max))))))
+         ,(when (< 0 min)     `(call-internal |checkArgsAtLeast| (nargs) ,min))
+         ,(when (numberp max) `(call-internal |checkArgsAtMost|  (nargs) ,max))))))
 
 (defun compile-lambda-optional (ll)
   (let* ((optional-arguments (ll-optional-arguments-canonical ll))
