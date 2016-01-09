@@ -40,6 +40,14 @@
 (define-js-macro arg (n)
   `(property |arguments| (+ ,n 1)))
 
+;;; Runtime
+
+(define-js-macro internal (x)
+  `(get |internals| ,x))
+
+(define-js-macro call-internal (name &rest args)
+  `(method-call |internals| ,name ,@args))
+
 
 ;;; A Form can return a multiple values object calling VALUES, like
 ;;; values(arg1, arg2, ...). It will work in any context, as well as
@@ -90,8 +98,8 @@
       (push-to-lexenv binding env namespace))))
 
 
-(defvar *environment* (make-lexenv))
-(defvar *variable-counter* 0)
+(defvar *environment*)
+(defvar *variable-counter*)
 
 (defun gvarname (symbol)
   (declare (ignore symbol))
@@ -278,11 +286,11 @@
     (block nil
       ;; Special case: a positive exact number of arguments.
       (when (and (< 0 min) (eql min max))
-        (return `(call |checkArgs| (nargs) ,min)))
+        (return `(call-internal |checkArgs| (nargs) ,min)))
       ;; General case:
       `(progn
-         ,(when (< 0 min)     `(call |checkArgsAtLeast| (nargs) ,min))
-         ,(when (numberp max) `(call |checkArgsAtMost|  (nargs) ,max))))))
+         ,(when (< 0 min)     `(call-internal |checkArgsAtLeast| (nargs) ,min))
+         ,(when (numberp max) `(call-internal |checkArgsAtMost|  (nargs) ,max))))))
 
 (defun compile-lambda-optional (ll)
   (let* ((optional-arguments (ll-optional-arguments-canonical ll))
@@ -495,8 +503,8 @@
         (declare (ignore environment))
         (second form)))
 
-(defvar *literal-table* nil)
-(defvar *literal-counter* 0)
+(defvar *literal-table*)
+(defvar *literal-counter*)
 
 (defun genlit ()
   (incf *literal-counter*)
@@ -507,32 +515,32 @@
     (cond
       ;; Uninterned symbol
       ((null package)
-       `(new (call |Symbol| ,(symbol-name symbol))))
+       `(new (call-internal |Symbol| ,(symbol-name symbol))))
       ;; Special case for bootstrap. For now, we just load all the
       ;; code with JSCL as the current package. We will compile the
       ;; JSCL package as CL in the target.
       #-jscl
       ((or (eq package (find-package "JSCL"))
            (eq package (find-package "CL")))
-       `(call |intern| ,(symbol-name symbol)))
+       `(call-internal |intern| ,(symbol-name symbol)))
       ;; Interned symbol
       (t
-       `(call |intern| ,(symbol-name symbol) ,(package-name package))))))
+       `(call-internal |intern| ,(symbol-name symbol) ,(package-name package))))))
 
 (defun dump-cons (cons)
   (let ((head (butlast cons))
         (tail (last cons)))
-    `(call |QIList|
-           ,@(mapcar (lambda (x) (literal x t)) head)
-           ,(literal (car tail) t)
-           ,(literal (cdr tail) t))))
+    `(call-internal |QIList|
+                    ,@(mapcar (lambda (x) (literal x t)) head)
+                    ,(literal (car tail) t)
+                    ,(literal (cdr tail) t))))
 
 (defun dump-array (array)
   (let ((elements (vector-to-list array)))
     (list-to-vector (mapcar #'literal elements))))
 
 (defun dump-string (string)
-  `(call |make_lisp_string| ,string))
+  `(call-internal |make_lisp_string| ,string))
 
 (defun literal (sexp &optional recursive)
   (cond
@@ -718,10 +726,11 @@
       (convert-block body t t)
       (let ((special-variables (mapcar #'car special-bindings))
             (lexical-variables (mapcar #'cdr special-bindings)))
-        `(return (call |bindSpecialBindings|
-                       ,(list-to-vector (mapcar #'literal special-variables))
-                       ,(list-to-vector (mapcar #'translate-variable lexical-variables))
-                       (function () ,(convert-block body t t)))))))
+        `(return (call-internal
+                  |bindSpecialBindings|
+                  ,(list-to-vector (mapcar #'literal special-variables))
+                  ,(list-to-vector (mapcar #'translate-variable lexical-variables))
+                  (function () ,(convert-block body t t)))))))
 
 
 (define-compilation let (bindings &rest body)
@@ -796,9 +805,10 @@
              (var (,idvar #()))
              ,cbody)
             (catch (cf)
-              (if (and (instanceof cf |BlockNLX|) (== (get cf "id") ,idvar))
+              (if (and (instanceof cf (internal |BlockNLX|)) (== (get cf "id") ,idvar))
                   ,(if *multiple-value-p*
-                       `(return (method-call |values| "apply" this (call |forcemv| (get cf "values"))))
+                       `(return (method-call |values| "apply" this
+                                             (call-internal |forcemv| (get cf "values"))))
                        `(return (get cf "values")))
                   (throw cf))))
           `(selfcall ,cbody)))))
@@ -814,27 +824,28 @@
     ;; variable name itself, because it could not to be unique, so we
     ;; capture it in a closure.
     `(selfcall
-      ,(when multiple-value-p `(var (|values| |mv|)))
-      (throw (new (call |BlockNLX|
-                        ,(binding-value b)
-                        ,(convert value multiple-value-p)
-                        ,(symbol-name name)))))))
+      ,(when multiple-value-p `(var (|values| (internal |mv|))))
+      (throw (new (call-internal |BlockNLX|
+                                 ,(binding-value b)
+                                 ,(convert value multiple-value-p)
+                                 ,(symbol-name name)))))))
 
 (define-compilation catch (id &rest body)
-  (let ((values (if *multiple-value-p* '|values| '|pv|)))
+  (let ((values (if *multiple-value-p* '|values| '(internal |pv|))))
     `(selfcall
       (var (id ,(convert id)))
       (try
        ,(convert-block body t))
       (catch (cf)
-        (if (and (instanceof cf |CatchNLX|) (== (get cf "id") id))
-            (return (method-call ,values "apply" this (call |forcemv| (get cf "values"))))
+        (if (and (instanceof cf (internal |CatchNLX|)) (== (get cf "id") id))
+            (return (method-call ,values "apply" this
+                                 (call-internal |forcemv| (get cf "values"))))
             (throw cf))))))
 
 (define-compilation throw (id value)
   `(selfcall
-    (var (|values| |mv|))
-    (throw (new (call |CatchNLX| ,(convert id) ,(convert value t))))))
+    (var (|values| (internal |mv|)))
+    (throw (new (call-internal |CatchNLX| ,(convert id) ,(convert value t))))))
 
 
 (defun go-tag-p (x)
@@ -883,7 +894,7 @@
                           default
                           (break tbloop)))
                  (catch (jump)
-                   (if (and (instanceof jump |TagNLX|) (== (get jump "id") ,tbidx))
+                   (if (and (instanceof jump (internal |TagNLX|)) (== (get jump "id") ,tbidx))
                        (= ,branch (get jump "label"))
                        (throw jump)))))
         (return ,(convert nil))))))
@@ -893,9 +904,9 @@
     (when (null b)
       (error "Unknown tag `~S'" label))
     `(selfcall
-      (throw (new (call |TagNLX|
-                        ,(first (binding-value b))
-                        ,(second (binding-value b))))))))
+      (throw (new (call-internal |TagNLX|
+                                 ,(first (binding-value b))
+                                 ,(second (binding-value b))))))))
 
 (define-compilation unwind-protect (form &rest clean-up)
   `(selfcall
@@ -909,10 +920,10 @@
 (define-compilation multiple-value-call (func-form &rest forms)
   `(selfcall
     (var (func ,(convert func-form)))
-    (var (args ,(vector (if *multiple-value-p* '|values| '|pv|))))
+    (var (args ,(vector (if *multiple-value-p* '|values| '(internal |pv|)))))
     (return
       (selfcall
-       (var (|values| |mv|))
+       (var (|values| (internal |mv|)))
        (var vs)
        (progn
          ,@(with-collect
@@ -1002,8 +1013,8 @@
   (let ((args (cons x others)))
     (variable-arity args
       (if (null others)
-          `(call |handled_division| 1 ,(car args))
-          (reduce (lambda (x y) `(call |handled_division| ,x ,y))
+          `(call-internal |handled_division| 1 ,(car args))
+          (reduce (lambda (x y) `(call-internal |handled_division| ,x ,y))
                   args)))))
 
 (define-builtin mod (x y)
@@ -1052,7 +1063,7 @@
   `(method-call |Math| "sqrt" ,x))
 
 (define-builtin float-to-string (x)
-  `(call |make_lisp_string| (method-call ,x |toString|)))
+  `(call-internal |make_lisp_string| (method-call ,x |toString|)))
 
 (define-builtin cons (x y)
   `(object "car" ,x "cdr" ,y))
@@ -1096,10 +1107,10 @@
      (return tmp)))
 
 (define-builtin symbolp (x)
-  `(bool (instanceof ,x |Symbol|)))
+  `(bool (instanceof ,x (internal |Symbol|))))
 
 (define-builtin make-symbol (name)
-  `(new (call |Symbol| (call |lisp_to_js| ,name))))
+  `(new (call-internal |Symbol| (call-internal |lisp_to_js| ,name))))
 
 (define-compilation symbol-name (x)
   (convert `(oget ,x "name")))
@@ -1125,19 +1136,19 @@
     (return value)))
 
 (define-builtin symbol-function (x)
-  `(call |symbolFunction| ,x))
+  `(call-internal |symbolFunction| ,x))
 
 (define-builtin lambda-code (x)
-  `(call |make_lisp_string| (method-call ,x "toString")))
+  `(call-internal |make_lisp_string| (method-call ,x "toString")))
 
 (define-builtin eq (x y)
   `(bool (=== ,x ,y)))
 
 (define-builtin char-code (x)
-  `(call |char_to_codepoint| ,x))
+  `(call-internal |char_to_codepoint| ,x))
 
 (define-builtin code-char (x)
-  `(call |char_from_codepoint| ,x))
+  `(call-internal |char_from_codepoint| ,x))
 
 (define-builtin characterp (x)
   `(selfcall
@@ -1148,10 +1159,10 @@
                       (== (get x "length") 2)))))))
 
 (define-builtin char-upcase (x)
-  `(call |safe_char_upcase| ,x))
+  `(call-internal |safe_char_upcase| ,x))
 
 (define-builtin char-downcase (x)
-  `(call |safe_char_downcase| ,x))
+  `(call-internal |safe_char_downcase| ,x))
 
 (define-builtin stringp (x)
   `(selfcall
@@ -1167,7 +1178,7 @@
     (return (call (if (=== (typeof f) "function")
                       f
                       (get f "fvalue"))
-                  ,@(cons (if *multiple-value-p* '|values| '|pv|)
+                  ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
 			  (mapcar #'convert args))))))
 
 (define-raw-builtin apply (func &rest args)
@@ -1178,7 +1189,7 @@
         `(selfcall
 	  (var (f ,(convert func)))
 	  (var (args ,(list-to-vector
-		       (cons (if *multiple-value-p* '|values| '|pv|)
+		       (cons (if *multiple-value-p* '|values| '(internal |pv|))
 			     (mapcar #'convert args)))))
 	  (var (tail ,(convert last)))
 	  (while (!= tail ,(convert nil))
@@ -1194,9 +1205,9 @@
 (define-builtin js-eval (string)
   (if *multiple-value-p*
       `(selfcall
-        (var (v (call |globalEval| (call |xstring| ,string))))
-        (return (method-call |values| "apply" this (call |forcemv| v))))
-      `(call |globalEval| (call |xstring| ,string))))
+        (var (v (call-internal |globalEval| (call-internal |xstring| ,string))))
+        (return (method-call |values| "apply" this (call-internal |forcemv| v))))
+      `(call-internal |globalEval| (call-internal |xstring| ,string))))
 
 (define-builtin %throw (string)
   `(selfcall (throw ,string)))
@@ -1205,7 +1216,7 @@
   `(bool (=== (typeof ,x) "function")))
 
 (define-builtin /debug (x)
-  `(method-call |console| "log" (call |xstring| ,x)))
+  `(method-call |console| "log" (call-internal |xstring| ,x)))
 
 (define-builtin /log (x)
   `(method-call |console| "log" ,x))
@@ -1259,12 +1270,12 @@
 (define-builtin values-array (array)
   (if *multiple-value-p*
       `(method-call |values| "apply" this ,array)
-      `(method-call |pv| "apply" this ,array)))
+      `(method-call (internals |pv|) "apply" this ,array)))
 
 (define-raw-builtin values (&rest args)
   (if *multiple-value-p*
       `(call |values| ,@(mapcar #'convert args))
-      `(call |pv| ,@(mapcar #'convert args))))
+      `(call-internal |pv| ,@(mapcar #'convert args))))
 
 ;;; Javascript FFI
 
@@ -1274,11 +1285,11 @@
 (define-raw-builtin oget* (object key &rest keys)
   `(selfcall
     (progn
-      (var (tmp (property ,(convert object) (call |xstring| ,(convert key)))))
+      (var (tmp (property ,(convert object) (call-internal |xstring| ,(convert key)))))
       ,@(mapcar (lambda (key)
                   `(progn
                      (if (=== tmp undefined) (return ,(convert nil)))
-                     (= tmp (property tmp (call |xstring| ,(convert key))))))
+                     (= tmp (property tmp (call-internal |xstring| ,(convert key))))))
                 keys))
     (return (if (=== tmp undefined) ,(convert nil) tmp))))
 
@@ -1289,19 +1300,19 @@
         (var (obj ,(convert object)))
         ,@(mapcar (lambda (key)
                     `(progn
-                       (= obj (property obj (call |xstring| ,(convert key))))
+                       (= obj (property obj (call-internal |xstring| ,(convert key))))
                        (if (=== obj undefined)
                            (throw "Impossible to set object property."))))
                   (butlast keys))
         (var (tmp
-              (= (property obj (call |xstring| ,(convert (car (last keys)))))
+              (= (property obj (call-internal |xstring| ,(convert (car (last keys)))))
                  ,(convert value))))
         (return (if (=== tmp undefined)
                     ,(convert nil)
                     tmp))))))
 
 (define-raw-builtin oget (object key &rest keys)
-  `(call |js_to_lisp| ,(convert `(oget* ,object ,key ,@keys))))
+  `(call-internal |js_to_lisp| ,(convert `(oget* ,object ,key ,@keys))))
 
 (define-raw-builtin oset (value object key &rest keys)
   (convert `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
@@ -1312,16 +1323,16 @@
 (define-builtin objectp (x)
   `(bool (=== (typeof ,x) "object")))
 
-(define-builtin lisp-to-js (x) `(call |lisp_to_js| ,x))
-(define-builtin js-to-lisp (x) `(call |js_to_lisp| ,x))
+(define-builtin lisp-to-js (x) `(call-internal |lisp_to_js| ,x))
+(define-builtin js-to-lisp (x) `(call-internal |js_to_lisp| ,x))
 
 
 (define-builtin in (key object)
-  `(bool (in (call |xstring| ,key) ,object)))
+  `(bool (in (call-internal |xstring| ,key) ,object)))
 
 (define-builtin delete-property (key object)
   `(selfcall
-    (delete (property ,object (call |xstring| ,key)))))
+    (delete (property ,object (call-internal |xstring| ,key)))))
 
 (define-builtin map-for-in (function object)
   `(selfcall
@@ -1329,15 +1340,15 @@
          (g (if (=== (typeof f) "function") f (get f "fvalue")))
          (o ,object))
     (for-in (key o)
-            (call g ,(if *multiple-value-p* '|values| '|pv|)
+            (call g ,(if *multiple-value-p* '|values| '(internal |pv|))
 		  (property o key)))
     (return ,(convert nil))))
 
 (define-compilation %js-vref (var)
-  `(call |js_to_lisp| ,(make-symbol var)))
+  `(call-internal |js_to_lisp| ,(make-symbol var)))
 
 (define-compilation %js-vset (var val)
-  `(= ,(make-symbol var) (call |lisp_to_js| ,(convert val))))
+  `(= ,(make-symbol var) (call-internal |lisp_to_js| ,(convert val))))
 
 (define-setf-expander %js-vref (var)
   (let ((new-value (gensym)))
@@ -1350,7 +1361,7 @@
             `(%js-vref ,var))))
 
 (define-compilation %js-typeof (x)
-  `(call |js_to_lisp| (typeof ,x)))
+  `(call-internal |js_to_lisp| (typeof ,x)))
 
 
 
@@ -1376,7 +1387,7 @@
                 (let* ((*environment* (extend-local-env (list var)))
                        (tvar (translate-variable var)))
                   `(catch (,tvar)
-                     (= ,tvar (call |js_to_lisp| ,tvar))
+                     (= ,tvar (call-internal |js_to_lisp| ,tvar))
                      ,(convert-block body t))))))
 
         (finally-compilation
@@ -1438,7 +1449,7 @@
      (values form nil))))
 
 (defun compile-funcall (function args)
-  (let* ((arglist (cons (if *multiple-value-p* '|values| '|pv|)
+  (let* ((arglist (cons (if *multiple-value-p* '|values| '(internal |pv|))
 			(mapcar #'convert args))))
     (unless (or (symbolp function)
                 (and (consp function)
@@ -1456,12 +1467,12 @@
       ((and (consp function) (eq (car function) 'lambda))
        `(call ,(convert `(function ,function)) ,@arglist))
       ((and (consp function) (eq (car function) 'oget))
-       `(call |js_to_lisp|
+       `(call-internal |js_to_lisp|
               (call ,(reduce (lambda (obj p)
-                               `(property ,obj (call |xstring| ,p)))
+                               `(property ,obj (call-internal |xstring| ,p)))
                              (mapcar #'convert (cdr function)))
                     ,@(mapcar (lambda (s)
-                                `(call |lisp_to_js| ,(convert s)))
+                                `(call-internal |lisp_to_js| ,(convert s)))
                               args))))
       (t
        (error "Bad function descriptor")))))
@@ -1521,11 +1532,12 @@
                (min width (length string)))))
     (subseq string 0 n)))
 
-(defun convert-toplevel (sexp &optional multiple-value-p)
+(defun convert-toplevel (sexp &optional multiple-value-p return-p)
   ;; Macroexpand sexp as much as possible
   (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
     (when expandedp
-      (return-from convert-toplevel (convert-toplevel sexp multiple-value-p))))
+      (return-from convert-toplevel
+        (convert-toplevel sexp multiple-value-p return-p))))
   ;; Process as toplevel
   (let ((*convert-level* -1)
         (*toplevel-compilations* nil))
@@ -1535,8 +1547,12 @@
             (eq (car sexp) 'progn)
             (cdr sexp))
        `(progn
-          ,@(mapcar (lambda (s) (convert-toplevel s t))
-                    (cdr sexp))))
+          ;; Discard all except the last value
+          ,@(mapcar (lambda (s) (convert-toplevel s nil nil))
+                    (butlast (cdr sexp)))
+          ;; Return the last value(s)
+          ,(convert-toplevel (first (last (cdr sexp)))
+                             multiple-value-p return-p)))
       (t
        (when *compile-print-toplevels*
          (let ((form-string (prin1-to-string sexp)))
@@ -1544,8 +1560,18 @@
        (let ((code (convert sexp multiple-value-p)))
          `(progn
             ,@(get-toplevel-compilations)
-            ,code))))))
+            ,(if return-p
+                 `(return ,code)
+                 code)))))))
 
-(defun compile-toplevel (sexp &optional multiple-value-p)
+(defun compile-toplevel (sexp &optional multiple-value-p return-p)
   (with-output-to-string (*js-output*)
-    (js (convert-toplevel sexp multiple-value-p))))
+    (js (convert-toplevel sexp multiple-value-p return-p))))
+
+
+(defmacro with-compilation-environment (&body body)
+  `(let ((*literal-table* nil)
+         (*variable-counter* 0)
+         (*gensym-counter* 0)
+         (*literal-counter* 0))
+     ,@body))
