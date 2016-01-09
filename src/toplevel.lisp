@@ -266,12 +266,29 @@
 (when (string/= (%js-typeof |module|) "undefined")
   (push :node *features*))
 
+
+(defun welcome-message ()
+  (format t "Welcome to ~a ~a (~a)~%~%"
+          (lisp-implementation-type)
+          (lisp-implementation-version)
+          (compilation-notice))
+  (format t "JSCL is a Common Lisp implementation on Javascript.~%")
+  (if (find :node *features*)
+      (format t "For more information, visit the project page at https://github.com/davazp/jscl.~%~%")
+      (%write-string
+       (format nil "For more information, visit the project page at <a href=\"https://github.com/davazp/jscl\">GitHub</a>.~%~%")
+       nil)))
+
+
+
 ;;; --------------------------------------------------------------------------------
 ;;; Web REPL
 ;;; --------------------------------------------------------------------------------
 
-(defun %write-string (string)
-  (#j:jqconsole:Write string "jqconsole-output"))
+(defun %write-string (string &optional (escape t))
+  (if #j:jqconsole
+      (#j:jqconsole:Write string "jqconsole-output" "" escape)
+      (#j:console:log string)))
 
 (defun load-history ()
   (let ((raw (#j:localStorage:getItem "jqhist")))
@@ -357,6 +374,7 @@
                 (lambda (string) (%write-string string))))
 
   (load-history)
+  (welcome-message)
   (#j:window:addEventListener "load" (lambda (&rest args) (toplevel))))
 
 
@@ -376,6 +394,7 @@
                 (lambda (string)
                   (#j:process:stdout:write string))))
   (setq *rl* (#j:readline:createInterface #j:process:stdin #j:process:stdout))
+  (welcome-message)
   (let ((*root* *rl*))
     (#j:setPrompt "CL-USER> ")
     (#j:prompt)
