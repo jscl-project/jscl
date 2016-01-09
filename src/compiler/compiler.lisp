@@ -515,7 +515,7 @@
     (cond
       ;; Uninterned symbol
       ((null package)
-       `(new (call |Symbol| ,(symbol-name symbol))))
+       `(new (call-internal |Symbol| ,(symbol-name symbol))))
       ;; Special case for bootstrap. For now, we just load all the
       ;; code with JSCL as the current package. We will compile the
       ;; JSCL package as CL in the target.
@@ -726,10 +726,11 @@
       (convert-block body t t)
       (let ((special-variables (mapcar #'car special-bindings))
             (lexical-variables (mapcar #'cdr special-bindings)))
-        `(return (call |bindSpecialBindings|
-                       ,(list-to-vector (mapcar #'literal special-variables))
-                       ,(list-to-vector (mapcar #'translate-variable lexical-variables))
-                       (function () ,(convert-block body t t)))))))
+        `(return (call-internal
+                  |bindSpecialBindings|
+                  ,(list-to-vector (mapcar #'literal special-variables))
+                  ,(list-to-vector (mapcar #'translate-variable lexical-variables))
+                  (function () ,(convert-block body t t)))))))
 
 
 (define-compilation let (bindings &rest body)
@@ -1106,10 +1107,10 @@
      (return tmp)))
 
 (define-builtin symbolp (x)
-  `(bool (instanceof ,x |Symbol|)))
+  `(bool (instanceof ,x (internal |Symbol|))))
 
 (define-builtin make-symbol (name)
-  `(new (call |Symbol| (call-internal |lisp_to_js| ,name))))
+  `(new (call-internal |Symbol| (call-internal |lisp_to_js| ,name))))
 
 (define-compilation symbol-name (x)
   (convert `(oget ,x "name")))
@@ -1135,7 +1136,7 @@
     (return value)))
 
 (define-builtin symbol-function (x)
-  `(call |symbolFunction| ,x))
+  `(call-internal |symbolFunction| ,x))
 
 (define-builtin lambda-code (x)
   `(call-internal |make_lisp_string| (method-call ,x "toString")))

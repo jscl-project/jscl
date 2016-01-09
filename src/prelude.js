@@ -234,22 +234,22 @@ function unboundFunction () {
   throw new Error("Function '" + this.name + "'undefined");
 }
 
-function Symbol(name, package_name){
+internals.Symbol = function(name, package_name){
   this.name = name;
   this.package = package_name;
   this.value = undefined;
   this.fvalue = unboundFunction;
-}
+};
 
-function symbolFunction (symbol){
+internals.symbolFunction = function (symbol){
   var fn = symbol.fvalue;
   if (fn === unboundFunction)
     symbol.fvalue();
   return fn;
-}
+};
 
 
-function bindSpecialBindings (symbols, values, callback){
+internals.bindSpecialBindings = function (symbols, values, callback){
   try {
     symbols.forEach(function(s, i){
       s.stack = s.stack || [];
@@ -262,7 +262,7 @@ function bindSpecialBindings (symbols, values, callback){
       s.value = s.stack.pop();
     });
   }
-}
+};
 
 function intern (name, package_name){
   package_name = package_name || "CL";
@@ -272,7 +272,7 @@ function intern (name, package_name){
 
   var symbol = lisp_package.symbols[name];
   if (!symbol)
-    symbol = lisp_package.symbols[name] = new Symbol(name, lisp_package);
+    symbol = lisp_package.symbols[name] = new internals.Symbol(name, lisp_package);
 
   // Auto-export symbol if it is the KEYWORD package.
   if (lisp_package === packages.KEYWORD)
