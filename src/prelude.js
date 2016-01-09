@@ -34,7 +34,12 @@ var nil;
 var lisp = {};
 var internals = lisp.internals = {};
 
-internals.globalEval = eval;  // Just an indirect eval
+var globalEval = eval;          // Just an indirect eval
+
+internals.globalEval = function(code){
+  return globalEval('(function(values){ ' + code + '; })(mv)');
+};
+
 
 function pv (x) { return x==undefined? nil: x; }
 

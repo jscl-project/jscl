@@ -90,8 +90,8 @@
       (push-to-lexenv binding env namespace))))
 
 
-(defvar *environment* (make-lexenv))
-(defvar *variable-counter* 0)
+(defvar *environment*)
+(defvar *variable-counter*)
 
 (defun gvarname (symbol)
   (declare (ignore symbol))
@@ -495,8 +495,8 @@
         (declare (ignore environment))
         (second form)))
 
-(defvar *literal-table* nil)
-(defvar *literal-counter* 0)
+(defvar *literal-table*)
+(defvar *literal-counter*)
 
 (defun genlit ()
   (incf *literal-counter*)
@@ -1521,11 +1521,12 @@
                (min width (length string)))))
     (subseq string 0 n)))
 
-(defun convert-toplevel (sexp &optional multiple-value-p)
+(defun convert-toplevel (sexp &optional multiple-value-p return-p)
   ;; Macroexpand sexp as much as possible
   (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
     (when expandedp
-      (return-from convert-toplevel (convert-toplevel sexp multiple-value-p))))
+      (return-from convert-toplevel
+        (convert-toplevel sexp multiple-value-p return-p))))
   ;; Process as toplevel
   (let ((*convert-level* -1)
         (*toplevel-compilations* nil))
@@ -1535,8 +1536,12 @@
             (eq (car sexp) 'progn)
             (cdr sexp))
        `(progn
-          ,@(mapcar (lambda (s) (convert-toplevel s t))
-                    (cdr sexp))))
+          ;; Discard all except the last value
+          ,@(mapcar (lambda (s) (convert-toplevel s nil nil))
+                    (butlast (cdr sexp)))
+          ;; Return the last value(s)
+          ,(convert-toplevel (first (last (cdr sexp)))
+                             multiple-value-p return-p)))
       (t
        (when *compile-print-toplevels*
          (let ((form-string (prin1-to-string sexp)))
@@ -1544,8 +1549,18 @@
        (let ((code (convert sexp multiple-value-p)))
          `(progn
             ,@(get-toplevel-compilations)
-            ,code))))))
+            ,(if return-p
+                 `(return ,code)
+                 code)))))))
 
-(defun compile-toplevel (sexp &optional multiple-value-p)
+(defun compile-toplevel (sexp &optional multiple-value-p return-p)
   (with-output-to-string (*js-output*)
-    (js (convert-toplevel sexp multiple-value-p))))
+    (js (convert-toplevel sexp multiple-value-p return-p))))
+
+
+(defmacro with-compilation-environment (&body body)
+  `(let ((*literal-table* nil)
+         (*variable-counter* 0)
+         (*gensym-counter* 0)
+         (*literal-counter* 0))
+     ,@body))
