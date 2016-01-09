@@ -32,8 +32,9 @@ var t;
 var nil;
 
 var lisp = {};
+var internals = lisp.internals = {};
 
-globalEval = eval;  // Just an indirect eval
+internals.globalEval = eval;  // Just an indirect eval
 
 function pv (x) { return x==undefined? nil: x; }
 

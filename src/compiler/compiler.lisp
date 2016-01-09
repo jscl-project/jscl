@@ -1194,9 +1194,9 @@
 (define-builtin js-eval (string)
   (if *multiple-value-p*
       `(selfcall
-        (var (v (call |globalEval| (call |xstring| ,string))))
+        (var (v (method-call |internals| |globalEval| (call |xstring| ,string))))
         (return (method-call |values| "apply" this (call |forcemv| v))))
-      `(call |globalEval| (call |xstring| ,string))))
+      `(method-call |internals| |globalEval| (call |xstring| ,string))))
 
 (define-builtin %throw (string)
   `(selfcall (throw ,string)))
