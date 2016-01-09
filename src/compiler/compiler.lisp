@@ -804,7 +804,7 @@
              (var (,idvar #()))
              ,cbody)
             (catch (cf)
-              (if (and (instanceof cf |BlockNLX|) (== (get cf "id") ,idvar))
+              (if (and (instanceof cf (internal |BlockNLX|)) (== (get cf "id") ,idvar))
                   ,(if *multiple-value-p*
                        `(return (method-call |values| "apply" this
                                              (call-internal |forcemv| (get cf "values"))))
@@ -824,10 +824,10 @@
     ;; capture it in a closure.
     `(selfcall
       ,(when multiple-value-p `(var (|values| (internal |mv|))))
-      (throw (new (call |BlockNLX|
-                        ,(binding-value b)
-                        ,(convert value multiple-value-p)
-                        ,(symbol-name name)))))))
+      (throw (new (call-internal |BlockNLX|
+                                 ,(binding-value b)
+                                 ,(convert value multiple-value-p)
+                                 ,(symbol-name name)))))))
 
 (define-compilation catch (id &rest body)
   (let ((values (if *multiple-value-p* '|values| '(internal |pv|))))
@@ -836,7 +836,7 @@
       (try
        ,(convert-block body t))
       (catch (cf)
-        (if (and (instanceof cf |CatchNLX|) (== (get cf "id") id))
+        (if (and (instanceof cf (internal |CatchNLX|)) (== (get cf "id") id))
             (return (method-call ,values "apply" this
                                  (call-internal |forcemv| (get cf "values"))))
             (throw cf))))))
@@ -844,7 +844,7 @@
 (define-compilation throw (id value)
   `(selfcall
     (var (|values| (internal |mv|)))
-    (throw (new (call |CatchNLX| ,(convert id) ,(convert value t))))))
+    (throw (new (call-internal |CatchNLX| ,(convert id) ,(convert value t))))))
 
 
 (defun go-tag-p (x)
@@ -893,7 +893,7 @@
                           default
                           (break tbloop)))
                  (catch (jump)
-                   (if (and (instanceof jump |TagNLX|) (== (get jump "id") ,tbidx))
+                   (if (and (instanceof jump (internal |TagNLX|)) (== (get jump "id") ,tbidx))
                        (= ,branch (get jump "label"))
                        (throw jump)))))
         (return ,(convert nil))))))
@@ -903,9 +903,9 @@
     (when (null b)
       (error "Unknown tag `~S'" label))
     `(selfcall
-      (throw (new (call |TagNLX|
-                        ,(first (binding-value b))
-                        ,(second (binding-value b))))))))
+      (throw (new (call-internal |TagNLX|
+                                 ,(first (binding-value b))
+                                 ,(second (binding-value b))))))))
 
 (define-compilation unwind-protect (form &rest clean-up)
   `(selfcall

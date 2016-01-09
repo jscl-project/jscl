@@ -167,8 +167,8 @@ internals.lisp_to_js = function (x) {
     return (function(){
       var args = Array.prototype.slice.call(arguments);
       for (var i in args)
-        args[i] = js_to_lisp(args[i]);
-      return lisp_to_js(x.apply(this, [internals.pv].concat(args)));
+        args[i] = internals.js_to_lisp(args[i]);
+      return internals.lisp_to_js(x.apply(this, [internals.pv].concat(args)));
     });
   }
   else return x;
@@ -186,8 +186,8 @@ internals.js_to_lisp = function (x) {
     return (function(values){
       var args = Array.prototype.slice.call(arguments, 1);
       for (var i in args)
-        args[i] = lisp_to_js(args[i]);
-      return values(js_to_lisp(x.apply(this, args)));
+        args[i] = internals.lisp_to_js(args[i]);
+      return values(internals.js_to_lisp(x.apply(this, args)));
     });
   } else return x;
 };
@@ -195,21 +195,21 @@ internals.js_to_lisp = function (x) {
 
 // Non-local exits
 
-function BlockNLX (id, values, name){
+internals.BlockNLX = function (id, values, name){
   this.id = id;
   this.values = values;
   this.name = name;
-}
+};
 
-function CatchNLX (id, values){
+internals.CatchNLX = function (id, values){
   this.id = id;
   this.values = values;
-}
+};
 
-function TagNLX (id, label){
+internals.TagNLX = function (id, label){
   this.id = id;
   this.label = label;
-}
+};
 
 
 // Packages & Symbols
