@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 BASE=`dirname $0`
 TMPDIR="$BASE/.tmp"

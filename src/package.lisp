@@ -15,7 +15,8 @@
 
 (/debug "loading package.lisp!")
 
-(defvar *package-table* #j:packages)
+(defvar *package-table*
+  (%js-vref "packages"))
 
 (defun list-all-packages ()
   (let ((packages nil))

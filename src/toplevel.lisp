@@ -19,7 +19,8 @@
 (/debug "loading toplevel.lisp!")
 
 (defun eval (x)
-  (js-eval (compile-toplevel x t)))
+  (with-compilation-environment
+    (js-eval (compile-toplevel x t t))))
 
 (defvar * nil)
 (defvar ** nil)
@@ -263,6 +264,32 @@
                    month)
               year)))
 
+(when (string/= (%js-typeof |module|) "undefined")
+  (push :node *features*))
+
+
+(defun welcome-message ()
+  (format t "Welcome to ~a ~a (~a)~%~%"
+          (lisp-implementation-type)
+          (lisp-implementation-version)
+          (compilation-notice))
+  (format t "JSCL is a Common Lisp implementation on Javascript.~%")
+  (if (find :node *features*)
+      (format t "For more information, visit the project page at https://github.com/davazp/jscl.~%~%")
+      (%write-string
+       (format nil "For more information, visit the project page at <a href=\"https://github.com/davazp/jscl\">GitHub</a>.~%~%")
+       nil)))
+
+
+
+;;; --------------------------------------------------------------------------------
+;;; Web REPL
+;;; --------------------------------------------------------------------------------
+
+(defun %write-string (string &optional (escape t))
+  (if #j:jqconsole
+      (#j:jqconsole:Write string "jqconsole-output" "" escape)
+      (#j:console:log string)))
 
 (defun load-history ()
   (let ((raw (#j:localStorage:getItem "jqhist")))
@@ -309,6 +336,8 @@
 
 
 (defun toplevel ()
+  (#j:jqconsole:RegisterMatching "(" ")" "parents")
+
   (let ((prompt (format nil "~a> " (package-name *package*))))
     (#j:jqconsole:Write prompt "jqconsole-prompt"))
   (flet ((process-input (input)
@@ -338,22 +367,43 @@
     (#j:jqconsole:Prompt t #'process-input #'indent-level)))
 
 
-(defun init (&rest args)
-  (when #j:jqconsole
-    (#j:jqconsole:RegisterMatching "(" ")" "parents"))
+(defun web-init ()
+  (setq *root* (%js-vref "window"))
+  (setq *standard-output*
+        (vector 'stream
+                (lambda (ch) (%write-string (string ch)))
+                (lambda (string) (%write-string string))))
 
-  (format t "Welcome to ~a ~a (~a)~%~%"
-          (lisp-implementation-type)
-          (lisp-implementation-version)
-          (compilation-notice))
-
-  (format t "JSCL is a Common Lisp implementation on Javascript.~%")
-  (%write-string
-   (format nil "For more information, visit the project page at <a href=\"https://github.com/davazp/jscl\">GitHub</a>.~%~%"))
-
-  (when #j:jqconsole
-    (load-history)
-    (toplevel)))
+  (load-history)
+  (welcome-message)
+  (#j:window:addEventListener "load" (lambda (&rest args) (toplevel))))
 
 
-(#j:window:addEventListener "load" #'init)
+
+;;; ----------------------------------------------------------------------
+;;; Node REPL
+;;; ----------------------------------------------------------------------
+
+(defvar *rl*)
+
+(defun node-init ()
+  (setq *root* (%js-vref "global"))
+  (setq *standard-output*
+        (vector 'stream
+                (lambda (ch)
+                  (#j:process:stdout:write (string ch)))
+                (lambda (string)
+                  (#j:process:stdout:write string))))
+  (setq *rl* (#j:readline:createInterface #j:process:stdin #j:process:stdout))
+  (welcome-message)
+  (let ((*root* *rl*))
+    (#j:setPrompt "CL-USER> ")
+    (#j:prompt)
+    (#j:on "line"
+           (lambda (line)
+             (print (eval-interactive (read-from-string line)))
+             ((oget *rl* "prompt"))))))
+
+(if (find :node *features*)
+    (node-init)
+    (web-init))
