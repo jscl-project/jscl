@@ -294,5 +294,5 @@ window.onload = (function () {
 });
 
 // Node Readline
-if (typeof module !== 'undefine' && typeof global !== 'undefined')
+if (typeof module !== 'undefined' && typeof global !== 'undefined')
   global.readline = require('readline');
