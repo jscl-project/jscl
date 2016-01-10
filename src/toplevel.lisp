@@ -401,7 +401,13 @@
     (#j:prompt)
     (#j:on "line"
            (lambda (line)
-             (print (eval-interactive (read-from-string line)))
+             (handler-case
+                 (let ((results (multiple-value-list
+                                 (eval-interactive (read-from-string line)))))
+                   (dolist (result results)
+                     (print result)))
+               (error ()
+                 ))
              ((oget *rl* "prompt"))))))
 
 (if (find :node *features*)
