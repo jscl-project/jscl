@@ -418,6 +418,11 @@
              ;; Continue
              ((oget *rl* "prompt"))))))
 
-(if (find :node *features*)
-    (node-init)
-    (web-init))
+
+(defun init ()
+  (if (find :node *features*)
+      (node-init)
+      (web-init)))
+
+
+(init)
