@@ -31,8 +31,8 @@ var window = this;
 var t;
 var nil;
 
-var lisp = {};
-var internals = lisp.internals = {};
+var jscl = window.jscl = {};
+var internals = jscl.internals = {};
 
 internals.globalEval = function(code){
   var geval = eval;             // Just an indirect eval

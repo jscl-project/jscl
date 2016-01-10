@@ -933,7 +933,7 @@
                                  (in "multiple-value" vs))
                             (= args (method-call args "concat" vs))
                             (method-call args "push" vs))))))
-       (return (method-call func "apply" |window| args))))))
+       (return (method-call func "apply" null args))))))
 
 (define-compilation multiple-value-prog1 (first-form &rest forms)
   `(selfcall
