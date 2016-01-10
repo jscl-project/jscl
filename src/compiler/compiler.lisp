@@ -28,9 +28,6 @@
 (define-js-macro selfcall (&body body)
   `(call (function () ,@body)))
 
-(define-js-macro bool (expr)
-  `(if ,expr |t| |nil|))
-
 (define-js-macro method-call (x method &rest args)
   `(call (get ,x ,method) ,@args))
 
@@ -47,6 +44,10 @@
 
 (define-js-macro call-internal (name &rest args)
   `(method-call |internals| ,name ,@args))
+
+
+(defun convert-to-bool (expr)
+  `(if ,expr ,(convert t) ,(convert nil)))
 
 
 ;;; A Form can return a multiple values object calling VALUES, like
@@ -1037,7 +1038,7 @@
   `(define-raw-builtin ,op (x &rest args)
      (let ((args (cons x args)))
        (variable-arity args
-	 `(bool ,(comparison-conjuntion args ',sym))))))
+         (convert-to-bool (comparison-conjuntion args ',sym))))))
 
 (define-builtin-comparison > >)
 (define-builtin-comparison < <)
@@ -1047,7 +1048,7 @@
 (define-builtin-comparison /= !=)
 
 (define-builtin numberp (x)
-  `(bool (== (typeof ,x) "number")))
+  (convert-to-bool `(== (typeof ,x) "number")))
 
 (define-builtin %floor (x)
   `(method-call |Math| "floor" ,x))
@@ -1070,8 +1071,9 @@
 (define-builtin consp (x)
   `(selfcall
     (var (tmp ,x))
-    (return (bool (and (== (typeof tmp) "object")
-                       (in "car" tmp))))))
+    (return ,(convert-to-bool
+              `(and (== (typeof tmp) "object")
+                    (in "car" tmp))))))
 
 (define-builtin car (x)
   `(selfcall
@@ -1106,7 +1108,7 @@
      (return tmp)))
 
 (define-builtin symbolp (x)
-  `(bool (instanceof ,x (internal |Symbol|))))
+  (convert-to-bool `(instanceof ,x (internal |Symbol|))))
 
 (define-builtin make-symbol (name)
   `(new (call-internal |Symbol| (call-internal |lisp_to_js| ,name))))
@@ -1121,10 +1123,10 @@
   `(= (get ,symbol "fvalue") ,value))
 
 (define-builtin boundp (x)
-  `(bool (!== (get ,x "value") undefined)))
+  (convert-to-bool `(!== (get ,x "value") undefined)))
 
 (define-builtin fboundp (x)
-  `(bool (!== (get ,x "fvalue") undefined)))
+  (convert-to-bool `(!== (get ,x "fvalue") undefined)))
 
 (define-builtin symbol-value (x)
   `(selfcall
@@ -1141,7 +1143,7 @@
   `(call-internal |make_lisp_string| (method-call ,x "toString")))
 
 (define-builtin eq (x y)
-  `(bool (=== ,x ,y)))
+  (convert-to-bool `(=== ,x ,y)))
 
 (define-builtin char-code (x)
   `(call-internal |char_to_codepoint| ,x))
@@ -1152,10 +1154,10 @@
 (define-builtin characterp (x)
   `(selfcall
     (var (x ,x))
-    (return (bool
-             (and (== (typeof x) "string")
-                  (or (== (get x "length") 1)
-                      (== (get x "length") 2)))))))
+    (return ,(convert-to-bool
+              `(and (== (typeof x) "string")
+                    (or (== (get x "length") 1)
+                        (== (get x "length") 2)))))))
 
 (define-builtin char-upcase (x)
   `(call-internal |safe_char_upcase| ,x))
@@ -1166,10 +1168,10 @@
 (define-builtin stringp (x)
   `(selfcall
     (var (x ,x))
-    (return (bool
-             (and (and (===(typeof x) "object")
-                       (in "length" x))
-                  (== (get x "stringp") 1))))))
+    (return ,(convert-to-bool
+              `(and (and (===(typeof x) "object")
+                         (in "length" x))
+                    (== (get x "stringp") 1))))))
 
 (define-raw-builtin funcall (func &rest args)
   `(selfcall
@@ -1212,7 +1214,7 @@
   `(selfcall (throw ,string)))
 
 (define-builtin functionp (x)
-  `(bool (=== (typeof ,x) "function")))
+  (convert-to-bool `(=== (typeof ,x) "function")))
 
 (define-builtin /debug (x)
   `(method-call |console| "log" (call-internal |xstring| ,x)))
@@ -1227,7 +1229,9 @@
 (define-builtin storage-vector-p (x)
   `(selfcall
     (var (x ,x))
-    (return (bool (and (=== (typeof x) "object") (in "length" x))))))
+    (return ,(convert-to-bool
+              `(and (=== (typeof x) "object")
+                    (in "length" x))))))
 
 (define-builtin make-storage-vector (n)
   `(selfcall
@@ -1317,17 +1321,17 @@
   (convert `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
 
 (define-builtin js-null-p (x)
-  `(bool (=== ,x null)))
+  (convert-to-bool `(=== ,x null)))
 
 (define-builtin objectp (x)
-  `(bool (=== (typeof ,x) "object")))
+  (convert-to-bool `(=== (typeof ,x) "object")))
 
 (define-builtin lisp-to-js (x) `(call-internal |lisp_to_js| ,x))
 (define-builtin js-to-lisp (x) `(call-internal |js_to_lisp| ,x))
 
 
 (define-builtin in (key object)
-  `(bool (in (call-internal |xstring| ,key) ,object)))
+  (convert-to-bool `(in (call-internal |xstring| ,key) ,object)))
 
 (define-builtin delete-property (key object)
   `(selfcall
