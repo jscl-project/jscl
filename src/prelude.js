@@ -41,7 +41,7 @@ var internals = jscl.internals = {};
 
 internals.globalEval = function(code){
   var geval = eval;             // Just an indirect eval
-  var fn = geval('(function(values, internals){ ' + code + '; })');
+  var fn = geval('(function(values, internals){ "use strict"; ' + code + '; })');
   return fn(internals.mv, internals);
 };
 

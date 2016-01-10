@@ -1347,7 +1347,8 @@
   `(selfcall
     (var (f ,function)
          (g (if (=== (typeof f) "function") f (get f "fvalue")))
-         (o ,object))
+         (o ,object)
+         key)
     (for-in (key o)
             (call g ,(if *multiple-value-p* '|values| '(internal |pv|))
 		  (property o key)))

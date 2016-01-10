@@ -159,6 +159,7 @@
                            :direction :output
                            :if-exists :supersede)
         (format out "(function(){~%")
+        (format out "'use strict';~%")
         (write-string (read-whole-file (source-pathname "prelude.js")) out)
         (do-source input :target
           (!compile-file input out :print verbose))
@@ -171,6 +172,7 @@
                            :direction :output
                            :if-exists :supersede)
         (format out "(function(jscl){~%")
+        (format out "'use strict';~%")
         (format out "(function(values, internals){~%")
         (dolist (input (append (directory "tests.lisp")
                                (directory "tests/*.lisp")
