@@ -15,7 +15,7 @@
 
 (/debug "loading ffi.lisp!")
 
-(defvar *root* (%js-vref "window"))
+(defvar *root*)
 
 (define-setf-expander oget (object key &rest keys)
   (let* ((keys (cons key keys))
@@ -45,5 +45,6 @@
             `(oset* ,g!value ,g!object ,@g!keys)
             `(oget* ,g!object ,@g!keys))))
 
-(setf #j:eval_in_lisp (lambda (form) (eval (read-from-string form))))
-
+(%js-vset "eval_in_lisp"
+          (lambda (form)
+            (eval (read-from-string form))))

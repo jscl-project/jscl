@@ -264,7 +264,8 @@
                    month)
               year)))
 
-(when (string/= (%js-typeof |module|) "undefined")
+(when (and (string/= (%js-typeof |module|) "undefined")
+           (string= (%js-typeof |phantom|) "undefined"))
   (push :node *features*))
 
 
@@ -423,6 +424,5 @@
   (if (find :node *features*)
       (node-init)
       (web-init)))
-
 
 (init)

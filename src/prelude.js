@@ -26,12 +26,17 @@
 // This file is prepended to the result of compile jscl.lisp, and
 // contain runtime code that jscl assumes to exist.
 
-var window = this;
-
 var t;
 var nil;
 
-var jscl = window.jscl = {};
+var jscl = {};
+
+if (typeof module !== 'undefined')
+  module.exports = jscl;
+else
+  window.jscl = jscl;
+
+
 var internals = jscl.internals = {};
 
 internals.globalEval = function(code){
@@ -281,18 +286,22 @@ internals.intern = function (name, package_name){
 };
 
 /* execute all script tags with type of x-common-lisp */
-window.onload = (function () {
+var eval_in_lisp;               // set in FFI.lisp
+if (typeof window !== "undefined"){
+  window.onload = (function () {
 	var scripts = document.scripts;
 	for (var i = 0; i < scripts.length; ++i) {
-		var script = scripts[i];
-
-		/* TODO: what about errors? */
-		if (script.type == "text/x-common-lisp") {
-			eval_in_lisp(script.text);
-		}
+	  var script = scripts[i];
+	  /* TODO: what about errors? */
+	  if (script.type == "text/x-common-lisp") {
+		eval_in_lisp(script.text);
+	  }
 	}
-});
+  });
+}
 
 // Node Readline
-if (typeof module !== 'undefined' && typeof global !== 'undefined')
+if (typeof module !== 'undefined' &&
+    typeof global !== 'undefined' &&
+    typeof phantom === 'undefined')
   global.readline = require('readline');

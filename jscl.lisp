@@ -170,12 +170,14 @@
       (with-open-file (out (merge-pathnames "tests.js" *base-directory*)
                            :direction :output
                            :if-exists :supersede)
+        (format out "(function(jscl){~%")
         (format out "(function(values, internals){~%")
         (dolist (input (append (directory "tests.lisp")
                                (directory "tests/*.lisp")
                                (directory "tests-report.lisp")))
           (!compile-file input out))
-        (format out "})(jscl.internals.pv, jscl.internals);~%")))
+        (format out "})(jscl.internals.pv, jscl.internals);~%")
+        (format out "})( typeof require !== 'undefined'? require('./jscl'): window.jscl )~%")))
 
     (report-undefined-functions)))
 
