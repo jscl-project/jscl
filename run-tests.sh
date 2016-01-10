@@ -6,10 +6,10 @@ TMPDIR="$BASE/.tmp"
 mkdir -p $TMPDIR
 
 TESTFILE="$TMPDIR/output.js"
-PHANTOMJS=phantomjs
+RUNJS=${RUNJS:-phantomjs}
 
 cat jscl.js tests.js > $TESTFILE
 echo >> $TESTFILE
 echo '' >> $TESTFILE
 
-$PHANTOMJS $TESTFILE
+$RUNJS $TESTFILE
