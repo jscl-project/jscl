@@ -31,7 +31,12 @@
 
     `(let ((*handler-bindings* *handler-bindings*))
        ,@install-handlers
-       ,@body)))
+       (%js-try
+        (progn ,@body)
+        (catch (err)
+          (if (%%nlx-p err)
+              (%%throw err)
+              (%error (or (oget err "message") err))))))))
 
 
 ;; Implementation if :NO-ERROR case is missing.

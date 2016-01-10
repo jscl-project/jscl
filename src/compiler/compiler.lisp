@@ -1326,6 +1326,12 @@
 (define-builtin objectp (x)
   (convert-to-bool `(=== (typeof ,x) "object")))
 
+(define-builtin %%nlx-p (x)
+  (convert-to-bool `(call-internal |isNLX| ,x)))
+
+(define-builtin %%throw (x)
+  `(selfcall (throw ,x)))
+
 (define-builtin lisp-to-js (x) `(call-internal |lisp_to_js| ,x))
 (define-builtin js-to-lisp (x) `(call-internal |js_to_lisp| ,x))
 

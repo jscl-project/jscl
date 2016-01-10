@@ -215,6 +215,13 @@ internals.TagNLX = function (id, label){
   this.label = label;
 };
 
+internals.isNLX = function(x){
+  var i = internals;
+  return x instanceof i.BlockNLX
+    ||   x instanceof i.CatchNLX
+    ||   x instanceof i.TagNLX;
+};
+
 
 // Packages & Symbols
 
