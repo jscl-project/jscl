@@ -118,7 +118,6 @@
   (reverse *toplevel-compilations*))
 
 (defun %compile-defmacro (name lambda)
-  (toplevel-compilation (convert `',name))
   (let ((binding (make-binding :name name :type 'macro :value lambda)))
     (push-to-lexenv binding  *environment* 'function))
   name)
