@@ -401,9 +401,28 @@
     (#j:prompt)
     (#j:on "line"
            (lambda (line)
-             (print (eval-interactive (read-from-string line)))
+             (%js-try
+              (progn
+                (handler-case
+                    (let ((results (multiple-value-list
+                                    (eval-interactive (read-from-string line)))))
+                      (dolist (result results)
+                        (print result)))
+                  (error (err)
+                    (format t "ERROR: ")
+                    (apply #'format t (!condition-args err))
+                    (terpri))))
+              (catch (err)
+                (let ((message (or (oget err "message") err)))
+                  (format t "ERROR[!]: ~a~%" message))))
+             ;; Continue
              ((oget *rl* "prompt"))))))
 
-(if (find :node *features*)
-    (node-init)
-    (web-init))
+
+(defun init ()
+  (if (find :node *features*)
+      (node-init)
+      (web-init)))
+
+
+(init)
