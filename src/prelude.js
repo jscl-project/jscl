@@ -225,7 +225,7 @@ internals.isNLX = function(x){
 
 // Packages & Symbols
 
-var packages = {};
+var packages = jscl.packages = {};
 
 packages.CL = {
   packageName: 'CL',
@@ -240,6 +240,8 @@ packages.KEYWORD = {
   exports: {},
   use: nil
 };
+
+jscl.CL = packages.CL.exports;
 
 function unboundFunction () {
   throw new Error("Function '" + this.name + "'undefined");
