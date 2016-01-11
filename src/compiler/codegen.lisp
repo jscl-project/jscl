@@ -206,27 +206,32 @@
 
 ;;; Process the Javascript AST to reduce some syntax sugar.
 (defun js-expand-expr (form)
-  (if (consp form)
-      (case (car form)
-        (+
-         (case (length (cdr form))
-           (1 `(unary+ ,(cadr form)))
-           (t (reduce (lambda (x y) `(+ ,x ,y)) (cdr form)))))
-        (-
-         (case (length (cdr form))
-           (1 `(unary- ,(cadr form)))
-           (t (reduce (lambda (x y) `(- ,x ,y)) (cdr form)))))
-        (*
-         (case (length (cdr form))
-           (0 1)
-           (t (reduce (lambda (x y) `(* ,x ,y)) (cdr form)))))
-        ((and or)
-         (reduce (lambda (x y) `(,(car form) ,x ,y)) (cdr form)))
-        ((progn comma)
-         (reduce (lambda (x y) `(comma ,x ,y)) (cdr form) :from-end t))
-        (t
-         (js-macroexpand form)))
-      form))
+  (flet ((reduce-expr (op &key from-end)
+           (reduce (lambda (x y) `(,op ,x ,y))
+                   (mapcar #'js-expand-expr (cdr form))
+                   :from-end from-end)))
+
+    (if (consp form)
+        (case (car form)
+          (+
+           (case (length (cdr form))
+             (1 `(unary+ ,(cadr form)))
+             (t (reduce-expr '+))))
+          (-
+           (case (length (cdr form))
+             (1 `(unary- ,(cadr form)))
+             (t (reduce-expr '-))))
+          (*
+           (case (length (cdr form))
+             (0 1)
+             (t (reduce-expr '*))))
+          ((and or)
+           (reduce-expr (car form)))
+          ((progn comma)
+           (reduce-expr 'comma :from-end t))
+          (t
+           (js-macroexpand form)))
+        form)))
 
 ;;; It is the more complicated function of the generator. It takes a
 ;;; operator expression and generate Javascript for it. It will
