@@ -50,6 +50,28 @@
   `(if ,expr ,(convert t) ,(convert nil)))
 
 
+
+
+;;;; Target
+;;;
+;;; Targets allow us to accumulate Javascript statements
+
+(def!struct target
+    code)
+
+(defvar *target*)
+
+(defun push-to-target (js &optional (target *target*))
+  (push js (target-code target)))
+
+(defun target-statements (&optional (target *target*))
+  (reverse (target-code target)))
+
+(defun emit (expr &optional var (target *target*))
+  (let ((stmt (if var `(var (,var ,expr)) expr)))
+    (push-to-target stmt target)))
+
+
 ;;; A Form can return a multiple values object calling VALUES, like
 ;;; values(arg1, arg2, ...). It will work in any context, as well as
 ;;; returning an individual object. However, if the special variable
