@@ -1113,14 +1113,17 @@
     out))
 
 (define-builtin cdr (x)
-  `(selfcall
-    (var (tmp ,x))
-    (if (=== tmp ,(convert nil))
-        (return ,(convert nil))
-        (if (and (== (typeof tmp) "object")
-                 (in "cdr" tmp))
-            (return (get tmp "cdr"))
-            (throw "CDR called on non-list argument")))))
+  (let ((tmp (target-var))
+        (out (target-var)))
+    (emit x tmp)
+    (emit `(var ,out))
+    (emit `(if (=== ,tmp ,(convert nil))
+               (= ,out ,(convert nil))
+               (if (and (== (typeof ,tmp) "object")
+                        (in "cdr" ,tmp))
+                   (= ,out (get ,tmp "cdr"))
+                   (throw "CDR called on non-list argument"))))
+    out))
 
 (define-builtin rplaca (x new)
   `(selfcall
