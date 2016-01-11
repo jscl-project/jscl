@@ -1100,14 +1100,17 @@
                     (in "car" tmp))))))
 
 (define-builtin car (x)
-  `(selfcall
-    (var (tmp ,x))
-    (if (=== tmp ,(convert nil))
-        (return ,(convert nil))
-        (if (and (== (typeof tmp) "object")
-                 (in "car" tmp))
-            (return (get tmp "car"))
-            (throw "CAR called on non-list argument")))))
+  (let ((tmp (target-var))
+        (out (target-var)))
+    (emit x tmp)
+    (emit `(var ,out))
+    (emit `(if (=== ,tmp ,(convert nil))
+               (= ,out ,(convert nil))
+               (if (and (== (typeof ,tmp) "object")
+                        (in "car" ,tmp))
+                   (= ,out (get ,tmp "car"))
+                   (throw "CAR called on non-list argument"))))
+    out))
 
 (define-builtin cdr (x)
   `(selfcall
