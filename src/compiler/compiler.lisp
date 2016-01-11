@@ -1606,12 +1606,13 @@
 
 
 (defun process-toplevel (sexp &optional multiple-value-p return-p)
-  (let ((*toplevel-compilations* nil))
+  (let ((*toplevel-compilations* nil)
+        (*target* (make-target)))
     (let ((code (convert-toplevel sexp multiple-value-p return-p)))
       `(progn
          ,@(get-toplevel-compilations)
+         ,@(target-statements)
          ,code))))
-
 
 
 (defun compile-toplevel (sexp &optional multiple-value-p return-p)
