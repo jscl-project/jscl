@@ -27,7 +27,7 @@
                     (cond
                       ((symbolp sd)
                        (list sd))
-                      ((and (listp sd) (car sd) (cddr sd))
+                      ((and (listp sd) (car sd) (null (cddr sd)))
                        sd)
                       (t
                        (error "Bad slot description `~S'." sd))))
