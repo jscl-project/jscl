@@ -57,7 +57,8 @@
 ;;; Targets allow us to accumulate Javascript statements
 
 (def!struct target
-    code)
+    code
+    variable-counter)
 
 (defvar *target*)
 
@@ -66,6 +67,10 @@
 
 (defun target-statements (&optional (target *target*))
   (reverse (target-code target)))
+
+(defun target-var (&optional (target *target*))
+  (incf (target-variable-counter target))
+  (make-symbol (concat "v" (integer-to-string (target-variable-counter target)))))
 
 (defun emit (expr &optional var (target *target*))
   (let ((stmt (if var `(var (,var ,expr)) expr)))
