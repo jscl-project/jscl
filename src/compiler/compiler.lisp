@@ -1497,10 +1497,10 @@
            (return ,(convert (car (last sexps)) *multiple-value-p*)))
         `(progn ,@(mapcar #'convert sexps)))))
 
-(defun convert (sexp &optional multiple-value-p)
+(defun convert-1 (sexp &optional multiple-value-p)
   (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
     (when expandedp
-      (return-from convert (convert sexp multiple-value-p)))
+      (return-from convert-1 (convert sexp multiple-value-p)))
     ;; The expression has been macroexpanded. Now compile it!
     (let ((*multiple-value-p* multiple-value-p)
           (*convert-level* (1+ *convert-level*)))
@@ -1535,6 +1535,10 @@
          (error "How should I compile `~S'?" sexp))))))
 
 
+(defun convert (sexp &optional multiple-value-p)
+  (convert-1 sexp multiple-value-p))
+
+
 (defvar *compile-print-toplevels* nil)
 
 (defun truncate-string (string &optional (width 60))
@@ -1549,8 +1553,7 @@
       (return-from convert-toplevel
         (convert-toplevel sexp multiple-value-p return-p))))
   ;; Process as toplevel
-  (let ((*convert-level* -1)
-        (*toplevel-compilations* nil))
+  (let ((*convert-level* -1))
     (cond
       ;; Non-empty toplevel progn
       ((and (consp sexp)
@@ -1558,25 +1561,33 @@
             (cdr sexp))
        `(progn
           ;; Discard all except the last value
-          ,@(mapcar (lambda (s) (convert-toplevel s nil nil))
+          ,@(mapcar (lambda (s) (convert-toplevel s nil))
                     (butlast (cdr sexp)))
           ;; Return the last value(s)
-          ,(convert-toplevel (first (last (cdr sexp)))
-                             multiple-value-p return-p)))
+          ,(convert-toplevel (first (last (cdr sexp))) multiple-value-p return-p)))
       (t
        (when *compile-print-toplevels*
          (let ((form-string (prin1-to-string sexp)))
            (format t "Compiling ~a...~%" (truncate-string form-string))))
+
        (let ((code (convert sexp multiple-value-p)))
-         `(progn
-            ,@(get-toplevel-compilations)
-            ,(if return-p
-                 `(return ,code)
-                 code)))))))
+         (if return-p
+             `(return ,code)
+             code))))))
+
+
+(defun process-toplevel (sexp &optional multiple-value-p return-p)
+  (let ((*toplevel-compilations* nil))
+    (let ((code (convert-toplevel sexp multiple-value-p return-p)))
+      `(progn
+         ,@(get-toplevel-compilations)
+         ,code))))
+
+
 
 (defun compile-toplevel (sexp &optional multiple-value-p return-p)
   (with-output-to-string (*js-output*)
-    (js (convert-toplevel sexp multiple-value-p return-p))))
+    (js (process-toplevel sexp multiple-value-p return-p))))
 
 
 (defmacro with-compilation-environment (&body body)
