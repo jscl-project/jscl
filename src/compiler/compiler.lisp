@@ -1565,8 +1565,14 @@
 
 
 (defun convert (sexp &optional multiple-value-p)
-  (convert-1 sexp multiple-value-p))
-
+  (let* ((*target* (make-target))
+         (expr (convert-1 sexp multiple-value-p)))
+    `(selfcall
+      ,@(target-statements *target*)
+      (return ,(or expr
+                ;; convert is allowed to return NIL. Temporarily,
+                ;; convert it to something else.
+                12345670)))))
 
 (defvar *compile-print-toplevels* nil)
 
