@@ -57,8 +57,7 @@
 ;;; Targets allow us to accumulate Javascript statements
 
 (def!struct target
-    code
-    variable-counter)
+    code)
 
 (defvar *target*)
 
@@ -67,10 +66,6 @@
 
 (defun target-statements (&optional (target *target*))
   (reverse (target-code target)))
-
-(defun target-var (&optional (target *target*))
-  (incf (target-variable-counter target))
-  (make-symbol (concat "v" (integer-to-string (target-variable-counter target)))))
 
 (defun emit (expr &optional var (target *target*))
   (let ((stmt (if var `(var (,var ,expr)) expr)))
@@ -129,7 +124,7 @@
 (defvar *environment*)
 (defvar *variable-counter*)
 
-(defun gvarname (symbol)
+(defun gvarname (&optional symbol)
   (declare (ignore symbol))
   (incf *variable-counter*)
   (make-symbol (concat "v" (integer-to-string *variable-counter*))))
@@ -1100,8 +1095,8 @@
                     (in "car" tmp))))))
 
 (define-builtin car (x)
-  (let ((tmp (target-var))
-        (out (target-var)))
+  (let ((tmp (gvarname))
+        (out (gvarname)))
     (emit x tmp)
     (emit `(var ,out))
     (emit `(if (=== ,tmp ,(convert nil))
@@ -1113,8 +1108,8 @@
     out))
 
 (define-builtin cdr (x)
-  (let ((tmp (target-var))
-        (out (target-var)))
+  (let ((tmp (gvarname))
+        (out (gvarname)))
     (emit x tmp)
     (emit `(var ,out))
     (emit `(if (=== ,tmp ,(convert nil))
