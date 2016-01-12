@@ -19,8 +19,10 @@
 (/debug "loading toplevel.lisp!")
 
 (defun eval (x)
-  (with-compilation-environment
-    (js-eval (compile-toplevel x t t))))
+  (let ((jscode
+         (with-compilation-environment
+             (compile-toplevel x t t))))
+    (js-eval jscode)))
 
 (defvar * nil)
 (defvar ** nil)
