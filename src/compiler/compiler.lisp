@@ -1603,13 +1603,9 @@
 
 ;;; Like `convert', but it compiles into a block of statements insted.
 (defun convert-to-block (sexp &optional out multiple-value-p)
-  (let* ((*target* (make-target))
-         (tmp (convert sexp multiple-value-p)))
-    `(progn
-       ,@(target-statements)
-       ,@(if out
-             `((= ,out ,(or tmp 12345670)))
-             '()))))
+  (let* ((*target* (make-target)))
+    (convert* sexp out multiple-value-p)
+    `(progn ,@(target-statements))))
 
 
 (defvar *compile-print-toplevels* nil)
