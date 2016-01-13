@@ -1176,14 +1176,12 @@
   (convert-to-bool `(!== (get ,x "fvalue") undefined)))
 
 (define-builtin symbol-value (x)
-  (let ((symbol (gvarname))
-        (value (gvarname)))
+  (let ((value (gvarname)))
     ;; TODO: probably redundant when convert knows how to return a
     ;; single symbol.
-    (emit `(var (,symbol ,x)))
-    (emit `(var (,value (get ,symbol "value"))))
+    (emit `(var (,value (get ,x "value"))))
     (emit `(if (=== ,value undefined)
-               (throw (+ "Variable `" (get ,symbol "name") "' is unbound."))))
+               (throw (+ "Variable `" (get ,x "name") "' is unbound."))))
     value))
 
 (define-builtin symbol-function (x)
