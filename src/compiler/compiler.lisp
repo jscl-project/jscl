@@ -74,6 +74,9 @@
 ;;; VAR. VAR is returned.
 ;;; 
 (defun emit (expr &optional var (target *target*))
+  (when (eq var t)
+    (setq var (gvarname))
+    (emit `(var ,var)))
   (let ((stmt (if var `(= ,var ,expr) expr)))
     (push-to-target stmt target)
     var))
@@ -1594,9 +1597,6 @@
 ;;; Like `convert', but returns a symbol and emit the result of the
 ;;; compilation.
 (defun convert* (sexp &optional out multiple-value-p)
-  (when (eq out t)
-    (setq out (gvarname))
-    (emit `(var ,out)))
   (let ((res (convert sexp multiple-value-p)))
     (emit res out)))
 
