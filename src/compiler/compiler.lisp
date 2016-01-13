@@ -239,9 +239,26 @@
          (lambda ,args (block ,name ,@body))))
 
 (define-compilation if (condition true &optional false)
-  `(if (!== ,(convert condition) ,(convert nil))
-       ,(convert true *multiple-value-p*)
-       ,(convert false *multiple-value-p*)))
+  (let* ((result-var (gvarname))
+         (condition-var (convert condition))
+
+         (true-branch (make-target))
+         (true-var (let ((*target* true-branch))
+                     (convert true *multiple-value-p*)))
+
+         (false-branch (make-target))
+         (false-var (let ((*target* false-branch))
+                      (convert false *multiple-value-p*))))
+
+    (emit `(if (!== ,condition-var ,(convert nil))
+               (progn
+                 ,@(target-statements true-branch)
+                 (= ,result-var ,true-var))
+               (progn
+                 ,@(target-statements false-branch)
+                 (= ,result-var ,false-var)))
+          result-var)))
+
 
 (defvar *ll-keywords* '(&optional &rest &key))
 
