@@ -67,8 +67,14 @@
 (defun target-statements (&optional (target *target*))
   (reverse (target-code target)))
 
+;;; Emit an expression or statement into target.
+;;;
+;;; If the optional argument VAR is provideed, EXPR must be an
+;;; expression, the result of the expression will be assigned into
+;;; VAR. VAR is returned.
+;;; 
 (defun emit (expr &optional var (target *target*))
-  (let ((stmt (if var `(var (,var ,expr)) expr)))
+  (let ((stmt (if var `(= ,var ,expr) expr)))
     (push-to-target stmt target)
     var))
 
@@ -250,14 +256,15 @@
          (false-var (let ((*target* false-branch))
                       (convert false *multiple-value-p*))))
 
+    (emit `(var ,result-var))
     (emit `(if (!== ,condition-var ,(convert nil))
                (progn
                  ,@(target-statements true-branch)
                  (= ,result-var ,true-var))
                (progn
                  ,@(target-statements false-branch)
-                 (= ,result-var ,false-var)))
-          result-var)))
+                 (= ,result-var ,false-var))))
+    result-var))
 
 
 (defvar *ll-keywords* '(&optional &rest &key))
@@ -1115,7 +1122,7 @@
 (define-builtin car (x)
   (let ((tmp (gvarname))
         (out (gvarname)))
-    (emit x tmp)
+    (emit `(var (,tmp ,x)))
     (emit `(var ,out))
     (emit `(if (=== ,tmp ,(convert nil))
                (= ,out ,(convert nil))
@@ -1128,7 +1135,7 @@
 (define-builtin cdr (x)
   (let ((tmp (gvarname))
         (out (gvarname)))
-    (emit x tmp)
+    (emit `(var (,tmp ,x)))
     (emit `(var ,out))
     (emit `(if (=== ,tmp ,(convert nil))
                (= ,out ,(convert nil))
