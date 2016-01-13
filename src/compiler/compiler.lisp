@@ -995,21 +995,10 @@
     `(define-raw-builtin ,name ,args
        (let ((,g!out (gvarname))
              ,@(mapcar (lambda (arg)
-                         `(,arg
-                           ;; TODO: This variable assignment will be
-                           ;; deprecated when `convert' is ready to
-                           ;; generate targets. Until then, we
-                           ;; generate this extra indirection so the
-                           ;; primitives will receive already a symbol
-                           ;; and we will not have to rewrite them
-                           ;; later.
-                           (let ((out (gvarname))
-                                 (res (convert ,arg)))
-                             (emit `(var (,out ,res)))
-                             out)))
+                         `(,arg (convert* ,arg)))
                        args))
-         (emit  `(var ,,g!out))
-         (emit  `(= ,,g!out ,(progn ,@body)))
+         (emit `(var ,,g!out))
+         (emit `(= ,,g!out ,(progn ,@body)))
          ,g!out))))
 
 ;;; VARIABLE-ARITY compiles variable arity operations. ARGS stands for
@@ -1615,6 +1604,16 @@
                 ;; convert is allowed to return NIL. Temporarily,
                 ;; convert it to something else.
                 12345670)))))
+
+
+;;; Like `convert', but returns a symbol and emit the result of the
+;;; compilation.
+(defun convert* (sexp &optional multiple-value-p)
+  (let ((out (gvarname))
+        (res (convert sexp multiple-value-p)))
+    (emit `(var (,out ,res)))
+    out))
+
 
 
 ;;; Like `convert', but it compiles into a block of statements insted.
