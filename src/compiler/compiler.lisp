@@ -246,25 +246,12 @@
 
 (define-compilation if (condition true &optional false)
   (let* ((result-var (gvarname))
-         (condition-var (convert condition))
-
-         (true-branch (make-target))
-         (true-var (let ((*target* true-branch))
-                     (convert true *multiple-value-p*)))
-
-         (false-branch (make-target))
-         (false-var (let ((*target* false-branch))
-                      (convert false *multiple-value-p*))))
-
+         (condition-var (convert condition)))
     (emit `(var ,result-var))
     (emit `(if (!== ,condition-var ,(convert nil))
-               (progn
-                 ,@(target-statements true-branch)
-                 (= ,result-var ,true-var))
-               (progn
-                 ,@(target-statements false-branch)
-                 (= ,result-var ,false-var))))
-    result-var))
+               ,(convert-to-block true result-var *multiple-value-p*)
+               ,(convert-to-block false result-var *multiple-value-p*))
+          result-var)))
 
 
 (defvar *ll-keywords* '(&optional &rest &key))
@@ -1604,6 +1591,18 @@
                 ;; convert is allowed to return NIL. Temporarily,
                 ;; convert it to something else.
                 12345670)))))
+
+
+;;; Like `convert', but it compiles into a block of statements insted.
+(defun convert-to-block (sexp &optional out multiple-value-p)
+  (let* ((*target* (make-target))
+         (tmp (convert sexp multiple-value-p)))
+    `(progn
+       ,@(target-statements)
+       ,@(if out
+             `((= ,out ,(or tmp 12345670)))
+             '()))))
+
 
 (defvar *compile-print-toplevels* nil)
 
