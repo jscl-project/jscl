@@ -248,13 +248,12 @@
          (lambda ,args (block ,name ,@body))))
 
 (define-compilation if (condition true &optional false)
-  (let* ((result-var (gvarname))
-         (condition-var (convert condition)))
+  (let* ((result-var (gvarname)))
     (emit `(var ,result-var))
-    (emit `(if (!== ,condition-var ,(convert nil))
+    (emit `(if (!== ,(convert* condition t) ,(convert nil))
                ,(convert-to-block true result-var *multiple-value-p*)
-               ,(convert-to-block false result-var *multiple-value-p*))
-          result-var)))
+               ,(convert-to-block false result-var *multiple-value-p*)))
+    result-var))
 
 
 (defvar *ll-keywords* '(&optional &rest &key))
