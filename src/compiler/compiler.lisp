@@ -994,7 +994,20 @@
   (let ((g!out (gensym)))
     `(define-raw-builtin ,name ,args
        (let ((,g!out (gvarname))
-             ,@(mapcar (lambda (arg) `(,arg (convert ,arg))) args))
+             ,@(mapcar (lambda (arg)
+                         `(,arg
+                           ;; TODO: This variable assignment will be
+                           ;; deprecated when `convert' is ready to
+                           ;; generate targets. Until then, we
+                           ;; generate this extra indirection so the
+                           ;; primitives will receive already a symbol
+                           ;; and we will not have to rewrite them
+                           ;; later.
+                           (let ((out (gvarname))
+                                 (res (convert ,arg)))
+                             (emit `(var (,out ,res)))
+                             out)))
+                       args))
          (emit  `(var ,,g!out))
          (emit  `(= ,,g!out ,(progn ,@body)))
          ,g!out))))
