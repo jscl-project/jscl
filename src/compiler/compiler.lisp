@@ -990,16 +990,23 @@
          (lambda ,args
            (block ,name ,@body))))
 
+(defvar *out*)
+
+
+(defmacro define-builtin* (name args &body body)
+  `(define-raw-builtin ,name ,args
+     (let ((*out* (gvarname))
+           ,@(mapcar (lambda (arg)
+                       `(,arg (convert* ,arg)))
+                     args))
+       (emit `(var ,*out*))
+       (progn ,@body)
+       *out*)))
+
 (defmacro define-builtin (name args &body body)
-  (let ((g!out (gensym)))
-    `(define-raw-builtin ,name ,args
-       (let ((,g!out (gvarname))
-             ,@(mapcar (lambda (arg)
-                         `(,arg (convert* ,arg)))
-                       args))
-         (emit `(var ,,g!out))
-         (emit `(= ,,g!out ,(progn ,@body)))
-         ,g!out))))
+  `(define-builtin* ,name ,args
+     (emit (progn ,@body) *out*)))
+
 
 ;;; VARIABLE-ARITY compiles variable arity operations. ARGS stands for
 ;;; a variable which holds a list of forms. It will compile them and
@@ -1120,27 +1127,21 @@
               `(and (== (typeof tmp) "object")
                     (in "car" tmp))))))
 
-(define-builtin car (x)
-  (let ((out (gvarname)))
-    (emit `(var ,out))
-    (emit `(if (=== ,x ,(convert nil))
-               (= ,out ,(convert nil))
-               (if (and (== (typeof ,x) "object")
-                        (in "car" ,x))
-                   (= ,out (get ,x "car"))
-                   (throw "CAR called on non-list argument"))))
-    out))
+(define-builtin* car (x)
+  (emit `(if (=== ,x ,(convert nil))
+             (= ,*out* ,(convert nil))
+             (if (and (== (typeof ,x) "object")
+                      (in "car" ,x))
+                 (= ,*out* (get ,x "car"))
+                 (throw "CAR called on non-list argument")))))
 
-(define-builtin cdr (x)
-  (let ((out (gvarname)))
-    (emit `(var ,out))
-    (emit `(if (=== ,x ,(convert nil))
-               (= ,out ,(convert nil))
-               (if (and (== (typeof ,x) "object")
-                        (in "cdr" ,x))
-                   (= ,out (get ,x "cdr"))
-                   (throw "CDR called on non-list argument"))))
-    out))
+(define-builtin* cdr (x)
+  (emit `(if (=== ,x ,(convert nil))
+             (= ,*out* ,(convert nil))
+             (if (and (== (typeof ,x) "object")
+                      (in "cdr" ,x))
+                 (= ,*out* (get ,x "cdr"))
+                 (throw "CDR called on non-list argument")))))
 
 (define-builtin rplaca (x new)
   `(selfcall
