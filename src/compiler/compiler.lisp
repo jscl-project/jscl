@@ -1178,12 +1178,15 @@
   (convert-to-bool `(!== (get ,x "fvalue") undefined)))
 
 (define-builtin symbol-value (x)
-  `(selfcall
-    (var (symbol ,x)
-         (value (get symbol "value")))
-    (if (=== value undefined)
-        (throw (+ "Variable `" (get symbol "name") "' is unbound.")))
-    (return value)))
+  (let ((symbol (gvarname))
+        (value (gvarname)))
+    ;; TODO: probably redundant when convert knows how to return a
+    ;; single symbol.
+    (emit `(var (,symbol ,x)))
+    (emit `(var (,value (get ,symbol "value"))))
+    (emit `(if (=== ,value undefined)
+               (throw (+ "Variable `" (get ,symbol "name") "' is unbound."))))
+    value))
 
 (define-builtin symbol-function (x)
   `(call-internal |symbolFunction| ,x))
