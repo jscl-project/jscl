@@ -991,9 +991,13 @@
            (block ,name ,@body))))
 
 (defmacro define-builtin (name args &body body)
-  `(define-raw-builtin ,name ,args
-     (let ,(mapcar (lambda (arg) `(,arg (convert ,arg))) args)
-       ,@body)))
+  (let ((g!out (gensym)))
+    `(define-raw-builtin ,name ,args
+       (let ((,g!out (gvarname))
+             ,@(mapcar (lambda (arg) `(,arg (convert ,arg))) args))
+         (emit  `(var ,,g!out))
+         (emit  `(= ,,g!out ,(progn ,@body)))
+         ,g!out))))
 
 ;;; VARIABLE-ARITY compiles variable arity operations. ARGS stands for
 ;;; a variable which holds a list of forms. It will compile them and
