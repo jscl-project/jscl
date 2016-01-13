@@ -997,7 +997,7 @@
   `(define-raw-builtin ,name ,args
      (let ((*out* (gvarname))
            ,@(mapcar (lambda (arg)
-                       `(,arg (convert* ,arg)))
+                       `(,arg (convert* ,arg t)))
                      args))
        (emit `(var ,*out*))
        (progn ,@body)
@@ -1607,11 +1607,12 @@
 
 ;;; Like `convert', but returns a symbol and emit the result of the
 ;;; compilation.
-(defun convert* (sexp &optional multiple-value-p)
-  (let ((out (gvarname))
-        (res (convert sexp multiple-value-p)))
-    (emit `(var (,out ,res)))
-    out))
+(defun convert* (sexp &optional out multiple-value-p)
+  (when (eq out t)
+    (setq out (gvarname))
+    (emit `(var ,out)))
+  (let ((res (convert sexp multiple-value-p)))
+    (emit res out)))
 
 
 
