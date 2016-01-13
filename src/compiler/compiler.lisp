@@ -1121,11 +1121,9 @@
   `(object "car" ,x "cdr" ,y))
 
 (define-builtin consp (x)
-  `(selfcall
-    (var (tmp ,x))
-    (return ,(convert-to-bool
-              `(and (== (typeof tmp) "object")
-                    (in "car" tmp))))))
+  (convert-to-bool
+   `(and (== (typeof ,x) "object")
+         (in "car" ,x))))
 
 (define-builtin* car (x)
   (emit `(if (=== ,x ,(convert nil))
@@ -1144,16 +1142,12 @@
                  (throw "CDR called on non-list argument")))))
 
 (define-builtin rplaca (x new)
-  `(selfcall
-     (var (tmp ,x))
-     (= (get tmp "car") ,new)
-     (return tmp)))
+  (emit `(= (get ,x "car") ,new))
+  x)
 
 (define-builtin rplacd (x new)
-  `(selfcall
-     (var (tmp ,x))
-     (= (get tmp "cdr") ,new)
-     (return tmp)))
+  (emit `(= (get ,x "cdr") ,new))
+  x)
 
 (define-builtin symbolp (x)
   (convert-to-bool `(instanceof ,x (internal |Symbol|))))
@@ -1176,14 +1170,10 @@
 (define-builtin fboundp (x)
   (convert-to-bool `(!== (get ,x "fvalue") undefined)))
 
-(define-builtin symbol-value (x)
-  (let ((value (gvarname)))
-    ;; TODO: probably redundant when convert knows how to return a
-    ;; single symbol.
-    (emit `(var (,value (get ,x "value"))))
-    (emit `(if (=== ,value undefined)
-               (throw (+ "Variable `" (get ,x "name") "' is unbound."))))
-    value))
+(define-builtin* symbol-value (x)
+  (emit `(get ,x "value") *out*)
+  (emit `(if (=== ,*out* undefined)
+             (throw (+ "Variable `" (get ,x "name") "' is unbound.")))))
 
 (define-builtin symbol-function (x)
   `(call-internal |symbolFunction| ,x))
@@ -1201,12 +1191,10 @@
   `(call-internal |char_from_codepoint| ,x))
 
 (define-builtin characterp (x)
-  `(selfcall
-    (var (x ,x))
-    (return ,(convert-to-bool
-              `(and (== (typeof x) "string")
-                    (or (== (get x "length") 1)
-                        (== (get x "length") 2)))))))
+  (convert-to-bool
+   `(and (== (typeof ,x) "string")
+         (or (== (get ,x "length") 1)
+             (== (get ,x "length") 2)))))
 
 (define-builtin char-upcase (x)
   `(call-internal |safe_char_upcase| ,x))
@@ -1215,12 +1203,10 @@
   `(call-internal |safe_char_downcase| ,x))
 
 (define-builtin stringp (x)
-  `(selfcall
-    (var (x ,x))
-    (return ,(convert-to-bool
-              `(and (and (===(typeof x) "object")
-                         (in "length" x))
-                    (== (get x "stringp") 1))))))
+  (convert-to-bool
+   `(and (and (=== (typeof ,x) "object")
+              (in "length" ,x))
+         (== (get ,x "stringp") 1))))
 
 (define-raw-builtin funcall (func &rest args)
   `(selfcall
