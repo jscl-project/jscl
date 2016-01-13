@@ -47,7 +47,7 @@
 
 
 (defun convert-to-bool (expr)
-  `(if ,expr ,(convert t) ,(convert nil)))
+  `(if ,expr ,(convert* t t) ,(convert* nil t)))
 
 
 
@@ -1074,11 +1074,10 @@
 
 (defmacro define-builtin-comparison (op sym)
   `(define-raw-builtin ,op (x &rest args)
-     (let ((out (gvarname))
-           (args (cons x args)))
-       (emit `(var (,out ,(variable-arity args
-                                          (convert-to-bool (comparison-conjuntion args ',sym))))))
-       out)))
+     (let ((args (cons x args)))
+       (emit (variable-arity args
+               (convert-to-bool (comparison-conjuntion args ',sym)))
+             t))))
 
 (define-builtin-comparison > >)
 (define-builtin-comparison < <)
