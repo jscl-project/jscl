@@ -1212,13 +1212,14 @@
          (== (get ,x "stringp") 1))))
 
 (define-raw-builtin funcall (func &rest args)
-  `(selfcall
-    (var (f ,(convert func)))
-    (return (call (if (=== (typeof f) "function")
-                      f
-                      (get f "fvalue"))
-                  ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
-			  (mapcar #'convert args))))))
+  ;; TODO: Use SYMBOL-FUNCTION and optimize so we don't lookup every time.
+  (let ((f (convert* func t)))
+    `(call (if (=== (typeof ,f) "function")
+               ,f
+               (get ,f "fvalue"))
+           ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
+                   (mapcar (lambda (arg) (convert arg t))
+                           args)))))
 
 (define-raw-builtin apply (func &rest args)
   (if (null args)
@@ -1226,20 +1227,20 @@
       (let ((args (butlast args))
             (last (car (last args))))
         `(selfcall
-	  (var (f ,(convert func)))
-	  (var (args ,(list-to-vector
-		       (cons (if *multiple-value-p* '|values| '(internal |pv|))
-			     (mapcar #'convert args)))))
-	  (var (tail ,(convert last)))
-	  (while (!= tail ,(convert nil))
-	    (method-call args "push" (get tail "car"))
-	    (= tail (get tail "cdr")))
-	  (return (method-call (if (=== (typeof f) "function")
-				   f
-				   (get f "fvalue"))
-			       "apply"
-			       this
-			       args))))))
+          (var (f ,(convert func)))
+          (var (args ,(list-to-vector
+                       (cons (if *multiple-value-p* '|values| '(internal |pv|))
+                             (mapcar #'convert args)))))
+          (var (tail ,(convert last)))
+          (while (!= tail ,(convert nil))
+            (method-call args "push" (get tail "car"))
+            (= tail (get tail "cdr")))
+          (return (method-call (if (=== (typeof f) "function")
+                                   f
+                                   (get f "fvalue"))
+                               "apply"
+                               this
+                               args))))))
 
 (define-builtin js-eval (string)
   (if *multiple-value-p*
@@ -1248,8 +1249,8 @@
         (return (method-call |values| "apply" this (call-internal |forcemv| v))))
       `(call-internal |globalEval| (call-internal |xstring| ,string))))
 
-(define-builtin %throw (string)
-  `(selfcall (throw ,string)))
+(define-builtin* %throw (string)
+  (emit `(throw ,string)))
 
 (define-builtin functionp (x)
   (convert-to-bool `(=== (typeof ,x) "function")))
@@ -1265,11 +1266,9 @@
 ;;; future) structures.
 
 (define-builtin storage-vector-p (x)
-  `(selfcall
-    (var (x ,x))
-    (return ,(convert-to-bool
-              `(and (=== (typeof x) "object")
-                    (in "length" x))))))
+  (convert-to-bool
+   `(and (=== (typeof ,x) "object")
+         (in "length" ,x))))
 
 (define-builtin make-storage-vector (n)
   `(selfcall
