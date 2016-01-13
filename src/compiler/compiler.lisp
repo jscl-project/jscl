@@ -1255,11 +1255,9 @@
    `(and (=== (typeof ,x) "object")
          (in "length" ,x))))
 
-(define-builtin make-storage-vector (n)
-  `(selfcall
-    (var (r #()))
-    (= (get r "length") ,n)
-    (return r)))
+(define-builtin* make-storage-vector (n)
+  (emit #() *out*)
+  (emit `(= (get ,*out* "length") ,n)))
 
 (define-builtin storage-vector-size (x)
   `(get ,x "length"))
@@ -1267,27 +1265,20 @@
 (define-builtin resize-storage-vector (vector new-size)
   `(= (get ,vector "length") ,new-size))
 
-(define-builtin storage-vector-ref (vector n)
-  `(selfcall
-    (var (x (property ,vector ,n)))
-    (if (=== x undefined) (throw "Out of range."))
-    (return x)))
+(define-builtin* storage-vector-ref (vector n)
+  (emit `(property ,vector ,n) *out*)
+  (emit `(if (=== ,*out* undefined)
+             (throw "Out of range."))))
 
 (define-builtin storage-vector-set (vector n value)
-  `(selfcall
-    (var (x ,vector))
-    (var (i ,n))
-    (if (or (< i 0) (>= i (get x "length")))
-        (throw "Out of range."))
-    (return (= (property x i) ,value))))
+  (emit `(if (or (< ,n 0) (>= ,n (get ,vector "length")))
+             (throw "Out of range.")))
+  `(= (property ,vector ,n) ,value))
 
-(define-builtin concatenate-storage-vector (sv1 sv2)
-  `(selfcall
-     (var (sv1 ,sv1))
-     (var (r (method-call sv1 "concat" ,sv2)))
-     (= (get r "type") (get sv1 "type"))
-     (= (get r "stringp") (get sv1 "stringp"))
-     (return r)))
+(define-builtin* concatenate-storage-vector (sv1 sv2)
+  (let ((r (emit `(method-call ,sv1 "concat" ,sv2) *out*)))
+    (emit `(= (get ,r "type") (get ,sv1 "type")))
+    (emit `(= (get ,r "stringp") (get ,sv1 "stringp")))))
 
 (define-builtin get-internal-real-time ()
   `(method-call (new (call |Date|)) "getTime"))
