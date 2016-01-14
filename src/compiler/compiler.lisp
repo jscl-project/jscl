@@ -491,29 +491,29 @@
   (let ((b (lookup-in-lexenv var *environment* 'variable)))
     (cond
       ((and b
-	    (eq (binding-type b) 'variable)
-	    (not (member 'special (binding-declarations b)))
-	    (not (member 'constant (binding-declarations b))))
-       `(= ,(binding-value b) ,(convert val)))
+            (eq (binding-type b) 'variable)
+            (not (member 'special (binding-declarations b)))
+            (not (member 'constant (binding-declarations b))))
+       (convert* val (binding-value b)))
+
       ((and b (eq (binding-type b) 'macro))
-       (convert `(setf ,var ,val)))
+       (convert* `(setf ,var ,val)))
+
       (t
-       (convert `(set ',var ,val))))))
+       (convert* `(set ',var ,val))))))
 
 (define-compilation setq (&rest pairs)
-  (when (null pairs)
-    (return-from setq (convert nil)))
-  (with-collector (result)
-    (while t
-      (cond
-        ((null pairs)
-         (return))
-        ((null (cdr pairs))
-         (error "Odd pairs in SETQ"))
-        (t
-         (collect-result (setq-pair (car pairs) (cadr pairs)))
-         (setq pairs (cddr pairs)))))
-    `(progn ,@result)))
+  (cond
+    ((and pairs (null (cddr pairs)))
+     (setq-pair (car pairs) (cadr pairs)))
+    ((null pairs)
+     (return-from setq (convert* nil)))
+    ((null (cdr pairs))
+     (error "Odd pairs in SETQ"))
+    (t
+     (setq-pair (car pairs) (cadr pairs))
+     (convert `(setq ,@(cddr pairs))))))
+
 
 ;;; Compilation of literals an object dumping
 
