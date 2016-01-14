@@ -47,7 +47,11 @@
 
 
 (defun convert-to-bool (expr)
-  `(if ,expr ,(convert* t) ,(convert* nil)))
+  (let ((var (emit expr t)))
+    (emit `(if ,var
+               ,(convert* t)
+               ,(convert* nil))
+          t)))
 
 
 
