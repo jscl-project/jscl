@@ -512,7 +512,7 @@
      (error "Odd pairs in SETQ"))
     (t
      (setq-pair (car pairs) (cadr pairs))
-     (convert `(setq ,@(cddr pairs))))))
+     (convert* `(setq ,@(cddr pairs))))))
 
 
 ;;; Compilation of literals an object dumping
