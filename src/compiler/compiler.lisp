@@ -1203,7 +1203,7 @@
                ,f
                (get ,f "fvalue"))
            ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
-                   (mapcar (lambda (arg) (convert arg t))
+                   (mapcar (lambda (arg) (convert arg))
                            args)))))
 
 (define-raw-builtin apply (func &rest args)
