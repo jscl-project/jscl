@@ -1,13 +1,18 @@
 <!doctype html>
 <html>
   <head>
-    <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <div id="console"></div>
-    <script src="jquery.js" type="text/javascript" charset="utf-8"></script>
-    <script src="jqconsole.min.js" type="text/javascript" charset="utf-8"></script>
-    <script>var jqconsole = $('#console').jqconsole('Running test suit...', '');</script>
+    <pre id="log"></pre>
+    <script>
+      var log = document.getElementById('log');
+      var console = {
+        log: function(msg){ 
+           log.appendChild ( document.createTextNode(msg + '\n') );
+        }
+      };
+      console.log('Running test suite...');
+    </script>
     <script src="jscl.js" type="text/javascript"></script>
     <script src="tests.js" type="text/javascript"></script>
   </body>
