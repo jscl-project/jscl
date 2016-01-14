@@ -150,6 +150,20 @@
     (late-compile `(setq *literal-counter* ,*literal-counter*))))
 
 
+
+(defun compile-application (files output)
+  (with-compilation-environment
+    (with-open-file (out output :direction :output :if-exists :supersede)
+      (format out "(function(jscl){~%")
+      (format out "'use strict';~%")
+      (format out "(function(values, internals){~%")
+      (dolist (input files)
+        (!compile-file input out))
+      (format out "})(jscl.internals.pv, jscl.internals);~%")
+      (format out "})( typeof require !== 'undefined'? require('./jscl'): window.jscl )~%"))))
+
+
+
 (defun bootstrap (&optional verbose)
   (let ((*features* (list* :jscl :jscl-xc *features*))
         (*package* (find-package "JSCL")))
@@ -166,22 +180,21 @@
         (dump-global-environment out)
         (format out "})();~%")))
 
-    ;; Tests
-    (with-compilation-environment
-      (with-open-file (out (merge-pathnames "tests.js" *base-directory*)
-                           :direction :output
-                           :if-exists :supersede)
-        (format out "(function(jscl){~%")
-        (format out "'use strict';~%")
-        (format out "(function(values, internals){~%")
-        (dolist (input (append (directory "tests.lisp")
-                               (directory "tests/*.lisp")
-                               (directory "tests-report.lisp")))
-          (!compile-file input out))
-        (format out "})(jscl.internals.pv, jscl.internals);~%")
-        (format out "})( typeof require !== 'undefined'? require('./jscl'): window.jscl )~%")))
+    (report-undefined-functions)
 
-    (report-undefined-functions)))
+    ;; Tests
+    (compile-application (append (directory "tests.lisp")
+                                 (directory "tests/*.lisp")
+                                 (directory "tests-report.lisp"))
+                         (merge-pathnames "tests.js" *base-directory*))
+
+    ;; Web REPL
+    (compile-application (list #P"repl-web/repl.lisp")
+                         (merge-pathnames "repl-web.js" *base-directory*))
+
+    ;; Node REPL
+    (compile-application (list #P"repl-node/repl.lisp")
+                         (merge-pathnames "repl-node.js" *base-directory*))))
 
 
 ;;; Run the tests in the host Lisp implementation. It is a quick way
