@@ -1075,9 +1075,8 @@
 (defmacro define-builtin-comparison (op sym)
   `(define-raw-builtin ,op (x &rest args)
      (let ((args (cons x args)))
-       (emit (variable-arity args
-               (convert-to-bool (comparison-conjuntion args ',sym)))
-             t))))
+       (variable-arity args
+         (convert-to-bool (comparison-conjuntion args ',sym))))))
 
 (define-builtin-comparison > >)
 (define-builtin-comparison < <)
