@@ -152,12 +152,6 @@
 ;;; Toplevel compilations
 (defvar *toplevel-compilations*)
 
-(defun toplevel-compilation (string)
-  (push string *toplevel-compilations*))
-
-(defun get-toplevel-compilations ()
-  (reverse *toplevel-compilations*))
-
 (defun %compile-defmacro (name lambda)
   (let ((binding (make-binding :name name :type 'macro :value lambda)))
     (push-to-lexenv binding  *environment* 'function))
@@ -592,16 +586,19 @@
                           ;; `dump-global-environment' for further
                           ;; information.
                           (if (eq (car sexp) *magic-unquote-marker*)
-                              (convert (second sexp))
+                              (let ((*target* *toplevel-compilations*))
+                                (convert* (second sexp) t))
                               (dump-cons sexp)))
                          (array (dump-array sexp)))))
            (if (and recursive (not (symbolp sexp)))
                dumped
                (let ((jsvar (genlit)))
                  (push (cons sexp jsvar) *literal-table*)
-                 (toplevel-compilation `(var (,jsvar ,dumped)))
+
+                 (emit `(var (,jsvar ,dumped)) nil *toplevel-compilations*)
                  (when (keywordp sexp)
-                   (toplevel-compilation `(= (get ,jsvar "value") ,jsvar)))
+                   (emit `(= (get ,jsvar "value") ,jsvar) nil *toplevel-compilations*))
+
                  jsvar)))))))
 
 
@@ -1624,11 +1621,10 @@
 
 
 (defun process-toplevel (sexp &optional multiple-value-p return-p)
-  (let ((*toplevel-compilations* nil)
-        (*target* (make-target)))
+  (let* ((*toplevel-compilations* (make-target))
+         (*target* *toplevel-compilations*))
     (let ((code (convert-toplevel sexp multiple-value-p return-p)))
       `(progn
-         ,@(get-toplevel-compilations)
          ,@(target-statements)
          ,code))))
 
