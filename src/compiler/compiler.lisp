@@ -762,17 +762,18 @@
       (convert-block body t t)
       (let ((special-variables (mapcar #'car special-bindings))
             (lexical-variables (mapcar #'cdr special-bindings)))
-        `(return (call-internal
-                  |bindSpecialBindings|
-                  ,(list-to-vector (mapcar #'literal special-variables))
-                  ,(list-to-vector (mapcar #'translate-variable lexical-variables))
-                  (function () ,(convert-block body t t)))))))
+        `(return
+           (call-internal
+            |bindSpecialBindings|
+            ,(list-to-vector (mapcar #'literal special-variables))
+            ,(list-to-vector (mapcar #'translate-variable lexical-variables))
+            (function () ,(convert-block body t t)))))))
 
 
 (define-compilation let (bindings &rest body)
   (multiple-value-bind (lexical-variables values special-bindings)
       (process-bindings bindings)
-    (let ((compiled-values (mapcar #'convert values))
+    (let ((compiled-values (mapcar #'convert* values))
           (*environment* (extend-local-env lexical-variables)))
       `(call (function ,(mapcar #'translate-variable lexical-variables)
                        ,(let-bind-dynamic-vars special-bindings body))
@@ -1025,7 +1026,7 @@
     (dolist (x args)
       (let ((v (gvarname)))
         (push v fargs)
-        (emit `(var (,v ,(convert x))))
+        (emit `(var (,v ,(convert* x))))
         (emit `(if (!= (typeof ,v) "number")
                    (throw "Not a number!")))))
     
@@ -1114,16 +1115,16 @@
          (in "car" ,x))))
 
 (define-builtin* car (x)
-  (emit `(if (=== ,x ,(convert nil))
-             (= ,*out* ,(convert nil))
+  (emit `(if (=== ,x ,(convert* nil))
+             (= ,*out* ,(convert* nil))
              (if (and (== (typeof ,x) "object")
                       (in "car" ,x))
                  (= ,*out* (get ,x "car"))
                  (throw "CAR called on non-list argument")))))
 
 (define-builtin* cdr (x)
-  (emit `(if (=== ,x ,(convert nil))
-             (= ,*out* ,(convert nil))
+  (emit `(if (=== ,x ,(convert* nil))
+             (= ,*out* ,(convert* nil))
              (if (and (== (typeof ,x) "object")
                       (in "cdr" ,x))
                  (= ,*out* (get ,x "cdr"))
@@ -1144,7 +1145,7 @@
   `(new (call-internal |Symbol| (call-internal |lisp_to_js| ,name))))
 
 (define-compilation symbol-name (x)
-  (convert `(oget ,x "name")))
+  (convert* `(oget ,x "name")))
 
 (define-builtin set (symbol value)
   `(= (get ,symbol "value") ,value))
@@ -1203,29 +1204,27 @@
                ,f
                (get ,f "fvalue"))
            ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
-                   (mapcar (lambda (arg) (convert arg))
-                           args)))))
+                   (mapcar #'convert* args)))))
 
-(define-raw-builtin apply (func &rest args)
-  (if (null args)
-      (convert func)
-      (let ((args (butlast args))
-            (last (car (last args))))
-        `(selfcall
-          (var (f ,(convert func)))
-          (var (args ,(list-to-vector
-                       (cons (if *multiple-value-p* '|values| '(internal |pv|))
-                             (mapcar #'convert args)))))
-          (var (tail ,(convert last)))
-          (while (!= tail ,(convert nil))
-            (method-call args "push" (get tail "car"))
-            (= tail (get tail "cdr")))
-          (return (method-call (if (=== (typeof f) "function")
-                                   f
-                                   (get f "fvalue"))
-                               "apply"
-                               this
-                               args))))))
+(define-raw-builtin apply (func arg &rest args)
+  (let ((args (cons arg args)))
+    (let ((args (butlast args))
+          (last (car (last args))))
+      `(selfcall
+        (var (f ,(convert func)))
+        (var (args ,(list-to-vector
+                     (cons (if *multiple-value-p* '|values| '(internal |pv|))
+                           (mapcar #'convert args)))))
+        (var (tail ,(convert last)))
+        (while (!= tail ,(convert nil))
+          (method-call args "push" (get tail "car"))
+          (= tail (get tail "cdr")))
+        (return (method-call (if (=== (typeof f) "function")
+                                 f
+                                 (get f "fvalue"))
+                             "apply"
+                             this
+                             args))))))
 
 (define-builtin js-eval (string)
   (if *multiple-value-p*
@@ -1289,9 +1288,11 @@
       `(method-call (internals |pv|) "apply" this ,array)))
 
 (define-raw-builtin values (&rest args)
-  (if *multiple-value-p*
-      `(call |values| ,@(mapcar #'convert args))
-      `(call-internal |pv| ,@(mapcar #'convert args))))
+  (let ((call
+         (if *multiple-value-p*
+             `(call |values| ,@(mapcar #'convert* args))
+             `(call-internal |pv| ,@(mapcar #'convert* args)))))
+    (emit call t)))
 
 ;;; Javascript FFI
 
@@ -1365,13 +1366,14 @@
     (for-in (key o)
             (call g ,(if *multiple-value-p* '|values| '(internal |pv|))
 		  (property o key)))
-    (return ,(convert nil))))
+    (return ,(convert* nil))))
 
 (define-compilation %js-vref (var)
   `(call-internal |js_to_lisp| ,(make-symbol var)))
 
 (define-compilation %js-vset (var val)
-  `(= ,(make-symbol var) (call-internal |lisp_to_js| ,(convert val))))
+  (let ((value (convert* val)))
+    (emit `(= ,(make-symbol var) (call-internal |lisp_to_js| ,value)) t)))
 
 (define-setf-expander %js-vref (var)
   (let ((new-value (gensym)))
@@ -1483,7 +1485,7 @@
 
 (defun compile-funcall (function args)
   (let* ((arglist (cons (if *multiple-value-p* '|values| '(internal |pv|))
-			(mapcar #'convert args))))
+                        (mapcar #'convert args))))
     (unless (or (symbolp function)
                 (and (consp function)
                      (member (car function) '(lambda oget))))
@@ -1501,12 +1503,12 @@
        `(call ,(convert `(function ,function)) ,@arglist))
       ((and (consp function) (eq (car function) 'oget))
        `(call-internal |js_to_lisp|
-              (call ,(reduce (lambda (obj p)
-                               `(property ,obj (call-internal |xstring| ,p)))
-                             (mapcar #'convert (cdr function)))
-                    ,@(mapcar (lambda (s)
-                                `(call-internal |lisp_to_js| ,(convert s)))
-                              args))))
+                       (call ,(reduce (lambda (obj p)
+                                        `(property ,obj (call-internal |xstring| ,p)))
+                                      (mapcar #'convert (cdr function)))
+                             ,@(mapcar (lambda (s)
+                                         `(call-internal |lisp_to_js| ,(convert s)))
+                                       args))))
       (t
        (error "Bad function descriptor")))))
 
