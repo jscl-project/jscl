@@ -298,3 +298,8 @@
                 (#j:console:log string))))
 
 
+(if (find :node *features*)
+    (setq *root* (%js-vref "global"))
+    (setq *root* (%js-vref "window")))
+
+

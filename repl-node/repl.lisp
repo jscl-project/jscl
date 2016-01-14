@@ -16,7 +16,6 @@
 (defvar *rl*)
 
 (defun node-init ()
-  (setq *root* (%js-vref "global"))
   (setq *standard-output*
         (vector 'stream
                 (lambda (ch)

@@ -95,7 +95,6 @@
 
 
 (defun web-init ()
-  (setq *root* (%js-vref "window"))
   (load-history)
   (welcome-message)
   (#j:window:addEventListener "load" (lambda (&rest args) (toplevel))))
