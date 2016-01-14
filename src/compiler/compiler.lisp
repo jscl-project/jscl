@@ -696,9 +696,9 @@
      (when (find :load-toplevel situations)
        (convert-toplevel `(progn ,@body) *multiple-value-p*)))
     ((find :execute situations)
-     (convert `(progn ,@body) *multiple-value-p*))
+     (convert* `(progn ,@body) t *multiple-value-p*))
     (t
-     (convert nil))))
+     (convert* nil))))
 
 (define-compilation progn (&rest body)
   (dolist (expr (butlast body))
@@ -1618,7 +1618,7 @@
          (let ((form-string (prin1-to-string sexp)))
            (format t "Compiling ~a...~%" (truncate-string form-string))))
 
-       (let ((code (convert sexp multiple-value-p)))
+       (let ((code (convert* sexp t multiple-value-p)))
          (if return-p
              `(return ,code)
              code))))))
