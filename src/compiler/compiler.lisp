@@ -465,22 +465,24 @@
                                     optional-arguments
                                     keyword-arguments
                                     (ll-svars ll)))))
-        (lambda-name/docstring-wrapper name documentation
-         `(function (|values| ,@(mapcar (lambda (x)
-					  (translate-variable x))
-					(append required-arguments optional-arguments)))
-                     ;; Check number of arguments
-                    ,(lambda-check-argument-count n-required-arguments
-                                                  n-optional-arguments
-                                                  (or rest-argument keyword-arguments))
-                    ,(compile-lambda-optional ll)
-                    ,(compile-lambda-rest ll)
-                    ,(compile-lambda-parse-keywords ll)
 
-                    ,(let ((*multiple-value-p* t))
-                          (if block
-                              (convert-block `((block ,block ,@body)) t)
-                              (convert-block body t)))))))))
+        (let* ((args (mapcar #'translate-variable (append required-arguments optional-arguments)))
+               (func
+                `(function (|values| ,@args)
+                           ;; Check number of arguments
+                           ,(lambda-check-argument-count n-required-arguments
+                                                         n-optional-arguments
+                                                         (or rest-argument keyword-arguments))
+                           ,(compile-lambda-optional ll)
+                           ,(compile-lambda-rest ll)
+                           ,(compile-lambda-parse-keywords ll)
+
+                           ,(let ((*multiple-value-p* t))
+                                 (if block
+                                     (convert-block `((block ,block ,@body)) t)
+                                     (convert-block body t))))))
+
+          (emit (lambda-name/docstring-wrapper name documentation func) t))))))
 
 
 (defun setq-pair (var val)
