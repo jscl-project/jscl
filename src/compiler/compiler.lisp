@@ -302,15 +302,6 @@
           (ll-optional-arguments-canonical lambda-list))))
     (remove nil (mapcar #'third args))))
 
-(defun lambda-name/docstring-wrapper (name docstring code)
-  (if (or name docstring)
-      `(selfcall
-        (var (func ,code))
-        ,(when name `(= (get func "fname") ,name))
-        ,(when docstring `(= (get func "docstring") ,docstring))
-        (return func))
-      code))
-
 (defun lambda-check-argument-count
     (n-required-arguments n-optional-arguments rest-p)
   ;; Note: Remember that we assume that the number of arguments of a
@@ -482,7 +473,13 @@
                                      (convert-block `((block ,block ,@body)) t)
                                      (convert-block body t))))))
 
-          (emit (lambda-name/docstring-wrapper name documentation func) t))))))
+          (let ((fnvar (emit func t)))
+            (when name
+              (emit `(= (get ,fnvar "fname") ,name)))
+            (when documentation
+              (emit `(= (get ,fnvar "docstring") ,documentation)))
+            fnvar))))))
+
 
 
 (defun setq-pair (var val)
