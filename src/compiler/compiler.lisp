@@ -86,6 +86,19 @@
     var))
 
 
+;;; Create a set of new targets and initialize them. Then execute
+;;; BODY.  Bindings is a list of the form (TARGET-NAME FORM). FORM is
+;;; evaluated with TARGET-NAME bound to the newly created target, and
+;;; set as the current target (*TARGET*).
+(defmacro let-target ((name) form &body body)
+  `(let ((,name
+          (let ((*target* (make-target)))
+            ,form
+            *target*)))
+     ,@body))
+
+
+
 ;;; A Form can return a multiple values object calling VALUES, like
 ;;; values(arg1, arg2, ...). It will work in any context, as well as
 ;;; returning an individual object. However, if the special variable
@@ -319,8 +332,8 @@
 
 (defun compile-lambda-optional (ll)
   (let* ((optional-arguments (ll-optional-arguments-canonical ll))
-	 (n-required-arguments (length (ll-required-arguments ll)))
-	 (n-optional-arguments (length optional-arguments)))
+         (n-required-arguments (length (ll-required-arguments ll)))
+         (n-optional-arguments (length optional-arguments)))
     (when optional-arguments
       `(switch (nargs)
                ,@(with-collect
@@ -661,28 +674,29 @@
                            ,(convert-block body t))
                  ,@cfuncs) t)))
 
+
+
 (define-compilation labels (definitions &rest body)
   (let* ((fnames (mapcar #'car definitions))
          (*environment*
           (extend-lexenv (mapcar #'make-function-binding fnames)
                          *environment*
-                         'function))
-         (target (make-target)))
+                         'function)))
 
-    (let ((*target* target))
-      ;; Function definitions
-      (dolist (definition definitions)
-        (destructuring-bind (name lambda-list &rest body) definition
-          (emit `(var (,(translate-function name)
-                        ,(compile-lambda lambda-list
-                                         `((block ,name ,@body))))))))
-      ;; Body
-      (emit (convert-block body t)))
+    (let-target (target)
+        (progn
+          ;; Function definitions
+          (dolist (definition definitions)
+            (destructuring-bind (name lambda-list &rest body) definition
+              (emit `(var (,(translate-function name)
+                            ,(compile-lambda lambda-list
+                                             `((block ,name ,@body))))))))
+          ;; Body
+          (emit (convert-block body t)))
 
-
-    (emit `(selfcall
-            ,@(target-statements target))
-          t)))
+      (emit `(selfcall
+              ,@(target-statements target))
+            t))))
 
 ;;; Was the compiler invoked from !compile-file?
 (defvar *compiling-file* nil)
@@ -1529,12 +1543,14 @@
   (multiple-value-bind (sexps decls)
       (parse-body sexps :declarations decls-allowed-p)
     (declare (ignore decls))
-    (let* ((target (make-target)))
-      (let ((*target* target))
-        (mapc #'convert* (butlast sexps))
-        (let ((output (convert* (first (last sexps)) t *multiple-value-p*)))
-          (when return-last-p
-            (emit `(return ,output)))))
+
+    (let-target (target)
+        (progn
+          (mapc #'convert* (butlast sexps))
+          (let ((output (convert* (first (last sexps)) t *multiple-value-p*)))
+            (when return-last-p
+              (emit `(return ,output)))))
+      
       `(progn
          ,@(target-statements target)))))
 
@@ -1598,9 +1614,9 @@
 
 ;;; Like `convert', but it compiles into a block of statements insted.
 (defun convert-to-block (sexp &optional out multiple-value-p)
-  (let* ((*target* (make-target)))
-    (convert* sexp out multiple-value-p)
-    `(progn ,@(target-statements))))
+  (let-target (target)
+      (convert* sexp out multiple-value-p)
+    `(progn ,@(target-statements target))))
 
 
 (defvar *compile-print-toplevels* nil)
