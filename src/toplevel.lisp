@@ -303,3 +303,7 @@
     (setq *root* (%js-vref "window")))
 
 
+
+(defun require (name)
+  (if (find :node *features*)
+      (funcall (%js-vref "require") name)))
