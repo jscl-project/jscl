@@ -667,15 +667,23 @@
          (*environment*
           (extend-lexenv (mapcar #'make-function-binding fnames)
                          *environment*
-                         'function)))
-    `(selfcall
-      ,@(mapcar (lambda (func)
-                  `(var (,(translate-function (car func))
-                          ,(compile-lambda (cadr func)
-                                           `((block ,(car func) ,@(cddr func)))))))
-                definitions)
-      ,(convert-block body t))))
+                         'function))
+         (target (make-target)))
 
+    (let ((*target* target))
+      ;; Function definitions
+      (dolist (definition definitions)
+        (destructuring-bind (name lambda-list &rest body) definition
+          (emit `(var (,(translate-function name)
+                        ,(compile-lambda lambda-list
+                                         `((block ,name ,@body))))))))
+      ;; Body
+      (emit (convert-block body t)))
+
+
+    (emit `(selfcall
+            ,@(target-statements target))
+          t)))
 
 ;;; Was the compiler invoked from !compile-file?
 (defvar *compiling-file* nil)
