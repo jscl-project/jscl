@@ -1530,11 +1530,15 @@
   (multiple-value-bind (sexps decls)
       (parse-body sexps :declarations decls-allowed-p)
     (declare (ignore decls))
-    (if return-last-p
-        `(progn
-           ,@(mapcar #'convert (butlast sexps))
-           (return ,(convert (car (last sexps)) *multiple-value-p*)))
-        `(progn ,@(mapcar #'convert sexps)))))
+    (let* ((target (make-target)))
+      (let ((*target* target))
+        (mapc #'convert* (butlast sexps))
+        (let ((output (convert* (first (last sexps)) t *multiple-value-p*)))
+          (when return-last-p
+            (emit `(return ,output)))))
+      `(progn
+         ,@(target-statements target)))))
+
 
 (defun convert-1 (sexp &optional multiple-value-p)
   (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
