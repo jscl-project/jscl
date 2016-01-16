@@ -262,12 +262,11 @@ internals.symbolFunction = function (symbol){
 };
 
 
-internals.bindSpecialBindings = function (symbols, values, callback){
+internals.withDynamicBindings = function (symbols, callback){
   try {
     symbols.forEach(function(s, i){
       s.stack = s.stack || [];
       s.stack.push(s.value);
-      s.value = values[i];
     });
     return callback();
   } finally {

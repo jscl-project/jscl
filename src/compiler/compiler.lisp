@@ -763,9 +763,8 @@
 
 ;;; Wrap CODE to restore the symbol values of the dynamic
 ;;; bindings. BINDINGS is a list of pairs of the form
-;;; (SYMBOL . PLACE),  where PLACE is a Javascript variable
-;;; name to initialize the symbol value and where to stored
-;;; the old value.
+;;; (SYMBOL . PLACE), where PLACE is a Javascript variable
+;;; name to bind the symbol to.
 (defun let-bind-dynamic-vars (special-bindings body)
   (if (null special-bindings)
       (convert-block body t t)
@@ -773,10 +772,16 @@
             (lexical-variables (mapcar #'cdr special-bindings)))
         `(return
            (call-internal
-            |bindSpecialBindings|
+            |withDynamicBindings|
             ,(list-to-vector (mapcar #'literal special-variables))
-            ,(list-to-vector (mapcar #'translate-variable lexical-variables))
-            (function () ,(convert-block body t t)))))))
+            (function ()
+                      ;; Set the value for the new bindings
+                      ,@(mapcar (lambda (symbol jsvar)
+                                  `(= (get ,symbol "value") ,jsvar))
+                                (mapcar #'literal special-variables)
+                                (mapcar #'translate-variable lexical-variables))
+
+                      ,(convert-block body t t)))))))
 
 
 (define-compilation let (bindings &rest body)
