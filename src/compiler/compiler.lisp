@@ -336,17 +336,14 @@
          (n-optional-arguments (length optional-arguments)))
     (when optional-arguments
       `(switch (nargs)
-               ,@(with-collect
-                  (dotimes (idx n-optional-arguments)
-                    (let ((arg (nth idx optional-arguments)))
-                      (collect `(case ,(+ idx n-required-arguments)))
-                      (collect `(= ,(translate-variable (car arg))
-                                   ,(convert (cadr arg))))
-                      (collect (when (third arg)
-                                 `(= ,(translate-variable (third arg))
-                                     ,(convert nil))))))
-                  (collect 'default)
-                  (collect '(break)))))))
+               ,@(let ((*target* (make-target)))
+                      (dotimes (idx n-optional-arguments (target-statements))
+                        (destructuring-bind (name &optional value present)
+                            (nth idx optional-arguments)
+                          (emit `(case ,(+ idx n-required-arguments)))
+                          (convert* value (translate-variable name))
+                          (when present
+                            (convert* nil (translate-variable present))))))))))
 
 (defun compile-lambda-rest (ll)
   (let ((n-required-arguments (length (ll-required-arguments ll)))
