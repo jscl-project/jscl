@@ -1002,10 +1002,11 @@
   (let ((b (lookup-in-lexenv label *environment* 'gotag)))
     (when (null b)
       (error "Unknown tag `~S'" label))
-    `(selfcall
-      (throw (new (call-internal |TagNLX|
-                                 ,(first (binding-value b))
-                                 ,(second (binding-value b))))))))
+    (emit `(selfcall
+            (throw (new (call-internal |TagNLX|
+                                       ,(first (binding-value b))
+                                       ,(second (binding-value b)))))))
+    0))
 
 (define-compilation unwind-protect (form &rest clean-up)
   (let ((ret (gvarname)))
@@ -1017,22 +1018,23 @@
     ret))
 
 (define-compilation multiple-value-call (func-form &rest forms)
-  `(selfcall
-    (var (func ,(convert* func-form)))
-    (var (args ,(vector (if *multiple-value-p* '|values| '(internal |pv|)))))
-    (return
-      (selfcall
-       (var (|values| (internal |mv|)))
-       (var vs)
-       (progn
-         ,@(with-collect
-            (dolist (form forms)
-              (collect (convert-to-block form 'vs t))
-              (collect `(if (and (=== (typeof vs) "object")
-                                 (in "multiple-value" vs))
-                            (= args (method-call args "concat" vs))
-                            (method-call args "push" vs))))))
-       (return (method-call func "apply" null args))))))
+  (emit `(selfcall
+          (var (func ,(convert* func-form)))
+          (var (args ,(vector (if *multiple-value-p* '|values| '(internal |pv|)))))
+          (return
+            (selfcall
+             (var (|values| (internal |mv|)))
+             (var vs)
+             (progn
+               ,@(with-collect
+                  (dolist (form forms)
+                    (collect (convert-to-block form 'vs t))
+                    (collect `(if (and (=== (typeof vs) "object")
+                                       (in "multiple-value" vs))
+                                  (= args (method-call args "concat" vs))
+                                  (method-call args "push" vs))))))
+             (return (method-call func "apply" null args)))))
+        t))
 
 (define-compilation multiple-value-prog1 (first-form &rest forms)
   (let ((out (convert* first-form t *multiple-value-p*)))
@@ -1261,11 +1263,12 @@
 (define-raw-builtin funcall (func &rest args)
   ;; TODO: Use SYMBOL-FUNCTION and optimize so we don't lookup every time.
   (let ((f (convert* func)))
-    `(call (if (=== (typeof ,f) "function")
-               ,f
-               (get ,f "fvalue"))
-           ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
-                   (mapcar #'convert* args)))))
+    (emit `(call (if (=== (typeof ,f) "function")
+                     ,f
+                     (get ,f "fvalue"))
+                 ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
+                         (mapcar #'convert* args)))
+          t)))
 
 (define-raw-builtin apply (func arg &rest args)
   (let ((args (cons arg args)))
@@ -1362,39 +1365,42 @@
   '(object))
 
 (define-raw-builtin oget* (object key &rest keys)
-  `(selfcall
-    (progn
-      (var (tmp (property ,(convert object) (call-internal |xstring| ,(convert key)))))
-      ,@(mapcar (lambda (key)
-                  `(progn
-                     (if (=== tmp undefined) (return ,(convert nil)))
-                     (= tmp (property tmp (call-internal |xstring| ,(convert key))))))
-                keys))
-    (return (if (=== tmp undefined) ,(convert nil) tmp))))
+  (emit `(selfcall
+          (progn
+            (var (tmp (property ,(convert* object) (call-internal |xstring| ,(convert* key)))))
+            ,@(mapcar (lambda (key)
+                        `(progn
+                           (if (=== tmp undefined) (return ,(convert* nil)))
+                           (= tmp (property tmp (call-internal |xstring| ,(convert* key))))))
+                      keys))
+          (return (if (=== tmp undefined) ,(convert* nil) tmp)))
+        t))
 
 (define-raw-builtin oset* (value object key &rest keys)
   (let ((keys (cons key keys)))
-    `(selfcall
-      (progn
-        (var (obj ,(convert object)))
-        ,@(mapcar (lambda (key)
-                    `(progn
-                       (= obj (property obj (call-internal |xstring| ,(convert key))))
-                       (if (=== obj undefined)
-                           (throw "Impossible to set object property."))))
-                  (butlast keys))
-        (var (tmp
-              (= (property obj (call-internal |xstring| ,(convert (car (last keys)))))
-                 ,(convert value))))
-        (return (if (=== tmp undefined)
-                    ,(convert nil)
-                    tmp))))))
+    (emit `(selfcall
+            (progn
+              (var (obj ,(convert* object)))
+              ,@(mapcar (lambda (key)
+                          `(progn
+                             (= obj (property obj (call-internal |xstring| ,(convert* key))))
+                             (if (=== obj undefined)
+                                 (throw "Impossible to set object property."))))
+                        (butlast keys))
+              (var (tmp
+                    (= (property obj (call-internal |xstring| ,(convert* (car (last keys)))))
+                       ,(convert* value))))
+              (return (if (=== tmp undefined)
+                          ,(convert* nil)
+                          tmp))))
+          t)))
 
 (define-raw-builtin oget (object key &rest keys)
-  `(call-internal |js_to_lisp| ,(convert `(oget* ,object ,key ,@keys))))
+  (emit `(call-internal |js_to_lisp| ,(convert* `(oget* ,object ,key ,@keys)))
+        t))
 
 (define-raw-builtin oset (value object key &rest keys)
-  (convert `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
+  (convert* `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
 
 (define-builtin js-null-p (x)
   (convert-to-bool `(=== ,x null)))
@@ -1681,12 +1687,13 @@
       ((and (consp sexp)
             (eq (car sexp) 'progn)
             (cdr sexp))
-       `(progn
-          ;; Discard all except the last value
-          ,@(mapcar (lambda (s) (convert-toplevel s nil))
-                    (butlast (cdr sexp)))
-          ;; Return the last value(s)
-          ,(convert-toplevel (first (last (cdr sexp))) multiple-value-p return-p)))
+
+       ;; Discard all except the last value
+       (mapc (lambda (s) (convert-toplevel s nil))
+             (butlast (cdr sexp)))
+       
+       (convert-toplevel (first (last (cdr sexp))) multiple-value-p return-p))
+      
       (t
        (when *compile-print-toplevels*
          (let ((form-string (prin1-to-string sexp)))
@@ -1694,7 +1701,7 @@
 
        (let ((code (convert* sexp t multiple-value-p)))
          (if return-p
-             `(return ,code)
+             (emit `(return ,code))
              code))))))
 
 
