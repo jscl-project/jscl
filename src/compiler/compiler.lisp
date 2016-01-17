@@ -1016,7 +1016,7 @@
 
 (define-compilation multiple-value-call (func-form &rest forms)
   `(selfcall
-    (var (func ,(convert func-form)))
+    (var (func ,(convert* func-form)))
     (var (args ,(vector (if *multiple-value-p* '|values| '(internal |pv|)))))
     (return
       (selfcall
@@ -1025,7 +1025,7 @@
        (progn
          ,@(with-collect
             (dolist (form forms)
-              (collect `(= vs ,(convert form t)))
+              (collect (convert-to-block form 'vs t))
               (collect `(if (and (=== (typeof vs) "object")
                                  (in "multiple-value" vs))
                             (= args (method-call args "concat" vs))
@@ -1033,10 +1033,9 @@
        (return (method-call func "apply" null args))))))
 
 (define-compilation multiple-value-prog1 (first-form &rest forms)
-  `(selfcall
-    (var (args ,(convert first-form *multiple-value-p*)))
-    (progn ,@(mapcar #'convert forms))
-    (return args)))
+  (let ((out (convert* first-form t *multiple-value-p*)))
+    (mapc #'convert* forms)
+    out))
 
 (define-compilation backquote (form)
   (convert* (bq-completely-process form) t))
