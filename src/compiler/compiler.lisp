@@ -1571,16 +1571,16 @@
   (multiple-value-bind (sexps decls)
       (parse-body sexps :declarations decls-allowed-p)
     (declare (ignore decls))
-
-    (let-target (target)
-        (progn
-          (mapc #'convert* (butlast sexps))
-          (let ((output (convert* (first (last sexps)) t *multiple-value-p*)))
+    (let (output)
+      (let-target (target)
+          (progn
+            (mapc #'convert* (butlast sexps))
+            (setq output (convert* (first (last sexps)) t *multiple-value-p*))
             (when return-last-p
-              (emit `(return ,output)))))
-      
-      `(progn
-         ,@(target-statements target)))))
+              (emit `(return ,output))))
+        (values `(progn
+                   ,@(target-statements target))
+                output)))))
 
 
 (defun convert-1 (sexp &optional multiple-value-p)
