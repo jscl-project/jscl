@@ -1643,14 +1643,18 @@
 
 
 (defun convert (sexp &optional multiple-value-p)
+  (let ((value (convert-1 sexp multiple-value-p)))
+    value)
+  
+  #+nil
   (let* ((*target* (make-target))
          (expr (convert-1 sexp multiple-value-p)))
     `(selfcall
       ,@(target-statements *target*)
       (return ,(or expr
-                ;; convert is allowed to return NIL. Temporarily,
-                ;; convert it to something else.
-                12345670)))))
+                   ;; convert is allowed to return NIL. Temporarily,
+                   ;; convert it to something else.
+                   12345670)))))
 
 
 ;;; Like `convert', but returns a symbol and emit the result of the
