@@ -709,7 +709,8 @@
        (eval (cons 'progn body)))
      ;; `load-toplevel' is given, then just compile the subforms as usual.
      (when (find :load-toplevel situations)
-       (convert-toplevel `(progn ,@body) *multiple-value-p*)))
+       (convert-toplevel `(progn ,@body) *multiple-value-p*))
+     0)
     ((find :execute situations)
      (convert* `(progn ,@body) t *multiple-value-p*))
     (t
