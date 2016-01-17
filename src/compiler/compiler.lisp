@@ -892,18 +892,19 @@
     (let* ((*environment* (extend-lexenv (list b) *environment* 'block))
            (cbody (convert-block body t)))
       (if (member 'used (binding-declarations b))
-          `(selfcall
-            (try
-             (var (,idvar #()))
-             ,cbody)
-            (catch (cf)
-              (if (and (instanceof cf (internal |BlockNLX|)) (== (get cf "id") ,idvar))
-                  ,(if *multiple-value-p*
-                       `(return (method-call |values| "apply" this
-                                             (call-internal |forcemv| (get cf "values"))))
-                       `(return (get cf "values")))
-                  (throw cf))))
-          `(selfcall ,cbody)))))
+          (emit `(selfcall
+                  (try
+                   (var (,idvar #()))
+                   ,cbody)
+                  (catch (cf)
+                    (if (and (instanceof cf (internal |BlockNLX|)) (== (get cf "id") ,idvar))
+                        ,(if *multiple-value-p*
+                             `(return (method-call |values| "apply" this
+                                                   (call-internal |forcemv| (get cf "values"))))
+                             `(return (get cf "values")))
+                        (throw cf))))
+                t)
+          (emit `(selfcall ,cbody) t)))))
 
 (define-compilation return-from (name &optional value)
   (let* ((b (lookup-in-lexenv name *environment* 'block))
