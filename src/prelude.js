@@ -252,6 +252,7 @@ internals.Symbol = function(name, package_name){
   this.package = package_name;
   this.value = undefined;
   this.fvalue = unboundFunction;
+  this.stack = [];  // Stack of shadowed bindings.
 };
 
 internals.symbolFunction = function (symbol){
@@ -265,7 +266,6 @@ internals.symbolFunction = function (symbol){
 internals.withDynamicBindings = function (symbols, callback){
   try {
     symbols.forEach(function(s, i){
-      s.stack = s.stack || [];
       s.stack.push(s.value);
     });
     return callback();
