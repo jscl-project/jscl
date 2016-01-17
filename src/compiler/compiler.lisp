@@ -347,12 +347,12 @@
 
 (defun compile-lambda-rest (ll)
   (let ((n-required-arguments (length (ll-required-arguments ll)))
-	(n-optional-arguments (length (ll-optional-arguments ll)))
-	(rest-argument (ll-rest-argument ll)))
+        (n-optional-arguments (length (ll-optional-arguments ll)))
+        (rest-argument (ll-rest-argument ll)))
     (when rest-argument
       (let ((js!rest (translate-variable rest-argument)))
         `(progn
-           (var (,js!rest ,(convert nil)))
+           (var (,js!rest ,(convert* nil)))
            (var i)
            (for ((= i (- (nargs) 1))
                  (>= i ,(+ n-required-arguments n-optional-arguments))
@@ -361,61 +361,58 @@
                                     "cdr" ,js!rest))))))))
 
 (defun compile-lambda-parse-keywords (ll)
-  (let ((n-required-arguments
-	 (length (ll-required-arguments ll)))
-	(n-optional-arguments
-	 (length (ll-optional-arguments ll)))
-	(keyword-arguments
-	 (ll-keyword-arguments-canonical ll)))
+  (let ((n-required-arguments (length (ll-required-arguments ll)))
+        (n-optional-arguments (length (ll-optional-arguments ll)))
+        (keyword-arguments (ll-keyword-arguments-canonical ll)))
     `(progn
        ;; Declare variables
-       ,@(with-collect
-          (dolist (keyword-argument keyword-arguments)
-            (destructuring-bind ((keyword-name var) &optional initform svar)
-                keyword-argument
-              (declare (ignore keyword-name initform))
-              (collect `(var ,(translate-variable var)))
-              (when svar
-                (collect
-                    `(var (,(translate-variable svar)
-                            ,(convert nil))))))))
+       ,@(let ((*target* (make-target)))
+              (dolist (keyword-argument keyword-arguments (target-statements))
+                (destructuring-bind ((keyword-name var) &optional initform svar)
+                    keyword-argument
+                  (declare (ignore keyword-name initform))
+                  (emit `(var ,(translate-variable var)))
+                  (when svar
+                    (emit
+                     `(var (,(translate-variable svar)
+                             ,(convert* nil))))))))
 
        ;; Parse keywords
        ,(flet ((parse-keyword (keyarg)
-                (destructuring-bind ((keyword-name var) &optional initform svar) keyarg
-                  ;; ((keyword-name var) init-form svar)
-                  `(progn
-                     (for ((= i ,(+ n-required-arguments n-optional-arguments))
-                           (< i (nargs))
-                           (+= i 2))
-                          ;; ....
-                          (if (=== (arg i) ,(convert keyword-name))
-                              (progn
-                                (= ,(translate-variable var) (arg (+ i 1)))
-                                ,(when svar `(= ,(translate-variable svar)
-                                                ,(convert t)))
-                                (break))))
-                     (if (== i (nargs))
-                         (= ,(translate-variable var) ,(convert initform)))))))
-         (when keyword-arguments
-           `(progn
-              (var i)
-              ,@(mapcar #'parse-keyword keyword-arguments))))
+                              (destructuring-bind ((keyword-name var) &optional initform svar) keyarg
+                                ;; ((keyword-name var) init-form svar)
+                                `(progn
+                                   (for ((= i ,(+ n-required-arguments n-optional-arguments))
+                                         (< i (nargs))
+                                         (+= i 2))
+                                        ;; ....
+                                        (if (=== (arg i) ,(convert* keyword-name))
+                                            (progn
+                                              (= ,(translate-variable var) (arg (+ i 1)))
+                                              ,(when svar `(= ,(translate-variable svar)
+                                                              ,(convert* t)))
+                                              (break))))
+                                   (if (== i (nargs))
+                                       ,(convert-to-block initform (translate-variable var)))))))
+              (when keyword-arguments
+                `(progn
+                   (var i)
+                   ,@(mapcar #'parse-keyword keyword-arguments))))
 
        ;; Check for unknown keywords
        ,(when keyword-arguments
-         `(progn
-            (var (start ,(+ n-required-arguments n-optional-arguments)))
-            (if (== (% (- (nargs) start) 2) 1)
-                (throw "Odd number of keyword arguments."))
-            (for ((= i start) (< i (nargs)) (+= i 2))
-                 (if (and ,@(mapcar (lambda (keyword-argument)
-                                 (destructuring-bind ((keyword-name var) &optional initform svar)
-                                     keyword-argument
-                                   (declare (ignore var initform svar))
-                                   `(!== (arg i) ,(convert keyword-name))))
-                               keyword-arguments))
-                     (throw (+ "Unknown keyword argument " (property (arg i) "name"))))))))))
+              `(progn
+                 (var (start ,(+ n-required-arguments n-optional-arguments)))
+                 (if (== (% (- (nargs) start) 2) 1)
+                     (throw "Odd number of keyword arguments."))
+                 (for ((= i start) (< i (nargs)) (+= i 2))
+                      (if (and ,@(mapcar (lambda (keyword-argument)
+                                           (destructuring-bind ((keyword-name var) &optional initform svar)
+                                               keyword-argument
+                                             (declare (ignore var initform svar))
+                                             `(!== (arg i) ,(convert* keyword-name))))
+                                         keyword-arguments))
+                          (throw (+ "Unknown keyword argument " (property (arg i) "name"))))))))))
 
 (defun parse-lambda-list (ll)
   (values (ll-required-arguments ll)
