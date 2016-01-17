@@ -916,29 +916,33 @@
     ;; unique identifier of the block as exception. We can't use the
     ;; variable name itself, because it could not to be unique, so we
     ;; capture it in a closure.
-    `(selfcall
-      ,(when multiple-value-p `(var (|values| (internal |mv|))))
-      (throw (new (call-internal |BlockNLX|
-                                 ,(binding-value b)
-                                 ,(convert value multiple-value-p)
-                                 ,(symbol-name name)))))))
+    (let ((v (convert* value t multiple-value-p)))
+      (emit `(throw (new (call-internal |BlockNLX|
+                                        ,(binding-value b)
+                                        ,v
+                                        ,(symbol-name name)))))
+      0)))
 
 (define-compilation catch (id &rest body)
   (let ((values (if *multiple-value-p* '|values| '(internal |pv|))))
-    `(selfcall
-      (var (id ,(convert id)))
-      (try
-       ,(convert-block body t))
-      (catch (cf)
-        (if (and (instanceof cf (internal |CatchNLX|)) (== (get cf "id") id))
-            (return (method-call ,values "apply" this
-                                 (call-internal |forcemv| (get cf "values"))))
-            (throw cf))))))
+    (emit `(selfcall
+            (var (id ,(convert* id)))
+            (try
+             ,(convert-block body t))
+            (catch (cf)
+              (if (and (instanceof cf (internal |CatchNLX|)) (== (get cf "id") id))
+                  (return (method-call ,values "apply" this
+                                       (call-internal |forcemv| (get cf "values"))))
+                  (throw cf))))
+          t)))
 
 (define-compilation throw (id value)
-  `(selfcall
-    (var (|values| (internal |mv|)))
-    (throw (new (call-internal |CatchNLX| ,(convert id) ,(convert value t))))))
+  (let ((out (gvarname)))
+    (emit `(selfcall
+            (var (|values| (internal |mv|)))
+            (var ,out)
+            ,(convert-to-block value out t)
+            (throw (new (call-internal |CatchNLX| ,(convert* id) ,out)))))))
 
 
 (defun go-tag-p (x)
