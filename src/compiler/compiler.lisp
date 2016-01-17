@@ -1554,23 +1554,29 @@
       (error "Bad function designator `~S'" function))
     (cond
       ((translate-function function)
-       `(call ,(translate-function function) ,@arglist))
+       (emit `(call ,(translate-function function) ,@arglist) t))
       ((symbolp function)
        (fn-info function :called t)
        ;; This code will work even if the symbol-function is unbound,
        ;; as it is represented by a function that throws the expected
        ;; error.
-       `(method-call ,(convert `',function) "fvalue" ,@arglist))
+       (let ((fn (convert* `',function)))
+         (emit `(method-call ,fn "fvalue" ,@arglist) t)))
+
       ((and (consp function) (eq (car function) 'lambda))
-       `(call ,(convert `(function ,function)) ,@arglist))
+       (let ((fn (convert* `(function ,function))))
+         (emit `(call ,fn ,@arglist) t)))
+      
       ((and (consp function) (eq (car function) 'oget))
-       `(call-internal |js_to_lisp|
-                       (call ,(reduce (lambda (obj p)
-                                        `(property ,obj (call-internal |xstring| ,p)))
-                                      (mapcar #'convert (cdr function)))
-                             ,@(mapcar (lambda (s)
-                                         `(call-internal |lisp_to_js| ,(convert s)))
-                                       args))))
+       (emit `(call-internal |js_to_lisp|
+                             (call ,(reduce (lambda (obj p)
+                                              `(property ,obj (call-internal |xstring| ,p)))
+                                      
+                                            (mapcar #'convert* (cdr function)))
+                                   ,@(mapcar (lambda (s)
+                                               `(call-internal |lisp_to_js| ,(convert* s)))
+                                             args)))
+             t))
       (t
        (error "Bad function descriptor")))))
 
