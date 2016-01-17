@@ -1271,21 +1271,22 @@
   (let ((args (cons arg args)))
     (let ((args (butlast args))
           (last (car (last args))))
-      `(selfcall
-        (var (f ,(convert func)))
-        (var (args ,(list-to-vector
-                     (cons (if *multiple-value-p* '|values| '(internal |pv|))
-                           (mapcar #'convert args)))))
-        (var (tail ,(convert last)))
-        (while (!= tail ,(convert nil))
-          (method-call args "push" (get tail "car"))
-          (= tail (get tail "cdr")))
-        (return (method-call (if (=== (typeof f) "function")
-                                 f
-                                 (get f "fvalue"))
-                             "apply"
-                             this
-                             args))))))
+      (emit `(selfcall
+              (var (f ,(convert* func)))
+              (var (args ,(list-to-vector
+                           (cons (if *multiple-value-p* '|values| '(internal |pv|))
+                                 (mapcar #'convert args)))))
+              (var (tail ,(convert* last)))
+              (while (!= tail ,(convert* nil))
+                (method-call args "push" (get tail "car"))
+                (= tail (get tail "cdr")))
+              (return (method-call (if (=== (typeof f) "function")
+                                       f
+                                       (get f "fvalue"))
+                                   "apply"
+                                   this
+                                   args)))
+            t))))
 
 (define-builtin js-eval (string)
   (if *multiple-value-p*
