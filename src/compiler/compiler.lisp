@@ -973,28 +973,30 @@
           initag)
       (let ((b (lookup-in-lexenv (first body) *environment* 'gotag)))
         (setq initag (second (binding-value b))))
-      `(selfcall
-        ;; TAGBODY branch to take
-        (var (,branch ,initag))
-        (var (,tbidx #()))
-        (label tbloop
-               (while true
-                 (try
-                  (switch ,branch
-                          ,@(with-collect
-                             (collect `(case ,initag))
-                             (dolist (form (cdr body))
-                               (if (go-tag-p form)
-                                   (let ((b (lookup-in-lexenv form *environment* 'gotag)))
-                                     (collect `(case ,(second (binding-value b)))))
-                                   (collect (convert-to-block form)))))
-                          default
-                          (break tbloop)))
-                 (catch (jump)
-                   (if (and (instanceof jump (internal |TagNLX|)) (== (get jump "id") ,tbidx))
-                       (= ,branch (get jump "label"))
-                       (throw jump)))))
-        (return ,(convert* nil))))))
+      
+      (emit `(selfcall
+              ;; TAGBODY branch to take
+              (var (,branch ,initag))
+              (var (,tbidx #()))
+              (label tbloop
+                     (while true
+                       (try
+                        (switch ,branch
+                                ,@(with-collect
+                                   (collect `(case ,initag))
+                                   (dolist (form (cdr body))
+                                     (if (go-tag-p form)
+                                         (let ((b (lookup-in-lexenv form *environment* 'gotag)))
+                                           (collect `(case ,(second (binding-value b)))))
+                                         (collect (convert-to-block form)))))
+                                default
+                                (break tbloop)))
+                       (catch (jump)
+                         (if (and (instanceof jump (internal |TagNLX|)) (== (get jump "id") ,tbidx))
+                             (= ,branch (get jump "label"))
+                             (throw jump)))))
+              (return ,(convert* nil)))
+            t))))
 
 (define-compilation go (label)
   (let ((b (lookup-in-lexenv label *environment* 'gotag)))
@@ -1428,7 +1430,7 @@
     (return ,(convert* nil))))
 
 (define-compilation %js-vref (var)
-  `(call-internal |js_to_lisp| ,(make-symbol var)))
+  (emit `(call-internal |js_to_lisp| ,(make-symbol var)) t))
 
 (define-compilation %js-vset (var val)
   (let ((value (convert* val)))
@@ -1445,7 +1447,7 @@
             `(%js-vref ,var))))
 
 (define-compilation %js-typeof (x)
-  `(call-internal |js_to_lisp| (typeof ,x)))
+  (emit `(call-internal |js_to_lisp| (typeof ,x)) t))
 
 
 
@@ -1482,10 +1484,11 @@
                 `(finally
                   ,(convert-block body))))))
 
-    `(selfcall
-      (try (return ,(convert form)))
-      ,catch-compilation
-      ,finally-compilation)))
+    (emit `(selfcall
+            (try ,(convert-block form t))
+            ,catch-compilation
+            ,finally-compilation)
+          t)))
 
 
 (define-compilation symbol-macrolet (macrobindings &rest body)
