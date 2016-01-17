@@ -796,9 +796,10 @@
       (process-bindings bindings)
     (let ((compiled-values (mapcar #'convert* values))
           (*environment* (extend-local-env lexical-variables)))
-      `(call (function ,(mapcar #'translate-variable lexical-variables)
-                       ,(let-bind-dynamic-vars special-bindings body))
-             ,@compiled-values))))
+      (emit `(call (function ,(mapcar #'translate-variable lexical-variables)
+                             ,(let-bind-dynamic-vars special-bindings body))
+                   ,@compiled-values)
+            t))))
 
 
 ;;; Return the code to initialize BINDING, and push it extending the
