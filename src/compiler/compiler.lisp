@@ -1493,7 +1493,7 @@
                   ,(convert-block body))))))
 
     (emit `(selfcall
-            (try ,(convert-block form t))
+            (try ,(convert-block (list form) t))
             ,catch-compilation
             ,finally-compilation)
           t)))
