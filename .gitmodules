@@ -1,0 +1,3 @@
+[submodule "vendor/sicl"]
+	path = vendor/sicl
+	url = git@github.com:robert-strandh/SICL.git

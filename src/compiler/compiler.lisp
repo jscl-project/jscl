@@ -681,7 +681,6 @@
           (push-to-lexenv binding  *environment* 'function))))
     (convert `(progn ,@body) *multiple-value-p*)))
 
-
 (defun special-variable-p (x)
   (and (claimp x 'variable 'special) t))
 
@@ -1413,7 +1412,6 @@
       ,catch-compilation
       ,finally-compilation)))
 
-
 #-jscl
 (defvar *macroexpander-cache*
   (make-hash-table :test #'eq))
@@ -1457,6 +1455,13 @@
            (values form nil))))
     (t
      (values form nil))))
+
+#-jscl
+(define-compilation loop (&rest forms)
+  (let ((end-tag (gensym)))
+    (convert `(macrolet ((loop-finish ()
+                           `(go ,',end-tag)))
+                ,(sicl-loop::expand-body forms end-tag)))))
 
 (defun compile-funcall (function args)
   (let* ((arglist (cons (if *multiple-value-p* '|values| '(internal |pv|))
