@@ -24,6 +24,19 @@
              (compile-toplevel x t t))))
     (js-eval jscode)))
 
+
+(oset (lambda (string)
+        (with-compilation-environment
+          (compile-toplevel (read-from-string string) t t)))
+      (%js-vref "internals")
+      "compile_string")
+
+(oset (lambda (string)
+        (eval (read-from-string string)))
+      (%js-vref "internals")
+      "evaluate_string")
+
+
 (defvar * nil)
 (defvar ** nil)
 (defvar *** nil)
