@@ -1279,7 +1279,7 @@
               (var (f ,(convert* func)))
               (var (args ,(list-to-vector
                            (cons (if *multiple-value-p* '|values| '(internal |pv|))
-                                 (mapcar #'convert args)))))
+                                 (mapcar #'convert* args)))))
               (var (tail ,(convert* last)))
               (while (!= tail ,(convert* nil))
                 (method-call args "push" (get tail "car"))
@@ -1555,7 +1555,7 @@
 
 (defun compile-funcall (function args)
   (let* ((arglist (cons (if *multiple-value-p* '|values| '(internal |pv|))
-                        (mapcar #'convert args))))
+                        (mapcar #'convert* args))))
     (unless (or (symbolp function)
                 (and (consp function)
                      (member (car function) '(lambda oget))))
@@ -1607,7 +1607,7 @@
 (defun convert-1 (sexp &optional multiple-value-p)
   (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
     (when expandedp
-      (return-from convert-1 (convert sexp multiple-value-p)))
+      (return-from convert-1 (convert-1 sexp multiple-value-p)))
     ;; The expression has been macroexpanded. Now compile it!
     (let ((*multiple-value-p* multiple-value-p)
           (*convert-level* (1+ *convert-level*)))
@@ -1660,7 +1660,7 @@
 ;;; Like `convert', but returns a symbol and emit the result of the
 ;;; compilation.
 (defun convert* (sexp &optional (out t) multiple-value-p)
-  (let ((res (convert sexp multiple-value-p)))
+  (let ((res (convert-1 sexp multiple-value-p)))
     (emit res out)))
 
 
