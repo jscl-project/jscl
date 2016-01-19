@@ -1069,11 +1069,9 @@
 
 (defmacro define-builtin* (name args &body body)
   `(define-raw-builtin ,name ,args
-     (let ((*out* (gvarname))
-           ,@(mapcar (lambda (arg)
+     (let (,@(mapcar (lambda (arg)
                        `(,arg (convert ,arg)))
                      args))
-       (emit `(var ,*out*))
        (progn ,@body)
        *out*)))
 
@@ -1673,14 +1671,19 @@
     ;; The expression has been macroexpanded. Now compile it!
     (let ((*multiple-value-p* multiple-value-p)
           (*convert-level* (1+ *convert-level*))
-          (*out* (if (eq out t)
-                     (let ((v (gvarname)))
-                       (emit `(var ,v))
-                       v)
-                     out)))
+          (*out* (case out
+                   ;; TODO: Remove the NIL case by defining an
+                   ;; abstract way to assign or discard a value,
+                   ;; instead of using (= ,x ,y).
+                   ((t nil)
+                    (let ((v (gvarname)))
+                      (emit `(var ,v))
+                      v))
+                   (t out))))
       (let ((res (convert-1 sexp)))
-        (unless (eq res *out*)
-          (emit res *out*))))))
+        (unless (or (eq res *out*) (null res))
+          (emit res *out*))
+        *out*))))
 
 
 ;;; Like `convert', but it compiles into a block of statements insted.
