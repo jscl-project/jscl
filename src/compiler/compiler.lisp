@@ -1672,9 +1672,15 @@
   (let ((sexp (!macroexpand sexp)))
     ;; The expression has been macroexpanded. Now compile it!
     (let ((*multiple-value-p* multiple-value-p)
-          (*convert-level* (1+ *convert-level*)))
+          (*convert-level* (1+ *convert-level*))
+          (*out* (if (eq out t)
+                     (let ((v (gvarname)))
+                       (emit `(var ,v))
+                       v)
+                     out)))
       (let ((res (convert-1 sexp)))
-        (emit res out)))))
+        (unless (eq res *out*)
+          (emit res *out*))))))
 
 
 ;;; Like `convert', but it compiles into a block of statements insted.
