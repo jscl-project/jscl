@@ -1045,7 +1045,7 @@
         forms))
 
 (define-compilation backquote (form)
-  (convert (bq-completely-process form) t))
+  (convert (bq-completely-process form) *out*))
 
 
 ;;; Primitives
@@ -1436,11 +1436,11 @@
     (return ,(convert nil))))
 
 (define-compilation %js-vref (var)
-  (emit `(call-internal |js_to_lisp| ,(make-symbol var)) t))
+  (emit `(call-internal |js_to_lisp| ,(make-symbol var)) *out*))
 
 (define-compilation %js-vset (var val)
   (let ((value (convert val)))
-    (emit `(= ,(make-symbol var) (call-internal |lisp_to_js| ,value)) t)))
+    (emit `(= ,(make-symbol var) (call-internal |lisp_to_js| ,value)) *out*)))
 
 (define-setf-expander %js-vref (var)
   (let ((new-value (gensym)))
@@ -1453,7 +1453,7 @@
             `(%js-vref ,var))))
 
 (define-compilation %js-typeof (x)
-  (emit `(call-internal |js_to_lisp| (typeof ,x)) t))
+  (emit `(call-internal |js_to_lisp| (typeof ,x)) *out*))
 
 
 
@@ -1494,7 +1494,7 @@
             (try ,(convert-block (list form) t))
             ,catch-compilation
             ,finally-compilation)
-          t)))
+          *out*)))
 
 
 (define-compilation symbol-macrolet (macrobindings &rest body)
@@ -1566,18 +1566,18 @@
       (error "Bad function designator `~S'" function))
     (cond
       ((translate-function function)
-       (emit `(call ,(translate-function function) ,@arglist) t))
+       (emit `(call ,(translate-function function) ,@arglist) *out*))
       ((symbolp function)
        (fn-info function :called t)
        ;; This code will work even if the symbol-function is unbound,
        ;; as it is represented by a function that throws the expected
        ;; error.
        (let ((fn (convert `',function)))
-         (emit `(method-call ,fn "fvalue" ,@arglist) t)))
+         (emit `(method-call ,fn "fvalue" ,@arglist) *out*)))
 
       ((and (consp function) (eq (car function) 'lambda))
        (let ((fn (convert `(function ,function))))
-         (emit `(call ,fn ,@arglist) t)))
+         (emit `(call ,fn ,@arglist) *out*)))
       
       ((and (consp function) (eq (car function) 'oget))
        (emit `(call-internal |js_to_lisp|
@@ -1588,7 +1588,7 @@
                                    ,@(mapcar (lambda (s)
                                                `(call-internal |lisp_to_js| ,(convert s)))
                                              args)))
-             t))
+             *out*))
       (t
        (error "Bad function descriptor")))))
 
@@ -1618,9 +1618,9 @@
           (binding-value b))
          ((or (keywordp sexp)
               (and b (member 'constant (binding-declarations b))))
-          (emit `(get ,(convert `',sexp) "value") t))
+          (emit `(get ,(convert `',sexp) "value") *out*))
          (t
-          (convert `(symbol-value ',sexp))))))
+          (convert `(symbol-value ',sexp) *out*)))))
     ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp))
      (literal sexp))
     ((listp sexp)
