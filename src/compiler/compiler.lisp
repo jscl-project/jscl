@@ -1553,6 +1553,12 @@
     (t
      (values form nil))))
 
+
+(defun !macroexpand (sexp)
+  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
+    (if expandedp (!macroexpand sexp) sexp)))
+
+
 (defun compile-funcall (function args)
   (let* ((arglist (cons (if *multiple-value-p* '|values| '(internal |pv|))
                         (mapcar #'convert args))))
@@ -1604,47 +1610,66 @@
                 output)))))
 
 
-(defun convert-1 (sexp &optional multiple-value-p)
-  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
-    (when expandedp
-      (return-from convert-1 (convert-1 sexp multiple-value-p)))
+(defun convert-1 (sexp)
+  (cond
+    ((symbolp sexp)
+     (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
+       (cond
+         ((and b (not (member 'special (binding-declarations b))))
+          (binding-value b))
+         ((or (keywordp sexp)
+              (and b (member 'constant (binding-declarations b))))
+          (emit `(get ,(convert `',sexp) "value") t))
+         (t
+          (convert `(symbol-value ',sexp))))))
+    ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp))
+     (literal sexp))
+    ((listp sexp)
+     (let ((name (car sexp))
+           (args (cdr sexp)))
+       (cond
+         ;; Special forms
+         ((gethash name *compilations*)
+          (let ((comp (gethash name *compilations*)))
+            (apply comp args)))
+         ;; Built-in functions
+         ((and (gethash name *builtins*)
+               (not (claimp name 'function 'notinline)))
+          (apply (gethash name *builtins*) args))
+         (t
+          (compile-funcall name args)))))
+    (t
+     (error "How should I compile `~S'?" sexp))))
+
+
+;;; Compile SEXP into the currently target (*TARGET*).
+;;;
+;;; Arguments:
+;;;
+;;;    - OUT: Variable in which the result of SEXP will be placed.
+;;;
+;;;       o T means that a new variable will be declared and the value
+;;;         f SEXP will be assigned to it. This is the default value.
+;;;
+;;;       o NIL means that the value should be discarded.
+;;;
+;;;       o A symbol as returned by gvarname will assignt he result of
+;;;         SEXP to that variable, which should already exist in the
+;;;         output code.
+;;;
+;;;    - MULTIPLE-VALUE-P: T if the form being compiled is in a
+;;;      position where multiple values could be consumed. NIL otherwise.
+;;;
+;;; Return the output variable or NIL if the value should be
+;;; discarded.
+;;;
+(defun convert (sexp &optional (out t) multiple-value-p)
+  (let ((sexp (!macroexpand sexp)))
     ;; The expression has been macroexpanded. Now compile it!
     (let ((*multiple-value-p* multiple-value-p)
           (*convert-level* (1+ *convert-level*)))
-      (cond
-        ((symbolp sexp)
-         (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
-           (cond
-             ((and b (not (member 'special (binding-declarations b))))
-              (binding-value b))
-             ((or (keywordp sexp)
-                  (and b (member 'constant (binding-declarations b))))
-              (emit `(get ,(convert `',sexp) "value") t))
-             (t
-              (convert `(symbol-value ',sexp))))))
-        ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp))
-         (literal sexp))
-        ((listp sexp)
-         (let ((name (car sexp))
-               (args (cdr sexp)))
-           (cond
-             ;; Special forms
-             ((gethash name *compilations*)
-              (let ((comp (gethash name *compilations*)))
-                (apply comp args)))
-             ;; Built-in functions
-             ((and (gethash name *builtins*)
-                   (not (claimp name 'function 'notinline)))
-              (apply (gethash name *builtins*) args))
-             (t
-              (compile-funcall name args)))))
-        (t
-         (error "How should I compile `~S'?" sexp))))))
-
-
-(defun convert (sexp &optional (out t) multiple-value-p)
-  (let ((res (convert-1 sexp multiple-value-p)))
-    (emit res out)))
+      (let ((res (convert-1 sexp)))
+        (emit res out)))))
 
 
 ;;; Like `convert', but it compiles into a block of statements insted.
@@ -1662,13 +1687,9 @@
     (subseq string 0 n)))
 
 (defun convert-toplevel (sexp &optional multiple-value-p return-p)
-  ;; Macroexpand sexp as much as possible
-  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
-    (when expandedp
-      (return-from convert-toplevel
-        (convert-toplevel sexp multiple-value-p return-p))))
   ;; Process as toplevel
-  (let ((*convert-level* -1))
+  (let ((sexp (!macroexpand sexp))
+        (*convert-level* -1))
     (cond
       ;; Non-empty toplevel progn
       ((and (consp sexp)
