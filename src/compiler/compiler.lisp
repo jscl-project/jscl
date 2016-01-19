@@ -1718,10 +1718,9 @@
          (let ((form-string (prin1-to-string sexp)))
            (format t "Compiling ~a...~%" (truncate-string form-string))))
 
-       (let ((code (convert sexp t multiple-value-p)))
-         (if return-p
-             (emit `(return ,code))
-             code))))))
+       (let ((code (convert sexp (if return-p t nil) multiple-value-p)))
+         (when return-p
+           (emit `(return ,code))))))))
 
 
 (defun process-toplevel (sexp &optional multiple-value-p return-p)
