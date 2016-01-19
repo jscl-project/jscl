@@ -46,16 +46,6 @@
   `(method-call |internals| ,name ,@args))
 
 
-(defun convert-to-bool (expr)
-  (let ((var (emit expr t)))
-    (emit `(if ,var
-               ,(convert t)
-               ,(convert nil))
-          t)))
-
-
-
-
 ;;;; Target
 ;;;
 ;;; Targets allow us to accumulate Javascript statements
@@ -1092,7 +1082,7 @@
         (emit `(if (!= (typeof ,v) "number")
                    (throw "Not a number!")))))
     
-    (emit (funcall function (reverse fargs)) t)))
+    (emit (funcall function (reverse fargs)) *out*)))
 
 
 (defmacro variable-arity (args &body body)
@@ -1136,6 +1126,13 @@
     (t
      `(and (,op ,(car vars) ,(cadr vars))
            ,(comparison-conjuntion (cdr vars) op)))))
+
+
+;;; Take a js-expr and return the same expr but returning T or NIL.
+(defun convert-to-bool (expr &optional (out t))
+  `(if ,expr
+       ,(convert t out)
+       ,(convert nil out)))
 
 (defmacro define-builtin-comparison (op sym)
   `(define-raw-builtin ,op (x &rest args)
@@ -1267,7 +1264,7 @@
                      (get ,f "fvalue"))
                  ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
                          (mapcar #'convert args)))
-          t)))
+          *out*)))
 
 (define-raw-builtin apply (func arg &rest args)
   (let ((args (cons arg args)))
@@ -1288,7 +1285,7 @@
                                    "apply"
                                    this
                                    args)))
-            t))))
+            *out*))))
 
 (define-builtin js-eval (string)
   (if *multiple-value-p*
@@ -1356,7 +1353,7 @@
          (if *multiple-value-p*
              `(call |values| ,@(mapcar #'convert args))
              `(call-internal |pv| ,@(mapcar #'convert args)))))
-    (emit call t)))
+    (emit call *out*)))
 
 ;;; Javascript FFI
 
@@ -1373,7 +1370,7 @@
                            (= tmp (property tmp (call-internal |xstring| ,(convert key))))))
                       keys))
           (return (if (=== tmp undefined) ,(convert nil) tmp)))
-        t))
+        *out*))
 
 (define-raw-builtin oset* (value object key &rest keys)
   (let ((keys (cons key keys)))
@@ -1392,11 +1389,11 @@
               (return (if (=== tmp undefined)
                           ,(convert nil)
                           tmp))))
-          t)))
+          *out*)))
 
 (define-raw-builtin oget (object key &rest keys)
   (emit `(call-internal |js_to_lisp| ,(convert `(oget* ,object ,key ,@keys)))
-        t))
+        *out*))
 
 (define-raw-builtin oset (value object key &rest keys)
   (convert `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
