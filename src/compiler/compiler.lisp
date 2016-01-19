@@ -264,12 +264,9 @@
          (lambda ,args (block ,name ,@body))))
 
 (define-compilation if (condition true &optional false)
-  (let* ((result-var (gvarname)))
-    (emit `(var ,result-var))
-    (emit `(if (!== ,(convert condition) ,(convert nil))
-               ,(convert-to-block true result-var *multiple-value-p*)
-               ,(convert-to-block false result-var *multiple-value-p*)))
-    result-var))
+  (emit `(if (!== ,(convert condition) ,(convert nil))
+             ,(convert-to-block true *out* *multiple-value-p*)
+             ,(convert-to-block false *out* *multiple-value-p*))))
 
 
 (defvar *ll-keywords* '(&optional &rest &key))
@@ -506,22 +503,21 @@
        (convert val (binding-value b)))
 
       ((and b (eq (binding-type b) 'macro))
-       (convert `(setf ,var ,val)))
-
+       (convert `(setf ,var ,val) *out*))
       (t
-       (convert `(set ',var ,val))))))
+       (convert `(set ',var ,val) *out*)))))
 
 (define-compilation setq (&rest pairs)
   (cond
     ((and pairs (null (cddr pairs)))
      (setq-pair (car pairs) (cadr pairs)))
     ((null pairs)
-     (return-from setq (convert nil)))
+     (convert nil *out*))
     ((null (cdr pairs))
      (error "Odd pairs in SETQ"))
     (t
      (setq-pair (car pairs) (cadr pairs))
-     (convert `(setq ,@(cddr pairs))))))
+     (convert `(setq ,@(cddr pairs)) *out*))))
 
 
 ;;; Compilation of literals an object dumping
@@ -631,7 +627,7 @@
     (emit `(while (!== ,condition  ,(convert nil))
              ,(convert-to-block `(progn ,@body))))
 
-    (convert nil)))
+    (convert nil *out*)))
 
 (define-compilation function (x)
   (cond
@@ -671,7 +667,8 @@
                          'function)))
     (emit `(call (function ,(mapcar #'translate-function fnames)
                            ,(convert-block body t))
-                 ,@cfuncs) t)))
+                 ,@cfuncs)
+          *out*)))
 
 
 
@@ -695,7 +692,7 @@
 
       (emit `(selfcall
               ,@(target-statements target))
-            t))))
+            *out*))))
 
 ;;; Was the compiler invoked from !compile-file?
 (defvar *compiling-file* nil)
@@ -715,16 +712,17 @@
      ;; `load-toplevel' is given, then just compile the subforms as usual.
      (when (find :load-toplevel situations)
        (convert-toplevel `(progn ,@body) *multiple-value-p*))
-     0)
+     nil)
+    
     ((find :execute situations)
-     (convert `(progn ,@body) t *multiple-value-p*))
+     (convert `(progn ,@body) *out* *multiple-value-p*))
     (t
-     (convert nil))))
+     (convert nil *out*))))
 
 (define-compilation progn (&rest body)
   (dolist (expr (butlast body))
-    (convert expr))
-  (convert (car (last body)) t *multiple-value-p*))
+    (convert expr nil))
+  (convert (car (last body)) *out* *multiple-value-p*))
 
 (define-compilation macrolet (definitions &rest body)
   (let ((*environment* (copy-lexenv *environment*)))
@@ -737,7 +735,7 @@
                                             ,@body))))))
           (push-to-lexenv binding  *environment* 'function))))
 
-    (convert `(progn ,@body) t *multiple-value-p*)))
+    (convert `(progn ,@body) *out* *multiple-value-p*)))
 
 
 (defun special-variable-p (x)
@@ -805,7 +803,7 @@
       (emit `(call (function ,(mapcar #'translate-variable lexical-variables)
                              ,(let-bind-dynamic-vars special-bindings body))
                    ,@compiled-values)
-            t))))
+            *out*))))
 
 
 
@@ -856,9 +854,8 @@
                ;; Arrange symbol to be unbound
                (emit `(method-call ,sbindings "push" ,s))))
             (t
-             (let* ((jsvar (gvarname))
+             (let* ((jsvar (convert value))
                     (binding (make-binding :name variable :type 'variable :value jsvar)))
-               (emit `(var (,jsvar ,(convert value))))
                (push-to-lexenv binding *environment* 'variable)))))))
 
     (let ((*target* postlude-target))
@@ -909,8 +906,8 @@
                                                    (call-internal |forcemv| (get cf "values"))))
                              `(return (get cf "values")))
                         (throw cf))))
-                t)
-          (emit `(selfcall ,cbody) t)))))
+                *out*)
+          (emit `(selfcall ,cbody) *out*)))))
 
 (define-compilation return-from (name &optional value)
   (let* ((b (lookup-in-lexenv name *environment* 'block))
@@ -927,7 +924,7 @@
                                         ,(binding-value b)
                                         ,v
                                         ,(symbol-name name)))))
-      0)))
+      nil)))
 
 (define-compilation catch (id &rest body)
   (let ((values (if *multiple-value-p* '|values| '(internal |pv|))))
@@ -940,7 +937,7 @@
                   (return (method-call ,values "apply" this
                                        (call-internal |forcemv| (get cf "values"))))
                   (throw cf))))
-          t)))
+          *out*)))
 
 (define-compilation throw (id value)
   (let ((out (gvarname)))
@@ -1002,7 +999,7 @@
                              (= ,branch (get jump "label"))
                              (throw jump)))))
               (return ,(convert nil)))
-            t))))
+            *out*))))
 
 (define-compilation go (label)
   (let ((b (lookup-in-lexenv label *environment* 'gotag)))
@@ -1011,8 +1008,7 @@
     (emit `(selfcall
             (throw (new (call-internal |TagNLX|
                                        ,(first (binding-value b))
-                                       ,(second (binding-value b)))))))
-    0))
+                                       ,(second (binding-value b)))))))))
 
 (define-compilation unwind-protect (form &rest clean-up)
   (let ((ret (gvarname)))
@@ -1040,12 +1036,13 @@
                                   (= args (method-call args "concat" vs))
                                   (method-call args "push" vs))))))
              (return (method-call func "apply" null args)))))
-        t))
+        *out*))
 
 (define-compilation multiple-value-prog1 (first-form &rest forms)
-  (let ((out (convert first-form t *multiple-value-p*)))
-    (mapc #'convert forms)
-    out))
+  (convert first-form *out* *multiple-value-p*)
+  (mapc (lambda (expr)
+          (convert expr nil))
+        forms))
 
 (define-compilation backquote (form)
   (convert (bq-completely-process form) t))
@@ -1604,7 +1601,8 @@
     (let (output)
       (let-target (target)
           (progn
-            (mapc #'convert (butlast sexps))
+            (mapc (lambda (expr) (convert expr nil))
+                  (butlast sexps))
             (setq output (convert (first (last sexps)) t *multiple-value-p*))
             (when return-last-p
               (emit `(return ,output))))
@@ -1684,6 +1682,7 @@
         (unless (or (eq res *out*) (null res))
           (emit res *out*))
         *out*))))
+
 
 
 ;;; Like `convert', but it compiles into a block of statements insted.
