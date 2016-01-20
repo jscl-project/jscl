@@ -1175,18 +1175,18 @@
 
 (define-builtin* car (x)
   (emit `(if (=== ,x ,(convert nil))
-             (= ,*out* ,(convert nil))
+             ,(and *out* `(= ,*out* ,(convert nil)))
              (if (and (== (typeof ,x) "object")
                       (in "car" ,x))
-                 (= ,*out* (get ,x "car"))
+                 ,(and `(= ,*out* (get ,x "car")))
                  (throw "CAR called on non-list argument")))))
 
 (define-builtin* cdr (x)
   (emit `(if (=== ,x ,(convert nil))
-             (= ,*out* ,(convert nil))
+             ,(and *out* `(= ,*out* ,(convert nil)))
              (if (and (== (typeof ,x) "object")
                       (in "cdr" ,x))
-                 (= ,*out* (get ,x "cdr"))
+                 ,(and *out* `(= ,*out* (get ,x "cdr")))
                  (throw "CDR called on non-list argument")))))
 
 (define-builtin rplaca (x new)
@@ -1664,20 +1664,17 @@
     ;; The expression has been macroexpanded. Now compile it!
     (let ((*multiple-value-p* multiple-value-p)
           (*convert-level* (1+ *convert-level*))
-          (*out* (case out
-                   ;; TODO: Remove the NIL case by defining an
-                   ;; abstract way to assign or discard a value,
-                   ;; instead of using (= ,x ,y).
-                   ((t nil)
-                    (let ((v (gvarname)))
-                      (emit `(var ,v))
-                      v))
-                   (t out))))
+          (*out* (if (eq out t)
+                     (let ((v (gvarname)))
+                       (emit `(var ,v))
+                       v)
+                     out)))
       (let ((res (convert-1 sexp)))
-        (unless (or (eq res *out*) (null res))
+        (when (and res
+                   *out*
+                   (not (eq res *out*)))
           (emit res *out*))
         *out*))))
-
 
 
 ;;; Like `convert', but it compiles into a block of statements insted.
