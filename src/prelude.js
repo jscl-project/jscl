@@ -46,7 +46,7 @@ internals.globalEval = function(code){
 };
 
 internals.pv = function(x) {
-  return x==undefined? nil: x;
+  return x===undefined? nil: x;
 };
 
 internals.mv = function(){
@@ -95,7 +95,7 @@ internals.QIList = function(){
 // Arithmetic
 
 internals.handled_division = function (x, y) {
-  if (y == 0) throw "Division by zero";
+  if (y === 0) throw "Division by zero";
   return x/y;
 };
 
