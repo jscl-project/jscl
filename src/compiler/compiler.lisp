@@ -955,7 +955,7 @@
   ;; because 1) it is easy and 2) many built-in forms expand to a
   ;; implicit tagbody, so we save some space.
   (unless (some #'go-tag-p body)
-    (return-from tagbody (convert `(progn ,@body nil))))
+    (return-from tagbody (convert `(progn ,@body nil) *out*)))
   ;; The translation assumes the first form in BODY is a label
   (unless (go-tag-p (car body))
     (push (gensym "START") body))
