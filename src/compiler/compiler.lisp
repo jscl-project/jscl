@@ -961,35 +961,36 @@
     (push (gensym "START") body))
   ;; Tagbody compilation
   (let ((branch (gvarname 'branch))
-        (tbidx (gvarname 'tbidx)))
+        (tbidx (gvarname 'tbidx))
+        (tbloop (gvarname 'tbloop)))
     (let ((*environment* (declare-tagbody-tags tbidx body))
           initag)
       (let ((b (lookup-in-lexenv (first body) *environment* 'gotag)))
         (setq initag (second (binding-value b))))
       
-      (emit `(selfcall
-              ;; TAGBODY branch to take
-              (var (,branch ,initag))
-              (var (,tbidx #()))
-              (label tbloop
-                     (while true
-                       (try
-                        (switch ,branch
-                                ,@(with-collect
-                                   (collect `(case ,initag))
-                                   (dolist (form (cdr body))
-                                     (if (go-tag-p form)
-                                         (let ((b (lookup-in-lexenv form *environment* 'gotag)))
-                                           (collect `(case ,(second (binding-value b)))))
-                                         (collect (convert-to-block form)))))
-                                default
-                                (break tbloop)))
-                       (catch (jump)
-                         (if (and (instanceof jump (internal |TagNLX|)) (== (get jump "id") ,tbidx))
-                             (= ,branch (get jump "label"))
-                             (throw jump)))))
-              (return ,(convert nil)))
-            *out*))))
+
+      (emit `(var (,branch ,initag)))
+      (emit `(var (,tbidx #())))
+      (emit `(label ,tbloop
+                    ;; TAGBODY branch to take
+                    (while true
+                      (try
+                       (switch ,branch
+                               ,@(with-collect
+                                  (collect `(case ,initag))
+                                  (dolist (form (cdr body))
+                                    (if (go-tag-p form)
+                                        (let ((b (lookup-in-lexenv form *environment* 'gotag)))
+                                          (collect `(case ,(second (binding-value b)))))
+                                        (collect (convert-to-block form)))))
+                               default
+                               (break ,tbloop)))
+                      (catch (jump)
+                        (if (and (instanceof jump (internal |TagNLX|)) (== (get jump "id") ,tbidx))
+                            (= ,branch (get jump "label"))
+                            (throw jump))))))
+      
+      (convert nil *out*))))
 
 (define-compilation go (label)
   (let ((b (lookup-in-lexenv label *environment* 'gotag)))

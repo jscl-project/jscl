@@ -22,6 +22,38 @@
 (test (foo-2 nil))
 
 
+
+;;; Nested tagbody
+(defun foo-3 ()
+  (tagbody
+     (tagbody
+        (go real-exit))
+     (go end)
+   real-exit
+     (return-from foo-3 t)
+   end
+     (return-from foo-3 nil)))
+
+(test (foo-3))
+
+
+;;; Tag shadowing
+(defun foo-4 ()
+  (let (x)
+    (block nil
+      (tagbody
+         (tagbody
+            (go here)
+          here
+            (setq x t)
+            (return))
+       here
+         (setq x nil)))
+    x))
+
+
+
+
 (test (equal (flet ((foo () (return-from foo 42)))
                (foo))
              42))
