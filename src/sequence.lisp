@@ -196,31 +196,39 @@
 (defun copy-seq (sequence)
   (subseq sequence 0))
 
+(defun %reduce (function sequence key index from-end step-fn compare-fn end value)
+  (if (funcall compare-fn index end)
+      value
+      (%reduce function sequence key (funcall step-fn index) from-end step-fn compare-fn end
+               (if from-end
+                   (funcall function (funcall key (elt sequence index)) value) ; If from end the reduction is right-associative
+                   (funcall function value (funcall key (elt sequence index)))))))
 
-;;; Reduce (based on SBCL's version)
-
-(defun reduce (function sequence &key key from-end (start 0) end (initial-value nil ivp))
+(defun reduce (function sequence &key key from-end (start 0 startp) end (initial-value nil initial-value-p))
   (let ((key (or key #'identity))
-        (end (or end (length sequence))))
-    (if (= end start)
-        (if ivp initial-value (funcall function))
-        (macrolet ((reduce-list (function sequence key start end initial-value ivp from-end)
-                     `(let ((sequence
-                             ,(if from-end
-                                  `(reverse (nthcdr ,start ,sequence))
-                                  `(nthcdr ,start ,sequence))))
-                        (do ((count (if ,ivp ,start (1+ ,start))
-                                    (1+ count))
-                             (sequence (if ,ivp sequence (cdr sequence))
-                                       (cdr sequence))
-                             (value (if ,ivp ,initial-value (funcall ,key (car sequence)))
-                                    ,(if from-end
-                                         `(funcall ,function (funcall ,key (car sequence)) value)
-                                         `(funcall ,function value (funcall ,key (car sequence))))))
-                            ((>= count ,end) value)))))
-          (if from-end
-              (reduce-list function sequence key start end initial-value ivp t)
-              (reduce-list function sequence key start end initial-value ivp nil))))))
+        (sequence-length (length sequence)))
+    (if (zerop sequence-length)
+        (if initial-value-p
+            (funcall function initial-value)
+            (funcall function))
+        (let* ((start (or (and startp start)
+                           (if from-end
+                               (1- sequence-length) ; sequences are 0 indexed
+                               0)))
+               (end (or end (if from-end
+                                0
+                                sequence-length)))
+               (step-fn (if from-end
+                            #'1-
+                            #'1+))
+               (value (if initial-value-p
+                          (if from-end
+                              (funcall function (funcall key (elt sequence start)) initial-value)
+                              (funcall function initial-value (funcall key (elt sequence start))))
+                          (prog1
+                              (funcall key (elt sequence start))
+                            (setf start (funcall step-fn start))))))
+          (%reduce function sequence key start from-end step-fn (if from-end #'< #'>=) end value)))))
 
 (defun elt (sequence index)
   (when (< index 0)
