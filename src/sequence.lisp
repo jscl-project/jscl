@@ -239,15 +239,6 @@
           (funcall function element initial-value)
           (funcall function element))))
 
-(defun reduce-from-end (function sequence indices key-fn initial-value initial-value-p)
-  (let ((value (indirect-elt sequence indices 0)))
-    (when initial-value-p
-      (setf value (funcall function (funcall key-fn value) initial-value)))
-    (setf indices (subseq indices 1))
-    (dotimes (index (length indices) value)
-      (setf value
-            (funcall function (funcall key-fn (indirect-elt sequence indices index)) value)))))
-
 (defun %reduce (function sequence indices key-fn initial-value initial-value-p)
   "A 'reduced' version of reduce. It assumes the sequence to have at least one
   value and to be traversed from start to end."
@@ -265,9 +256,10 @@
     (case sequence-length
       (0 (zero-args-reduce function initial-value initial-value-p))
       (1 (one-args-reduce function (funcall key (elt sequence 0)) from-end initial-value initial-value-p))
-      (t (if from-end
-              (reduce-from-end function sequence (make-bounding-indexes start end from-end) key initial-value initial-value-p)
-              (%reduce function sequence (make-bounding-indexes start end) key initial-value initial-value-p))))))
+      (t (let ((function (if from-end
+                             #'(lambda (x y) (funcall function y x))
+                             function)))
+           (%reduce function sequence (make-bounding-indexes start end from-end) key initial-value initial-value-p))))))
 
 (defun mismatch (sequence1 sequence2 &key key (test #'eql testp) (test-not nil test-not-p)
                                        (start1 0) (end1 (length sequence1))
