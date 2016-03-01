@@ -1,6 +1,7 @@
 *~
 *.fasl
 *.fas
+*.lx64fsl
 *.lib
 \#*
 jscl.js
