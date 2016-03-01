@@ -77,6 +77,10 @@
 
 (test (equal (reduce #'+ '(100) :key #'1+)
              101))
+(test (= (reduce #'+ #(1 2 3))
+         6))
+(test (equal '((Z . C) . D)
+             (reduce #'cons #(a b c d e f) :start 2 :end 4 :initial-value 'z)))
 
 ; MISMATCH
 (test (= (mismatch '(1 2 3) '(1 2 3 4 5 6)) 3))
