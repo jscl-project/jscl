@@ -323,6 +323,7 @@
   alist)
 
 (defun copy-alist (alist)
+  "Return a new association list which is EQUAL to ALIST."
   (with-collect
     (while alist
       (collect (cons (caar alist) (cdar alist)))
