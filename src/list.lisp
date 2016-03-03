@@ -323,12 +323,10 @@
   alist)
 
 (defun copy-alist (alist)
-  (let ((new-alist ()))
+  (with-collect
     (while alist
-      (push (cons (caar alist) (cdar alist)) new-alist)
-      (setq alist (cdr alist)))
-    (reverse new-alist)))
-
+      (collect (cons (caar alist) (cdar alist)))
+      (setq alist (cdr alist)))))
 
 (define-setf-expander car (x)
   (let ((cons (gensym))
