@@ -56,6 +56,20 @@
   ; Test that nums hasn't been altered: SUBSEQ should construct fresh lists
   (test (equal nums '(1 2 3 4 5))))
 
+;; REVERSE
+(test (eq (reverse nil) nil))
+(test (equal (reverse '(a b c)) '(c b a)))
+;; FIXME: When replace the following two cases when implemented.
+(test (zerop (length (reverse #()))))
+;; (test (equalp (reverse #(a b c)) #(c b a)))
+(let ((xs (reverse #(a b c)))
+      (pattern #(c b a)))
+  (test (equal (aref xs 0) (aref pattern 0)))
+  (test (equal (aref xs 1) (aref pattern 1)))
+  (test (equal (aref xs 2) (aref pattern 2))))
+(test (equal (reverse "") ""))
+(test (equal (reverse "abc") "cba"))
+
 ;;; REDUCE
 (test (equal (reduce (lambda (x y) `(+ ,x ,y))
                      '(1 2 3 4))
