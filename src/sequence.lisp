@@ -32,6 +32,18 @@
     (t
      (not-seq-error seq))))
 
+(defun vector-reverse (vector)
+  (let* ((length (length vector))
+         (new-vector (make-array length :element-type (array-element-type vector))))
+    (dotimes (index length new-vector)
+      (setf (aref new-vector index) (aref vector (- length (1+ index)))))))
+
+(defun reverse (sequence)
+  "Return a new sequence containing the same elements but in reverse order."
+  (etypecase sequence
+    (list (revappend sequence '()))
+    (vector (vector-reverse sequence))))
+
 (defmacro do-sequence ((elt seq &optional (index (gensym "i") index-p)) &body body)
   (let ((nseq (gensym "seq")))
     (unless (symbolp elt)

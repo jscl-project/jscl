@@ -139,9 +139,6 @@
     (setq list1 (cdr list1)))
   list2)
 
-(defun reverse (list)
-  (revappend list '()))
-
 (defun sublis (alist tree &key key (test #'eql testp) (test-not #'eql test-not-p))
   (when (and testp test-not-p)
     (error "Both test and test-not are set"))
