@@ -213,18 +213,6 @@
          (error "The index ~D is too large for ~A of length ~D." index 'vector length))
        (aref sequence index)))))
 
-(defun indirect-elt (sequence indices index)
-  (elt sequence (elt indices index)))
-
-(defun make-bounding-indexes (start end &optional reverse)
-  "Return a list of indexes to access."
-  (let (result)
-    (dotimes (count (- end start))
-      (push (+ start count) result))
-    (if reverse
-        result
-        (reverse result))))
-
 (defun zero-args-reduce (function initial-value initial-value-p)
   (if initial-value-p
       (funcall function initial-value)
@@ -239,27 +227,26 @@
           (funcall function element initial-value)
           (funcall function element))))
 
-(defun %reduce (function sequence indices key-fn initial-value initial-value-p)
-  "A 'reduced' version of reduce. It assumes the sequence to have at least one
-  value and to be traversed from start to end."
-  (let ((value (indirect-elt sequence indices 0)))
-    (when initial-value-p
-      (setf value (funcall function initial-value (funcall key-fn value))))
-    (setf indices (subseq indices 1))
-    (dotimes (index (length indices) value)
-      (setf value
-            (funcall function value (funcall key-fn (indirect-elt sequence indices index)))))))
-
 (defun reduce (function sequence &key (key #'identity) from-end (start 0) end (initial-value nil initial-value-p))
-  (let* ((sequence-length (length sequence))
-         (end (or end sequence-length)))
+  (let* ((sequence (subseq sequence start (when end end)))
+         (sequence-length (length sequence)))
     (case sequence-length
       (0 (zero-args-reduce function initial-value initial-value-p))
       (1 (one-args-reduce function (funcall key (elt sequence 0)) from-end initial-value initial-value-p))
-      (t (let ((function (if from-end
+      (t (let* ((function (if from-end
                              #'(lambda (x y) (funcall function y x))
-                             function)))
-           (%reduce function sequence (make-bounding-indexes start end from-end) key initial-value initial-value-p))))))
+                             function))
+                (sequence (if from-end
+                              (reverse sequence)
+                              sequence))
+                (value (elt sequence 0)))
+           (when initial-value-p
+             (setf value (funcall function initial-value (funcall key value))))
+           (etypecase sequence
+             (list (dolist (elt (cdr sequence) value)
+                     (setf value (funcall function value (funcall key elt)))))
+             (vector (dotimes (index (1- sequence-length) value)
+                       (setf value (funcall function value (funcall key (elt sequence (1+ index)))))))))))))
 
 (defun mismatch (sequence1 sequence2 &key key (test #'eql testp) (test-not nil test-not-p)
                                        (start1 0) (end1 (length sequence1))
