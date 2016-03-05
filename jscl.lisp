@@ -56,7 +56,6 @@
     ("stream"        :target)
     ("hash-table"    :target)
     ("print"         :target)
-    ("documentation" :target)
     ("misc"          :target)
     ("ffi"           :target)
     ("symbol"        :target)
@@ -67,6 +66,7 @@
     ("compiler"
      ("codegen"      :both)
      ("compiler"     :both))
+    ("documentation" :target)
     ("toplevel"      :target)))
 
 
