@@ -91,6 +91,17 @@
 
 (test (equal (reduce #'+ '(100) :key #'1+)
              101))
+(test (= (reduce #'+ #(1 2 3))
+         6))
+(test (equal '((Z . C) . D)
+             (reduce #'cons #(a b c d e f) :start 2 :end 4 :initial-value 'z)))
+
+;; The following tests reduced reduce were copied from ANSI CL TESTS.
+(test (equal (reduce #'cons '(a b c d e f) :start 1 :end 4 :from-end t)
+             '(b c . d)))
+(test (equal (reduce #'cons '(a b c d e f) :start 1 :end 4 :from-end t
+                                           :initial-value nil)
+             '(b c d)))
 
 ; MISMATCH
 (test (= (mismatch '(1 2 3) '(1 2 3 4 5 6)) 3))

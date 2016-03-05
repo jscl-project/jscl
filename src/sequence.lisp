@@ -208,32 +208,6 @@
 (defun copy-seq (sequence)
   (subseq sequence 0))
 
-
-;;; Reduce (based on SBCL's version)
-
-(defun reduce (function sequence &key key from-end (start 0) end (initial-value nil ivp))
-  (let ((key (or key #'identity))
-        (end (or end (length sequence))))
-    (if (= end start)
-        (if ivp initial-value (funcall function))
-        (macrolet ((reduce-list (function sequence key start end initial-value ivp from-end)
-                     `(let ((sequence
-                             ,(if from-end
-                                  `(reverse (nthcdr ,start ,sequence))
-                                  `(nthcdr ,start ,sequence))))
-                        (do ((count (if ,ivp ,start (1+ ,start))
-                                    (1+ count))
-                             (sequence (if ,ivp sequence (cdr sequence))
-                                       (cdr sequence))
-                             (value (if ,ivp ,initial-value (funcall ,key (car sequence)))
-                                    ,(if from-end
-                                         `(funcall ,function (funcall ,key (car sequence)) value)
-                                         `(funcall ,function value (funcall ,key (car sequence))))))
-                            ((>= count ,end) value)))))
-          (if from-end
-              (reduce-list function sequence key start end initial-value ivp t)
-              (reduce-list function sequence key start end initial-value ivp nil))))))
-
 (defun elt (sequence index)
   (when (< index 0)
     (error "The index ~D is below zero." index))
@@ -250,6 +224,41 @@
        (when (>= index length)
          (error "The index ~D is too large for ~A of length ~D." index 'vector length))
        (aref sequence index)))))
+
+(defun zero-args-reduce (function initial-value initial-value-p)
+  (if initial-value-p
+      (funcall function initial-value)
+      (funcall function)))
+
+(defun one-args-reduce (function element from-end initial-value initial-value-p)
+  (if from-end
+      (if initial-value-p
+          (funcall function initial-value element)
+          (funcall function element))
+      (if initial-value-p
+          (funcall function element initial-value)
+          (funcall function element))))
+
+(defun reduce (function sequence &key (key #'identity) from-end (start 0) end (initial-value nil initial-value-p))
+  (let* ((sequence (subseq sequence start (when end end)))
+         (sequence-length (length sequence)))
+    (case sequence-length
+      (0 (zero-args-reduce function initial-value initial-value-p))
+      (1 (one-args-reduce function (funcall key (elt sequence 0)) from-end initial-value initial-value-p))
+      (t (let* ((function (if from-end
+                             #'(lambda (x y) (funcall function y x))
+                             function))
+                (sequence (if from-end
+                              (reverse sequence)
+                              sequence))
+                (value (elt sequence 0)))
+           (when initial-value-p
+             (setf value (funcall function initial-value (funcall key value))))
+           (etypecase sequence
+             (list (dolist (elt (cdr sequence) value)
+                     (setf value (funcall function value (funcall key elt)))))
+             (vector (dotimes (index (1- sequence-length) value)
+                       (setf value (funcall function value (funcall key (elt sequence (1+ index)))))))))))))
 
 (defun mismatch (sequence1 sequence2 &key key (test #'eql testp) (test-not nil test-not-p)
                                        (start1 0) (end1 (length sequence1))
