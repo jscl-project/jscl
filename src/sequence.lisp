@@ -234,10 +234,10 @@
   (if from-end
       (if initial-value-p
           (funcall function initial-value element)
-          (funcall function element))
+          element)
       (if initial-value-p
           (funcall function element initial-value)
-          (funcall function element))))
+          element)))
 
 (defun reduce (function sequence &key (key #'identity) from-end (start 0) end (initial-value nil initial-value-p))
   (let* ((sequence (subseq sequence start (when end end)))
