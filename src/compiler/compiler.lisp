@@ -1421,7 +1421,7 @@
         (let ((b (make-binding :name symbol :type 'macro :value expansion)))
           (push-to-lexenv b new 'variable))))
     (let ((*environment* new))
-      (convert `(progn ,@body) *multiple-value-p*))))
+      (convert-block body nil t))))
 
 
 #-jscl
