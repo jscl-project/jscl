@@ -50,10 +50,10 @@
   (join (mapcar func list)))
 
 (defun vector-to-list (vector)
-  (let ((list nil)
-	(size (length vector)))
-    (dotimes (i size (reverse list))
-      (push (aref vector i) list))))
+  (let ((size (length vector)))
+    (with-collect
+      (dotimes (i size)
+        (collect (aref vector i))))))
 
 (defun list-to-vector (list)
   (let ((v (make-array (length list)))
