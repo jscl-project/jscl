@@ -29,6 +29,18 @@
          ,@body)
        (cdr ,head))))
 
+(defmacro with-collector ((name &optional (collector (intern (format nil "COLLECT-~a" (symbol-name name))))) &body body)
+  (let ((head (gensym))
+        (tail (gensym)))
+    `(let* ((,head (cons 'sentinel nil))
+            (,tail ,head))
+       (symbol-macrolet ((,name (cdr ,head)))
+         (flet ((,collector (x)
+                  (rplacd ,tail (cons x nil))
+                  (setq ,tail (cdr ,tail))
+                  x))
+           ,@body)))))
+
 (defmacro while (condition &body body)
   `(do ()
        ((not ,condition))
