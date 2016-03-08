@@ -1414,6 +1414,16 @@
       ,finally-compilation)))
 
 
+(define-compilation symbol-macrolet (macrobindings &rest body)
+  (let ((new (copy-lexenv *environment*)))
+    (dolist (macrobinding macrobindings)
+      (destructuring-bind (symbol expansion) macrobinding
+        (let ((b (make-binding :name symbol :type 'macro :value expansion)))
+          (push-to-lexenv b new 'variable))))
+    (let ((*environment* new))
+      (convert `(progn ,@body) *multiple-value-p*))))
+
+
 #-jscl
 (defvar *macroexpander-cache*
   (make-hash-table :test #'eq))
