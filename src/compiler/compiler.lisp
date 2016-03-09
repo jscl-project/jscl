@@ -467,17 +467,17 @@
 (define-compilation setq (&rest pairs)
   (when (null pairs)
     (return-from setq (convert nil)))
-  `(progn
-     ,@(with-collect
-         (while t
-           (cond
-             ((null pairs)
-              (return))
-             ((null (cdr pairs))
-              (error "Odd pairs in SETQ"))
-             (t
-              (collect (setq-pair (car pairs) (cadr pairs)))
-              (setq pairs (cddr pairs))))))))
+  (with-collector (result)
+    (while t
+      (cond
+        ((null pairs)
+         (return))
+        ((null (cdr pairs))
+         (error "Odd pairs in SETQ"))
+        (t
+         (collect-result (setq-pair (car pairs) (cadr pairs)))
+         (setq pairs (cddr pairs)))))
+    `(progn ,@result)))
 
 ;;; Compilation of literals an object dumping
 
