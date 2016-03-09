@@ -464,22 +464,20 @@
       (t
        (convert `(set ',var ,val))))))
 
-
 (define-compilation setq (&rest pairs)
-  (let ((result nil))
-    (when (null pairs)
-      (return-from setq (convert nil)))
-    (while t
-      (cond
-        ((null pairs)
-         (return))
-        ((null (cdr pairs))
-         (error "Odd pairs in SETQ"))
-        (t
-         (push `,(setq-pair (car pairs) (cadr pairs)) result)
-         (setq pairs (cddr pairs)))))
-    `(progn ,@(reverse result))))
-
+  (when (null pairs)
+    (return-from setq (convert nil)))
+  `(progn
+     ,@(with-collect
+         (while t
+           (cond
+             ((null pairs)
+              (return))
+             ((null (cdr pairs))
+              (error "Odd pairs in SETQ"))
+             (t
+              (collect (setq-pair (car pairs) (cadr pairs)))
+              (setq pairs (cddr pairs))))))))
 
 ;;; Compilation of literals an object dumping
 
