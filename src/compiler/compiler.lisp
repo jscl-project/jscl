@@ -464,11 +464,10 @@
       (t
        (convert `(set ',var ,val))))))
 
-
 (define-compilation setq (&rest pairs)
-  (let ((result nil))
-    (when (null pairs)
-      (return-from setq (convert nil)))
+  (when (null pairs)
+    (return-from setq (convert nil)))
+  (with-collector (result)
     (while t
       (cond
         ((null pairs)
@@ -476,10 +475,9 @@
         ((null (cdr pairs))
          (error "Odd pairs in SETQ"))
         (t
-         (push `,(setq-pair (car pairs) (cadr pairs)) result)
+         (collect-result (setq-pair (car pairs) (cadr pairs)))
          (setq pairs (cddr pairs)))))
-    `(progn ,@(reverse result))))
-
+    `(progn ,@result)))
 
 ;;; Compilation of literals an object dumping
 
@@ -971,22 +969,21 @@
 (defun variable-arity-call (args function)
   (unless (consp args)
     (error "ARGS must be a non-empty list"))
-  (let ((counter 0)
-        (fargs '())
-        (prelude '()))
-    (dolist (x args)
-      (if (or (floatp x) (numberp x))
-          (push x fargs)
-          (let ((v (make-symbol (concat "x" (integer-to-string (incf counter))))))
-            (push v fargs)
-            (push `(var (,v ,(convert x)))
-                  prelude)
-            (push `(if (!= (typeof ,v) "number")
-                       (throw "Not a number!"))
-                  prelude))))
-    `(selfcall
-      (progn ,@(reverse prelude))
-      ,(funcall function (reverse fargs)))))
+  (let ((counter 0))
+    ;; XXX: Add macro with-collectors
+    (with-collector (fargs)
+      (with-collector (prelude)
+        (dolist (x args)
+          (if (or (floatp x) (numberp x))
+              (collect-fargs x)
+              (let ((v (make-symbol (concat "x" (integer-to-string (incf counter))))))
+                (collect-fargs v)
+                (collect-prelude `(var (,v ,(convert x))))
+                (collect-prelude `(if (!= (typeof ,v) "number")
+                                      (throw "Not a number!"))))))
+        `(selfcall
+          (progn ,@prelude)
+          ,(funcall function fargs))))))
 
 
 (defmacro variable-arity (args &body body)
@@ -1412,6 +1409,16 @@
       (try (return ,(convert form)))
       ,catch-compilation
       ,finally-compilation)))
+
+
+(define-compilation symbol-macrolet (macrobindings &rest body)
+  (let ((new (copy-lexenv *environment*)))
+    (dolist (macrobinding macrobindings)
+      (destructuring-bind (symbol expansion) macrobinding
+        (let ((b (make-binding :name symbol :type 'macro :value expansion)))
+          (push-to-lexenv b new 'variable))))
+    (let ((*environment* new))
+      (convert-block body nil t))))
 
 
 #-jscl
