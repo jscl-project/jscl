@@ -111,8 +111,9 @@
     result))
 
 (defun position-if-not (predicate sequence
-                 &key key (start 0) end)
-  (position-if (complement predicate) sequence :key key :start start :end end))
+                 &key from-end key (start 0) end)
+  (position-if (complement predicate) sequence
+               :from-end from-end :key key :start start :end end))
 
 (defun remove (x seq &key key (test #'eql testp) (test-not #'eql test-not-p))
   (cond
