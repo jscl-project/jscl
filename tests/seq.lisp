@@ -36,6 +36,9 @@
 (test (= (position '(1 2) #((1 2) (3 4)) :test #'equal) 0))
 (test (= (position 1 #(1 1 3) :test-not #'=) 2))
 (test (= (position 1 '(1 1 3) :test-not #'=) 2))
+(test (= (position 1 '(1 1 3) :from-end nil) 0))
+(test (= (position 1 '(1 1 3) :from-end t) 1))
+(test (= (position #\a "baobab" :from-end t) 4))
 
 ;; POSITION-IF, POSITION-IF-NOT
 (test (= 2 (position-if #'oddp '((1) (2) (3) (4)) :start 1 :key #'car)))
