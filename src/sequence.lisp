@@ -95,17 +95,20 @@
             (return))))
     result))
 
-;; TODO: need to support &key from-end
 (defun position-if (predicate sequence
-                 &key key (start 0) end)
+                 &key from-end key (start 0) end)
   ;; TODO: Implement START and END efficiently for all the sequence
   ;; functions.
-  (let ((end (or end (length sequence))))
+  (let ((end (or end (length sequence)))
+        (result nil))
     (do-sequence (x sequence index)
       (when (and (<= start index)
                  (< index end)
                  (funcall predicate (if key (funcall key x) x)))
-        (return index)))))
+        (setf result index)
+        (unless from-end
+          (return))))
+    result))
 
 (defun position-if-not (predicate sequence
                  &key key (start 0) end)
