@@ -86,6 +86,25 @@
           (incf result))))
     result))
 
+(defun count-if (predicate sequence &key from-end (start 0) end key)
+  ;; TODO: Implement START and END efficiently for all the sequence
+  ;; functions.
+  (let* ((l (length sequence))
+         (end (or end l))
+         (result 0))
+    (if from-end
+      (do-sequence (x (reverse sequence) index)
+        (when (and (<= start (- l index 1))
+                   (< (- l index 1) end)
+                   (funcall predicate (if key (funcall key x) x)))
+          (incf result)))
+      (do-sequence (x sequence index)
+        (when (and (<= start index)
+                   (< index end)
+                   (funcall predicate (if key (funcall key x) x)))
+          (incf result))))
+    result))
+
 (defun find (item seq &key key (test #'eql testp) (test-not #'eql test-not-p))
   (do-sequence (x seq)
     (when (satisfies-test-p item x :key key :test test :testp testp
