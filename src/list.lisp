@@ -26,12 +26,14 @@
 (defun null (x)
   (eq x nil))
 
-(defun endp (x)
-  (if (null x)
-      t
-      (if (consp x)
-          nil
-          (error "The value `~S' is not a type list." x))))
+(defun endp (object)
+  "It returns true if OBJECT is NIL, false if OBJECT is a CONS, and an error
+   for any other type of OBJECT.
+
+   This is the recommended way to test for the end of a proper list."
+  (cond ((null object) t)
+        ((consp object) nil)
+        (t (error "The value `~S' is not a type list." object))))
 
 (defun car (x)
   "Return the CAR part of a cons, or NIL if X is null."
