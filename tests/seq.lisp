@@ -2,6 +2,24 @@
 (defvar halve  (lambda (x) (/ x 2)))
 (defvar double (lambda (x) (* x 2)))
 
+; COUNT
+(test (= (count #\a "how many A's are there in here?") 2))
+(test (= (count #\a "how many A's are there in here?" :start 10) 1))
+(test (= (count 'a '(a b c d e a e f)) 2))
+(test (= (count 1 '(1 2 2 3 2 1 2 2 5 4) :key #'1-) 5))
+(test (= (count #\1 "11111011" :start 2 :end 7) 4))
+(test (= (count #\1 "11111011" :start 2 :end 7 :from-end t) 4))
+
+;; COUNT-IF, COUNT-IF-NOT
+(test (= (count-if #'upper-case-p "The Crying of Lot 49" :start 4) 2))
+(test (= (count-if #'not '(a b nil c d nil e)) 2))
+(test (= (count-if #'evenp '(1 2 3 4 4 1 8 10 1) :key #'1+) 4))
+(test (= (count-if #'evenp '(1 2 3 4 4 1 8 10 1) :key #'1+ :from-end t) 4))
+(test (= (count-if-not #'oddp '((1) (2) (3) (4)) :key #'car) 2))
+(test (= (count-if-not #'oddp '((1) (2) (3) (4)) :key #'car :from-end t) 2))
+(test (= (count-if-not #'not '(a b nil c d nil e)) 5))
+(test (= (count-if-not #'oddp '(1 2 3 4 4 1 8 10 1) :key #'1+) 4))
+
 ; FIND
 (test (find 1 #(2 1 3)))
 (test (find 1 '(2 1 3)))
