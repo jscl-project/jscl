@@ -8,7 +8,7 @@ from Common Lisp and executed from the browser.
 You can try a demo [here](http://davazp.net/jscl/jscl.html). But if
 you want to hack JSCL, you will have to download the repository
 
-    git clone git@github.com:davazp/jscl.git
+    git clone https://github.com/davazp/jscl.git
 
 *load* `jscl.lisp` in your Lisp, and call the bootstrap function to
 compile the implementation itself:
