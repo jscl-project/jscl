@@ -21,9 +21,11 @@
      (oget* x "plist"))))
 
 (defun set-symbol-plist (new-value x)
-  (if (symbolp x)
-      (oset* new-value x "plist")
-      (error "`~a' is not a symbol." x)))
+  (unless (symbolp x )
+    (error "`~a' is not a symbol." x))
+  (unless (listp new-value)
+    (error "`~a' is not a list." new-value))
+  (oset* new-value x "plist"))
 
 (define-setf-expander symbol-plist (x)
   (let ((g!x (gensym))
