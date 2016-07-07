@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-RUNJS=${RUNJS:-phantomjs}
+RUNJS=${RUNJS:-node}
 $RUNJS "tests.js"
