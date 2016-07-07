@@ -244,7 +244,7 @@ packages.KEYWORD = {
 jscl.CL = packages.CL.exports;
 
 function unboundFunction () {
-  throw new Error("Function '" + this.name + "'undefined");
+  throw new Error("Function '" + this.name + "' undefined");
 }
 
 internals.Symbol = function(name, package_name){

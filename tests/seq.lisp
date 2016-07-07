@@ -2,6 +2,24 @@
 (defvar halve  (lambda (x) (/ x 2)))
 (defvar double (lambda (x) (* x 2)))
 
+; COUNT
+(test (= (count #\a "how many A's are there in here?") 2))
+(test (= (count #\a "how many A's are there in here?" :start 10) 1))
+(test (= (count 'a '(a b c d e a e f)) 2))
+(test (= (count 1 '(1 2 2 3 2 1 2 2 5 4) :key #'1-) 5))
+(test (= (count #\1 "11111011" :start 2 :end 7) 4))
+(test (= (count #\1 "11111011" :start 2 :end 7 :from-end t) 4))
+
+;; COUNT-IF, COUNT-IF-NOT
+(test (= (count-if #'upper-case-p "The Crying of Lot 49" :start 4) 2))
+(test (= (count-if #'not '(a b nil c d nil e)) 2))
+(test (= (count-if #'evenp '(1 2 3 4 4 1 8 10 1) :key #'1+) 4))
+(test (= (count-if #'evenp '(1 2 3 4 4 1 8 10 1) :key #'1+ :from-end t) 4))
+(test (= (count-if-not #'oddp '((1) (2) (3) (4)) :key #'car) 2))
+(test (= (count-if-not #'oddp '((1) (2) (3) (4)) :key #'car :from-end t) 2))
+(test (= (count-if-not #'not '(a b nil c d nil e)) 5))
+(test (= (count-if-not #'oddp '(1 2 3 4 4 1 8 10 1) :key #'1+) 4))
+
 ; FIND
 (test (find 1 #(2 1 3)))
 (test (find 1 '(2 1 3)))
@@ -36,10 +54,16 @@
 (test (= (position '(1 2) #((1 2) (3 4)) :test #'equal) 0))
 (test (= (position 1 #(1 1 3) :test-not #'=) 2))
 (test (= (position 1 '(1 1 3) :test-not #'=) 2))
+(test (= (position 1 '(1 1 3) :from-end nil) 0))
+(test (= (position 1 '(1 1 3) :from-end t) 1))
+(test (= (position #\a "baobab" :from-end t) 4))
 
 ;; POSITION-IF, POSITION-IF-NOT
 (test (= 2 (position-if #'oddp '((1) (2) (3) (4)) :start 1 :key #'car)))
 (test (= 4 (position-if-not #'integerp '(1 2 3 4 X))))  ;; (hyperspec example used "5.0", but we don't have a full numeric tower yet!)
+(test (= 4 (position-if #'oddp '((1) (2) (3) (4) (5)) :start 1 :key #'car :from-end t)))
+(test (= 4 (position-if-not #'integerp '(1 2 3 4 X Y))))  ;; (hyperspec example used "5.0", but we don't have a full numeric tower yet!)
+(test (= 5 (position-if-not #'integerp '(1 2 3 4 X Y) :from-end t)))
 
 ; REMOVE-IF
 (test (equal (remove-if     #'zerop '(1 0 2 0 3)) '(1 2 3)))

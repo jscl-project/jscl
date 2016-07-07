@@ -61,6 +61,54 @@
              (let ((,elt (aref ,nseq ,index)))
                ,@body))))))
 
+(defun count (item sequence &key from-end (start 0) end
+                                 key (test #'eql testp)
+                                 (test-not #'eql test-not-p))
+  ;; TODO: Implement START and END efficiently for all the sequence
+  ;; functions.
+  (let* ((l (length sequence))
+         (end (or end l))
+         (result 0))
+    (if from-end
+      (do-sequence (x (reverse sequence) index)
+        (when (and (<= start (- l index 1))
+                   (< (- l index 1) end)
+                   (satisfies-test-p item x
+                                     :key key :test test :testp testp
+                                     :test-not test-not :test-not-p test-not-p))
+          (incf result)))
+      (do-sequence (x sequence index)
+        (when (and (<= start index)
+                   (< index end)
+                   (satisfies-test-p item x
+                                     :key key :test test :testp testp
+                                     :test-not test-not :test-not-p test-not-p))
+          (incf result))))
+    result))
+
+(defun count-if (predicate sequence &key from-end (start 0) end key)
+  ;; TODO: Implement START and END efficiently for all the sequence
+  ;; functions.
+  (let* ((l (length sequence))
+         (end (or end l))
+         (result 0))
+    (if from-end
+      (do-sequence (x (reverse sequence) index)
+        (when (and (<= start (- l index 1))
+                   (< (- l index 1) end)
+                   (funcall predicate (if key (funcall key x) x)))
+          (incf result)))
+      (do-sequence (x sequence index)
+        (when (and (<= start index)
+                   (< index end)
+                   (funcall predicate (if key (funcall key x) x)))
+          (incf result))))
+    result))
+
+(defun count-if-not (predicate sequence &key from-end (start 0) end key)
+  (count-if (complement predicate) sequence :from-end from-end
+            :start start :end end :key key))
+
 (defun find (item seq &key key (test #'eql testp) (test-not #'eql test-not-p))
   (do-sequence (x seq)
     (when (satisfies-test-p item x :key key :test test :testp testp
@@ -77,35 +125,43 @@
           (return x)))))
 
 (defun position (elt sequence
-                 &key key (test #'eql testp)
+                 &key from-end key (test #'eql testp)
                    (test-not #'eql test-not-p)
                    (start 0) end)
   ;; TODO: Implement START and END efficiently for all the sequence
   ;; functions.
-  (let ((end (or end (length sequence))))
+  (let ((end (or end (length sequence)))
+        (result nil))
     (do-sequence (x sequence index)
       (when (and (<= start index)
                  (< index end)
                  (satisfies-test-p elt x
                                    :key key :test test :testp testp
                                    :test-not test-not :test-not-p test-not-p))
-        (return index)))))
+        (setf result index)
+        (unless from-end
+            (return))))
+    result))
 
-;; TODO: need to support &key from-end
 (defun position-if (predicate sequence
-                 &key key (start 0) end)
+                 &key from-end key (start 0) end)
   ;; TODO: Implement START and END efficiently for all the sequence
   ;; functions.
-  (let ((end (or end (length sequence))))
+  (let ((end (or end (length sequence)))
+        (result nil))
     (do-sequence (x sequence index)
       (when (and (<= start index)
                  (< index end)
                  (funcall predicate (if key (funcall key x) x)))
-        (return index)))))
+        (setf result index)
+        (unless from-end
+          (return))))
+    result))
 
 (defun position-if-not (predicate sequence
-                 &key key (start 0) end)
-  (position-if (complement predicate) sequence :key key :start start :end end))
+                 &key from-end key (start 0) end)
+  (position-if (complement predicate) sequence
+               :from-end from-end :key key :start start :end end))
 
 (defun remove (x seq &key key (test #'eql testp) (test-not #'eql test-not-p))
   (cond
