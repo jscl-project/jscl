@@ -38,8 +38,11 @@
 (defun car (x)
   "Return the CAR part of a cons, or NIL if X is null."
   (car x))
+(declaim (notinline car))
 
-(defun cdr (x) (cdr x))
+(defun cdr (x)
+  (cdr x))
+(declaim (notinline cdr))
 
 (defun rplaca (cons x)
   (rplaca cons x))
