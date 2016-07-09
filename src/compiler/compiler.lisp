@@ -515,8 +515,7 @@
       ;; code with JSCL as the current package. We will compile the
       ;; JSCL package as CL in the target.
       #-jscl
-      ((or (eq package (find-package "JSCL"))
-           (eq package (find-package "CL")))
+      ((eq package (find-package "JSCL"))
        `(call-internal |intern| ,(symbol-name symbol)))
       ;; Interned symbol
       (t
