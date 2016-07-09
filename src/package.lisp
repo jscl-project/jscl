@@ -118,10 +118,6 @@
         (make-package name :use use))))
 
 
-(defpackage :test-package
-  (:use :cl))
-
-
 (defun find-symbol (name &optional (package *package*))
   (let* ((package (find-package-or-fail package))
          (externals (%package-external-symbols package))
