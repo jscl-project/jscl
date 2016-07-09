@@ -119,7 +119,8 @@
 
 (defun !compile-file (filename out &key print)
   (let ((*compiling-file* t)
-        (*compile-print-toplevels* print))
+        (*compile-print-toplevels* print)
+        (*package* *package*))
     (let* ((source (read-whole-file filename))
            (in (make-string-stream source)))
       (format t "Compiling ~a...~%" (enough-namestring filename))

@@ -1,8 +1,5 @@
 ;;; compiler.lisp ---
 
-;; Copyright (C) 2012, 2013 David Vazquez
-;; Copyright (C) 2012 Raimon Grau
-
 ;; JSCL is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation, either version 3 of the
@@ -518,8 +515,7 @@
       ;; code with JSCL as the current package. We will compile the
       ;; JSCL package as CL in the target.
       #-jscl
-      ((or (eq package (find-package "JSCL"))
-           (eq package (find-package "CL")))
+      ((eq package (find-package "JSCL"))
        `(call-internal |intern| ,(symbol-name symbol)))
       ;; Interned symbol
       (t

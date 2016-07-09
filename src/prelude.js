@@ -227,12 +227,21 @@ internals.isNLX = function(x){
 
 var packages = jscl.packages = {};
 
+packages.JSCL = {
+  packageName: 'JSCL',
+  symbols: {},
+  exports: {},
+  use: nil
+};
+
 packages.CL = {
   packageName: 'CL',
   symbols: {},
   exports: {},
   use: nil
 };
+
+packages['COMMON-LISP'] = packages.CL;
 
 packages.KEYWORD = {
   packageName: 'KEYWORD',
@@ -278,7 +287,7 @@ internals.bindSpecialBindings = function (symbols, values, callback){
 };
 
 internals.intern = function (name, package_name){
-  package_name = package_name || "CL";
+  package_name = package_name || "JSCL";
   var lisp_package = packages[package_name];
   if (!lisp_package)
     throw "No package " + package_name;
