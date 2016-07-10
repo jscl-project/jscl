@@ -123,11 +123,6 @@
 (defun get-toplevel-compilations ()
   (reverse *toplevel-compilations*))
 
-(defun %compile-defmacro (name lambda)
-  (let ((binding (make-binding :name name :type 'macro :value lambda)))
-    (push-to-lexenv binding  *environment* 'function))
-  name)
-
 (defun global-binding (name type namespace)
   (or (lookup-in-lexenv name *environment* namespace)
       (let ((b (make-binding :name name :type type :value nil)))
@@ -478,26 +473,6 @@
 
 ;;; Compilation of literals an object dumping
 
-;;; BOOTSTRAP MAGIC: We record the macro definitions as lists during
-;;; the bootstrap. Once everything is compiled, we want to dump the
-;;; whole global environment to the output file to reproduce it in the
-;;; run-time. However, the environment must contain expander functions
-;;; rather than lists. We do not know how to dump function objects
-;;; itself, so we mark the list definitions with this object and the
-;;; compiler will be called when this object has to be dumped.
-;;; Backquote/unquote does a similar magic, but this use is exclusive.
-;;;
-;;; Indeed, perhaps to compile the object other macros need to be
-;;; evaluated. For this reason we define a valid macro-function for
-;;; this symbol.
-(defvar *magic-unquote-marker* (gensym "MAGIC-UNQUOTE"))
-
-#-jscl
-(setf (macro-function *magic-unquote-marker*)
-      (lambda (form &optional environment)
-        (declare (ignore environment))
-        (second form)))
-
 (defvar *literal-table*)
 (defvar *literal-counter*)
 
@@ -546,15 +521,8 @@
          (let ((dumped (typecase sexp
                          (symbol (dump-symbol sexp))
                          (string (dump-string sexp))
-                         (cons
-                          ;; BOOTSTRAP MAGIC: See the root file
-                          ;; jscl.lisp and the function
-                          ;; `dump-global-environment' for further
-                          ;; information.
-                          (if (eq (car sexp) *magic-unquote-marker*)
-                              (convert (second sexp))
-                              (dump-cons sexp)))
-                         (array (dump-array sexp)))))
+                         (cons   (dump-cons sexp))
+                         (array  (dump-array sexp)))))
            (if (and recursive (not (symbolp sexp)))
                dumped
                (let ((jsvar (genlit)))
@@ -667,11 +635,15 @@
   (let ((*environment* (copy-lexenv *environment*)))
     (dolist (def definitions)
       (destructuring-bind (name lambda-list &body body) def
-        (let ((binding (make-binding :name name :type 'macro :value
-                                     (let ((g!form (gensym)))
-                                       `(lambda (,g!form)
-                                          (destructuring-bind ,lambda-list ,g!form
-                                            ,@body))))))
+        (let ((binding
+               (make-binding
+                :name name
+                :type 'macro
+                :value
+                (let ((g!form (gensym)))
+                  (eval `(lambda (,g!form)
+                           (destructuring-bind ,lambda-list ,g!form
+                             ,@body)))))))
           (push-to-lexenv binding  *environment* 'function))))
     (convert `(progn ,@body) *multiple-value-p*)))
 
@@ -1421,32 +1393,49 @@
 (defvar *macroexpander-cache*
   (make-hash-table :test #'eq))
 
-(defun !macro-function (symbol)
+;;; For now, we just use a alist as it can be dumped easily, but we
+;;; will teach the compiler how to dump hash tables later.
+(defvar *macrofunctions* nil)
+
+(defun %compile-defmacro (name lambda)
+  (push (cons name lambda) *macrofunctions*)
+  name)
+
+(defun !macro-function (symbol &optional env)
   (unless (symbolp symbol)
     (error "`~S' is not a symbol." symbol))
-  (let ((b (lookup-in-lexenv symbol *environment* 'function)))
-    (if (and b (eq (binding-type b) 'macro))
-        (let ((expander (binding-value b)))
-          (cond
-            #-jscl
-            ((gethash b *macroexpander-cache*)
-             (setq expander (gethash b *macroexpander-cache*)))
-            ((listp expander)
-             (let ((compiled (eval expander)))
-               ;; The list representation are useful while
-               ;; bootstrapping, as we can dump the definition of the
-               ;; macros easily, but they are slow because we have to
-               ;; evaluate them and compile them now and again. So, let
-               ;; us replace the list representation version of the
-               ;; function with the compiled one.
-               ;;
-               #+jscl (setf (binding-value b) compiled)
-               #-jscl (setf (gethash b *macroexpander-cache*) compiled)
-               (setq expander compiled))))
-          expander)
-        nil)))
 
-(defun !macroexpand-1 (form)
+  (flet ((global-macro-function ()
+           (let ((expander (cdr (assoc symbol *macrofunctions*))))
+             (when expander
+               (cond
+                 #-jscl
+                 ((gethash symbol *macroexpander-cache*)
+                  (setq expander (gethash symbol *macroexpander-cache*)))
+                 ((listp expander)
+                  (let ((compiled (eval expander)))
+                    ;; The list representation are useful while
+                    ;; bootstrapping, as we can dump the definition of the
+                    ;; macros easily, but they are slow because we have to
+                    ;; evaluate them and compile them now and again. So, let
+                    ;; us replace the list representation version of the
+                    ;; function with the compiled one.
+                    ;;
+                    #+jscl (setf (binding-value b) compiled)
+                    #-jscl (setf (gethash symbol *macroexpander-cache*) compiled)
+                    (setq expander compiled))))
+               expander)))
+         
+         (local-macro-function ()
+           (let ((b (lookup-in-lexenv symbol env 'function)))
+             (if (and b (eq (binding-type b) 'macro))
+                 (binding-value b)
+                 nil))))
+
+    (or (if env (local-macro-function))
+        (global-macro-function))))
+
+(defun !macroexpand-1 (form &optional env)
   (cond
     ((symbolp form)
      (let ((b (lookup-in-lexenv form *environment* 'variable)))
@@ -1454,7 +1443,7 @@
            (values (binding-value b) t)
            (values form nil))))
     ((and (consp form) (symbolp (car form)))
-     (let ((macrofun (!macro-function (car form))))
+     (let ((macrofun (!macro-function (car form) env)))
        (if macrofun
            (values (funcall macrofun (cdr form)) t)
            (values form nil))))
@@ -1501,7 +1490,7 @@
         `(progn ,@(mapcar #'convert sexps)))))
 
 (defun convert-1 (sexp &optional multiple-value-p)
-  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
+  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp *environment*)
     (when expandedp
       (return-from convert-1 (convert sexp multiple-value-p)))
     ;; The expression has been macroexpanded. Now compile it!
@@ -1551,7 +1540,7 @@
 
 (defun convert-toplevel (sexp &optional multiple-value-p return-p)
   ;; Macroexpand sexp as much as possible
-  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
+  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp *environment*)
     (when expandedp
       (return-from convert-toplevel
         (convert-toplevel sexp multiple-value-p return-p))))

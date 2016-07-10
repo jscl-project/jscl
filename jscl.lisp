@@ -136,12 +136,14 @@
   (flet ((late-compile (form)
            (let ((*standard-output* stream))
              (write-string (compile-toplevel form)))))
+
+    (late-compile `(setq *environment* ',*environment*))
+
     ;; We assume that environments have a friendly list representation
     ;; for the compiler and it can be dumped.
-    (dolist (b (lexenv-function *environment*))
-      (when (eq (binding-type b) 'macro)
-        (setf (binding-value b) `(,*magic-unquote-marker* ,(binding-value b)))))
-    (late-compile `(setq *environment* ',*environment*))
+    (dolist (b *macrofunctions*)
+      (late-compile `(%compile-defmacro ',(car b) ,(cdr b))))
+
     ;; Set some counter variable properly, so user compiled code will
     ;; not collide with the compiler itself.
     (late-compile
@@ -169,6 +171,7 @@
   (let ((*features* (list* :jscl :jscl-xc *features*))
         (*package* (find-package "JSCL")))
     (setq *environment* (make-lexenv))
+    (setq *macrofunctions* nil)
     (with-compilation-environment
       (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
                            :direction :output
