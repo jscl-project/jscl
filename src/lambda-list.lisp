@@ -348,7 +348,7 @@
 #+jscl
 (eval-when (:compile-toplevel)
   (let ((macroexpander
-         '#'(lambda (form &optional environment)
+         '#'(lambda (form environment)
               (declare (ignore environment))
               (apply #'!expand-destructuring-bind form))))
     (%compile-defmacro '!destructuring-bind macroexpander)

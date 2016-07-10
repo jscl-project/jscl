@@ -640,8 +640,10 @@
                 :name name
                 :type 'macro
                 :value
-                (let ((g!form (gensym)))
-                  (eval `(lambda (,g!form)
+                (let ((g!form (gensym))
+                      (g!env (gensym)))
+                  (eval `(lambda (,g!form ,g!env)
+                           (declare (ignore ,g!env)) ;for now
                            (destructuring-bind ,lambda-list ,g!form
                              ,@body)))))))
           (push-to-lexenv binding  *environment* 'function))))
@@ -1445,7 +1447,7 @@
     ((and (consp form) (symbolp (car form)))
      (let ((macrofun (!macro-function (car form) env)))
        (if macrofun
-           (values (funcall macrofun (cdr form)) t)
+           (values (funcall macrofun (cdr form) env) t)
            (values form nil))))
     (t
      (values form nil))))

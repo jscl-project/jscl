@@ -26,12 +26,15 @@
 
 (eval-when (:compile-toplevel)
   (let ((defmacro-macroexpander
-         '#'(lambda (form)
+         '#'(lambda (form env)
+              (declare (ignore env))    ;for now
               (destructuring-bind (name args &body body)
                   form
                 (let* ((whole (gensym))
+                       (env (gensym))
                        (expander `(function
-                                   (lambda (,whole)
+                                   (lambda (,whole ,env)
+                                    (declare (ignore ,env))
                                     (block ,name
                                       (destructuring-bind ,args ,whole
                                         ,@body))))))
