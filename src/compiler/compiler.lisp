@@ -151,15 +151,6 @@
 #+jscl
 (fset 'proclaim #'!proclaim)
 
-(defun %define-symbol-macro (name expansion)
-  (let ((b (make-binding :name name :type 'macro :value expansion)))
-    (push-to-lexenv b *environment* 'variable)
-    name))
-
-#+jscl
-(defmacro define-symbol-macro (name expansion)
-  `(%define-symbol-macro ',name ',expansion))
-
 
 
 ;;; Report functions which are called but not defined
@@ -1437,13 +1428,31 @@
     (or (if env (local-macro-function))
         (global-macro-function))))
 
+
+
+(defvar *macrosymbols*
+  (make-hash-table :test #'eq))
+
+(defun %define-symbol-macro (name expansion)
+  (setf (gethash name *macrosymbols*) expansion)
+  name)
+
+#+jscl
+(defmacro define-symbol-macro (name expansion)
+  `(%define-symbol-macro ',name ',expansion))
+
 (defun !macroexpand-1 (form &optional env)
   (cond
     ((symbolp form)
-     (let ((b (lookup-in-lexenv form *environment* 'variable)))
+     (let ((b (and env (lookup-in-lexenv form *environment* 'variable))))
        (if (and b (eq (binding-type b) 'macro))
            (values (binding-value b) t)
-           (values form nil))))
+           (multiple-value-bind (expanded expanded-p)
+               (gethash form *macrosymbols*)
+             (if expanded-p
+                 (values expanded t)
+                 (values form nil))))))
+    
     ((and (consp form) (symbolp (car form)))
      (let ((macrofun (!macro-function (car form) env)))
        (if macrofun

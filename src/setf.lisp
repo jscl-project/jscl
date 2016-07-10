@@ -19,7 +19,7 @@
 
 (eval-when(:compile-toplevel :load-toplevel :execute)
   (defvar *setf-expanders* nil)
-  (defun !get-setf-expansion (place)
+  (defun !get-setf-expansion (place &optional env)
     (if (symbolp place)
         (let ((value (gensym)))
           (values nil
@@ -27,7 +27,7 @@
                   `(,value)
                   `(setq ,place ,value)
                   place))
-        (let ((place (!macroexpand-1 place)))
+        (let ((place (!macroexpand-1 place env)))
           (let* ((access-fn (car place))
                  (expander (cdr (assoc access-fn *setf-expanders*))))
             (when (null expander)
@@ -85,7 +85,7 @@
     ((null (cdr pairs))
      (error "Odd number of arguments to setf."))
     ((null (cddr pairs))
-     (let ((place (!macroexpand-1 (first pairs)))
+     (let ((place (!macroexpand-1 (first pairs) *environment*))
            (value (second pairs)))
        (multiple-value-bind (vars vals store-vars writer-form reader-form)
            (!get-setf-expansion place)
@@ -110,7 +110,7 @@
 
 (defmacro incf (place &optional (delta 1))
   (multiple-value-bind (dummies vals newval setter getter)
-      (!get-setf-expansion place)
+      (!get-setf-expansion place *environment*)
     (let ((d (gensym)))
       `(let* (,@(mapcar #'list dummies vals)
               (,d ,delta)
@@ -120,7 +120,7 @@
 
 (defmacro decf (place &optional (delta 1))
   (multiple-value-bind (dummies vals newval setter getter)
-      (!get-setf-expansion place)
+      (!get-setf-expansion place *environment*)
     (let ((d (gensym)))
       `(let* (,@(mapcar #'list dummies vals)
               (,d ,delta)
@@ -130,7 +130,7 @@
 
 (defmacro push (x place)
   (multiple-value-bind (dummies vals newval setter getter)
-      (!get-setf-expansion place)
+      (!get-setf-expansion place *environment*)
     (let ((g (gensym)))
       `(let* ((,g ,x)
               ,@(mapcar #'list dummies vals)
@@ -140,7 +140,7 @@
 
 (defmacro pop (place)
   (multiple-value-bind (dummies vals newval setter getter)
-    (!get-setf-expansion place)
+    (!get-setf-expansion place *environment*)
     (let ((head (gensym)))
       `(let* (,@(mapcar #'list dummies vals)
               (,head ,getter)
@@ -152,7 +152,7 @@
 (defmacro pushnew (x place &rest keys &key key test test-not)
   (declare (ignore key test test-not))
   (multiple-value-bind (dummies vals newval setter getter)
-      (!get-setf-expansion place)
+      (!get-setf-expansion place *environment*)
     (let ((g (gensym))
           (v (gensym)))
       `(let* ((,g ,x)

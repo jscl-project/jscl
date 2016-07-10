@@ -431,7 +431,7 @@
 
 (define-setf-expander getf (plist indicator &optional default)
   (multiple-value-bind (dummies vals newval setter getter)
-      (get-setf-expansion plist)
+      (!get-setf-expansion plist *environment*)
     (let ((store (gensym))
           (indicator-sym (gensym))
           (default-sym (and default (gensym))))
