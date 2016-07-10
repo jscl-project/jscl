@@ -20,7 +20,7 @@
 
 (defun list-all-packages ()
   (let ((packages nil))
-    (map-for-in (lambda (name) (push name packages))
+    (map-for-in (lambda (name) (pushnew name packages))
                 *package-table*)
     packages))
 
