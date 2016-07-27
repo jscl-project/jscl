@@ -18,14 +18,14 @@
 
 (defpackage :jscl
   (:use :cl)
-  (:export #:bootstrap #:run-tests-in-host))
+  (:export #:bootstrap #:run-tests-in-host #:jscl-compile))
 
 (in-package :jscl)
 
 (defvar *version* "0.3.0")
 
 (defvar *base-directory*
-  (or #.*load-pathname* *default-pathname-defaults*))
+  (or #.*compile-file-pathname* *load-pathname*))
 
 ;;; List of all the source files that need to be compiled, and whether they
 ;;; are to be compiled just by the host, by the target JSCL, or by both.
@@ -163,39 +163,44 @@
       (format out "})(jscl.internals.pv, jscl.internals);~%")
       (format out "})( typeof require !== 'undefined'? require('./jscl'): window.jscl )~%"))))
 
-
-
-(defun bootstrap (&optional verbose)
+(defun jscl-compile (files
+             &key 
+               (outputdir *base-directory*)
+               (jscl t)
+               verbose)
   (let ((*features* (list* :jscl :jscl-xc *features*))
-        (*package* (find-package "JSCL")))
-    (setq *environment* (make-lexenv))
+        (*package* (find-package "JSCL"))
+        (*environment* (make-lexenv)))
     (with-compilation-environment
-      (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
-                           :direction :output
-                           :if-exists :supersede)
-        (format out "(function(){~%")
-        (format out "'use strict';~%")
-        (write-string (read-whole-file (source-pathname "prelude.js")) out)
-        (do-source input :target
-          (!compile-file input out :print verbose))
-        (dump-global-environment out)
-        (format out "})();~%")))
+      (flet ((f (out)
+               (format out "(function(){~%")
+               (format out "'use strict';~%")
+               (write-string (read-whole-file (source-pathname "prelude.js")) out)
+               (do-source input :target
+                 (!compile-file input out :print verbose))
+               (dump-global-environment out)
+               (format out "})();~%")))
+        (if jscl
+            (with-open-file (out (merge-pathnames "jscl.js" outputdir)
+                                 :direction :output
+                                 :if-exists :supersede)
+              (f out))
+            (let ((out (make-concatenated-stream)))
+              (f out)))))
 
     (report-undefined-functions)
+    (loop for (name . files) in files
+          do (compile-application files (merge-pathnames name outputdir)))))
 
-    ;; Tests
-    (compile-application (append (directory "tests.lisp")
-                                 (directory "tests/*.lisp")
-                                 (directory "tests-report.lisp"))
-                         (merge-pathnames "tests.js" *base-directory*))
-
-    ;; Web REPL
-    (compile-application (list #P"repl-web/repl.lisp")
-                         (merge-pathnames "repl-web.js" *base-directory*))
-
-    ;; Node REPL
-    (compile-application (list #P"repl-node/repl.lisp")
-                         (merge-pathnames "repl-node.js" *base-directory*))))
+(defun bootstrap (&optional verbose)
+  (jscl-compile
+   `(("tests.js" ,@(append (directory "tests.lisp")
+                           (directory "tests/*.lisp")
+                           (directory "tests-report.lisp")))
+     ("repl-web.js"  ,@(list #P"repl-web/repl.lisp"))
+     ("repl-node.js" ,@(list #P"repl-node/repl.lisp")))
+   :outputdir *base-directory*
+   :verbose verbose))
 
 
 ;;; Run the tests in the host Lisp implementation. It is a quick way
