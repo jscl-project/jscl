@@ -78,6 +78,34 @@ internals.checkArgs = function(args, n){
   internals.checkArgsAtMost(args, n);
 };
 
+
+// Lists
+
+internals.Cons = function (car, cdr) {
+  this.car = car;
+  this.cdr = cdr;
+};
+
+internals.car = function(x){
+  if (x === nil)
+    return nil;
+  else if (x instanceof internals.Cons)
+    return x.car;
+  else {
+    console.log(x);
+    throw new Error('CAR called on non-list argument');
+  }
+};
+
+internals.cdr = function(x){
+  if (x === nil)
+    return nil;
+  else if (x instanceof internals.Cons)
+    return x.cdr;
+  else
+    throw new Error('CDR called on non-list argument');
+};
+
 // Improper list constructor (like LIST*)
 internals.QIList = function(){
   if (arguments.length == 1)
@@ -86,11 +114,14 @@ internals.QIList = function(){
     var i = arguments.length-1;
     var r = arguments[i--];
     for (; i>=0; i--){
-      r = {car: arguments[i], cdr: r};
+      r = new internals.Cons(arguments[i], r);
     }
     return r;
   }
 };
+
+
+
 
 // Arithmetic
 
@@ -261,6 +292,15 @@ internals.Symbol = function(name, package_name){
   this.package = package_name;
   this.value = undefined;
   this.fvalue = unboundFunction;
+};
+
+internals.symbolValue = function (symbol){
+  var value = symbol.value;
+  if (value === undefined){
+    throw new Error("Variable " + symbol.name + " is unbound.");
+  } else {
+    return value;
+  }
 };
 
 internals.symbolFunction = function (symbol){

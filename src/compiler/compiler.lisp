@@ -309,8 +309,8 @@
 
 (defun compile-lambda-rest (ll)
   (let ((n-required-arguments (length (ll-required-arguments ll)))
-	(n-optional-arguments (length (ll-optional-arguments ll)))
-	(rest-argument (ll-rest-argument ll)))
+        (n-optional-arguments (length (ll-optional-arguments ll)))
+        (rest-argument (ll-rest-argument ll)))
     (when rest-argument
       (let ((js!rest (translate-variable rest-argument)))
         `(progn
@@ -319,8 +319,7 @@
            (for ((= i (- (nargs) 1))
                  (>= i ,(+ n-required-arguments n-optional-arguments))
                  (post-- i))
-                (= ,js!rest (object "car" (arg i)
-                                    "cdr" ,js!rest))))))))
+                (= ,js!rest (new (call-internal |Cons| (arg i) ,js!rest)))))))))
 
 (defun compile-lambda-parse-keywords (ll)
   (let ((n-required-arguments
@@ -1059,34 +1058,16 @@
   `(call-internal |make_lisp_string| (method-call ,x |toString|)))
 
 (define-builtin cons (x y)
-  `(object "car" ,x "cdr" ,y))
+  `(new (call-internal |Cons| ,x ,y)))
 
 (define-builtin consp (x)
-  `(selfcall
-    (var (tmp ,x))
-    (return ,(convert-to-bool
-              `(and (== (typeof tmp) "object")
-                    (in "car" tmp))))))
+  (convert-to-bool `(instanceof ,x (internal |Cons|))))
 
 (define-builtin car (x)
-  `(selfcall
-    (var (tmp ,x))
-    (if (=== tmp ,(convert nil))
-        (return ,(convert nil))
-        (if (and (== (typeof tmp) "object")
-                 (in "car" tmp))
-            (return (get tmp "car"))
-            (throw "CAR called on non-list argument")))))
+  `(call-internal |car| ,x))
 
 (define-builtin cdr (x)
-  `(selfcall
-    (var (tmp ,x))
-    (if (=== tmp ,(convert nil))
-        (return ,(convert nil))
-        (if (and (== (typeof tmp) "object")
-                 (in "cdr" tmp))
-            (return (get tmp "cdr"))
-            (throw "CDR called on non-list argument")))))
+  `(call-internal |cdr| ,x))
 
 (define-builtin rplaca (x new)
   `(selfcall
@@ -1122,12 +1103,7 @@
   (convert-to-bool `(!== (get ,x "fvalue") undefined)))
 
 (define-builtin symbol-value (x)
-  `(selfcall
-    (var (symbol ,x)
-         (value (get symbol "value")))
-    (if (=== value undefined)
-        (throw (+ "Variable `" (get symbol "name") "' is unbound.")))
-    (return value)))
+  `(call-internal |symbolValue| ,x))
 
 (define-builtin symbol-function (x)
   `(call-internal |symbolFunction| ,x))
