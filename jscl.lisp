@@ -167,7 +167,8 @@
 
 (defun bootstrap (&optional verbose)
   (let ((*features* (list* :jscl :jscl-xc *features*))
-        (*package* (find-package "JSCL")))
+        (*package* (find-package "JSCL"))
+        (*default-pathname-defaults* *base-directory*))
     (setq *environment* (make-lexenv))
     (with-compilation-environment
       (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
