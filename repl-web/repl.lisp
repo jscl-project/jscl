@@ -34,7 +34,7 @@
         (stringp nil)
         (s (length string))
         (depth 0))
-
+    
     (while (< i s)
       (cond
         (stringp
@@ -63,7 +63,7 @@
 
 
 (defun toplevel ()
-  (#j:jqconsole:RegisterMatching "(" ")" "parents")
+  (#j:jqconsole:RegisterMatching "(" ")" "parens")
 
   (let ((prompt (format nil "~a> " (package-name *package*))))
     (#j:jqconsole:Write prompt "jqconsole-prompt"))
