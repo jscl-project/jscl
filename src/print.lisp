@@ -361,7 +361,8 @@
               (cond
                 ((char= next #\~)
                  (concatf res "~"))
-                ((char= next #\%)
+                ((or (char= next #\&) 
+                     (char= next #\%))
                  (concatf res (string #\newline)))
                 ((char= next #\*)
                  (pop arguments))
