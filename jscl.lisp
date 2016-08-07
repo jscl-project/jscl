@@ -157,6 +157,7 @@
 (defun compile-application (files output)
   (with-compilation-environment
     (with-open-file (out output :direction :output :if-exists :supersede)
+      (format out "#!/usr/bin/env node~%")
       (format out "(function(jscl){~%")
       (format out "'use strict';~%")
       (format out "(function(values, internals){~%")
