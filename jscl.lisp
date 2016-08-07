@@ -25,7 +25,9 @@
 (defvar *version* "0.3.0")
 
 (defvar *base-directory*
-  (or #.*load-pathname* *default-pathname-defaults*))
+  (if #.*load-pathname*
+      (make-pathname :name nil :type nil :defaults #.*load-pathname*)
+      *default-pathname-defaults*))
 
 ;;; List of all the source files that need to be compiled, and whether they
 ;;; are to be compiled just by the host, by the target JSCL, or by both.
@@ -185,17 +187,18 @@
     (report-undefined-functions)
 
     ;; Tests
-    (compile-application (append (directory "tests.lisp")
-                                 (directory "tests/*.lisp")
-                                 (directory "tests-report.lisp"))
-                         (merge-pathnames "tests.js" *base-directory*))
+    (compile-application
+     `(,(source-pathname "tests.lisp" :directory nil)
+        ,@(directory (source-pathname "*" :directory '(:relative "tests") :type "lisp"))
+        ,(source-pathname "tests-report.lisp" :directory nil))
+     (merge-pathnames "tests.js" *base-directory*))
 
     ;; Web REPL
-    (compile-application (list #P"repl-web/repl.lisp")
+    (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "repl-web")))
                          (merge-pathnames "repl-web.js" *base-directory*))
 
     ;; Node REPL
-    (compile-application (list #P"repl-node/repl.lisp")
+    (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "repl-node")))
                          (merge-pathnames "repl-node.js" *base-directory*))))
 
 
@@ -204,7 +207,7 @@
 (defun run-tests-in-host ()
   (let ((*package* (find-package "JSCL"))
         (*default-pathname-defaults* *base-directory*))
-    (load "tests.lisp")
+    (load (source-pathname "tests.lisp" :directory nil))
     (let ((*use-html-output-p* nil))
       (declare (special *use-html-output-p*))
       (dolist (input (directory "tests/*.lisp"))
