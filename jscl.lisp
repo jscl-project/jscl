@@ -167,7 +167,8 @@
 
 (defun bootstrap (&optional verbose)
   (let ((*features* (list* :jscl :jscl-xc *features*))
-        (*package* (find-package "JSCL")))
+        (*package* (find-package "JSCL"))
+        (*default-pathname-defaults* *base-directory*))
     (setq *environment* (make-lexenv))
     (with-compilation-environment
       (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
@@ -201,7 +202,8 @@
 ;;; Run the tests in the host Lisp implementation. It is a quick way
 ;;; to improve the level of trust of the tests.
 (defun run-tests-in-host ()
-  (let ((*package* (find-package "JSCL")))
+  (let ((*package* (find-package "JSCL"))
+        (*default-pathname-defaults* *base-directory*))
     (load "tests.lisp")
     (let ((*use-html-output-p* nil))
       (declare (special *use-html-output-p*))
