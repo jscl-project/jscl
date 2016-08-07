@@ -22,12 +22,26 @@
 
 (in-package :jscl)
 
-(defvar *version* "0.3.0")
-
 (defvar *base-directory*
   (if #.*load-pathname*
       (make-pathname :name nil :type nil :defaults #.*load-pathname*)
       *default-pathname-defaults*))
+
+(defvar *version*
+  ;; Read the version from the package.json file. We could have used a
+  ;; json library to parse this, but that would introduce a dependency
+  ;; and we are not using ASDF yet.
+  (with-open-file (in (merge-pathnames "package.json" *base-directory*))
+    (loop
+       for line = (read-line in nil)
+       while line
+       when (search "\"version\":" line)
+       do (let ((colon (position #\: line))
+                (comma (position #\, line)))
+            (return (string-trim '(#\newline #\" #\tab #\space)
+                                 (subseq line (1+ colon) comma)))))))
+
+
 
 ;;; List of all the source files that need to be compiled, and whether they
 ;;; are to be compiled just by the host, by the target JSCL, or by both.
