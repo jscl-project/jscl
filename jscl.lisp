@@ -154,17 +154,18 @@
 
 
 
-(defun compile-application (files output)
+(defun compile-application (files output &key shebang)
   (with-compilation-environment
-    (with-open-file (out output :direction :output :if-exists :supersede)
-      (format out "#!/usr/bin/env node~%")
-      (format out "(function(jscl){~%")
-      (format out "'use strict';~%")
-      (format out "(function(values, internals){~%")
-      (dolist (input files)
-        (!compile-file input out))
-      (format out "})(jscl.internals.pv, jscl.internals);~%")
-      (format out "})( typeof require !== 'undefined'? require('./jscl'): window.jscl )~%"))))
+      (with-open-file (out output :direction :output :if-exists :supersede)
+        (when shebang
+          (format out "#!/usr/bin/env node~%"))
+        (format out "(function(jscl){~%")
+        (format out "'use strict';~%")
+        (format out "(function(values, internals){~%")
+        (dolist (input files)
+          (!compile-file input out))
+        (format out "})(jscl.internals.pv, jscl.internals);~%")
+        (format out "})( typeof require !== 'undefined'? require('./jscl'): window.jscl )~%"))))
 
 
 
@@ -200,7 +201,8 @@
 
     ;; Node REPL
     (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "repl-node")))
-                         (merge-pathnames "repl-node.js" *base-directory*))))
+                         (merge-pathnames "repl-node.js" *base-directory*)
+                         :shebang t)))
 
 
 ;;; Run the tests in the host Lisp implementation. It is a quick way
