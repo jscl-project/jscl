@@ -278,9 +278,9 @@
           (compilation-notice))
   (format t "JSCL is a Common Lisp implementation on Javascript.~%")
   (if (find :node *features*)
-      (format t "For more information, visit the project page at https://github.com/davazp/jscl.~%~%")
+      (format t "For more information, visit the project page at https://github.com/jscl-project/jscl.~%~%")
       (%write-string
-       (format nil "For more information, visit the project page at <a href=\"https://github.com/davazp/jscl\">GitHub</a>.~%~%")
+       (format nil "For more information, visit the project page at <a href=\"https://github.com/jscl-project/jscl\">GitHub</a>.~%~%")
        nil)))
 
 

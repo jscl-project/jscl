@@ -784,7 +784,7 @@
   ;; transfer. Exceptions has dynamic scoping, so we use a uniquely
   ;; generated object to identify the block. The instance of a empty
   ;; array is used to distinguish between nested dynamic Javascript
-  ;; exceptions. See https://github.com/davazp/jscl/issues/64 for
+  ;; exceptions. See https://github.com/jscl-project/jscl/issues/64 for
   ;; futher details.
   (let* ((idvar (gvarname name))
          (b (make-binding :name name :type 'block :value idvar)))
