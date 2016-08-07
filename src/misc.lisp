@@ -21,31 +21,41 @@
 (defun lisp-implementation-version ()
   #.*version*)
 
+;; Following  the  “most  useful”  (in one  opinion)  form,  these  wrap
+;; Navigator  (browser) methods.  NB someone  familiar with  Node.JS may
+;; want to  provide alternative  implementations that  are more  in line
+;; with what a “normal” compiler would provide.
+
 (defun short-site-name ()
-  nil)
+  (and #j:window #j:window:location #j:window:location:hostname))
 
 (defun long-site-name ()
-  nil)
-
-;;; Javascript has  not access  to the hardware.  Would it make  sense to  have the browser  data as
-;;; machine abstraction instead?
+  (and #j:window #j:window:location #j:window:location:origin))
 
 (defun machine-instance ()
-  nil)
+  (and #j:window #j:window:location #j:window:location:hostname))
 
 (defun machine-version ()
-  nil)
+  "The platform or OS type"
+  (let ((platform (and #j:navigator #j:navigator:platform)))
+    (if (and platform (find #\Space platform))
+        (subseq platform 0 (position #\Space platform))
+        platform)))
 
 (defun machine-type ()
-  nil)
-
-;;; Return browser information here?
+  "Probably a CPU type"
+  (let ((platform (and #j:navigator #j:navigator:platform)))
+    (if (and platform (find #\Space platform))
+        (subseq platform (position #\Space platform))
+        platform)))
 
 (defun software-type ()
-  nil)
+  "The browser's Product name; eg, Gecko for Firefox"
+  (and #j:navigator #j:navigator:product))
 
 (defun software-version ()
-  nil)
+  "The User-Agent string provided by the browser."
+  (and #j:navigator #j:navigator:userAgent))
 
 (defmacro time (form)
   (let ((start (gensym))
