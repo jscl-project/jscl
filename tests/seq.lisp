@@ -41,6 +41,13 @@
 (test (find 2 (remove 2 #(1 2 3) :test-not #'=)))
 (test (find 2 (remove 2 '(1 2 3) :test-not #'=)))
 
+;; SUBSTITUTE
+(test (equal (substitute #\_ #\- "Hello-World") "Hello_World"))
+(test (equal (substitute 4 5 '(1 2 3 4)) '(1 2 3 4)))
+(test (equal (substitute 99 3 '(1 2 3 4)) '(1 2 99 4)))
+(test (equal (substitute 99 3 '(1 2 3 4) :test #'<=) '(1 2 99 99)))
+(test (equal (substitute 99 3 #(1 2 3 4) :test #'<=) #(1 2 99 99)))
+
 ; POSITION
 (test (= (position 1 #(1 2 3))  0))
 (test (= (position 1 '(1 2 3))  0))
