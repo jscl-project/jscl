@@ -163,6 +163,19 @@
   (position-if (complement predicate) sequence
                :from-end from-end :key key :start start :end end))
 
+(defun substitute (new old seq 
+                   &key (key #'identity) (test #'eql))
+  (and seq
+       (map (cond
+              ((stringp seq) 'string)
+              ((vectorp seq) 'vector)
+              ((listp seq) 'list)) 
+            (lambda (elt)
+              (if (funcall test old (funcall key elt))
+                  new
+                  elt))
+            seq)))
+
 (defun remove (x seq &key key (test #'eql testp) (test-not #'eql test-not-p))
   (cond
     ((null seq)
