@@ -48,3 +48,6 @@
 (test (= (read-from-string "#| #| |# |# 2")  2))
 (test (= (read-from-string "#|#$#%^&*&|# 2") 2))
 (test (= (read-from-string "#|||# 2")        2))
+
+;; character literals
+(test (char= #\SPACE #\Space #\space))

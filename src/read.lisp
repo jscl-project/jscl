@@ -261,9 +261,9 @@
               (concat (string (%read-char stream))
                       (read-until stream #'terminalp))))
          (cond
-           ((string= cname "space") #\space)
-           ((string= cname "tab") #\tab)
-           ((string= cname "newline") #\newline)
+           ((string-equal cname "space") #\space)
+           ((string-equal cname "tab") #\tab)
+           ((string-equal cname "newline") #\newline)
            (t (char cname 0)))))
       ((#\+ #\-)
        (let* ((expression
