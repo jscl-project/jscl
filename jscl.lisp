@@ -159,7 +159,7 @@
          until (eq x eof-mark)
          do (let ((compilation (compile-toplevel x)))
               (if (possibly-valid-js-p compilation)
-                  (when (plusp (length compilation))
+              (when (plusp (length compilation))
                     (write-string compilation out))
                   (error "Generated illegal characters (first is ~@c)~%Compiling form:~%~S~%from ~s~%Generated:~%~s"
                          (find-if (complement #'possibly-valid-js-p) compilation)
