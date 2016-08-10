@@ -67,9 +67,13 @@ internals.forcemv = function(x) {
 //
 //    https://github.com/jscl-project/jscl/pull/242#issuecomment-238923579
 //
+// Note that primitive constructors, if accessed with oget (e.g:
+// #j:Date) will be converted into a Lisp function. We track the
+// original function in the jscl_original property as we can't wrap
+// the primitive constructor in a Lisp function or it will not work.
 internals.newInstance = function(values, ct){
   var args = Array.prototype.slice.call(arguments);
-  var newCt = ct.bind.apply(ct, args.slice(1));
+  var newCt = ct.bind.apply(ct.jscl_original || ct, args.slice(1));
   return new newCt();
 };
 
