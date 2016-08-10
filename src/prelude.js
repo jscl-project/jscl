@@ -59,6 +59,21 @@ internals.forcemv = function(x) {
   return typeof x == 'object' && 'multiple-value' in x? x: internals.mv(x);
 };
 
+
+//
+// Workaround the problems with `new` for arbitrary number of
+// arguments. Some primitive constructors (like Date) differ if they
+// are called as a function or as a constructor.
+//
+//    https://github.com/jscl-project/jscl/pull/242#issuecomment-238923579
+//
+internals.newInstance = function(values, ct){
+  var args = Array.prototype.slice.call(arguments);
+  var newCt = ct.bind.apply(ct, args.slice(1));
+  return new newCt();
+};
+
+
 // NOTE: Define VALUES to be MV for toplevel forms. It is because
 // `eval' compiles the forms and execute the Javascript code at
 // toplevel with `js-eval', so it is necessary to return multiple
