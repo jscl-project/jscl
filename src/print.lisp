@@ -282,8 +282,7 @@
      (simple-format stream "#<PACKAGE ~a>" (package-name form)))
     ;; Others
     (otherwise
-     (simple-format stream "#<JS-OBJECT ~a>"
-                    ((oget form "toString"))))))
+     (simple-format stream "#<JS-OBJECT ~a>" (#j:String form)))))
 
 
 (defun output-stream-designator (x)
