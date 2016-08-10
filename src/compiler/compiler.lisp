@@ -1255,21 +1255,8 @@
   '(object))
 
 (define-raw-builtin make-new (constructor-function &rest constructor-args)
-  (let ((args (butlast constructor-args))
-        (last (car (last constructor-args))))
-    `(selfcall
-      (var (ctor ,(convert constructor-function)))
-      (var (args ,(list-to-vector
-                   (cons (if *multiple-value-p* '|values| '(internal |pv|))
-                         (mapcar #'convert args)))))
-      (var (tail ,(convert last)))
-      (while (!= tail ,(convert nil))
-        (method-call args "push" (get tail "car"))
-        (= tail (get tail "cdr")))
-      (new (call (if (=== (typeof ctor) "function")
-                     ctor
-                     (get ctor "fvalue"))
-                 args)))))
+  `(selfcall 
+    (return (new (call ,constructor-function  ,@(mapcar #'convert constructor-args))))))
 
 (define-raw-builtin oget* (object key &rest keys)
   `(selfcall
