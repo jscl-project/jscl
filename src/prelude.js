@@ -233,13 +233,16 @@ internals.js_to_lisp = function (x) {
     return nil;
   else if (typeof x == 'function'){
     // Trampoline calling the JS function
-    return (function(values){
+    let trampoline = function(values){
       var args = Array.prototype.slice.call(arguments, 1);
       for (var i in args)
         args[i] = internals.lisp_to_js(args[i]);
       return values(internals.js_to_lisp(x.apply(this, args)));
-    });
-  } else return x;
+    };
+    trampoline.jscl_original = x;
+    return trampoline;
+  } else 
+    return x;
 };
 
 
