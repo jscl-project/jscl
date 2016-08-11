@@ -405,6 +405,13 @@
       (setq body (cdr body)))
     (values body value-declarations value-docstring)))
 
+
+(defun bind-this ()
+  (let* ((gvar (gvarname 'this))
+         (binding (make-binding :name 'this :type 'variable :value gvar)))
+    (push-to-lexenv binding *environment* 'variable)
+    `(var (,gvar |this|))))
+
 ;;; Compile a lambda function with lambda list LL and body BODY. If
 ;;; NAME is given, it should be a constant string and it will become
 ;;; the name of the function. If BLOCK is non-NIL, a named block is
@@ -438,7 +445,7 @@
                     ,(compile-lambda-optional ll)
                     ,(compile-lambda-rest ll)
                     ,(compile-lambda-parse-keywords ll)
-
+                    ,(bind-this)
                     ,(let ((*multiple-value-p* t))
                           (if block
                               (convert-block `((block ,block ,@body)) t)
