@@ -26,36 +26,39 @@
 ;; want to  provide alternative  implementations that  are more  in line
 ;; with what a “normal” compiler would provide.
 
+(defun null-if-empty (x)
+  (if (and x (emptyp x)) nil x))
+
 (defun short-site-name ()
-  (and #j:window #j:window:location #j:window:location:hostname))
+  (null-if-empty (and #j:window #j:window:location #j:window:location:hostname)))
 
 (defun long-site-name ()
-  (and #j:window #j:window:location #j:window:location:origin))
+  (null-if-empty (and #j:window #j:window:location #j:window:location:origin)))
 
 (defun machine-instance ()
-  (and #j:window #j:window:location #j:window:location:hostname))
+  (null-if-empty (and #j:window #j:window:location #j:window:location:hostname)))
 
 (defun machine-version ()
   "The platform or OS type"
-  (let ((platform (and #j:navigator #j:navigator:platform)))
-    (if (and platform (find #\Space platform))
-        (subseq platform 0 (position #\Space platform))
-        platform)))
+  (null-if-empty (let ((platform (and #j:navigator #j:navigator:platform)))
+                   (if (and platform (find #\Space platform))
+                       (subseq platform 0 (position #\Space platform))
+                       platform))))
 
 (defun machine-type ()
   "Probably a CPU type"
-  (let ((platform (and #j:navigator #j:navigator:platform)))
-    (if (and platform (find #\Space platform))
-        (subseq platform (1+ (position #\Space platform)))
-        platform)))
+  (null-if-empty (let ((platform (and #j:navigator #j:navigator:platform)))
+                   (if (and platform (find #\Space platform))
+                       (subseq platform (1+ (position #\Space platform)))
+                       platform))))
 
 (defun software-type ()
   "The browser's Product name; eg, Gecko for Firefox"
-  (and #j:navigator #j:navigator:product))
+  (null-if-empty (and #j:navigator #j:navigator:product)))
 
 (defun software-version ()
   "The User-Agent string provided by the browser."
-  (and #j:navigator #j:navigator:userAgent))
+  (null-if-empty (and #j:navigator #j:navigator:userAgent)))
 
 (defmacro time (form)
   (let ((start (gensym))
