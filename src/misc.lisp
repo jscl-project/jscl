@@ -51,7 +51,7 @@
   (let ((platform (or (and #j:navigator #j:navigator:platform)
                       (and #j:process #j:process:arch))))
     (if (and platform (find #\Space platform))
-        (subseq platform (position #\Space platform))
+        (subseq platform (1+ (position #\Space platform)))
         platform)))
 
 (defun software-type ()
