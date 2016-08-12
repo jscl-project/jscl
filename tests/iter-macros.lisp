@@ -1,4 +1,5 @@
-                                        ; Tests for macros implementing iteration constructs DOTIMES
+                                        ; Tests for  macros implementing
+                                        ; iteration constructs DOTIMES
 (test (let ((total 0))
         (dotimes (n 6)
           (incf total n))

@@ -1,4 +1,5 @@
-                                        ; Functions used as :KEY argument in tests
+                                        ; Functions    used   as    :KEY
+                                        ; argument in tests
 (defvar halve  (lambda (x) (/ x 2)))
 (defvar double (lambda (x) (* x 2)))
 
@@ -98,6 +99,7 @@
 (let ((v1 (remove-if #'zerop #(1 0 2 0 3))))
   (test (and (= (aref v1 0) 1) (= (aref v1 1) 2) (= (aref v1 2) 3))))
 (test (every #'zerop (remove-if-not #'zerop #(1 0 2 0 3))))
+(test (every #'= '(0 1 2 3) '(0 1 2 3))) ; test “every” with two seqs
 
                                         ; SUBSEQ
 (let ((nums '(1 2 3 4 5)))
