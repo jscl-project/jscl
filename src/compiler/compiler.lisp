@@ -1310,10 +1310,6 @@
 (define-builtin new ()
   '(object))
 
-(define-raw-builtin make-new (constructor-function &rest constructor-args)
-  `(selfcall 
-    (return (new (call ,constructor-function  ,@(mapcar #'convert constructor-args))))))
-
 (define-raw-builtin oget* (object key &rest keys)
   `(selfcall
     (progn
