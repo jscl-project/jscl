@@ -35,8 +35,7 @@
 (test (not (find 1 (remove 1 '(1 2 3 1)))))
 (test (not (find 2 (remove 1 #(1 2 3 1) :key halve))))
 (test (not (find 2 (remove 1 '(1 2 3 1) :key halve))))
-;; TODO: Rewrite this test when EQUALP exists and works on vectors
-(test (equal (length (remove '(1 2) #((1 2) (1 2)) :test #'equal)) 0))
+(test (equalp (length (remove '(1 2) #((1 2) (1 2)) :test #'equal)) 0))
 (test (null          (remove '(1 2) '((1 2) (1 2)) :test #'equal)))
 (test (find 2 (remove 2 #(1 2 3) :test-not #'=)))
 (test (find 2 (remove 2 '(1 2 3) :test-not #'=)))
@@ -46,7 +45,27 @@
 (test (equal (substitute 4 5 '(1 2 3 4)) '(1 2 3 4)))
 (test (equal (substitute 99 3 '(1 2 3 4)) '(1 2 99 4)))
 (test (equal (substitute 99 3 '(1 2 3 4) :test #'<=) '(1 2 99 99)))
-(test (equal (substitute 99 3 #(1 2 3 4) :test #'<=) #(1 2 99 99)))
+(test (equalp (substitute 99 3 #(1 2 3 4) :test #'<=) #(1 2 99 99)))
+
+;; SUBSTITUTE-IF, SUBSTITUTE-IF-NOT
+(test (equal (substitute-if 99 (lambda (elt) (<= elt 2)) '(1 2 3 4)) '(99 99 3 4)))
+(test (equal (substitute-if-not 99 (lambda (elt) (<= elt 2)) '(1 2 3 4)) '(1 2 99 99)))
+(test (equal (substitute-if-not #\- #'alphanumericp "The 12 ducks are not wet.")
+             "The-12-ducks-are-not-wet-"))
+
+;; CLHS SUBSTITUTE TESTS
+(test (equal (substitute #\. #\space "0 2 4 6") "0.2.4.6"))
+(test (equal (substitute 9 4 '(1 2 4 1 3 4 5)) '(1 2 9 1 3 9 5)))
+;;; — these cases: https://github.com/jscl-project/jscl/issues/239
+(test (equal (substitute 9 4 '(1 2 4 1 3 4 5) :count 1) '(1 2 9 1 3 4 5)))
+(expected-failure (equal (substitute 9 4 '(1 2 4 1 3 4 5) :count 1 :from-end t)
+                         '(1 2 4 1 3 9 5)))
+(test (equal (substitute 9 3 '(1 2 4 1 3 4 5) :test #'>) '(9 9 4 9 3 4 5)))
+(test (equal (substitute-if 0 #'evenp '((1) (2) (3) (4)) :start 2 :key #'car)
+             '((1) (2) (3) 0)))
+(test (equal (substitute-if 9 #'oddp '(1 2 4 1 3 4 5)) '(9 2 4 9 9 4 9)))
+(expected-failure (equal (substitute-if 9 #'evenp '(1 2 4 1 3 4 5) :count 1 :from-end t)
+                         '(1 2 4 1 3 9 5)))
 
 ; POSITION
 (test (= (position 1 #(1 2 3))  0))
