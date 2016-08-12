@@ -51,3 +51,51 @@
                    (write-to-string list)))))
 
 
+;;; FORMAT
+(test (equal (format nil "~d" 42) "42"))
+(test (equal (format nil "~6,'#d" 42) "####42"))
+(test (equal (let ((*print-base* 16))
+               (format nil "~d" 42))
+             "42"))
+(test (equal (let ((*print-base* 16))
+               (princ-to-string 42))
+             "2A"))
+(test (equal (format nil "~x" 42) "2A"))
+(test (equal (format nil "~@d" 42) "+42"))
+(test (equal (format nil "~@x" 42) "+2A"))
+(test (equal (format nil "~d" -42) "-42"))
+(test (equal (format nil "~36r" 42) "16"))
+(test (equal (format nil "~@d" 0) "+0"))
+#-jscl (test (equal (format nil "~f" 1/2) "0.5"))
+(test (equal (format nil "~a" :monkey) "MONKEY"))
+(test (equal (format nil "~a" 'monkey) "MONKEY"))
+(test (equal (format nil "~a" "monkey") "monkey"))
+(test (equal (format nil "~a" 42) "42"))
+(test (equal (format nil "~d" :monkey) "MONKEY"))
+(test (equal (format nil "~20a" "x") "x                   "))
+(test (equal (format nil "~4x" 42) "  2A"))
+(test (equal (format nil "~4,'0x" 42) "002A"))
+(test (equal (format nil "~c" #\x) "x"))
+(test (equal (format nil "~@c" #\x) "#\\x"))
+(test (equalp (format nil "~%") #(#\newline)))
+(test (equalp (format nil "~3%") #(#\newline #\newline #\newline)))
+(test (or (equalp (format nil "~&") #(#\newline))
+          (equalp (format nil "~&") "")))
+(test (or (equalp (format nil "~3&") #(#\newline #\newline))
+          (equalp (format nil "~3&") #(#\newline #\newline #\newline))))
+(test (equal (format nil "~a" #\c) "c"))
+(test (equal (format nil "~c" #\c) "c"))
+(test (or (equal (format nil "~@c" #\space) "#\\Space") ; JSCL doing this, unless someone objects
+          (equal (format nil "~@c" #\space) "#\\ "))) ; SBCL does this, arguably equally valid
+(test (equal (format nil "~@c" #\newline) "#\\Newline"))
+(expected-failure (equal (format nil "~{~a~^, ~}" '(1 2 3)) "1, 2, 3"))
+(expected-failure (equal (format nil "~(~a~)" :monkey) "monkey"))
+(expected-failure (equal (format nil "~:(~a~)" :monkey) "Monkey"))
+(expected-failure (equal (format nil "~:@(~a~)" :monkey) "MONKEY"))
+
+(test (equal (read-from-string (format nil "~@c" #\u+2010)) #\u+2010))
+
+(test (equal (format nil "~5,':x" 4) "::::4"))
+;;(test (equal (format nil "~5,,2,':d" 400) " 4:00")) CRASHER
+
+
