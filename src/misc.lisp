@@ -52,10 +52,10 @@
 (defun machine-type ()
   "Probably a CPU type"
   (null-if-empty (let ((platform (or (and #j:navigator #j:navigator:platform)
-                                     (and #j:process #j:process:arch)))))
-                 (if (and platform (find #\Space platform))
-                     (subseq platform (1+ (position #\Space platform)))
-                     platform)))
+                                     (and #j:process #j:process:arch))))
+                   (if (and platform (find #\Space platform))
+                       (subseq platform (1+ (position #\Space platform)))
+                       platform))))
 
 (defun software-type ()
   "The browser's Product name; eg, Gecko for Firefox"
