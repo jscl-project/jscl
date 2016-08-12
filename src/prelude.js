@@ -59,6 +59,25 @@ internals.forcemv = function(x) {
   return typeof x == 'object' && 'multiple-value' in x? x: internals.mv(x);
 };
 
+
+//
+// Workaround the problems with `new` for arbitrary number of
+// arguments. Some primitive constructors (like Date) differ if they
+// are called as a function or as a constructor.
+//
+//    https://github.com/jscl-project/jscl/pull/242#issuecomment-238923579
+//
+// Note that primitive constructors, if accessed with oget (e.g:
+// #j:Date) will be converted into a Lisp function. We track the
+// original function in the jscl_original property as we can't wrap
+// the primitive constructor in a Lisp function or it will not work.
+internals.newInstance = function(values, ct){
+  var args = Array.prototype.slice.call(arguments);
+  var newCt = ct.bind.apply(ct.jscl_original || ct, args.slice(1));
+  return new newCt();
+};
+
+
 // NOTE: Define VALUES to be MV for toplevel forms. It is because
 // `eval' compiles the forms and execute the Javascript code at
 // toplevel with `js-eval', so it is necessary to return multiple
@@ -228,13 +247,16 @@ internals.js_to_lisp = function (x) {
     return nil;
   else if (typeof x == 'function'){
     // Trampoline calling the JS function
-    return (function(values){
+    let trampoline = function(values){
       var args = Array.prototype.slice.call(arguments, 1);
       for (var i in args)
         args[i] = internals.lisp_to_js(args[i]);
       return values(internals.js_to_lisp(x.apply(this, args)));
-    });
-  } else return x;
+    };
+    trampoline.jscl_original = x;
+    return trampoline;
+  } else 
+    return x;
 };
 
 

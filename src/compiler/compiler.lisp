@@ -1402,6 +1402,9 @@
 (define-compilation %js-typeof (x)
   `(call-internal |js_to_lisp| (typeof ,x)))
 
+;;; Access a function defined in the internals runtime object.
+(define-compilation %js-internal (name)
+  `(internal ,name))
 
 
 ;; Catch any Javascript exception. Note that because all non-local
