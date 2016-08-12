@@ -255,9 +255,9 @@
           (read-escaped-until stream #'terminalp)))))
       (#\\
        (cond ((and (char-equal #\U (%peek-char stream))
-                   (char= #\+ (%peek-char stream 1)))
-              (%read-char stream)       ; U (or u)
-              (%read-char stream)       ; +
+                   (char=      #\+ (%peek-char stream 1)))
+              (%read-char stream)          ; U (or u)
+              (%read-char stream)          ; +
               (let ((*read-base* 16))
                 (code-char (read-integer-from-stream stream))))
              (t (let ((cname
@@ -322,7 +322,7 @@
                      (add-labelled-object id *future-value*)
                      (let ((obj (ls-read stream eof-error-p eof-value t)))
                        ;; FIXME: somehow the more natural (setf (cdr (find-labelled-object id)) obj)
-                       ;;    doesn't work
+                       ;; doesn't work
                        (rplacd (find-labelled-object id) obj)
                        obj))))
               ((#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)
