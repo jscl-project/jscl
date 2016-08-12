@@ -284,12 +284,11 @@
        nil)))
 
 
-;;; Basic *standard-output* stream. This will usually be overriden by
+;;; Basic *standard-output*  stream. This  will usually be  overriden by
 ;;; web or node REPL.
 ;;;
-;;; TODO: Cache character operation so they result in a single call to
+;;; TODO: Cache character  operation so they result in a  single call to
 ;;; console.log.
-;;;
 (setq *standard-output*
       (vector 'stream
               (lambda (ch)

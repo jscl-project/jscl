@@ -440,7 +440,7 @@ macro cache is so aggressive that it cannot be redefined."
 
 ;;; Early error definition.
 (defun error (fmt &rest args)
-  (%throw (apply #'format nil fmt args)))
+  (%throw (make-new |Error| (apply #'format nil fmt args))))
 
 (defmacro nth-value (n form)
   `(multiple-value-call (lambda (&rest values)
