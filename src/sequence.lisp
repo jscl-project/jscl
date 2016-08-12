@@ -30,6 +30,9 @@
     (t
      (not-seq-error seq))))
 
+(defun emptyp (seq)
+  (and seq (zerop (length seq))))
+
 (defun vector-reverse (vector)
   (let* ((length (length vector))
          (new-vector (make-array length :element-type (array-element-type vector))))
