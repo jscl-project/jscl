@@ -1,16 +1,18 @@
-(test (or (stringp (short-site-name))
-          (null (short-site-name))))
-(test (or (stringp (long-site-name))
-          (null (long-site-name))))
-(test (or (stringp (machine-instance))
-          (null (machine-instance))))
-(test (or (stringp (machine-version))
-          (null (machine-version))))
+(test (every (lambda (string) (or (and (stringp string)
+                                       (plusp (length string)))
+                                  (null string)))
+             (list (short-site-name)
+                   (long-site-name)
+                   (machine-instance)
+                   (machine-version)
+                   (software-type)
+                   (software-version))))
+
 (test (stringp (lisp-implementation-type)))
 #+jscl (test (equal "JSCL" (lisp-implementation-type)))
 (test (string (lisp-implementation-version)))
 #+jscl
 (when (boundp 'jscl::*version*)
   (test (equal jscl::*version* (lisp-implementation-version))))
-(test (stringp (software-type)))
-(test (stringp (software-version)))
+
+(test (search "64" (machine-type))) ; add an “or” clause if anyone tests on a not-64-bit machine?
