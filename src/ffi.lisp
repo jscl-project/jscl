@@ -45,6 +45,10 @@
             `(oset* ,g!value ,g!object ,@g!keys)
             `(oget* ,g!object ,@g!keys))))
 
+
+(defun make-new (constructor &rest args)
+  (apply (%js-internal "newInstance") constructor args))
+
 (%js-vset "eval_in_lisp"
           (lambda (form)
             (eval (read-from-string form))))
