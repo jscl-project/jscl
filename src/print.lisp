@@ -1,17 +1,17 @@
 ;;; print.lisp ---
 
-;; JSCL is free software: you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation, either version 3 of the
-;; License, or (at your option) any later version.
+;; JSCL is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General  Public License as published by the Free
+;; Software Foundation,  either version  3 of the  License, or  (at your
+;; option) any later version.
 ;;
-;; JSCL is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
 (/debug "loading print.lisp!")
 
@@ -25,15 +25,15 @@
       (let ((ch (char string index)))
         (when (or (char= ch #\") (char= ch #\\))
           (setq output (concat output "\\")))
-        (when (or (char= ch #\newline))
+        (when (or (char= ch #\newline))   	; wait, what? \n in Lisp? No… *BRFP TODO
           (setq output (concat output "\\"))
           (setq ch #\n))
         (setq output (concat output (string ch))))
       (incf index))
     (concat "\"" output "\"")))
 
-;;; Return T if the string S contains characters which need to be
-;;; escaped to print the symbol name, NIL otherwise.
+;;; Return T if the string S contains characters which  need to be escaped to print the symbol name,
+;;; NIL otherwise.
 (defun escape-symbol-name-p (s)
   (let ((dots-only t))
     (dotimes (i (length s))
@@ -47,12 +47,10 @@
           (return-from escape-symbol-name-p t))))
     dots-only))
 
-;;; Return T if the specified string can be read as a number
-;;; In case such a string is the name of a symbol then escaping
-;;; is required when printing to ensure correct reading.
+;;; Return T if the  specified string can be read as  a number In case such a string  is the name of
+;;; a symbol then escaping is required when printing to ensure correct reading.
 (defun potential-number-p (string)
-  ;; The four rules for being a potential number are described in
-  ;; 2.3.1.1 Potential Numbers as Token
+  ;; The four rules for being a potential number are described in 2.3.1.1 Potential Numbers as Token
   ;;
   ;; First Rule
   (dotimes (i (length string))
@@ -68,8 +66,8 @@
         ((alpha-char-p char)
          (when (and (< i (1- (length string)))
                     (alpha-char-p (char string (1+ i))))
-           ;; fail: adjacent letters are not number marker, or
-           ;; there is a decimal point in the string.
+           ;; fail:  adjacent  letters are  not  number  marker, or  there  is  a decimal  point  in
+           ;; the string.
            (return-from potential-number-p)))
         (t
          ;; fail: there is a non-allowed character
@@ -120,14 +118,12 @@
 ;; they're found multiple times by assining them an id starting from
 ;; 1.
 ;;
-;; After the tracking has been completed the printing phase can begin:
-;; if an object has an id > 0 then #<n>= is prefixed and the id is
-;; changed to negative. If an object has an id < 0 then #<-n># is
-;; printed instead of the object.
+;; After the  tracking has been completed  the printing phase  can begin: if  an object has an  id >
+;; 0 then  #<n>= is prefixed  and the id is  changed to negative.  If an object  has an id <  0 then
+;; #<-n># is printed instead of the object.
 ;;
-;; The processing is O(n^2) with n = number of tracked
-;; objects. Hopefully it will become good enough when the new compiler
-;; is available.
+;; The processing is O(n^2) with n = number of tracked objects. Hopefully it will become good enough
+;; when the new compiler is available.
 (defun scan-multiple-referenced-objects (form)
   (let ((known-objects (make-array 0 :adjustable t :fill-pointer 0))
         (object-ids    (make-array 0 :adjustable t :fill-pointer 0)))
@@ -164,10 +160,10 @@
 (defun write-integer (value stream)
   (write-string (integer-to-string value) stream))
 
-;;; This version of format supports only ~A for strings and ~D for
-;;; integers. It is used to avoid circularities. Indeed, it just
-;;; ouputs to streams.
 (defun simple-format (stream fmt &rest args)
+  "This  version of  format  supports only  ~A for  strings  and ~D  for
+integers. It  is used  to avoid circularities.  Indeed, it  just outputs
+to streams."
   (do ((i 0 (1+ i)))
       ((= i (length fmt)))
     (let ((char (char fmt i)))
@@ -202,13 +198,12 @@
     (symbol
      (let ((name (symbol-name form))
            (package (symbol-package form)))
-       ;; Check if the symbol is accesible from the current package. It
-       ;; is true even if the symbol's home package is not the current
-       ;; package, because it could be inherited.
+       ;; Check if the symbol is accesible from the current package. It is true even if the symbol's
+       ;; home package is not the current package, because it could be inherited.
        (if (eq form (find-symbol (symbol-name form)))
            (write-string (escape-token (symbol-name form)) stream)
-           ;; Symbol is not accesible from *PACKAGE*, so let us prefix
-           ;; the symbol with the optional package or uninterned mark.
+           ;; Symbol is not accesible from *PACKAGE*, so  let us prefix the symbol with the optional
+           ;; package or uninterned mark.
            (progn
              (cond
                ((null package) (write-char #\# stream))
@@ -254,8 +249,7 @@
      (unless (null form)
        (write-aux (car form) stream known-objects object-ids)
        (do ((tail (cdr form) (cdr tail)))
-           ;; Stop on symbol OR if the object is already known when we
-           ;; accept circular printing.
+           ;; Stop on symbol OR if the object is already known when we accept circular printing.
            ((or (atom tail)
                 (and *print-circle*
                      (let* ((ix (or (position tail known-objects) 0))
@@ -327,12 +321,12 @@
   (defun terpri ()
     (write-char #\newline)
     (values))
-  
+
   (defun write-line (x)
     (write-string x)
     (terpri)
     x)
-  
+
   (defun print (x)
     (prog1 (prin1 x)
       (terpri))))
@@ -361,7 +355,7 @@
               (cond
                 ((char= next #\~)
                  (concatf res "~"))
-                ((or (char= next #\&) 
+                ((or (char= next #\&)
                      (char= next #\%))
                  (concatf res (string #\newline)))
                 ((char= next #\*)

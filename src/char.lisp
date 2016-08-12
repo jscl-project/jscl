@@ -334,8 +334,8 @@ character exists."
 except with Common Lisp's suggested changes.
 For the first 32 characters ('C0 controls'), the first
 'Commonly used alternative alias' is used -- note that this differs from SBCL, which uses abbreviations.")
-;; I hope being slightly different from SBCL doesn't bite me down the road.
-;; I'll figure out a good way to add the other 21701 names later.
+;; I hope  being slightly different from  SBCL doesn't bite me  down the
+;; road. I'll figure out a good way to add the other 21701 names later.
 
 (defun char-name (char)
   ;; For consistency, I'm using the SBCL convention of the Unicode
