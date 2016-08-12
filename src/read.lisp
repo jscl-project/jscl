@@ -48,13 +48,11 @@
 ;; (e.g. #1# while reading elements of "#1=(#1# #1# #1#)")
 (defvar *future-value* (make-symbol "future"))
 
-;; A unique value used to mark temporary values that will
-;; be replaced when fixups are run.
+;; A unique value used to mark temporary values that will be replaced when fixups are run.
 (defvar *fixup-value* (make-symbol "fixup"))
 
-;; Fixup locations keeps a list of conses where the CAR
-;; is a callable to be called with the value of the object
-;; associated to label stored in CDR once reading is completed
+;; Fixup locations keeps a list of conses where the CAR is a callable to be called with the value of
+;; the object associated to label stored in CDR once reading is completed
 (defvar *fixup-locations* nil)
 
 (defun fixup-backrefs ()
@@ -67,9 +65,8 @@
           (error "Internal error in fixup-backrefs: object #~S# not found"
                  (cdr fixup))))))
 
-;; A function that will need to return a fixup callback
-;; for the object that is being read. The returned callback will
-;; be called with the result of reading.
+;; A  function that  will  need to  return a  fixup  callback for  the  object that  is being  read.
+;; The returned callback will be called with the result of reading.
 (defvar *make-fixup-function*
   (lambda ()
     (error "Internal error in fixup creation during read")))
@@ -210,10 +207,9 @@
     (keyword
      (and (find expression *features*) t))
     (list
-     ;; Macrocharacters for conditional reading #+ and #- bind the
-     ;; current package to KEYWORD so features are correctly
-     ;; interned. For this reason, AND, OR and NOT symbols will be
-     ;; also keyword in feature expressions.
+     ;; Macrocharacters for  conditional reading #+  and #- bind the  current package to  KEYWORD so
+     ;; features are  correctly interned.  For this  reason, AND, OR  and NOT  symbols will  also be
+     ;; keyword in feature expressions.
      (ecase (first expression)
        (:and
         (every #'eval-feature-expression (rest expression)))
@@ -228,7 +224,7 @@
   (%read-char stream)
   (let ((ch (%read-char stream)))
     (case ch
-      (#\'
+      (#\apostrophe
        (list 'function (ls-read stream eof-error-p eof-value t)))
       (#\.
        (eval (ls-read stream)))
@@ -244,7 +240,7 @@
             (dotimes (i index)
               (aset result (decf index) (pop elements)))
             result)
-         (let* ((ix index) ; Can't just use index: the same var would be captured in all fixups
+         (let* ((ix index)      ; Can't just use index: the same var would be captured in all fixups
                 (*make-fixup-function* (lambda ()
                                          (lambda (obj)
                                            (aset result ix obj))))
@@ -312,9 +308,8 @@
                    (progn
                      (add-labelled-object id *future-value*)
                      (let ((obj (ls-read stream eof-error-p eof-value t)))
-                       ;; FIXME: somehow the more natural
-                       ;;    (setf (cdr (find-labelled-object id)) obj)
-                       ;; doesn't work
+                       ;; FIXME: somehow the more natural (setf (cdr (find-labelled-object id)) obj)
+                       ;;    doesn't work
                        (rplacd (find-labelled-object id) obj)
                        obj))))
               (#\#
@@ -353,10 +348,9 @@
                 (setf result (concat result (string-upcase (string ch))))))))
     result))
 
-;;; Parse a string of the form NAME, PACKAGE:NAME or
-;;; PACKAGE::NAME and return the name. If the string is of the
-;;; form 1) or 3), but the symbol does not exist, it will be created
-;;; and interned in that package.
+;;; Parse a  string of  the form NAME,  PACKAGE:NAME or  PACKAGE::NAME and return  the name.  If the
+;;; string is of the form  1) or 3), but the symbol does not exist, it  will be created and interned
+;;; in that package.
 (defun read-symbol (string)
   (let ((size (length string))
         package name internalp index)
@@ -551,10 +545,10 @@
               ((char= ch #\()
                (%read-char stream)
                (%read-list stream eof-error-p eof-value))
-              ((char= ch #\')
+              ((char= ch #\apostrophe)
                (%read-char stream)
                (list 'quote (ls-read stream eof-error-p eof-value t)))
-              ((char= ch #\`)
+              ((char= ch #\grave_accent)
                (%read-char stream)
                (list 'backquote (ls-read stream eof-error-p eof-value t)))
               ((char= ch #\")
