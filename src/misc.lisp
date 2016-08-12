@@ -27,35 +27,42 @@
 ;; with what a “normal” compiler would provide.
 
 (defun short-site-name ()
-  (and #j:window #j:window:location #j:window:location:hostname))
+  (or (and #j:window #j:window:location #j:window:location:hostname)
+      (and #j:os #j:os:hostname (#j:os:hostname))))
 
 (defun long-site-name ()
-  (and #j:window #j:window:location #j:window:location:origin))
+  (or (and #j:window #j:window:location #j:window:location:origin)
+      (and #j:os #j:os:hostname (#j:os:hostname))))
 
 (defun machine-instance ()
-  (and #j:window #j:window:location #j:window:location:hostname))
+  (or (and #j:window #j:window:location #j:window:location:hostname)
+      (and #j:os #j:os:hostname (#j:os:hostname))))
 
 (defun machine-version ()
   "The platform or OS type"
-  (let ((platform (and #j:navigator #j:navigator:platform)))
+  (let ((platform (or (and #j:navigator #j:navigator:platform)
+                      (and #j:process #j:process:platform))))
     (if (and platform (find #\Space platform))
         (subseq platform 0 (position #\Space platform))
         platform)))
 
 (defun machine-type ()
   "Probably a CPU type"
-  (let ((platform (and #j:navigator #j:navigator:platform)))
+  (let ((platform (or (and #j:navigator #j:navigator:platform)
+                      (and #j:process #j:process:arch))))
     (if (and platform (find #\Space platform))
         (subseq platform (position #\Space platform))
         platform)))
 
 (defun software-type ()
   "The browser's Product name; eg, Gecko for Firefox"
-  (and #j:navigator #j:navigator:product))
+  (or (and #j:navigator #j:navigator:product)
+      (and #j:process #j:process:title)))
 
 (defun software-version ()
-  "The User-Agent string provided by the browser."
-  (and #j:navigator #j:navigator:userAgent))
+  "The User-Agent string provided by the browser, or Node.js version"
+  (or (and #j:navigator #j:navigator:userAgent)
+      (and #j:process #j:process:version)))
 
 (defmacro time (form)
   (let ((start (gensym))
