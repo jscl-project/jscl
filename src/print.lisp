@@ -407,6 +407,23 @@ to streams."
            (*print-radix* nil))
        (format-numeric arg nil nil)))))
 
+
+(defun format-binary (arg colonp atp &optional (min-column 1) (pad-char #\space)
+                                               (comma-char #\,) (comma-interval 3))
+  (let ((*print-escape* nil)
+        (*print-base* 2)
+        (*print-radix* nil)
+        (*print-readably* nil))
+    (format-numeric arg colonp atp min-column pad-char comma-char comma-interval)))
+
+(defun format-octal (arg colonp atp &optional (min-column 1) (pad-char #\space)
+                                              (comma-char #\,) (comma-interval 3))
+  (let ((*print-escape* nil)
+        (*print-base* 8)
+        (*print-radix* nil)
+        (*print-readably* nil))
+    (format-numeric arg colonp atp min-column pad-char comma-char comma-interval)))
+
 (defun format-decimal (arg colonp atp &optional (min-column 1) (pad-char #\space)
                                                 (comma-char #\,) (comma-interval 3))
   (let ((*print-base* 10))
@@ -466,11 +483,13 @@ to streams."
            (#\( #'format-letter-case)
            (#\< #'format-justify)
            (#\A #'format-aesthetic)
+           (#\B #'format-binary)
            (#\C #'format-char)
            (#\D #'format-decimal)
            (#\E #'format-float-e)
            (#\F #'format-float-f)
            (#\G #'format-float-g)
+           (#\O #'format-octal)
            (#\R #'format-radix)
            (#\S #'format-syntax)
            (#\W #'format-write)
@@ -493,8 +512,8 @@ to streams."
               (tagbody
                read-control
                  (assert (and (< (1+ i) len) "~ at end of format"))
-            (let ((next (char fmt (incf i))))
-              (cond
+                 (let ((next (char fmt (incf i))))
+                   (cond
                      ((digit-char-p next)
                       (multiple-value-bind (param ending)
                           (parse-integer (subseq fmt i) :junk-allowed t)
@@ -542,7 +561,7 @@ to streams."
                           (if atp "ies" "s"))))
 
                      ((char= #\~ next)
-                 (concatf res "~"))
+                      (concatf res "~"))
 
                      ((char= #\| next) (concatf res (string #\|)))
                      ((char= #\% next) (concatf res (apply #'format-terpri (reverse params))))
