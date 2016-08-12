@@ -282,7 +282,7 @@
      (simple-format stream "#<PACKAGE ~a>" (package-name form)))
     ;; Others
     (otherwise
-     (write-string "#<javascript object>" stream))))
+     (simple-format stream "#<JS-OBJECT ~a>" (#j:String form)))))
 
 
 (defun output-stream-designator (x)

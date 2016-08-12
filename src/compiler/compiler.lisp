@@ -291,21 +291,29 @@
 
 (defun compile-lambda-optional (ll)
   (let* ((optional-arguments (ll-optional-arguments-canonical ll))
-	 (n-required-arguments (length (ll-required-arguments ll)))
-	 (n-optional-arguments (length optional-arguments)))
+         (n-required-arguments (length (ll-required-arguments ll)))
+         (n-optional-arguments (length optional-arguments))
+         (svars (remove nil (mapcar #'third optional-arguments))))
+
     (when optional-arguments
-      `(switch (nargs)
-               ,@(with-collect
-                  (dotimes (idx n-optional-arguments)
-                    (let ((arg (nth idx optional-arguments)))
-                      (collect `(case ,(+ idx n-required-arguments)))
-                      (collect `(= ,(translate-variable (car arg))
-                                   ,(convert (cadr arg))))
-                      (collect (when (third arg)
-                                 `(= ,(translate-variable (third arg))
-                                     ,(convert nil))))))
-                  (collect 'default)
-                  (collect '(break)))))))
+      `(progn
+         ,(when svars
+                `(var ,@(mapcar (lambda (svar)
+                                  (list (translate-variable svar)
+                                        (convert t)))
+                                svars)))
+         (switch (nargs)
+                 ,@(with-collect
+                    (dotimes (idx n-optional-arguments)
+                      (let ((arg (nth idx optional-arguments)))
+                        (collect `(case ,(+ idx n-required-arguments)))
+                        (collect `(= ,(translate-variable (car arg))
+                                     ,(convert (cadr arg))))
+                        (collect (when (third arg)
+                                   `(= ,(translate-variable (third arg))
+                                       ,(convert nil))))))
+                    (collect 'default)
+                    (collect '(break))))))))
 
 (defun compile-lambda-rest (ll)
   (let ((n-required-arguments (length (ll-required-arguments ll)))
@@ -434,10 +442,11 @@
                                     optional-arguments
                                     keyword-arguments
                                     (ll-svars ll)))))
+
         (lambda-name/docstring-wrapper name documentation
          `(function (|values| ,@(mapcar (lambda (x)
-					  (translate-variable x))
-					(append required-arguments optional-arguments)))
+                                          (translate-variable x))
+                                        (append required-arguments optional-arguments)))
                      ;; Check number of arguments
                     ,(lambda-check-argument-count n-required-arguments
                                                   n-optional-arguments
