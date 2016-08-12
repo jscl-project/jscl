@@ -46,7 +46,7 @@
   "Probably a CPU type"
   (let ((platform (and #j:navigator #j:navigator:platform)))
     (if (and platform (find #\Space platform))
-        (subseq platform (position #\Space platform))
+        (subseq platform (1+ (position #\Space platform)))
         platform)))
 
 (defun software-type ()
