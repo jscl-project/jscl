@@ -127,8 +127,7 @@
     42528 43216 43264 43472 43600 44016 65296 66720 120782)
   "Unicode codepoints which have Digit value 0, followed by 1, 2, ..., 9, as of Unicode 6.2")
 
-;; The "Digit  value" of a  (Unicode) character,  or NIL, if  it doesn't
-;; have one.
+;; The "Digit value" of a (Unicode) character, or NIL, if it doesn't have one.
 (defun unicode-digit-value (char)
   (let ((code (char-code char)))
     (dolist (z +unicode-zeroes+)
@@ -140,34 +139,25 @@
 ;; From comment #4 on <https://bugs.launchpad.net/sbcl/+bug/1177986>:
 (defun digit-char-p (char &optional (radix 10))
   "Includes ASCII 0-9 a-z A-Z, plus any Unicode decimal digit characters or fullwidth variants A-Z."
-  (check-type char character)
-  (check-type radix integer)
-  (let ((radix (or radix 10)))
-    (assert (<= 2 radix 36))
-    (let* ((number (unicode-digit-value char))
-           (code (char-code char))
-           (upper (char-upcase char))
-           (code-upper (char-code upper)))
-      (assert (or (not number) (numberp number))) ; use NOT not NULL for bootstrap
-      (check-type code integer)
-      (check-type upper character)
-      (check-type code-upper integer)
-      (let ((potential (cond (number number)
-                             ((char<= #\A upper #\Z)
-                              (+ 10 (- code-upper (char-code #\A))))
-                             ((<= 65313 code-upper 65338) ; FULLWIDTH_LATIN_CAPITAL_LETTER_A - _Z
-                              (+ 10 (- code-upper 65313)))
-                             (t nil))))
-        (assert (or (not potential) (numberp potential)))
-        (let ((result (and potential (< potential radix) potential)))
-          (assert (or (not result) (numberp result)))
-          (return-from digit-char-p result))))))
+  (check-type character char)
+  (check-type integer radix)
+  (let* ((radix (or (and radix (<= 2 radix 36) radix) 10))
+         (number (unicode-digit-value char))
+         (code (char-code char))
+         (upper (char-upcase char))
+         (code-upper (char-code upper))
+         (potential (cond (number number)
+                          ((char<= #\A upper #\Z)
+                           (+ 10 (- code-upper (char-code #\A))))
+                          ((<= 65313 code-upper 65338) ; FULLWIDTH_LATIN_CAPITAL_LETTER_A - _Z
+                           (+ 10 (- code-upper 65313)))
+                          (t nil))))
+    (and potential (< potential radix) potential)))
 
 (defun digit-char (weight &optional (radix 10))
   "All arguments must be integers. Returns a character object that represents
 a digit of the given weight in the specified radix. Returns NIL if no such
 character exists."
-
   (and (>= weight 0) (< weight radix) (< weight 36)
        (or (and (<= 0 weight 9)
                 (code-char (+ (char-code #\0) weight)))
