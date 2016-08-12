@@ -1,25 +1,21 @@
-;;; early-char.lisp   ---  Character   things   needed   early  in   the
-;;; cross-compilation
+;;; early-char.lisp --- Character things needed early in the cross-compilation
 
-;; JSCL is free software: you can redistribute it and/or modify it under
-;; the terms of the GNU General  Public License as published by the Free
-;; Software Foundation,  either version  3 of the  License, or  (at your
-;; option) any later version.
+;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
+;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
+;; License, or (at your option) any later version.
 ;;
-;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
-;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-;; for more details.
+;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
+;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
+;; Public License for more details.
 ;;
-;; You should  have received a  copy of  the GNU General  Public License
-;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
+;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
+;; <http://www.gnu.org/licenses/>.
 
 (/debug "loading early-char.lisp!")
 
-;; This list  comes from SBCL:  everything that's ALPHA-CHAR-P,  but not
-;; SB-IMPL::UCD-DECIMAL-DIGIT          (to          work          around
-;; <https://bugs.launchpad.net/sbcl/+bug/1177986>),  then combined  into
-;; a much smaller set of ranges. Yes, this can be compressed better.
+;; This list comes from SBCL: everything that's ALPHA-CHAR-P, but not SB-IMPL::UCD-DECIMAL-DIGIT (to
+;; work around  <https://bugs.launchpad.net/sbcl/+bug/1177986>), then  combined into a  much smaller
+;; set of ranges. Yes, this can be compressed better.
 (defconstant +unicode-alphas+
   '((65 . 90) (97 . 122) (170 . 170) (181 . 181) (186 . 186) (192 . 214)
     (216 . 246) (248 . 705) (710 . 721) (736 . 740) (748 . 748) (750 . 750)

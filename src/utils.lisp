@@ -2,18 +2,16 @@
 
 ;; Copyright (C) 2012, 2013 David Vazquez Copyright (C) 2012 Raimon Grau
 
-;; JSCL is free software: you can redistribute it and/or modify it under
-;; the terms of the GNU General  Public License as published by the Free
-;; Software Foundation,  either version  3 of the  License, or  (at your
-;; option) any later version.
+;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
+;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
+;; License, or (at your option) any later version.
 ;;
-;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
-;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-;; for more details.
+;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
+;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
+;; Public License for more details.
 ;;
-;; You should  have received a  copy of  the GNU General  Public License
-;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
+;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
+;; <http://www.gnu.org/licenses/>.
 
 (/debug "loading utils.lisp!")
 
@@ -51,8 +49,7 @@ accumulated, in the order."
 (defmacro concatf (variable &body form)
   `(setq ,variable (concat ,variable (progn ,@form))))
 
-;;; This couple of helper functions will be defined in both Common
-;;; Lisp and in JSCL
+;;; This couple of helper functions will be defined in both Common Lisp and in JSCL
 (defun ensure-list (x)
   (if (listp x)
       x
@@ -98,10 +95,10 @@ accumulated, in the order."
 
 (defun integer-to-string (x &optional (radix (or *print-base* 10)) plusp)
   (let ((radix (or radix *print-base* 10))) ; some callers screw up and pass literal NIL
-  (cond
-    ((zerop x)
+    (cond
+      ((zerop x)
        (if plusp "+0" "0"))
-    ((minusp x)
+      ((minusp x)
        (concat "-" (integer-to-string (- x) radix)))
       ((and plusp (plusp x))
        (concat "+" (integer-to-string x radix)))
@@ -114,9 +111,9 @@ accumulated, in the order."
            (16 (concat "#x" (integer-to-string x radix)))
            (otherwise (concat "#" (integer-to-string radix 10 nil)
                               "r" (integer-to-string x radix))))))
-    (t
-     (let ((digits nil))
-       (while (not (zerop x))
+      (t
+       (let ((digits nil))
+         (while (not (zerop x))
            (push (mod x radix) digits)
            (setq x (truncate x radix)))
          (mapconcat (lambda (x) (string (digit-char x radix)))

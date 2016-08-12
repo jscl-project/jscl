@@ -1,12 +1,11 @@
-; Tests for conditional forms
-; Boolean operators
+                                        ; Tests for conditional forms Boolean operators
 (test (eql (and nil 1) nil))
 (test (=   (and 1   2)   2))
 
 (test (= (or  nil 1)   1))
 (test (= (or  1   2)   1))
 
-; COND
+                                        ; COND
 (test (eql nil (cond)))
 (test (=   1   (cond (1))))
 (test (= 1
@@ -16,7 +15,7 @@
 (test (=   3   (cond (nil 1) (2 3))))
 (test (eql nil (cond (nil 1) (nil 2))))
 
-; CASE
+                                        ; CASE
 
 (test (= (case 1 (2 3) (otherwise 42)) 42))
 (test (= (case 1 (2 3) (t 42)) 42))

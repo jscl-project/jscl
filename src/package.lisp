@@ -1,17 +1,15 @@
 ;;; package.lisp ---
 
-;; JSCL is free software: you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation, either version 3 of the
+;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
+;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
 ;; License, or (at your option) any later version.
 ;;
-;; JSCL is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
+;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
+;; Public License for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
+;; <http://www.gnu.org/licenses/>.
 
 (/debug "loading package.lisp!")
 
@@ -30,10 +28,8 @@
       (oget *package-table* (string package-designator))))
 
 (defun delete-package (package-designator)
-  ;; TODO: Signal a correctlable error in case the package-designator does not
-  ;; name a package.
-  ;; TODO: Implement unuse-package and remove the deleted package from packages
-  ;; that use it.
+  ;; TODO: Signal a correctlable error in case the package-designator does not name a package. TODO:
+  ;; Implement unuse-package and remove the deleted package from packages that use it.
   (delete-property (package-name (find-package-or-fail package-designator))
                    *package-table*))
 
@@ -193,7 +189,7 @@
      ,result-form))
 
 (defmacro do-external-symbols ((var &optional (package '*package*)
-                                              result-form)
+                                    result-form)
                                &body body)
   `(block nil
      (%map-external-symbols

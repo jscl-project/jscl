@@ -1,33 +1,33 @@
 {
-  "name": "jscl",
-  "version": "0.4.0",
-  "description": "A Common Lisp implementation for Javascript",
-  "main": "jscl.js",
-  "files": [
-    "jscl.js",
-    "repl-node.js",
-    "repl-web.js"
-  ],
-  "bin": {
-    "jscl-repl" : "./repl-node.js"
-  },
-  "directories": {
-    "test": "tests"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/davazp/jscl.git"
-  },
-  "keywords": [
-    "lisp",
-    "compiler"
-  ],
-  "license": "GPL-3.0",
-  "bugs": {
-    "url": "https://github.com/davazp/jscl/issues"
-  },
-  "homepage": "https://github.com/davazp/jscl#readme"
+    "name": "jscl",
+    "version": "0.4.0",
+    "description": "A Common Lisp implementation for Javascript",
+    "main": "jscl.js",
+    "files": [
+        "jscl.js",
+        "repl-node.js",
+        "repl-web.js"
+    ],
+    "bin": {
+        "jscl-repl" : "./repl-node.js"
+    },
+    "directories": {
+        "test": "tests"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/davazp/jscl.git"
+    },
+    "keywords": [
+        "lisp",
+        "compiler"
+    ],
+    "license": "GPL-3.0",
+    "bugs": {
+        "url": "https://github.com/davazp/jscl/issues"
+    },
+    "homepage": "https://github.com/davazp/jscl#readme"
 }
