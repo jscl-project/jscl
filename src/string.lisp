@@ -134,6 +134,12 @@
     (!reduce #'concat-two strs "")))
 
 
+(defun concatenate (target &rest elements)
+  (ecase target
+    (string (apply #'concat elements))
+    (list (apply #'reduce #'append elements))))
+
+
 (defun string-upcase (string &key (start 0) end)
   (let* ((string (string string))
          (new (make-string (length string))))
