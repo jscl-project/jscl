@@ -100,9 +100,8 @@
 (defvar *variable-counter*)
 
 (defun gvarname (symbol)
-  (declare (ignore symbol))
   (incf *variable-counter*)
-  (make-symbol (concat "v" (integer-to-string *variable-counter*))))
+  (safe-js-var-name (limit-string-length symbol 32) (integer-to-string *variable-counter*)))
 
 (defun translate-variable (symbol)
   (awhen (lookup-in-lexenv symbol *environment* 'variable)
@@ -265,14 +264,36 @@
           (ll-optional-arguments-canonical lambda-list))))
     (remove nil (mapcar #'third args))))
 
+(defun js-identifier-char-p (char)
+  (or (char= #\_ char)
+      (char= #\$ char)
+      (alphanumericp char)))
+
+(defun js-name-part (name)
+  (substitute-if #\$ (complement #'js-identifier-char-p)
+                 (substitute #\_ #\- (string name))))
+
+(defun safe-js-name (&rest name-parts)
+  (intern (join (mapcar #'js-name-part name-parts) "_")))
+
+(defun safe-js-fun-name (&rest name-parts)
+  (apply #'safe-js-name "fun" name-parts))
+
+(defun safe-js-var-name (&rest name-parts)
+  (apply #'safe-js-name "var" name-parts))
+
+(defun safe-js-lit-name (&rest name-parts)
+  (apply #'safe-js-name "lit" name-parts))
+
 (defun lambda-name/docstring-wrapper (name docstring code)
+  (let ((func (safe-js-fun-name name)))
   (if (or name docstring)
       `(selfcall
-        (var (func ,code))
-        ,(when name `(= (get func "fname") ,name))
-        ,(when docstring `(= (get func "docstring") ,docstring))
-        (return func))
-      code))
+          (var (,func ,code))
+          ,(when name `(= (get ,func "fname") ,name))
+          ,(when docstring `(= (get ,func "docstring") ,docstring))
+          (return ,func))
+        code)))
 
 (defun lambda-check-argument-count
     (n-required-arguments n-optional-arguments rest-p)
@@ -303,17 +324,17 @@
                                         (convert t)))
                                 svars)))
          (switch (nargs)
-                 ,@(with-collect
-                    (dotimes (idx n-optional-arguments)
-                      (let ((arg (nth idx optional-arguments)))
-                        (collect `(case ,(+ idx n-required-arguments)))
-                        (collect `(= ,(translate-variable (car arg))
-                                     ,(convert (cadr arg))))
-                        (collect (when (third arg)
-                                   `(= ,(translate-variable (third arg))
-                                       ,(convert nil))))))
-                    (collect 'default)
-                    (collect '(break))))))))
+           ,@(with-collect
+              (dotimes (idx n-optional-arguments)
+                (let ((arg (nth idx optional-arguments)))
+                  (collect `(case ,(+ idx n-required-arguments)))
+                  (collect `(= ,(translate-variable (car arg))
+                               ,(convert (cadr arg))))
+                  (collect (when (third arg)
+                             `(= ,(translate-variable (third arg))
+                                 ,(convert nil))))))
+              (collect 'default)
+              (collect '(break))))))))
 
 (defun compile-lambda-rest (ll)
   (let ((n-required-arguments (length (ll-required-arguments ll)))
@@ -327,15 +348,15 @@
            (for ((= i (- (nargs) 1))
                  (>= i ,(+ n-required-arguments n-optional-arguments))
                  (post-- i))
-                (= ,js!rest (new (call-internal |Cons| (arg i) ,js!rest)))))))))
+             (= ,js!rest (new (call-internal |Cons| (arg i) ,js!rest)))))))))
 
 (defun compile-lambda-parse-keywords (ll)
   (let ((n-required-arguments
-	 (length (ll-required-arguments ll)))
-	(n-optional-arguments
-	 (length (ll-optional-arguments ll)))
-	(keyword-arguments
-	 (ll-keyword-arguments-canonical ll)))
+         (length (ll-required-arguments ll)))
+        (n-optional-arguments
+         (length (ll-optional-arguments ll)))
+        (keyword-arguments
+         (ll-keyword-arguments-canonical ll)))
     `(progn
        ;; Declare variables
        ,@(with-collect
@@ -351,40 +372,40 @@
 
        ;; Parse keywords
        ,(flet ((parse-keyword (keyarg)
-                (destructuring-bind ((keyword-name var) &optional initform svar) keyarg
-                  ;; ((keyword-name var) init-form svar)
-                  `(progn
-                     (for ((= i ,(+ n-required-arguments n-optional-arguments))
-                           (< i (nargs))
-                           (+= i 2))
-                          ;; ....
-                          (if (=== (arg i) ,(convert keyword-name))
-                              (progn
-                                (= ,(translate-variable var) (arg (+ i 1)))
-                                ,(when svar `(= ,(translate-variable svar)
-                                                ,(convert t)))
-                                (break))))
-                     (if (== i (nargs))
-                         (= ,(translate-variable var) ,(convert initform)))))))
-         (when keyword-arguments
-           `(progn
-              (var i)
-              ,@(mapcar #'parse-keyword keyword-arguments))))
+                              (destructuring-bind ((keyword-name var) &optional initform svar) keyarg
+                                ;; ((keyword-name var) init-form svar)
+                                `(progn
+                                   (for ((= i ,(+ n-required-arguments n-optional-arguments))
+                                         (< i (nargs))
+                                         (+= i 2))
+                                     ;; ....
+                                     (if (=== (arg i) ,(convert keyword-name))
+                                         (progn
+                                           (= ,(translate-variable var) (arg (+ i 1)))
+                                           ,(when svar `(= ,(translate-variable svar)
+                                                           ,(convert t)))
+                                           (break))))
+                                   (if (== i (nargs))
+                                       (= ,(translate-variable var) ,(convert initform)))))))
+              (when keyword-arguments
+                `(progn
+                   (var i)
+                   ,@(mapcar #'parse-keyword keyword-arguments))))
 
        ;; Check for unknown keywords
        ,(when keyword-arguments
-         `(progn
-            (var (start ,(+ n-required-arguments n-optional-arguments)))
-            (if (== (% (- (nargs) start) 2) 1)
-                (throw "Odd number of keyword arguments."))
-            (for ((= i start) (< i (nargs)) (+= i 2))
-                 (if (and ,@(mapcar (lambda (keyword-argument)
-                                 (destructuring-bind ((keyword-name var) &optional initform svar)
-                                     keyword-argument
-                                   (declare (ignore var initform svar))
-                                   `(!== (arg i) ,(convert keyword-name))))
-                               keyword-arguments))
-                     (throw (+ "Unknown keyword argument " (property (arg i) "name"))))))))))
+              `(progn
+                 (var (start ,(+ n-required-arguments n-optional-arguments)))
+                 (if (== (% (- (nargs) start) 2) 1)
+                     (throw "Odd number of keyword arguments."))
+                 (for ((= i start) (< i (nargs)) (+= i 2))
+                   (if (and ,@(mapcar (lambda (keyword-argument)
+                                        (destructuring-bind ((keyword-name var) &optional initform svar)
+                                            keyword-argument
+                                          (declare (ignore var initform svar))
+                                          `(!== (arg i) ,(convert keyword-name))))
+                                      keyword-arguments))
+                       (throw (+ "Unknown keyword argument " (property (arg i) "name"))))))))))
 
 (defun parse-lambda-list (ll)
   (values (ll-required-arguments ll)
@@ -424,7 +445,7 @@
 ;;; NAME is given, it should be a constant string and it will become
 ;;; the name of the function. If BLOCK is non-NIL, a named block is
 ;;; created around the body. NOTE: No block (even anonymous) is
-;;; created if BLOCk is NIL.
+;;; created if BLOCK is NIL.
 (defun compile-lambda (ll body &key name block)
   (multiple-value-bind (required-arguments
                         optional-arguments
@@ -442,12 +463,11 @@
                                     optional-arguments
                                     keyword-arguments
                                     (ll-svars ll)))))
-
-        (lambda-name/docstring-wrapper name documentation
-         `(function (|values| ,@(mapcar (lambda (x)
-                                          (translate-variable x))
+        (lambda-name/docstring-wrapper
+         name documentation
+         `(function (|values| ,@(mapcar #'translate-variable
                                         (append required-arguments optional-arguments)))
-                     ;; Check number of arguments
+                    ;; Check number of arguments
                     ,(lambda-check-argument-count n-required-arguments
                                                   n-optional-arguments
                                                   (or rest-argument keyword-arguments))
@@ -467,9 +487,9 @@
   (let ((b (lookup-in-lexenv var *environment* 'variable)))
     (cond
       ((and b
-	    (eq (binding-type b) 'variable)
-	    (not (member 'special (binding-declarations b)))
-	    (not (member 'constant (binding-declarations b))))
+            (eq (binding-type b) 'variable)
+            (not (member 'special (binding-declarations b)))
+            (not (member 'constant (binding-declarations b))))
        `(= ,(binding-value b) ,(convert val)))
       ((and b (eq (binding-type b) 'macro))
        (convert `(setf ,var ,val)))
@@ -516,9 +536,17 @@
 (defvar *literal-table*)
 (defvar *literal-counter*)
 
-(defun genlit ()
+(defun limit-string-length (string length)
+  (and string
+       (let ((string (princ-to-string string)))
+         (if (> (length string) length)
+             (subseq string 0 length)
+             string))))
+
+(defun genlit (&optional name)
   (incf *literal-counter*)
-  (make-symbol (concat "l" (integer-to-string *literal-counter*))))
+  (safe-js-lit-name (or (limit-string-length name 32) "")
+                    (integer-to-string *literal-counter*)))
 
 (defun dump-symbol (symbol)
   (let ((package (symbol-package symbol)))
@@ -572,7 +600,10 @@
                          (array (dump-array sexp)))))
            (if (and recursive (not (symbolp sexp)))
                dumped
-               (let ((jsvar (genlit)))
+               (let ((jsvar (genlit (typecase sexp
+                                      (cons "expr")
+                                      (array "array")
+                                      (t (string sexp))))))
                  (push (cons sexp jsvar) *literal-table*)
                  (toplevel-compilation `(var (,jsvar ,dumped)))
                  (when (keywordp sexp)
@@ -601,8 +632,8 @@
     ((symbolp x)
      (let ((b (lookup-in-lexenv x *environment* 'function)))
        (if b
-	   (binding-value b)
-	   (convert `(symbol-function ',x)))))))
+           (binding-value b)
+           (convert `(symbol-function ',x)))))))
 
 (defun make-function-binding (fname)
   (make-binding :name fname :type 'function :value (gvarname fname)))
@@ -626,12 +657,12 @@
                          *environment*
                          'function)))
     `(call (function ,(mapcar #'translate-function fnames)
-                ,(convert-block body t))
+                     ,(convert-block body t))
            ,@cfuncs)))
 
 (define-compilation labels (definitions &rest body)
   (let* ((fnames (mapcar #'car definitions))
-	 (*environment*
+         (*environment*
           (extend-lexenv (mapcar #'make-function-binding fnames)
                          *environment*
                          'function)))
@@ -893,15 +924,15 @@
                (while true
                  (try
                   (switch ,branch
-                          ,@(with-collect
-                             (collect `(case ,initag))
-                             (dolist (form (cdr body))
-                               (if (go-tag-p form)
-                                   (let ((b (lookup-in-lexenv form *environment* 'gotag)))
-                                     (collect `(case ,(second (binding-value b)))))
-                                   (collect (convert form)))))
-                          default
-                          (break tbloop)))
+                    ,@(with-collect
+                       (collect `(case ,initag))
+                       (dolist (form (cdr body))
+                         (if (go-tag-p form)
+                             (let ((b (lookup-in-lexenv form *environment* 'gotag)))
+                               (collect `(case ,(second (binding-value b)))))
+                             (collect (convert form)))))
+                    default
+                    (break tbloop)))
                  (catch (jump)
                    (if (and (instanceof jump (internal |TagNLX|)) (== (get jump "id") ,tbidx))
                        (= ,branch (get jump "label"))
@@ -987,11 +1018,17 @@
         (dolist (x args)
           (if (or (floatp x) (numberp x))
               (collect-fargs x)
-              (let ((v (make-symbol (concat "x" (integer-to-string (incf counter))))))
+              (let ((v (make-symbol (concat "arg" (integer-to-string (incf counter))))))
                 (collect-fargs v)
                 (collect-prelude `(var (,v ,(convert x))))
                 (collect-prelude `(if (!= (typeof ,v) "number")
-                                      (throw "Not a number!"))))))
+                                      (throw (new (call |Error| (+ "" (typeof ,v)
+                                                                   " is not a number: " ,v " "
+                                                                   ,(princ-to-string (convert x)) " in "
+                                                                   ,(princ-to-string function)
+                                                                   ,@(mapcar (lambda (s)
+                                                                               (concatenate 'string " "
+                                                                                            (princ-to-string s))) args))))))))))
         `(selfcall
           (progn ,@prelude)
           ,(funcall function fargs))))))
@@ -1006,7 +1043,7 @@
   (if (null numbers)
       0
       (variable-arity numbers
-        `(+ ,@numbers))))
+                      `(+ ,@numbers))))
 
 (define-raw-builtin - (x &rest others)
   (let ((args (cons x others)))
@@ -1016,6 +1053,10 @@
   (if (null numbers)
       1
       (variable-arity numbers `(* ,@numbers))))
+
+(define-builtin logior (x y) (list 'logior x y))
+(define-builtin logand (x y) (list 'logand x y))
+(define-builtin logxor (x y) (list 'logxor x y))
 
 (define-raw-builtin / (x &rest others)
   (let ((args (cons x others)))
@@ -1046,7 +1087,7 @@
   `(define-raw-builtin ,op (x &rest args)
      (let ((args (cons x args)))
        (variable-arity args
-         (convert-to-bool (comparison-conjuntion args ',sym))))))
+                       (convert-to-bool (comparison-conjuntion args ',sym))))))
 
 (define-builtin-comparison > >)
 (define-builtin-comparison < <)
@@ -1087,15 +1128,15 @@
 
 (define-builtin rplaca (x new)
   `(selfcall
-     (var (tmp ,x))
-     (= (get tmp "car") ,new)
-     (return tmp)))
+    (var (tmp ,x))
+    (= (get tmp "car") ,new)
+    (return tmp)))
 
 (define-builtin rplacd (x new)
   `(selfcall
-     (var (tmp ,x))
-     (= (get tmp "cdr") ,new)
-     (return tmp)))
+    (var (tmp ,x))
+    (= (get tmp "cdr") ,new)
+    (return tmp)))
 
 (define-builtin symbolp (x)
   (convert-to-bool `(instanceof ,x (internal |Symbol|))))
@@ -1165,7 +1206,7 @@
                       f
                       (get f "fvalue"))
                   ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
-			  (mapcar #'convert args))))))
+                          (mapcar #'convert args))))))
 
 (define-raw-builtin apply (func &rest args)
   (if (null args)
@@ -1173,20 +1214,20 @@
       (let ((args (butlast args))
             (last (car (last args))))
         `(selfcall
-	  (var (f ,(convert func)))
-	  (var (args ,(list-to-vector
-		       (cons (if *multiple-value-p* '|values| '(internal |pv|))
-			     (mapcar #'convert args)))))
-	  (var (tail ,(convert last)))
-	  (while (!= tail ,(convert nil))
-	    (method-call args "push" (get tail "car"))
-	    (= tail (get tail "cdr")))
-	  (return (method-call (if (=== (typeof f) "function")
-				   f
-				   (get f "fvalue"))
-			       "apply"
-			       this
-			       args))))))
+          (var (f ,(convert func)))
+          (var (args ,(list-to-vector
+                       (cons (if *multiple-value-p* '|values| '(internal |pv|))
+                             (mapcar #'convert args)))))
+          (var (tail ,(convert last)))
+          (while (!= tail ,(convert nil))
+            (method-call args "push" (get tail "car"))
+            (= tail (get tail "cdr")))
+          (return (method-call (if (=== (typeof f) "function")
+                                   f
+                                   (get f "fvalue"))
+                               "apply"
+                               this
+                               args))))))
 
 (define-builtin js-eval (string)
   (if *multiple-value-p*
@@ -1233,7 +1274,7 @@
 (define-builtin storage-vector-ref (vector n)
   `(selfcall
     (var (x (property ,vector ,n)))
-    (if (=== x undefined) (throw "Out of range."))
+    (if (=== x undefined) (throw (new (call |Error| ,(concatenate 'string "AREF out of range for vector " (string vector))))))
     (return x)))
 
 (define-builtin storage-vector-set (vector n value)
@@ -1241,16 +1282,16 @@
     (var (x ,vector))
     (var (i ,n))
     (if (or (< i 0) (>= i (get x "length")))
-        (throw "Out of range."))
+        (throw (new (call |Error| ,(concatenate 'string "SETF AREF out of range for vector " (string vector))))))
     (return (= (property x i) ,value))))
 
 (define-builtin concatenate-storage-vector (sv1 sv2)
   `(selfcall
-     (var (sv1 ,sv1))
-     (var (r (method-call sv1 "concat" ,sv2)))
-     (= (get r "type") (get sv1 "type"))
-     (= (get r "stringp") (get sv1 "stringp"))
-     (return r)))
+    (var (sv1 ,sv1))
+    (var (r (method-call sv1 "concat" ,sv2)))
+    (= (get r "type") (get sv1 "type"))
+    (= (get r "stringp") (get sv1 "stringp"))
+    (return r)))
 
 (define-builtin get-internal-real-time ()
   `(method-call (new (call |Date|)) "getTime"))
@@ -1336,7 +1377,7 @@
          key)
     (for-in (key o)
             (call g ,(if *multiple-value-p* '|values| '(internal |pv|))
-		  (property o key)))
+                  (property o key)))
     (return ,(convert nil))))
 
 (define-compilation %js-vref (var)
@@ -1458,7 +1499,7 @@
 
 (defun compile-funcall (function args)
   (let* ((arglist (cons (if *multiple-value-p* '|values| '(internal |pv|))
-			(mapcar #'convert args))))
+                        (mapcar #'convert args))))
     (unless (or (symbolp function)
                 (and (consp function)
                      (member (car function) '(lambda oget))))
@@ -1476,14 +1517,14 @@
        `(call ,(convert `(function ,function)) ,@arglist))
       ((and (consp function) (eq (car function) 'oget))
        `(call-internal |js_to_lisp|
-              (call ,(reduce (lambda (obj p)
-                               `(property ,obj (call-internal |xstring| ,p)))
-                             (mapcar #'convert (cdr function)))
-                    ,@(mapcar (lambda (s)
-                                `(call-internal |lisp_to_js| ,(convert s)))
-                              args))))
+                       (call ,(reduce (lambda (obj p)
+                                        `(property ,obj (call-internal |xstring| ,p)))
+                                      (mapcar #'convert (cdr function)))
+                             ,@(mapcar (lambda (s)
+                                         `(call-internal |lisp_to_js| ,(convert s)))
+                                       args))))
       (t
-       (error "Bad function descriptor")))))
+       (error "Bad function designator `~S'" function)))))
 
 (defun convert-block (sexps &optional return-last-p decls-allowed-p)
   (multiple-value-bind (sexps decls)

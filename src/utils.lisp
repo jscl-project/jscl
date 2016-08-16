@@ -97,19 +97,31 @@ accumulated, in the order."
   `(let ((it ,condition))
      (when it ,@body)))
 
-(defun integer-to-string (x)
+(defun integer-to-string (x &optional (radix (or *print-base* 10)) plusp)
+  (let ((radix (or radix *print-base* 10))) ; some callers screw up and pass literal NIL
   (cond
     ((zerop x)
-     "0")
+       (if plusp "+0" "0"))
     ((minusp x)
-     (concat "-" (integer-to-string (- 0 x))))
+       (concat "-" (integer-to-string (- x) radix)))
+      ((and plusp (plusp x))
+       (concat "+" (integer-to-string x radix)))
+      (*print-radix*
+       (let ((*print-radix* nil))
+         (case *print-base*
+           (2 (concat "#b" (integer-to-string x radix)))
+           (8 (concat "#o" (integer-to-string x radix)))
+           (10 (concat (integer-to-string x) "."))
+           (16 (concat "#x" (integer-to-string x radix)))
+           (otherwise (concat "#" (integer-to-string radix 10 nil)
+                              "r" (integer-to-string x radix))))))
     (t
      (let ((digits nil))
        (while (not (zerop x))
-         (push (mod x 10) digits)
-         (setq x (truncate x 10)))
-       (mapconcat (lambda (x) (string (digit-char x)))
-		  digits)))))
+           (push (mod x radix) digits)
+           (setq x (truncate x radix)))
+         (mapconcat (lambda (x) (string (digit-char x radix)))
+                    digits))))))
 
 (defun float-to-string (x)
   #+jscl (float-to-string x)
