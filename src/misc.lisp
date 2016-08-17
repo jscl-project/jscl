@@ -21,31 +21,51 @@
 (defun lisp-implementation-version ()
   #.*version*)
 
+;; Following  the  “most  useful”  (in one  opinion)  form,  these  wrap
+;; Navigator  (browser) methods.  NB someone  familiar with  Node.JS may
+;; want to  provide alternative  implementations that  are more  in line
+;; with what a “normal” compiler would provide.
+
+(defun null-if-empty (x)
+  (if (and x (emptyp x)) nil x))
+
 (defun short-site-name ()
-  nil)
+  (null-if-empty (or (and #j:window #j:window:location #j:window:location:hostname)
+                     (and #j:os #j:os:hostname (#j:os:hostname)))))
 
 (defun long-site-name ()
-  nil)
-
-;;; Javascript has  not access  to the hardware.  Would it make  sense to  have the browser  data as
-;;; machine abstraction instead?
+  (null-if-empty (or (and #j:window #j:window:location #j:window:location:origin)
+                     (and #j:os #j:os:hostname (#j:os:hostname)))))
 
 (defun machine-instance ()
-  nil)
+  (null-if-empty (or (and #j:window #j:window:location #j:window:location:hostname)
+                     (and #j:os #j:os:hostname (#j:os:hostname)))))
 
 (defun machine-version ()
-  nil)
+  "The platform or OS type"
+  (null-if-empty (let ((platform (or (and #j:navigator #j:navigator:platform)
+                                     (and #j:process #j:process:platform))))
+                   (if (and platform (find #\Space platform))
+                       (subseq platform 0 (position #\Space platform))
+                       platform))))
 
 (defun machine-type ()
-  nil)
-
-;;; Return browser information here?
+  "Probably a CPU type"
+  (null-if-empty (let ((platform (or (and #j:navigator #j:navigator:platform)
+                                     (and #j:process #j:process:arch))))
+                   (if (and platform (find #\Space platform))
+                       (subseq platform (1+ (position #\Space platform)))
+                       platform))))
 
 (defun software-type ()
-  nil)
+  "The browser's Product name; eg, Gecko for Firefox"
+  (null-if-empty (or (and #j:navigator #j:navigator:product)
+                     (and #j:process #j:process:title))))
 
 (defun software-version ()
-  nil)
+  "The User-Agent string provided by the browser, or Node.js version"
+  (null-if-empty (or (and #j:navigator #j:navigator:userAgent)
+                     (and #j:process #j:process:version))))
 
 (defmacro time (form)
   (let ((start (gensym))
