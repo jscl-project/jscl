@@ -333,8 +333,8 @@ to streams."
     (with-output-to-string (output)
       (princ form output)))
 
-  (defun terpri ()
-    (write-char #\newline)
+  (defun terpri (&optional (stream *standard-output*))
+    (write-char #\newline stream)
     (values))
 
   (defun write-line (x)
@@ -342,9 +342,9 @@ to streams."
     (terpri)
     x)
 
-  (defun print (x)
-    (prog1 (prin1 x)
-      (terpri))))
+  (defun print (x &optional (stream *standard-output*))
+    (prog1 (prin1 x stream)
+      (terpri stream))))
 
 
 ;;; Format
