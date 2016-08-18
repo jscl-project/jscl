@@ -1,4 +1,4 @@
-; Tests for funcall/apply
+                                        ; Tests for funcall/apply
 
 (test (equal (funcall #'list 1 2 3) '(1 2 3)))
 (test (equal (apply #'list 1 2 3 '(4 5 6)) '(1 2 3 4 5 6)))

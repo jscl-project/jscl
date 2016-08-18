@@ -2,18 +2,16 @@
 
 ;;; Copyright (C) 2013 David Vazquez
 
-;; JSCL is free software: you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation, either version 3 of the
+;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
+;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
 ;; License, or (at your option) any later version.
 ;;
-;; JSCL is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
+;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
+;; Public License for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
+;; <http://www.gnu.org/licenses/>.
 
 (/debug "loading lambda-list.lisp!")
 
@@ -24,16 +22,16 @@
 ;;;; Lambda list parsing
 
 (def!struct optvar
-  variable initform supplied-p-parameter)
+    variable initform supplied-p-parameter)
 
 (def!struct keyvar
-  variable keyword-name initform supplied-p-parameter)
+    variable keyword-name initform supplied-p-parameter)
 
 (def!struct auxvar
-  variable initform)
+    variable initform)
 
 (def!struct lambda-list
-  wholevar
+    wholevar
   reqvars
   optvars
   restvar
@@ -127,19 +125,19 @@
            (in-section-p ()
              (and (consp lambda-list)
                   (not (find (first lambda-list) !lambda-list-keywords)))))
-      
+
       ;; &whole var
       (when (lambda-section '&whole)
         (let ((wholevar (pop lambda-list)))
           (setf (lambda-list-wholevar ll) (var-or-pattern wholevar))))
-      
+
       ;; required vars
       (while (in-section-p)
         (let ((var (pop lambda-list)))
           (push (var-or-pattern var) (lambda-list-reqvars ll))))
       (setf (lambda-list-reqvars ll)
             (reverse (lambda-list-reqvars ll)))
-      
+
       ;; optional vars
       (when (lambda-section '&optional)
         (while (in-section-p)
@@ -147,7 +145,7 @@
                 (lambda-list-optvars ll)))
         (setf (lambda-list-optvars ll)
               (reverse (lambda-list-optvars ll))))
-      
+
       ;; Dotted lambda-list and &rest/&body vars. If the lambda-list
       ;; is dotted. Convert it the tail to a &rest and finish.
       (when (and lambda-list (atom lambda-list))
@@ -164,7 +162,7 @@
           (push (parse-keyvar (pop lambda-list))
                 (lambda-list-keyvars ll)))
         (setf (lambda-list-keyvars ll)
-              (reverse (lambda-list-keyvars ll))))      
+              (reverse (lambda-list-keyvars ll))))
       (when (lambda-section '&allow-other-keys)
         (setf (lambda-list-allow-other-keys ll) t))
 
@@ -192,16 +190,16 @@
 ;;; Return T if KEYWORD is supplied in the list of arguments LIST.
 (defun keyword-supplied-p (keyword list)
   (do-keywords key value list
-    (declare (ignore value))
-    (when (eq key keyword) (return t))
-    (setq list (cddr list))))
+               (declare (ignore value))
+               (when (eq key keyword) (return t))
+               (setq list (cddr list))))
 
 ;;; Return the value of KEYWORD in the list of arguments LIST or NIL
 ;;; if it is not supplied.
 (defun keyword-lookup (keyword list)
   (do-keywords key value list
-    (when (eq key keyword) (return value))
-    (setq list (cddr list))))
+               (when (eq key keyword) (return value))
+               (setq list (cddr list))))
 
 (defun validate-reqvars (list n)
   (unless (listp list)
@@ -223,9 +221,9 @@
          (or allow-other-keys (keyword-lookup :allow-other-keys list))))
     (unless allow-other-keys
       (do-keywords key value list
-        (declare (ignore value))
-        (unless (find key keyword-list)
-          (error "Unknown keyword argument `~S'." key))))
+                   (declare (ignore value))
+                   (unless (find key keyword-list)
+                     (error "Unknown keyword argument `~S'." key))))
     (do* ((tail list (cddr tail))
           (key (car tail) (car tail)))
          ((null tail) list)
@@ -258,7 +256,7 @@
                     pattern)
                    ((lambda-list-p pattern)
                     (compute-bindings pattern form))))
-               
+
                ;; Compute the bindings for the full LAMBDA-LIST ll
                ;; against FORM.
                (compute-bindings (ll form)
@@ -269,7 +267,7 @@
                    ;; FORM. It will match to LL, so we validate the
                    ;; number of elements on the result of FORM.
                    (compute-pbindings whole `(validate-reqvars ,form ,reqvar-count))
-                   
+
                    (let ((count 0))
                      ;; Required vars
                      (dolist (reqvar (lambda-list-reqvars ll))
@@ -287,7 +285,7 @@
                        (incf count))
 
                      ;; Rest-variable and keywords
-                     
+
                      ;; If there is a rest or keyword variable, we
                      ;; will add a binding for the rest or an
                      ;; auxiliary variable. The computations in of the
@@ -326,7 +324,7 @@
                      ;; Aux variables
                      (dolist (auxvar (lambda-list-auxvars ll))
                        (compute-pbindings (auxvar-variable auxvar) (auxvar-initform auxvar))))
-                   
+
                    whole)))
 
         ;; Macroexpansion. Compute bindings and generate code for them
