@@ -98,10 +98,6 @@ accumulated, in the order."
     (cond
       ((zerop x)
        (if plusp "+0" "0"))
-      ((minusp x)
-       (concat "-" (integer-to-string (- x) radix)))
-      ((and plusp (plusp x))
-       (concat "+" (integer-to-string x radix)))
       (*print-radix*
        (let ((*print-radix* nil))
          (case *print-base*
@@ -111,6 +107,10 @@ accumulated, in the order."
            (16 (concat "#x" (integer-to-string x radix)))
            (otherwise (concat "#" (integer-to-string radix 10 nil)
                               "r" (integer-to-string x radix))))))
+      ((minusp x)
+       (concat "-" (integer-to-string (- x) radix)))
+      ((and plusp (plusp x))
+       (concat "+" (integer-to-string x radix)))
       (t
        (let ((digits nil))
          (while (not (zerop x))
