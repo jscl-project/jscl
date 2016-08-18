@@ -24,49 +24,38 @@
 (test (= (string< "" "a") 0))
 (test (= (string< "aaa" "aaaaa") 3))
 
-;;; BUG: The compiler will macroexpand the forms below (char str N)
-;;; will expand to internal SBCL code instead of our (setf char). It
-;;; is because macrodefinitions during bootstrapping are not included
-;;; in the host's environment. It should, but we have to think how to
-;;; avoid conflicts (package renaming??)
+;;; BUG: The  compiler will macroexpand the  forms below (char str  N) will expand to  internal SBCL
+;;; code instead  of our (setf  char). It is because  macrodefinitions during bootstrapping  are not
+;;; included in  the host's  environment. It should,  but we  have to think  how to  avoid conflicts
+;;; (package renaming??)
 
-;; (let ((str "hello"))
-;;   (setf (char str 0) #\X)
-;;   (setf (char str 4) #\X)
-;;   (test (string= str "XellX")))
+;; (let  ((str "hello"))  (setf  (char str  0)  #\X) (setf  (char  str 4)  #\X)  (test (string=  str
+;;   "XellX")))
 
-;; ----------------------------------------
-;; The following tests in this file were derived from the file "must-string.lisp",
-;; part of SACLA <http://homepage1.nifty.com/bmonkey/lisp/sacla/>.
+;; ---------------------------------------- The following  tests in this file were  derived from the
+;; file   "must-string.lisp",   part  of   SACLA   <http://homepage1.nifty.com/bmonkey/lisp/sacla/>.
 ;; The origial copyright notice appears below:
 
-;; Copyright (C) 2002-2004, Yuji Minejima <ggb01164@nifty.ne.jp>
-;; ALL RIGHTS RESERVED.
+;; Copyright (C) 2002-2004, Yuji Minejima <ggb01164@nifty.ne.jp> ALL RIGHTS RESERVED.
 ;;
 ;; $Id: must-string.lisp,v 1.7 2004/02/20 07:23:42 yuji Exp $
-;; 
-;; Redistribution and use in source and binary forms, with or without
-;; modification, are permitted provided that the following conditions
-;; are met:
-;; 
-;;  * Redistributions of source code must retain the above copyright
-;;    notice, this list of conditions and the following disclaimer.
-;;  * Redistributions in binary form must reproduce the above copyright
-;;    notice, this list of conditions and the following disclaimer in
-;;    the documentation and/or other materials provided with the
-;;    distribution.
-;; 
-;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-;; "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-;; LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-;; A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-;; OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-;; SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-;; LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-;; OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;;
+;; Redistribution and use  in source and binary  forms, with or without  modification, are permitted
+;; provided that the following conditions are met:
+;;
+;;  * Redistributions of source code must retain the above copyright notice, this list of conditions
+;;    and  the following  disclaimer. *  Redistributions  in binary  form must  reproduce the  above
+;;    copyright notice,  this list of conditions  and the following disclaimer  in the documentation
+;;    and/or other materials provided with the distribution.
+;;
+;; THIS SOFTWARE IS  PROVIDED BY THE COPYRIGHT HOLDERS  AND CONTRIBUTORS "AS IS" AND  ANY EXPRESS OR
+;; IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+;; FITNESS  FOR A  PARTICULAR PURPOSE  ARE DISCLAIMED.  IN  NO EVENT  SHALL THE  COPYRIGHT OWNER  OR
+;; CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+;; DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;; DATA,  OR PROFITS;  OR BUSINESS  INTERRUPTION) HOWEVER  CAUSED AND  ON ANY  THEORY OF  LIABILITY,
+;; WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+;; WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ;; JSCL: no SIMPLE-STRING-P yet, so disabled
 ;; (test (simple-string-p ""))
@@ -109,84 +98,84 @@
 
 (test (string= (string-upcase "abcde") "ABCDE"))
 (test (string= (string-upcase "Dr. Livingston, I presume?")
-         "DR. LIVINGSTON, I PRESUME?"))
+               "DR. LIVINGSTON, I PRESUME?"))
 (test (string= (string-upcase "Dr. Livingston, I presume?" :start 6 :end 10)
-         "Dr. LiVINGston, I presume?"))
+               "Dr. LiVINGston, I presume?"))
 (test (string= (string-upcase 'Kludgy-HASH-Search) "KLUDGY-HASH-SEARCH"))
 (test (string= (string-upcase "abcde" :start 2 :end nil) "abCDE"))
 
 (test (string= (string-downcase "Dr. Livingston, I presume?")
-         "dr. livingston, i presume?"))
+               "dr. livingston, i presume?"))
 (test (string= (string-downcase 'Kludgy-HASH-Search) "kludgy-hash-search"))
 (test (string= (string-downcase "A FOOL" :start 2 :end nil) "A fool"))
 (test (string= (string-capitalize "elm 13c arthur;fig don't")
-         "Elm 13c Arthur;Fig Don'T"))
+               "Elm 13c Arthur;Fig Don'T"))
 (test (string= (string-capitalize " hello ") " Hello "))
 (test (string= (string-capitalize
-          "occlUDeD cASEmenTs FOreSTAll iNADVertent DEFenestraTION")
-         "Occluded Casements Forestall Inadvertent Defenestration"))
+                "occlUDeD cASEmenTs FOreSTAll iNADVertent DEFenestraTION")
+               "Occluded Casements Forestall Inadvertent Defenestration"))
 (test (string= (string-capitalize 'kludgy-hash-search) "Kludgy-Hash-Search"))
 (test (string= (string-capitalize "DON'T!") "Don'T!"))    ;not "Don't!"
 (test (string= (string-capitalize "pipe 13a, foo16c") "Pipe 13a, Foo16c"))
 (test (string= (string-capitalize "a fool" :start 2 :end nil) "a Fool"))
 
 (test (let ((str (copy-seq "0123ABCD890a")))
-  (and (string= (nstring-downcase str :start 5 :end 7) "0123AbcD890a")
-       (string= str "0123AbcD890a"))))
+        (and (string= (nstring-downcase str :start 5 :end 7) "0123AbcD890a")
+             (string= str "0123AbcD890a"))))
 
 (test (let* ((str0 (copy-seq "abcde"))
-       (str  (nstring-upcase str0)))
-  (and (eq str0 str)
-       (string= str "ABCDE"))))
+             (str  (nstring-upcase str0)))
+        (and (eq str0 str)
+             (string= str "ABCDE"))))
 (test (let* ((str0 (copy-seq "Dr. Livingston, I presume?"))
-       (str  (nstring-upcase str0)))
-  (and (eq str0 str)
-       (string= str "DR. LIVINGSTON, I PRESUME?"))))
+             (str  (nstring-upcase str0)))
+        (and (eq str0 str)
+             (string= str "DR. LIVINGSTON, I PRESUME?"))))
 (test (let* ((str0 (copy-seq "Dr. Livingston, I presume?"))
-       (str  (nstring-upcase str0 :start 6 :end 10)))
-  (and (eq str0 str)
-       (string= str "Dr. LiVINGston, I presume?"))))
+             (str  (nstring-upcase str0 :start 6 :end 10)))
+        (and (eq str0 str)
+             (string= str "Dr. LiVINGston, I presume?"))))
 
 (test (let* ((str0 (copy-seq "abcde"))
-       (str (nstring-upcase str0 :start 2 :end nil)))
-  (string= str "abCDE")))
+             (str (nstring-upcase str0 :start 2 :end nil)))
+        (string= str "abCDE")))
 
 
 
 (test (let* ((str0 (copy-seq "Dr. Livingston, I presume?"))
-       (str  (nstring-downcase str0)))
-  (and (eq str0 str)
-       (string= str "dr. livingston, i presume?"))))
+             (str  (nstring-downcase str0)))
+        (and (eq str0 str)
+             (string= str "dr. livingston, i presume?"))))
 (test (let* ((str0 (copy-seq "ABCDE"))
-       (str (nstring-downcase str0 :start 2 :end nil)))
-  (string= str "ABcde")))
+             (str (nstring-downcase str0 :start 2 :end nil)))
+        (string= str "ABcde")))
 
 (test (let* ((str0 (copy-seq "elm 13c arthur;fig don't"))
-       (str  (nstring-capitalize str0)))
-  (and (eq str0 str)
-       (string= str "Elm 13c Arthur;Fig Don'T"))))
+             (str  (nstring-capitalize str0)))
+        (and (eq str0 str)
+             (string= str "Elm 13c Arthur;Fig Don'T"))))
 
 (test (let* ((str0 (copy-seq " hello "))
-       (str  (nstring-capitalize str0)))
-  (and (eq str0 str)
-       (string= str " Hello "))))
+             (str  (nstring-capitalize str0)))
+        (and (eq str0 str)
+             (string= str " Hello "))))
 (test (let* ((str0 (copy-seq
-              "occlUDeD cASEmenTs FOreSTAll iNADVertent DEFenestraTION"))
-       (str  (nstring-capitalize str0)))
-  (and (eq str0 str)
-       (string= str
-                "Occluded Casements Forestall Inadvertent Defenestration"))))
+                    "occlUDeD cASEmenTs FOreSTAll iNADVertent DEFenestraTION"))
+             (str  (nstring-capitalize str0)))
+        (and (eq str0 str)
+             (string= str
+                      "Occluded Casements Forestall Inadvertent Defenestration"))))
 (test (let* ((str0 (copy-seq "DON'T!"))
-       (str  (nstring-capitalize str0)))
-  (and (eq str0 str)
-       (string= str "Don'T!"))))    ;not "Don't!"
+             (str  (nstring-capitalize str0)))
+        (and (eq str0 str)
+             (string= str "Don'T!"))))    ;not "Don't!"
 (test (let* ((str0 (copy-seq "pipe 13a, foo16c"))
-       (str  (nstring-capitalize str0)))
-  (and (eq str0 str)
-       (string= str "Pipe 13a, Foo16c"))))
+             (str  (nstring-capitalize str0)))
+        (and (eq str0 str)
+             (string= str "Pipe 13a, Foo16c"))))
 (test (let* ((str0 (copy-seq "a fool"))
-       (str (nstring-capitalize str0 :start 2 :end nil)))
-  (string= str "a Fool")))
+             (str (nstring-capitalize str0 :start 2 :end nil)))
+        (string= str "a Fool")))
 
 
 
@@ -194,12 +183,12 @@
 ;; (test (string= (string-trim '(#\Space #\Tab #\Newline) " garbanzo beans
 ;;         ") "garbanzo beans"))
 (test (string= (string-trim " (*)" " ( *three (silly) words* ) ")
-         "three (silly) words"))
+               "three (silly) words"))
 (test (string= (string-left-trim "abc" "labcabcabc") "labcabcabc"))
 (test (string= (string-left-trim " (*)" " ( *three (silly) words* ) ")
-         "three (silly) words* ) "))
-(test (string= (string-right-trim " (*)" " ( *three (silly) words* ) ") 
-         " ( *three (silly) words"))
+               "three (silly) words* ) "))
+(test (string= (string-right-trim " (*)" " ( *three (silly) words* ) ")
+               " ( *three (silly) words"))
 (test (string= (string-trim "ABC" "abc") "abc"))
 (test (string= (string-trim "AABBCC" "abc") "abc"))
 (test (string= (string-trim "" "abc") "abc"))
@@ -250,8 +239,8 @@
 (test (eql (string>= "aaaaa" "aaaa") 4))
 (test (eql (string-not-greaterp "Abcde" "abcdE") 5))
 (test (eql (string-lessp "012AAAA789" "01aaab6"
-                   :start1 3 :end1 7
-                   :start2 2 :end2 6) 6))
+                         :start1 3 :end1 7
+                         :start2 2 :end2 6) 6))
 (test (not (string-not-equal "AAAA" "aaaA")))
 
 
@@ -311,7 +300,7 @@
 (test (not (string< "aba" "aaa")))
 (test (not (string< "my cat food" "your dog food" :start1 6 :start2 8)))
 (test (not (string< "cat food 2 dollars" "dog food 3 dollars"
-              :start1 3 :end1 9 :start2 3 :end2 9)))
+                    :start1 3 :end1 9 :start2 3 :end2 9)))
 (test (eql (string< "xyzabc" "abcd" :start1 3) 6))
 (test (eql (string< "abc" "abc" :end1 1) 1))
 (test (eql (string< "xyzabc" "abc" :start1 3 :end1 5) 5))
@@ -322,8 +311,8 @@
 (test (eql (string< "aaaa" "z") 0))
 (test (eql (string< "pppTTTaTTTqqq" "pTTTxTTT" :start1 3 :start2 1) 6))
 (test (eql (string< "pppTTTaTTTqqq" "pTTTxTTT"
-              :start1 6 :end1 7
-              :start2 4 :end2 5) 6))
+                    :start1 6 :end1 7
+                    :start2 4 :end2 5) 6))
 ;; (test (not (string< (make-array 0 :element-type 'character)
 ;;            (make-array 0 :element-type 'base-char))))
 (test (not (string< 'love 'hate)))
@@ -344,7 +333,7 @@
 (test (not (string> "aaa" "aba")))
 (test (not (string> "my cat food" "your dog food" :start1 6 :start2 8)))
 (test (not (string> "cat food 2 dollars" "dog food 3 dollars"
-              :start1 3 :end1 9 :start2 3 :end2 9)))
+                    :start1 3 :end1 9 :start2 3 :end2 9)))
 (test (eql (string> "xyzabcde" "abcd" :start1 3) 7))
 (test (not (string> "abc" "abc" :end1 1)))
 (test (eql (string> "xyzabc" "a" :start1 3 :end1 5) 4))
@@ -355,8 +344,8 @@
 (test (eql (string> "z" "aaaa") 0))
 (test (eql (string> "pTTTxTTTqqq" "pppTTTaTTT" :start1 1 :start2 3) 4))
 (test (eql (string> "pppTTTxTTTqqq" "pTTTaTTT"
-              :start1 6 :end1 7
-              :start2 4 :end2 5) 6))
+                    :start1 6 :end1 7
+                    :start2 4 :end2 5) 6))
 ;; (test (not (string> (make-array 0 :element-type 'character)
 ;;            (make-array 0 :element-type 'base-char))))
 (test (= (string> 'love 'hate) 0))
@@ -376,7 +365,7 @@
 (test (not (string<= "aba" "aaa")))
 (test (eql (string<= "my cat food" "your dog food" :start1 6 :start2 8) 11))
 (test (eql (string<= "cat food 2 dollars" "dog food 3 dollars"
-               :start1 3 :end1 9 :start2 3 :end2 9) 9))
+                     :start1 3 :end1 9 :start2 3 :end2 9) 9))
 (test (eql (string<= "xyzabc" "abcd" :start1 3) 6))
 (test (eql (string<= "abc" "abc" :end1 1) 1))
 (test (eql (string<= "xyzabc" "abc" :start1 3 :end1 5) 5))
@@ -387,8 +376,8 @@
 (test (eql (string<= "aaaa" "z") 0))
 (test (eql (string<= "pppTTTaTTTqqq" "pTTTxTTT" :start1 3 :start2 1) 6))
 (test (eql (string<= "pppTTTaTTTqqq" "pTTTxTTT"
-               :start1 6 :end1 7
-               :start2 4 :end2 5) 6))
+                     :start1 6 :end1 7
+                     :start2 4 :end2 5) 6))
 ;; (test (eql (string<= (make-array 0 :element-type 'character)
 ;;             (make-array 0 :element-type 'base-char)) 0))
 (test (not (string<= 'love 'hate)))
@@ -410,7 +399,7 @@
 (test (not (string>= "aaa" "aba")))
 (test (eql (string>= "my cat food" "your dog food" :start1 6 :start2 8) 11))
 (test (eql (string>= "cat food 2 dollars" "dog food 3 dollars"
-               :start1 3 :end1 9 :start2 3 :end2 9) 9))
+                     :start1 3 :end1 9 :start2 3 :end2 9) 9))
 (test (eql (string>= "xyzabcde" "abcd" :start1 3) 7))
 (test (not (string>= "abc" "abc" :end1 1)))
 (test (eql (string>= "xyzabc" "a" :start1 3 :end1 5) 4))
@@ -421,8 +410,8 @@
 (test (eql (string>= "z" "aaaa") 0))
 (test (eql (string>= "pTTTxTTTqqq" "pppTTTaTTT" :start1 1 :start2 3) 4))
 (test (eql (string>= "pppTTTxTTTqqq" "pTTTaTTT"
-               :start1 6 :end1 7
-               :start2 4 :end2 5) 6))
+                     :start1 6 :end1 7
+                     :start2 4 :end2 5) 6))
 ;; (test (eql (string>= (make-array 0 :element-type 'character)
 ;;             (make-array 0 :element-type 'base-char)) 0))
 (test (= (string>= 'love 'hate) 0))
@@ -498,7 +487,7 @@
 (test (not (string-lessp "aba" "aaa")))
 (test (not (string-lessp "my cat food" "your dog food" :start1 6 :start2 8)))
 (test (not (string-lessp "cat food 2 dollars" "dog food 3 dollars"
-                   :start1 3 :end1 9 :start2 3 :end2 9)))
+                         :start1 3 :end1 9 :start2 3 :end2 9)))
 (test (eql (string-lessp "xyzabc" "abcd" :start1 3) 6))
 (test (eql (string-lessp "abc" "abc" :end1 1) 1))
 (test (eql (string-lessp "xyzabc" "abc" :start1 3 :end1 5) 5))
@@ -509,12 +498,12 @@
 (test (eql (string-lessp "aaaa" "z") 0))
 (test (eql (string-lessp "pppTTTaTTTqqq" "pTTTxTTT" :start1 3 :start2 1) 6))
 (test (eql (string-lessp "pppTTTaTTTqqq" "pTTTxTTT"
-                   :start1 6 :end1 7
-                   :start2 4 :end2 5) 6))
+                         :start1 6 :end1 7
+                         :start2 4 :end2 5) 6))
 ;; (test (not (string-lessp (make-array 0 :element-type 'character)
 ;;                 (make-array 0 :element-type 'base-char))))
 (test (and (not (string-lessp "abc" "ABC"))
-     (not (string-lessp "ABC" "abc"))))
+           (not (string-lessp "ABC" "abc"))))
 (test (not (string-lessp 'love 'hate)))
 (test (= (string-lessp 'peace 'war) 0))
 (test (not (string-lessp 'love 'love)))
@@ -534,7 +523,7 @@
 (test (not (string-greaterp "aaa" "aba")))
 (test (not (string-greaterp "my cat food" "your dog food" :start1 6 :start2 8)))
 (test (not (string-greaterp "cat food 2 dollars" "dog food 3 dollars"
-                      :start1 3 :end1 9 :start2 3 :end2 9)))
+                            :start1 3 :end1 9 :start2 3 :end2 9)))
 (test (eql (string-greaterp "xyzabcde" "abcd" :start1 3) 7))
 (test (not (string-greaterp "abc" "abc" :end1 1)))
 (test (eql (string-greaterp "xyzabc" "a" :start1 3 :end1 5) 4))
@@ -545,12 +534,12 @@
 (test (eql (string-greaterp "z" "aaaa") 0))
 (test (eql (string-greaterp "pTTTxTTTqqq" "pppTTTaTTT" :start1 1 :start2 3) 4))
 (test (eql (string-greaterp "pppTTTxTTTqqq" "pTTTaTTT"
-                      :start1 6 :end1 7
-                      :start2 4 :end2 5) 6))
+                            :start1 6 :end1 7
+                            :start2 4 :end2 5) 6))
 ;; (test (not (string-greaterp (make-array 0 :element-type 'character)
 ;;                    (make-array 0 :element-type 'base-char))))
 (test (and (not (string-greaterp "abc" "ABC"))
-     (not (string-greaterp "ABC" "abc"))))
+           (not (string-greaterp "ABC" "abc"))))
 (test (= (string-greaterp 'love 'hate) 0))
 (test (not (string-greaterp 'peace 'war)))
 (test (not (string-greaterp 'love 'love)))
@@ -568,7 +557,7 @@
 (test (not (string-not-greaterp "aba" "aaa")))
 (test (eql (string-not-greaterp "my cat food" "your dog food" :start1 6 :start2 8) 11))
 (test (eql (string-not-greaterp "cat food 2 dollars" "dog food 3 dollars"
-                          :start1 3 :end1 9 :start2 3 :end2 9) 9))
+                                :start1 3 :end1 9 :start2 3 :end2 9) 9))
 (test (eql (string-not-greaterp "xyzabc" "abcd" :start1 3) 6))
 (test (eql (string-not-greaterp "abc" "abc" :end1 1) 1))
 (test (eql (string-not-greaterp "xyzabc" "abc" :start1 3 :end1 5) 5))
@@ -579,12 +568,12 @@
 (test (eql (string-not-greaterp "aaaa" "z") 0))
 (test (eql (string-not-greaterp "pppTTTaTTTqqq" "pTTTxTTT" :start1 3 :start2 1) 6))
 (test (eql (string-not-greaterp "pppTTTaTTTqqq" "pTTTxTTT"
-                          :start1 6 :end1 7
-                          :start2 4 :end2 5) 6))
+                                :start1 6 :end1 7
+                                :start2 4 :end2 5) 6))
 ;; (test (eql (string-not-greaterp (make-array 0 :element-type 'character)
 ;;                        (make-array 0 :element-type 'base-char)) 0))
 (test (and (eql (string-not-greaterp "abc" "ABC") 3)
-     (eql (string-not-greaterp "ABC" "abc") 3)))
+           (eql (string-not-greaterp "ABC" "abc") 3)))
 (test (not (string-not-greaterp 'love 'hate)))
 (test (= (string-not-greaterp 'peace 'war) 0))
 (test (= (string-not-greaterp 'love 'love) 4))
@@ -604,7 +593,7 @@
 (test (not (string-not-lessp "aaa" "aba")))
 (test (eql (string-not-lessp "my cat food" "your dog food" :start1 6 :start2 8) 11))
 (test (eql (string-not-lessp "cat food 2 dollars" "dog food 3 dollars"
-                       :start1 3 :end1 9 :start2 3 :end2 9) 9))
+                             :start1 3 :end1 9 :start2 3 :end2 9) 9))
 (test (eql (string-not-lessp "xyzabcde" "abcd" :start1 3) 7))
 (test (not (string-not-lessp "abc" "abc" :end1 1)))
 (test (eql (string-not-lessp "xyzabc" "a" :start1 3 :end1 5) 4))
@@ -615,12 +604,12 @@
 (test (eql (string-not-lessp "z" "aaaa") 0))
 (test (eql (string-not-lessp "pTTTxTTTqqq" "pppTTTaTTT" :start1 1 :start2 3) 4))
 (test (eql (string-not-lessp "pppTTTxTTTqqq" "pTTTaTTT"
-                       :start1 6 :end1 7
-                       :start2 4 :end2 5) 6))
+                             :start1 6 :end1 7
+                             :start2 4 :end2 5) 6))
 ;; (test (eql (string-not-lessp (make-array 0 :element-type 'character)
 ;;                     (make-array 0 :element-type 'base-char)) 0))
 (test (and (eql (string-not-lessp "abc" "ABC") 3)
-     (eql (string-not-lessp "ABC" "abc") 3)))
+           (eql (string-not-lessp "ABC" "abc") 3)))
 (test (= (string-not-lessp 'love 'hate) 0))
 (test (not (string-not-lessp 'peace 'war)))
 (test (= (string-not-lessp 'love 'love) 4))

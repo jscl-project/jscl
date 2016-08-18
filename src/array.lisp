@@ -1,17 +1,15 @@
 ;;; arrays.lisp
 
-;; JSCL is free software: you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation, either version 3 of the
+;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
+;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
 ;; License, or (at your option) any later version.
 ;;
-;; JSCL is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
+;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
+;; Public License for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
+;; <http://www.gnu.org/licenses/>.
 
 (/debug "loading array.lisp!")
 
@@ -67,12 +65,12 @@
 
 (defun aref (array index)
   (unless (arrayp array)
-    (error "~S is not an array." array))  
+    (error "~S is not an array." array))
   (storage-vector-ref array index))
 
 (defun aset (array index value)
   (unless (arrayp array)
-    (error "~S is not an array." array))  
+    (error "~S is not an array." array))
   (storage-vector-set array index value))
 
 (define-setf-expander aref (array index)
@@ -98,7 +96,7 @@
 ;;; FIXME: should use fill-pointer instead of the absolute end of array
 (defun vector-push-extend (new vector)
   (unless (vectorp vector)
-    (error "~S is not a vector." vector))  
+    (error "~S is not a vector." vector))
   (let ((size (storage-vector-size vector)))
     (resize-storage-vector vector (1+ size))
     (aset vector size new)

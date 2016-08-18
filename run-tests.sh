@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 RUNJS=${RUNJS:-node}
-$RUNJS "tests.js"
+$RUNJS  "$(dirname $0)/tests.js"

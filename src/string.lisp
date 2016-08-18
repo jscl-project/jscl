@@ -1,17 +1,15 @@
 ;;; string.lisp
 
-;; JSCL is free software: you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation, either version 3 of the
+;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
+;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
 ;; License, or (at your option) any later version.
 ;;
-;; JSCL is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
+;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
+;; Public License for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
+;; <http://www.gnu.org/licenses/>.
 
 (/debug "loading string.lisp!")
 
@@ -81,9 +79,9 @@
             (c2 (char s2 (+ start2 i))))
         (when (not (funcall char-eq c1 c2))  ;; found a difference
           (return-from compare-strings
-                       (if (not (funcall char-lt c1 c2))
-                           (+ start1 i)
-                         nil)))))))
+            (if (not (funcall char-lt c1 c2))
+                (+ start1 i)
+                nil)))))))
 
 (defun string< (s1 s2 &key (start1 0) end1 (start2 0) end2)
   (compare-strings s1 s2 start1 end1 start2 end2
@@ -96,7 +94,7 @@
 (defun string<= (s1 s2 &key (start1 0) end1 (start2 0) end2)
   (compare-strings s1 s2 start1 end1 start2 end2
                    #'char= #'char> t t nil))
-  
+
 (defun string>= (s1 s2 &key (start1 0) end1 (start2 0) end2)
   (compare-strings s1 s2 start1 end1 start2 end2
                    #'char= #'char< t nil t))
@@ -134,6 +132,12 @@
     (!reduce #'concat-two strs "")))
 
 
+(defun concatenate (target &rest elements)
+  (ecase target
+    (string (apply #'concat elements))
+    (list (apply #'reduce #'append elements))))
+
+
 (defun string-upcase (string &key (start 0) end)
   (let* ((string (string string))
          (new (make-string (length string))))
@@ -142,7 +146,7 @@
             (if (and (or (null start) (>= i start))
                      (or (null end) (< i end)))
                 (char-upcase (char string i))
-              (char string i))))))
+                (char string i))))))
 
 (defun nstring-upcase (string &key (start 0) end)
   (let ((end (or end (length string))))
@@ -158,7 +162,7 @@
             (if (and (or (null start) (>= i start))
                      (or (null end) (< i end)))
                 (char-downcase (char string i))
-              (char string i))))))
+                (char string i))))))
 
 (defun nstring-downcase (string &key (start 0) end)
   (let ((end (or end (length string))))
@@ -190,7 +194,7 @@
             (if (or (zerop i)
                     (not just-saw-alphanum-p))
                 (char-upcase (char string (+ start i)))
-              (char-downcase (char string (+ start i)))))
+                (char-downcase (char string (+ start i)))))
       (setq just-saw-alphanum-p (alphanumericp (char string (+ start i)))))))
 
 (defun string-equal (s1 s2 &key start1 end1 start2 end2)

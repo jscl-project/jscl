@@ -16,7 +16,7 @@
 (test (null (find-package 'fubar)))
 
 (when (find-package 'foo)
-     (delete-package (find-package 'foo)))
+  (delete-package (find-package 'foo)))
 (test
  (let ((package (make-package 'foo :use '(cl)))
        foo-symbols
@@ -29,7 +29,7 @@
         (equal foo-symbols cl-symbols))))
 
 (when (find-package 'bar)
-   (delete-package (find-package 'bar)))
+  (delete-package (find-package 'bar)))
 (test
  (let* ((package (make-package 'bar))
         (baz (intern (string 'baz) package)))
@@ -41,7 +41,5 @@
 
 (test (member 'car (find-all-symbols (string 'car))))
 
-;; This test is failing. I have disabled temporarily.
-;; (test (eq (eval '(in-package #:cl-user)) (find-package '#:cl-user)))
-
-
+;; This  test is  failing. I  have disabled  temporarily. (test  (eq (eval  '(in-package #:cl-user))
+;; (find-package '#:cl-user)))

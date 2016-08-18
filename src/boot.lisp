@@ -1,26 +1,22 @@
 ;;; boot.lisp --- First forms to be cross compiled
 
-;; Copyright (C) 2012, 2013 David Vazquez
-;; Copyright (C) 2012 Raimon Grau
+;; Copyright (C) 2012, 2013 David Vazquez Copyright (C) 2012 Raimon Grau
 
-;; JSCL is free software: you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation, either version 3 of the
+;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
+;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
 ;; License, or (at your option) any later version.
 ;;
-;; JSCL is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
+;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
+;; Public License for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
+;; <http://www.gnu.org/licenses/>.
 
-;;; This code is executed when JSCL compiles this file itself. The
-;;; compiler provides compilation of some special forms, as well as
-;;; funcalls and macroexpansion, but no functions. So, we define the
-;;; Lisp world from scratch. This code has to define enough language
-;;; to the compiler to be able to run.
+;;; This code is executed when JSCL compiles  this file itself. The compiler provides compilation of
+;;; some special forms, as well as funcalls and  macroexpansion, but no functions. So, we define the
+;;; Lisp world  from scratch. This  code has to  define enough language to  the compiler to  be able
+;;; to run.
 
 (/debug "loading boot.lisp!")
 
@@ -36,18 +32,16 @@
                                       (destructuring-bind ,args ,whole
                                         ,@body))))))
 
-                  ;; If we are boostrapping JSCL, we need to quote the
-                  ;; macroexpander, because the macroexpander will
-                  ;; need to be dumped in the final environment
-                  ;; somehow.
+                  ;; If we  are boostrapping JSCL, we  need to quote the  macroexpander, because the
+                  ;; macroexpander will need to be dumped in the final environment somehow.
                   (when (find :jscl-xc *features*)
                     (setq expander `(quote ,expander)))
-                  
+
                   `(eval-when (:compile-toplevel :execute)
                      (%compile-defmacro ',name ,expander))
 
                   )))))
-    
+
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
 (defmacro declaim (&rest decls)
@@ -251,7 +245,7 @@
   `(block nil
      (let ,(mapcar (lambda (x) (if (symbolp x)
                                    (list x nil)
-                                 (list (first x) (second x)))) varlist)
+                                   (list (first x) (second x)))) varlist)
        (while t
          (when ,(car endlist)
            (return (progn ,@(cdr endlist))))
@@ -268,7 +262,7 @@
   `(block nil
      (let* ,(mapcar (lambda (x1) (if (symbolp x1)
                                      (list x1 nil)
-                                   (list (first x1) (second x1)))) varlist)
+                                     (list (first x1) (second x1)))) varlist)
        (while t
          (when ,(car endlist)
            (return (progn ,@(cdr endlist))))
@@ -281,6 +275,25 @@
                                   (list (first v) (third v))))
                            varlist)))))))
 
+(defmacro declare (&rest declarations)
+  "Early DECLARE ignores everything."
+  nil)
+
+(defmacro assert (test &rest _)
+  "An  early ASSERT  that does  not trigger  bugs in  the macroexpander.
+Note, this will  still signal errors itself if it  actually is triggered
+before  princ-to-string is  available, but  it needs  to be  declared as
+a macro before  anything else gets loaded, and  currently the compiler's
+macro cache is so aggressive that it cannot be redefined."
+  #-jscl (declare (ignore _))
+  `(unless ,test
+     (error "Assertion failed: NOT ~s" ',test)))
+
+(defmacro check-type (var type &rest _)
+  "Early/minimalist CHECK-TYPE using ETYPECASE"
+  #-jscl (declare (ignore _))
+  `(etypecase ,var (,type nil)))
+
 (defmacro loop (&body body)
   `(while t ,@body))
 
@@ -292,6 +305,7 @@
 
 (defun constantly (x)
   (lambda (&rest args)
+    (declare (ignore args))
     x))
 
 (defun code-char (x)
@@ -309,27 +323,34 @@
 (defun atom (x)
   (not (consp x)))
 
-(defun alpha-char-p (x)
-  (or (<= (char-code #\a) (char-code x) (char-code #\z))
-      (<= (char-code #\A) (char-code x) (char-code #\Z))))
-
-(defun digit-char-p (x)
-  (and (<= (char-code #\0) (char-code x) (char-code #\9))
-       (- (char-code x) (char-code #\0))))
-
-(defun digit-char (weight)
-  (and (<= 0 weight 9)
-       (char "0123456789" weight)))
-
 (defun equal (x y)
   (cond
     ((eql x y) t)
+    ((numberp x) (and (numberp y) (= x y)))
     ((consp x)
      (and (consp y)
           (equal (car x) (car y))
           (equal (cdr x) (cdr y))))
     ((stringp x)
      (and (stringp y) (string= x y)))
+    (t nil)))
+
+(defun equalp (x y)
+  "This is a marginally correct implementation of EQUALP"
+  (cond
+    ((eql x y) t)
+    ((numberp x) (and (numberp y) (= x y)))
+    ((consp x)
+     (and (consp y)
+          (equalp (car x) (car y))
+          (equalp (cdr x) (cdr y))))
+    ((characterp x)
+     (and (characterp y)
+          (char-equal x y)))
+    ((vectorp x)
+     (and (vectorp y)
+          (= (length x) (length y))
+          (every #'equalp x y)))
     (t nil)))
 
 (defun fdefinition (x)
@@ -363,6 +384,7 @@
                      (if (find (car c) '(t otherwise))
                          `(t ,@(rest c))
                          `((,(ecase (car c)
+                                    (number 'numberp)
                                     (integer 'integerp)
                                     (cons 'consp)
                                     (list 'listp)
@@ -412,9 +434,18 @@
 
 ;;; Early error definition.
 (defun error (fmt &rest args)
-  (%throw (apply #'format nil fmt args)))
+  (%throw (make-new #j:Error (apply #'format nil fmt args))))
 
 (defmacro nth-value (n form)
   `(multiple-value-call (lambda (&rest values)
                           (nth ,n values))
      ,form))
+
+
+
+(defvar *print-escape* t)
+(defvar *print-readably* t)
+(defvar *print-circle* nil)
+(defvar *print-radix* nil)
+(defvar *print-base* 10)
+(defvar *read-base* 10)

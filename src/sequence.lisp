@@ -1,17 +1,15 @@
 ;;; sequence.lisp
 
-;; JSCL is free software: you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation, either version 3 of the
+;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
+;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
 ;; License, or (at your option) any later version.
 ;;
-;; JSCL is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
+;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
+;; Public License for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
+;; <http://www.gnu.org/licenses/>.
 
 (/debug "loading sequence.lisp!")
 
@@ -31,6 +29,9 @@
      (list-length seq))
     (t
      (not-seq-error seq))))
+
+(defun emptyp (seq)
+  (and seq (zerop (length seq))))
 
 (defun vector-reverse (vector)
   (let* ((length (length vector))
@@ -70,20 +71,20 @@
          (end (or end l))
          (result 0))
     (if from-end
-      (do-sequence (x (reverse sequence) index)
-        (when (and (<= start (- l index 1))
-                   (< (- l index 1) end)
-                   (satisfies-test-p item x
-                                     :key key :test test :testp testp
-                                     :test-not test-not :test-not-p test-not-p))
-          (incf result)))
-      (do-sequence (x sequence index)
-        (when (and (<= start index)
-                   (< index end)
-                   (satisfies-test-p item x
-                                     :key key :test test :testp testp
-                                     :test-not test-not :test-not-p test-not-p))
-          (incf result))))
+        (do-sequence (x (reverse sequence) index)
+          (when (and (<= start (- l index 1))
+                     (< (- l index 1) end)
+                     (satisfies-test-p item x
+                                       :key key :test test :testp testp
+                                       :test-not test-not :test-not-p test-not-p))
+            (incf result)))
+        (do-sequence (x sequence index)
+          (when (and (<= start index)
+                     (< index end)
+                     (satisfies-test-p item x
+                                       :key key :test test :testp testp
+                                       :test-not test-not :test-not-p test-not-p))
+            (incf result))))
     result))
 
 (defun count-if (predicate sequence &key from-end (start 0) end key)
@@ -93,16 +94,16 @@
          (end (or end l))
          (result 0))
     (if from-end
-      (do-sequence (x (reverse sequence) index)
-        (when (and (<= start (- l index 1))
-                   (< (- l index 1) end)
-                   (funcall predicate (if key (funcall key x) x)))
-          (incf result)))
-      (do-sequence (x sequence index)
-        (when (and (<= start index)
-                   (< index end)
-                   (funcall predicate (if key (funcall key x) x)))
-          (incf result))))
+        (do-sequence (x (reverse sequence) index)
+          (when (and (<= start (- l index 1))
+                     (< (- l index 1) end)
+                     (funcall predicate (if key (funcall key x) x)))
+            (incf result)))
+        (do-sequence (x sequence index)
+          (when (and (<= start index)
+                     (< index end)
+                     (funcall predicate (if key (funcall key x) x)))
+            (incf result))))
     result))
 
 (defun count-if-not (predicate sequence &key from-end (start 0) end key)
@@ -126,8 +127,8 @@
 
 (defun position (elt sequence
                  &key from-end key (test #'eql testp)
-                   (test-not #'eql test-not-p)
-                   (start 0) end)
+                      (test-not #'eql test-not-p)
+                      (start 0) end)
   ;; TODO: Implement START and END efficiently for all the sequence
   ;; functions.
   (let ((end (or end (length sequence)))
@@ -140,11 +141,11 @@
                                    :test-not test-not :test-not-p test-not-p))
         (setf result index)
         (unless from-end
-            (return))))
+          (return))))
     result))
 
 (defun position-if (predicate sequence
-                 &key from-end key (start 0) end)
+                    &key from-end key (start 0) end)
   ;; TODO: Implement START and END efficiently for all the sequence
   ;; functions.
   (let ((end (or end (length sequence)))
@@ -159,9 +160,70 @@
     result))
 
 (defun position-if-not (predicate sequence
-                 &key from-end key (start 0) end)
+                        &key from-end key (start 0) end)
   (position-if (complement predicate) sequence
                :from-end from-end :key key :start start :end end))
+
+(defun substitute (new old seq
+                   &key (key #'identity) (test #'eql)
+                        (start 0) (end nil endp)
+                        (count nil countp)
+                        test-not from-end)
+  (when test-not (warn "SUBSTITUTE :TEST-NOT still not supported"))
+  (when from-end (warn "SUBSTITUTE :FROM-END still not supported"))
+  (and seq
+       (let ((counted 0)
+             (count (if (and countp (plusp count)) count 0))
+             (i 0))
+         (map
+          (cond
+            ((stringp seq) 'string)
+            ((vectorp seq) 'vector)
+            ((listp seq) 'list)
+            (t (warn "SUBSTITUTE: sequence type not supported") 'vector))
+          (lambda (elt)
+            (prog1
+                (if (or (and countp (>= counted count))
+                        (< i start)
+                        (and endp (> i end))
+                        (not (funcall test old (funcall key elt))))
+                    elt
+                    (progn
+                      (incf counted)
+                      new))
+              (incf i)))
+          seq))))
+
+(defun substitute-if (new pred seq
+                      &key (key #'identity)
+                           (start 0) (end nil endp) (count nil countp)
+                           from-end)
+  (let ((substitute-args (append (list new t seq
+                                       :key (lambda (elt)
+                                              (funcall pred (funcall key elt)))
+                                       :test (lambda (_ v)
+                                               (declare (ignore _))
+                                               v)
+                                       :start start)
+                                 (when endp (list :end end))
+                                 (when from-end (list :from-end t))
+                                 (when countp (list :count count)))))
+    (apply #'substitute substitute-args)))
+
+(defun substitute-if-not (new pred seq &rest keys
+                          &key (key #'identity) (start 0) (end nil endp)
+                               (count nil countp) from-end)
+  (let ((substitute-args (append (list new t seq
+                                       :key (lambda (elt)
+                                              (not (funcall pred (funcall key elt))))
+                                       :test (lambda (_ v)
+                                               (declare (ignore _))
+                                               v)
+                                       :start start)
+                                 (when endp (list :end end))
+                                 (when from-end (list :from-end t))
+                                 (when countp (list :count count)))))
+    (apply #'substitute substitute-args)))
 
 (defun remove (x seq &key key (test #'eql testp) (test-not #'eql test-not-p))
   (cond
@@ -198,10 +260,15 @@
     (when (funcall function elt)
       (return-from some t))))
 
-(defun every (function seq)
-  (do-sequence (elt seq)
-    (unless (funcall function elt)
-      (return-from every nil)))
+(defun every (function seq &rest more-seqs)
+  (if more-seqs
+      (apply #'map nil (lambda (&rest seqs)
+                         (unless (apply function seqs)
+                           (return-from every nil))) seq more-seqs)
+      ;; optimized single sequence case
+      (do-sequence (elt seq)
+        (unless (funcall function elt)
+          (return-from every nil))))
   t)
 
 (defun remove-if (func seq)
@@ -218,11 +285,11 @@
 
 (defun list-remove-if (func list negate)
   (if (endp list)
-    ()
-    (let ((test (funcall func (car list))))
-      (if (if negate (not test) test)
-        (list-remove-if func (cdr list) negate)
-        (cons (car list) (list-remove-if func (cdr list) negate))))))
+      ()
+      (let ((test (funcall func (car list))))
+        (if (if negate (not test) test)
+            (list-remove-if func (cdr list) negate)
+            (cons (car list) (list-remove-if func (cdr list) negate))))))
 
 (defun vector-remove-if (func vector negate)
   (let ((out-vector (make-array 0)))
@@ -236,21 +303,21 @@
   (cond
     ((listp seq)
      (if b
-       (let ((diff (- b a)))
-         (cond
-           ((zerop  diff) ())
-           ((minusp diff)
-            (error "Start index must be smaller than end index"))
-           (t
-            (let* ((drop-a (copy-list (nthcdr a seq)))
-                   (pointer drop-a))
-              (dotimes (_ (1- diff))
-                (setq pointer (cdr pointer))
-                (when (null pointer)
-                  (error "Ending index larger than length of list")))
-              (rplacd pointer ())
-              drop-a))))
-       (copy-list (nthcdr a seq))))
+         (let ((diff (- b a)))
+           (cond
+             ((zerop  diff) ())
+             ((minusp diff)
+              (error "Start index must be smaller than end index"))
+             (t
+              (let* ((drop-a (copy-list (nthcdr a seq)))
+                     (pointer drop-a))
+                (dotimes (_ (1- diff))
+                  (setq pointer (cdr pointer))
+                  (when (null pointer)
+                    (error "Ending index larger than length of list")))
+                (rplacd pointer ())
+                drop-a))))
+         (copy-list (nthcdr a seq))))
     ((vectorp seq)
      (let* ((b (or b (length seq)))
             (size (- b a))
@@ -302,8 +369,8 @@
       (0 (zero-args-reduce function initial-value initial-value-p))
       (1 (one-args-reduce function (funcall key (elt sequence 0)) from-end initial-value initial-value-p))
       (t (let* ((function (if from-end
-                             #'(lambda (x y) (funcall function y x))
-                             function))
+                              #'(lambda (x y) (funcall function y x))
+                              function))
                 (sequence (if from-end
                               (reverse sequence)
                               sequence))
@@ -317,8 +384,8 @@
                        (setf value (funcall function value (funcall key (elt sequence (1+ index)))))))))))))
 
 (defun mismatch (sequence1 sequence2 &key key (test #'eql testp) (test-not nil test-not-p)
-                                       (start1 0) (end1 (length sequence1))
-                                       (start2 0) (end2 (length sequence2)))
+                                          (start1 0) (end1 (length sequence1))
+                                          (start2 0) (end2 (length sequence2)))
   (let ((index1 start1)
         (index2 start2))
     (while (and (<= index1 end1) (<= index2 end2))
@@ -367,40 +434,40 @@
   (let ((tail the-list))
     (lambda ()
       (if (null tail)
-	  *iterator-done*
-	  (pop tail)))))
+          *iterator-done*
+          (pop tail)))))
 
 (defun make-vector-iterator (the-vector)
   (let ((i 0)
-	(len (length the-vector)))
+        (len (length the-vector)))
     (lambda ()
       (if (= i len)
-	  *iterator-done*
-	  (let ((item (aref the-vector i)))
-	    (incf i)
-	    item)))))
+          *iterator-done*
+          (let ((item (aref the-vector i)))
+            (incf i)
+            item)))))
 
 (defun make-iterator (sequence)
   (funcall (cond ((listp sequence) #'make-list-iterator)
-		 ((vectorp sequence) #'make-vector-iterator)
-		 (t (error "Not of type SEQUENCE")))
-	   sequence))
+                 ((vectorp sequence) #'make-vector-iterator)
+                 (t (error "Not of type SEQUENCE")))
+           sequence))
 
 (defun make-list-collector ()
   (let* (the-list tail)
     (lambda (&rest item)
       (cond ((and item (null the-list))
-	     (setf the-list item
-		   tail item))
-	    (item (setf (cdr tail) item
-			tail (cdr tail))))
+             (setf the-list item
+                   tail item))
+            (item (setf (cdr tail) item
+                        tail (cdr tail))))
       the-list)))
 
 (defun make-vector-collector (&key (element-type t))
   (let* ((the-vector (make-array 0 :adjustable t :element-type element-type :fill-pointer 0)))
     (lambda (&rest item)
       (when item
-	(vector-push-extend (first item) the-vector))
+        (vector-push-extend (first item) the-vector))
       the-vector)))
 
 (defun make-collector (type)
@@ -410,17 +477,16 @@
     (vector (make-vector-collector))
     (t
      (when (and (listp type)
-		(eql 'vector (first type)))
+                (eql 'vector (first type)))
        (make-vector-collector :element-type (or (second type) t))))))
-  
+
 
 (defun map (result-type function &rest sequences)
   (let ((iterators (mapcar #'make-iterator sequences))
-	(result-collector (make-collector result-type)))
+        (result-collector (make-collector result-type)))
     (do ((args (mapcar #'funcall iterators) (mapcar #'funcall iterators)))
-	((find *iterator-done* args)
-	 (when result-type (funcall result-collector)))
+        ((find *iterator-done* args)
+         (when result-type (funcall result-collector)))
       (if result-type
-	  (funcall result-collector (apply function args))
-	  (apply function args)))))
-
+          (funcall result-collector (apply function args))
+          (apply function args)))))

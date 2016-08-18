@@ -1,14 +1,14 @@
-# JSCL	[![Build Status](https://travis-ci.org/davazp/jscl.svg?branch=master)](https://travis-ci.org/davazp/jscl)
+# JSCL [![Build Status](https://travis-ci.org/jscl-project/jscl.svg?branch=master)](https://travis-ci.org/jscl-project/jscl)
 
 JSCL is a Common Lisp to Javascript compiler, which is bootstrapped
 from Common Lisp and executed from the browser.
 
 ## Getting Started
 
-You can try a demo [here](http://davazp.net/jscl/jscl.html). But if
+You can try a demo [here](https://jscl-project.github.io/). But if
 you want to hack JSCL, you will have to download the repository
 
-    git clone https://github.com/davazp/jscl.git
+    git clone https://github.com/jscl-project/jscl.git
 
 *load* `jscl.lisp` in your Lisp, and call the bootstrap function to
 compile the implementation itself:

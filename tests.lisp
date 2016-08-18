@@ -1,6 +1,7 @@
 (defparameter *total-tests* 0)
 (defparameter *passed-tests* 0)
 (defparameter *failed-tests* 0)
+(defparameter *failed-tests-details* nil)
 (defparameter *expected-failures* 0)
 (defparameter *unexpected-passes* 0)
 
@@ -21,6 +22,7 @@
       (if *use-html-output-p*
           (format t "<font color='red'>Test `~S' failed.</font>~%" form)
           (format t "Test `~S' failed.~%" form))
+      (push (list form :failed) *failed-tests-details*)
       (incf *failed-tests*)))
    (incf *total-tests*)))
 
@@ -34,6 +36,7 @@
       (incf *unexpected-passes*))
      (t
       (format t "Test `~S' failed expectedly.~%" form)
+      (push (list form :failed-expected) *failed-tests-details*)
       (incf *expected-failures*)))
    (incf *total-tests*)))
 

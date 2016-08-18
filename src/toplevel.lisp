@@ -1,20 +1,17 @@
 ;;; toplevel.lisp ---
 
-;; Copyright (C) 2012, 2013, 2014 David Vazquez
-;; Copyright (C) 2012 Raimon Grau
+;; Copyright (C) 2012, 2013, 2014 David Vazquez Copyright (C) 2012 Raimon Grau
 
-;; JSCL is free software: you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation, either version 3 of the
+;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
+;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
 ;; License, or (at your option) any later version.
 ;;
-;; JSCL is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
+;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
+;; Public License for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
+;; <http://www.gnu.org/licenses/>.
 
 (/debug "loading toplevel.lisp!")
 
@@ -278,18 +275,17 @@
           (compilation-notice))
   (format t "JSCL is a Common Lisp implementation on Javascript.~%")
   (if (find :node *features*)
-      (format t "For more information, visit the project page at https://github.com/davazp/jscl.~%~%")
+      (format t "For more information, visit the project page at https://github.com/jscl-project/jscl.~%~%")
       (%write-string
-       (format nil "For more information, visit the project page at <a href=\"https://github.com/davazp/jscl\">GitHub</a>.~%~%")
+       (format nil "For more information, visit the project page at <a href=\"https://github.com/jscl-project/jscl\">GitHub</a>.~%~%")
        nil)))
 
 
-;;; Basic *standard-output* stream. This will usually be overriden by
+;;; Basic *standard-output*  stream. This  will usually be  overriden by
 ;;; web or node REPL.
 ;;;
-;;; TODO: Cache character operation so they result in a single call to
+;;; TODO: Cache character  operation so they result in a  single call to
 ;;; console.log.
-;;;
 (setq *standard-output*
       (vector 'stream
               (lambda (ch)

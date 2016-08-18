@@ -1,9 +1,27 @@
-;; TODO: Uncomment when either read-from-string supports all these parameters
-;; or when test macro supports error handling, whichever comes first
-;; (test (equal (read-from-string " 1 3 5" t nil :start 2) (values 3 5)))
+;; TODO: Uncomment  when either read-from-string  supports all these  parameters or when  test macro
+;; supports  error  handling,  whichever  comes  first  (test (equal  (read-from-string  "  1  3  5"
+;; t nil :start 2) (values 3 5)))
+(test (equal 'THE-END
+             (with-input-from-string (is " ")
+               (read is nil 'the-end))))
 (expected-failure
  (equal (multiple-value-list (read-from-string "(a b c)"))
         '((A B C) 7)))
+#| (expected-failure
+(let ((string (flet ((skip-then-read-char (s c n)
+                       (declare (ignore n))
+                       (if (char= c #\{)
+                           (read s t nil t)
+                           (read-preserving-whitespace s))
+                       (read-char-no-hang s)))
+                (let ((*readtable* (copy-readtable nil)))
+                  (set-dispatch-macro-character #\# #\{ #'skip-then-read-char)
+                  (set-dispatch-macro-character #\# #\} #'skip-then-read-char)
+                  (with-input-from-string (is "#{123 x #}123 y")
+                    (format nil "~S ~S" (read is) (read is)))))))
+  (or (equal string "#\\Space #\\x")          ; CLHS says this
+      (equal string "#\\  X"))))              ; but SBCL gives this.
+|#
 
 (test (equal (symbol-name (read-from-string "cl:cond")) "COND"))
 (test (equal (symbol-name (read-from-string "co|N|d")) "COND"))
@@ -42,9 +60,21 @@
              (eql (nth 3 x) 5)
              (eq (nth 4 x) (nth 2 x)))))
 
-; SHARPSIGN VERTICAL-BAR
+                                        ; SHARPSIGN VERTICAL-BAR
 (test (= (read-from-string "#||# 2")         2))
 (test (= (read-from-string "#||#2")          2))
 (test (= (read-from-string "#| #| |# |# 2")  2))
 (test (= (read-from-string "#|#$#%^&*&|# 2") 2))
 (test (= (read-from-string "#|||# 2")        2))
+
+;; character literals
+(test (char= #\SPACE #\Space #\space))
+;; (test (char= (code-char 3) #\u+3)) ; Fails so hard it crashes the works. FIXME
+(test (char= (code-char #x2010) #\u+2010))
+
+;; parse-integer
+(test (= #x42 (parse-integer "42" :radix 16)))
+(test (multiple-value-bind (value ending)
+          (parse-integer "xx42xx" :start 2 :junk-allowed t)
+        (and (= 42 value)
+             (= 4 ending))))
