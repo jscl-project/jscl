@@ -1,17 +1,20 @@
 ;;; sequence.lisp
 
-;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
-;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
-;; License, or (at your option) any later version.
+;; JSCL is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General  Public License as published by the Free
+;; Software Foundation,  either version  3 of the  License, or  (at your
+;; option) any later version.
 ;;
-;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
-;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
-;; Public License for more details.
+;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
 ;;
-;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
-;; <http://www.gnu.org/licenses/>.
-
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
+(in-package :jscl)
 (/debug "loading sequence.lisp!")
+#-jscl (error "Don't load this file in the cross-compiler")
 
 (defun sequencep (thing)
   (or (listp thing) (vectorp thing)))
@@ -24,7 +27,7 @@
     ((stringp seq)
      (string-length seq))
     ((arrayp seq)
-     (oget seq "length"))
+     (jscl/ffi:oget seq "length"))
     ((listp seq)
      (list-length seq))
     (t
@@ -44,6 +47,24 @@
   (etypecase sequence
     (list (revappend sequence '()))
     (vector (vector-reverse sequence))))
+
+(defun list-nreverse (list)
+  (do ((1st (cdr list) (if (endp 1st) 1st (cdr 1st)))
+       (2nd list 1st)
+       (3rd '() 2nd))
+      ((atom 2nd) 3rd)
+    (rplacd 2nd 3rd)))
+
+(defun vector-nreverse (sequence)
+  (let ((size (length sequence)))
+    (do ((i 0 (1+ i)))
+        ((< i (/ size 2)) sequence)
+      (set (elt sequence i) (elt sequence (- size i 1))))))
+
+(defun nreverse (sequence)
+  (etypecase sequence
+    (list (list-nreverse sequence))
+    (vector (vector-nreverse sequence))))
 
 (defmacro do-sequence ((elt seq &optional (index (gensym "i") index-p)) &body body)
   (let ((nseq (gensym "seq")))
@@ -332,6 +353,7 @@
   (subseq sequence 0))
 
 (defun elt (sequence index)
+  (check-type index (integer 0 *))
   (when (< index 0)
     (error "The index ~D is below zero." index))
   (etypecase sequence
@@ -347,6 +369,25 @@
        (when (>= index length)
          (error "The index ~D is too large for ~A of length ~D." index 'vector length))
        (aref sequence index)))))
+
+(defun (setf elt) (sequence index new-value)
+  (check-type index (integer 0 *))
+  (when (< index 0)
+    (error "The index ~D is below zero." index))
+  (etypecase sequence
+    (list
+     (let ((i 0))
+       (dolist (elt sequence)
+         (when (eql index i)
+           (setf (car elt) new-value)
+           (return-from elt new-value))
+         (incf i))
+       (error "The index ~D is too large for ~A of length ~D." index 'list i)))
+    (array
+     (let ((length (length sequence)))
+       (when (>= index length)
+         (error "The index ~D is too large for ~A of length ~D." index 'vector length))
+       (setf (aref sequence index) new-value)))))
 
 (defun zero-args-reduce (function initial-value initial-value-p)
   (if initial-value-p
@@ -428,7 +469,7 @@
      (t (not-seq-error sequence2)))
    sequence1 sequence2 args))
 
-(defparameter *iterator-done* (gensym))
+(defparameter *iterator-done* (gensym "ITERATOR-DONE-"))
 
 (defun make-list-iterator (the-list)
   (let ((tail the-list))

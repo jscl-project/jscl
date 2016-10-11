@@ -1,25 +1,30 @@
 ;;; backquote.lisp ---
 
-;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
-;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
-;; License, or (at your option) any later version.
+;; JSCL is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General  Public License as published by the Free
+;; Software Foundation,  either version  3 of the  License, or  (at your
+;; option) any later version.
 ;;
-;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
-;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
-;; Public License for more details.
+;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
 ;;
-;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
-;; <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
+
+(in-package :jscl)
 
 (/debug "loading backquote.lisp!")
 
 ;;; Backquote implementation.
 ;;;
-;;;    Author: Guy L. Steele Jr. Date: 27 December 1985 Tested under Symbolics Common Lisp and Lucid
-;;;    Common Lisp. This software is in the public domain.
+;;;    Author: Guy  L. Steele  Jr. Date: 27  December 1985  Tested under
+;;;    Symbolics Common Lisp and Lucid  Common Lisp. This software is in
+;;;    the public domain.
 
-;;;    The following are unique  tokens used during processing. They need not  be symbols; they need
-;;;    not even be atoms.
+;;;    The following are unique tokens used during processing. They need
+;;;    not be symbols; they need not even be atoms.
 (defvar *comma* 'unquote)
 (defvar *comma-atsign* 'unquote-splicing)
 
@@ -31,13 +36,15 @@
 (defvar *bq-quote* (make-symbol "BQ-QUOTE"))
 (defvar *bq-quote-nil* (list *bq-quote* nil))
 
-;;; BACKQUOTE is an ordinary macro (not a read-macro) that processes the expression foo, looking for
-;;; occurrences of #:COMMA, #:COMMA-ATSIGN, and #:COMMA-DOT. It constructs code in strict accordance
-;;; with the  rules on pages 349-350  of the first edition  (pages 528-529 of this  second edition).
-;;; It then optionally applies a code simplifier.
+;;; BACKQUOTE is an ordinary macro (not a read-macro) that processes the
+;;; expression foo, looking for  occurrences of #:COMMA, #:COMMA-ATSIGN,
+;;; and #:COMMA-DOT.  It constructs code  in strict accordance  with the
+;;; rules on pages  349-350 of the first edition (pages  528-529 of this
+;;; second edition). It then optionally applies a code simplifier.
 
-;;; If the value of *BQ-SIMPLIFY* is non-NIL, then BACKQUOTE processing applies the code simplifier.
-;;; If the  value is NIL, then  the code resulting from  BACKQUOTE is exactly that  specified by the
+;;; If the value of *BQ-SIMPLIFY*  is non-NIL, then BACKQUOTE processing
+;;; applies the  code simplifier.  If the  value is  NIL, then  the code
+;;; resulting  from   BACKQUOTE  is   exactly  that  specified   by  the
 ;;; official rules.
 (defparameter *bq-simplify* t)
 
@@ -87,9 +94,8 @@
         ((eq (car x) *comma*) (cadr x))
         ((eq (car x) *comma-atsign*)
          (error ",@~S after `" (cadr x)))
-        ;; ((eq (car x) *comma-dot*)
-        ;;  ;; (error ",.~S after `" (cadr x))
-        ;;  (error "ill-formed"))
+        ;; ((eq (car x) *comma-dot*) ;;  (error ",.~S after `" (cadr x))
+        ;; (error "ill-formed"))
         (t (do ((p x (cdr p))
                 (q '() (cons (bracket (car p)) q)))
                ((atom p)
@@ -102,9 +108,8 @@
                              (nreconc q (list (cadr p))))))
              (when (eq (car p) *comma-atsign*)
                (error "Dotted ,@~S" p))
-             ;; (when (eq (car p) *comma-dot*)
-             ;;   ;; (error "Dotted ,.~S" p)
-             ;;   (error "Dotted"))
+             ;; (when (eq  (car p) *comma-dot*) ;;  (error "Dotted ,.~S"
+             ;; p) (error "Dotted"))
              ))))
 
 ;;; This implements the bracket operator of the formal rules.
@@ -115,13 +120,12 @@
          (list *bq-list* (cadr x)))
         ((eq (car x) *comma-atsign*)
          (cadr x))
-        ;; ((eq (car x) *comma-dot*)
-        ;;  (list *bq-clobberable* (cadr x)))
+        ;; ((eq (car x) *comma-dot*) (list *bq-clobberable* (cadr x)))
         (t (list *bq-list* (bq-process x)))))
 
-;;; This auxiliary function is like MAPCAR but has two extra
-;;; purposes: (1) it handles dotted lists; (2) it tries to make
-;;; the result share with the argument x as much as possible.
+;;; This auxiliary function  is like MAPCAR but has  two extra purposes:
+;;; (1) it handles  dotted lists; (2) it tries to  make the result share
+;;; with the argument x as much as possible.
 (defun maptree (fn x)
   (if (atom x)
       (funcall fn x)

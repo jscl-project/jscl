@@ -1,24 +1,29 @@
 ;;; toplevel.lisp ---
 
-;; Copyright (C) 2012, 2013, 2014 David Vazquez Copyright (C) 2012 Raimon Grau
+;; Copyright  (C) 2012,  2013,  2014 David  Vazquez  Copyright (C)  2012
+;; Raimon Grau
 
-;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
-;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
-;; License, or (at your option) any later version.
+;; JSCL is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General  Public License as published by the Free
+;; Software Foundation,  either version  3 of the  License, or  (at your
+;; option) any later version.
 ;;
-;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
-;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
-;; Public License for more details.
+;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
 ;;
-;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
-;; <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
+(in-package :jscl)
+#-jscl (error "Don't compile this file on the host compiler!")
 (/debug "loading toplevel.lisp!")
 
 (defun eval (x)
   (let ((jscode
          (with-compilation-environment
-             (compile-toplevel x t t))))
+           (compile-toplevel x t t))))
     (js-eval jscode)))
 
 (defvar * nil)
@@ -48,6 +53,8 @@
         ++ +
         + -)
   (values-list /))
+
+(in-package :common-lisp)
 
 (export
  '(&allow-other-keys &aux &body &environment &key &optional &rest &whole
@@ -248,8 +255,9 @@
    write-line write-sequence write-string write-to-string y-or-n-p
    yes-or-no-p zerop))
 
-(setq *package* *user-package*)
+(in-package :jscl)
 
+(setq *package* *user-package*)
 
 (defun compilation-notice ()
   #.(multiple-value-bind (second minute hour date month year)
@@ -267,7 +275,6 @@
            (string= (%js-typeof |phantom|) "undefined"))
   (push :node *features*))
 
-
 (defun welcome-message ()
   (format t "Welcome to ~a ~a (~a)~%~%"
           (lisp-implementation-type)
@@ -280,24 +287,25 @@
        (format nil "For more information, visit the project page at <a href=\"https://github.com/jscl-project/jscl\">GitHub</a>.~%~%")
        nil)))
 
-
 ;;; Basic *standard-output*  stream. This  will usually be  overriden by
 ;;; web or node REPL.
-;;;
-;;; TODO: Cache character  operation so they result in a  single call to
-;;; console.log.
 (setq *standard-output*
-      (vector 'stream
-              (lambda (ch)
-                (#j:console:log (string ch)))
-              (lambda (string)
-                (#j:console:log string))))
-
+      (let ((buffer ""))
+        (flet ((force-out ()
+                 (#j:console:log buffer)
+                 (setq buffer "")))
+          (vector 'stream
+                  (lambda (ch)
+                    (setq buffer (concat buffer ch))
+                    (when (member ch '(#\newline #\return #\page))
+                      (force-out)))
+                  (lambda (string)
+                    (force-out)
+                    (#j:console:log string))))))
 
 (if (find :node *features*)
-    (setq *root* (%js-vref "global"))
-    (setq *root* (%js-vref "window")))
-
+    (setq jscl/ffi:*root* (%js-vref "global"))
+    (setq jscl/ffi:*root* (%js-vref "window")))
 
 
 (defun require (name)

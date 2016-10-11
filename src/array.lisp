@@ -1,15 +1,19 @@
 ;;; arrays.lisp
 
-;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
-;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
-;; License, or (at your option) any later version.
+;; JSCL is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General  Public License as published by the Free
+;; Software Foundation,  either version  3 of the  License, or  (at your
+;; option) any later version.
 ;;
-;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
-;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
-;; Public License for more details.
+;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
 ;;
-;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
-;; <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
+
+(in-package :jscl)
 
 (/debug "loading array.lisp!")
 
@@ -50,14 +54,14 @@
 (defun array-element-type (array)
   (unless (arrayp array)
     (error "~S is not an array." array))
-  (if (eq (oget array "stringp") 1)
+  (if (eq (jscl/ffi:oget array "stringp") 1)
       'character
-      (oget array "type")))
+      (jscl/ffi:oget array "type")))
 
 (defun array-dimensions (array)
   (unless (arrayp array)
     (error "~S is not an array." array))
-  (oget array "dimensions"))
+  (jscl/ffi:oget array "dimensions"))
 
 ;; TODO: Error checking
 (defun array-dimension (array axis)
@@ -74,9 +78,9 @@
   (storage-vector-set array index value))
 
 (define-setf-expander aref (array index)
-  (let ((g!array (gensym))
-        (g!index (gensym))
-        (g!value (gensym)))
+  (let ((g!array (gensym "ARRAY-"))
+        (g!index (gensym "INDEX-"))
+        (g!value (gensym "VALUE-")))
     (values (list g!array g!index)
             (list array index)
             (list g!value)

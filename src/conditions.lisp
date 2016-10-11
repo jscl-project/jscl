@@ -1,19 +1,23 @@
 ;;; conditions.lisp ---
 
-;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
-;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
-;; License, or (at your option) any later version.
+;; JSCL is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General  Public License as published by the Free
+;; Software Foundation,  either version  3 of the  License, or  (at your
+;; option) any later version.
 ;;
-;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
-;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
-;; Public License for more details.
+;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
 ;;
-;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
-;; <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
+(in-package :jscl)
 
-;;; Follow here a straighforward implementation of the  condition system of Common Lisp, except that
-;;; any value will work as a condition. Because, well, we do not have conditions at this point.
+;;; Follow here a straighforward  implementation of the condition system
+;;; of Common  Lisp, except  that any  value will  work as  a condition.
+;;; Because, well, we do not have conditions at this point.
 
 
 (defvar *handler-bindings* nil)
@@ -33,24 +37,25 @@
         (catch (err)
           (if (%%nlx-p err)
               (%%throw err)
-              (%error (or (oget err "message") err))))))))
+              (%error (or (jscl/ffi:oget err "message") err))))))))
 
 
 ;; Implementation if :NO-ERROR case is missing.
 (defmacro %handler-case-1 (form &body cases)
-  (let ((datum (gensym))
-        (nlx (gensym))
+  (let ((datum (gensym "DATUM-"))
+        (nlx (gensym "NON-LOCAL-TRANSFER-POINT-"))
         (tagbody-content nil))
 
     (flet (
-           ;; Given  a  case,  return  a  condition  handler   for  it.  It  will  also  update  the
-           ;; TAGBODY-CONTENT  variable.  This  variable  contains  the  body  of  a  tagbody  form.
-           ;; The condition handlers will GO to labels there  in order to perform non local exit and
-           ;; handle the condition.
+           ;; Given a case,  return a condition handler for  it. It will
+           ;; also  update the  TAGBODY-CONTENT variable.  This variable
+           ;; contains  the  body  of  a  tagbody  form.  The  condition
+           ;; handlers will GO  to labels there in order  to perform non
+           ;; local exit and handle the condition.
            (translate-case (case)
-             (destructuring-bind (type (&optional (var (gensym))) &body body)
+             (destructuring-bind (type (&optional (var (gensym "VAR-"))) &body body)
                  case
-               (let ((label (gensym)))
+               (let ((label (gensym "LABEL-")))
                  (push label tagbody-content)
                  (push `(return-from ,nlx
                           (let ((,var ,datum))
@@ -64,7 +69,7 @@
          (let (,datum)
            (tagbody
               (%handler-bind ,(mapcar #'translate-case cases)
-                             (return-from ,nlx ,form))
+                (return-from ,nlx ,form))
               ,@(reverse tagbody-content)))))))
 
 
@@ -73,14 +78,14 @@
   (let ((last-case (car (last cases))))
     (if (and last-case (eq (car last-case) :no-error))
         (destructuring-bind (lambda-list &body body) (cdr last-case)
-          (let ((error-return (gensym))
-                (normal-return (gensym)))
+          (let ((error-return (gensym "ERROR-RETURN-"))
+                (normal-return (gensym "NORMAL-RETURN-")))
             `(block ,error-return
                (multiple-value-call (lambda ,lambda-list ,@body)
                  (block ,normal-return
                    (return-from ,error-return
                      (%handler-case-1 (return-from ,normal-return ,form)
-                                      ,@(butlast cases))))))))
+                       ,@(butlast cases))))))))
         `(%handler-case-1 ,form ,@cases))))
 
 
@@ -88,8 +93,8 @@
 ;;; Fake condition objects until we have at least type system, but
 ;;; final implementation would require CLOS.
 
-(def!struct !condition
-    type
+(defstruct !condition
+  type
   args)
 
 (defun condition-type-p (x type)

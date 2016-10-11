@@ -1,6 +1,7 @@
-;; TODO: Uncomment  when either read-from-string  supports all these  parameters or when  test macro
-;; supports  error  handling,  whichever  comes  first  (test (equal  (read-from-string  "  1  3  5"
-;; t nil :start 2) (values 3 5)))
+;; TODO:  Uncomment  when  either read-from-string  supports  all  these
+;; parameters  or when  test  macro supports  error handling,  whichever
+;; comes first (test  (equal (read-from-string " 1 3 5"  t nil :start 2)
+;; (values 3 5)))
 (test (equal 'THE-END
              (with-input-from-string (is " ")
                (read is nil 'the-end))))
@@ -69,7 +70,8 @@
 
 ;; character literals
 (test (char= #\SPACE #\Space #\space))
-;; (test (char= (code-char 3) #\u+3)) ; Fails so hard it crashes the works. FIXME
+;; (test (char=  (code-char 3) #\u+3))  ; Fails  so hard it  crashes the
+;; works. FIXME
 (test (char= (code-char #x2010) #\u+2010))
 
 ;; parse-integer

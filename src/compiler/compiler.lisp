@@ -1,23 +1,28 @@
-;;; compiler.lisp ---
+;;;; compiler.lisp ---
 
-;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
-;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
-;; License, or (at your option) any later version.
+;; JSCL is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General  Public License as published by the Free
+;; Software Foundation,  either version  3 of the  License, or  (at your
+;; option) any later version.
 ;;
-;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
-;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
-;; Public License for more details.
+;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
 ;;
-;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
-;; <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
 ;;;; Compiler
 
+(in-package :jscl)
+
 (/debug "loading compiler.lisp!")
 
-;;; Translate  the Lisp  code to  Javascript.  It will  compile  the special  forms. Some  primitive
-;;; functions are compiled  as special forms too.  The respective real functions are  defined in the
-;;; target (see the beginning of this file) as well as some primitive functions.
+;; Translate the  Lisp code to  Javascript. It will compile  the special
+;; forms. Some  primitive functions are  compiled as special  forms too.
+;; The  respective real  functions are  defined in  the target  (see the
+;; beginning of this file) as well as some primitive functions.
 
 (define-js-macro selfcall (&body body)
   `(call (function () ,@body)))
@@ -31,6 +36,7 @@
 (define-js-macro arg (n)
   `(property |arguments| (+ ,n 1)))
 
+
 ;;; Runtime
 
 (define-js-macro internal (x)
@@ -39,63 +45,68 @@
 (define-js-macro call-internal (name &rest args)
   `(method-call |internals| ,name ,@args))
 
-
 (defun convert-to-bool (expr)
   `(if ,expr ,(convert t) ,(convert nil)))
 
+(defvar *multiple-value-p* nil
+  "A Form  can return  a multiple values  object calling  `values', like
+ values(arg1,  arg2, ...).  It  will work  in any  context,  as well  as
+ returning  an  individual  object.  However, if  the  special  variable
+ `*multiple-value-p*' is  NIL, it  is guaranteed  that only  the primary
+ value  will  be   used,  so  we  can  optimize  to   avoid  the  VALUES
+ function call.
+")
 
-;;; A Form can return a multiple values object calling VALUES, like values(arg1, arg2, ...). It will
-;;; work in any context, as well as returning an individual object. However, if the special variable
-;;; `*multiple-value-p*' is  NIL, is granted  that only the  primary value will  be used, so  we can
-;;; optimize to avoid the VALUES function call.
-(defvar *multiple-value-p* nil)
+(defvar *convert-level* -1
+  "Bound  dynamically  to  the  number of  nested  calls  to  `convert'.
+ Therefore, a form is being compiled as toplevel if it is zero.")
 
-;;; It is bound dinamically  to the number of nested calls to `convert'.  Therefore, a form is being
-;;; compiled as toplevel if it is zero.
-(defvar *convert-level* -1)
-
-
+
 ;;; Environment
 
-(def!struct binding
-    name
+(defstruct binding
+  name
   type
   value
   declarations)
 
-(def!struct lexenv
-    variable
+(defstruct lexenv
+  variable
   function
   block
-  gotag)
+  gotag
+  class)
 
 (defun lookup-in-lexenv (name lexenv namespace)
   (find name (ecase namespace
-               (variable (lexenv-variable lexenv))
-               (function (lexenv-function lexenv))
-               (block    (lexenv-block    lexenv))
-               (gotag    (lexenv-gotag    lexenv)))
-        :key #'binding-name))
+               (variable	(lexenv-variable	lexenv))
+               (function	(lexenv-function	lexenv))
+               (block	(lexenv-block	lexenv))
+               (gotag	(lexenv-gotag	lexenv))
+               (class	(lexenv-class	lexenv)))
+        :key #'binding-name
+        :test #'equalp))
 
 (defun push-to-lexenv (binding lexenv namespace)
   (ecase namespace
-    (variable (push binding (lexenv-variable lexenv)))
-    (function (push binding (lexenv-function lexenv)))
-    (block    (push binding (lexenv-block    lexenv)))
-    (gotag    (push binding (lexenv-gotag    lexenv)))))
+    (variable	(push binding (lexenv-variable lexenv)))
+    (function	(push binding (lexenv-function	lexenv)))
+    (block	(push binding (lexenv-block	lexenv)))
+    (gotag	(push binding (lexenv-gotag	lexenv)))
+    (class	(push binding (lexenv-class	lexenv)))))
 
 (defun extend-lexenv (bindings lexenv namespace)
   (let ((env (copy-lexenv lexenv)))
     (dolist (binding (reverse bindings) env)
       (push-to-lexenv binding env namespace))))
 
-
 (defvar *environment*)
 (defvar *variable-counter*)
 
 (defun gvarname (symbol)
   (incf *variable-counter*)
-  (safe-js-var-name (limit-string-length symbol 32) (integer-to-string *variable-counter*)))
+  (safe-js-var-name (limit-string-length symbol 32)
+                    (integer-to-string *variable-counter*)))
 
 (defun translate-variable (symbol)
   (awhen (lookup-in-lexenv symbol *environment* 'variable)
@@ -107,6 +118,7 @@
       (let ((b (make-binding :name symbol :type 'variable :value (gvarname symbol))))
         (push-to-lexenv b new 'variable)))))
 
+
 ;;; Toplevel compilations
 (defvar *toplevel-compilations*)
 
@@ -131,20 +143,17 @@
   (let ((b (lookup-in-lexenv symbol *environment* namespace)))
     (and b (member claim (binding-declarations b)))))
 
+(defun !proclamation (decl type)
+  (dolist (name (cdr decl))
+    (let ((b (global-binding name type type)))
+      (push (car decl) (binding-declarations b)))))
+
 (defun !proclaim (decl)
   (case (car decl)
-    (special
-     (dolist (name (cdr decl))
-       (let ((b (global-binding name 'variable 'variable)))
-         (push 'special (binding-declarations b)))))
-    (notinline
-     (dolist (name (cdr decl))
-       (let ((b (global-binding name 'function 'function)))
-         (push 'notinline (binding-declarations b)))))
-    (constant
-     (dolist (name (cdr decl))
-       (let ((b (global-binding name 'variable 'variable)))
-         (push 'constant (binding-declarations b)))))))
+    (jscl::pure (!proclamation decl 'function))
+    (special (!proclamation decl 'variable))
+    (notinline (!proclamation decl 'function))
+    (constant (!proclamation decl 'variable))))
 
 #+jscl
 (fset 'proclaim #'!proclaim)
@@ -158,26 +167,34 @@
 (defmacro define-symbol-macro (name expansion)
   `(%define-symbol-macro ',name ',expansion))
 
-
-
+
 ;;; Report functions which are called but not defined
 
 (defvar *fn-info* '())
 
-(def!struct fn-info
-    symbol
+(defstruct fn-info
+  name
   defined
   called)
 
-(defun find-fn-info (symbol)
-  (let ((entry (find symbol *fn-info* :key #'fn-info-symbol)))
+(defun function-name-p (name)
+  (or (symbolp name)
+      (and (listp name)
+           (= 2 (length name))
+           (find (car name) '(setf jscl/ffi:oget)))))
+
+(defun find-fn-info (name)
+  (assert (function-name-p name))
+  (let ((entry (find name *fn-info*
+                     :key #'fn-info-name
+                     :test 'equalp)))
     (unless entry
-      (setq entry (make-fn-info :symbol symbol))
+      (setq entry (make-fn-info :name name))
       (push entry *fn-info*))
     entry))
 
-(defun fn-info (symbol &key defined called)
-  (let ((info (find-fn-info symbol)))
+(defun fn-info (name &key defined called)
+  (let ((info (find-fn-info name)))
     (when defined
       (setf (fn-info-defined info) defined))
     (when called
@@ -185,23 +202,22 @@
 
 (defun report-undefined-functions ()
   (dolist (info *fn-info*)
-    (let ((symbol (fn-info-symbol info)))
+    (let ((name (fn-info-name info)))
       (when (and (fn-info-called info)
                  (not (fn-info-defined info)))
-        (warn "The function `~a' is undefined.~%" symbol))))
+        (warn "The function `~s' is undefined." name))))
   (setq *fn-info* nil))
 
-
-
+
 ;;; Special forms
 
 (defvar *compilations*
   (make-hash-table))
 
 (defmacro define-compilation (name args &body body)
-  ;; Creates a new primitive `name' with parameters args and
-  ;; @body. The body can access to the local environment through the
-  ;; variable *ENVIRONMENT*.
+  "Creates a new primitive named NAME with parameters ARGS and
+ BODY. The body can access to the local environment through the
+ variable *ENVIRONMENT*."
   `(setf (gethash ',name *compilations*)
          (lambda ,args (block ,name ,@body))))
 
@@ -291,8 +307,8 @@
 
 (defun lambda-check-argument-count
     (n-required-arguments n-optional-arguments rest-p)
-  ;; Note: Remember that we assume that the number of arguments of a
-  ;; call is at least 1 (the values argument).
+  ;; Note:  Remember that  we assume  that  the number  of arguments  of
+  ;; a call is at least 1 (the values argument).
   (let ((min n-required-arguments)
         (max (if rest-p 'n/a (+ n-required-arguments n-optional-arguments))))
     (block nil
@@ -313,22 +329,22 @@
     (when optional-arguments
       `(progn
          ,(when svars
-                `(var ,@(mapcar (lambda (svar)
-                                  (list (translate-variable svar)
-                                        (convert t)))
-                                svars)))
+            `(var ,@(mapcar (lambda (svar)
+                              (list (translate-variable svar)
+                                    (convert t)))
+                            svars)))
          (switch (nargs)
            ,@(with-collect
-              (dotimes (idx n-optional-arguments)
-                (let ((arg (nth idx optional-arguments)))
-                  (collect `(case ,(+ idx n-required-arguments)))
-                  (collect `(= ,(translate-variable (car arg))
-                               ,(convert (cadr arg))))
-                  (collect (when (third arg)
-                             `(= ,(translate-variable (third arg))
-                                 ,(convert nil))))))
-              (collect 'default)
-              (collect '(break))))))))
+               (dotimes (idx n-optional-arguments)
+                 (let ((arg (nth idx optional-arguments)))
+                   (collect `(case ,(+ idx n-required-arguments)))
+                   (collect `(= ,(translate-variable (car arg))
+                                ,(convert (cadr arg))))
+                   (collect (when (third arg)
+                              `(= ,(translate-variable (third arg))
+                                  ,(convert nil))))))
+               (collect 'default)
+               (collect '(break))))))))
 
 (defun compile-lambda-rest (ll)
   (let ((n-required-arguments (length (ll-required-arguments ll)))
@@ -342,7 +358,7 @@
            (for ((= i (- (nargs) 1))
                  (>= i ,(+ n-required-arguments n-optional-arguments))
                  (post-- i))
-                (= ,js!rest (new (call-internal |Cons| (arg i) ,js!rest)))))))))
+             (= ,js!rest (new (call-internal |Cons| (arg i) ,js!rest)))))))))
 
 (defun compile-lambda-parse-keywords (ll)
   (let ((n-required-arguments
@@ -354,52 +370,52 @@
     `(progn
        ;; Declare variables
        ,@(with-collect
-          (dolist (keyword-argument keyword-arguments)
-            (destructuring-bind ((keyword-name var) &optional initform svar)
-                keyword-argument
-              (declare (ignore keyword-name initform))
-              (collect `(var ,(translate-variable var)))
-              (when svar
-                (collect
-                    `(var (,(translate-variable svar)
-                            ,(convert nil))))))))
+           (dolist (keyword-argument keyword-arguments)
+             (destructuring-bind ((keyword-name var) &optional initform svar)
+                 keyword-argument
+               (declare (ignore keyword-name initform))
+               (collect `(var ,(translate-variable var)))
+               (when svar
+                 (collect
+                     `(var (,(translate-variable svar)
+                             ,(convert nil))))))))
 
        ;; Parse keywords
        ,(flet ((parse-keyword (keyarg)
-                              (destructuring-bind ((keyword-name var) &optional initform svar) keyarg
-                                ;; ((keyword-name var) init-form svar)
-                                `(progn
-                                   (for ((= i ,(+ n-required-arguments n-optional-arguments))
-                                         (< i (nargs))
-                                         (+= i 2))
-                                        ;; ....
-                                        (if (=== (arg i) ,(convert keyword-name))
-                                            (progn
-                                              (= ,(translate-variable var) (arg (+ i 1)))
-                                              ,(when svar `(= ,(translate-variable svar)
-                                                              ,(convert t)))
-                                              (break))))
-                                   (if (== i (nargs))
-                                       (= ,(translate-variable var) ,(convert initform)))))))
-              (when keyword-arguments
-                `(progn
-                   (var i)
-                   ,@(mapcar #'parse-keyword keyword-arguments))))
+                 (destructuring-bind ((keyword-name var) &optional initform svar) keyarg
+                   ;; ((keyword-name var) init-form svar)
+                   `(progn
+                      (for ((= i ,(+ n-required-arguments n-optional-arguments))
+                            (< i (nargs))
+                            (+= i 2))
+                        ;; ....
+                        (if (=== (arg i) ,(convert keyword-name))
+                            (progn
+                              (= ,(translate-variable var) (arg (+ i 1)))
+                              ,(when svar `(= ,(translate-variable svar)
+                                              ,(convert t)))
+                              (break))))
+                      (if (== i (nargs))
+                          (= ,(translate-variable var) ,(convert initform)))))))
+          (when keyword-arguments
+            `(progn
+               (var i)
+               ,@(mapcar #'parse-keyword keyword-arguments))))
 
        ;; Check for unknown keywords
        ,(when keyword-arguments
-              `(progn
-                 (var (start ,(+ n-required-arguments n-optional-arguments)))
-                 (if (== (% (- (nargs) start) 2) 1)
-                     (throw "Odd number of keyword arguments."))
-                 (for ((= i start) (< i (nargs)) (+= i 2))
-                      (if (and ,@(mapcar (lambda (keyword-argument)
-                                           (destructuring-bind ((keyword-name var) &optional initform svar)
-                                               keyword-argument
-                                             (declare (ignore var initform svar))
-                                             `(!== (arg i) ,(convert keyword-name))))
-                                         keyword-arguments))
-                          (throw (+ "Unknown keyword argument " (property (arg i) "name"))))))))))
+          `(progn
+             (var (start ,(+ n-required-arguments n-optional-arguments)))
+             (if (== (% (- (nargs) start) 2) 1)
+                 (throw "Odd number of keyword arguments."))
+             (for ((= i start) (< i (nargs)) (+= i 2))
+               (if (and ,@(mapcar (lambda (keyword-argument)
+                                    (destructuring-bind ((keyword-name var) &optional initform svar)
+                                        keyword-argument
+                                      (declare (ignore var initform svar))
+                                      `(!== (arg i) ,(convert keyword-name))))
+                                  keyword-arguments))
+                   (throw (+ "Unknown keyword argument " (property (arg i) "name"))))))))))
 
 (defun parse-lambda-list (ll)
   (values (ll-required-arguments ll)
@@ -407,10 +423,10 @@
           (ll-keyword-arguments  ll)
           (ll-rest-argument      ll)))
 
-;;; Process BODY for declarations and/or docstrings. Return as
-;;; multiple values the BODY without docstrings or declarations, the
-;;; list of declaration forms and the docstring.
 (defun parse-body (body &key declarations docstring)
+  "Process BODY for declarations and/or docstrings. Return as
+ multiple values the BODY without docstrings or declarations, the
+ list of declaration forms and the docstring."
   (let ((value-declarations)
         (value-docstring))
     ;; Parse declarations
@@ -428,19 +444,18 @@
       (setq body (cdr body)))
     (values body value-declarations value-docstring)))
 
-
 (defun bind-this ()
   (let* ((gvar (gvarname 'this))
          (binding (make-binding :name 'this :type 'variable :value gvar)))
     (push-to-lexenv binding *environment* 'variable)
     `(var (,gvar |this|))))
 
-;;; Compile a lambda function with lambda list LL and body BODY. If
-;;; NAME is given, it should be a constant string and it will become
-;;; the name of the function. If BLOCK is non-NIL, a named block is
-;;; created around the body. NOTE: No block (even anonymous) is
-;;; created if BLOCK is NIL.
 (defun compile-lambda (ll body &key name block)
+  "Compile a lambda function with lambda list LL and body BODY. If NAME
+is given, it should be a constant string and it will become the name
+of  the function.  If BLOCK  is non-NIL,  a named  block is  created
+around the body. NOTE: No block (even anonymous) is created if BLOCK
+is NIL."
   (multiple-value-bind (required-arguments
                         optional-arguments
                         keyword-arguments
@@ -457,23 +472,25 @@
                                     optional-arguments
                                     keyword-arguments
                                     (ll-svars ll)))))
-        (lambda-name/docstring-wrapper
-         name documentation
-         `(function (|values| ,@(mapcar #'translate-variable
-                                        (append required-arguments optional-arguments)))
-                    ;; Check number of arguments
-                    ,(lambda-check-argument-count n-required-arguments
-                                                  n-optional-arguments
-                                                  (or rest-argument keyword-arguments))
-                    ,(compile-lambda-optional ll)
-                    ,(compile-lambda-rest ll)
-                    ,(compile-lambda-parse-keywords ll)
-                    ,(bind-this)
-                    ,(let ((*multiple-value-p* t))
-                          (if block
-                              (convert-block `((block ,block ,@body)) t)
-                              (convert-block body t)))))))))
 
+        (lambda-name/docstring-wrapper name documentation
+                                       `(named-function ,(safe-js-fun-name name)
+                                                        (|values| ,@(mapcar (lambda (x)
+                                                                              (translate-variable x))
+                                                                            (append required-arguments optional-arguments)))
+                                                        ;; Check  number
+                                                        ;; of arguments
+                                                        ,(lambda-check-argument-count n-required-arguments
+                                                                                      n-optional-arguments
+                                                                                      (or rest-argument keyword-arguments))
+                                                        ,(compile-lambda-optional ll)
+                                                        ,(compile-lambda-rest ll)
+                                                        ,(compile-lambda-parse-keywords ll)
+                                                        ,(bind-this)
+                                                        ,(let ((*multiple-value-p* t))
+                                                           (if block
+                                                               (convert-block `((block ,block ,@body)) t)
+                                                               (convert-block body t)))))))))
 
 (defun setq-pair (var val)
   (unless (symbolp var)
@@ -494,34 +511,35 @@
   (when (null pairs)
     (return-from setq (convert nil)))
   (with-collector (result)
-    (while t
-      (cond
-        ((null pairs)
-         (return))
-        ((null (cdr pairs))
-         (error "Odd pairs in SETQ"))
-        (t
-         (collect-result (setq-pair (car pairs) (cadr pairs)))
-         (setq pairs (cddr pairs)))))
+    (loop
+       (cond
+         ((null pairs)
+          (return))
+         ((null (cdr pairs))
+          (error "Odd pairs in SETQ; dangling ~s" pairs))
+         (t
+          (collect-result (setq-pair (car pairs) (cadr pairs)))
+          (setq pairs (cddr pairs)))))
     `(progn ,@result)))
 
-;;; Compilation of literals an object dumping
+
+;;; Compilation of literals and object dumping
 
-;;; BOOTSTRAP MAGIC: We record the macro definitions as lists during
-;;; the bootstrap. Once everything is compiled, we want to dump the
-;;; whole global environment to the output file to reproduce it in the
-;;; run-time. However, the environment must contain expander functions
-;;; rather than lists. We do not know how to dump function objects
-;;; itself, so we mark the list definitions with this object and the
-;;; compiler will be called when this object has to be dumped.
-;;; Backquote/unquote does a similar magic, but this use is exclusive.
-;;;
-;;; Indeed, perhaps to compile the object other macros need to be
-;;; evaluated. For this reason we define a valid macro-function for
-;;; this symbol.
-(defvar *magic-unquote-marker* (gensym "MAGIC-UNQUOTE"))
+;; BOOTSTRAP MAGIC: We record the  macro definitions as lists during the
+;; bootstrap. Once  everything is  compiled, we want  to dump  the whole
+;; global  environment  to  the  output  file to  reproduce  it  in  the
+;; run-time. However,  the environment  must contain  expander functions
+;; rather  than lists.  We  do not  know how  to  dump function  objects
+;; itself, so  we mark  the list  definitions with  this object  and the
+;; compiler  will  be  called  when   this  object  has  to  be  dumped.
+;; Backquote/unquote does a similar magic, but this use is exclusive.
+;;
+;; Indeed,  perhaps  to compile  the  object  other  macros need  to  be
+;; evaluated.  For this  reason  we define  a  valid macro-function  for
+;; this symbol.
+(defvar *magic-unquote-marker* (gensym "MAGIC-UNQUOTE-"))
 
-#-jscl
+#-jscl-xc
 (setf (macro-function *magic-unquote-marker*)
       (lambda (form &optional environment)
         (declare (ignore environment))
@@ -548,9 +566,9 @@
       ;; Uninterned symbol
       ((null package)
        `(new (call-internal |Symbol| ,(symbol-name symbol))))
-      ;; Special case for bootstrap. For now, we just load all the
-      ;; code with JSCL as the current package. We will compile the
-      ;; JSCL package as CL in the target.
+      ;; Special case for bootstrap. For now,  we just load all the code
+      ;; with  JSCL as  the current  package. We  will compile  the JSCL
+      ;; package as CL in the target. ☠ FIXME
       #-jscl
       ((eq package (find-package "JSCL"))
        `(call-internal |intern| ,(symbol-name symbol)))
@@ -573,37 +591,68 @@
 (defun dump-string (string)
   `(call-internal |make_lisp_string| ,string))
 
-(defun literal (sexp &optional recursive)
-  (cond
-    ((integerp sexp) sexp)
-    ((floatp sexp) sexp)
-    ((characterp sexp) (string sexp))
-    (t
-     (or (cdr (assoc sexp *literal-table* :test #'eql))
-         (let ((dumped (typecase sexp
-                         (symbol (dump-symbol sexp))
-                         (string (dump-string sexp))
-                         (cons
-                          ;; BOOTSTRAP MAGIC: See the root file
-                          ;; jscl.lisp and the function
-                          ;; `dump-global-environment' for further
-                          ;; information.
-                          (if (eq (car sexp) *magic-unquote-marker*)
-                              (convert (second sexp))
-                              (dump-cons sexp)))
-                         (array (dump-array sexp)))))
-           (if (and recursive (not (symbolp sexp)))
-               dumped
-               (let ((jsvar (genlit (typecase sexp
-                                      (cons "expr")
-                                      (array "array")
-                                      (t (string sexp))))))
-                 (push (cons sexp jsvar) *literal-table*)
-                 (toplevel-compilation `(var (,jsvar ,dumped)))
-                 (when (keywordp sexp)
-                   (toplevel-compilation `(= (get ,jsvar "value") ,jsvar)))
-                 jsvar)))))))
+                                        ; from ALEXANDRIA
+(declaim (inline safe-endp))
+(defun safe-endp (x)
+  (declare (optimize safety))
+  (endp x))
 
+(defun alist-plist (alist)
+  "Returns a property list containing the same keys and values as the
+association list ALIST in the same order."
+  (let (plist)
+    (dolist (pair alist)
+      (push (car pair) plist)
+      (push (cdr pair) plist))
+    (nreverse plist)))
+
+                                        ; end ALEXANDRIA
+
+(defun constructor<-structure (object)
+  (let* ((class (type-of object))
+         (constructor (intern (concatenate 'string (string :make-) (symbol-name class)) (symbol-package class)))
+         (slot-names (mapcar #'sb-mop:slot-definition-name (sb-mop:class-slots (find-class class))))
+         (slot-values (mapcar (lambda (slot-name) (literal (slot-value object slot-name)))
+                              slot-names)))
+    (convert-1 (cons constructor (alist-plist (mapcar #'cons slot-names slot-values))))))
+
+(defun dump-complex-literal (sexp &optional recursivep)
+  (or (cdr (assoc sexp *literal-table* :test #'eql))
+      (let ((dumped (typecase sexp
+                      (symbol (dump-symbol sexp))
+                      (string (dump-string sexp))
+                      (cons
+                       ;; BOOTSTRAP   MAGIC:   See  the   root   file
+                       ;; jscl.lisp       and      the       function
+                       ;; `dump-global-environment'               for
+                       ;; further information.
+                       (if (eq (car sexp) *magic-unquote-marker*)
+                           (convert (second sexp))
+                           (dump-cons sexp)))
+                      (array (dump-array sexp)))))
+        (if (and recursivep (not (symbolp sexp)))
+            dumped
+            (let ((jsvar (genlit (typecase sexp
+                                   (cons "expr")
+                                   (array "array")
+                                   (t (string sexp))))))
+              (push (cons sexp jsvar) *literal-table*)
+              (toplevel-compilation `(var (,jsvar ,dumped)))
+              (when (keywordp sexp)
+                (toplevel-compilation `(= (get ,jsvar "value") ,jsvar)))
+              jsvar)))))
+
+(defun literal (sexp &optional recursivep)
+  (typecase sexp
+    (complex (error "Can't use complex number ~a yet" sexp))
+    (rational 
+     (warn "Rounding ~a to float" sexp)
+     (coerce sexp 'double-float))
+    (number sexp)
+    (character (string sexp))
+    (pathname (namestring sexp))
+    (structure-object (constructor<-structure sexp))
+    (t (dump-complex-literal sexp recursivep))))
 
 (define-compilation quote (sexp)
   (literal sexp))
@@ -614,20 +663,43 @@
       ,(convert-block body))
     (return ,(convert nil))))
 
+(defun function-namestring (name)
+  (cond
+    ((symbolp name) (symbol-name name))
+    ((and (listp name)
+          (eq 'setf (car name)))
+     (concatenate 'string
+                  "@Set-Field@«"
+                  (symbol-name (second name))
+                  "»"))))
+
+(defun function-block-name (name)
+  (etypecase name
+    (symbol name)
+    (list (second name))))
+
 (define-compilation function (x)
   (cond
-    ((and (listp x) (eq (car x) 'lambda))
-     (compile-lambda (cadr x) (cddr x)))
-    ((and (listp x) (eq (car x) 'named-lambda))
-     (destructuring-bind (name ll &rest body) (cdr x)
-       (compile-lambda ll body
-                       :name (symbol-name name)
-                       :block name)))
+    ((listp x)
+     (case (car x)
+       (lambda
+           (compile-lambda (cadr x) (cddr x)))
+       (named-lambda
+           (destructuring-bind (name ll &rest body) (cdr x)
+             (compile-lambda ll body
+                             :name (function-namestring name)
+                             :block (function-block-name name))))
+       (setf
+        (let ((b (lookup-in-lexenv x *environment* 'function)))
+          (if b
+              (binding-value b)
+              (error "No SETF function ~as" x))))))
     ((symbolp x)
      (let ((b (lookup-in-lexenv x *environment* 'function)))
        (if b
            (binding-value b)
-           (convert `(symbol-function ',x)))))))
+           (convert `(symbol-function ',x)))))
+    (t (error "~s is not a function designator" x))))
 
 (defun make-function-binding (fname)
   (make-binding :name fname :type 'function :value (gvarname fname)))
@@ -639,52 +711,51 @@
   (let ((b (lookup-in-lexenv name *environment* 'function)))
     (and b (binding-value b))))
 
+(defun compiled-function-code (def)
+  (compile-lambda (cadr def)
+                  `((block ,(car def)
+                      ,@(cddr def)))))
+
+(defun environment+new-functions (fun-names)
+  (extend-lexenv (mapcar #'make-function-binding fun-names)
+                 *environment*
+                 'function))
+
 (define-compilation flet (definitions &rest body)
-  (let* ((fnames (mapcar #'car definitions))
-         (cfuncs (mapcar (lambda (def)
-                           (compile-lambda (cadr def)
-                                           `((block ,(car def)
-                                               ,@(cddr def)))))
-                         definitions))
-         (*environment*
-          (extend-lexenv (mapcar #'make-function-binding fnames)
-                         *environment*
-                         'function)))
-    `(call (function ,(mapcar #'translate-function fnames)
+  (let* ((flet-fun-names (mapcar #'car definitions))
+         (flet-compiled-funs (mapcar #'compiled-function-code definitions))
+         (*environment* (environment+new-functions flet-fun-names)))
+    `(call (function ,(mapcar #'translate-function flet-fun-names)
                      ,(convert-block body t))
-           ,@cfuncs)))
+           ,@flet-compiled-funs)))
+
+(defun labels/compiled-label-function (func)
+  `(var (,(translate-function (car func))
+          ,(compiled-function-code func))))
 
 (define-compilation labels (definitions &rest body)
-  (let* ((fnames (mapcar #'car definitions))
-         (*environment*
-          (extend-lexenv (mapcar #'make-function-binding fnames)
-                         *environment*
-                         'function)))
+  (let* ((label-fun-names (mapcar #'car definitions))
+         (*environment* (environment+new-functions label-fun-names)))
     `(selfcall
-      ,@(mapcar (lambda (func)
-                  `(var (,(translate-function (car func))
-                          ,(compile-lambda (cadr func)
-                                           `((block ,(car func) ,@(cddr func)))))))
-                definitions)
+      ,@(mapcar #'labels/compiled-label-function definitions)
       ,(convert-block body t))))
 
+(defvar *compiling-file* nil
+  "Was the compiler invoked from `!compile-file'?")
 
-;;; Was the compiler invoked from !compile-file?
-(defvar *compiling-file* nil)
-
-;;; NOTE: It is probably wrong in many cases but we will not use this
-;;; heavily. Please, do not rely on wrong cases of this
-;;; implementation.
 (define-compilation eval-when (situations &rest body)
+  "NOTE: It  is probably wrong  in many cases but  we will not  use this
+ heavily. Please, do not rely on wrong cases of this implementation."
   ;; TODO: Error checking
   (cond
     ;; Toplevel form compiled by !compile-file.
     ((and *compiling-file* (zerop *convert-level*))
-     ;; If the situation `compile-toplevel' is given. The form is
+     ;; If  the  situation  `compile-toplevel'  is given.  The  form  is
      ;; evaluated at compilation-time.
      (when (find :compile-toplevel situations)
        (eval (cons 'progn body)))
-     ;; `load-toplevel' is given, then just compile the subforms as usual.
+     ;; `load-toplevel'  is  given,  then   just  compile  the  subforms
+     ;; as usual.
      (when (find :load-toplevel situations)
        (convert-toplevel `(progn ,@body) *multiple-value-p*)))
     ((find :execute situations)
@@ -703,43 +774,44 @@
          ,@(append (mapcar #'convert (butlast body))
                    (list (convert (car (last body)) t))))))
 
+(defun macrolet-value (lambda-list body)
+  (let ((g!form (gensym "FORM-")))
+    `(lambda (,g!form)
+       (destructuring-bind ,lambda-list ,g!form
+         ,@body))))
+
 (define-compilation macrolet (definitions &rest body)
   (let ((*environment* (copy-lexenv *environment*)))
     (dolist (def definitions)
       (destructuring-bind (name lambda-list &body body) def
-        (let ((binding (make-binding :name name :type 'macro :value
-                                     (let ((g!form (gensym)))
-                                       `(lambda (,g!form)
-                                          (destructuring-bind ,lambda-list ,g!form
-                                            ,@body))))))
+        (let ((binding (make-binding :name name :type 'macro
+                                     :value (macrolet-value lambda-list body))))
           (push-to-lexenv binding  *environment* 'function))))
-    (convert `(progn ,@body) *multiple-value-p*)))
-
+    (convert (cons 'progn body) *multiple-value-p*)))
 
 (defun special-variable-p (x)
   (and (claimp x 'variable 'special) t))
-
 
 (defun normalize-bindings (arg)
   (destructuring-bind (name &optional value)
       (ensure-list arg)
     (list name value)))
 
-
-;;; Given a let-like description of bindings, return:
-;;;
-;;; 1. A list of lexical
-;;; 2. A list of values to bind to the lexical variables
-;;; 3. A alist of (special-variable . lexical-variable) to bind.
-;;;
 (defun process-bindings (bindings)
+  "Given a LET-like description of bindings, return:
+
+1. A list of lexical variable names
+
+2. A list of values to bind to the lexical variables
+
+3. A alist of (special-variable . lexical-variable) to bind."
   (let ((bindings (mapcar #'normalize-bindings bindings))
         (special-bindings nil))
     (values
      ;; Lexical Variables
      (mapcar (lambda (var)
                (if (special-variable-p var)
-                   (let ((lexvar (gensym)))
+                   (let ((lexvar (gensym "LEXICAL-VARIABLE-")))
                      (push (cons var lexvar) special-bindings)
                      lexvar)
                    var))
@@ -749,23 +821,23 @@
      ;; Binding special variables to lexical variables
      special-bindings)))
 
-
-;;; Wrap CODE to restore the symbol values of the dynamic
-;;; bindings. BINDINGS is a list of pairs of the form
-;;; (SYMBOL . PLACE),  where PLACE is a Javascript variable
-;;; name to initialize the symbol value and where to stored
-;;; the old value.
-(defun let-bind-dynamic-vars (special-bindings body)
-  (if (null special-bindings)
-      (convert-block body t t)
+(defun convert-block-with-special-bindings (body special-bindings)
       (let ((special-variables (mapcar #'car special-bindings))
             (lexical-variables (mapcar #'cdr special-bindings)))
         `(return (call-internal
                   |bindSpecialBindings|
-                  ,(list-to-vector (mapcar #'literal special-variables))
-                  ,(list-to-vector (mapcar #'translate-variable lexical-variables))
-                  (function () ,(convert-block body t t)))))))
+              ,(map 'vector #'literal special-variables)
+              ,(map 'vector #'translate-variable lexical-variables)
+              (function () ,(convert-block body t t))))))
 
+(defun let-bind-dynamic-vars (special-bindings body)
+  "Wrap  CODE to  restore the  symbol  values of  the dynamic  bindings.
+BINDINGS is a list of pairs of the form (SYMBOL . PLACE), where PLACE is
+a Javascript variable  name to initialize the symbol value  and where to
+stored the old value."
+  (if (null special-bindings)
+      (convert-block body t t)
+      (convert-block-with-special-bindings body special-bindings)))
 
 (define-compilation let (bindings &rest body)
   (multiple-value-bind (lexical-variables values special-bindings)
@@ -776,39 +848,43 @@
                        ,(let-bind-dynamic-vars special-bindings body))
              ,@compiled-values))))
 
+(defun add-let*-var-to-environment (var value)
+  (let* ((v (gvarname var))
+         (b (make-binding :name var :type 'variable :value v)))
+    (prog1 `(var (,v ,(convert value)))
+      (push-to-lexenv b *environment* 'variable))))
 
-;;; Return the code to initialize BINDING, and push it extending the
-;;; current lexical environment if the variable is not special.
 (defun let*-initialize-value (binding)
+  " Return  the code to  initialize BINDING,  and push it  extending the
+current lexical environment if the variable is not special."
   (let ((var (first binding))
         (value (second binding)))
     (if (special-variable-p var)
         (convert `(setq ,var ,value))
-        (let* ((v (gvarname var))
-               (b (make-binding :name var :type 'variable :value v)))
-          (prog1 `(var (,v ,(convert value)))
-            (push-to-lexenv b *environment* 'variable))))))
+        (add-let*-var-to-environment var value))))
 
-;;; Wrap BODY to restore the symbol values of SYMBOLS after body. It
-;;; DOES NOT generate code to initialize the value of the symbols,
-;;; unlike let-binding-wrapper.
+(defun let*-wrapper-set-value (b)
+  (let ((s (convert `(quote ,(car b)))))
+    `(var (,(cdr b) (get ,s "value")))))
+
+(defun let*-wrapper-reset-value (b)
+  (let ((s (convert `(quote ,(car b)))))
+    `(= (get ,s "value") ,(cdr b))))
+
 (defun let*-binding-wrapper (symbols body)
-  (when (null symbols)
+  "  Wrap BODY  to  restore the  symbol values  of  SYMBOLS after  body.
+It DOES NOT generate code to initialize the value of the symbols, unlike
+let-binding-wrapper."
+  (unless symbols
     (return-from let*-binding-wrapper body))
   (let ((store (mapcar (lambda (s) (cons s (gvarname s)))
                        (remove-if-not #'special-variable-p symbols))))
     `(progn
        (try
-        ,@(mapcar (lambda (b)
-                    (let ((s (convert `(quote ,(car b)))))
-                      `(var (,(cdr b) (get ,s "value")))))
-                  store)
+        ,@(mapcar #'let*-wrapper-set-value store)
         ,body)
        (finally
-        ,@(mapcar (lambda (b)
-                    (let ((s (convert `(quote ,(car b)))))
-                      `(= (get ,s "value") ,(cdr b))))
-                  store)))))
+        ,@(mapcar #'let*-wrapper-reset-value store)))))
 
 (define-compilation let* (bindings &rest body)
   (let ((bindings (mapcar #'ensure-list bindings))
@@ -819,14 +895,32 @@
                    ,(convert-block body t t))))
       `(selfcall ,(let*-binding-wrapper specials body)))))
 
+(defun block-return-multiple-values ()
+  `(return (method-call |values| "apply" this
+                        (call-internal |forcemv| (get cf "values")))))
+
+(defun block-return-single-value ()
+  `(return (get cf "values")))
+
+(defun block/build-nlx-catcher (idvar cbody)
+  `(selfcall
+    (try
+     (var (,idvar #()))
+     ,cbody)
+    (catch (cf)
+      (if (and (instanceof cf (internal |BlockNLX|)) (== (get cf "id") ,idvar))
+          ,(if *multiple-value-p*
+               (block-return-multiple-values)
+               (block-return-single-value))
+          (throw cf)))))
 
 (define-compilation block (name &rest body)
-  ;; We use Javascript exceptions to implement non local control
-  ;; transfer. Exceptions has dynamic scoping, so we use a uniquely
-  ;; generated object to identify the block. The instance of a empty
-  ;; array is used to distinguish between nested dynamic Javascript
-  ;; exceptions. See https://github.com/jscl-project/jscl/issues/64 for
-  ;; futher details.
+  "  We  use  Javascript  exceptions  to  implement  non  local  control
+ transfer.  Exceptions  has  dynamic  scoping, so  we  use  a  uniquely
+ generated object to identify the block.  The instance of a empty array
+ is used  to distinguish between nested  dynamic Javascript exceptions.
+ See         https://github.com/jscl-project/jscl/issues/64         for
+ futher details."
   (let* ((idvar (gvarname name))
          (b (make-binding :name name :type 'block :value idvar)))
     (when *multiple-value-p*
@@ -834,33 +928,23 @@
     (let* ((*environment* (extend-lexenv (list b) *environment* 'block))
            (cbody (convert-block body t)))
       (if (member 'used (binding-declarations b))
-          `(selfcall
-            (try
-             (var (,idvar #()))
-             ,cbody)
-            (catch (cf)
-              (if (and (instanceof cf (internal |BlockNLX|)) (== (get cf "id") ,idvar))
-                  ,(if *multiple-value-p*
-                       `(return (method-call |values| "apply" this
-                                             (call-internal |forcemv| (get cf "values"))))
-                       `(return (get cf "values")))
-                  (throw cf))))
+          (block/build-nlx-catcher idvar cbody)
           `(selfcall ,cbody)))))
 
 (define-compilation return-from (name &optional value)
-  (let* ((b (lookup-in-lexenv name *environment* 'block))
-         (multiple-value-p (member 'multiple-value (binding-declarations b))))
-    (when (null b)
-      (error "Return from unknown block `~S'." (symbol-name name)))
-    (push 'used (binding-declarations b))
-    ;; The binding value is the name of a variable, whose value is the
-    ;; unique identifier of the block as exception. We can't use the
-    ;; variable name itself, because it could not to be unique, so we
+  (let* ((binding (lookup-in-lexenv name *environment* 'block))
+         (multiple-value-p (member 'multiple-value (binding-declarations binding))))
+    (unless binding
+      (error "Return from unknown block `~S'." name))
+    (push 'used (binding-declarations binding))
+    ;; The binding value  is the name of a variable,  whose value is the
+    ;; unique identifier  of the  block as exception.  We can't  use the
+    ;; variable  name itself,  because it  might  not be  unique, so  we
     ;; capture it in a closure.
     `(selfcall
       ,(when multiple-value-p `(var (|values| (internal |mv|))))
       (throw (new (call-internal |BlockNLX|
-                                 ,(binding-value b)
+                                 ,(binding-value binding)
                                  ,(convert value multiple-value-p)
                                  ,(symbol-name name)))))))
 
@@ -881,7 +965,6 @@
     (var (|values| (internal |mv|)))
     (throw (new (call-internal |CatchNLX| ,(convert id) ,(convert value t))))))
 
-
 (defun go-tag-p (x)
   (or (integerp x) (symbolp x)))
 
@@ -895,9 +978,9 @@
     (extend-lexenv bindings *environment* 'gotag)))
 
 (define-compilation tagbody (&rest body)
-  ;; Ignore the tagbody if it does not contain any go-tag. We do this
-  ;; because 1) it is easy and 2) many built-in forms expand to a
-  ;; implicit tagbody, so we save some space.
+  ;; Ignore the  tagbody if it does  not contain any go-tag.  We do this
+  ;; because  1)  it is  easy  and  2)  many  built-in forms  expand  to
+  ;; a implicit tagbody, so we save some space.
   (unless (some #'go-tag-p body)
     (return-from tagbody (convert `(progn ,@body nil))))
   ;; The translation assumes the first form in BODY is a label
@@ -919,12 +1002,12 @@
                  (try
                   (switch ,branch
                     ,@(with-collect
-                       (collect `(case ,initag))
-                       (dolist (form (cdr body))
-                         (if (go-tag-p form)
-                             (let ((b (lookup-in-lexenv form *environment* 'gotag)))
-                               (collect `(case ,(second (binding-value b)))))
-                             (collect (convert form)))))
+                        (collect `(case ,initag))
+                        (dolist (form (cdr body))
+                          (if (go-tag-p form)
+                              (let ((b (lookup-in-lexenv form *environment* 'gotag)))
+                                (collect `(case ,(second (binding-value b)))))
+                              (collect (convert form)))))
                     default
                     (break tbloop)))
                  (catch (jump)
@@ -961,12 +1044,12 @@
        (var vs)
        (progn
          ,@(with-collect
-            (dolist (form forms)
-              (collect `(= vs ,(convert form t)))
-              (collect `(if (and (=== (typeof vs) "object")
-                                 (in "multiple-value" vs))
-                            (= args (method-call args "concat" vs))
-                            (method-call args "push" vs))))))
+             (dolist (form forms)
+               (collect `(= vs ,(convert form t)))
+               (collect `(if (and (=== (typeof vs) "object")
+                                  (in "multiple-value" vs))
+                             (= args (method-call args "concat" vs))
+                             (method-call args "push" vs))))))
        (return (method-call func "apply" null args))))))
 
 (define-compilation multiple-value-prog1 (first-form &rest forms)
@@ -975,19 +1058,23 @@
     (progn ,@(mapcar #'convert forms))
     (return args)))
 
+(define-compilation the (value-type form)
+  (warn "discarding THE ~a" value-type) ; XXX perhaps one day
+  (convert form *multiple-value-p*))
+
 (define-transformation backquote (form)
   (bq-completely-process form))
 
-
+
 ;;; Primitives
 
 (defvar *builtins*
   (make-hash-table))
 
 (defmacro define-raw-builtin (name args &body body)
-  ;; Creates a new primitive function `name' with parameters args and
-  ;; @body. The body can access to the local environment through the
-  ;; variable *ENVIRONMENT*.
+  " Creates  a new  primitive function `name'  with parameters  args and
+ @body.  The body  can access  to  the local  environment through  the
+ variable *ENVIRONMENT*."
   `(setf (gethash ',name *builtins*)
          (lambda ,args
            (block ,name ,@body))))
@@ -997,12 +1084,22 @@
      (let ,(mapcar (lambda (arg) `(,arg (convert ,arg))) args)
        ,@body)))
 
-;;; VARIABLE-ARITY compiles variable arity operations. ARGS stands for
-;;; a variable which holds a list of forms. It will compile them and
-;;; store the result in some Javascript variables. BODY is evaluated
-;;; with ARGS bound to the list of these variables to generate the
-;;; code which performs the transformation on these variables.
+(defun variable-arity/check-numeric-arg (v x function args)
+  `(if (!= (typeof ,v) "number")
+       (throw (new (call |Error| (+ "" (typeof ,v)
+                                    " is not a number: " ,v " "
+                                    ,(princ-to-string (convert x)) " in "
+                                    ,(princ-to-string function)
+                                    ,@(mapcar (lambda (s)
+                                                (concatenate 'string " "
+                                                             (princ-to-string s))) args)))))))
+
 (defun variable-arity-call (args function)
+  "VARIABLE-ARITY-CALL  compiles variable  arity  operations on  numeric
+arguments.  ARGS stands  for a  variable which  holds a  list of  forms.
+It will compile them and store  the result in some Javascript variables.
+BODY is  evaluated with  ARGS bound  to the list  of these  variables to
+generate the code which performs the transformation on these variables."
   (unless (consp args)
     (error "ARGS must be a non-empty list"))
   (let ((counter 0))
@@ -1010,23 +1107,17 @@
     (with-collector (fargs)
       (with-collector (prelude)
         (dolist (x args)
-          (if (or (floatp x) (numberp x))
+          (if (numberp x)
               (collect-fargs x)
               (let ((v (make-symbol (concat "arg" (integer-to-string (incf counter))))))
-                (collect-fargs v)
                 (collect-prelude `(var (,v ,(convert x))))
-                (collect-prelude `(if (!= (typeof ,v) "number")
-                                      (throw (new (call |Error| (+ "" (typeof ,v)
-                                                                   " is not a number: " ,v " "
-                                                                   ,(princ-to-string (convert x)) " in "
-                                                                   ,(princ-to-string function)
-                                                                   ,@(mapcar (lambda (s)
-                                                                               (concatenate 'string " "
-                                                                                            (princ-to-string s))) args))))))))))
+                (collect-prelude (variable-arity/check-numeric-arg v x
+                                                                   function args))
+                (collect-fargs v))))
         `(selfcall
-          (progn ,@prelude)
+          (progn
+            ,@prelude)
           ,(funcall function fargs))))))
-
 
 (defmacro variable-arity (args &body body)
   (unless (symbolp args)
@@ -1037,7 +1128,7 @@
   (if (null numbers)
       0
       (variable-arity numbers
-                      `(+ ,@numbers))))
+        `(+ ,@numbers))))
 
 (define-raw-builtin - (x &rest others)
   (let ((args (cons x others)))
@@ -1055,17 +1146,18 @@
 (define-raw-builtin / (x &rest others)
   (let ((args (cons x others)))
     (variable-arity args
-                    (if (null others)
-                        `(call-internal |handled_division| 1 ,(car args))
-                        (reduce (lambda (x y) `(call-internal |handled_division| ,x ,y))
-                                args)))))
+      (if (null others)
+          `(call-internal |handled_division| 1 ,(car args))
+          (reduce (lambda (x y) `(call-internal |handled_division| ,x ,y))
+                  args)))))
 
 (define-builtin mod (x y)
+  (when (constantp y)
+    (assert (not (zerop y))))
   `(selfcall
     (if (== ,y 0)
-        (throw "Division by zero"))
+        (throw (new |Error| "Division by zero")))
     (return (% ,x ,y))))
-
 
 (defun comparison-conjuntion (vars op)
   (cond
@@ -1077,16 +1169,16 @@
      `(and (,op ,(car vars) ,(cadr vars))
            ,(comparison-conjuntion (cdr vars) op)))))
 
-(defmacro define-builtin-comparison (op sym)
+(defmacro define-builtin-comparison (op &optional (sym op))
   `(define-raw-builtin ,op (x &rest args)
      (let ((args (cons x args)))
        (variable-arity args
-                       (convert-to-bool (comparison-conjuntion args ',sym))))))
+         (convert-to-bool (comparison-conjuntion args ',sym))))))
 
-(define-builtin-comparison > >)
-(define-builtin-comparison < <)
-(define-builtin-comparison >= >=)
-(define-builtin-comparison <= <=)
+(define-builtin-comparison >)
+(define-builtin-comparison <)
+(define-builtin-comparison >=)
+(define-builtin-comparison <=)
 (define-builtin-comparison = ==)
 (define-builtin-comparison /= !=)
 
@@ -1139,7 +1231,7 @@
   `(new (call-internal |Symbol| (call-internal |lisp_to_js| ,name))))
 
 (define-compilation symbol-name (x)
-  (convert `(oget ,x "name")))
+  (convert `(jscl/ffi:oget ,x "name")))
 
 (define-builtin set (symbol value)
   `(= (get ,symbol "value") ,value))
@@ -1193,6 +1285,20 @@
                          (in "length" x))
                     (== (get x "stringp") 1))))))
 
+(define-builtin ornate-object-class% (x)
+  `(selfcall
+    (var (x ,x))
+    (return (and (=== (typeof x) "object")
+                 (in "🏛" x)
+                 (get x "🏛")))))
+
+(define-builtin set-ornate-object-class% (x class)
+  `(selfcall
+    (var (x ,x))
+    (return (and (=== (typeof x) "object")
+                 (in "🏛" x)
+                 (= (get x "🏛") ,(string class))))))
+
 (define-raw-builtin funcall (func &rest args)
   `(selfcall
     (var (f ,(convert func)))
@@ -1242,9 +1348,9 @@
 (define-builtin /log (x)
   `(method-call |console| "log" ,x))
 
-
-;;; Storage vectors. They are used to implement arrays and (in the
-;;; future) structures.
+
+;;; Storage  vectors. They  are used  to  implement arrays  and (in  the
+;;; future) structures. (work-in-progress, kinda.)
 
 (define-builtin storage-vector-p (x)
   `(selfcall
@@ -1266,9 +1372,14 @@
   `(= (get ,vector "length") ,new-size))
 
 (define-builtin storage-vector-ref (vector n)
+  (check-type n (integer 0 *))
   `(selfcall
     (var (x (property ,vector ,n)))
-    (if (=== x undefined) (throw (new (call |Error| ,(concatenate 'string "AREF out of range for vector " (string vector))))))
+    (if (=== x undefined)
+        (throw (new (call |Error| ,(concatenate 'string "AREF "
+                                                (princ-to-string n)
+                                                "out of range for vector "
+                                                (string vector))))))
     (return x)))
 
 (define-builtin storage-vector-set (vector n value)
@@ -1300,12 +1411,13 @@
       `(call |values| ,@(mapcar #'convert args))
       `(call-internal |pv| ,@(mapcar #'convert args))))
 
+
 ;;; Javascript FFI
 
 (define-builtin new ()
   '(object))
 
-(define-raw-builtin oget* (object key &rest keys)
+(define-raw-builtin jscl/ffi::oget* (object key &rest keys)
   `(selfcall
     (progn
       (var (tmp (property ,(convert object) (call-internal |xstring| ,(convert key)))))
@@ -1316,7 +1428,7 @@
                 keys))
     (return (if (=== tmp undefined) ,(convert nil) tmp))))
 
-(define-raw-builtin oset* (value object key &rest keys)
+(define-raw-builtin jscl/ffi::oset* (value object key &rest keys)
   (let ((keys (cons key keys)))
     `(selfcall
       (progn
@@ -1334,10 +1446,10 @@
                     ,(convert nil)
                     tmp))))))
 
-(define-raw-builtin oget (object key &rest keys)
-  `(call-internal |js_to_lisp| ,(convert `(oget* ,object ,key ,@keys))))
+(define-raw-builtin jscl/ffi::oget (object key &rest keys)
+  `(call-internal |js_to_lisp| ,(convert `(jscl/ffi:oget* ,object ,key ,@keys))))
 
-(define-raw-builtin oset (value object key &rest keys)
+(define-raw-builtin jscl/ffi::oset (value object key &rest keys)
   (convert `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
 
 (define-builtin js-null-p (x)
@@ -1354,7 +1466,6 @@
 
 (define-builtin lisp-to-js (x) `(call-internal |lisp_to_js| ,x))
 (define-builtin js-to-lisp (x) `(call-internal |js_to_lisp| ,x))
-
 
 (define-builtin in (key object)
   (convert-to-bool `(in (call-internal |xstring| ,key) ,object)))
@@ -1381,7 +1492,7 @@
   `(= ,(make-symbol var) (call-internal |lisp_to_js| ,(convert val))))
 
 (define-setf-expander %js-vref (var)
-  (let ((new-value (gensym)))
+  (let ((new-value (gensym "JS-VREF-NEW-VALUE-")))
     (unless (stringp var)
       (error "`~S' is not a string." var))
     (values nil
@@ -1397,20 +1508,12 @@
 (define-compilation %js-internal (name)
   `(internal ,name))
 
-
-;; Catch any Javascript exception. Note that because all non-local
-;; exit are based on try-catch-finally, it will also catch them. We
-;; could provide a JS function to detect it, so the user could rethrow
+;; Catch any Javascript exception. Note  that because all non-local exit
+;; are based  on try-catch-finally,  it will also  catch them.  We could
+;; provide  a JS  function  to  detect it,  so  the  user could  rethrow
 ;; the error.
 ;;
-;; (%js-try
-;;  (progn
-;;    )
-;;  (catch (err)
-;;    )
-;;  (finally
-;;   ))
-;;
+;; (%js-try (progn …) (catch (err) …) (finally …))
 (define-compilation %js-try (form &optional catch-form finally-form)
   (let ((catch-compilation
          (and catch-form
@@ -1436,7 +1539,6 @@
       ,catch-compilation
       ,finally-compilation)))
 
-
 (define-compilation symbol-macrolet (macrobindings &rest body)
   (let ((new (copy-lexenv *environment*)))
     (dolist (macrobinding macrobindings)
@@ -1446,14 +1548,21 @@
     (let ((*environment* new))
       (convert-block body nil t))))
 
-
 #-jscl
 (defvar *macroexpander-cache*
   (make-hash-table :test #'eq))
 
 (defun !macro-function (symbol)
-  (unless (symbolp symbol)
+  (unless (function-name-p symbol)
     (error "`~S' is not a symbol." symbol))
+  (when (and (listp symbol)
+             (eq 'setf (first symbol)))
+    (return-from !macro-function nil))
+  #+sbcl
+  (when (eql symbol 'sb-int:quasiquote)
+    (return-from !macro-function
+      (lambda (form)
+        (sb-impl::expand-quasiquote form nil))))
   (let ((b (lookup-in-lexenv symbol *environment* 'function)))
     (if (and b (eq (binding-type b) 'macro))
         (let ((expander (binding-value b)))
@@ -1463,62 +1572,112 @@
              (setq expander (gethash b *macroexpander-cache*)))
             ((listp expander)
              (let ((compiled (eval expander)))
-               ;; The list representation are useful while
-               ;; bootstrapping, as we can dump the definition of the
-               ;; macros easily, but they are slow because we have to
-               ;; evaluate them and compile them now and again. So, let
-               ;; us replace the list representation version of the
+               ;; The    list    representation   are    useful    while
+               ;; bootstrapping, as  we can  dump the definition  of the
+               ;; macros easily,  but they are  slow because we  have to
+               ;; evaluate them and compile them  now and again. So, let
+               ;; us  replace the  list  representation  version of  the
                ;; function with the compiled one.
-               ;;
                #+jscl (setf (binding-value b) compiled)
                #-jscl (setf (gethash b *macroexpander-cache*) compiled)
                (setq expander compiled))))
           expander)
         nil)))
 
-(defun !macroexpand-1 (form)
-  (cond
-    ((symbolp form)
-     (let ((b (lookup-in-lexenv form *environment* 'variable)))
-       (if (and b (eq (binding-type b) 'macro))
-           (values (binding-value b) t)
-           (values form nil))))
-    ((and (consp form) (symbolp (car form)))
-     (let ((macrofun (!macro-function (car form))))
-       (if macrofun
-           (values (funcall macrofun (cdr form)) t)
-           (values form nil))))
-    (t
-     (values form nil))))
+(defun !macroexpand-1/symbol (symbol)
+  (let ((b (lookup-in-lexenv symbol *environment* 'variable)))
+    (if (and b (eq (binding-type b) 'macro))
+        (values (binding-value b) t)
+        (values symbol nil))))
+
+(defun !macroexpand-1 (form &optional env)
+  (let ((*environment* (or env *environment*)))
+    (cond
+      ((symbolp form)
+       (!macroexpand-1/symbol form))
+      ((and (consp form) (symbolp (car form)))
+       (let ((macrofun (!macro-function (car form))))
+         (if macrofun
+             (values (funcall macrofun (cdr form)) t)
+             (values form nil))))
+      (t
+       (values form nil)))))
+
+#+jscl
+(fset 'macroexpand-1 #'!macroexpand-1)
+
+(defun !macroexpand (form &optional env)
+  (let ((continue t))
+    (while continue
+      (multiple-value-setq (form continue) (!macroexpand-1 form env))))
+  form)
+
+#+jscl
+(fset 'macroexpand #'!macroexpand)
+
+(defun compile-funcall/function (function arglist)
+  (when (!macro-function function)
+    (error "Compiler error: Macro function was not expanded: ~s"
+           function))
+  (fn-info function :called t)
+  ;; This code will  work even if the symbol-function is  unbound, as it
+  ;; is represented by a function that throws the expected error.
+  `(method-call ,(convert `',function) "fvalue" ,@arglist))
+
+(defun compile-funcall/translate-function (function arglist)
+  `(call ,(translate-function function) ,@arglist))
+
+(defun compile-funcall/lambda (function arglist)
+  `(call ,(convert `(function ,function)) ,@arglist))
+
+(defun compile-funcall/oget (function args)
+  `(call-internal
+    |js_to_lisp|
+    (call ,(reduce (lambda (obj p)
+                     `(property ,obj (call-internal |xstring| ,p)))
+                   (mapcar #'convert (cdr function)))
+          ,@(mapcar (lambda (s)
+                      `(call-internal |lisp_to_js| ,(convert s)))
+                    args))))
+
+(defun compile-funcall/error (function)
+  (error "Function designator ~s is not a lambda form nor an oget; car is ~a::~a"
+         function
+         (let ((p (symbol-package (car function))))
+           (if p (package-name p) "#"))
+         (symbol-name (car function))))
+
+(defun compile-funcall/args-list (args)
+  (cons (if *multiple-value-p*
+            '|values|
+            '(internal |pv|))
+        (mapcar #'convert args)))
+
+(defun compile-funcall/function-special (fun args)
+  (compile-funcall fun args))
 
 (defun compile-funcall (function args)
-  (let* ((arglist (cons (if *multiple-value-p* '|values| '(internal |pv|))
-                        (mapcar #'convert args))))
-    (unless (or (symbolp function)
-                (and (consp function)
-                     (member (car function) '(lambda oget))))
-      (error "Bad function designator `~S'" function))
+  (let* ((arglist (compile-funcall/args-list args)))
     (cond
+      ((eql 'setf function)
+       (compile-funcall (list 'setf (first args))
+                        (rest args)))
       ((translate-function function)
-       `(call ,(translate-function function) ,@arglist))
-      ((symbolp function)
-       (fn-info function :called t)
-       ;; This code will work even if the symbol-function is unbound,
-       ;; as it is represented by a function that throws the expected
-       ;; error.
-       `(method-call ,(convert `',function) "fvalue" ,@arglist))
-      ((and (consp function) (eq (car function) 'lambda))
-       `(call ,(convert `(function ,function)) ,@arglist))
-      ((and (consp function) (eq (car function) 'oget))
-       `(call-internal |js_to_lisp|
-                       (call ,(reduce (lambda (obj p)
-                                        `(property ,obj (call-internal |xstring| ,p)))
-                                      (mapcar #'convert (cdr function)))
-                             ,@(mapcar (lambda (s)
-                                         `(call-internal |lisp_to_js| ,(convert s)))
-                                       args))))
+       (compile-funcall/translate-function function arglist))
+      ((and (symbolp function) (!macro-function function))
+       (error "Compiler error: Macro function was not expanded: ~s" function))
+      ((function-name-p function)
+       (compile-funcall/function function arglist))
+      ((not (consp function))
+       (error "Bad function designator `~S'" function))
+      ((eql (car function) 'function)
+       (compile-funcall/function-special (rest function) arglist))
+      ((eql (car function) 'lambda)
+       (compile-funcall/lambda function arglist))
+      ((eql (car function) 'jscl/ffi:oget)
+       (compile-funcall/oget function args))
       (t
-       (error "Bad function designator `~S'" function)))))
+       (compile-funcall/error function)))))
 
 (defun convert-block (sexps &optional return-last-p decls-allowed-p)
   (multiple-value-bind (sexps decls)
@@ -1530,47 +1689,124 @@
            (return ,(convert (car (last sexps)) *multiple-value-p*)))
         `(progn ,@(mapcar #'convert sexps)))))
 
+#+jscl (defun macroexpand-1 (form) (!macroexpand-1 form))
+
+(defun inline-builtin-p (name)
+  (and (gethash name *builtins*)
+       (not (claimp name 'function 'notinline))))
+
+(defun special-form-p (name)
+  (gethash name *compilations*))
+
+(defun compile-special-form (name args)
+  (let ((comp (gethash name *compilations*)))
+    (apply comp args)))
+
+(defun compile-builtin-function (name args)
+  (apply (gethash name *builtins*) args))
+
+#+jscl
+(declaim (jscl::pure (+ - / * mod sqrt expt log
+                        round floor
+                        elt nth aref
+                        first rest last lastcar
+                        car cdr
+                        caar cadr cdar cddr
+                        caaar caadr cadar caddr cdaar cdadr cddar cdddr
+                        logand logior logxor
+                        and or xor not)))
+
+(defun compile-sexp (sexp)
+  (let ((name (car sexp))
+        (args (cdr sexp)))
+    (cond
+      ((and (claimp name 'function 'jscl::pure)
+            (every #'constantp args))
+       (apply name args))
+      ((special-form-p name)
+       (compile-special-form name args))
+      ((inline-builtin-p name)
+       (compile-builtin-function name args))
+      (t (compile-funcall name args)))))
+
+(defun convert-1/symbol (sexp)
+  (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
+    (cond
+      ((and b (not (member 'special (binding-declarations b))))
+       (binding-value b))
+      ((or (keywordp sexp)
+           (and b (member 'constant (binding-declarations b))))
+       `(get ,(convert `',sexp) "value"))
+      (t
+       (convert `(symbol-value ',sexp))))))
+
+(defun emit-uncompilable-form (error sexp)
+  (restart-case
+      (error error)
+    (replace-with-warning ()
+      :report "Replace failed form with a warning"
+      (list 'warn (format nil "Failed compilation of ~s"
+                          sexp)))
+    (replace-with-cerror ()
+      :report "Replace failed form with a continuable error"
+      (list 'cerror "Continue"
+            (format nil "Failed compilation of ~s"
+                    sexp)))
+    (replace-with-error ()
+      :report "Replace failed form with an error"
+      (list 'error (format nil "Failed compilation of ~s"
+                           sexp)))))
+
+(defun check-for-failed-macroexpansion (sexp)
+  (if (and (consp sexp)
+           (symbolp (car sexp))
+           ;; DESTRUCTURING-BIND is defined  via !DESTRUCTURING-BIND and
+           ;; is almost not a macro and almost, but not quite, a special
+           ;; form,  so  we have  to  work  around  that here.
+           (not (eql 'destructuring-bind (car sexp)))
+           (eql (find-package :common-lisp)
+                (symbol-package (car sexp)))
+           (macro-function (car sexp)))
+      (emit-uncompilable-form
+       (format nil "Failed to macroexpand ~s ~% in ~s"
+               (car sexp) sexp)
+       sexp)
+      sexp))
+
+(defun object-evaluates-to-itself-p (object)
+  (or (integerp object)                   ; TODO: REALP, NUMBERP
+      (floatp object)
+      (characterp object)
+      (stringp object)
+      (arrayp object)
+      (pathnamep object)
+      (typep object 'structure-object)))
+
 (defun convert-1 (sexp &optional multiple-value-p)
   (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
     (when expandedp
       (return-from convert-1 (convert sexp multiple-value-p)))
     ;; The expression has been macroexpanded. Now compile it!
-    (let ((*multiple-value-p* multiple-value-p)
-          (*convert-level* (1+ *convert-level*)))
-      (cond
-        ((symbolp sexp)
-         (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
-           (cond
-             ((and b (not (member 'special (binding-declarations b))))
-              (binding-value b))
-             ((or (keywordp sexp)
-                  (and b (member 'constant (binding-declarations b))))
-              `(get ,(convert `',sexp) "value"))
-             (t
-              (convert `(symbol-value ',sexp))))))
-        ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp))
-         (literal sexp))
-        ((listp sexp)
-         (let ((name (car sexp))
-               (args (cdr sexp)))
-           (cond
-             ;; Special forms
-             ((gethash name *compilations*)
-              (let ((comp (gethash name *compilations*)))
-                (apply comp args)))
-             ;; Built-in functions
-             ((and (gethash name *builtins*)
-                   (not (claimp name 'function 'notinline)))
-              (apply (gethash name *builtins*) args))
-             (t
-              (compile-funcall name args)))))
-        (t
-         (error "How should I compile `~S'?" sexp))))))
-
+    (let ((sexp (check-for-failed-macroexpansion sexp)))
+      (let ((*multiple-value-p* multiple-value-p)
+            (*convert-level* (1+ *convert-level*)))
+        (cond
+          ((symbolp sexp)
+           (convert-1/symbol sexp))
+          ((object-evaluates-to-itself-p sexp)
+           (literal sexp))
+          ((rational-float-p sexp)
+           (literal (rational-float-p sexp)))
+          ((listp sexp)
+           (compile-sexp sexp))
+          (t
+           (error "How should I compile ~s `~S'?"
+                  (type-of sexp) sexp)))))))
 
 (defun convert (sexp &optional multiple-value-p)
   (convert-1 sexp multiple-value-p))
 
+#+jscl (defun macroexpand (form) (!macroexpand form))
 
 (defvar *compile-print-toplevels* nil)
 
@@ -1588,6 +1824,19 @@
   ;; Process as toplevel
   (let ((*convert-level* -1))
     (cond
+      ;; HACK work-around for IN-PACKAGE not working
+      ((and (consp sexp)
+            (eql (car sexp) 'defpackage))
+       (warn
+        "DEFPACKAGE ~a will probably not be effective within the current file"
+        (second sexp)))
+      ((and (consp sexp)
+            (eql (car sexp) 'in-package)
+            (= 2 (length sexp)))
+       (setf *package* (find-package-or-fail (second sexp)))
+       (format *trace-output*
+               "~&;;; In package ~a…" (package-name *package*))
+       nil)
       ;; Non-empty toplevel progn
       ((and (consp sexp)
             (eq (car sexp) 'progn)
@@ -1601,13 +1850,12 @@
       (t
        (when *compile-print-toplevels*
          (let ((form-string (prin1-to-string sexp)))
-           (format t "Compiling ~a...~%" (truncate-string form-string))))
+           (format t "~&;; Compiling ~a…" (truncate-string form-string))))
 
        (let ((code (convert sexp multiple-value-p)))
          (if return-p
              `(return ,code)
              code))))))
-
 
 (defun process-toplevel (sexp &optional multiple-value-p return-p)
   (let ((*toplevel-compilations* nil))
@@ -1616,16 +1864,14 @@
          ,@(get-toplevel-compilations)
          ,code))))
 
-
-
 (defun compile-toplevel (sexp &optional multiple-value-p return-p)
   (with-output-to-string (*js-output*)
     (js (process-toplevel sexp multiple-value-p return-p))))
-
 
 (defmacro with-compilation-environment (&body body)
   `(let ((*literal-table* nil)
          (*variable-counter* 0)
          (*gensym-counter* 0)
          (*literal-counter* 0))
-     ,@body))
+     (with-sharp-j
+       ,@body)))

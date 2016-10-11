@@ -2,41 +2,44 @@
 
 ;; Copyright (C) 2012, 2013 David Vazquez Copyright (C) 2012 Raimon Grau
 
-;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
-;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
-;; License, or (at your option) any later version.
+;; JSCL is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General  Public License as published by the Free
+;; Software Foundation,  either version  3 of the  License, or  (at your
+;; option) any later version.
 ;;
-;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
-;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
-;; Public License for more details.
+;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
 ;;
-;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
-;; <http://www.gnu.org/licenses/>.
-
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
+(in-package :jscl)
 (/debug "loading utils.lisp!")
 
 (defmacro with-collect (&body body)
   "Makes available to BODY a function named collect. The function accumulates
 values passed to it. The return value of with-collect is the list of values
 accumulated, in the order."
-  (let ((head (gensym))
-        (tail (gensym)))
-    `(let* ((,head (cons 'sentinel nil))
-            (,tail ,head))
-       (flet ((collect (x)
-                (rplacd ,tail (cons x nil))
-                (setq ,tail (cdr ,tail))
-                x))
-         ,@body)
-       (cdr ,head))))
+  (let ((*break-on-signals* t))
+    (let ((head (gensym "HEAD-"))
+          (tail (gensym "TAIL-")))
+      `(let* ((,head (cons 'sentinel nil))
+              (,tail ,head))
+         (flet ((collect (x)
+                  (rplacd ,tail (cons x nil))
+                  (setq ,tail (cdr ,tail))
+                  x))
+           ,@body)
+         (cdr ,head)))))
 
 (defmacro with-collector ((name &optional (collector (intern (format nil "COLLECT-~a" (symbol-name name))))) &body body)
   "Similar to `with-collect' with the following differences:
  1) However the list where the values are being accumulated is available to the body by the name NAME.
  2) The name COLLECTOR function can be passed as a parameter
  3) The return value the last form of BODY"
-  (let ((head (gensym))
-        (tail (gensym)))
+  (let ((head (gensym "HEAD-"))
+        (tail (gensym "TAIL-")))
     `(let* ((,head (cons 'sentinel nil))
             (,tail ,head))
        (symbol-macrolet ((,name (cdr ,head)))
@@ -49,7 +52,8 @@ accumulated, in the order."
 (defmacro concatf (variable &body form)
   `(setq ,variable (concat ,variable (progn ,@form))))
 
-;;; This couple of helper functions will be defined in both Common Lisp and in JSCL
+;;; This couple of helper functions will  be defined in both Common Lisp
+;;; and in JSCL
 (defun ensure-list (x)
   (if (listp x)
       x
@@ -79,8 +83,8 @@ accumulated, in the order."
 (defun vector-to-list (vector)
   (let ((size (length vector)))
     (with-collect
-        (dotimes (i size)
-          (collect (aref vector i))))))
+      (dotimes (i size)
+        (collect (aref vector i))))))
 
 (defun list-to-vector (list)
   (let ((v (make-array (length list)))
@@ -98,6 +102,10 @@ accumulated, in the order."
     (cond
       ((zerop x)
        (if plusp "+0" "0"))
+    ((minusp x)
+       (concat "-" (integer-to-string (- x) radix)))
+      ((and plusp (plusp x))
+       (concat "+" (integer-to-string x radix)))
       (*print-radix*
        (let ((*print-radix* nil))
          (case *print-base*
@@ -107,10 +115,6 @@ accumulated, in the order."
            (16 (concat "#x" (integer-to-string x radix)))
            (otherwise (concat "#" (integer-to-string radix 10 nil)
                               "r" (integer-to-string x radix))))))
-      ((minusp x)
-       (concat "-" (integer-to-string (- x) radix)))
-      ((and plusp (plusp x))
-       (concat "+" (integer-to-string x radix)))
       (t
        (let ((digits nil))
          (while (not (zerop x))
@@ -134,7 +138,7 @@ accumulated, in the order."
 (defun interleave (list element &optional after-last-p)
   (unless (null list)
     (with-collect
-        (collect (car list))
+      (collect (car list))
       (dolist (x (cdr list))
         (collect element)
         (collect x))
