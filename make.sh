@@ -8,11 +8,9 @@ while getopts :v OPT; do
             VERBOSE=t
             ;;
         *)
-            echo "usage: `basename $0` [+-v} [--] ARGS..."
+            echo "usage: `basename $0` [+v]"
             exit 2
     esac
 done
-shift `expr $OPTIND - 1`
-OPTIND=1
 
-sbcl --load "$BASE/jscl.lisp" --eval "(jscl:bootstrap $VERBOSE)" --eval '(quit)'
+exec sbcl --non-interactive --load "$BASE/jscl.lisp" --eval "(jscl:bootstrap $VERBOSE)"

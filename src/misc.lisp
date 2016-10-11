@@ -12,6 +12,7 @@
 ;;
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
+(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
 
 (/debug "loading misc.lisp!")
 
@@ -70,8 +71,8 @@
                      (and #j:process #j:process:version))))
 
 (defmacro time (form)
-  (let ((start (gensym))
-        (end (gensym)))
+  (let ((start (gensym "START-TIME-"))
+        (end (gensym "END-TIME-")))
     `(let ((,start (get-internal-real-time))
            (,end))
        (prog1 (progn ,form)
@@ -81,12 +82,12 @@
 
 ;;;; TRACE
 
-;;; This trace  implementation works on symbols,  replacing the function
-;;; with a wrapper. So  it will not trace calls to  the function if they
+;;; This trace implementation works on symbols, replacing the function
+;;; with a wrapper. So it will not trace calls to the function if they
 ;;; got the function object before it was traced.
 
-;;; An alist  of the  form (NAME  FUNCTION), where NAME  is the  name of
-;;; a function, and FUNCTION is the function traced.
+;;; An alist of the form (NAME FUNCTION), where NAME is the name of a
+;;; function, and FUNCTION is the function traced.
 (defvar *traced-functions* nil)
 (defvar *trace-level* 0)
 
@@ -130,3 +131,15 @@
 
 (defmacro untrace (&rest names)
   `(untrace-functions ',names))
+
+
+;;; Time related functions
+
+(defun get-internal-real-time ()
+  (get-internal-real-time))
+
+(defun get-unix-time ()
+  (truncate (/ (get-internal-real-time) 1000)))
+
+(defun get-universal-time ()
+  (+ (get-unix-time) 2208988800))

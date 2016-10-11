@@ -1,0 +1,15 @@
+@c  This  file  is  the  introduction chapter  which  is  added  to  the
+@c  documentation  produced  by  “make  doc”  —  see  the  Makefile  for
+@c alternative formats available.
+
+JSCL  is a  Common Lisp  implementation  designed to  operate under  the
+JavaScript (ECMA-262) runtime environment in a web browser or Node.js.
+
+At present,  it is fairly incomplete,  and this manual is  in pretty bad
+shape, as well.
+
+For a  good reference to the  Common Lisp ANSI specification,  Google up
+a copy of the Common Lisp HyperSpec, such as that shared by LispWorks.
+
+For details of  JSCL, this manual ---  and the source code  --- are your
+best bet.

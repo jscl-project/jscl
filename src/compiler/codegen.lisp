@@ -23,12 +23,15 @@
 ;;; It is  intended to  be used  with the new  compiler. However,  it is
 ;;; quite independent so it has been integrated early in JSCL.
 
-(/debug "loading compiler-codegen.lisp!")
+(in-package :jscl)
 
-
+(/debug "loading compiler/codegen.lisp!")
+
 (defvar *js-macros* nil)
+
 (defmacro define-js-macro (name lambda-list &body body)
-  (let ((form (gensym)))
+  "Define a macro for emitting JavaScript code from the JavaScript AST."
+  (let ((form (gensym "FORM-")))
     `(push (cons ',name
                  (lambda (,form)
                    (block ,name
@@ -46,94 +49,95 @@
               (js-macroexpand expansion))))
       js))
 
-
-(defconstant no-comma 12)
+(defconstant no-comma 12)               ; ?? ☠
 
 (defvar *js-output* t)
 
 (defvar *js-pretty-print* t)
 
-;;; Two seperate  functions are  needed for  escaping strings: One  for producing  JavaScript string
-;;;  literals (which are singly or doubly quoted) And one for producing Lisp strings (which are only
-;;;  doubly quoted)
+
+
+;;; Two  separate functions  are needed  for escaping  strings: One  for
+;;;  producing JavaScript  string literals  (which are singly  or doubly
+;;;  quoted) And one  for producing Lisp strings (which  are only doubly
+;;;  quoted)
 ;;;
-;;; The same function would suffice for both, but for javascript string literals it is neater to use
-;;; either depending on the  context, e.g: foo's => "foo's" "foo" => '"foo"'  which avoids having to
-;;; escape quotes where possible
+;;; The same function would suffice  for both, but for javascript string
+;;; literals it is  neater to use either depending on  the context, e.g:
+;;; foo's  → "foo's"  "foo" → '"foo"' which  avoids having  to escape
+;;; quotes where possible
 (defun js-escape-string (string)
-  (let ((index 0)
-        (size (length string))
-        (seen-single-quote nil)
-        (seen-double-quote nil)
-        (skipper (gensym)))
+  (let ((size (length string)))
     (flet ((%js-escape-string (string escape-single-quote-p)
              (let ((output "")
                    (index 0))
-               (while (< index size)
-                 (let ((ch (char string index)))
-                   (cond
-                     ((char= ch #\\)
-                      (setq output (concat output "\\")))
-                     ((and escape-single-quote-p (char= ch #\apostrophe))
-                      (setq output (concat output "\\")))
-                     ((char= ch #\newline)
-                      (setq output (concat output "\\"))
-                      (setq ch #\n))
-                     ((char= ch #\return)
-                      (setq output (concat output "\\"))
-                      (setq ch #\r))
-                     ((char= ch #\tab)
-                      (setq output (concat output "\\"))
-                      (setq ch #\t))
-                     ((char= ch #\page)
-                      (setq output (concat output "\\"))
-                      (setq ch #\f))
-                     ((char= ch #\backspace)
-                      (setq output (concat output "\\"))
-                      (setq ch #\b))
-                     ((char= ch #\null)
-                      (setq output (concat output "\\"))
-                      (setq ch #\0))
-                     ((or (<= 1 (char-code ch) 26))
-                      (setq output (concat output "\\c"
-                                           (string (code-char (+ (char-code #\A) -1 (char-code ch))))))
-                      (setq ch skipper))
-                     ((<= 27 (char-code ch) 31)
-                      (setq output (concat output "\\x" (integer-to-string (char-code ch) 16)))
-                      (setq ch skipper))
-                     ((<= 127 (char-code ch) 159)
-                      (let ((s (integer-to-string (char-code ch) 16)))
-                        (setq output (concat output "\\u"
-                                             (make-string (- 4 (length s)) :initial-element #\0)
-                                             s)))
-                      (setq ch skipper)))
-                   (unless (eq ch skipper)
-                     (setq output (concat output (string ch)))))
-                 (incf index))
+               (labels
+                   ((add (stuff)
+                      (setq output (concat output
+                                           (etypecase stuff
+                                             (character (string stuff))
+                                             (vector stuff)))))
+                    (backslash (char)
+                      (add (vector #\\ char))))
+                 (while (< index size)
+                   (let ((ch (char string index)))
+                     (case ch
+                       (#\apostrophe
+                        (if escape-single-quote-p
+                            (backslash #\apostrophe)
+                            (add #\apostrophe)))
+                       (#\\      	(backslash #\\))
+                       (#\newline 	(backslash #\n))
+                       (#\return 	(backslash #\r))
+                       (#\tab 	(backslash #\t))
+                       (#\page 	(backslash #\f))
+                       (#\backspace 	(backslash #\b))
+                       (#\null 	(backslash #\0))
+                       (otherwise
+                        (cond
+                          ((<= 1 (char-code ch) 26)
+                           (add "\\c")
+                           (add (code-char (+ (char-code #\A)
+                                              -1
+                                              (char-code ch)))))
+                          ((<= 27 (char-code ch) 31)
+                           (add "\\x")
+                           (add (integer-to-string (char-code ch) 16)))
+                          ((<= 127 (char-code ch) 159)
+                           (let ((s (integer-to-string (char-code ch) 16)))
+                             (add "\\u")
+                             (add (make-string (- 4 (length s))
+                                               :initial-element #\0))
+                             (add s)))
+                          (t (add ch))))))
+                   (incf index)))
                output)))
       ;; First, scan the string for single/double quotes
-      (while (< index size)
-        (let ((ch (char string index)))
-          (when (char= ch #\apostrophe)
-            (setq seen-single-quote t))
-          (when (char= ch #\")
-            (setq seen-double-quote t)))
-        (incf index))
-      ;; Then pick the appropriate way to escape the quotes
       (cond
-        ((not seen-single-quote)
-         (concat "'"   (%js-escape-string string nil) "'"))
-        ((not seen-double-quote)
-         (concat "\""  (%js-escape-string string nil) "\""))
-        (t (concat "'" (%js-escape-string string t)   "'"))))))
-
-
+        ((not (find #\apostrophe string))
+         (concat #(#\apostrophe)
+                 (%js-escape-string string nil)
+                 #(#\apostrophe)))
+        ((not (find #\" string))
+         (concat #(#\")
+                 (%js-escape-string string nil)
+                 #(#\")))
+        (t
+         (concat #(#\apostrophe)
+                 (%js-escape-string string t)
+                 #(#\apostrophe)))))))
+
 (defun js-format (fmt &rest args)
   (apply #'format *js-output* fmt args))
 
-;;; Check if STRING-DESIGNATOR is  valid as a Javascript identifier. It returns  a couple of values.
-;;; The identifier itself as a string and a boolean value with the result of this check.
+
 (defun valid-js-identifier (string-designator)
+  "Check  if  STRING-DESIGNATOR is  valid  as  a Javascript  identifier.
+ It returns  a couple of values.  The identifier itself as  a string and
+ a boolean value with the result of this check.
+
+FIXME: This  does not check the  list of reserved words  which cannot be
+used as identifiers; for example, “package” and “if”"
   (let ((string (typecase string-designator
                   (symbol (symbol-name string-designator))
                   (string string-designator)
@@ -148,7 +152,7 @@
           (values string t)
           (values nil nil)))))
 
-
+
 ;;; Expression generators
 ;;;
 ;;; `js-expr'  and   the  following   auxiliary  functions  are   the  responsible   for  generating
@@ -180,7 +184,7 @@
         (js-identifier form))))
     (t
      (error "Unknown Javascript syntax ~S." form))))
-
+
 (defun js-vector-initializer (vector)
   (let ((size (length vector)))
     (js-format "[")
@@ -234,7 +238,7 @@
               (and (consp x)
                    (member (car x) '(get = property))))
     (error "Bad Javascript lvalue ~S" x)))
-
+
 ;;; Process the Javascript AST to reduce some syntax sugar.
 (defun js-expand-expr (form)
   (flet ((reduce-expr (op &key from-end)
@@ -265,12 +269,12 @@
           (t
            (js-macroexpand form)))
         form)))
-
-;;; It is the more complicated function of the generator. It takes a
-;;; operator expression and generate Javascript for it. It will
-;;; consider associativity and precedence in order not to generate
-;;; unnecessary parenthesis.
+
 (defun js-operator-expression (op args precedence associativity operand-order)
+  "This is the  most complicated function of the generator.  It takes an
+operator expression  and generates JavaScript  for it. It  will consider
+associativity    and   precedence    in    order    to   not    generate
+unnecessary parentheses."
   (let ((op1 (car args))
         (op2 (cadr args)))
     (case op
@@ -290,7 +294,11 @@
          (js-identifier accessor)))
       ;; Function call
       (call
-       (js-expr (car args) 1)
+       (js-expr (if (and (consp (car args))
+                         (eql (caar args) 'lambda))
+                    (compile-lambda (second (car args)) (cddr (car args)))
+                    (car args))
+                1)
        (js-format "(")
        (when (cdr args)
          (js-expr (cadr args) no-comma)
@@ -414,26 +422,28 @@
              (return-from js-operator-expression))
 
            (error "Unknown operator `~S'" op)))))))
-
+
 (defun js-expr (form &optional (precedence 1000) associativity operand-order)
   (let ((form (js-expand-expr form)))
     (cond
+      ((pathnamep form)
+       (js-primary-expr (concatenate 'string
+                                     "file://"
+                                     (host-namestring form)
+                                     (namestring form))))
       ((or (symbolp form) (numberp form) (stringp form))
        (js-primary-expr form))
       ((vectorp form)
        (js-vector-initializer form))
-      (t
-       (js-operator-expression (car form) (cdr form) precedence associativity operand-order)))))
-
-
-
+      ((consp form)
+       (js-operator-expression (car form) (cdr form)
+                               precedence associativity operand-order)))))
+
 ;;; Statements generators
 ;;;
 ;;; `js-stmt' generates code for Javascript statements. A form is
 ;;; provided to label statements. Remember that in particular,
 ;;; expressions can be used as statements (semicolon suffixed).
-;;;
-
 (defun js-expand-stmt (form)
   (cond
     ((and (consp form) (eq (car form) 'progn))
@@ -541,15 +551,15 @@
                       (js-stmt case))))
                  (js-format "}")))
            (for
-            (destructuring-bind ((start condition step) &body body) (cdr form)
-              (js-format "for (")
-              (js-expr start)
-              (js-format ";")
-              (js-expr condition)
-              (js-format ";")
-              (js-expr step)
-              (js-format ")")
-              (js-stmt `(progn ,@body))))
+               (destructuring-bind ((start condition step) &body body) (cdr form)
+                 (js-format "for (")
+                 (js-expr start)
+                 (js-format ";")
+                 (js-expr condition)
+                 (js-format ";")
+                 (js-expr step)
+                 (js-format ")")
+                 (js-stmt `(progn ,@body))))
            (for-in
             (destructuring-bind ((x object) &body body) (cdr form)
               (js-format "for (")
@@ -586,8 +596,8 @@
             (js-expr form)
             (js-end-stmt))))))))
 
-
-;;; It is intended to be the entry point to the code generator.
+
 (defun js (&rest stmts)
+  "The entry point to the code generator."
   (mapc #'js-stmt stmts)
   nil)

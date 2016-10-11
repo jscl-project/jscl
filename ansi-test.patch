@@ -1,0 +1,13 @@
+diff --git a/gclload1.lsp b/gclload1.lsp
+index fef7cef..fa34186 100644
+--- a/gclload1.lsp
++++ b/gclload1.lsp
+@@ -16,7 +16,7 @@
+ 
+ ;;; Configure logical pathnames
+ (setf (logical-pathname-translations "ansi-tests")
+-      `(("aux;*.*" ,(merge-pathnames
++      `(("aux;*.*.*" ,(merge-pathnames
+                      "auxiliary/"
+                      (make-pathname
+                       :directory

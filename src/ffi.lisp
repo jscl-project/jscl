@@ -13,18 +13,23 @@
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
+(in-package :jscl/ffi) #-jscl-xc #.(error "Do not load this file in the host compiler")
+
 (/debug "loading ffi.lisp!")
 
-(defvar *root*)
+(defvar *root* :error-unbound
+  "The *ROOT* object is “window” (in a browser) or the Node root object.
+ This provides access to whichever root  object happens to exist in the
+ active JavaScript Virtual Machine. ")
 
 (define-setf-expander oget (object key &rest keys)
   (let* ((keys (cons key keys))
-         (g!object (gensym))
+         (g!object (gensym "OBJECT-"))
          (g!keys (mapcar (lambda (s)
                            (declare (ignore s))
-                           (gensym))
+                           (gensym "KEY-"))
                          keys))
-         (g!value (gensym)))
+         (g!value (gensym "VALUE-")))
     (values `(,g!object ,@g!keys)
             `(,object ,@keys)
             `(,g!value)
@@ -33,22 +38,33 @@
 
 (define-setf-expander oget* (object key &rest keys)
   (let* ((keys (cons key keys))
-         (g!object (gensym))
+         (g!object (gensym "OBJECT-"))
          (g!keys (mapcar (lambda (s)
                            (declare (ignore s))
-                           (gensym))
+                           (gensym "KEY-"))
                          keys))
-         (g!value (gensym)))
+         (g!value (gensym "VALUE-")))
     (values `(,g!object ,@g!keys)
             `(,object ,@keys)
             `(,g!value)
             `(oset* ,g!value ,g!object ,@g!keys)
             `(oget* ,g!object ,@g!keys))))
 
+(defun oset (object key value)
+  #+jscl (oset object key value)
+  #-jscl (error "Cannot set ~a.~a ← ~a" object key value))
+
+(defun oset (object &rest keys+value)
+  #+jscl (apply 'oset* object keys+value)
+  #-jscl (error "Cannot set ~a~{.~a~} ← ~a" object
+                (butlast keys+value)
+                (lastcar keys+value)))
 
 (defun make-new (constructor &rest args)
   (apply (%js-internal "newInstance") constructor args))
 
-(%js-vset "eval_in_lisp"
+(%js-vset "internals.eval_in_lisp"
           (lambda (form)
             (eval (read-from-string form))))
+
+(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")

@@ -1,4 +1,4 @@
-;;; list.lisp ---
+;;;; list.lisp --- Lists and pairs and so forth
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
 ;; the terms of the GNU General  Public License as published by the Free
@@ -12,11 +12,13 @@
 ;;
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
+(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
 
 (/debug "loading list.lisp!")
+
+;;; Various list functions
 
-;;;; Various list functions
-
+;;; Compiler primitives
 (defun cons (x y) (cons x y))
 (defun consp (x) (consp x))
 
@@ -34,6 +36,9 @@
   (cond ((null object) t)
         ((consp object) nil)
         (t (error "The value `~S' is not a type list." object))))
+
+
+;;; CAR, CDR, and their kin
 
 (defun car (x)
   "Return the CAR part of a cons, or NIL if X is null."
@@ -59,16 +64,6 @@
 (defun tenth   (x) (cadr (cddddr (cddddr x))))
 (defun rest    (x) (cdr x))
 
-(defun list (&rest args)
-  args)
-
-(defun list* (arg &rest others)
-  (cond ((null others) arg)
-        ((null (cdr others)) (cons arg (car others)))
-        (t (do ((x others (cdr x)))
-               ((null (cddr x)) (rplacd x (cadr x))))
-           (cons arg others))))
-
 (defun list-length (list)
   (let ((l 0))
     (while (not (null list))
@@ -86,9 +81,9 @@
   (car (nthcdr n list)))
 
 (define-setf-expander nth (n list)
-  (let ((g!list (gensym))
-        (g!index (gensym))
-        (g!value (gensym)))
+  (let ((g!list (gensym "NTH-LIST-"))
+        (g!index (gensym "NTH-INDEX-"))
+        (g!value (gensym "NTH-VALUE-")))
     (values (list g!list g!index)
             (list list n)
             (list g!value)
@@ -125,6 +120,30 @@
 (defun cddadr (x) (cdr (cdadr x)))
 (defun cdddar (x) (cdr (cddar x)))
 (defun cddddr (x) (cdr (cdddr x)))
+
+
+;;; Construction
+
+(defun make-list (size &key (initial-element nil))
+  "Create a list of size `size` of `initial-element`s."
+  (when (< size 0)
+    (error "Size must be non-negative"))
+  (let ((newlist))
+    (dotimes (i size newlist)
+      (push initial-element newlist))))
+
+(defun list (&rest args)
+  args)
+
+(defun list* (arg &rest others)
+  (cond ((null others) arg)
+        ((null (cdr others)) (cons arg (car others)))
+        (t (do ((x others (cdr x)))
+               ((null (cddr x)) (rplacd x (cadr x))))
+           (cons arg others))))
+
+
+;;; APPEND, SUBLIS, &c.
 
 (defun append-two (list1 list2)
   (if (null list1)
@@ -180,6 +199,9 @@
           (setq last-cell (cdr last-cell)))
         new-list)))
 
+
+;;; Trees
+
 (defun copy-tree (tree)
   (if (consp tree)
       (cons (copy-tree (car tree))
@@ -198,19 +220,14 @@
                         (%tree-equal (cdr tree1) (cdr tree2))))))
       (%tree-equal tree1 tree2))))
 
+
+;;; The end
+
 (defun tailp (object list)
   (do ((tail list (cdr tail)))
       ((atom tail) (eq object tail))
     (when (eql tail object)
       (return-from tailp t))))
-
-(defun make-list (size &key (initial-element nil))
-  "Create a list of size `size` of `initial-element`s."
-  (when (< size 0)
-    (error "Size must be non-negative"))
-  (let ((newlist))
-    (dotimes (i size newlist)
-      (push initial-element newlist))))
 
 (defun last (x)
   (while (consp (cdr x))
@@ -230,7 +247,8 @@
     ;; trivial optimizations
     ((zerop n) x)
     (t
-     ;; O(n) walk of the linked list, trimming out the link where appropriate
+     ;; O(n)  walk of  the  linked  list, trimming  out  the link  where
+     ;; appropriate
      (let* ((head x)
             (trailing (nthcdr n x)))
        ;; If there are enough conses
@@ -242,6 +260,9 @@
          (rplacd head nil)
          x)))))
 
+
+;;; Sets
+
 (defun member (x list &key key (test #'eql testp) (test-not #'eql test-not-p))
   (while list
     (when (satisfies-test-p x (car list) :key key :test test :testp testp
@@ -249,6 +270,15 @@
       (return list))
     (setq list (cdr list))))
 
+(defun intersection (list1 list2 &key (test #'eql) (key #'identity))
+  (let ((new-list ()))
+    (dolist (x list1)
+      (when (member (funcall key x) list2 :test test :key key)
+        (push x new-list)))
+    new-list))
+
+
+;;; Associative Lists
 
 (defun assoc (x alist &key key (test #'eql testp) (test-not #'eql test-not-p))
   (while alist
@@ -284,24 +314,35 @@
         (collect (cons (caar alist) (cdar alist)))
         (setq alist (cdr alist)))))
 
-(define-setf-expander car (x)
-  (let ((cons (gensym))
-        (new-value (gensym)))
-    (values (list cons)
-            (list x)
-            (list new-value)
-            `(progn (rplaca ,cons ,new-value) ,new-value)
-            `(car ,cons))))
+
+;;; SETFs
 
-(define-setf-expander cdr (x)
-  (let ((cons (gensym))
-        (new-value (gensym)))
-    (values (list cons)
-            (list x)
-            (list new-value)
-            `(progn (rplacd ,cons ,new-value) ,new-value)
-            `(cdr ,cons))))
+(defun (setf car) (value cell)
+  (rplaca cell value)
+  value)
 
+(defun (setf cdr) (value cell)
+  (rplacd cell value)
+  value)
+
+(defun (setf nth) (value n list)
+  (check-type n (integer 0 *) "a list index")
+  (check-type list list)
+  (let ((nthcdr (nthcdr n list)))
+    (rplaca nthcdr value)))
+
+;;; TODO:   test    the   above,   then   remove    the   more   complex
+;;; setf-expanders below.
+
+;; (define-setf-expander   car  (x)   (let   ((cons  (gensym   "CONS-"))
+;;   (new-value (gensym "NEW-CAR-"))) (values (list cons) (list x) (list
+;;   new-value)  `(progn  (rplaca  ,cons ,new-value)  ,new-value)  `(car
+;;   ,cons))))
+
+;; (define-setf-expander   cdr  (x)   (let   ((cons  (gensym   "CONS-"))
+;;   (new-value (gensym "NEW-CDR-"))) (values (list cons) (list x) (list
+;;   new-value)  `(progn  (rplacd  ,cons ,new-value)  ,new-value)  `(cdr
+;;   ,cons))))
 
 ;; The NCONC function is based on the SBCL's one.
 (defun nconc (&rest lists)
@@ -339,18 +380,13 @@
       ((atom 2nd) 3rd)
     (rplacd 2nd 3rd)))
 
-
 (defun adjoin (item list &key (test #'eql) (key #'identity))
   (if (member item list :key key :test test)
       list
       (cons item list)))
 
-(defun intersection (list1 list2 &key (test #'eql) (key #'identity))
-  (let ((new-list ()))
-    (dolist (x list1)
-      (when (member (funcall key x) list2 :test test :key key)
-        (push x new-list)))
-    new-list))
+
+;;; Property lists
 
 (defun get-properties (plist indicator-list)
   (do* ((plist plist (cddr plist))
@@ -388,9 +424,9 @@
 (define-setf-expander getf (plist indicator &optional default)
   (multiple-value-bind (dummies vals newval setter getter)
       (get-setf-expansion plist)
-    (let ((store (gensym))
-          (indicator-sym (gensym))
-          (default-sym (and default (gensym))))
+    (let ((store (gensym "GETF-STORE-"))
+          (indicator-sym (gensym "GETF-INDICATOR-"))
+          (default-sym (and default (gensym "GETF-DEFAULT-"))))
       (values `(,indicator-sym ,@(and default `(,default-sym)) ,@dummies)
               `(,indicator ,@(and default `(,default)) ,@vals)
               `(,store)
@@ -400,20 +436,20 @@
                  ,store)
               `(getf ,getter ,indicator-sym ,@(and default `(,default-sym)))))))
 
+
+;;; Mapping
 
+;; The following code has been taken from SBCL
 
-;;;
-;;; The following code has been taken from SBCL
+;; mapping functions
 
-;;; mapping functions
-
-;;; a helper function for implementation  of MAPC, MAPCAR, MAPCAN, MAPL,
-;;; MAPLIST, and MAPCON
-;;;
-;;; Map the  designated function  over the  arglists in  the appropriate
-;;; way. It is  done when any of  the arglists runs out.  Until then, it
-;;; CDRs down the arglists calling the function and accumulating results
-;;; as desired.
+;; a helper function  for implementation of MAPC,  MAPCAR, MAPCAN, MAPL,
+;; MAPLIST, and MAPCON
+;;
+;; Map the designated function over the arglists in the appropriate way.
+;; It is  done when any  of the arglists runs  out. Until then,  it CDRs
+;; down  the  arglists calling  the  function  and accumulating  results
+;; as desired.
 (defun map1 (fun-designator arglists accumulate take-car)
   (do* ((fun fun-designator)
         (non-acc-result (car arglists))

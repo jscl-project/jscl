@@ -12,6 +12,7 @@
 ;;
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
+(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
 
 (/debug "loading string.lisp!")
 
@@ -118,9 +119,9 @@
                    #'char-equal #'char-lessp t nil t))
 
 (define-setf-expander char (string index)
-  (let ((g!string (gensym))
-        (g!index (gensym))
-        (g!value (gensym)))
+  (let ((g!string (gensym "STRING-"))
+        (g!index (gensym "INDEX-"))
+        (g!value (gensym "VALUE-")))
     (values (list g!string g!index)
             (list string index)
             (list g!value)

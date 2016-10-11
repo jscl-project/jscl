@@ -12,13 +12,18 @@
 ;;
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
+(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+
+(/debug "Loading symbol.lisp")
+
+
 
 (defun symbol-plist (x)
   (cond
     ((not (symbolp x))
      (error "`~a' is not a symbol." x))
     ((in "plist" x)
-     (oget* x "plist"))))
+     (jscl/ffi:oget* x "plist"))))
 
 (defun set-symbol-plist (new-value x)
   (unless (symbolp x )
@@ -28,8 +33,8 @@
   (oset* new-value x "plist"))
 
 (define-setf-expander symbol-plist (x)
-  (let ((g!x (gensym))
-        (g!value (gensym)))
+  (let ((g!x (gensym "SYMBOL-"))
+        (g!value (gensym "VALUE-")))
     (values (list g!x)
             (list x)
             (list g!value)

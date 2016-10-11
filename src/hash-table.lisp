@@ -13,6 +13,8 @@
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
+(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+
 ;;; Plain Javascript  objects are  the natural  way to  implement Common
 ;;; Lisp hash tables. However, there  is a big differences betweent them
 ;;; which we need to work around. Javascript objects require the keys to
@@ -37,7 +39,7 @@
      (unless (in "$$jscl_id" x)
        (oset (format nil "$~d" *eq-hash-counter*) x "$$jscl_id")
        (incf *eq-hash-counter*))
-     (oget x "$$jscl_id"))))
+     (jscl/ffi:oget x "$$jscl_id"))))
 
 ;;; We do not have bignums, so eql is equivalent to eq.
 (defun eql-hash (x)
@@ -56,8 +58,9 @@
      (eql-hash x))))
 
 (defun equalp-hash (x)
-  ;; equalp is not implemented as predicate. So I am skipping this one by now.
-  )
+  ;; FIXME
+  ;; equalp is now implemented as predicate. So this should get implemented now.
+  (error "HASH-TABLE :TEST 'EQUALP is unimplemented"))
 
 
 (defun make-hash-table (&key (test #'eql) size)
@@ -68,8 +71,8 @@
             ((eq test-fn #'eql)   #'eql-hash)
             ((eq test-fn #'equal) #'equal-hash)
             ((eq test-fn #'equalp) #'equalp-hash))))
-    ;; TODO: Replace list with a storage-vector and tag
-    ;; conveniently to implemnet `hash-table-p'.
+    ;; TODO: Replace list with a  storage-vector and tag conveniently to
+    ;; implement `hash-table-p'.
     `(hash-table ,hash-fn ,(new))))
 
 (defun gethash (key hash-table &optional default)
@@ -77,7 +80,7 @@
          (hash (funcall (cadr hash-table) key))
          (exists (in hash obj)))
     (if exists
-        (values (cdr (oget obj hash)) t)
+        (values (cdr (jscl/ffi:oget obj hash)) t)
         (values default nil))))
 
 (defun sethash (new-value key hash-table)
@@ -89,10 +92,10 @@
 
 ;;; TODO: Please, implement (DEFUN (SETF foo) ...) syntax!
 (define-setf-expander gethash (key hash-table &optional defaults)
-  (let ((g!key (gensym))
-        (g!hash-table (gensym))
-        (g!defaults (gensym))
-        (g!new-value (gensym)))
+  (let ((g!key (gensym "KEY-"))
+        (g!hash-table (gensym "HASH-TABLE-"))
+        (g!defaults (gensym "DEFAULTS-"))
+        (g!new-value (gensym "NEW-VALUE-")))
     (values (list g!key g!hash-table g!defaults)            ; temporary variables
             (list key hash-table defaults)                  ; value forms
             (list g!new-value)                              ; store variables

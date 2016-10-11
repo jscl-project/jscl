@@ -10,7 +10,8 @@
 ;;
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
-
+(in-package :repl-web)
+(read-#j)
 (/debug "loading repl-web/repl.lisp!")
 
 (defun %write-string (string &optional (escape t))
@@ -34,7 +35,7 @@
         (stringp nil)
         (s (length string))
         (depth 0))
-
+    
     (while (< i s)
       (cond
         (stringp
@@ -85,7 +86,7 @@
 
             (catch (err)
               (#j:console:log err)
-              (let ((message (or (oget err "message") err)))
+              (let ((message (or (jscl/ffi:oget err "message") err)))
                 (#j:jqconsole:Write (format nil "ERROR[!]: ~a~%" message) "jqconsole-error"))))
 
            (save-history)

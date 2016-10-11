@@ -40,7 +40,8 @@
   (test (or (equal (mapcar #'/ a b c) '( 1  0.5))
             #-jscl (equal (mapcar #'/ a b c) '( 1  1/2)))))
 
-;;; >, >=, =, <, <=, /= As above, we need to make sure the function is called, not the builtin
+;;; >, >=, =, <,  <=, /= As above, we need to make  sure the function is
+;;; >called, not the builtin
 (let ((a '(1 3 1 2 1))
       (b '(2 2 2 2 1))
       (c '(3 1 2 1 1)))

@@ -14,15 +14,16 @@
 ;;
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
-
+(in-package :jscl)
 (/debug "loading utils.lisp!")
 
 (defmacro with-collect (&body body)
   "Makes available to BODY a function named collect. The function accumulates
 values passed to it. The return value of with-collect is the list of values
 accumulated, in the order."
-  (let ((head (gensym))
-        (tail (gensym)))
+  (let ((*break-on-signals* t))
+    (let ((head (gensym "HEAD-"))
+          (tail (gensym "TAIL-")))
     `(let* ((,head (cons 'sentinel nil))
             (,tail ,head))
        (flet ((collect (x)
@@ -30,15 +31,15 @@ accumulated, in the order."
                 (setq ,tail (cdr ,tail))
                 x))
          ,@body)
-       (cdr ,head))))
+         (cdr ,head)))))
 
 (defmacro with-collector ((name &optional (collector (intern (format nil "COLLECT-~a" (symbol-name name))))) &body body)
   "Similar to `with-collect' with the following differences:
  1) However the list where the values are being accumulated is available to the body by the name NAME.
  2) The name COLLECTOR function can be passed as a parameter
  3) The return value the last form of BODY"
-  (let ((head (gensym))
-        (tail (gensym)))
+  (let ((head (gensym "HEAD-"))
+        (tail (gensym "TAIL-")))
     `(let* ((,head (cons 'sentinel nil))
             (,tail ,head))
        (symbol-macrolet ((,name (cdr ,head)))
@@ -51,7 +52,8 @@ accumulated, in the order."
 (defmacro concatf (variable &body form)
   `(setq ,variable (concat ,variable (progn ,@form))))
 
-;;; This couple of helper functions will be defined in both Common Lisp and in JSCL
+;;; This couple of helper functions will  be defined in both Common Lisp
+;;; and in JSCL
 (defun ensure-list (x)
   (if (listp x)
       x
