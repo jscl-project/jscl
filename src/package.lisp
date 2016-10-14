@@ -90,16 +90,21 @@
      (setq *package* (find-package-or-fail ',string-designator))))
 
 (defmacro defpackage (package &rest options)
-  (let (use)
+  (let (use exports)
     (dolist (option options)
       (ecase (car option)
         (:use
-         (setf use (append use (cdr option))))))
+         (setf use (append use (cdr option))))
+        (:export
+         (setf exports (append exports (cdr option))))))
     `(progn
        (eval-when (:load-toplevel :execute)
          (%defpackage ',(string package) ',use))
        (eval-when (:compile-toplevel)
-         (make-package ',(string package) :use ',use)))))
+         (make-package ',(string package) :use ',use))
+       ,@(mapcar (lambda (symbol)
+                   (export (intern (symbol-name symbol) package)))
+                 exports))))
 
 
 (defun redefine-package (package use)
