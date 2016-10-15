@@ -19,6 +19,9 @@
   (:use :cl)
   (:export #:bootstrap #:run-tests-in-host))
 
+(defpackage :jscl/ffi
+  (:use :jscl))
+
 (in-package :jscl)
 
 (defvar *base-directory*
