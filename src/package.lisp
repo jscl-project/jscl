@@ -90,17 +90,21 @@
      (setq *package* (find-package-or-fail ',string-designator))))
 
 (defmacro defpackage (package &rest options)
-  (let (use)
+  (let (use exports)
     (dolist (option options)
       (ecase (car option)
         (:use
-         (setf use (append use (cdr option))))))
+         (setf use (append use (cdr option))))
+        (:export
+         (setf exports (append exports (cdr option))))))
     `(progn
        (eval-when (:load-toplevel :execute)
-         (%defpackage ',(string package) ',use))
+         (%defpackage ',(string package) ',use)
+         ,@(mapcar (lambda (symbol)
+                     `(export (intern ,(string symbol) (find-package ,(string package)))))
+                   exports))
        (eval-when (:compile-toplevel)
          (make-package ',(string package) :use ',use)))))
-
 
 (defun redefine-package (package use)
   (setf (oget package "use") use)
@@ -112,7 +116,6 @@
     (if package
         (redefine-package package use)
         (make-package name :use use))))
-
 
 (defun find-symbol (name &optional (package *package*))
   (let* ((package (find-package-or-fail package))
@@ -128,7 +131,6 @@
          (let ((exports (%package-external-symbols used)))
            (when (in name exports)
              (return (values (oget exports name) :inherit)))))))))
-
 
 ;;; It is a function to call when a symbol is interned. The function
 ;;; is invoked with the already interned symbol as argument.

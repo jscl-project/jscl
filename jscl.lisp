@@ -2,20 +2,25 @@
 
 ;; Copyright (C) 2012, 2013 David Vazquez Copyright (C) 2012 Raimon Grau
 
-;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
-;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
-;; License, or (at your option) any later version.
+;; JSCL is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General  Public License as published by the Free
+;; Software Foundation,  either version  3 of the  License, or  (at your
+;; option) any later version.
 ;;
-;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
-;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
-;; Public License for more details.
+;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
 ;;
-;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
-;; <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
 (defpackage :jscl
   (:use :cl)
   (:export #:bootstrap #:run-tests-in-host))
+
+(defpackage :jscl/ffi
+  (:use :jscl))
 
 (in-package :jscl)
 
@@ -25,8 +30,9 @@
       *default-pathname-defaults*))
 
 (defvar *version*
-  ;; Read the version from  the package.json file. We could have used a  json library to parse this,
-  ;; but that would introduce a dependency and we are not using ASDF yet.
+  ;; Read the  version from  the package.json file.  We could  have used
+  ;; a json library to parse this, but that would introduce a dependency
+  ;; and we are not using ASDF yet.
   (with-open-file (in (merge-pathnames "package.json" *base-directory*))
     (loop
        for line = (read-line in nil)
@@ -36,7 +42,6 @@
                 (comma (position #\, line)))
             (return (string-trim '(#\newline #\" #\tab #\space)
                                  (subseq line (1+ colon) comma)))))))
-
 
 
 ;;; List of all the source files that need to  be compiled, and whether they are to be compiled just
@@ -75,7 +80,6 @@
     ("documentation" :target)
     ("toplevel"      :target)))
 
-
 (defun source-pathname (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
   (merge-pathnames
    (if type
@@ -111,11 +115,11 @@
 ;;; Compile and load jscl into the host
 (with-compilation-unit ()
   (do-source input :host
-             (multiple-value-bind (fasl warn fail) (compile-file input)
-               (declare (ignore warn))
-               (when fail
-                 (error "Compilation of ~A failed." input))
-               (load fasl))))
+    (multiple-value-bind (fasl warn fail) (compile-file input)
+      (declare (ignore warn))
+      (when fail
+        (error "Compilation of ~A failed." input))
+      (load fasl))))
 
 (defun read-whole-file (filename)
   (with-open-file (in filename)
@@ -135,36 +139,38 @@
                    (char= #\newline ch)))
              string)))
 
+(defun complain-about-illegal-chars (form in compilation)
+  (error "Generated illegal characters (first is ~@c)~%Compiling form:~%~S~%from ~s~%Generated:~%~s"
+         (find-if (complement #'possibly-valid-js-p) compilation)
+         form in compilation))
+
 (defun !compile-file (filename out &key print)
   (let ((*compiling-file* t)
         (*compile-print-toplevels* print)
         (*package* *package*))
-    (let* ((source (read-whole-file filename))
-           (in (make-string-stream source)))
+    (let ((in (make-string-stream (read-whole-file filename))))
       (format t "Compiling ~a...~%" (enough-namestring filename))
       (loop
          with eof-mark = (gensym)
-         for x = (ls-read in nil eof-mark)
-         until (eq x eof-mark)
-         do (let ((compilation (compile-toplevel x)))
+         for form = (ls-read in nil eof-mark)
+         until (eq form eof-mark)
+         do (let ((compilation (compile-toplevel form)))
               (if (possibly-valid-js-p compilation)
                   (when (plusp (length compilation))
                     (write-string compilation out))
-                  (error "Generated illegal characters (first is ~@c)~%Compiling form:~%~S~%from ~s~%Generated:~%~s"
-                         (find-if (complement #'possibly-valid-js-p) compilation)
-                         x in compilation)))))))
+                  (complain-about-illegal-chars form in compilation)))))))
 
 (defun dump-global-environment (stream)
   (flet ((late-compile (form)
            (let ((*standard-output* stream))
              (write-string (compile-toplevel form)))))
-    ;; We assume that environments have a friendly list representation
+    ;; We assume  that environments have a  friendly list representation
     ;; for the compiler and it can be dumped.
     (dolist (b (lexenv-function *environment*))
       (when (eq (binding-type b) 'macro)
         (setf (binding-value b) `(,*magic-unquote-marker* ,(binding-value b)))))
     (late-compile `(setq *environment* ',*environment*))
-    ;; Set some counter variable properly, so user compiled code will
+    ;; Set some  counter variable properly,  so user compiled  code will
     ;; not collide with the compiler itself.
     (late-compile
      `(progn
@@ -173,61 +179,70 @@
     (late-compile `(setq *literal-counter* ,*literal-counter*))))
 
 
+(defmacro with-scoping-function ((out) &body body)
+  `(progn (write-string "(function(jscl){
+'use strict';
+\(function(values, internals){" ,out)
+          ,@body
+          (write-string "})(jscl.internals.pv, jscl.internals);
+})( typeof require !== 'undefined'? require('./jscl'): window.jscl )" ,out)
+          (terpri ,out)))
 
 (defun compile-application (files output &key shebang)
   (with-compilation-environment
-      (with-open-file (out output :direction :output :if-exists :supersede)
-        (when shebang
-          (format out "#!/usr/bin/env node~%"))
-        (format out "(function(jscl){~%")
-        (format out "'use strict';~%")
-        (format out "(function(values, internals){~%")
+    (with-open-file (out output :direction :output :if-exists :supersede)
+      (when shebang
+        (write-string "#!/usr/bin/env node" out)
+        (terpri out))
+      (with-scoping-function (out)
         (dolist (input files)
-          (!compile-file input out))
-        (format out "})(jscl.internals.pv, jscl.internals);~%")
-        (format out "})( typeof require !== 'undefined'? require('./jscl'): window.jscl )~%"))))
+          (terpri out)
+          (!compile-file input out))))))
 
+(defun compile-test-suite ()
+  (compile-application
+   `(,(source-pathname "tests.lisp" :directory nil)
+      ,@(directory (source-pathname "*" :directory '(:relative "tests") :type "lisp"))
+      ,(source-pathname "tests-report.lisp" :directory nil))
+   (merge-pathnames "tests.js" *base-directory*)))
 
+(defun compile-web-repl ()
+  (compile-application
+   (list (source-pathname "repl.lisp" :directory '(:relative "repl-web")))
+   (merge-pathnames "repl-web.js" *base-directory*)))
 
-(defun bootstrap (&optional verbose)
+(defun compile-node-repl ()
+  (compile-application
+   (list (source-pathname "repl.lisp" :directory '(:relative "repl-node")))
+   (merge-pathnames "repl-node.js" *base-directory*)
+   :shebang t))
+
+(defun compile-jscl.js (verbosep)
+  (with-compilation-environment
+    (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
+                         :direction :output
+                         :if-exists :supersede)
+      (format out "(function(){~%'use strict';~%")
+      (write-string (read-whole-file (source-pathname "prelude.js")) out)
+      (do-source input :target
+        (!compile-file input out :print verbosep))
+      (dump-global-environment out)
+      (format out "})();~%"))))
+
+(defun bootstrap (&optional verbosep)
   (let ((*features* (list* :jscl :jscl-xc *features*))
         (*package* (find-package "JSCL"))
         (*default-pathname-defaults* *base-directory*))
     (setq *environment* (make-lexenv))
-    (with-compilation-environment
-        (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
-                             :direction :output
-                             :if-exists :supersede)
-          (format out "(function(){~%")
-          (format out "'use strict';~%")
-          (write-string (read-whole-file (source-pathname "prelude.js")) out)
-          (do-source input :target
-                     (!compile-file input out :print verbose))
-          (dump-global-environment out)
-          (format out "})();~%")))
-
+    (compile-jscl.js verbosep)
     (report-undefined-functions)
+    (compile-test-suite)
+    (compile-web-repl)
+    (compile-node-repl)))
 
-    ;; Tests
-    (compile-application
-     `(,(source-pathname "tests.lisp" :directory nil)
-        ,@(directory (source-pathname "*" :directory '(:relative "tests") :type "lisp"))
-        ,(source-pathname "tests-report.lisp" :directory nil))
-     (merge-pathnames "tests.js" *base-directory*))
-
-    ;; Web REPL
-    (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "repl-web")))
-                         (merge-pathnames "repl-web.js" *base-directory*))
-
-    ;; Node REPL
-    (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "repl-node")))
-                         (merge-pathnames "repl-node.js" *base-directory*)
-                         :shebang t)))
-
-
-;;; Run the tests in the host Lisp implementation. It is a quick way
-;;; to improve the level of trust of the tests.
 (defun run-tests-in-host ()
+  "Run the tests in  the host Lisp implementation. It is  a quick way to
+improve the level of trust of the tests."
   (let ((*package* (find-package "JSCL"))
         (*default-pathname-defaults* *base-directory*))
     (load (source-pathname "tests.lisp" :directory nil))
