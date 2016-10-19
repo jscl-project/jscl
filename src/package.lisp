@@ -1,17 +1,15 @@
 ;;; package.lisp ---
 
-;; JSCL is free software: you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation, either version 3 of the
+;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
+;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
 ;; License, or (at your option) any later version.
 ;;
-;; JSCL is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
+;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
+;; Public License for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
+;; <http://www.gnu.org/licenses/>.
 
 (/debug "loading package.lisp!")
 
@@ -30,10 +28,8 @@
       (oget *package-table* (string package-designator))))
 
 (defun delete-package (package-designator)
-  ;; TODO: Signal a correctlable error in case the package-designator does not
-  ;; name a package.
-  ;; TODO: Implement unuse-package and remove the deleted package from packages
-  ;; that use it.
+  ;; TODO: Signal a correctlable error in case the package-designator does not name a package. TODO:
+  ;; Implement unuse-package and remove the deleted package from packages that use it.
   (delete-property (package-name (find-package-or-fail package-designator))
                    *package-table*))
 
@@ -94,17 +90,21 @@
      (setq *package* (find-package-or-fail ',string-designator))))
 
 (defmacro defpackage (package &rest options)
-  (let (use)
+  (let (use exports)
     (dolist (option options)
       (ecase (car option)
         (:use
-         (setf use (append use (cdr option))))))
+         (setf use (append use (cdr option))))
+        (:export
+         (setf exports (append exports (cdr option))))))
     `(progn
        (eval-when (:load-toplevel :execute)
-         (%defpackage ',(string package) ',use))
+         (%defpackage ',(string package) ',use)
+         ,@(mapcar (lambda (symbol)
+                     `(export (intern ,(string symbol) (find-package ,(string package)))))
+                   exports))
        (eval-when (:compile-toplevel)
          (make-package ',(string package) :use ',use)))))
-
 
 (defun redefine-package (package use)
   (setf (oget package "use") use)
@@ -116,7 +116,6 @@
     (if package
         (redefine-package package use)
         (make-package name :use use))))
-
 
 (defun find-symbol (name &optional (package *package*))
   (let* ((package (find-package-or-fail package))
@@ -132,7 +131,6 @@
          (let ((exports (%package-external-symbols used)))
            (when (in name exports)
              (return (values (oget exports name) :inherit)))))))))
-
 
 ;;; It is a function to call when a symbol is interned. The function
 ;;; is invoked with the already interned symbol as argument.
@@ -193,7 +191,7 @@
      ,result-form))
 
 (defmacro do-external-symbols ((var &optional (package '*package*)
-                                              result-form)
+                                    result-form)
                                &body body)
   `(block nil
      (%map-external-symbols

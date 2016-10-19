@@ -1,15 +1,13 @@
-;; JSCL is free software: you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation, either version 3 of the
+;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
+;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
 ;; License, or (at your option) any later version.
 ;;
-;; JSCL is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
+;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
+;; Public License for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
+;; <http://www.gnu.org/licenses/>.
 
 (/debug "loading repl-web/repl.lisp!")
 
@@ -27,14 +25,13 @@
   (#j:localStorage:setItem "jqhist" (#j:JSON:stringify (#j:jqconsole:GetHistory))))
 
 
-;;; Decides wheater the input the user has entered is completed or we
-;;; should accept one more line.
+;;; Decides wheater the input the user has entered is completed or we should accept one more line.
 (defun indent-level (string)
   (let ((i 0)
         (stringp nil)
         (s (length string))
         (depth 0))
-
+    
     (while (< i s)
       (cond
         (stringp
@@ -55,15 +52,14 @@
 
     (if (and (zerop depth))
         nil
-        ;; We should use something based on DEPTH in order to make
-        ;; edition nice, but the behaviour is a bit weird with
-        ;; jqconsole.
+        ;; We should use something  based on DEPTH in order to make edition  nice, but the behaviour
+        ;; is a bit weird with jqconsole.
         0)))
 
 
 
 (defun toplevel ()
-  (#j:jqconsole:RegisterMatching "(" ")" "parents")
+  (#j:jqconsole:RegisterMatching "(" ")" "parens")
 
   (let ((prompt (format nil "~a> " (package-name *package*))))
     (#j:jqconsole:Write prompt "jqconsole-prompt"))
@@ -83,12 +79,12 @@
                 (#j:jqconsole:Write "ERROR: " "jqconsole-error")
                 (#j:jqconsole:Write (apply #'format nil (!condition-args err)) "jqconsole-error")
                 (#j:jqconsole:Write (string #\newline) "jqconsole-error")))
-            
+
             (catch (err)
               (#j:console:log err)
               (let ((message (or (oget err "message") err)))
                 (#j:jqconsole:Write (format nil "ERROR[!]: ~a~%" message) "jqconsole-error"))))
-           
+
            (save-history)
            (toplevel)))
     (#j:jqconsole:Prompt t #'process-input #'indent-level)))

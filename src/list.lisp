@@ -1,17 +1,15 @@
-;;; list.lisp --- 
+;;; list.lisp ---
 
-;; JSCL is free software: you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation, either version 3 of the
+;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
+;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
 ;; License, or (at your option) any later version.
 ;;
-;; JSCL is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
+;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
+;; Public License for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
+;; <http://www.gnu.org/licenses/>.
 
 (/debug "loading list.lisp!")
 
@@ -28,9 +26,9 @@
 
 (defun endp (object)
   "It returns true if OBJECT is NIL, false if OBJECT is a CONS, and an error
-   for any other type of OBJECT.
+ for any other type of OBJECT.
 
-   This is the recommended way to test for the end of a proper list."
+ This is the recommended way to test for the end of a proper list."
   (cond ((null object) t)
         ((consp object) nil)
         (t (error "The value `~S' is not a type list." object))))
@@ -171,36 +169,36 @@
 
 (defun copy-list (x)
   (if (null x)
-    nil
-    (let* ((new-list (list (car x)))
-           (last-cell new-list))
-      (do ((orig (cdr x) (cdr orig)))
-        ((atom orig) (rplacd last-cell orig))
-        (rplacd last-cell (cons (car orig) nil))
-        (setq last-cell (cdr last-cell)))
-      new-list)))
+      nil
+      (let* ((new-list (list (car x)))
+             (last-cell new-list))
+        (do ((orig (cdr x) (cdr orig)))
+            ((atom orig) (rplacd last-cell orig))
+          (rplacd last-cell (cons (car orig) nil))
+          (setq last-cell (cdr last-cell)))
+        new-list)))
 
 (defun copy-tree (tree)
   (if (consp tree)
-    (cons (copy-tree (car tree))
-          (copy-tree (cdr tree)))
-    tree))
+      (cons (copy-tree (car tree))
+            (copy-tree (cdr tree)))
+      tree))
 
 (defun tree-equal (tree1 tree2 &key (test #'eql testp)
-                         (test-not #'eql test-not-p))
+                                    (test-not #'eql test-not-p))
   (when (and testp test-not-p) (error "Both test and test-not are set"))
   (let ((func (if test-not-p (complement test-not) test)))
     (labels ((%tree-equal (tree1 tree2)
                (if (atom tree1)
-                 (and (atom tree2) (funcall func tree1 tree2))
-                 (and (consp tree2)
-                      (%tree-equal (car tree1) (car tree2))
-                      (%tree-equal (cdr tree1) (cdr tree2))))))
+                   (and (atom tree2) (funcall func tree1 tree2))
+                   (and (consp tree2)
+                        (%tree-equal (car tree1) (car tree2))
+                        (%tree-equal (cdr tree1) (cdr tree2))))))
       (%tree-equal tree1 tree2))))
 
 (defun tailp (object list)
   (do ((tail list (cdr tail)))
-    ((atom tail) (eq object tail))
+      ((atom tail) (eq object tail))
     (when (eql tail object)
       (return-from tailp t))))
 
@@ -214,39 +212,39 @@
 
 (defun map1 (func list)
   (with-collect
-    (while list
-      (collect (funcall func (car list)))
-      (setq list (cdr list)))))
+      (while list
+        (collect (funcall func (car list)))
+        (setq list (cdr list)))))
 
 (defun mapcar (func list &rest lists)
   (let ((lists (cons list lists)))
     (with-collect
-      (block loop
-        (loop
-           (let ((elems (map1 #'car lists)))
-             (do ((tail lists (cdr tail)))
-                 ((null tail))
-               (when (null (car tail)) (return-from loop))
-               (rplaca tail (cdar tail)))
-             (collect (apply func elems))))))))
+        (block loop
+          (loop
+             (let ((elems (map1 #'car lists)))
+               (do ((tail lists (cdr tail)))
+                   ((null tail))
+                 (when (null (car tail)) (return-from loop))
+                 (rplaca tail (cdar tail)))
+               (collect (apply func elems))))))))
 
 (defun mapn (func list)
   (with-collect
-    (while list
-      (collect (funcall func list))
-      (setq list (cdr list)))))
+      (while list
+        (collect (funcall func list))
+        (setq list (cdr list)))))
 
 (defun maplist (func list &rest lists)
   (let ((lists (cons list lists)))
     (with-collect
-      (block loop
-        (loop
-           (let ((elems (mapn #'car lists)))
-             (do ((tail lists (cdr tail)))
-                 ((null tail))
-               (when (null (car tail)) (return-from loop))
-               (rplaca tail (cdar tail)))
-             (collect (apply func elems))))))))
+        (block loop
+          (loop
+             (let ((elems (mapn #'car lists)))
+               (do ((tail lists (cdr tail)))
+                   ((null tail))
+                 (when (null (car tail)) (return-from loop))
+                 (rplaca tail (cdar tail)))
+               (collect (apply func elems))))))))
 
 (defun mapc (func &rest lists)
   (do* ((tails lists (map1 #'cdr tails))
@@ -298,17 +296,17 @@
   (while alist
     (if (satisfies-test-p x (caar alist) :key key :test test :testp testp
                           :test-not test-not :test-not-p test-not-p)
-      (return)
-      (setq alist (cdr alist))))
+        (return)
+        (setq alist (cdr alist))))
   (car alist))
 
 (defun rassoc (x alist &key key (test #'eql) (test #'eql testp)
-                 (test-not #'eql test-not-p))
+                            (test-not #'eql test-not-p))
   (while alist
     (if (satisfies-test-p x (cdar alist) :key key :test test :testp testp
                           :test-not test-not :test-not-p test-not-p)
-      (return)
-      (setq alist (cdr alist))))
+        (return)
+        (setq alist (cdr alist))))
   (car alist))
 
 (defun acons (key datum alist)
@@ -324,9 +322,9 @@
 (defun copy-alist (alist)
   "Return a new association list which is EQUAL to ALIST."
   (with-collect
-    (while alist
-      (collect (cons (caar alist) (cdar alist)))
-      (setq alist (cdr alist)))))
+      (while alist
+        (collect (cons (caar alist) (cdar alist)))
+        (setq alist (cdr alist)))))
 
 (define-setf-expander car (x)
   (let ((cons (gensym))
@@ -386,8 +384,8 @@
 
 (defun adjoin (item list &key (test #'eql) (key #'identity))
   (if (member item list :key key :test test)
-    list
-    (cons item list)))
+      list
+      (cons item list)))
 
 (defun intersection (list1 list2 &key (test #'eql) (key #'identity))
   (let ((new-list ()))
@@ -400,7 +398,7 @@
   (do* ((plist plist (cddr plist))
         (cdr (cdr plist) (cdr plist))
         (car (car plist) (car plist)))
-      ((null plist) (values nil nil nil))
+       ((null plist) (values nil nil nil))
     (when (null cdr)
       (error "malformed property list ~S" plist))
     (let ((found (member car indicator-list :test #'eq)))
@@ -411,7 +409,7 @@
   (do* ((plist plist (cddr plist))
         (cdr (cdr plist) (cdr plist))
         (car (car plist) (car plist)))
-      ((null plist) default)
+       ((null plist) default)
     (when (null cdr)
       (error "malformed property list ~S" plist))
     (when (eq indicator car)
@@ -421,7 +419,7 @@
   (do* ((tail plist (cddr tail))
         (cdr (cdr tail) (cdr tail))
         (car (car tail) (car tail)))
-      ((null tail) (list* indicator new-value plist))
+       ((null tail) (list* indicator new-value plist))
     (when (null cdr)
       (error "malformed property list ~S" tail))
     (when (eq indicator car)
