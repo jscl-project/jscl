@@ -83,6 +83,8 @@
      ("codegen"      :both)
      ("compiler"     :both))
     ("documentation" :target)
+    ("ansiloop"
+     ("ansi-loop"    :target))
     ("toplevel"      :target)))
 
 
