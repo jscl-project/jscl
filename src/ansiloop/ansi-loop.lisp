@@ -207,23 +207,11 @@
 ;;;; List Collection Macrology
 
 
-;; (defmacro with-loop-list-collection-head ((head-var tail-var &optional user-head-var)
-;; 					  &body body)
-;;   ;;@@@@ TI? Exploder?
-;;   #+LISPM (let ((head-place (or user-head-var head-var)))
-;; 	    `(let* ((,head-place nil)
-;; 		    (,tail-var
-;; 		      ,(hide-variable-reference
-;; 			 user-head-var user-head-var
-;; 			 `(progn #+Genera (scl:locf ,head-place)
-;; 				 #-Genera (system:variable-location ,head-place)))))
-;; 	       ,@body))
-;;   #-LISPM (let ((l (and user-head-var (list (list user-head-var nil)))))
-;; 	    #+CLOE `(sys::with-stack-list* (,head-var nil nil)
-;; 		      (let ((,tail-var ,head-var) ,@l)
-;; 			,@body))
-;; 	    #-CLOE `(let* ((,head-var (list nil)) (,tail-var ,head-var) ,@l)
-;; 		      ,@body)))
+(defmacro with-loop-list-collection-head ((head-var tail-var &optional user-head-var)
+					  &body body)
+  (let ((l (and user-head-var (list (list user-head-var nil)))))
+    `(let* ((,head-var (list nil)) (,tail-var ,head-var) ,@l)
+       ,@body)))
 
 
 ;; (defmacro loop-collect-rplacd (&environment env
