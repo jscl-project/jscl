@@ -363,6 +363,7 @@
                      (if (find (car c) '(t otherwise))
                          `(t ,@(rest c))
                          `((,(ecase (car c)
+                                    (fixnum 'integerp)
                                     (integer 'integerp)
                                     (cons 'consp)
                                     (list 'listp)
