@@ -439,3 +439,17 @@
   `(multiple-value-call (lambda (&rest values)
                           (nth ,n values))
      ,form))
+
+
+(defun constantp (x)
+  ;; TODO: Consider quoted forms, &environment and many other
+  ;; semantics of this function.
+  (cond
+    ((symbolp x)
+     (cond
+       ((eq x t) t)
+       ((setq x nil) t)))
+    ((atom x)
+     t)
+    (t
+     nil)))
