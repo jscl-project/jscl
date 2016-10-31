@@ -859,6 +859,7 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
 	  ((atom x) 1)				;??? self-evaluating???
 	  ((symbolp (car x))
 	   (let ((fn (car x)) (tem nil) (n 0))
+         ;; FIXME: JSCL doen't support declarations at this context
 	     (declare (symbol fn) (fixnum n))
 	     (macrolet ((f (overhead &optional (args nil args-p))
 			  `(the fixnum (+ (the fixnum ,overhead)
@@ -1761,7 +1762,8 @@ collected result will be returned as the value of the LOOP."
 		   initial-phrases))
 	 (used-prepositions (mapcar #'car initial-phrases)))
 	((null *loop-source-code*) (nreverse prepositional-phrases))
-      (declare (symbol this-prep))
+      ;; FIXME: JSCL doen't support declarations at this context
+      #+nil (declare (symbol this-prep))
       (setq token (car *loop-source-code*))
       (dolist (group preposition-groups)
 	(when (setq this-prep (in-group-p token group))
