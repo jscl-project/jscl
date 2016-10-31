@@ -453,7 +453,7 @@ code to be loaded.
 (defun make-standard-loop-universe (&key keywords for-keywords iteration-keywords path-keywords
 				    type-keywords type-symbols ansi)
   #-(and CLOE Source-Bootstrap)
-  (check-type ansi (member nil t :extended))
+  ;; (check-type ansi (member nil t :extended))
   (flet ((maketable (entries)
 	   (let* ((size (length entries))
 		  (ht (make-hash-table :size (if (< size 10) 10 size) :test #'equal)))
@@ -1668,7 +1668,8 @@ collected result will be returned as the value of the LOOP."
 (defun add-loop-path (names function universe &key preposition-groups inclusive-permitted user-data)
   (unless (listp names) (setq names (list names)))
   ;; Can't do this due to CLOS bootstrapping problems.
-  #-(or Genera (and CLOE Source-Bootstrap)) (check-type universe loop-universe)
+  #-(or Genera (and CLOE Source-Bootstrap))
+  ;; (check-type universe loop-universe)
   (let ((ht (loop-universe-path-keywords universe))
 	(lp (make-loop-path
 	      :names (mapcar #'symbol-name names)
@@ -1933,7 +1934,7 @@ collected result will be returned as the value of the LOOP."
 ||#
 
 (defun loop-hash-table-iteration-path (variable data-type prep-phrases &key which)
-  (check-type which (member hash-key hash-value))
+  ;; (check-type which (member hash-key hash-value))
   (cond ((or (cdr prep-phrases) (not (member (caar prep-phrases) '(:in :of))))
 	 (loop-error "Too many prepositions!"))
 	((null prep-phrases) (loop-error "Missing OF or IN in ~S iteration path.")))
@@ -2055,6 +2056,7 @@ collected result will be returned as the value of the LOOP."
 				   symbol t vector)
 	     :type-keywords nil
 	     :ansi (if extended-p :extended t))))
+
     (add-loop-path '(hash-key hash-keys) 'loop-hash-table-iteration-path w
 		   :preposition-groups '((:of :in))
 		   :inclusive-permitted nil
@@ -2079,9 +2081,7 @@ collected result will be returned as the value of the LOOP."
 
 
 (defparameter *loop-ansi-universe*
-  ;; (make-ansi-loop-universe nil))
-  nil
-  )
+  (make-ansi-loop-universe nil)))
 
 (defun loop-standard-expansion (keywords-and-forms environment universe)
   (if (and keywords-and-forms (symbolp (car keywords-and-forms)))
