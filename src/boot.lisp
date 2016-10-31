@@ -391,6 +391,11 @@
          ,@clausules
          (t (error "~S fell through etypecase expression." ,g!x))))))
 
+
+;;; No type system is implemented yet.
+(defun subtypep (type1 type2)
+  (values nil nil))
+
 (defun notany (fn seq)
   (not (some fn seq)))
 
