@@ -704,10 +704,12 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
     #-Genera (when (setq constantp (constantp new-form))
 	       (setq constant-value (eval new-form)))
     (when (and constantp expected-type)
+      ;; FIXME: The warning are useful but we do not have a type system yet.
+      #+nil
       (unless (typep constant-value expected-type)
-	(loop-warn "The form ~S evaluated to ~S, which was not of the anticipated type ~S."
+        (loop-warn "The form ~S evaluated to ~S, which was not of the anticipated type ~S."
 		   form constant-value expected-type)
-	(setq constantp nil constant-value nil)))
+        (setq constantp nil constant-value nil)))
     (values new-form constantp constant-value)))
 
 
