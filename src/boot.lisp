@@ -124,6 +124,9 @@
 (defun apply (function arg &rest args)
   (apply function (apply #'list* arg args)))
 
+(defun symbol-name (x)
+  (symbol-name x))
+
 ;; Basic macros
 
 (defmacro dolist ((var list &optional result) &body body)
