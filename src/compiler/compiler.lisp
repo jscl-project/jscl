@@ -1460,6 +1460,10 @@
     (t
      (values form nil))))
 
+#+jscl
+(fset 'macroexpand-1 #'!macroexpand-1)
+
+
 (defun compile-funcall (function args)
   (let* ((arglist (cons (if *multiple-value-p* '|values| '(internal |pv|))
 			(mapcar #'convert args))))
