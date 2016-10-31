@@ -950,6 +950,10 @@
     (progn ,@(mapcar #'convert forms))
     (return args)))
 
+(define-compilation the (value-type form)
+  (convert form *multiple-value-p*))
+
+
 (define-transformation backquote (form)
   (bq-completely-process form))
 
