@@ -314,7 +314,15 @@
 
 
 (defun make-loop-minimax (answer-variable type)
-  (let ((infinity-data (cdr (assoc type *loop-minimax-type-infinities-alist* :test #'subtypep))))
+  (let ((infinity-data
+         ;; FIXME: The original code relies relied on subtypep, but
+         ;; JSCL still doesn't have a proper implementation of the
+         ;; type system.
+         #+nil (cdr (assoc type *loop-minimax-type-infinities-alist* :test #'subtypep))
+         ;;
+         ;; so we just inline the value in here
+         '(most-positive-fixnum most-negative-fixnum)))
+
     (make-loop-minimax-internal
       :answer-variable answer-variable
       :type type
