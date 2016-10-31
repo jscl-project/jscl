@@ -1668,7 +1668,7 @@ collected result will be returned as the value of the LOOP."
 (defun add-loop-path (names function universe &key preposition-groups inclusive-permitted user-data)
   (unless (listp names) (setq names (list names)))
   ;; Can't do this due to CLOS bootstrapping problems.
-  #-(or Genera (and CLOE Source-Bootstrap))
+  ;; #-(or Genera (and CLOE Source-Bootstrap))
   ;; (check-type universe loop-universe)
   (let ((ht (loop-universe-path-keywords universe))
 	(lp (make-loop-path
