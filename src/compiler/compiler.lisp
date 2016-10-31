@@ -425,7 +425,7 @@
   (let ((str (string symbol)))
     (intern
      (with-output-to-string (out)
-       (format out "~a" prefix)
+       (format out "~a" (string prefix))
        (dotimes (i (length str))
          (let ((ch (char str i)))
            (when (char<= #\a (char-downcase ch) #\z)
