@@ -1476,6 +1476,15 @@
 #+jscl
 (fset 'macroexpand-1 #'!macroexpand-1)
 
+(defun !macroexpand (form &optional env)
+  (let ((continue t))
+    (while continue
+      (multiple-value-setq (form continue) (!macroexpand-1 form env)))
+    form))
+#+jscl
+(fset 'macroexpand #'!macroexpand)
+
+
 
 (defun compile-funcall (function args)
   (let* ((arglist (cons (if *multiple-value-p* '|values| '(internal |pv|))
