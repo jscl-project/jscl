@@ -930,7 +930,7 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
 
 
 ;;;INTERFACE: Traditional, ANSI, Lucid.
-(defmacro loop-finish () 
+(defmacro !loop-finish () 
   "Causes the iteration to terminate \"normally\", the same as implicit
 termination by an iteration driving clause, or by use of WHILE or
 UNTIL -- the epilogue code (if any) will be run, and any implicitly
@@ -940,61 +940,67 @@ collected result will be returned as the value of the LOOP."
 
 
 
-(defun loop-translate (*loop-source-code* *loop-macro-environment* *loop-universe*)
-  (let ((*loop-original-source-code* *loop-source-code*)
-	(*loop-source-context* nil)
-	(*loop-iteration-variables* nil)
-	(*loop-variables* nil)
-	(*loop-nodeclare* nil)
-	(*loop-named-variables* nil)
-	(*loop-declarations* nil)
-	(*loop-desetq-crocks* nil)
-	(*loop-bind-stack* nil)
-	(*loop-prologue* nil)
-	(*loop-wrappers* nil)
-	(*loop-before-loop* nil)
-	(*loop-body* nil)
-	(*loop-emitted-body* nil)
-	(*loop-after-body* nil)
-	(*loop-epilogue* nil)
-	(*loop-after-epilogue* nil)
-	(*loop-final-value-culprit* nil)
-	(*loop-inside-conditional* nil)
-	(*loop-when-it-variable* nil)
-	(*loop-never-stepped-variable* nil)
-	(*loop-names* nil)
-	(*loop-collection-cruft* nil))
-    (loop-iteration-driver)
-    (loop-bind-block)
-    (let ((answer `(loop-body
-		     ,(nreverse *loop-prologue*)
-		     ,(nreverse *loop-before-loop*)
-		     ,(nreverse *loop-body*)
-		     ,(nreverse *loop-after-body*)
-		     ,(nreconc *loop-epilogue* (nreverse *loop-after-epilogue*)))))
-      (do () (nil)
-	(setq answer `(block ,(pop *loop-names*) ,answer))
-	(unless *loop-names* (return nil)))
-      (dolist (entry *loop-bind-stack*)
-	(let ((vars (first entry))
-	      (dcls (second entry))
-	      (crocks (third entry))
-	      (wrappers (fourth entry)))
-	  (dolist (w wrappers)
-	    (setq answer (append w (list answer))))
-	  (when (or vars dcls crocks)
-	    (let ((forms (list answer)))
-	      ;;(when crocks (push crocks forms))
-	      (when dcls (push `(declare ,@dcls) forms))
-	      (setq answer `(,(cond ((not vars) 'locally)
-				    (*loop-destructuring-hooks* (first *loop-destructuring-hooks*))
-				    (t 'let))
-			     ,vars
-			     ,@(if crocks
-				   `((destructuring-bind ,@crocks
-					 ,@forms))
-				 forms)))))))
-      answer)))
+(defun loop-translate (loop-source-code loop-macro-environment loop-universe)
+  ;; FIXME: Originally, these variables were bound in the arguments
+  ;; directly, but as the time of writing, JSCL does not support
+  ;; special bindings as function arguments yet.
+  (let* ((*loop-source-code* loop-source-code)
+         (*loop-macro-environment* loop-macro-environment)
+         (*loop-universe* loop-universe))
+    (let ((*loop-original-source-code* *loop-source-code*)
+          (*loop-source-context* nil)
+          (*loop-iteration-variables* nil)
+          (*loop-variables* nil)
+          (*loop-nodeclare* nil)
+          (*loop-named-variables* nil)
+          (*loop-declarations* nil)
+          (*loop-desetq-crocks* nil)
+          (*loop-bind-stack* nil)
+          (*loop-prologue* nil)
+          (*loop-wrappers* nil)
+          (*loop-before-loop* nil)
+          (*loop-body* nil)
+          (*loop-emitted-body* nil)
+          (*loop-after-body* nil)
+          (*loop-epilogue* nil)
+          (*loop-after-epilogue* nil)
+          (*loop-final-value-culprit* nil)
+          (*loop-inside-conditional* nil)
+          (*loop-when-it-variable* nil)
+          (*loop-never-stepped-variable* nil)
+          (*loop-names* nil)
+          (*loop-collection-cruft* nil))
+      (loop-iteration-driver)
+      (loop-bind-block)
+      (let ((answer `(loop-body
+                        ,(nreverse *loop-prologue*)
+                        ,(nreverse *loop-before-loop*)
+                        ,(nreverse *loop-body*)
+                        ,(nreverse *loop-after-body*)
+                        ,(nreconc *loop-epilogue* (nreverse *loop-after-epilogue*)))))
+        (do () (nil)
+          (setq answer `(block ,(pop *loop-names*) ,answer))
+          (unless *loop-names* (return nil)))
+        (dolist (entry *loop-bind-stack*)
+          (let ((vars (first entry))
+                (dcls (second entry))
+                (crocks (third entry))
+                (wrappers (fourth entry)))
+            (dolist (w wrappers)
+              (setq answer (append w (list answer))))
+            (when (or vars dcls crocks)
+              (let ((forms (list answer)))
+                ;;(when crocks (push crocks forms))
+                (when dcls (push `(declare ,@dcls) forms))
+                (setq answer `(,(cond ((not vars) 'locally)
+                                      (*loop-destructuring-hooks* (first *loop-destructuring-hooks*))
+                                      (t 'let))
+                                ,vars
+                                ,@(if crocks
+                                      `((destructuring-bind ,@crocks
+                                            ,@forms))
+                                      forms)))))))
+        answer))))
 
 
 (defun loop-iteration-driver ()
@@ -2095,7 +2101,7 @@ collected result will be returned as the value of the LOOP."
 
 
 ;; INTERFACE: ANSI
-(defmacro loop (&rest keywords-and-forms)
+(defmacro !loop (&rest keywords-and-forms)
   #+Genera (declare (compiler:do-not-record-macroexpansions)
 		    (zwei:indentation . zwei:indent-loop))
   (loop-standard-expansion keywords-and-forms jscl::*environment* *loop-ansi-universe*))
