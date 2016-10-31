@@ -354,6 +354,21 @@
   `(multiple-value-call #'list ,value-from))
 
 
+(defmacro multiple-value-setq ((&rest vars) &rest form)
+  (let ((gvars (mapcar (lambda (x) (gensym)) vars))
+        (setqs '()))
+
+    (do ((vars vars (cdr vars))
+         (gvars gvars (cdr gvars)))
+        ((or (null vars) (null gvars)))
+      (push `(setq ,(car vars) ,(car gvars))
+            setqs))
+    (setq setqs (reverse setqs))
+
+    `(multiple-value-call (lambda ,gvars ,@setqs)
+       ,@form)))
+
+
 ;; Incorrect typecase, but used in NCONC.
 (defmacro typecase (x &rest clausules)
   (let ((value (gensym)))
