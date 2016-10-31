@@ -2081,7 +2081,7 @@ collected result will be returned as the value of the LOOP."
 
 
 (defparameter *loop-ansi-universe*
-  (make-ansi-loop-universe nil)))
+  (make-ansi-loop-universe nil))
 
 (defun loop-standard-expansion (keywords-and-forms environment universe)
   (if (and keywords-and-forms (symbolp (car keywords-and-forms)))
