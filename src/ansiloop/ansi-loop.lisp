@@ -1417,9 +1417,10 @@ collected result will be returned as the value of the LOOP."
 		     ,(loop-construct-return *loop-when-it-variable*))))
 
 
-(defun loop-do-while (negate kwd &aux (form (loop-get-form)))
-  (loop-disallow-conditional kwd)
-  (loop-pseudo-body `(,(if negate 'when 'unless) ,form (go end-loop))))
+(defun loop-do-while (negate kwd)
+  (let ((form (loop-get-form)))
+    (loop-disallow-conditional kwd)
+    (loop-pseudo-body `(,(if negate 'when 'unless) ,form (go end-loop)))))
 
 
 (defun loop-do-with ()
