@@ -420,6 +420,17 @@
     (push-to-lexenv binding *environment* 'variable)
     `(var (,gvar |this|))))
 
+
+(defun jsize-symbol (symbol prefix)
+  (let ((str (string symbol)))
+    (intern
+     (with-output-to-string (out)
+       (format out "~a" prefix)
+       (dotimes (i (length str))
+         (let ((ch (char str i)))
+           (when (char<= #\a (char-downcase ch) #\z)
+             (write-char ch out))))))))
+
 ;;; Compile a lambda function with lambda list LL and body BODY. If
 ;;; NAME is given, it should be a constant string and it will become
 ;;; the name of the function. If BLOCK is non-NIL, a named block is
@@ -444,21 +455,22 @@
                                     (ll-svars ll)))))
 
         (lambda-name/docstring-wrapper name documentation
-         `(function (|values| ,@(mapcar (lambda (x)
-                                          (translate-variable x))
-                                        (append required-arguments optional-arguments)))
-                     ;; Check number of arguments
-                    ,(lambda-check-argument-count n-required-arguments
-                                                  n-optional-arguments
-                                                  (or rest-argument keyword-arguments))
-                    ,(compile-lambda-optional ll)
-                    ,(compile-lambda-rest ll)
-                    ,(compile-lambda-parse-keywords ll)
-                    ,(bind-this)
-                    ,(let ((*multiple-value-p* t))
-                          (if block
-                              (convert-block `((block ,block ,@body)) t)
-                              (convert-block body t)))))))))
+         `(named-function ,(jsize-symbol name 'jscl_user_)
+                          (|values| ,@(mapcar (lambda (x)
+                                                (translate-variable x))
+                                              (append required-arguments optional-arguments)))
+                          ;; Check number of arguments
+                          ,(lambda-check-argument-count n-required-arguments
+                                                        n-optional-arguments
+                                                        (or rest-argument keyword-arguments))
+                          ,(compile-lambda-optional ll)
+                          ,(compile-lambda-rest ll)
+                          ,(compile-lambda-parse-keywords ll)
+                          ,(bind-this)
+                          ,(let ((*multiple-value-p* t))
+                             (if block
+                                 (convert-block `((block ,block ,@body)) t)
+                                 (convert-block body t)))))))))
 
 
 (defun setq-pair (var val)
