@@ -131,7 +131,7 @@
   (multiple-value-bind (string valid)
       (valid-js-identifier string-designator)
     (unless valid
-      (error "~S is not a valid Javascript identifier." string))
+      (error "~S is not a valid Javascript identifier." string-designator))
     (js-format "~a" string)))
 
 (defun js-primary-expr (form)
@@ -187,8 +187,12 @@
   (when wrap-p
     (js-format ")")))
 
-(defun js-function (arguments &rest body)
-  (js-format "function(")
+(defun js-function (name arguments &rest body)
+  (js-format "function")
+  (when name
+    (js-format " ")
+    (js-identifier name))
+  (js-format "(")
   (when arguments
     (js-identifier (car arguments))
     (dolist (arg (cdr arguments))
@@ -270,6 +274,10 @@
        (js-object-initializer args))
       ;; Function expressions
       (function
+       (js-format "(")
+       (apply #'js-function nil args)
+       (js-format ")"))
+      (named-function
        (js-format "(")
        (apply #'js-function args)
        (js-format ")"))
