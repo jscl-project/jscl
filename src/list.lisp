@@ -212,49 +212,7 @@
     (dotimes (i size newlist)
       (push initial-element newlist))))
 
-(defun map1 (func list)
-  (with-collect
-    (while list
-      (collect (funcall func (car list)))
-      (setq list (cdr list)))))
 
-(defun mapcar (func list &rest lists)
-  (let ((lists (cons list lists)))
-    (with-collect
-      (block loop
-        (loop
-           (let ((elems (map1 #'car lists)))
-             (do ((tail lists (cdr tail)))
-                 ((null tail))
-               (when (null (car tail)) (return-from loop))
-               (rplaca tail (cdar tail)))
-             (collect (apply func elems))))))))
-
-(defun mapn (func list)
-  (with-collect
-    (while list
-      (collect (funcall func list))
-      (setq list (cdr list)))))
-
-(defun maplist (func list &rest lists)
-  (let ((lists (cons list lists)))
-    (with-collect
-      (block loop
-        (loop
-           (let ((elems (mapn #'car lists)))
-             (do ((tail lists (cdr tail)))
-                 ((null tail))
-               (when (null (car tail)) (return-from loop))
-               (rplaca tail (cdar tail)))
-             (collect (apply func elems))))))))
-
-(defun mapc (func &rest lists)
-  (do* ((tails lists (map1 #'cdr tails))
-        (elems (map1 #'car tails)
-               (map1 #'car tails)))
-       ((dolist (x tails) (when (null x) (return t)))
-        (car lists))
-    (apply func elems)))
 
 (defun last (x)
   (while (consp (cdr x))
@@ -443,3 +401,71 @@
                  ,setter
                  ,store)
               `(getf ,getter ,indicator-sym ,@(and default `(,default-sym)))))))
+
+
+
+;;; 
+;;; The following code has been taken from SBCL
+;;; 
+
+;;; mapping functions
+
+;;; a helper function for implementation of MAPC, MAPCAR, MAPCAN,
+;;; MAPL, MAPLIST, and MAPCON
+;;;
+;;; Map the designated function over the arglists in the appropriate
+;;; way. It is done when any of the arglists runs out. Until then, it
+;;; CDRs down the arglists calling the function and accumulating
+;;; results as desired.
+(defun map1 (fun-designator arglists accumulate take-car)
+  (do* ((fun fun-designator)
+        (non-acc-result (car arglists))
+        (ret-list (list nil))
+        (temp ret-list)
+        (res nil)
+        (args (make-list (length arglists))))
+       ((dolist (x arglists) (or x (return t)))
+        (if accumulate
+            (cdr ret-list)
+            non-acc-result))
+    (do ((l arglists (cdr l))
+         (arg args (cdr arg)))
+        ((null l))
+      (setf (car arg) (if take-car (caar l) (car l)))
+      (setf (car l) (cdar l)))
+    (setq res (apply fun args))
+    (case accumulate
+      (:nconc
+       (when res
+         (setf (cdr temp) res)
+         ;; KLUDGE: it is said that MAPCON is equivalent to
+         ;; (apply #'nconc (maplist ...)) which means (nconc 1) would
+         ;; return 1, but (nconc 1 1) should signal an error.
+         ;; The transformed MAP code returns the last result, do that
+         ;; here as well for consistency and simplicity.
+         (when (consp res)
+           (setf temp (last res)))))
+      (:list (setf (cdr temp) (list res)
+                   temp (cdr temp))))))
+
+(defun mapc (function list &rest more-lists)
+  "Apply FUNCTION to successive elements of lists. Return the second argument."
+  (map1 function (cons list more-lists) nil t))
+
+(defun mapcar (function list &rest more-lists)
+  "Apply FUNCTION to successive elements of LIST. Return list of FUNCTION
+   return values."
+  (map1 function (cons list more-lists) :list t))
+
+(defun mapcan (function list &rest more-lists)
+  "Apply FUNCTION to successive elements of LIST. Return NCONC of FUNCTION
+   results."
+  (map1 function (cons list more-lists) :nconc t))
+
+(defun maplist (function list &rest more-lists)
+  "Apply FUNCTION to successive CDRs of list. Return list of results."
+  (map1 function (cons list more-lists) :list nil))
+
+(defun mapcon (function list &rest more-lists)
+  "Apply FUNCTION to successive CDRs of lists. Return NCONC of results."
+  (map1 function (cons list more-lists) :nconc nil))
