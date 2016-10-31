@@ -44,6 +44,24 @@
     (list (revappend sequence '()))
     (vector (vector-reverse sequence))))
 
+
+(defun list-nreverse (list)
+  (do ((1st (cdr list) (if (endp 1st) 1st (cdr 1st)))
+       (2nd list 1st)
+       (3rd '() 2nd))
+      ((atom 2nd) 3rd)
+    (rplacd 2nd 3rd)))
+
+(defun nreverse (sequence)
+  (etypecase sequence
+    (list (list-nreverse sequence))
+    (vector
+     (let ((size (length sequence)))
+       (do ((i 0 (1+ i)))
+           ((< i (/ size 2)) sequence)
+         (set (elt sequence i) (elt sequence (- size i 1))))))))
+
+
 (defmacro do-sequence ((elt seq &optional (index (gensym "i") index-p)) &body body)
   (let ((nseq (gensym "seq")))
     (unless (symbolp elt)
