@@ -1457,20 +1457,21 @@
           expander)
         nil)))
 
-(defun !macroexpand-1 (form)
-  (cond
-    ((symbolp form)
-     (let ((b (lookup-in-lexenv form *environment* 'variable)))
-       (if (and b (eq (binding-type b) 'macro))
-           (values (binding-value b) t)
-           (values form nil))))
-    ((and (consp form) (symbolp (car form)))
-     (let ((macrofun (!macro-function (car form))))
-       (if macrofun
-           (values (funcall macrofun (cdr form)) t)
-           (values form nil))))
-    (t
-     (values form nil))))
+(defun !macroexpand-1 (form &optional env)
+  (let ((*environment* (or env *environment*)))
+    (cond
+      ((symbolp form)
+       (let ((b (lookup-in-lexenv form *environment* 'variable)))
+         (if (and b (eq (binding-type b) 'macro))
+             (values (binding-value b) t)
+             (values form nil))))
+      ((and (consp form) (symbolp (car form)))
+       (let ((macrofun (!macro-function (car form))))
+         (if macrofun
+             (values (funcall macrofun (cdr form)) t)
+             (values form nil))))
+      (t
+       (values form nil)))))
 
 #+jscl
 (fset 'macroexpand-1 #'!macroexpand-1)
