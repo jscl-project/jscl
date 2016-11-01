@@ -16,7 +16,7 @@
 (test (null (find-package 'fubar)))
 
 (when (find-package 'foo)
-     (delete-package (find-package 'foo)))
+  (delete-package (find-package 'foo)))
 (test
  (let ((package (make-package 'foo :use '(cl)))
        foo-symbols
@@ -29,7 +29,7 @@
         (equal foo-symbols cl-symbols))))
 
 (when (find-package 'bar)
-   (delete-package (find-package 'bar)))
+  (delete-package (find-package 'bar)))
 (test
  (let* ((package (make-package 'bar))
         (baz (intern (string 'baz) package)))
@@ -44,5 +44,3 @@
 (test (eq (eval '(in-package #:cl-user)) (find-package '#:cl-user)))
 (test (eq 'cl:format 'jscl::format))
 (test (eq (intern "FOO123" (find-package '#:jscl)) (intern "FOO123" (find-package '#:jscl))))
-
-

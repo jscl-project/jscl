@@ -28,8 +28,8 @@
 (test (not (oddp  2)))
 (test (not (oddp  0)))
 
-;;; +, -, *, / The builtin definition of these is variadic, but the function definition should be as
-;;; well. So, test it using MAPCAR
+;;; +, -,  *, /  The builtin  definition of these  is variadic,  but the
+;;; function definition should be as well. So, test it using MAPCAR
 (let* ((a '(1 2))
        (b a)
        (c a))

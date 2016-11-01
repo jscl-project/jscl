@@ -1,21 +1,25 @@
-;;; early-char.lisp --- Character things needed early in the cross-compilation
+;;; early-char.lisp   ---  Character   things   needed   early  in   the
+;;; cross-compilation
 
-;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
-;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
-;; License, or (at your option) any later version.
+;; JSCL is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General  Public License as published by the Free
+;; Software Foundation,  either version  3 of the  License, or  (at your
+;; option) any later version.
 ;;
-;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
-;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
-;; Public License for more details.
+;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
 ;;
-;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
-;; <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
 (/debug "loading early-char.lisp!")
 
-;; This list comes from SBCL: everything that's ALPHA-CHAR-P, but not SB-IMPL::UCD-DECIMAL-DIGIT (to
-;; work around  <https://bugs.launchpad.net/sbcl/+bug/1177986>), then  combined into a  much smaller
-;; set of ranges. Yes, this can be compressed better.
+;; This list  comes from SBCL:  everything that's ALPHA-CHAR-P,  but not
+;; SB-IMPL::UCD-DECIMAL-DIGIT          (to          work          around
+;; <https://bugs.launchpad.net/sbcl/+bug/1177986>),  then combined  into
+;; a much smaller set of ranges. Yes, this can be compressed better.
 (defconstant +unicode-alphas+
   '((65 . 90) (97 . 122) (170 . 170) (181 . 181) (186 . 186) (192 . 214)
     (216 . 246) (248 . 705) (710 . 721) (736 . 740) (748 . 748) (750 . 750)
@@ -118,16 +122,18 @@
         (return-from alpha-char-p t)))
     nil))
 
-;; I made this list by running DIGIT-CHAR-P in SBCL on every codepoint up to CHAR-CODE-LIMIT,
-;; filtering on only those with SB-IMPL::UCD-GENERAL-CATEGORY 12 (Nd), and then grouping
-;; consecutive sets.  There's 37 spans of 10, plus 1 extra digit (6618).
+;; I made this  list by running DIGIT-CHAR-P in SBCL  on every codepoint
+;; up    to   CHAR-CODE-LIMIT,    filtering   on    only   those    with
+;; SB-IMPL::UCD-GENERAL-CATEGORY 12 (Nd),  and then grouping consecutive
+;; sets. There's 37 spans of 10, plus 1 extra digit (6618).
 (defconstant +unicode-zeroes+
   '(48 1632 1776 1984 2406 2534 2662 2790 2918 3046 3174 3302 3430 3664
     3792 3872 4160 4240 6112 6160 6470 6608 6784 6800 6992 7088 7232 7248
     42528 43216 43264 43472 43600 44016 65296 66720 120782)
   "Unicode codepoints which have Digit value 0, followed by 1, 2, ..., 9, as of Unicode 6.2")
 
-;; The "Digit value" of a (Unicode) character, or NIL, if it doesn't have one.
+;; The "Digit  value" of a  (Unicode) character,  or NIL, if  it doesn't
+;; have one.
 (defun unicode-digit-value (char)
   (let ((code (char-code char)))
     (dolist (z +unicode-zeroes+)
@@ -140,7 +146,7 @@
 (defun digit-char-p (char &optional (radix 10))
   "Includes ASCII 0-9 a-z A-Z, plus any Unicode decimal digit characters or fullwidth variants A-Z."
   (check-type char character)
-  (check-type radix integer) 
+  (check-type radix integer)
   (let* ((radix (or (and radix (<= 2 radix 36) radix) 10))
          (number (unicode-digit-value char))
          (code (char-code char))

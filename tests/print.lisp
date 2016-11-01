@@ -134,7 +134,8 @@
 (test (equal (read-from-string (format nil "~@c" #\u+2010)) #\u+2010))
 
 (test (equal (format nil "~5,':x" 4) "::::4"))
-;; (test (equal (format nil "~5,,':,2d" 400) " 4:00")) — this goes into infinite loop
+;; (test (equal (format nil "~5,,':,2d" 400)  " 4:00")) — this goes into
+;; infinite loop
 
 ;;; Internal unit tests
 (test (equal (jscl::group-digits #\, 3 "1234") "1,234"))
@@ -142,5 +143,3 @@
 (test (equal (jscl::group-digits #\: 2 "F00FC7C8") "F0:0F:C7:C8"))
 (test (equal (jscl::group-digits #\, 3 "-1234") "-1,234"))
 (test (equal (jscl::format-pad-to-right "4" 5 #\:) "::::4"))
-
-

@@ -247,7 +247,7 @@ internals.js_to_lisp = function (x) {
         return nil;
     else if (typeof x == 'function'){
         // Trampoline calling the JS function
-    var trampoline = function(values){
+        var trampoline = function(values){
             var args = Array.prototype.slice.call(arguments, 1);
             for (var i in args)
                 args[i] = internals.lisp_to_js(args[i]);

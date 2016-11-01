@@ -2,16 +2,18 @@
 
 ;;; Copyright (C) 2013 David Vazquez
 
-;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
-;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
-;; License, or (at your option) any later version.
+;; JSCL is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General  Public License as published by the Free
+;; Software Foundation,  either version  3 of the  License, or  (at your
+;; option) any later version.
 ;;
-;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
-;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
-;; Public License for more details.
+;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
 ;;
-;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
-;; <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
 (/debug "loading lambda-list.lisp!")
 
@@ -237,17 +239,17 @@
   (multiple-value-bind (ll)
       (parse-destructuring-lambda-list lambda-list)
     (let ((bindings '()))
-      (labels ( ;; Return a chain of the form (CAR (CDR (CDR ... (CDR X))),
-               ;; such that there are N calls to CDR.
+      (labels ( ;;  Return a chain of  the form (CAR (CDR  (CDR ... (CDR
+               ;; X))), such that there are N calls to CDR.
                (nth-chain (x n &optional tail)
                  (if tail
                      (if (zerop n) x `(cdr ,(nth-chain x (1- n) t)))
                      `(car ,(nth-chain x n t))))
-               ;; Compute the bindings for a pattern against FORM. If
-               ;; PATTERN is a lambda-list the pattern is bound to an
-               ;; auxiliary variable, otherwise PATTERN must be a
-               ;; symbol it will be bound to the form. The variable
-               ;; where the form is bound is returned.
+               ;; Compute  the  bindings  for a  pattern  against  FORM.
+               ;; If PATTERN is a lambda-list the pattern is bound to an
+               ;; auxiliary variable, otherwise PATTERN must be a symbol
+               ;; it will be  bound to the form. The  variable where the
+               ;; form is bound is returned.
                (compute-pbindings (pattern form)
                  (cond
                    ((null pattern))
@@ -257,15 +259,15 @@
                    ((lambda-list-p pattern)
                     (compute-bindings pattern form))))
 
-               ;; Compute the bindings for the full LAMBDA-LIST ll
+               ;; Compute  the  bindings  for the  full  LAMBDA-LIST  ll
                ;; against FORM.
                (compute-bindings (ll form)
                  (let ((reqvar-count (length (lambda-list-reqvars ll)))
                        (optvar-count (length (lambda-list-optvars ll)))
                        (whole (or (lambda-list-wholevar ll) (gensym))))
-                   ;; Create a binding for the whole expression
-                   ;; FORM. It will match to LL, so we validate the
-                   ;; number of elements on the result of FORM.
+                   ;; Create a  binding for  the whole  expression FORM.
+                   ;; It will match to LL,  so we validate the number of
+                   ;; elements on the result of FORM.
                    (compute-pbindings whole `(validate-reqvars ,form ,reqvar-count))
 
                    (let ((count 0))
@@ -286,25 +288,25 @@
 
                      ;; Rest-variable and keywords
 
-                     ;; If there is a rest or keyword variable, we
-                     ;; will add a binding for the rest or an
-                     ;; auxiliary variable. The computations in of the
-                     ;; keyword start in this variable, so we avoid
-                     ;; the long tail of nested CAR/CDR operations
-                     ;; each time. We also include validation of
-                     ;; keywords if there is any.
+                     ;; If there is a rest  or keyword variable, we will
+                     ;; add  a  binding for  the  rest  or an  auxiliary
+                     ;; variable.  The computations  in  of the  keyword
+                     ;; start  in this  variable, so  we avoid  the long
+                     ;; tail  of nested  CAR/CDR  operations each  time.
+                     ;; We also include validation  of keywords if there
+                     ;; is any.
                      (let* ((chain (nth-chain whole (+ reqvar-count optvar-count) t))
                             (restvar (lambda-list-restvar ll))
                             (pattern (or restvar (gensym)))
                             (keywords (mapcar #'keyvar-keyword-name (lambda-list-keyvars ll)))
                             (rest
-                             ;; Create a binding for the rest of the
-                             ;; arguments. If there is keywords, then
-                             ;; validate this list. If there is no
-                             ;; keywords and no &rest variable, then
-                             ;; validate that the rest is empty, it is
-                             ;; to say, there is no more arguments
-                             ;; that we expect.
+                             ;; Create  a binding  for the  rest of  the
+                             ;; arguments.  If there  is keywords,  then
+                             ;; validate  this  list.  If  there  is  no
+                             ;; keywords  and  no &rest  variable,  then
+                             ;; validate that  the rest is empty,  it is
+                             ;; to say, there is  no more arguments that
+                             ;; we expect.
                              (cond
                                (keywords (compute-pbindings pattern `(validate-keyvars ,chain ',keywords ,(lambda-list-allow-other-keys ll))))
                                (restvar  (compute-pbindings pattern chain))
@@ -327,17 +329,17 @@
 
                    whole)))
 
-        ;; Macroexpansion. Compute bindings and generate code for them
+        ;; Macroexpansion. Compute  bindings and generate code  for them
         ;; and some necessary checking.
         (compute-bindings ll expression)
         `(let* ,(reverse bindings)
            ,@body)))))
 
 
-;;; Because DEFMACRO uses destructuring-bind to parse the arguments of
-;;; the macro-function, we can't define DESTRUCTURING-BIND with
-;;; defmacro to avoid a circularity. So just define the macro function
-;;; explicitly.
+;;; Because DEFMACRO  uses destructuring-bind to parse  the arguments of
+;;; the macro-function, we can't define DESTRUCTURING-BIND with defmacro
+;;; to    avoid   a    circularity.   So    just   define    the   macro
+;;; function explicitly.
 
 #-jscl
 (defmacro !destructuring-bind (lambda-list expression &body body)

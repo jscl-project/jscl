@@ -1,19 +1,22 @@
 ;;; print.lisp ---
 
-;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
-;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
-;; License, or (at your option) any later version.
+;; JSCL is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General  Public License as published by the Free
+;; Software Foundation,  either version  3 of the  License, or  (at your
+;; option) any later version.
 ;;
-;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
-;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
-;; Public License for more details.
+;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
 ;;
-;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
-;; <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
 (/debug "loading print.lisp!")
 
-;;; HACK HACK — if an error occurs during startup before toplevel binds this correctly,
+;;; HACK HACK — if an error  occurs during startup before toplevel binds
+;;; this correctly,
 #+jscl
 (setq *standard-output*
       (vector 'stream
@@ -387,7 +390,7 @@ STRING is a string of digits with an optional leading + or - sign."
 
 (defun format-pad-to-right (string min-column &optional (pad-char #\space))
   "Pad a  string, right-flush, to  at least MIN-COLUMN  characters wide;
-pad  with PAD-CHAR  (or  #\Space). 
+pad  with PAD-CHAR  (or  #\Space).
 
 If the length of STRING is known, passing it in can save a few cycles."
   (let ((min-column (or min-column 1))
@@ -412,7 +415,7 @@ bound accordingly."
   (let* ((digits (integer-to-string number *print-base* atp))
          (grouped (if colonp
                       (group-digits (or group-comma #\,) (or group-length 3) digits)
-                      digits))) 
+                      digits)))
     (format-pad-to-right grouped min-column pad-char)))
 
 (defun format-hex (arg colonp atp &optional (min-column 1) (pad-char #\space)
@@ -555,27 +558,27 @@ dispatching on the CHR ending the format sequence."
   ;; docstring c/o SBCL
   "Provides various facilities for formatting output.
 
-  CONTROL-STRING contains a string to be output, possibly with embedded
-  directives, which are flagged with the escape character \"~\". Directives
-  generally expand into additional text to be output, usually consuming one
-  or more of the FORMAT-ARGUMENTS in the process. A few useful directives
-  are:
-        ~A or ~nA   Prints one argument as if by PRINC
-        ~S or ~nS   Prints one argument as if by PRIN1
-        ~D or ~nD   Prints one argument as a decimal integer
-        ~%          Does a TERPRI
-        ~&          Does a FRESH-LINE
-  where n is the width of the field in which the object is printed.
+ CONTROL-STRING contains a string to be output, possibly with embedded
+ directives, which are flagged with the escape character \"~\". Directives
+ generally expand into additional text to be output, usually consuming one
+ or more of the FORMAT-ARGUMENTS in the process. A few useful directives
+ are:
+ ~A or ~nA   Prints one argument as if by PRINC
+ ~S or ~nS   Prints one argument as if by PRIN1
+ ~D or ~nD   Prints one argument as a decimal integer
+ ~%          Does a TERPRI
+ ~&          Does a FRESH-LINE
+ where n is the width of the field in which the object is printed.
 
-  DESTINATION controls where the result will go. If DESTINATION is T, then
-  the output is sent to the standard output stream. If it is NIL, then the
-  output is returned in a string as the value of the call. Otherwise,
-  DESTINATION must be a stream to which the output will be sent.
+ DESTINATION controls where the result will go. If DESTINATION is T, then
+ the output is sent to the standard output stream. If it is NIL, then the
+ output is returned in a string as the value of the call. Otherwise,
+ DESTINATION must be a stream to which the output will be sent.
 
-  Example:   (FORMAT NIL \"The answer is ~D.\" 10) => \"The answer is 10.\"
+ Example:   (FORMAT NIL \"The answer is ~D.\" 10) => \"The answer is 10.\"
 
-  FORMAT has many additional capabilities not described here. Consult the
-  manual for details."
+ FORMAT has many additional capabilities not described here. Consult the
+ manual for details."
   (let ((length (length control-string))
         (i 0)
         (output "")
@@ -595,7 +598,7 @@ dispatching on the CHR ending the format sequence."
                         (push param params)
                         (setf i (1+ ending)))
                       (assert (and (< i length) "~numbers at end of format"))
-                      (unless (char= (char control-string i) #\,) 
+                      (unless (char= (char control-string i) #\,)
                         (decf i))
                       (go read-control))
 
@@ -665,5 +668,3 @@ dispatching on the CHR ending the format sequence."
        (write-string output destination)))))
 
 #+jscl (fset 'format (fdefinition '!format))
-
-
