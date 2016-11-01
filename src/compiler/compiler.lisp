@@ -457,9 +457,11 @@
                                     optional-arguments
                                     keyword-arguments
                                     (ll-svars ll)))))
-        (lambda-name/docstring-wrapper
-         name documentation
-         `(function (|values| ,@(mapcar #'translate-variable
+
+        (lambda-name/docstring-wrapper name documentation
+                                       `(named-function ,(safe-js-fun-name name)
+                                                        (|values| ,@(mapcar (lambda (x)
+                                                                              (translate-variable x))
                                         (append required-arguments optional-arguments)))
                     ;; Check number of arguments
                     ,(lambda-check-argument-count n-required-arguments
@@ -975,6 +977,10 @@
     (progn ,@(mapcar #'convert forms))
     (return args)))
 
+(define-compilation the (value-type form)
+  (warn "discarding THE ~a" value-type) ; XXX perhaps one day
+  (convert form *multiple-value-p*))
+
 (define-transformation backquote (form)
   (bq-completely-process form))
 
@@ -1476,7 +1482,8 @@
           expander)
         nil)))
 
-(defun !macroexpand-1 (form)
+(defun !macroexpand-1 (form &optional env)
+  (let ((*environment* (or env *environment*)))
   (cond
     ((symbolp form)
      (let ((b (lookup-in-lexenv form *environment* 'variable)))
@@ -1489,7 +1496,20 @@
            (values (funcall macrofun (cdr form)) t)
            (values form nil))))
     (t
-     (values form nil))))
+       (values form nil)))))
+
+#+jscl
+(fset 'macroexpand-1 #'!macroexpand-1)
+
+(defun !macroexpand (form &optional env)
+  (let ((continue t))
+    (while continue
+      (multiple-value-setq (form continue) (!macroexpand-1 form env)))
+    form))
+#+jscl
+(fset 'macroexpand #'!macroexpand)
+
+
 
 (defun compile-funcall (function args)
   (let* ((arglist (cons (if *multiple-value-p* '|values| '(internal |pv|))

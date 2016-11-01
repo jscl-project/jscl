@@ -13,13 +13,29 @@
 
 (/debug "loading defstruct.lisp!")
 
-;; A very simple defstruct built on lists. It  supports just slot with an optional default initform,
-;; and it will create a constructor, predicate and accessors for you.
-(defmacro def!struct (name &rest slots)
-  (unless (symbolp name)
-    (error "It is not a full defstruct implementation."))
-  (let* ((name-string (symbol-name name))
-         (slot-descriptions
+;; A very simple defstruct built on lists. It supports just slot with
+;; an optional default initform, and it will create a constructor,
+;; predicate and accessors for you.
+(defmacro def!struct (name-and-options &rest slots)
+  (let* ((name-and-options (ensure-list name-and-options))
+         (name (first name-and-options))
+         (name-string (symbol-name name))
+         (options (rest name-and-options))
+         (constructor (if (assoc :constructor options)
+                          (second (assoc :constructor options))
+                          (intern (concat "MAKE-" name-string))))
+         (predicate (if (assoc :predicate options)
+                        (second (assoc :predicate options))
+                        (intern (concat name-string "-P"))))
+         (copier (if (assoc :copier options)
+                     (second (assoc :copier options))
+                     (intern (concat "COPY-" name-string)))))
+
+
+    (unless predicate
+      (setq predicate (gensym "PREDICATE")))
+
+    (let* ((slot-descriptions
           (mapcar (lambda (sd)
                     (cond
                       ((symbolp sd)
@@ -29,17 +45,31 @@
                       (t
                        (error "Bad slot description `~S'." sd))))
                   slots))
-         (predicate (intern (concat name-string "-P"))))
+
+           constructor-expansion
+           predicate-expansion
+           copier-expansion)
+      
+
+      (when constructor
+        (setq constructor-expansion
+              `(defun ,constructor (&key ,@slot-descriptions)
+                 (list ',name ,@(mapcar #'car slot-descriptions)))))
+
+      (when predicate
+        (setq predicate-expansion
+              `(defun ,predicate (x)
+                 (and (consp x) (eq (car x) ',name)))))
+
+      (when copier
+        (setq copier-expansion
+              `(defun ,copier (x)
+                 (copy-list x))))
+
     `(progn
-       ;; Constructor
-       (defun ,(intern (concat "MAKE-" name-string)) (&key ,@slot-descriptions)
-         (list ',name ,@(mapcar #'car slot-descriptions)))
-       ;; Predicate
-       (defun ,predicate (x)
-         (and (consp x) (eq (car x) ',name)))
-       ;; Copier
-       (defun ,(intern (concat "COPY-" name-string)) (x)
-         (copy-list x))
+         ,constructor-expansion
+         ,predicate-expansion
+         ,copier-expansion
        ;; Slot accessors
        ,@(with-collect
           (let ((index 1))
@@ -51,8 +81,8 @@
                        (unless (,predicate x)
                          (error "The object `~S' is not of type `~S'" x ,name-string))
                        (nth ,index x)))
-                ;; TODO: Implement this with a higher level abstraction like defsetf or (defun (setf
-                ;; ..))
+                ;; TODO: Implement this with a higher level
+                ;; abstraction like defsetf or (defun (setf …))
                 (collect
                     `(define-setf-expander ,accessor-name (x)
                        (let ((object (gensym))

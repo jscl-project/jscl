@@ -56,7 +56,7 @@
   )
 
 
-(defun make-hash-table (&key (test #'eql))
+(defun make-hash-table (&key (test #'eql) size)
   (let* ((test-fn (fdefinition test))
          (hash-fn
           (cond

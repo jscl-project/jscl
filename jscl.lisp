@@ -12,15 +12,15 @@
 ;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 ;; for more details.
 ;;
-;; You should  have received a  copy of  the GNU General  Public License
-;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
+;; You should have received a copy of the GNU General Public License
+;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 (defpackage :jscl
   (:use :cl)
   (:export #:bootstrap #:run-tests-in-host))
 
 (defpackage :jscl/ffi
-  (:use :jscl))
+  (:use :jscl :cl))
 
 (in-package :jscl)
 
@@ -89,15 +89,15 @@
 
 (defun get-files (file-list type dir)
   "Traverse FILE-LIST and retrieve a list of the files within which match
- either TYPE or :BOTH, processing subdirectories."
+   either TYPE or :BOTH, processing subdirectories."
   (let ((file (car file-list)))
     (cond
       ((null file-list)
        ())
       ((listp (cadr file))
        (append
-        (get-files (cdr file)      type (append dir (list (car file))))
-        (get-files (cdr file-list) type dir)))
+         (get-files (cdr file)      type (append dir (list (car file))))
+         (get-files (cdr file-list) type dir)))
       ((member (cadr file) (list type :both))
        (cons (source-pathname (car file) :directory dir :type "lisp")
              (get-files (cdr file-list) type dir)))
@@ -106,7 +106,7 @@
 
 (defmacro do-source (name type &body body)
   "Iterate over all the source files that need to be compiled in the host or
- the target, depending on the TYPE argument."
+   the target, depending on the TYPE argument."
   (unless (member type '(:host :target))
     (error "TYPE must be one of :HOST or :TARGET, not ~S" type))
   `(dolist (,name (get-files *source* ,type '(:relative "src")))
@@ -156,7 +156,7 @@
          until (eq form eof-mark)
          do (let ((compilation (compile-toplevel form)))
               (if (possibly-valid-js-p compilation)
-                  (when (plusp (length compilation))
+              (when (plusp (length compilation))
                     (write-string compilation out))
                   (complain-about-illegal-chars form in compilation)))))))
 
@@ -164,13 +164,13 @@
   (flet ((late-compile (form)
            (let ((*standard-output* stream))
              (write-string (compile-toplevel form)))))
-    ;; We assume  that environments have a  friendly list representation
+    ;; We assume that environments have a friendly list representation
     ;; for the compiler and it can be dumped.
     (dolist (b (lexenv-function *environment*))
       (when (eq (binding-type b) 'macro)
         (setf (binding-value b) `(,*magic-unquote-marker* ,(binding-value b)))))
     (late-compile `(setq *environment* ',*environment*))
-    ;; Set some  counter variable properly,  so user compiled  code will
+    ;; Set some counter variable properly, so user compiled code will
     ;; not collide with the compiler itself.
     (late-compile
      `(progn
@@ -190,8 +190,8 @@
 
 (defun compile-application (files output &key shebang)
   (with-compilation-environment
-    (with-open-file (out output :direction :output :if-exists :supersede)
-      (when shebang
+      (with-open-file (out output :direction :output :if-exists :supersede)
+        (when shebang
         (write-string "#!/usr/bin/env node" out)
         (terpri out))
       (with-scoping-function (out)
@@ -218,15 +218,15 @@
    :shebang t))
 
 (defun compile-jscl.js (verbosep)
-  (with-compilation-environment
-    (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
-                         :direction :output
-                         :if-exists :supersede)
+    (with-compilation-environment
+      (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
+                           :direction :output
+                           :if-exists :supersede)
       (format out "(function(){~%'use strict';~%")
-      (write-string (read-whole-file (source-pathname "prelude.js")) out)
-      (do-source input :target
+        (write-string (read-whole-file (source-pathname "prelude.js")) out)
+        (do-source input :target
         (!compile-file input out :print verbosep))
-      (dump-global-environment out)
+        (dump-global-environment out)
       (format out "})();~%"))))
 
 (defun bootstrap (&optional verbosep)

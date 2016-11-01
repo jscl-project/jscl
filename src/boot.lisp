@@ -323,6 +323,18 @@ macro cache is so aggressive that it cannot be redefined."
 (defun atom (x)
   (not (consp x)))
 
+(defun alpha-char-p (x)
+  (or (<= (char-code #\a) (char-code x) (char-code #\z))
+      (<= (char-code #\A) (char-code x) (char-code #\Z))))
+
+(defun digit-char-p (x)
+  (and (<= (char-code #\0) (char-code x) (char-code #\9))
+       (- (char-code x) (char-code #\0))))
+
+(defun digit-char (weight)
+  (and (<= 0 weight 9)
+       (char "0123456789" weight)))
+
 (defun equal (x y)
   (cond
     ((eql x y) t)
@@ -374,6 +386,19 @@ macro cache is so aggressive that it cannot be redefined."
 (defmacro multiple-value-list (value-from)
   `(multiple-value-call #'list ,value-from))
 
+(defmacro multiple-value-setq ((&rest vars) &rest form)
+  (let ((gvars (mapcar (lambda (x) (gensym)) vars))
+        (setqs '()))
+
+    (do ((vars vars (cdr vars))
+         (gvars gvars (cdr gvars)))
+        ((or (null vars) (null gvars)))
+      (push `(setq ,(car vars) ,(car gvars))
+            setqs))
+    (setq setqs (reverse setqs))
+
+    `(multiple-value-call (lambda ,gvars ,@setqs)
+       ,@form)))
 
 ;; Incorrect typecase, but used in NCONC.
 (defmacro typecase (x &rest clausules)
@@ -384,6 +409,7 @@ macro cache is so aggressive that it cannot be redefined."
                      (if (find (car c) '(t otherwise))
                          `(t ,@(rest c))
                          `((,(ecase (car c)
+                                    (fixnum 'integerp)
                                     (number 'numberp)
                                     (integer 'integerp)
                                     (cons 'consp)
@@ -411,6 +437,10 @@ macro cache is so aggressive that it cannot be redefined."
        (typecase ,g!x
          ,@clausules
          (t (error "~S fell through etypecase expression." ,g!x))))))
+
+;;; No type system is implemented yet.
+(defun subtypep (type1 type2)
+  (values nil nil))
 
 (defun notany (fn seq)
   (not (some fn seq)))
@@ -441,7 +471,18 @@ macro cache is so aggressive that it cannot be redefined."
                           (nth ,n values))
      ,form))
 
-
+(defun constantp (x)
+  ;; TODO: Consider quoted forms, &environment and many other
+  ;; semantics of this function.
+  (cond
+    ((symbolp x)
+     (cond
+       ((eq x t) t)
+       ((setq x nil) t)))
+    ((atom x)
+     t)
+    (t
+     nil)))
 
 (defvar *print-escape* t)
 (defvar *print-readably* t)
