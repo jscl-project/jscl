@@ -181,18 +181,75 @@
   (position-if (complement predicate) sequence
                :from-end from-end :key key :start start :end end))
 
+<<<<<<< HEAD
 (defun substitute (new old seq 
                    &key (key #'identity) (test #'eql))
+=======
+(defun substitute (new old seq
+                   &key (key #'identity) (test #'eql)
+                        (start 0) (end nil endp)
+                        (count nil countp)
+                        test-not from-end)
+  (when test-not (warn "SUBSTITUTE :TEST-NOT still not supported"))
+  (when from-end (warn "SUBSTITUTE :FROM-END still not supported"))
+>>>>>>> d790cca... Support for radix, Unicode
   (and seq
-       (map (cond
+       (let ((counted 0)
+             (count (if (and countp (plusp count)) count 0))
+             (i 0))
+         (map
+          (cond
               ((stringp seq) 'string)
               ((vectorp seq) 'vector)
+<<<<<<< HEAD
               ((listp seq) 'list)) 
+=======
+            ((listp seq) 'list)
+            (t (warn "SUBSTITUTE: sequence type not supported") 'vector))
+>>>>>>> d790cca... Support for radix, Unicode
             (lambda (elt)
-              (if (funcall test old (funcall key elt))
-                  new
-                  elt))
-            seq)))
+            (prog1
+                (if (or (and countp (>= counted count))
+                        (< i start)
+                        (and endp (> i end))
+                        (not (funcall test old (funcall key elt))))
+                    elt
+                    (progn
+                      (incf counted)
+                      new))
+              (incf i)))
+          seq))))
+
+(defun substitute-if (new pred seq
+                      &key (key #'identity)
+                           (start 0) (end nil endp) (count nil countp)
+                           from-end)
+  (let ((substitute-args (append (list new t seq
+                                       :key (lambda (elt)
+                                              (funcall pred (funcall key elt)))
+                                       :test (lambda (_ v)
+                                               (declare (ignore _))
+                                               v)
+                                       :start start)
+                                 (when endp (list :end end))
+                                 (when from-end (list :from-end t))
+                                 (when countp (list :count count)))))
+    (apply #'substitute substitute-args)))
+
+(defun substitute-if-not (new pred seq &rest keys
+                          &key (key #'identity) (start 0) (end nil endp)
+                               (count nil countp) from-end)
+  (let ((substitute-args (append (list new t seq
+                                       :key (lambda (elt)
+                                              (not (funcall pred (funcall key elt))))
+                                       :test (lambda (_ v)
+                                               (declare (ignore _))
+                                               v)
+                                       :start start)
+                                 (when endp (list :end end))
+                                 (when from-end (list :from-end t))
+                                 (when countp (list :count count)))))
+    (apply #'substitute substitute-args)))
 
 (defun remove (x seq &key key (test #'eql testp) (test-not #'eql test-not-p))
   (cond
@@ -229,10 +286,15 @@
     (when (funcall function elt)
       (return-from some t))))
 
-(defun every (function seq)
+(defun every (function seq &rest more-seqs)
+  (if more-seqs
+      (apply #'map nil (lambda (&rest seqs)
+                         (unless (apply function seqs)
+                           (return-from every nil))) seq more-seqs)
+      ;; optimized single sequence case
   (do-sequence (elt seq)
     (unless (funcall function elt)
-      (return-from every nil)))
+          (return-from every nil))))
   t)
 
 (defun remove-if (func seq)

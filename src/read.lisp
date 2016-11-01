@@ -77,9 +77,9 @@
 (defun make-string-stream (string)
   (cons string 0))
 
-(defun %peek-char (stream)
-  (and (< (cdr stream) (length (car stream)))
-       (char (car stream) (cdr stream))))
+(defun %peek-char (stream &optional (look-ahead 0))
+  (and (< (+ look-ahead (cdr stream)) (length (car stream)))
+       (char (car stream) (+ look-ahead (cdr stream)))))
 
 (defun %read-char (stream)
   (and (< (cdr stream) (length (car stream)))
@@ -224,6 +224,12 @@
           (not (eval-feature-expression subexpr))))))))
 
 
+(defun read-integer-from-stream (stream)
+  (parse-integer (read-until stream
+                             (lambda (ch)
+                               (not (digit-char-p ch *read-base*))))
+                 :radix *read-base*))
+
 (defun read-sharp (stream &optional eof-error-p eof-value)
   (%read-char stream)
   (let ((ch (%read-char stream)))
@@ -257,14 +263,17 @@
          (string-upcase-noescaped
           (read-escaped-until stream #'terminalp)))))
       (#\\
-       (let ((cname
+       (cond ((and (char-equal #\U (%peek-char stream))
+                   (char= #\+ (%peek-char stream 1)))
+              (%read-char stream)       ; U (or u)
+              (%read-char stream)       ; +
+              (let ((*read-base* 16))
+                (code-char (read-integer-from-stream stream))))
+             (t (let ((cname
               (concat (string (%read-char stream))
                       (read-until stream #'terminalp))))
-         (cond
-           ((string-equal cname "space") #\space)
-           ((string-equal cname "tab") #\tab)
-           ((string-equal cname "newline") #\newline)
-           (t (char cname 0)))))
+                  (let ((ch (name-char cname)))
+                    (or ch (char cname 0)))))))
       ((#\+ #\-)
        (let* ((expression
                (let ((*package* (find-package :keyword)))
@@ -275,6 +284,9 @@
              (prog2 (let ((*read-skip-p* t))
                       (ls-read stream))
                  (ls-read stream eof-error-p eof-value t)))))
+      ((#\B #\b)
+       (let ((*read-base* 2))
+         (read-integer-from-stream stream)))
       ((#\J #\j)
        (unless (char= (%peek-char stream) #\:)
          (error "FFI descriptor must start with a colon."))
@@ -287,6 +299,12 @@
                (push (subseq descriptor start) subdescriptors)
                `(oget *root* ,@(reverse subdescriptors)))
            (push (subseq descriptor start end) subdescriptors))))
+      ((#\O #\o)
+       (let ((*read-base* 8))
+         (read-integer-from-stream stream)))
+      ((#\X #\x)
+       (let ((*read-base* 16))
+         (read-integer-from-stream stream)))
       (#\|
        (labels ((read-til-bar-sharpsign ()
                   (do ((ch (%read-char stream) (%read-char stream)))
@@ -317,6 +335,14 @@
                        ;; doesn't work
                        (rplacd (find-labelled-object id) obj)
                        obj))))
+              ((#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9)
+               (let ((param (read-integer-from-stream stream)))
+                 (ecase (%peek-char stream)
+                   ((#\R #\r)
+                    (assert (<= 2 param 36) (param) "#nR radix must be 2-36; got ~d" param)
+                    (let ((*read-base* param))
+                      (read-integer-from-stream stream)))
+                   (#\( (error "READer cannot read multi-dimension arrays yet")))))
               (#\#
                (%read-char stream)
                (let ((cell (find-labelled-object id)))
@@ -404,8 +430,8 @@
     (dotimes (i size)
       (let ((elt (char string i)))
         (cond
-          ((digit-char-p elt)
-           (setq number (+ (* (or number 0) 10) (digit-char-p elt))))
+          ((digit-char-p elt *read-base*)
+           (setq number (+ (* (or number 0) *read-base*) (digit-char-p elt *read-base*))))
           ((zerop i)
            (case elt
              (#\+ nil)
@@ -483,7 +509,8 @@
       ;; XXX: Use FLOAT when implemented.
       (/ (* sign (expt 10.0 (* exponent-sign exponent)) number) divisor 1.0))))
 
-(defun !parse-integer (string junk-allow)
+(defun !parse-integer (string junk-allow &optional (radix *read-base*))
+  (let ((radix (or radix 10)))
   (block nil
     (let ((value 0)
           (index 0)
@@ -501,14 +528,14 @@
              (incf index)))
       ;; First digit
       (unless (and (< index size)
-                   (setq value (digit-char-p (char string index))))
+                     (setq value (digit-char-p (char string index) radix)))
         (return (values nil index)))
       (incf index)
       ;; Other digits
       (while (< index size)
-        (let ((digit (digit-char-p (char string index))))
+          (let ((digit (digit-char-p (char string index) radix)))
           (unless digit (return))
-          (setq value (+ (* value 10) digit))
+            (setq value (+ (* value radix) digit))
           (incf index)))
       ;; Trailing whitespace
       (do ((i index (1+ i)))
@@ -517,14 +544,14 @@
       (if (or junk-allow
               (= index size))
           (values (* sign value) index)
-          (values nil index)))))
+            (values nil index))))))
 
 #+jscl
-(defun parse-integer (string &key junk-allowed)
+(defun parse-integer (string &key (start 0) (end (length string)) junk-allowed radix)
   (multiple-value-bind (num index)
-      (!parse-integer string junk-allowed)
+      (!parse-integer (subseq string start end) junk-allowed radix)
     (if num
-        (values num index)
+        (values num (+ start index))
         (error "Junk detected."))))
 
 
@@ -577,8 +604,16 @@
         (setf *labelled-objects* save-labelled-objects)
         (setf *fixup-locations* save-fixup-locations)))))
 
-(defun ls-read-from-string (string &optional (eof-error-p t) eof-value)
-  (ls-read (make-string-stream string) eof-error-p eof-value))
+(defun ls-read-from-string (string &optional (eof-error-p t) eof-value
+                            &key (start 0) (end nil) (preserve-whitespace t))
+  (funcall (if preserve-whitespace
+               #'ls-read  ; TODO: READ-PRESERVING-WHITESPACE
+               #'ls-read)
+           (make-string-stream (subseq string start (or end (length string)))) eof-error-p eof-value))
+
+#+jscl
+(defun read (&optional (stream *standard-input*) (eof-error-p t) (eof-value nil) (recursive-p nil))
+  (ls-read stream eof-error-p eof-value recursive-p))
 
 #+jscl
 (defun read-from-string (string &optional (eof-errorp t) eof-value)

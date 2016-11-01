@@ -281,6 +281,25 @@
                                   (list (first v) (third v))))
                            varlist)))))))
 
+(defmacro declare (&rest declarations)
+  "Early DECLARE ignores everything."
+  nil)
+
+(defmacro assert (test &rest _)
+  "An  early ASSERT  that does  not trigger  bugs in  the macroexpander.
+Note, this will  still signal errors itself if it  actually is triggered
+before  princ-to-string is  available, but  it needs  to be  declared as
+a macro before  anything else gets loaded, and  currently the compiler's
+macro cache is so aggressive that it cannot be redefined."
+  #-jscl (declare (ignore _))
+  `(unless ,test
+     (error "Assertion failed: NOT ~s" ',test)))
+
+(defmacro check-type (var type &rest _)
+  "Early/minimalist CHECK-TYPE using ETYPECASE"
+  #-jscl (declare (ignore _))
+  `(etypecase ,var (,type nil)))
+
 (defmacro loop (&body body)
   `(while t ,@body))
 
@@ -292,6 +311,7 @@
 
 (defun constantly (x)
   (lambda (&rest args)
+    (declare (ignore args))
     x))
 
 (defun code-char (x)
@@ -324,12 +344,31 @@
 (defun equal (x y)
   (cond
     ((eql x y) t)
+    ((numberp x) (and (numberp y) (= x y)))
     ((consp x)
      (and (consp y)
           (equal (car x) (car y))
           (equal (cdr x) (cdr y))))
     ((stringp x)
      (and (stringp y) (string= x y)))
+    (t nil)))
+
+(defun equalp (x y)
+  "This is a marginally correct implementation of EQUALP"
+  (cond
+    ((eql x y) t)
+    ((numberp x) (and (numberp y) (= x y)))
+    ((consp x)
+     (and (consp y)
+          (equalp (car x) (car y))
+          (equalp (cdr x) (cdr y))))
+    ((characterp x)
+     (and (characterp y)
+          (char-equal x y)))
+    ((vectorp x)
+     (and (vectorp y)
+          (= (length x) (length y))
+          (every #'equalp x y)))
     (t nil)))
 
 (defun fdefinition (x)
@@ -379,6 +418,7 @@
                          `(t ,@(rest c))
                          `((,(ecase (car c)
                                     (fixnum 'integerp)
+                                    (number 'numberp)
                                     (integer 'integerp)
                                     (cons 'consp)
                                     (list 'listp)
@@ -405,7 +445,6 @@
        (typecase ,g!x
          ,@clausules
          (t (error "~S fell through etypecase expression." ,g!x))))))
-
 
 ;;; No type system is implemented yet.
 (defun subtypep (type1 type2)
@@ -440,7 +479,6 @@
                           (nth ,n values))
      ,form))
 
-
 (defun constantp (x)
   ;; TODO: Consider quoted forms, &environment and many other
   ;; semantics of this function.
@@ -453,3 +491,10 @@
      t)
     (t
      nil)))
+
+(defvar *print-escape* t)
+(defvar *print-readably* t)
+(defvar *print-circle* nil)
+(defvar *print-radix* nil)
+(defvar *print-base* 10)
+(defvar *read-base* 10)

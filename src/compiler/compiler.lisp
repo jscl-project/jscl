@@ -102,7 +102,7 @@
 (defun gvarname (symbol)
   (declare (ignore symbol))
   (incf *variable-counter*)
-  (make-symbol (concat "v" (integer-to-string *variable-counter*))))
+  (safe-js-var-name (limit-string-length symbol 32) (integer-to-string *variable-counter*)))
 
 (defun translate-variable (symbol)
   (awhen (lookup-in-lexenv symbol *environment* 'variable)
@@ -265,14 +265,36 @@
           (ll-optional-arguments-canonical lambda-list))))
     (remove nil (mapcar #'third args))))
 
+(defun js-identifier-char-p (char)
+  (or (char= #\_ char)
+      (char= #\$ char)
+      (alphanumericp char)))
+
+(defun js-name-part (name)
+  (substitute-if #\$ (complement #'js-identifier-char-p)
+                 (substitute #\_ #\- (string name))))
+
+(defun safe-js-name (&rest name-parts)
+  (intern (join (mapcar #'js-name-part name-parts) "_")))
+
+(defun safe-js-fun-name (&rest name-parts)
+  (apply #'safe-js-name "fun" name-parts))
+
+(defun safe-js-var-name (&rest name-parts)
+  (apply #'safe-js-name "var" name-parts))
+
+(defun safe-js-lit-name (&rest name-parts)
+  (apply #'safe-js-name "lit" name-parts))
+
 (defun lambda-name/docstring-wrapper (name docstring code)
+  (let ((func (safe-js-fun-name name)))
   (if (or name docstring)
       `(selfcall
-        (var (func ,code))
-        ,(when name `(= (get func "fname") ,name))
-        ,(when docstring `(= (get func "docstring") ,docstring))
-        (return func))
-      code))
+          (var (,func ,code))
+          ,(when name `(= (get ,func "fname") ,name))
+          ,(when docstring `(= (get ,func "docstring") ,docstring))
+          (return ,func))
+        code)))
 
 (defun lambda-check-argument-count
     (n-required-arguments n-optional-arguments rest-p)
@@ -420,22 +442,11 @@
     (push-to-lexenv binding *environment* 'variable)
     `(var (,gvar |this|))))
 
-
-(defun jsize-symbol (symbol prefix)
-  (let ((str (string symbol)))
-    (intern
-     (with-output-to-string (out)
-       (format out "~a" (string prefix))
-       (dotimes (i (length str))
-         (let ((ch (char str i)))
-           (when (char<= #\a (char-downcase ch) #\z)
-             (write-char ch out))))))))
-
 ;;; Compile a lambda function with lambda list LL and body BODY. If
 ;;; NAME is given, it should be a constant string and it will become
 ;;; the name of the function. If BLOCK is non-NIL, a named block is
 ;;; created around the body. NOTE: No block (even anonymous) is
-;;; created if BLOCk is NIL.
+;;; created if BLOCK is NIL.
 (defun compile-lambda (ll body &key name block)
   (multiple-value-bind (required-arguments
                         optional-arguments
@@ -455,22 +466,22 @@
                                     (ll-svars ll)))))
 
         (lambda-name/docstring-wrapper name documentation
-         `(named-function ,(jsize-symbol name 'jscl_user_)
-                          (|values| ,@(mapcar (lambda (x)
-                                                (translate-variable x))
-                                              (append required-arguments optional-arguments)))
-                          ;; Check number of arguments
-                          ,(lambda-check-argument-count n-required-arguments
-                                                        n-optional-arguments
-                                                        (or rest-argument keyword-arguments))
-                          ,(compile-lambda-optional ll)
-                          ,(compile-lambda-rest ll)
-                          ,(compile-lambda-parse-keywords ll)
-                          ,(bind-this)
-                          ,(let ((*multiple-value-p* t))
-                             (if block
-                                 (convert-block `((block ,block ,@body)) t)
-                                 (convert-block body t)))))))))
+                                       `(named-function ,(safe-js-fun-name name)
+                                                        (|values| ,@(mapcar (lambda (x)
+                                                                              (translate-variable x))
+                                                                            (append required-arguments optional-arguments)))
+                                                        ;; Check number of arguments
+                                                        ,(lambda-check-argument-count n-required-arguments
+                                                                                      n-optional-arguments
+                                                                                      (or rest-argument keyword-arguments))
+                                                        ,(compile-lambda-optional ll)
+                                                        ,(compile-lambda-rest ll)
+                                                        ,(compile-lambda-parse-keywords ll)
+                                                        ,(bind-this)
+                                                        ,(let ((*multiple-value-p* t))
+                                                           (if block
+                                                               (convert-block `((block ,block ,@body)) t)
+                                                               (convert-block body t)))))))))
 
 
 (defun setq-pair (var val)
@@ -528,9 +539,17 @@
 (defvar *literal-table*)
 (defvar *literal-counter*)
 
-(defun genlit ()
+(defun limit-string-length (string length)
+  (and string
+       (let ((string (princ-to-string string)))
+         (if (> (length string) length)
+             (subseq string 0 length)
+             string))))
+
+(defun genlit (&optional name)
   (incf *literal-counter*)
-  (make-symbol (concat "l" (integer-to-string *literal-counter*))))
+  (safe-js-lit-name (or (limit-string-length name 32) "")
+                    (integer-to-string *literal-counter*)))
 
 (defun dump-symbol (symbol)
   (let ((package (symbol-package symbol)))
@@ -584,7 +603,10 @@
                          (array (dump-array sexp)))))
            (if (and recursive (not (symbolp sexp)))
                dumped
-               (let ((jsvar (genlit)))
+               (let ((jsvar (genlit (typecase sexp
+                                      (cons "expr")
+                                      (array "array")
+                                      (t (string sexp))))))
                  (push (cons sexp jsvar) *literal-table*)
                  (toplevel-compilation `(var (,jsvar ,dumped)))
                  (when (keywordp sexp)
@@ -963,8 +985,8 @@
     (return args)))
 
 (define-compilation the (value-type form)
+  (warn "discarding THE ~a" value-type) ; XXX perhaps one day
   (convert form *multiple-value-p*))
-
 
 (define-transformation backquote (form)
   (bq-completely-process form))
@@ -1003,11 +1025,17 @@
         (dolist (x args)
           (if (or (floatp x) (numberp x))
               (collect-fargs x)
-              (let ((v (make-symbol (concat "x" (integer-to-string (incf counter))))))
+              (let ((v (make-symbol (concat "arg" (integer-to-string (incf counter))))))
                 (collect-fargs v)
                 (collect-prelude `(var (,v ,(convert x))))
                 (collect-prelude `(if (!= (typeof ,v) "number")
-                                      (throw "Not a number!"))))))
+                                      (throw (new (call |Error| (+ "" (typeof ,v)
+                                                                   " is not a number: " ,v " "
+                                                                   ,(princ-to-string (convert x)) " in "
+                                                                   ,(princ-to-string function)
+                                                                   ,@(mapcar (lambda (s)
+                                                                               (concatenate 'string " "
+                                                                                            (princ-to-string s))) args))))))))))
         `(selfcall
           (progn ,@prelude)
           ,(funcall function fargs))))))
@@ -1032,6 +1060,10 @@
   (if (null numbers)
       1
       (variable-arity numbers `(* ,@numbers))))
+
+(define-builtin logior (x y) (list 'logior x y))
+(define-builtin logand (x y) (list 'logand x y))
+(define-builtin logxor (x y) (list 'logxor x y))
 
 (define-raw-builtin / (x &rest others)
   (let ((args (cons x others)))
@@ -1249,7 +1281,7 @@
 (define-builtin storage-vector-ref (vector n)
   `(selfcall
     (var (x (property ,vector ,n)))
-    (if (=== x undefined) (throw "Out of range."))
+    (if (=== x undefined) (throw (new (call |Error| ,(concatenate 'string "AREF out of range for vector " (string vector))))))
     (return x)))
 
 (define-builtin storage-vector-set (vector n value)
@@ -1257,7 +1289,7 @@
     (var (x ,vector))
     (var (i ,n))
     (if (or (< i 0) (>= i (get x "length")))
-        (throw "Out of range."))
+        (throw (new (call |Error| ,(concatenate 'string "SETF AREF out of range for vector " (string vector))))))
     (return (= (property x i) ,value))))
 
 (define-builtin concatenate-storage-vector (sv1 sv2)
@@ -1459,18 +1491,18 @@
 
 (defun !macroexpand-1 (form &optional env)
   (let ((*environment* (or env *environment*)))
-    (cond
-      ((symbolp form)
-       (let ((b (lookup-in-lexenv form *environment* 'variable)))
-         (if (and b (eq (binding-type b) 'macro))
-             (values (binding-value b) t)
-             (values form nil))))
-      ((and (consp form) (symbolp (car form)))
-       (let ((macrofun (!macro-function (car form))))
-         (if macrofun
-             (values (funcall macrofun (cdr form)) t)
-             (values form nil))))
-      (t
+  (cond
+    ((symbolp form)
+     (let ((b (lookup-in-lexenv form *environment* 'variable)))
+       (if (and b (eq (binding-type b) 'macro))
+           (values (binding-value b) t)
+           (values form nil))))
+    ((and (consp form) (symbolp (car form)))
+     (let ((macrofun (!macro-function (car form))))
+       (if macrofun
+           (values (funcall macrofun (cdr form)) t)
+           (values form nil))))
+    (t
        (values form nil)))))
 
 #+jscl
@@ -1513,7 +1545,7 @@
                                 `(call-internal |lisp_to_js| ,(convert s)))
                               args))))
       (t
-       (error "Bad function descriptor")))))
+       (error "Bad function designator `~S'" function)))))
 
 (defun convert-block (sexps &optional return-last-p decls-allowed-p)
   (multiple-value-bind (sexps decls)

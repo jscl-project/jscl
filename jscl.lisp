@@ -58,6 +58,7 @@
 ;;; compiled in the host
 (defvar *source*
   '(("boot"          :target)
+    ("early-char"    :target)
     ("compat"        :host)
     ("setf"          :target)
     ("utils"         :both)
@@ -129,9 +130,21 @@
 
 (defun read-whole-file (filename)
   (with-open-file (in filename)
-    (let ((seq (make-array (file-length in) :element-type 'character)))
+    ;; FILE-LENGTH is  in bytes, not  characters. UTF-8 characters will  yield a shorter  read, with
+    ;; trailing  #\NULL bytes,  unless  we initialize  to  spaces. It's  a hack,  but  it's a  cheap
+    ;; enough one.
+    (let ((seq (make-string (file-length in) :initial-element #\space)))
       (read-sequence seq in)
       seq)))
+
+(defun possibly-valid-js-p (string)
+  (if (characterp string)
+      (or (graphic-char-p string)
+          (char= #\newline string))
+      (every (lambda (ch)
+               (or (graphic-char-p ch)
+                   (char= #\newline ch)))
+             string)))
 
 (defun !compile-file (filename out &key print)
   (let ((*compiling-file* t)
@@ -145,8 +158,12 @@
          for x = (ls-read in nil eof-mark)
          until (eq x eof-mark)
          do (let ((compilation (compile-toplevel x)))
-              (when (plusp (length compilation))
-                (write-string compilation out)))))))
+              (if (possibly-valid-js-p compilation)
+                  (when (plusp (length compilation))
+                    (write-string compilation out))
+                  (error "Generated illegal characters (first is ~@c)~%Compiling form:~%~S~%from ~s~%Generated:~%~s"
+                         (find-if (complement #'possibly-valid-js-p) compilation)
+                         x in compilation)))))))
 
 (defun dump-global-environment (stream)
   (flet ((late-compile (form)
