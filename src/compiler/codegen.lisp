@@ -2,23 +2,26 @@
 
 ;; Copyright (C) 2013, 2014 David Vazquez
 
-;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
-;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
-;; License, or (at your option) any later version.
+;; JSCL is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General  Public License as published by the Free
+;; Software Foundation,  either version  3 of the  License, or  (at your
+;; option) any later version.
 ;;
-;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
-;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
-;; Public License for more details.
+;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
 ;;
-;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
-;; <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
 
-;;; This code  generator takes  as input  a S-expression  representation of  the Javascript  AST and
-;;; generates Javascript code without redundant syntax constructions like extra parenthesis.
+;;; This code generator takes as  input a S-expression representation of
+;;; the Javascript  AST and generates Javascript  code without redundant
+;;; syntax constructions like extra parenthesis.
 ;;;
-;;; It is intended to be used with the new compiler. However, it is quite independent so it has been
-;;; integrated early in JSCL.
+;;; It is  intended to  be used  with the new  compiler. However,  it is
+;;; quite independent so it has been integrated early in JSCL.
 
 (/debug "loading compiler-codegen.lisp!")
 
@@ -155,7 +158,7 @@
   (multiple-value-bind (string valid)
       (valid-js-identifier string-designator)
     (unless valid
-      (error "~S is not a valid Javascript identifier." string))
+      (error "~S is not a valid Javascript identifier." string-designator))
     (js-format "~a" string)))
 
 (defun js-primary-expr (form)
@@ -211,8 +214,12 @@
   (when wrap-p
     (js-format ")")))
 
-(defun js-function (arguments &rest body)
-  (js-format "function(")
+(defun js-function (name arguments &rest body)
+  (js-format "function")
+  (when name
+    (js-format " ")
+    (js-identifier name))
+  (js-format "(")
   (when arguments
     (js-identifier (car arguments))
     (dolist (arg (cdr arguments))
@@ -296,6 +303,10 @@
        (js-object-initializer args))
       ;; Function expressions
       (function
+       (js-format "(")
+       (apply #'js-function nil args)
+       (js-format ")"))
+      (named-function
        (js-format "(")
        (apply #'js-function args)
        (js-format ")"))
@@ -567,8 +578,8 @@
                  (js-expr object)
                  (js-end-stmt)))
            (object
-            ;; wrap ourselves within a  pair of parens, in case JS EVAL interprets  us as a block of
-            ;; code
+            ;; wrap ourselves within  a pair of parens, in  case JS EVAL
+            ;; interprets us as a block of code
             (js-object-initializer (cdr form) t)
             (js-end-stmt))
            (t

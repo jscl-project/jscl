@@ -1,9 +1,8 @@
-                                        ; Functions    used   as    :KEY
-                                        ; argument in tests
+;; Functions used as :KEY argument in tests
 (defvar halve  (lambda (x) (/ x 2)))
 (defvar double (lambda (x) (* x 2)))
 
-                                        ; COUNT
+;; COUNT
 (test (= (count #\a "how many A's are there in here?") 2))
 (test (= (count #\a "how many A's are there in here?" :start 10) 1))
 (test (= (count 'a '(a b c d e a e f)) 2))

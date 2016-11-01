@@ -1,15 +1,17 @@
 ;;; numbers.lisp
 
-;; JSCL is  free software:  you can  redistribute it  and/or modify it  under the  terms of  the GNU
-;; General Public  License as published  by the  Free Software Foundation,  either version 3  of the
-;; License, or (at your option) any later version.
+;; JSCL is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General  Public License as published by the Free
+;; Software Foundation,  either version  3 of the  License, or  (at your
+;; option) any later version.
 ;;
-;; JSCL is distributed  in the hope that it  will be useful, but WITHOUT ANY  WARRANTY; without even
-;; the implied warranty of MERCHANTABILITY or FITNESS  FOR A PARTICULAR PURPOSE. See the GNU General
-;; Public License for more details.
+;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
 ;;
-;; You should have  received a copy of the GNU  General Public License along with JSCL.  If not, see
-;; <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
 (/debug "loading numbers.lisp!")
 
@@ -26,8 +28,9 @@
   (def + 0)
   (def * 1))
 
-;; - and / work differently  from the above macro. If only one arg is given,  it negates it or takes
-;; its reciprocal. Otherwise all the other args are subtracted from or divided by it.
+;; - and  / work differently  from the above macro.  If only one  arg is
+;; given, it negates it or takes its reciprocal. Otherwise all the other
+;; args are subtracted from or divided by it.
 (macrolet ((def (operator unary-form)
              `(defun ,operator (x &rest args)
                 (cond

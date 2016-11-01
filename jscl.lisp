@@ -20,7 +20,7 @@
   (:export #:bootstrap #:run-tests-in-host))
 
 (defpackage :jscl/ffi
-  (:use :jscl))
+  (:use :jscl :cl))
 
 (in-package :jscl)
 
@@ -115,17 +115,17 @@
 ;;; Compile and load jscl into the host
 (with-compilation-unit ()
   (do-source input :host
-    (multiple-value-bind (fasl warn fail) (compile-file input)
-      (declare (ignore warn))
-      (when fail
-        (error "Compilation of ~A failed." input))
-      (load fasl))))
+             (multiple-value-bind (fasl warn fail) (compile-file input)
+               (declare (ignore warn))
+               (when fail
+                 (error "Compilation of ~A failed." input))
+               (load fasl))))
 
 (defun read-whole-file (filename)
   (with-open-file (in filename)
-    ;; FILE-LENGTH is  in bytes, not  characters. UTF-8 characters will  yield a shorter  read, with
-    ;; trailing  #\NULL bytes,  unless  we initialize  to  spaces. It's  a hack,  but  it's a  cheap
-    ;; enough one.
+    ;; FILE-LENGTH is  in bytes,  not characters. UTF-8  characters will
+    ;; yield  a shorter  read,  with trailing  #\NULL  bytes, unless  we
+    ;; initialize to spaces. It's a hack, but it's a cheap enough one.
     (let ((seq (make-string (file-length in) :initial-element #\space)))
       (read-sequence seq in)
       seq)))
@@ -164,13 +164,13 @@
   (flet ((late-compile (form)
            (let ((*standard-output* stream))
              (write-string (compile-toplevel form)))))
-    ;; We assume  that environments have a  friendly list representation
+    ;; We assume that environments have a friendly list representation
     ;; for the compiler and it can be dumped.
     (dolist (b (lexenv-function *environment*))
       (when (eq (binding-type b) 'macro)
         (setf (binding-value b) `(,*magic-unquote-marker* ,(binding-value b)))))
     (late-compile `(setq *environment* ',*environment*))
-    ;; Set some  counter variable properly,  so user compiled  code will
+    ;; Set some counter variable properly, so user compiled code will
     ;; not collide with the compiler itself.
     (late-compile
      `(progn
@@ -190,14 +190,14 @@
 
 (defun compile-application (files output &key shebang)
   (with-compilation-environment
-    (with-open-file (out output :direction :output :if-exists :supersede)
-      (when shebang
-        (write-string "#!/usr/bin/env node" out)
-        (terpri out))
-      (with-scoping-function (out)
-        (dolist (input files)
-          (terpri out)
-          (!compile-file input out))))))
+      (with-open-file (out output :direction :output :if-exists :supersede)
+        (when shebang
+          (write-string "#!/usr/bin/env node" out)
+          (terpri out))
+        (with-scoping-function (out)
+          (dolist (input files)
+            (terpri out)
+            (!compile-file input out))))))
 
 (defun compile-test-suite ()
   (compile-application
@@ -219,15 +219,15 @@
 
 (defun compile-jscl.js (verbosep)
   (with-compilation-environment
-    (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
-                         :direction :output
-                         :if-exists :supersede)
-      (format out "(function(){~%'use strict';~%")
-      (write-string (read-whole-file (source-pathname "prelude.js")) out)
-      (do-source input :target
-        (!compile-file input out :print verbosep))
-      (dump-global-environment out)
-      (format out "})();~%"))))
+      (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
+                           :direction :output
+                           :if-exists :supersede)
+        (format out "(function(){~%'use strict';~%")
+        (write-string (read-whole-file (source-pathname "prelude.js")) out)
+        (do-source input :target
+                   (!compile-file input out :print verbosep))
+        (dump-global-environment out)
+        (format out "})();~%"))))
 
 (defun bootstrap (&optional verbosep)
   (let ((*features* (list* :jscl :jscl-xc *features*))

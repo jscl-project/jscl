@@ -31,16 +31,19 @@
 (test (char>= #\d #\d #\c #\a))
 (test (not (char> #\e #\d #\b #\c #\a)))
 (test (not (char>= #\e #\d #\b #\c #\a)))
-;; (char> #\z #\A) => implementation-dependent (char> #\Z #\a) => implementation-dependent
+;; (char>  #\z  #\A)  =>  implementation-dependent (char>  #\Z  #\a)  =>
+;; implementation-dependent
 (test (char-equal #\A #\a))
-;; (stable-sort  (list #\b  #\A  #\B  #\a #\c  #\C)  #'char-lessp)  => (#\A  #\a  #\b  #\B #\c  #\C)
-;; (stable-sort (list #\b #\A #\B #\a #\c #\C) #'char<) => implementation-dependent
+;; (stable-sort (list #\b #\A #\B #\a #\c #\C) #'char-lessp) => (#\A #\a
+;; #\b #\B #\c #\C) (stable-sort (list #\b #\A #\B #\a #\c #\C) #'char<)
+;; => implementation-dependent
 
 ;; CHARACTER
 (test (equal #\a (character #\a)))
 (test (equal #\a (character "a")))
-;; (test (equal #\A (character 'a))) (test (equal #\a (character '\a))) (expected-failure (character
-;; 65.)) (expected-failure (character 'apple))
+;; (test (equal #\A (character 'a)))  (test (equal #\a (character '\a)))
+;; (expected-failure   (character  65.))   (expected-failure  (character
+;; 'apple))
 
 ;; CHARACTERP
 (test (characterp #\a))
