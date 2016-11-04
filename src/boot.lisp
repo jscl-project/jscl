@@ -412,7 +412,16 @@
 
 ;;; No type system is implemented yet.
 (defun subtypep (type1 type2)
-  (values nil nil))
+  (cond
+    ((null type1)
+     (values t t))
+    ((eq type1 type2)
+     (values t t))
+    ((eq type2 'number)
+     (values (and (member type1 '(fixnum integer)) t)
+             t))
+    (t
+     (values nil nil))))
 
 (defun notany (fn seq)
   (not (some fn seq)))
