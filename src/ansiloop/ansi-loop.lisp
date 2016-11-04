@@ -934,17 +934,20 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
 
 
 (defun loop-check-data-type (specified-type required-type
-			     &optional (default-type required-type))
+                             &optional (default-type required-type))
   (if (null specified-type)
       default-type
       (multiple-value-bind (a b) (subtypep specified-type required-type)
-	(cond ((not b)
-	       (loop-warn "LOOP couldn't verify that ~S is a subtype of the required type ~S."
-			  specified-type required-type))
-	      ((not a)
-	       (loop-error "Specified data type ~S is not a subtype of ~S."
-			   specified-type required-type)))
-	specified-type)))
+        ;; FIXME: Uncomment when we have implemented type system and
+        ;; jscl can understand this.
+        #+nil
+        (cond ((not b)
+               (loop-warn "LOOP couldn't verify that ~S is a subtype of the required type ~S."
+                  specified-type required-type))
+              ((not a)
+               (loop-error "Specified data type ~S is not a subtype of ~S."
+                  specified-type required-type)))
+        specified-type)))
 
 
 ;;;INTERFACE: Traditional, ANSI, Lucid.
