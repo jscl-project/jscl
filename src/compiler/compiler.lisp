@@ -975,6 +975,12 @@
 (defvar *builtins*
   (make-hash-table))
 
+(defun !special-operator-p (name)
+  (nth-value 1 (gethash name *builtins*)))
+#+jscl
+(fset 'special-operator-p #'!special-operator-p)
+
+
 (defmacro define-raw-builtin (name args &body body)
   ;; Creates a new primitive function `name' with parameters args and
   ;; @body. The body can access to the local environment through the
