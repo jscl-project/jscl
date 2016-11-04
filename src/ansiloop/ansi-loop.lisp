@@ -2134,7 +2134,8 @@ collected result will be returned as the value of the LOOP."
 
 ;;; FIXME: Somehow the pacakge is not being bound properly in
 ;;; !compile-file.
-(in-package :cl)
-
-(defmacro loop (&rest keywords-and-forms)
-  `(jscl/loop::!loop ,@keywords-and-forms))
+#+jscl
+(progn
+  (in-package :cl)
+  (defmacro loop (&rest keywords-and-forms)
+    `(jscl/loop::!loop ,@keywords-and-forms)))
