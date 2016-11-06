@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/davazp/jscl.git"
+    "url": "git+https://github.com/jscl-project/jscl.git"
   },
   "keywords": [
     "lisp",
@@ -27,7 +27,7 @@
   ],
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/davazp/jscl/issues"
+    "url": "https://github.com/jscl-project/jscl/pulls"
   },
-  "homepage": "https://github.com/davazp/jscl#readme"
+  "homepage": "https://github.com/jscl-project/jscl#readme"
 }
