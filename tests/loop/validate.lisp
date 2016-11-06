@@ -67,7 +67,7 @@
 	  ',params-and-answers))
 
 
-(defun test1 (short-desc form lambda-list interpreted params-and-answers &aux (slow *slow-test*))
+(defun test1 (short-desc form lambda-list interpreted params-and-answers)
   (declare (ignore short-desc))
   (let ((slow *slow-test*))
     (dolist (pair params-and-answers)
