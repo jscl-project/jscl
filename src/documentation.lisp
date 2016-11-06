@@ -1,5 +1,7 @@
 ;;; documentation.lisp --- Accessing DOCUMENTATION
 
+(/debug "loading documentation.lisp!")
+
 ;;; Documentation.
 (defun documentation (x type)
   "Return the documentation of X. TYPE must be the symbol VARIABLE or FUNCTION."

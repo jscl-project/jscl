@@ -84,7 +84,7 @@
      ("compiler"     :both))
     ("documentation" :target)
     ("ansiloop"
-     ("ansi-loop"    :target))
+     ("ansi-loop"    :both))
     ("toplevel"      :target)))
 
 
@@ -208,6 +208,10 @@
     (compile-application
      `(,(source-pathname "tests.lisp" :directory nil)
         ,@(directory (source-pathname "*" :directory '(:relative "tests") :type "lisp"))
+        ;; Loop tests
+        ,(source-pathname "validate.lisp" :directory '(:relative "tests" "loop") :type "lisp")
+        ,(source-pathname "base-tests.lisp" :directory '(:relative "tests" "loop") :type "lisp")
+        
         ,(source-pathname "tests-report.lisp" :directory nil))
      (merge-pathnames "tests.js" *base-directory*))
 
