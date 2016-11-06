@@ -56,7 +56,6 @@
          collect (list x y))
       (() ((1 nil) (2 2) (3 3) (4 4) (5 5) (6 6) (7 7) (8 8) (9 9) (10 10))))
 
-#+nil
 (test "from/=/colllect/variable"
       (lo hi)
       (loop for x from lo to hi
@@ -64,7 +63,6 @@
          collect (list x y))
       ((1 10) ((1 nil) (2 2) (3 3) (4 4) (5 5) (6 6) (7 7) (8 8) (9 9) (10 10))))
 
-#+nil
 (test "exercise loop-body flagvar"
       (lo hi)
       (loop for x from lo to hi
@@ -76,7 +74,6 @@
               (error "oops")))
       ((1 10) ((1 nil) (2 2) (3 3) (4 4) (5 5) (6 6) (7 7) (8 8) (9 9) (10 10))))
 
-#+nil
 (test "add fixnum dcl"
       (lo hi)
       (loop for x of-type fixnum from lo to hi
@@ -84,7 +81,6 @@
          collect (list x y))
       ((1 10) ((1 nil) (2 2) (3 3) (4 4) (5 5) (6 6) (7 7) (8 8) (9 9) (10 10))))
 
-#+nil
 (test "add fixnum keyword"
       (lo hi)
       (loop for x fixnum from lo to hi
@@ -92,49 +88,42 @@
          collect (list x y))
       ((1 10) ((1 nil) (2 2) (3 3) (4 4) (5 5) (6 6) (7 7) (8 8) (9 9) (10 10))))
 
-#+nil
 (test "simple parallel constant arguments"
       ()
       (loop for x from 1 to 10 and y = nil then x
          collect (list x y))
       (() ((1 nil) (2 1) (3 2) (4 3) (5 4) (6 5) (7 6) (8 7) (9 8) (10 9))))
 
-#+nil
 (test "simple parallel variable arguments"
       (lo hi)
       (loop for x from lo to hi and y = nil then x
          collect (list x y))
       ((1 10) ((1 nil) (2 1) (3 2) (4 3) (5 4) (6 5) (7 6) (8 7) (9 8) (10 9))))
 
-#+nil
-(test "AS constant args"
+(test "as constant args"
       ()
       (loop as i from 1 to 3
          collect i)
       (() (1 2 3)))
 
-#+nil
-(test "AS variable args"
+(test "as variable args"
       (lo hi)
       (loop as i from lo to hi
          collect i)
       ((1 3) (1 2 3)))
 
-#+nil
 (test "step downto constant args"
       ()
       (loop for i from 10 downto 1 by 3
          collect i)
       (() (10 7 4 1)))
 
-#+nil
 (test "step downto variable args constant step"
       (hi lo)
       (loop for i from hi downto lo by 3
          collect i)
       ((10 1) (10 7 4 1)))
 
-#+nil
 (test "step downto variable args"
       (hi lo step)
       (loop for i from hi downto lo by step
@@ -146,7 +135,6 @@
       ((10 5 3) (10 7))
       )
 
-#+nil
 (test "step above variable args"
       (hi lo step)
       (loop for i from hi above lo by step
@@ -157,108 +145,92 @@
       ((10 4 3) (10 7))
       )
 
-#+nil
-(test "AS BELOW constant limit"
+(test "as below constant limit"
       ()
       (loop as i below 3
          collect i)
       (() (0 1 2)))
 
-#+nil
-(test "AS BELOW variable limit"
+(test "as below variable limit"
       (limit)
       (loop as i below limit
          collect i)
       ((3) (0 1 2)))
 
 
-#+nil
-(test "IN constant list"
+(test "in constant list"
       ()
       (loop for item in '(1 2 3)
          collect item)
       (() (1 2 3)))
 
-#+nil
-(test "IN variable list"
+(test "in variable list"
       (l)
       (loop for item in l collect item)
       ((nil) nil)
       (((foo)) (foo)))
 
-#+nil
-(test "IN constant list with step"
+(test "in constant list with step"
       ()
       (loop for item in '(1 2 3 4 5) by #'cddr
          collect item)
       (() (1 3 5)))
 
-#+nil
-(test "IN different constant list with step"
+(test "in different constant list with step"
       ()
       (loop for item in '(1 2 3 4) by #'cddr
          collect item)
       (() (1 3)))
 
-#+nil
-(test "IN variable list with step"
+(test "in variable list with step"
       (l)
       (loop for item in l by #'cddr
          collect item)
       (((1 2 3 4 5)) (1 3 5))
       (((1 2 3 4)) (1 3)))
 
-#+nil
-(test "IN destructured typedeclared constant list"
+(test "in destructured typedeclared constant list"
       ()
       (loop for (item . x) (t . fixnum) in '((a . 1) (b . 2) (c . 3))
          unless (eq item 'b) sum x)
       (() 4))
 
-#+nil
-(test "IN destructured type-declared variable list"
+(test "in destructured type-declared variable list"
       (l)
       (loop for (item . x) (t . fixnum) in l
          unless (eq item 'b) sum x)
       ((((a . 1) (b . 2) (c . 3))) 4))
 
-#+nil
-(test "ON constant list"
+(test "on constant list"
       ()
       (loop for sublist on '(a b c d)
          collect sublist)
       (() ((a b c d) (b c d) (c d) (d))))
 
-#+nil
-(test "ON variable list"
+(test "on variable list"
       (l)
       (loop for sublist on l
          collect sublist)
       (((a b c d)) ((a b c d) (b c d) (c d) (d))))
 
-#+nil
-(test "ON destructured"
+(test "on destructured"
       (l)
       (loop for (item) on l
          collect item)
       (((a b c d)) (a b c d)))
 
-
-#+nil
 (test "ON destructured (item) with step"
       (l)
       (loop for (item) on l by #'cddr
          collect item)
       (((a b c d)) (a c)))
 
-#+nil
 (test "ON destructured (x y) with step"
       (l)
       (loop for (x y) on l by #'cddr
          collect (cons x y))
       (((a b c d)) ((a . b) (c . d))))
 
-#+nil
 (test "ON destructured (x y . z) with step"
       (l)
       (loop for (x y . z) on l by #'cddr
@@ -266,7 +238,6 @@
       (((a b c d)) ((a b (c d)) (c d nil))))
 
 
-#+nil
 (test "miscellaneous sequential iteration"
       ()
       (loop for item = 1 then (+ item 10)
@@ -274,20 +245,17 @@
          collect item)
       (() (1 11 21 31 41)))
 
-#+nil
 (test "ACROSS constant arg"
       ()
       (loop for char across "foobar" collect char)
       (() (#\f #\o #\o #\b #\a #\r)))
 
-#+nil
 (test "ACROSS declared variable arg"
       (s)
       (loop for char of-type character across (the simple-string s) collect char)
       (("foobar") (#\f #\o #\o #\b #\a #\r)))
 
 
-#+nil
 (test "REPEAT sequencing, constant arg"
       (l)
       (loop repeat 3
@@ -299,7 +267,6 @@
       (((1 2 3)) (1 2 3))
       (((1 2 3 4)) (1 2 3)))
 
-#+nil
 (test "REPEAT sequencing 2, constant arg"
       (l)
       (loop for x in l
@@ -311,7 +278,6 @@
       (((1 2 3)) (1 2 3))
       (((1 2 3 4)) (1 2 3)))
 
-#+nil
 (test "REPEAT sequencing, variable arg"
       (n l)
       (loop repeat n
@@ -323,7 +289,6 @@
       ((3 (1 2 3)) (1 2 3))
       ((3 (1 2 3 4)) (1 2 3)))
 
-#+nil
 (test "REPEAT sequencing 2, variable arg"
       (n l)
       (loop for x in l
@@ -335,7 +300,6 @@
       ((3 (1 2 3)) (1 2 3))
       ((3 (1 2 3 4)) (1 2 3)))
 
-#+nil
 (test "WHILE sequencing"
       (stack)
       (loop while stack
@@ -345,7 +309,6 @@
       (((a)) (1 a))
       ((()) ()))
 
-#+nil
 (test "WHILE sequencing 2"
       ()
       (loop for i fixnum from 3
@@ -353,7 +316,6 @@
          while (< i 5))
       (() (3 5)))
 
-#+nil
 (test "simple always"
       (n)
       (loop for i from 0 to n
@@ -361,7 +323,6 @@
       ((10) t)
       ((11) nil))
 
-#+nil
 (test "always runs epilogue"
       (n)
       (loop for i from 0 to n
@@ -370,7 +331,6 @@
       ((5) nil)
       ((2) overriding-value))
 
-#+nil
 (test "simple never"
       (n)
       (loop for i from n to (+ n 3)
@@ -378,7 +338,6 @@
       ((8) t)
       ((9) nil))
 
-#+nil
 (test "never runs epilogue"
       (n)
       (loop for i from n to (+ n 3)
@@ -387,13 +346,11 @@
       ((0) nil)
       ((3) overriding-value))
 
-#+nil
 (defun oddsq (x)
   (cond ((not (numberp x)) (error "not a number"))
         ((oddp x) (* x x))
         (t nil)))
 
-#+nil
 (test "simple thereis"
       (l)
       (loop for x in l
@@ -402,7 +359,6 @@
       (((2 4 6)) nil)
       (((2 4 6 7)) 49))
 
-#+nil
 (test "thereis runs epilogue"
       (l)
       (loop for x in l
@@ -411,7 +367,6 @@
       (((2 3 4)) 9)
       (((2 4 6)) overriding-value))
 
-#+nil
 (test "loop-finish"
       ()
       (loop for i in '(1 2 3 stop-here 4 5 6)
@@ -419,7 +374,6 @@
          count i)
       (() 3))
 
-#+nil
 (test "count"
       ()
       (loop for i in '(1 2 3 stop-here 4 5 6)
@@ -428,7 +382,6 @@
       (() 3))
 
 
-#+nil
 (test "multiple collection"
       (l)
       (loop for x in l
@@ -440,14 +393,12 @@
          appending (list x))
       (((a b)) (a a a a a a b b b b b b)))
 
-#+nil
 (test "nconc 1"
       (l)
       (loop for x in l
          nconc (copy-list x))
       ((((a) (b c) () (d e))) (a b c d e)))
 
-#+nil
 (test "more multiple collection"
       ()
       (loop for name in '(fred sue alice joe june)
@@ -469,21 +420,18 @@
                                  name-and-age-list)))
       (() 19 (fred 22 sue 26 alice 19 joe 20 june 10)))
 
-#+nil
 (test "gratuitous multiple collection"
       ()
       (loop for i in '(bird 3 4 turtle (1 . 4) horse cat)
          when (symbolp i) collect i)
       (() (bird turtle horse cat)))
 
-#+nil
 (test "collection sequencing"
       ()
       (loop for i from 1 to 10
          if (oddp i) collect i)
       (() (1 3 5 7 9)))
 
-#+nil
 (test "more collecting into"
       ()
       (loop for i in '(a b c d) by #'cddr
@@ -492,14 +440,12 @@
       (() foo (a c) bar))
 
 
-#+nil
 (test "append 1"
       ()
       (loop for x in '((a) (b) ((c)))
          append x)
       (() (a b (c))))
 
-#+nil
 (test "nconc 2"
       ()
       (loop for i upfrom 0
@@ -507,7 +453,6 @@
          nconc (if (evenp i) (list x) nil))
       (() (a (c))))
 
-#+nil
 (test "count simple variable arg"
       ()
       (loop for i in '(a b nil c nil d e)
@@ -515,21 +460,18 @@
       (() 5))
 
 
-#+nil
 (test "simple sum"
       ()
       (loop for i fixnum in '(1 2 3 4 5)
          sum i)
       (() 15))
 
-#+nil
 (test "sum fixnum keyword"
       ()
       (loop for i fixnum in '(1 2 3 4 5)
          sum i fixnum)
       (() 15))
 
-#+nil
 (test "sum fixnum declaration"
       ()
       (loop for i fixnum in '(1 2 3 4 5)
@@ -581,7 +523,6 @@
       (((1.2 4.3 5.7)) 1))
 
 
-#+nil
 (test "sequential with"
       ()
       (loop with a = 1
@@ -591,7 +532,6 @@
       (() (1 3 6)))
 
 
-#+nil
 (test "parallel with"
       ()
       (loop with a = 1 and b = 2 and c = 3
@@ -600,7 +540,6 @@
 
 
 
-#+nil
 (test "parallel with 2"
       (a b)
       (loop with a = 1 and b = (+ a 2) and c = (+ b 3)
@@ -614,7 +553,6 @@
          return (list a b c d e f))
       (() (0.f0 0 0.0s0 0.0f0 0.0d0 0.0l0)))
 
-#+nil
 (test "single-type-keyword destructured WITH"
       ()
       (loop with (a b c) float
@@ -622,7 +560,6 @@
       (() (0.f0 0.f0 0.f0)))
 
 
-#+nil
 (test "hairy conditional nesting"
       ()
       (loop with gubbish
@@ -636,7 +573,7 @@
          finally (return (values odd-numbers even-numbers gubbish)))
       (() (1 3 5) (2 4 6) (5 5 3 3 1 1)))
 
-#+nil
+
 (test "collecting IT"
       ()
       (loop for i in '(1 2 3 4 5 6)
@@ -644,7 +581,7 @@
          collect it)
       (() (4 5 6)))
 
-#+nil
+
 (test "returning IT"
       ()
       (loop for i in '(1 2 3 4 5 6)
@@ -652,7 +589,6 @@
          return it)
       (() 4))
 
-#+nil
 (test "THEREIS 3"
       ()
       (loop for i in '(1 2 3 4 5 6)
@@ -676,7 +612,7 @@
 ;;          finally (return (list big-numbers other-numbers symbol-list other-list)))
 ;;       (() ((#.(1+ most-positive-fixnum)) (1 2 3 4) (buckle-my-shoe shut-the-door) ((foo)))))
 
-#+nil
+
 (test "more conditional structure"
       ()
       (with-output-to-string (s)
@@ -691,14 +627,12 @@
       (() ":0  a b c:1 :2  a c:3 "))
 
 
-#+nil
 (test "more type-declared destructuring"
       ()
       (loop for (a b c) (integer integer float) in '((1 2 4.0) (5 6 8.3) (8 9 10.4))
          collect (list c b a))
       (() ((4.0 2 1) (8.3 6 5) (10.4 9 8))))
 
-#+nil
 (test "even more type-declared destructuring"
       ()
       (loop for (a b c) float in '((1.0 2.0 4.0) (5.0 6.0 8.3) (8.0 9.0 10.4))

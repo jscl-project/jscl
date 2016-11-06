@@ -10,16 +10,18 @@
     ;; Execute the test and put T/NIL if SUCCESS if the test
     ;; completed successfully.
     (handler-case
-        (unwind-protect
-             (progn
-               (setq result (funcall fn))
-               (if result
-                   (setq success t)
-                   (setq success nil))
-               (setq normal-exit t))
-          (unless normal-exit
-            (setq success nil)))
-      (error (err)
+        (catch 'recover
+          (unwind-protect
+               (progn
+                 (setq result (funcall fn))
+                 (if result
+                     (setq success t)
+                     (setq success nil))
+                 (setq normal-exit t))
+            (unless normal-exit
+              (setq success nil)
+              (throw 'recover t))))
+      (error ()
         nil))
 
     (incf *total-tests*)
