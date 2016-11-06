@@ -44,6 +44,8 @@ functions and macros. In particular:
 
 - Packages
 
+- The `LOOP` macro
+
 - Others
 
 The compiler is very verbose, some simple optimizations or
@@ -52,9 +54,6 @@ The compiler is very verbose, some simple optimizations or
 Most of the above features are incomplete. The major features that are still missing are:
 
 - The `format` function
-
-- A loop implementation 
-  (http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/code/iter/loop/mit/0.html)
 
 - CLOS 
   (http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/oop/0.html)
