@@ -425,15 +425,6 @@
 
 (defconstant internal-time-units-per-second 1000)
 
-(defun get-internal-real-time ()
-  (get-internal-real-time))
-
-(defun get-unix-time ()
-  (truncate (/ (get-internal-real-time) 1000)))
-
-(defun get-universal-time ()
-  (+ (get-unix-time) 2208988800))
-
 (defun values-list (list)
   (values-array (list-to-vector list)))
 
