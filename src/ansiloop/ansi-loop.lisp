@@ -219,7 +219,7 @@
    #+LISPM (ignore head-var user-head-var) ;use locatives, unconditionally update through the tail.
    )
   (let ((env jscl::*environment*))
-    (setq form (macroexpand form env))
+    (setq form (jscl::!macroexpand form env))
     (flet ((cdr-wrap (form n)
              #+nil (declare (fixnum n))
              (do () ((<= n 4) (setq form `(,(case n
@@ -533,7 +533,7 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
                                      (and (consp x)
                                           (or (not (eq (car x) 'car))
                                               (not (symbolp (cadr x)))
-                                              (not (symbolp (setq x (macroexpand x env)))))
+                                              (not (symbolp (setq x (jscl::!macroexpand x env)))))
                                           (cons x nil)))
                                  (cdr val))
                          `(,val))))
@@ -871,7 +871,7 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
 	     (dolist (x l n) (incf n (estimate-code-size-1 x env))))))
     ;;@@@@ ???? (declare (function list-size (list) fixnum))
     (cond ((constantp x #+Genera env) 1)
-	  ((symbolp x) (multiple-value-bind (new-form expanded-p) (macroexpand-1 x env)
+	  ((symbolp x) (multiple-value-bind (new-form expanded-p) (jscl::!macroexpand-1 x env)
 			 (if expanded-p (estimate-code-size-1 new-form env) 1)))
 	  ((atom x) 1)				;??? self-evaluating???
 	  ((symbolp (car x))
@@ -908,7 +908,7 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
 		     ((eq fn 'return-from) (1+ (estimate-code-size-1 (third x) env)))
 		     ((or (special-operator-p fn) (member fn *estimate-code-size-punt*))
 		      (throw 'estimate-code-size nil))
-		     (t (multiple-value-bind (new-form expanded-p) (macroexpand-1 x env)
+		     (t (multiple-value-bind (new-form expanded-p) (jscl::!macroexpand-1 x env)
 			  (if expanded-p
 			      (estimate-code-size-1 new-form env)
 			      (f 3))))))))
