@@ -284,9 +284,6 @@
                                   (list (first v) (third v))))
                            varlist)))))))
 
-(defmacro loop (&body body)
-  `(while t ,@body))
-
 (defun identity (x) x)
 
 (defun complement (x)
