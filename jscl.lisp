@@ -76,6 +76,8 @@
     ("ffi"           :target)
     ("symbol"        :target)
     ("package"       :target)
+    ("ansiloop"
+     ("ansi-loop"    :both))
     ("read"          :both)
     ("conditions"    :both)
     ("backquote"     :both)
@@ -206,6 +208,10 @@
     (compile-application
      `(,(source-pathname "tests.lisp" :directory nil)
         ,@(directory (source-pathname "*" :directory '(:relative "tests") :type "lisp"))
+        ;; Loop tests
+        ,(source-pathname "validate.lisp" :directory '(:relative "tests" "loop") :type "lisp")
+        ,(source-pathname "base-tests.lisp" :directory '(:relative "tests" "loop") :type "lisp")
+        
         ,(source-pathname "tests-report.lisp" :directory nil))
      (merge-pathnames "tests.js" *base-directory*))
 

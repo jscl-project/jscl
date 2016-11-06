@@ -975,6 +975,12 @@
 (defvar *builtins*
   (make-hash-table))
 
+(defun !special-operator-p (name)
+  (nth-value 1 (gethash name *builtins*)))
+#+jscl
+(fset 'special-operator-p #'!special-operator-p)
+
+
 (defmacro define-raw-builtin (name args &body body)
   ;; Creates a new primitive function `name' with parameters args and
   ;; @body. The body can access to the local environment through the
@@ -1355,8 +1361,10 @@
 		  (property o key)))
     (return ,(convert nil))))
 
-(define-compilation %js-vref (var)
-  `(call-internal |js_to_lisp| ,(make-symbol var)))
+(define-compilation %js-vref (var &optional raw)
+  (if raw
+      (make-symbol var)
+      `(call-internal |js_to_lisp| ,(make-symbol var))))
 
 (define-compilation %js-vset (var val)
   `(= ,(make-symbol var) (call-internal |lisp_to_js| ,(convert val))))
