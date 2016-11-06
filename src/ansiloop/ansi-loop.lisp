@@ -2149,4 +2149,6 @@ collected result will be returned as the value of the LOOP."
 (progn
   (in-package :cl)
   (defmacro loop (&rest keywords-and-forms)
-    `(jscl/loop::!loop ,@keywords-and-forms)))
+    `(jscl/loop::!loop ,@keywords-and-forms))
+  (defmacro loop-finish ()
+    `(jscl/loop::!loop-finish)))
