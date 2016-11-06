@@ -42,6 +42,13 @@
   (def / (/ 1 x)))
 
 
+(defconstant most-positive-fixnum
+  (oget (%js-vref "Number" t) "MAX_SAFE_INTEGER"))
+
+(defconstant most-negative-fixnum
+  (oget (%js-vref "Number" t) "MIN_SAFE_INTEGER"))
+
+
 (defun 1+ (x) (+ x 1))
 (defun 1- (x) (- x 1))
 

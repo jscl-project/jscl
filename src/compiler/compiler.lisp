@@ -1361,8 +1361,10 @@
 		  (property o key)))
     (return ,(convert nil))))
 
-(define-compilation %js-vref (var)
-  `(call-internal |js_to_lisp| ,(make-symbol var)))
+(define-compilation %js-vref (var &optional raw)
+  (if raw
+      (make-symbol var)
+      `(call-internal |js_to_lisp| ,(make-symbol var))))
 
 (define-compilation %js-vset (var val)
   `(= ,(make-symbol var) (call-internal |lisp_to_js| ,(convert val))))
