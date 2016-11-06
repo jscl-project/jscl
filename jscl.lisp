@@ -76,6 +76,8 @@
     ("ffi"           :target)
     ("symbol"        :target)
     ("package"       :target)
+    ("ansiloop"
+     ("ansi-loop"    :both))
     ("read"          :both)
     ("conditions"    :both)
     ("backquote"     :both)
@@ -83,8 +85,6 @@
      ("codegen"      :both)
      ("compiler"     :both))
     ("documentation" :target)
-    ("ansiloop"
-     ("ansi-loop"    :both))
     ("toplevel"      :target)))
 
 
