@@ -84,7 +84,7 @@
      ("compiler"     :both))
     ("documentation" :target)
     ("ansiloop"
-     ("ansi-loop"    :target))
+     ("ansi-loop"    :both))
     ("toplevel"      :target)))
 
 

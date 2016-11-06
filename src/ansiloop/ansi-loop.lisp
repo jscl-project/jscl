@@ -49,10 +49,15 @@
 
 ;;;; LOOP Iteration Macro
 
+#-jscl
 (defpackage :jscl/loop
   (:use :common-lisp))
+#+jscl
+(eval-when (:load-toplevel :execute)
+  (make-package "JSCL/LOOP" :use (list(find-package "CL"))))
 
 (in-package :jscl/loop)
+
 
 ;;; Technology.
 ;;;
@@ -2129,10 +2134,13 @@ collected result will be returned as the value of the LOOP."
 		    (zwei:indentation . zwei:indent-loop))
   (loop-standard-expansion keywords-and-forms jscl::*environment* *loop-ansi-universe*))
 
+#+jscl
+(defmacro loop (&rest keywords-and-forms)
+  `(!loop ,@keywords-and-forms))
+
 #+allegro
 (defun excl::complex-loop-expander (body env)
   (loop-standard-expansion body env *loop-ansi-universe*))
-
 
 
 ;;; FIXME: Somehow the pacakge is not being bound properly in
