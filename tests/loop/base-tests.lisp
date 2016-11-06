@@ -486,14 +486,12 @@
   (((1.2 4.3 5.7)) 22.4))
 ||#
 
-#+nil
 (test "simple maximize"
       ()
       (loop for i in '(2 1 5 3 4)
          maximize i)
       (() 5))
 
-#+nil
 (test "simple minimize"
       ()
       (loop for i in '(2 1 5 3 4)
