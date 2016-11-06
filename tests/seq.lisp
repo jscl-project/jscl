@@ -46,6 +46,9 @@
 (test (equal (substitute 4 5 '(1 2 3 4)) '(1 2 3 4)))
 (test (equal (substitute 99 3 '(1 2 3 4)) '(1 2 99 4)))
 (test (equal (substitute 99 3 '(1 2 3 4) :test #'<=) '(1 2 99 99)))
+
+;;; This test fails expectely as you can't compare vectors with equal.
+#+nil
 (test (equal (substitute 99 3 #(1 2 3 4) :test #'<=) #(1 2 99 99)))
 
 ; POSITION
