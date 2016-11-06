@@ -8,5 +8,8 @@
 (terpri)
 
 #+jscl
-(when #j:phantom
-  (#j:phantom:exit *failed-tests*))
+(progn
+  (when #j:phantom
+    (#j:phantom:exit *failed-tests*))
+  (when #j:process
+    (#j:process:exit *failed-tests*)))
