@@ -34,6 +34,10 @@
                      (intern (concat "COPY-" name-string)))))
 
 
+    ;; The predicate function is used by slot accessors and the copier
+    ;; to check the type of their arguments, so it is actually
+    ;; required. If the user is not interested on it (:predicate nil),
+    ;; let's generate a name.
     (unless predicate
       (setq predicate (gensym "PREDICATE")))
 
