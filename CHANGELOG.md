@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
-## 0.5.1 - 2016-11-06
+## [0.5.1] - 2016-11-06
 ### Added
 - Implement the [LOOP](https://github.com/jscl-project/jscl/pull/253) macro
 
