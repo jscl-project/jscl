@@ -41,3 +41,41 @@
         :until (terminalp ch)))
 
 (set-dispatch-macro-character #\# #\J #'j-reader)
+
+
+
+;;; Storage Vectors
+;;;
+;;; Provide a ANSI compatible implementation of storage vectors.
+;;; 
+(defstruct (storage-vector
+             (:constructor make-storage-vector-1))
+  underlying-vector)
+
+(defun make-storage-vector (n)
+  (let ((v (make-array n :adjustable t)))
+    (make-storage-vector-1 :underlying-vector v)))
+
+(defun storage-vector-size (sv)
+  (length (storage-vector-underlying-vector sv)))
+
+(defun resize-storage-vector (sv new-size)
+  (let ((v (storage-vector-underlying-vector sv)))
+    (adjust-array v new-size)
+    sv))
+
+(defun storage-vector-ref (sv n)
+  (aref (storage-vector-underlying-vector sv) n))
+
+(defun storage-vector-set (sv n value)
+  (setf (aref (storage-vector-underlying-vector sv) n) value))
+
+(defun concatenate-storage-vector (sv1 sv2)
+  (let* ((sv (make-storage-vector (+ (storage-vector-size sv1)
+                                     (storage-vector-size sv2))))
+         (v (storage-vector-underlying-vector sv)))
+    (setf (subseq v 0 (storage-vector-size sv1))
+          (storage-vector-underlying-vector sv1))
+    (setf (subseq v (storage-vector-size sv1))
+          (storage-vector-underlying-vector sv2))
+    sv))
