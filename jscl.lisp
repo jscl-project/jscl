@@ -371,13 +371,17 @@ forms if PRINT is set."
     (compile-node-repl)))
 
 (defun bootstrap-core (&optional verbosep)
+  (when verbosep
+    (format *trace-output* "~|~2%;;;; — Bootstrapping core for JSCL, version ~a.~2%" *version*))
   (let ((*features* (cons :jscl-xc *features*))
         (*package* (find-package "JSCL"))
         (*default-pathname-defaults* *base-directory*))
     (setq *environment* (make-lexenv))
     (compile-jscl.js verbosep)
     (report-undefined-functions)
-    (compile-test-suite)))
+    (compile-test-suite))
+  (when verbosep
+    (format *trace-output* "~2&;;;; … Done, compiled jscl.js and test suite.~%~|~%")))
 
 (defun run-tests-in-host ()
   "Run the tests in  the host Lisp implementation. It is  a quick way to
