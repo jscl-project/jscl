@@ -45,8 +45,6 @@
 
 ;; COMPLEMENT
 (test (funcall (complement #'zerop) 1))
-;; FIXME: Uncomment whenever characterp is defined
-                                        ;(test (not (funcall (complement
-                                        ;#'characterp) #\A)))
+(test (not (funcall (complement #'characterp) #\A)))
 (test (not (funcall (complement #'member) 'a '(a b c))))
 (test (funcall (complement #'member) 'd '(a b c)))
