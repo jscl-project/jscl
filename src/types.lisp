@@ -87,63 +87,24 @@
                                   :predicate predicate)
             *types*)))
 
-(defun make-numeric-range-check-predicate (type)
-  (lambda (object &optional min max)
-    (and (typep object type)
-         (etypecase min
-           (null t)
-           (cons (and (numberp (car min))
-                      (null (cdr min))
-                      (< (car min) object)))
-           (number (<= min object)))
-         (etypecase max
-           (null t)
-           (cons (and (numberp (car max))
-                      (null (cdr max))
-                      (> (car max) object)))
-           (number (>= max object))))))
-
 (defun find-type-definition (type)
   (find type *types* :key #'type-definition-name))
 
-(progn
-  (dolist (type '(number integer real rational
-                  float single-float double-float long-float))
-    (setf (type-definition-ornate-predicate
-           (find-type-definition type))
-          (make-numeric-range-check-predicate type)))
-  (setf (type-definition-ornate-predicate
-         (find-type-definition 'string))
-        (lambda (object length)
-          (and (stringp object)
-               (= length (length object)))))
-
-  (setf (type-definition-ornate-predicate
-         (find-type-definition 'array))
-        (lambda (object element-type &optional dimensions)
-          (if (stringp object)
-              (and (find element-type '(t character))
-                   (etypecase dimensions
-                     (null t)
-                     (integer (= (length object) dimensions))
-                     (cons (and (integerp (car object))
-                                (null (cdr object))
-                                (= (length object) 
-                                   (car dimensions))))))
-              (and (subtypep (array-element-type object) element-type)
-                   (equalp (array-dimensions object) dimensions))))))
-
 
 (defun typep (object type &optional environment)
-  (etypecase type
-    (cons (let ((ornate-predicate (type-defition-ornate-predicate
-                                   (find-type-definition (car type)))))
-            (if ornate-predicate
-                (apply ornate-predicate object (cdr type))
-                (error))))
-    (symbol (funcall (type-definition-predicate
-                      (find-type-definition type))
-                     object))))
+  (cond
+    ((consp type)
+     (let ((ornate-predicate (type-defition-ornate-predicate
+                              (find-type-definition (car type)))))
+       (if ornate-predicate
+           (apply ornate-predicate object (cdr type))
+           (error "Can't handle type specifier ~s; is it valid?"
+                  type))))
+    ((symbolp type)
+     (funcall (type-definition-predicate
+               (find-type-definition type))
+              object))
+    (t (error "~s is not a valid type specifier" type))))
 
 (defmacro check-type (place type &optional type-string)
   "Signal a restartable  error of type TYPE-ERROR if the  value of PLACE
@@ -220,3 +181,46 @@ invoked. In that case it will store into PLACE and start over."
          ,@clausules
          (t (error "~S fell through etypecase expression." ,g!x))))))
 
+
+(defun make-numeric-range-check-predicate (type)
+  (lambda (object &optional min max)
+    (and (typep object type)
+         (etypecase min
+           (null t)
+           (cons (and (numberp (car min))
+                      (null (cdr min))
+                      (< (car min) object)))
+           (number (<= min object)))
+         (etypecase max
+           (null t)
+           (cons (and (numberp (car max))
+                      (null (cdr max))
+                      (> (car max) object)))
+           (number (>= max object))))))
+
+(progn
+  (dolist (type '(number integer real rational
+                  float single-float double-float long-float))
+    (setf (type-definition-ornate-predicate
+           (find-type-definition type))
+          (make-numeric-range-check-predicate type)))
+  (setf (type-definition-ornate-predicate
+         (find-type-definition 'string))
+        (lambda (object length)
+          (and (stringp object)
+               (= length (length object)))))
+
+  (setf (type-definition-ornate-predicate
+         (find-type-definition 'array))
+        (lambda (object element-type &optional dimensions)
+          (if (stringp object)
+              (and (find element-type '(t character))
+                   (etypecase dimensions
+                     (null t)
+                     (integer (= (length object) dimensions))
+                     (cons (and (integerp (car object))
+                                (null (cdr object))
+                                (= (length object)
+                                   (car dimensions))))))
+              (and (subtypep (array-element-type object) element-type)
+                   (equalp (array-dimensions object) dimensions))))))
