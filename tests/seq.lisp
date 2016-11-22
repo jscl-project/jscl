@@ -67,7 +67,7 @@
 (expected-failure (equal (substitute-if 9 #'evenp '(1 2 4 1 3 4 5) :count 1 :from-end t)
                          '(1 2 4 1 3 9 5)))
 
-                                        ; POSITION
+;; POSITION
 (test (= (position 1 #(1 2 3))  0))
 (test (= (position 1 '(1 2 3))  0))
 (test (= (position 1 #(1 2 3 1)) 0))
@@ -104,7 +104,7 @@
 (let ((nums '(1 2 3 4 5)))
   (test (equal (subseq nums 3) '(4 5)))
   (test (equal (subseq nums 2 4) '(3 4)))
-                                        ; Test that nums hasn't been altered: SUBSEQ should construct fresh lists
+  ;; Test that nums hasn't been altered: SUBSEQ should construct fresh lists
   (test (equal nums '(1 2 3 4 5))))
 
 ;; REVERSE
@@ -119,6 +119,19 @@
   (test (equal (aref xs 2) (aref pattern 2))))
 (test (equal (reverse "") ""))
 (test (equal (reverse "abc") "cba"))
+
+;; NREVERSE
+(test (eq (nreverse nil) nil))
+(test (equalp (nreverse (copy-list '(a b c))) '(c b a)))
+(test (zerop (length (nreverse (copy-seq #())))))
+(test (equalp (nreverse (copy-seq #(a b c))) #(c b a)))
+(let ((xs (nreverse (copy-seq #(a b c))))
+      (pattern #(c b a)))
+  (test (equal (aref xs 0) (aref pattern 0)))
+  (test (equal (aref xs 1) (aref pattern 1)))
+  (test (equal (aref xs 2) (aref pattern 2))))
+(test (equal (nreverse "") ""))
+(test (equal (nreverse (copy-seq "abc")) "cba"))
 
 ;;; REDUCE
 (test (equal (reduce (lambda (x y) `(+ ,x ,y))
