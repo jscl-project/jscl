@@ -30,8 +30,14 @@
 
 ;;; Package definitions for within the environment.
 
-(defpackage :common-list
-  (:nicknames :cl :jscl))
+(defpackage :common-lisp
+  (:nicknames :cl)) ; exports handled by toplevel.lisp
+
+(defpackage :jscl
+  (:use :cl :jscl)
+  (:export #:bootstrap #:bootstrap-core
+           #:run-tests-in-host #:with-sharp-j #:read-#j
+           #:write-javascript-for-files #:compile-application))
 
 (defpackage :jscl/ffi
   (:use :cl :jscl)
@@ -466,6 +472,10 @@ macro cache is so aggressive that it cannot be redefined."
 
 
 ;;; Function names/values
+
+(defun %fdefinition-setf (name)
+  "Primitive; look up the fdefinition for (SETF NAME)"
+  (%fdefinition-setf name))
 
 (defun !fdefinition-soft (name)
   "Like `FDEFINITION' but returns NULL rather than signaling an error."
