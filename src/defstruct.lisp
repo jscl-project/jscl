@@ -151,6 +151,3 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
        ,@(defstruct/make-slot-accessors name-string predicate slot-descriptions)
        ',name)))
 
-#+jscl-xc (defmacro defstruct (name+options &rest slots)
-            `(def!struct ,name+options ,@slots))
-
