@@ -1741,9 +1741,9 @@ generate the code which performs the transformation on these variables."
       (t
        (convert `(symbol-value ',sexp))))))
 
-(defun emit-uncompilable-form (error sexp)
+(defun emit-uncompilable-form (sexp err-format &rest err-args)
   (restart-case
-      (error error)
+      (apply #'error err-format err-args)
     (replace-with-warning ()
       :report "Replace failed form with a warning"
       (list 'warn (format nil "Failed compilation of ~s"
@@ -1768,10 +1768,7 @@ generate the code which performs the transformation on these variables."
            (eql (find-package :common-lisp)
                 (symbol-package (car sexp)))
            (macro-function (car sexp)))
-      (emit-uncompilable-form
-       (format nil "Failed to macroexpand ~s ~% in ~s"
-               (car sexp) sexp)
-       sexp)
+      (emit-uncompilable-form sexp "Failed to macroexpand ~s ~% in ~s" (car sexp) sexp)
       sexp))
 
 (defun object-evaluates-to-itself-p (object)
