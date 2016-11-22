@@ -110,9 +110,8 @@
 ;; REVERSE
 (test (eq (reverse nil) nil))
 (test (equal (reverse '(a b c)) '(c b a)))
-;; FIXME: When replace the following two cases when implemented.
 (test (zerop (length (reverse #()))))
-;; (test (equalp (reverse #(a b c)) #(c b a)))
+(test (equalp (reverse #(a b c)) #(c b a)))
 (let ((xs (reverse #(a b c)))
       (pattern #(c b a)))
   (test (equal (aref xs 0) (aref pattern 0)))
