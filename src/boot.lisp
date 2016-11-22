@@ -361,7 +361,7 @@ macro cache is so aggressive that it cannot be redefined."
   (lambda (&rest)
     x))
 
-;;; Atoms. CONSP is defined as a primitive.
+;;; Atoms. CONSP is defined in list.lisp
 
 (defun atom (x)
   (not (consp x)))
