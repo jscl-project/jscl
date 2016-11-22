@@ -1,4 +1,4 @@
-;;; list.lisp ---
+;;;; list.lisp --- Lists and pairs and so forth
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
 ;; the terms of the GNU General  Public License as published by the Free
@@ -16,9 +16,10 @@
 
 
 (/debug "loading list.lisp!")
+
+;;; Various list functions
 
-;;;; Various list functions
-
+;;; Compiler primitives
 (defun cons (x y) (cons x y))
 (defun consp (x) (consp x))
 
@@ -36,6 +37,9 @@
   (cond ((null object) t)
         ((consp object) nil)
         (t (error "The value `~S' is not a type list." object))))
+
+
+;;; CAR, CDR, and their kin
 
 (defun car (x)
   "Return the CAR part of a cons, or NIL if X is null."
@@ -60,16 +64,6 @@
 (defun ninth   (x) (car  (cddddr (cddddr x))))
 (defun tenth   (x) (cadr (cddddr (cddddr x))))
 (defun rest    (x) (cdr x))
-
-(defun list (&rest args)
-  args)
-
-(defun list* (arg &rest others)
-  (cond ((null others) arg)
-        ((null (cdr others)) (cons arg (car others)))
-        (t (do ((x others (cdr x)))
-               ((null (cddr x)) (rplacd x (cadr x))))
-           (cons arg others))))
 
 (defun list-length (list)
   (let ((l 0))
@@ -128,6 +122,30 @@
 (defun cdddar (x) (cdr (cddar x)))
 (defun cddddr (x) (cdr (cdddr x)))
 
+
+;;; Construction
+
+(defun make-list (size &key (initial-element nil))
+  "Create a list of size `size` of `initial-element`s."
+  (when (< size 0)
+    (error "Size must be non-negative"))
+  (let ((newlist))
+    (dotimes (i size newlist)
+      (push initial-element newlist))))
+
+(defun list (&rest args)
+  args)
+
+(defun list* (arg &rest others)
+  (cond ((null others) arg)
+        ((null (cdr others)) (cons arg (car others)))
+        (t (do ((x others (cdr x)))
+               ((null (cddr x)) (rplacd x (cadr x))))
+           (cons arg others))))
+
+
+;;; APPEND, SUBLIS, &c.
+
 (defun append-two (list1 list2)
   (if (null list1)
       list2
@@ -182,6 +200,9 @@
           (setq last-cell (cdr last-cell)))
         new-list)))
 
+
+;;; Trees
+
 (defun copy-tree (tree)
   (if (consp tree)
       (cons (copy-tree (car tree))
@@ -200,19 +221,14 @@
                         (%tree-equal (cdr tree1) (cdr tree2))))))
       (%tree-equal tree1 tree2))))
 
+
+;;; The end
+
 (defun tailp (object list)
   (do ((tail list (cdr tail)))
       ((atom tail) (eq object tail))
     (when (eql tail object)
       (return-from tailp t))))
-
-(defun make-list (size &key (initial-element nil))
-  "Create a list of size `size` of `initial-element`s."
-  (when (< size 0)
-    (error "Size must be non-negative"))
-  (let ((newlist))
-    (dotimes (i size newlist)
-      (push initial-element newlist))))
 
 (defun last (x)
   (while (consp (cdr x))
@@ -244,6 +260,9 @@
          (rplacd head nil)
          x)))))
 
+
+;;; Sets
+
 (defun member (x list &key key (test #'eql testp) (test-not #'eql test-not-p))
   (while list
     (when (satisfies-test-p x (car list) :key key :test test :testp testp
@@ -251,6 +270,15 @@
       (return list))
     (setq list (cdr list))))
 
+(defun intersection (list1 list2 &key (test #'eql) (key #'identity))
+  (let ((new-list ()))
+    (dolist (x list1)
+      (when (member (funcall key x) list2 :test test :key key)
+        (push x new-list)))
+    new-list))
+
+
+;;; Associative Lists
 
 (defun assoc (x alist &key key (test #'eql testp) (test-not #'eql test-not-p))
   (while alist
@@ -341,18 +369,13 @@
       ((atom 2nd) 3rd)
     (rplacd 2nd 3rd)))
 
-
 (defun adjoin (item list &key (test #'eql) (key #'identity))
   (if (member item list :key key :test test)
       list
       (cons item list)))
 
-(defun intersection (list1 list2 &key (test #'eql) (key #'identity))
-  (let ((new-list ()))
-    (dolist (x list1)
-      (when (member (funcall key x) list2 :test test :key key)
-        (push x new-list)))
-    new-list))
+
+;;; Property lists
 
 (defun get-properties (plist indicator-list)
   (do* ((plist plist (cddr plist))
@@ -402,20 +425,20 @@
                  ,store)
               `(getf ,getter ,indicator-sym ,@(and default `(,default-sym)))))))
 
+
+;;; Mapping
 
+;; The following code has been taken from SBCL
 
-;;;
-;;; The following code has been taken from SBCL
+;; mapping functions
 
-;;; mapping functions
-
-;;; a helper function for implementation  of MAPC, MAPCAR, MAPCAN, MAPL,
-;;; MAPLIST, and MAPCON
-;;;
-;;; Map the  designated function  over the  arglists in  the appropriate
-;;; way. It is  done when any of  the arglists runs out.  Until then, it
-;;; CDRs down the arglists calling the function and accumulating results
-;;; as desired.
+;; a helper function  for implementation of MAPC,  MAPCAR, MAPCAN, MAPL,
+;; MAPLIST, and MAPCON
+;;
+;; Map the designated function over the arglists in the appropriate way.
+;; It is  done when any  of the arglists runs  out. Until then,  it CDRs
+;; down  the  arglists calling  the  function  and accumulating  results
+;; as desired.
 (defun map1 (fun-designator arglists accumulate take-car)
   (do* ((fun fun-designator)
         (non-acc-result (car arglists))
@@ -468,3 +491,4 @@
 (defun mapcon (function list &rest more-lists)
   "Apply FUNCTION to successive CDRs of lists. Return NCONC of results."
   (map1 function (cons list more-lists) :nconc nil))
+
