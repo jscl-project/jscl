@@ -1246,11 +1246,27 @@ generate the code which performs the transformation on these variables."
 (define-builtin fboundp (x)
   (convert-to-bool `(!== (get ,x "fvalue") undefined)))
 
+(define-builtin %fboundp-setf (x)
+  (convert-to-bool `(!== (get ,x "setfValue") undefined)))
+
 (define-builtin symbol-value (x)
   `(call-internal |symbolValue| ,x))
 
+(define-builtin %fdefinition-setf (accessor)
+  `(call-internal |fDefinitionSetF| ,accessor))
+(define-builtin %setf-fdefinition-setf (accessor function)
+  `(call-internal |setFDefinitionSetF| ,accessor ,function))
+(define-builtin %fmakunbound-setf (x)
+  `(call-internal |fMakUnbound| ,x))
+
+(define-builtin %setf-symbol-function (x fn)
+  `(call-internal |setSymbolFunction| ,x ,fn))
 (define-builtin symbol-function (x)
   `(call-internal |symbolFunction| ,x))
+(define-builtin %fmakunbound (x)
+  `(= (get ,x "fvalue") undefined))
+(define-builtin %fmakunbound-setf (x)
+  `(= (get ,x "setfValue") undefined))
 
 (define-builtin lambda-code (x)
   `(call-internal |make_lisp_string| (method-call ,x "toString")))
