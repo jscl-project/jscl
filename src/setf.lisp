@@ -34,7 +34,7 @@
           (assert (consp place) (place)
                   "SETF PLACE not a SYMBOL nor CONS: ~s" place)
           (let* ((access-fn (car place))
-                 (expander (expander (cdr (assoc access-fn *setf-expanders*)))))
+                 (expander (cdr (assoc access-fn *setf-expanders*))))
             (unless expander
               (error "Unknown generalized reference."))
             (apply expander (cdr place)))))))
