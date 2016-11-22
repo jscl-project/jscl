@@ -314,24 +314,47 @@
       (collect (cons (caar alist) (cdar alist)))
       (setq alist (cdr alist)))))
 
-(define-setf-expander car (x)
-  (let ((cons (gensym "CONS-"))
-        (new-value (gensym "NEW-CAR-")))
-    (values (list cons)
-            (list x)
-            (list new-value)
-            `(progn (rplaca ,cons ,new-value) ,new-value)
-            `(car ,cons))))
+
+;;; SETFs
 
-(define-setf-expander cdr (x)
-  (let ((cons (gensym "CONS-"))
-        (new-value (gensym "NEW-CDR-")))
-    (values (list cons)
-            (list x)
-            (list new-value)
-            `(progn (rplacd ,cons ,new-value) ,new-value)
-            `(cdr ,cons))))
+(defun (setf car) (value cell)
+  (rplaca cell value)
+  value)
 
+(defun (setf cdr) (value cell)
+  (rplacd cell value)
+  value)
+
+(defun (setf nth) (value n list) 
+  (check-type n (integer 0 *) "a list index")
+  (let ((cell list))
+    (do ((i 0 (1+ i)))
+        ((= i n))
+      (setq cell (rest list))
+      (when (null cell)
+        (error "Index out of range: ~s greater than list length ~s" n i)))
+    (rplaca cell value)
+    value))
+
+;;; TODO: test the above, then remove the more complex setf-expanders below.
+
+;; (define-setf-expander car (x)
+;;   (let ((cons (gensym "CONS-"))
+;;         (new-value (gensym "NEW-CAR-")))
+;;     (values (list cons)
+;;             (list x)
+;;             (list new-value)
+;;             `(progn (rplaca ,cons ,new-value) ,new-value)
+;;             `(car ,cons))))
+
+;; (define-setf-expander cdr (x)
+;;   (let ((cons (gensym "CONS-"))
+;;         (new-value (gensym "NEW-CDR-")))
+;;     (values (list cons)
+;;             (list x)
+;;             (list new-value)
+;;             `(progn (rplacd ,cons ,new-value) ,new-value)
+;;             `(cdr ,cons))))
 
 ;; The NCONC function is based on the SBCL's one.
 (defun nconc (&rest lists)
