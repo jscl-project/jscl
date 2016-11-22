@@ -36,7 +36,7 @@
           (let* ((access-fn (car place))
                  (expander (cdr (assoc access-fn *setf-expanders*))))
             (unless expander
-              (error "Unknown generalized reference."))
+              (error "Unknown generalized reference: ~s" access-fn))
             (apply expander (cdr place)))))))
 (fset 'get-setf-expansion (fdefinition '!get-setf-expansion))
 
@@ -81,6 +81,10 @@
       `(short-defsetf ,@args)))
 
 (defmacro setf (&rest pairs)
+  "Takes pairs  of arguments  like SETQ.  The first is  a place  and the
+second is the value that is supposed  to go into that place. Returns the
+last value. The place argument may be  any of the access forms for which
+SETF knows a corresponding setting form."
   (cond
     ((null pairs) nil)
     ((null (cdr pairs))
