@@ -570,6 +570,9 @@ This is SETF'able."
     (t
      nil)))
 
+
+;;; “environment” variables around READ/PRINT
+
 (defvar *print-escape* t
   "Should  we  print in  a  reasonably  machine-readable way?  (possibly
 overridden by *PRINT-READABLY*)")
@@ -588,3 +591,10 @@ general (and circularity in particular) when printing?")
   "the radix that Lisp reads numbers in")
 (defvar *read-eval* t
   "If false, then the #. read macro is disabled.")
+
+
+;;; Forward-declared macro funkiness
+;;; DEF!STRUCT isn't yet defined, but this makes it work once it is.
+(defmacro defstruct (name+options &rest slots)
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
+     (def!struct ,name+options ,@slots)))
