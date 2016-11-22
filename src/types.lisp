@@ -123,23 +123,6 @@ invoked. In that case it will store into PLACE and start over."
             (setf ,place ,new-value)
             (go ,new-value))))))
 
-(defun !fdefinition-soft (name)
-  "Like `FDEFINITION' but returns NULL rather than signaling an error."
-  (cond
-    ;; FIXME:  I  don't   believe  this  is  correct.   eg,  SBCL  gives
-    ;; a SIMPLE-TYPE-ERROR if you call (FDEFINITION (FUNCTION +)) or so
-    ((functionp name) name)
-    ;; ^ Think about deleting this. ~brfp
-    ((symbolp name)
-     (symbol-function name))
-    ((consp name)
-     (case (first name)
-       (setf (error "FIXME: SETF FDefinition ~s" name))
-       (jscl/ffi:oget (error "FIXME: FDefinition FFI bridge"))
-       ;; Should be something  like if ( x && typeof  x === 'function' )
-       ;; {  return x;  } else  { throw  new Error  "" +  x +  " is  not
-       ;; a function" }
-       ))))
 
 "(old typecase — make sure these tests pass
                                (hash-table 'hash-table-p)
