@@ -2,7 +2,7 @@
 (defvar halve  (lambda (x) (/ x 2)))
 (defvar double (lambda (x) (* x 2)))
 
-; COUNT
+;; COUNT
 (test (= (count #\a "how many A's are there in here?") 2))
 (test (= (count #\a "how many A's are there in here?" :start 10) 1))
 (test (= (count 'a '(a b c d e a e f)) 2))
@@ -94,13 +94,12 @@
                                         ; REMOVE-IF
 (test (equal (remove-if     #'zerop '(1 0 2 0 3)) '(1 2 3)))
 (test (equal (remove-if-not #'zerop '(1 0 2 0 3)) '(0 0)))
-;; TODO: Rewrite these tests when EQUALP exists and works on vectors
-(let ((v1 (remove-if #'zerop #(1 0 2 0 3))))
-  (test (and (= (aref v1 0) 1) (= (aref v1 1) 2) (= (aref v1 2) 3))))
+(test (equalp (remove-if #'zerop #(1 0 2 0 3))
+              #(1 2 3)))
 (test (every #'zerop (remove-if-not #'zerop #(1 0 2 0 3))))
 (test (every #'= '(0 1 2 3) '(0 1 2 3))) ; test “every” with two seqs
 
-                                        ; SUBSEQ
+;; SUBSEQ
 (let ((nums '(1 2 3 4 5)))
   (test (equal (subseq nums 3) '(4 5)))
   (test (equal (subseq nums 2 4) '(3 4)))
@@ -133,7 +132,7 @@
 (test (equal (nreverse "") ""))
 (test (equal (nreverse (copy-seq "abc")) "cba"))
 
-;;; REDUCE
+;; REDUCE
 (test (equal (reduce (lambda (x y) `(+ ,x ,y))
                      '(1 2 3 4))
              '(+ (+ (+ 1 2) 3) 4)))
@@ -160,10 +159,12 @@
              (reduce #'cons #(a b c d e f) :start 2 :end 4 :initial-value 'z)))
 
 (test (equal '1
-             (reduce #'(lambda () (error "When reducing a sequence with one element the function should not be called"))
+             (reduce (lambda () 
+                       (error "When reducing a sequence with one element the function should not be called"))
                      #(1))))
 
-(test (equal 3 (reduce #'(lambda () (error "When reducing a sequence with one element the function should not be called"))
+(test (equal 3 (reduce (lambda ()
+                         (error "When reducing a sequence with one element the function should not be called"))
                        #(1 2 3 4) :start 2 :end 3)))
 
 ;; The following tests reduced reduce were copied from ANSI CL TESTS.
@@ -173,13 +174,13 @@
                      :initial-value nil)
              '(b c d)))
 
-                                        ; MISMATCH
+;; MISMATCH
 (test (= (mismatch '(1 2 3) '(1 2 3 4 5 6)) 3))
 (test (= (mismatch '(1 2 3) #(1 2 3 4 5 6)) 3))
 (test (= (mismatch #(1 2 3) '(1 2 3 4 5 6)) 3))
 (test (= (mismatch #(1 2 3) #(1 2 3 4 5 6)) 3))
 
-                                        ; SEARCH
+;; SEARCH
 (test (= (search '(1 2 3) '(4 5 6 1 2 3)) 3))
 (test (= (search '(1 2 3) #(4 5 6 1 2 3)) 3))
 (test (= (search #(1 2 3) '(4 5 6 1 2 3)) 3))
@@ -188,7 +189,7 @@
 (test (= (search '(1) '(4 5 6 1 2 3)) 3))
 (test (= (search #(1) #(4 5 6 1 2 3)) 3))
 
-;;; MAP
+;; MAP
 
 (test-equal
  (map 'list #'list '())
@@ -216,7 +217,7 @@
  (map 'list #'list "123")
  '((#\1) (#\2) (#\3)))
 
-                                        ; CHAR-UPCASE cannot be sharp-quoted currently
+;; CHAR-UPCASE cannot be sharp-quoted currently
 (test-equal
  (map 'string (lambda (c) (char-upcase c)) '(#\a #\b #\c))
  "ABC")
