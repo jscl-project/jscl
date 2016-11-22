@@ -145,8 +145,12 @@
 ;; From comment #4 on <https://bugs.launchpad.net/sbcl/+bug/1177986>:
 (defun digit-char-p (char &optional (radix 10))
   "Includes ASCII 0-9 a-z A-Z, plus any Unicode decimal digit characters or fullwidth variants A-Z."
-  (check-type char character)
-  (check-type radix integer)
+  ;; Check-Type not available yet.
+  ;; This could maybe move to char.lisp though?
+  (unless (and (characterp char)
+               (integerp radix)
+               (<= 2 radix 36))
+    (error "Type error"))
   (let* ((radix (or (and radix (<= 2 radix 36) radix) 10))
          (number (unicode-digit-value char))
          (code (char-code char))
