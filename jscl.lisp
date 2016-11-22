@@ -255,8 +255,9 @@ compiled in the host
 forms if PRINT is set."
   (with-compilation-restarts (filename)
     (with-compile-file-bindings (filename :verbosep print)
-      (format *trace-output*
-              "~&;;;; Compiling file ~a... " (enough-namestring filename))
+      (when print
+        (format *trace-output*
+                "~&;;;; Compiling file ~a... " (enough-namestring filename)))
       (handler-case
           (doforms (form in)
             (when print
