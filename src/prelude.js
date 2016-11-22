@@ -367,6 +367,8 @@ internals.Symbol = function(name, package_name) {
     this["package"] = package_name;
     this.value = undefined;
     this.fvalue = unboundFunction;
+    this.setfValue = unboundFunction;
+    this.typeName = undefined;
 };
 
 internals.symbolValue = function (symbol) {
@@ -383,8 +385,23 @@ internals.symbolValue = function (symbol) {
 
 internals.symbolFunction = function (symbol) {
     var fn = symbol.fvalue;
-    if (fn === unboundFunction)
-        symbol.fvalue();
+    if (fn === unboundFunction)        fn();
+    return fn;
+};
+
+internals.setSymbolFunction = function (symbol, fn) {
+    symbol.fvalue = fn;
+    return fn;
+};
+
+internals.fDefinitionSetF = function (symbol) {
+    var fn = symbol.setfValue;
+    if (fn === unboundFunction) fn();
+    return fn;
+};
+
+internals.setFDefinitionSetF = function (symbol, fn) {
+    symbol.setfValue = fn;
     return fn;
 };
 
