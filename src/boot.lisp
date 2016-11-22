@@ -33,6 +33,10 @@
 (defpackage :common-lisp
   (:nicknames :cl)) ; exports handled by toplevel.lisp
 
+(defpackage :common-lisp-user
+  (:use :common-lisp)
+  (:nicknames :cl-user))
+
 (defpackage :jscl
   (:use :cl :jscl)
   (:export #:bootstrap #:bootstrap-core
@@ -479,21 +483,16 @@ macro cache is so aggressive that it cannot be redefined."
 
 (defun !fdefinition-soft (name)
   "Like `FDEFINITION' but returns NULL rather than signaling an error."
-  (cond
-    ;; FIXME:  I  don't   believe  this  is  correct.   eg,  SBCL  gives
-    ;; a SIMPLE-TYPE-ERROR if you call (FDEFINITION (FUNCTION +)) or so
-    ((functionp name) name)
-    ;; ^ Think about deleting this. ~brfp
+  (cond 
     ((symbolp name)
      (symbol-function name))
     ((consp name)
-     (case (first name)
+     (ecase (first name)
        (setf (%fdefinition-setf (second name)))
        (jscl/ffi:oget (error "FIXME: FDefinition FFI bridge for ~s" name))
        ;; Should be something  like if ( x && typeof  x === 'function' )
        ;; {  return x;  } else  { throw  new Error  "" +  x +  " is  not
-       ;; a function" }
-       (otherwise (error "Not a function name: ~s" name))
+       ;; a function" } 
        ))
     (t (error "Not a function name: ~s" name))))
 
