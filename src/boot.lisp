@@ -27,16 +27,18 @@
 (error "This should not be getting evaluated except during JSCL-XC.")
 (/debug "loading boot.lisp!")
 
-(defpackage :jscl
-  (:use :cl #+sbcl :sb-gray)
-  (:export #:bootstrap #:bootstrap-core
-           #:run-tests-in-host #:with-sharp-j #:read-#j
-           #:write-javascript-for-files #:compile-application))
+
+;;; Package definitions for within the environment.
+
+(defpackage :common-list
+  (:nicknames :cl :jscl))
 
 (defpackage :jscl/ffi
   (:use :cl :jscl)
   (:export #:oget #:oget* #:make-new #:new #:*root*))
 
+
+;;; DEFMACRO
 (eval-when (:compile-toplevel) 
   (let ((defmacro-macroexpander
          '#'(lambda (form)
@@ -61,9 +63,15 @@
 
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
+
+;;; DECLAIM
+
 (defmacro declaim (&rest decls)
   `(eval-when (:compile-toplevel :execute)
      ,@(mapcar (lambda (decl) `(!proclaim ',decl)) decls)))
+
+
+;;; DEFCONSTANT, T, NIL, LAMBDA
 
 (defmacro defconstant (name value &optional docstring)
   `(progn
@@ -81,6 +89,35 @@
 (defmacro lambda (args &body body)
   `(function (lambda ,args ,@body)))
 
+
+;;; AND, OR
+
+(defmacro and (&rest forms)
+  (cond
+    ((null forms)
+     t)
+    ((null (cdr forms))
+     (car forms))
+    (t
+     `(if ,(car forms)
+          (and ,@(cdr forms))
+          nil))))
+
+(defmacro or (&rest forms)
+  (cond
+    ((null forms)
+     nil)
+    ((null (cdr forms))
+     (car forms))
+    (t
+     (let ((g (gensym "OR-")))
+       `(let ((,g ,(car forms)))
+          (if ,g
+              ,g
+              (or ,@(cdr forms))))))))
+
+
+;;; COND, WHEN, UNLESS
 (defmacro cond (&rest clausules)
   (unless (null clausules)
     (let ((clause (first clausules))
@@ -113,6 +150,9 @@
 
 (defmacro unless (condition &body body)
   `(cond ((not ,condition) ,@body)))
+
+
+;;; DEFVAR, DEFPARAMETER, DEFUN
 
 (defmacro defvar (name &optional (value nil value-p) docstring)
   `(progn
@@ -159,9 +199,6 @@
 (defun boundp (x)
   (boundp x))
 
-(defun fboundp (x)
-  (fboundp x))
-
 (defun eq (x y) (eq x y))
 (defun eql (x y) (eq x y))
 
@@ -198,10 +235,8 @@
                  (incf ,var))
          ,result))))
 
-(defun ensure-list (list-or-atom)
-  (if (listp list-or-atom)
-      list-or-atom
-      (list list-or-atom)))
+
+;;; CASE, ECASE
 
 (defmacro case (form &rest clausules)
   (let ((!form (gensym "CASE-FORM-")))
@@ -228,29 +263,8 @@
             `((t
                (error "ECASE expression failed for the object `~S'." ,g!form))))))))
 
-(defmacro and (&rest forms)
-  (cond
-    ((null forms)
-     t)
-    ((null (cdr forms))
-     (car forms))
-    (t
-     `(if ,(car forms)
-          (and ,@(cdr forms))
-          nil))))
-
-(defmacro or (&rest forms)
-  (cond
-    ((null forms)
-     nil)
-    ((null (cdr forms))
-     (car forms))
-    (t
-     (let ((g (gensym "OR-")))
-       `(let ((,g ,(car forms)))
-          (if ,g
-              ,g
-              (or ,@(cdr forms))))))))
+
+;;; PROG1, PROG2, PROG, PSETQ
 
 (defmacro prog1 (form &body body)
   (let ((value (gensym "PROG1-")))
@@ -288,6 +302,9 @@
     `(let ,(mapcar #'cdr assignments)
        (setq ,@(mapcan #'butlast assignments)))))
 
+
+;;; DO, DO*
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun do/do* (do/do* varlist endlist body)
     `(block nil
@@ -314,13 +331,15 @@
 (defmacro do* (varlist endlist &body body)
   (do/do* 'do* varlist endlist body))
 
+
+
 (defmacro declare (&rest declarations)
   "Early DECLARE ignores everything. This only exists so that during the
  bootstrapping process,  we can have  declarations that SBCL  will read
  and  they won't  make JSCL  choke. Once  the various  places in  which
  DECLARE forms  are valid have  appropriate support to at  least ignore
  them, this can be removed."
-  nil)
+  (warn "Tried to compile a DECLARE form: ~s" declarations))
 
 (defmacro assert (test &rest _)
   "An  early ASSERT  that does  not trigger  bugs in  the macroexpander.
@@ -332,14 +351,6 @@ macro cache is so aggressive that it cannot be redefined."
   `(unless ,test
      (error "Assertion failed: NOT ~s" ',test)))
 
-(defmacro check-type (place type &optional type-name)
-  "Early/minimalist CHECK-TYPE using ETYPECASE"
-  (declare (ignore type-name))
-  `(etypecase ,place (,type nil)))
-
-(defmacro loop (&body body)
-  `(while t ,@body))
-
 (defun identity (x) x)
 
 (defun complement (x)
@@ -350,6 +361,12 @@ macro cache is so aggressive that it cannot be redefined."
   (lambda (&rest)
     x))
 
+;;; Atoms. CONSP is defined as a primitive.
+
+(defun atom (x)
+  (not (consp x)))
+
+;;; Character codes
 (defun code-char (x)
   (code-char x))
 
@@ -362,25 +379,27 @@ macro cache is so aggressive that it cannot be redefined."
 (defun char< (x y)
   (< (char-code x) (char-code y)))
 
-(defun atom (x)
-  (not (consp x)))
+
+;;; Numbers
 
 (defconstant most-positive-fixnum (1- (expt 2 53))
   "JS integers  are really floats with  no exponent, there is  a limited
  range; see
- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
- defined as (1- (expt 2 53)) and MIN_SAFE_INTEGER is the inverse.")
+ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER")
+
 (defconstant most-negative-fixnum (- most-positive-fixnum)
   "JS integers  are really floats with  no exponent, there is  a limited
  range; see
- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
- defined as (1- (expt 2 53)) and MIN_SAFE_INTEGER is the inverse.")
+ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MIN_SAFE_INTEGER")
 
 (defun fixnump (number)
   (and (integerp number)
        (<= most-negative-fixnum
            number
            most-positive-fixnum)))
+
+
+;;; General equality
 
 (defun equal (x y)
   (cond
@@ -416,18 +435,12 @@ macro cache is so aggressive that it cannot be redefined."
           (every #'equalp x y)))
     (t nil)))
 
-(defun fdefinition (x)
-  (cond
-    ((functionp x)
-     x)
-    ((symbolp x)
-     (symbol-function x))
-    (t
-     (error "Invalid function `~S'." x))))
-
 (defun disassemble (function)
   (write-line (lambda-code (fdefinition function)))
   nil)
+
+
+;;; Multiple Values
 
 (defmacro multiple-value-bind (variables value-from &body body)
   `(multiple-value-call (lambda (&optional ,@variables &rest ,(gensym "_"))
@@ -451,6 +464,9 @@ macro cache is so aggressive that it cannot be redefined."
     `(multiple-value-call (lambda ,gvars ,@setqs)
        ,@form)))
 
+
+;;; Function names/values
+
 (defun fdefinition (name)
   "Return NAME's global function definition,  taking care to respect any
 encapsulations  and to  return  the  innermost encapsulated  definition.
@@ -459,12 +475,38 @@ This is SETF'able."
       (error "No function is named `~S'." name)))
 
 (defun (setf fdefinition) (function name)
-  (etypecase name
-    (symbol (setf (symbol-function name) function))
-    (list
-     (ecase (first name)
-       (setf (error "FIXME: SETF FDefinition ~s" name))
-       (jscl/ffi:oget (error "FIXME: FDefinition FFI bridge"))))))
+  ;; Cannot use ETypeCase yet
+  (cond ((symbolp name)
+         (%setf-symbol-function name function))
+        ((and (listp name)
+              (= 2 (length name))
+              (eql 'setf (first name)))
+         (%setf-fdefinition-setf (second name) function))
+        ((and (listp name)
+              (eql 'jscl/ffi:oget (first name)))
+         (error "FIXME: FDefinition FFI bridge"))
+        (t (error "Cannot SETF FDEFINITION of ~s" name))))
+
+(defun (setf symbol-function) (function name)
+  (if (symbolp name)
+      (%setf-symbol-function name function)
+      (error "Cannot SETF SYMBOL-FUNCTION of ~s" name)))
+
+
+(defun fboundp (x)
+  (cond ((symbolp x) (fboundp x))
+        ((and (listp x)
+              (= 2 (length x))
+              (eql 'setf (first x)))
+         (%fboundp-setf (second x)))))
+
+(defun fmakunbound (name)
+  (cond ((symbolp name)
+         (%fmakunbound name))
+        ((and (listp name)
+              (= 2 (length name))
+              (eql 'setf (first name)))
+         (%fmakunbound-setf (second name)))))
 
 (defun notany (fn seq)
   (not (some fn seq)))
@@ -508,10 +550,21 @@ This is SETF'able."
     (t
      nil)))
 
-(defvar *print-escape* t)
-(defvar *print-readably* t)
-(defvar *print-circle* nil)
-(defvar *print-radix* nil)
-(defvar *print-base* 10)
-(defvar *read-base* 10)
-(defvar *read-eval* t)
+(defvar *print-escape* t
+  "Should  we  print in  a  reasonably  machine-readable way?  (possibly
+overridden by *PRINT-READABLY*)")
+(defvar *print-readably* t
+  "If true, all  objects will be printed readably.  If readable printing
+is impossible, an  error will be signalled. This overrides  the value of
+*PRINT-ESCAPE*.")
+(defvar *print-circle* nil
+  "Should  we  use  #n=  and  #n# notation  to  preserve  uniqueness  in
+general (and circularity in particular) when printing?")
+(defvar *print-radix* nil
+  "Should base be verified when printing RATIONALs?")
+(defvar *print-base* 10
+  "The output base for RATIONALs (including integers).")
+(defvar *read-base* 10
+  "the radix that Lisp reads numbers in")
+(defvar *read-eval* t
+  "If false, then the #. read macro is disabled.")
