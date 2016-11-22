@@ -95,7 +95,7 @@ SETF knows a corresponding setting form."
            (value (second pairs)))
        (let* ((access-fn (first place))
               (params (rest place))
-              (setf-fn (fdefinition (list 'setf access-fn))))
+              (setf-fn (!fdefinition-soft (list 'setf access-fn))))
          (if setf-fn
              `((setf ,access-fn) ,@params ,value)
              (multiple-value-bind (vars vals store-vars writer-form reader-form)
