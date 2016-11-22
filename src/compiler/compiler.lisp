@@ -645,6 +645,7 @@ association list ALIST in the same order."
 (defun literal (sexp &optional recursivep)
   (typecase sexp
     (complex (error "Can't use complex number ~a yet" sexp))
+    (fixnum sexp)
     (rational 
      (warn "Rounding ~a to float" sexp)
      (coerce sexp 'double-float))
