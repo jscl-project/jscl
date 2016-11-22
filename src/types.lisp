@@ -8,7 +8,9 @@
 
 (defvar *types* ())
 
-#.(assert (!macro-function 'defstruct))
+#.(assert (!macro-function 'defstruct)
+          ()
+          "DEFSTRUCT should have been defined by defstruct.lisp before this file was loaded.")
 
 (defstruct type-definition
   name supertypes lambda-list body
