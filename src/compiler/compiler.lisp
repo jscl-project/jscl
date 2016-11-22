@@ -1775,6 +1775,12 @@ generate the code which performs the transformation on these variables."
                            sexp)))))
 
 (defun check-for-failed-macroexpansion (sexp)
+  "When a symbol is defined as a  macro in the host compiler, and exists
+in the CL package,  it is usually a safe bet that  we should be treating
+it as a macro within JSCL  as well. The notable exception (inversion) is
+`DESTRUCTURING-BIND'.  This checks  for  missing  macros, which  usually
+means either that  we have a compile-time dependency  ordering issue, or
+just haven't gotten around to defining that macro at all, yet."
   (if (and (consp sexp)
            (symbolp (car sexp))
            ;; DESTRUCTURING-BIND is defined  via !DESTRUCTURING-BIND and
@@ -1784,7 +1790,11 @@ generate the code which performs the transformation on these variables."
            (eql (find-package :common-lisp)
                 (symbol-package (car sexp)))
            (macro-function (car sexp)))
-      (emit-uncompilable-form sexp "Failed to macroexpand ~s ~% in ~s" (car sexp) sexp)
+      (emit-uncompilable-form sexp
+                              "Failed to macroexpand ~s ~% in ~s~2%~a" (car sexp) sexp
+                              (if (!macro-function (car sexp))
+                                  "A macro-function is defined, but did not work"
+                                  "No macro-function is defined in JSCL"))
       sexp))
 
 (defun object-evaluates-to-itself-p (object)
@@ -1842,7 +1852,10 @@ generate the code which performs the transformation on these variables."
       ((and (consp sexp)
             (eql (car sexp) 'defpackage))
        (warn
-        "DEFPACKAGE ~a will probably not be effective within the current file"
+        "DEFPACKAGE ~a will probably not be effective within the current
+file.  See  https://github.com/romance-ii/jscl/issues/30  — If  you  put
+DEFPACKAGE in  a separate file  from IN-PACKAGE, everything seems  to be
+just fine."
         (second sexp)))
       ((and (consp sexp)
             (eql (car sexp) 'in-package)
