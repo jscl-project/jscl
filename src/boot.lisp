@@ -365,17 +365,22 @@ macro cache is so aggressive that it cannot be redefined."
 (defun atom (x)
   (not (consp x)))
 
-(defun alpha-char-p (x)
-  (or (<= (char-code #\a) (char-code x) (char-code #\z))
-      (<= (char-code #\A) (char-code x) (char-code #\Z))))
+(defconstant most-positive-fixnum (1- (expt 2 53))
+  "JS integers  are really floats with  no exponent, there is  a limited
+ range; see
+ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
+ defined as (1- (expt 2 53)) and MIN_SAFE_INTEGER is the inverse.")
+(defconstant most-negative-fixnum (- most-positive-fixnum)
+  "JS integers  are really floats with  no exponent, there is  a limited
+ range; see
+ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
+ defined as (1- (expt 2 53)) and MIN_SAFE_INTEGER is the inverse.")
 
-(defun digit-char-p (x)
-  (and (<= (char-code #\0) (char-code x) (char-code #\9))
-       (- (char-code x) (char-code #\0))))
-
-(defun digit-char (weight)
-  (and (<= 0 weight 9)
-       (char "0123456789" weight)))
+(defun fixnump (number)
+  (and (integerp number)
+       (<= most-negative-fixnum
+           number
+           most-positive-fixnum)))
 
 (defun equal (x y)
   (cond
@@ -432,22 +437,6 @@ macro cache is so aggressive that it cannot be redefined."
 (defmacro multiple-value-list (value-from)
   `(multiple-value-call #'list ,value-from))
 
-(defun type-of (value)
-  (cond
-    ((integerp value) (list 'integer value value))
-    ((numberp value) 'double-float)
-    ((nullp value) 'null)
-    ((consp value) 'cons)
-    ((vectorp value) (list 'vector (length value)))
-    ((arrayp value) (append (list 'array t) (array-dimensions value)))
-    ((sequencep value) 'sequence)
-    ((keywordp value) 'keyword)
-    ((symbolp value) 'symbol)
-    ((functionp value) 'function)
-    ((packagep value) 'package)
-    ((hash-table-p value) 'hash-table)
-    (t t)))
-
 (defmacro multiple-value-setq ((&rest vars) &rest form)
   (let ((gvars (mapcar (lambda (x) (gensym (limit-string-length x 40))) vars))
         (setqs '()))
@@ -462,49 +451,20 @@ macro cache is so aggressive that it cannot be redefined."
     `(multiple-value-call (lambda ,gvars ,@setqs)
        ,@form)))
 
-;; Incorrect typecase, but used in NCONC.
-(defmacro typecase (x &rest clausules)
-  "A fair approximation of TYPECASE for limited cases"
-  (let ((value (gensym "TYPECASE-VALUE-")))
-    `(let ((,value ,x))
-       (cond
-         ,@(mapcar (lambda (c)
-                     (if (find (car c) '(t otherwise))
-                         `(t ,@(rest c))
-                         `((,(ecase (car c)
-                               (hash-table 'hash-table-p)
-                               (fixnum 'integerp)
-                               (number 'numberp)
-                               (integer 'integerp)
-                               (cons 'consp)
-                               (list 'listp)
-                               (vector 'vectorp)
-                               (character 'characterp)
-                               (sequence 'sequencep)
-                               (symbol 'symbolp)
-                               (keyword 'keywordp)
-                               (function 'functionp)
-                               (float 'floatp)
-                               (array 'arrayp)
-                               (string 'stringp)
-                               (atom 'atom)
-                               (null 'null)
-                               (package 'packagep))
-                             ,value)
-                           ,@(or (rest c)
-                                 (list nil)))))
-                   clausules)))))
+(defun fdefinition (name)
+  "Return NAME's global function definition,  taking care to respect any
+encapsulations  and to  return  the  innermost encapsulated  definition.
+This is SETF'able."
+  (or (!fdefinition-soft name)
+      (error "No function is named `~S'." name)))
 
-(defmacro etypecase (x &rest clausules)
-  (let ((g!x (gensym "ETYPECASE-VALUE-")))
-    `(let ((,g!x ,x))
-       (typecase ,g!x
-         ,@clausules
-         (t (error "~S fell through etypecase expression." ,g!x))))))
-
-;;; No type system is implemented yet.
-(defun subtypep (type1 type2)
-  (values nil nil))
+(defun (setf fdefinition) (function name)
+  (etypecase name
+    (symbol (setf (symbol-function name) function))
+    (list
+     (ecase (first name)
+       (setf (error "FIXME: SETF FDefinition ~s" name))
+       (jscl/ffi:oget (error "FIXME: FDefinition FFI bridge"))))))
 
 (defun notany (fn seq)
   (not (some fn seq)))

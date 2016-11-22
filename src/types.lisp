@@ -104,30 +104,32 @@
 (defun find-type-definition (type)
   (find type *types* :key #'type-definition-name))
 
-(dolist (type '(number integer real rational
-                float single-float double-float long-float))
+(progn
+  (dolist (type '(number integer real rational
+                  float single-float double-float long-float))
+    (setf (type-definition-ornate-predicate
+           (find-type-definition type))
+          (make-numeric-range-check-predicate type)))
   (setf (type-definition-ornate-predicate
-         (find-type-definition type))
-        (make-numeric-range-check-predicate type)))
-(setf (type-definition-ornate-predicate
-       (find-type-definition 'string))
-      (lambda (object length)
-        (and (stringp object)
-             (= length (length object)))))
+         (find-type-definition 'string))
+        (lambda (object length)
+          (and (stringp object)
+               (= length (length object)))))
 
-(setf (type-definition-ornate-predicate
-       (find-type-definition 'array))
-      (lambda (object element-type &optional dimensions)
-        (if (stringp object)
-            (and (find element-type '(t character))
-                 (etypecase dimensions
-                   (null t)
-                   (integer (= (length object) dimensions))
-                   (cons (and (integerp (car object))
-                              (null (cdr object))
-                              (= (length object) (car dimensions))))))
-            (and (subtypep (array-element-type object) element-type)
-                 (equalp (array-dimensions object) dimensions)))))
+  (setf (type-definition-ornate-predicate
+         (find-type-definition 'array))
+        (lambda (object element-type &optional dimensions)
+          (if (stringp object)
+              (and (find element-type '(t character))
+                   (etypecase dimensions
+                     (null t)
+                     (integer (= (length object) dimensions))
+                     (cons (and (integerp (car object))
+                                (null (cdr object))
+                                (= (length object) 
+                                   (car dimensions))))))
+              (and (subtypep (array-element-type object) element-type)
+                   (equalp (array-dimensions object) dimensions))))))
 
 
 (defun typep (object type &optional environment)
@@ -176,17 +178,43 @@ invoked. In that case it will store into PLACE and start over."
        ;; a function" }
        ))))
 
-(defun fdefinition (name)
-  "Return NAME's global function definition,  taking care to respect any
-encapsulations  and to  return  the  innermost encapsulated  definition.
-This is SETF'able."
-  (or (!fdefinition-soft name)
-      (error "No function is named `~S'." name)))
+"(old typecase — make sure these tests pass
+                               (hash-table 'hash-table-p)
+                               (fixnum 'fixnump)
+                               (number 'numberp)
+                               (integer 'integerp)
+                               (cons 'consp)
+                               (list 'listp)
+                               (vector 'vectorp)
+                               (character 'characterp)
+                               (sequence 'sequencep)
+                               (symbol 'symbolp)
+                               (keyword 'keywordp)
+                               (function 'functionp)
+                               (float 'floatp)
+                               (array 'arrayp)
+                               (string 'stringp)
+                               (atom 'atom)
+                               (null 'null)
+                               (package 'packagep))"
 
-(defun (setf fdefinition) (function name)
-  (etypecase name
-    (symbol (setf (symbol-function name) function))
-    (list
-     (ecase (first name)
-       (setf (error "FIXME: SETF FDefinition ~s" name))
-       (jscl/ffi:oget (error "FIXME: FDefinition FFI bridge"))))))
+(defmacro typecase (x &rest clausules)
+  "A fair approximation of TYPECASE for limited cases"
+  (let ((value (gensym "TYPECASE-VALUE-")))
+    `(let ((,value ,x))
+       (cond
+         ,@(mapcar (lambda (c)
+                     (if (find (car c) '(t otherwise))
+                         `(t ,@(rest c))
+                         `((typep ,value ',(car c))
+                           ,@(or (rest c)
+                                 (list nil)))))
+                   clausules)))))
+
+(defmacro etypecase (x &rest clausules)
+  (let ((g!x (gensym "ETYPECASE-VALUE-")))
+    `(let ((,g!x ,x))
+       (typecase ,g!x
+         ,@clausules
+         (t (error "~S fell through etypecase expression." ,g!x))))))
+
