@@ -370,7 +370,7 @@
          (error "The index ~D is too large for ~A of length ~D." index 'vector length))
        (aref sequence index)))))
 
-(defun (setf elt) (sequence index new-value)
+(defun (setf elt) (new-value sequence index)
   (check-type index (integer 0 *))
   (when (< index 0)
     (error "The index ~D is below zero." index))
