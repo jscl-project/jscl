@@ -77,6 +77,25 @@
       `(long-defsetf ,@args)
       `(short-defsetf ,@args)))
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun setf/split-into-pairs (pairs)
+    `(progn
+       ,@(do ((pairs pairs (cddr pairs))
+              (result '() (cons `(setf ,(car pairs) ,(cadr pairs)) result)))
+             ((null pairs)
+              (reverse result)))))
+
+  (defun setf/apply-setf-expander (place)
+    (multiple-value-bind (vars vals store-vars writer-form reader-form)
+        (!get-setf-expansion place)
+      (declare (ignorable reader-form))
+      ;; TODO:  Optimize the  expansion a  little bit  to avoid  let* or
+      ;; multiple-value-bind when unnecesary.
+      `(let* ,(mapcar #'list vars vals)
+         (multiple-value-bind ,store-vars
+             ,value
+           ,writer-form)))))
+
 (defmacro setf (&rest pairs)
   "Takes pairs  of arguments  like SETQ.  The first is  a place  and the
 second is the value that is supposed  to go into that place. Returns the
@@ -87,29 +106,16 @@ SETF knows a corresponding setting form."
     ((null (cdr pairs))
      (error "Odd number of arguments to SETF (trailing ~s)"
             (car pairs)))
-    ((null (cddr pairs))
+    ((null (cddr pairs))                ; meaning exactly one pair
      (let ((place (!macroexpand-1 (first pairs)))
            (value (second pairs)))
        (let* ((access-fn (first place))
               (params (rest place))
               (setf-fn (!fdefinition-soft (list 'setf access-fn))))
          (if setf-fn
-             `((setf ,access-fn) ,@params ,value)
-             (multiple-value-bind (vars vals store-vars writer-form reader-form)
-                 (!get-setf-expansion place)
-               (declare (ignorable reader-form))
-               ;; TODO:  Optimize the  expansion a  little bit  to avoid
-               ;; let* or multiple-value-bind when unnecesary.
-               `(let* ,(mapcar #'list vars vals)
-                  (multiple-value-bind ,store-vars
-                      ,value
-                    ,writer-form)))))))
-    (t
-     `(progn
-        ,@(do ((pairs pairs (cddr pairs))
-               (result '() (cons `(setf ,(car pairs) ,(cadr pairs)) result)))
-              ((null pairs)
-               (reverse result)))))))
+             `((setf ,access-fn) ,value ,@params)
+             (setf/apply-setf-expander place)))))
+    (t (setf/split-into-pairs pairs))))
 
 ;;; SETF-Based macros
 
