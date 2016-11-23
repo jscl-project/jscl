@@ -348,12 +348,12 @@ to streams."
   (defun terpri (&optional (stream *standard-output*))
     (write-char #\newline stream)
     (values))
-  
+
   (defun write-line (x)
     (write-string x)
     (terpri)
     x)
-  
+
   (defun print (x &optional (stream *standard-output*))
     (prog1 (prin1 x stream)
       (terpri stream))))
@@ -593,7 +593,7 @@ dispatching on the CHR ending the format sequence."
         (if (char= c #\~)
             (let (params atp colonp)
               (tagbody
-               read-control 
+               read-control
                  (assert (and (< (1+ i) length) "~ at end of format"))
                  (let ((next (char control-string (incf i))))
                    (cond

@@ -16,6 +16,8 @@
 
 (/debug "Loading symbol.lisp")
 
+
+
 (defun symbol-plist (x)
   (cond
     ((not (symbolp x))

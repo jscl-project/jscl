@@ -247,7 +247,8 @@
     ;; trivial optimizations
     ((zerop n) x)
     (t
-     ;; O(n) walk of the linked list, trimming out the link where appropriate
+     ;; O(n)  walk of  the  linked  list, trimming  out  the link  where
+     ;; appropriate
      (let* ((head x)
             (trailing (nthcdr n x)))
        ;; If there are enough conses
@@ -324,7 +325,7 @@
   (rplacd cell value)
   value)
 
-(defun (setf nth) (value n list) 
+(defun (setf nth) (value n list)
   (check-type n (integer 0 *) "a list index")
   (let ((cell list))
     (do ((i 0 (1+ i)))
@@ -335,25 +336,18 @@
     (rplaca cell value)
     value))
 
-;;; TODO: test the above, then remove the more complex setf-expanders below.
+;;; TODO:   test    the   above,   then   remove    the   more   complex
+;;; setf-expanders below.
 
-;; (define-setf-expander car (x)
-;;   (let ((cons (gensym "CONS-"))
-;;         (new-value (gensym "NEW-CAR-")))
-;;     (values (list cons)
-;;             (list x)
-;;             (list new-value)
-;;             `(progn (rplaca ,cons ,new-value) ,new-value)
-;;             `(car ,cons))))
+;; (define-setf-expander   car  (x)   (let   ((cons  (gensym   "CONS-"))
+;;   (new-value (gensym "NEW-CAR-"))) (values (list cons) (list x) (list
+;;   new-value)  `(progn  (rplaca  ,cons ,new-value)  ,new-value)  `(car
+;;   ,cons))))
 
-;; (define-setf-expander cdr (x)
-;;   (let ((cons (gensym "CONS-"))
-;;         (new-value (gensym "NEW-CDR-")))
-;;     (values (list cons)
-;;             (list x)
-;;             (list new-value)
-;;             `(progn (rplacd ,cons ,new-value) ,new-value)
-;;             `(cdr ,cons))))
+;; (define-setf-expander   cdr  (x)   (let   ((cons  (gensym   "CONS-"))
+;;   (new-value (gensym "NEW-CDR-"))) (values (list cons) (list x) (list
+;;   new-value)  `(progn  (rplacd  ,cons ,new-value)  ,new-value)  `(cdr
+;;   ,cons))))
 
 ;; The NCONC function is based on the SBCL's one.
 (defun nconc (&rest lists)
@@ -513,4 +507,3 @@
 (defun mapcon (function list &rest more-lists)
   "Apply FUNCTION to successive CDRs of lists. Return NCONC of results."
   (map1 function (cons list more-lists) :nconc nil))
-

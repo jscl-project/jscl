@@ -31,23 +31,23 @@
   (and (consp object)
        (symbolp (car object))))
 
-(defun structure-type% (object) 
-  (unless (structure%-p object) 
+(defun structure-type% (object)
+  (unless (structure%-p object)
     (error "Not a structure: ~s" object))
   (car object))
 
-(defun assert-struct-type (predicate type-name object) 
+(defun assert-struct-type (predicate type-name object)
   (when predicate
     (assert (funcall predicate object) (object)
             "The object `~S' is not of type `~S'" object type-name)))
 
-(defun copy-structure% (type predicate object) 
+(defun copy-structure% (type predicate object)
   (assert-struct-type predicate type object)
   (copy-list object))
 
 (defun defstruct/make-predicate (predicate name slot-count)
   (when predicate
-    `(defun ,predicate (object) 
+    `(defun ,predicate (object)
        (and (structure%-p object)
             (eq (structure-type% object) ',name)
             (= (length object) ,(1+ slot-count))))))
@@ -87,19 +87,19 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
 
 (defun defstruct/make-copier (copier name predicate)
   (when copier
-    `(defun ,copier (object) 
+    `(defun ,copier (object)
        (copy-structure% ',name ',predicate object))))
 
 (defun defstruct/make-slot-reader (predicate struct-name-string
                                    accessor-name index)
   `(progn
-     (defun ,accessor-name (object) 
-       (structure-slot-value-by-index% ,struct-name-string ',predicate object ,index)) 
+     (defun ,accessor-name (object)
+       (structure-slot-value-by-index% ,struct-name-string ',predicate object ,index))
      #+jscl (declaim (jscl::pure ,accessor-name))))
 
 (defun defstruct/make-slot-writer (predicate struct-name-string
                                    accessor-name index)
-  `(defun (setf ,accessor-name) (object new-value) 
+  `(defun (setf ,accessor-name) (object new-value)
      (structure-setf-slot% ',predicate ,struct-name-string ,index
                            object new-value)))
 
@@ -115,12 +115,12 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
     (let ((index 1))
       (dolist (slot slot-descriptions)
         (collect (cons 'progn
-                       (defstruct/make-slot-accessor name-string predicate slot index))) 
+                       (defstruct/make-slot-accessor name-string predicate slot index)))
         (incf index)))))
 
 (defun defstruct/define-type (type predicate)
-  #-jscl (declare (ignore type predicate)) 
-  #+jscl 
+  #-jscl (declare (ignore type predicate))
+  #+jscl
   (push (make-type-definition :name type
                               :predicate predicate
                               :supertypes '(structure-object))
@@ -134,15 +134,15 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
   (let* ((name-and-options (ensure-list name-and-options))
          (name (first name-and-options))
          (name-string (symbol-name name))
-         (options (rest name-and-options)) 
+         (options (rest name-and-options))
          (constructor (defstruct/option-value :constructor options
                         (intern (concat "MAKE-" name-string))))
          (predicate (or (defstruct/option-value :predicate options
                           (intern (concat name-string "-P")))
                         (gensym "PREDICATE")))
          (copier (defstruct/option-value :copier options
-                   (intern (concat "COPY-" name-string)))) 
-         (slot-descriptions (mapcar #'defstruct/parse-slot-description slots))) 
+                   (intern (concat "COPY-" name-string))))
+         (slot-descriptions (mapcar #'defstruct/parse-slot-description slots)))
     `(progn
        ,(defstruct/make-constructor constructor name slot-descriptions)
        ,(defstruct/make-predicate predicate name (length slot-descriptions))
@@ -150,4 +150,3 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
        ,(defstruct/define-type name predicate)
        ,@(defstruct/make-slot-accessors name-string predicate slot-descriptions)
        ',name)))
-

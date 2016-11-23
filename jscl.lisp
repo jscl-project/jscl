@@ -142,12 +142,12 @@ compiled in the host
 
 ;;; Compile and load jscl into the host
 (defun load-jscl ()
-(with-compilation-unit ()
-  (do-source input :host
-    (multiple-value-bind (fasl warn fail) (compile-file input)
-      (declare (ignore warn))
-      (when fail
-        (error "Compilation of ~A failed." input))
+  (with-compilation-unit ()
+    (do-source input :host
+      (multiple-value-bind (fasl warn fail) (compile-file input)
+        (declare (ignore warn))
+        (when fail
+          (error "Compilation of ~A failed." input))
         (load fasl)))))
 
 (load-jscl)
@@ -206,9 +206,9 @@ compiled in the host
        (+ 5 compiled-form-timer)))
 
   (defun reset-progress-for-new-file (source)
-      (setf compiled-form-timer 0
-            compiling-source source
-            last-reported-% -1))
+    (setf compiled-form-timer 0
+          compiling-source source
+          last-reported-% -1))
 
   (defun !compile-file/progress (in source)
     (unless (eql source compiling-source)
@@ -354,9 +354,9 @@ forms if PRINT is set."
                          :direction :output
                          :if-exists :supersede)
       (with-self-invoking-function (out)
-      (write-string (read-whole-file (source-pathname "prelude.js")) out)
-      (do-source input :target
-        (!compile-file input out :print verbosep))
+        (write-string (read-whole-file (source-pathname "prelude.js")) out)
+        (do-source input :target
+          (!compile-file input out :print verbosep))
         (dump-global-environment out)))))
 
 (defun bootstrap (&optional verbosep)

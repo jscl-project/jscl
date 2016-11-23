@@ -88,7 +88,6 @@
 (defun find-type-definition (type)
   (find type *types* :key #'type-definition-name))
 
-
 (defun typep (object type &optional environment)
   (cond
     ((consp type)
@@ -122,7 +121,7 @@ invoked. In that case it will store into PLACE and start over."
             (go ,new-value))))))
 
 
-"(old typecase — make sure these tests pass
+"(old typecase — make sure these tests pass TODO
                                (hash-table 'hash-table-p)
                                (fixnum 'fixnump)
                                (number 'numberp)
@@ -161,7 +160,6 @@ invoked. In that case it will store into PLACE and start over."
        (typecase ,g!x
          ,@clausules
          (t (error "~S fell through etypecase expression." ,g!x))))))
-
 
 (defun make-numeric-range-check-predicate (type)
   (lambda (object &optional min max)

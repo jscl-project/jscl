@@ -102,7 +102,7 @@ accumulated, in the order."
     (cond
       ((zerop x)
        (if plusp "+0" "0"))
-    ((minusp x)
+      ((minusp x)
        (concat "-" (integer-to-string (- x) radix)))
       ((and plusp (plusp x))
        (concat "+" (integer-to-string x radix)))

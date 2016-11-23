@@ -68,7 +68,6 @@
   ;; support defsetf lambda lists.
   ;;
   ;;     http://www.lispworks.com/documentation/HyperSpec/Body/03_dg.htm
-  ;;
   (declare (ignore access-fn lambda-list store-variables body))
   (error "The long form of defsetf is not implemented"))
 
@@ -99,8 +98,8 @@ SETF knows a corresponding setting form."
              (multiple-value-bind (vars vals store-vars writer-form reader-form)
                  (!get-setf-expansion place)
                (declare (ignorable reader-form))
-               ;; TODO: Optimize the expansion a little bit to avoid let*
-               ;; or multiple-value-bind when unnecesary.
+               ;; TODO:  Optimize the  expansion a  little bit  to avoid
+               ;; let* or multiple-value-bind when unnecesary.
                `(let* ,(mapcar #'list vars vals)
                   (multiple-value-bind ,store-vars
                       ,value

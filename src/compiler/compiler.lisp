@@ -622,9 +622,8 @@ association list ALIST in the same order."
                       (symbol (dump-symbol sexp))
                       (string (dump-string sexp))
                       (cons
-                       ;; BOOTSTRAP   MAGIC:   See  the   root   file
-                       ;; jscl.lisp       and      the       function
-                       ;; `dump-global-environment'               for
+                       ;; BOOTSTRAP MAGIC:  See the root  file jscl.lisp
+                       ;; and the function `dump-global-environment' for
                        ;; further information.
                        (if (eq (car sexp) *magic-unquote-marker*)
                            (convert (second sexp))
@@ -646,7 +645,7 @@ association list ALIST in the same order."
   (typecase sexp
     (complex (error "Can't use complex number ~a yet" sexp))
     (fixnum sexp)
-    (rational 
+    (rational
      (warn "Rounding ~a to float" sexp)
      (coerce sexp 'double-float))
     (number sexp)
@@ -823,10 +822,10 @@ association list ALIST in the same order."
      special-bindings)))
 
 (defun convert-block-with-special-bindings (body special-bindings)
-      (let ((special-variables (mapcar #'car special-bindings))
-            (lexical-variables (mapcar #'cdr special-bindings)))
-        `(return (call-internal
-                  |bindSpecialBindings|
+  (let ((special-variables (mapcar #'car special-bindings))
+        (lexical-variables (mapcar #'cdr special-bindings)))
+    `(return (call-internal
+              |bindSpecialBindings|
               ,(map 'vector #'literal special-variables)
               ,(map 'vector #'translate-variable lexical-variables)
               (function () ,(convert-block body t t))))))
@@ -1785,7 +1784,7 @@ just haven't gotten around to defining that macro at all, yet."
            (symbolp (car sexp))
            ;; DESTRUCTURING-BIND is defined  via !DESTRUCTURING-BIND and
            ;; is almost not a macro and almost, but not quite, a special
-           ;; form,  so  we have  to  work  around  that here.
+           ;; form, so we have to work around that here.
            (not (eql 'destructuring-bind (car sexp)))
            (eql (find-package :common-lisp)
                 (symbol-package (car sexp)))

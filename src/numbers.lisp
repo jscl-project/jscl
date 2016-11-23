@@ -20,13 +20,13 @@
 ;;;; Various numeric functions and constants
 
 (macrolet ((def (operator initial-value)
-               (let ((init-sym   (gensym "INIT-"))
-                     (dolist-sym (gensym "DOLIST-")))
-                 `(defun ,operator (&rest args)
-                    (let ((,init-sym ,initial-value))
-                      (dolist (,dolist-sym args)
-                        (setq ,init-sym (,operator ,init-sym ,dolist-sym)))
-                      ,init-sym)))))
+             (let ((init-sym   (gensym "INIT-"))
+                   (dolist-sym (gensym "DOLIST-")))
+               `(defun ,operator (&rest args)
+                  (let ((,init-sym ,initial-value))
+                    (dolist (,dolist-sym args)
+                      (setq ,init-sym (,operator ,init-sym ,dolist-sym)))
+                    ,init-sym)))))
   (def + 0)
   (def * 1))
 
@@ -34,12 +34,12 @@
 ;; given, it negates it or takes its reciprocal. Otherwise all the other
 ;; args are subtracted from or divided by it.
 (macrolet ((def (operator unary-form)
-               `(defun ,operator (x &rest args)
-                  (cond
-                    ((null args) ,unary-form)
-                    (t (dolist (y args)
-                         (setq x (,operator x y)))
-                       x)))))
+             `(defun ,operator (x &rest args)
+                (cond
+                  ((null args) ,unary-form)
+                  (t (dolist (y args)
+                       (setq x (,operator x y)))
+                     x)))))
   (def - (-   x))
   (def / (/ 1 x)))
 
@@ -74,12 +74,12 @@
   (if (zerop x) x (/ x (abs x))))
 
 (macrolet ((def (operator)
-               `(defun ,operator (x &rest args)
-                  (dolist (y args)
-                    (if (,operator x y)
-                        (setq x    (car args))
-                        (return-from ,operator nil)))
-                  t)))
+             `(defun ,operator (x &rest args)
+                (dolist (y args)
+                  (if (,operator x y)
+                      (setq x    (car args))
+                      (return-from ,operator nil)))
+                t)))
   (def >)
   (def >=)
   (def =)
@@ -93,11 +93,11 @@
 (defun oddp  (x) (not (evenp x)))
 
 (macrolet ((def (name comparison)
-               `(defun ,name (x &rest xs)
-                  (dolist (y xs)
-                    (when (,comparison y x)
-                      (setq x y)))
-                  x)))
+             `(defun ,name (x &rest xs)
+                (dolist (y xs)
+                  (when (,comparison y x)
+                    (setq x y)))
+                x)))
   (def max >)
   (def min <))
 

@@ -23,7 +23,7 @@
 
 (in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
 
-#-jscl-xc 
+#-jscl-xc
 (error "This should not be getting evaluated except during JSCL-XC.")
 (/debug "loading boot.lisp!")
 
@@ -49,7 +49,7 @@
 
 
 ;;; DEFMACRO
-(eval-when (:compile-toplevel) 
+(eval-when (:compile-toplevel)
   (let ((defmacro-macroexpander
          '#'(lambda (form)
               (destructuring-bind (name args &body body)
@@ -186,10 +186,10 @@
                    (find (car name) '(setf jscl/ffi:oget)))))
   (if (and (listp name) (eq (car name) 'jscl/ffi))
       (error "Can't bind to JS function yet, TODO")
-  `(progn
-     (eval-when (:compile-toplevel)
-       (fn-info ',name :defined t))
-     (fset ',name #'(named-lambda ,name ,args ,@body))
+      `(progn
+         (eval-when (:compile-toplevel)
+           (fn-info ',name :defined t))
+         (fset ',name #'(named-lambda ,name ,args ,@body))
          ',name)))
 
 (defmacro return (&optional value)
@@ -483,7 +483,7 @@ macro cache is so aggressive that it cannot be redefined."
 
 (defun !fdefinition-soft (name)
   "Like `FDEFINITION' but returns NULL rather than signaling an error."
-  (cond 
+  (cond
     ((symbolp name)
      (symbol-function name))
     ((consp name)
@@ -492,7 +492,7 @@ macro cache is so aggressive that it cannot be redefined."
        (jscl/ffi:oget (error "FIXME: FDefinition FFI bridge for ~s" name))
        ;; Should be something  like if ( x && typeof  x === 'function' )
        ;; {  return x;  } else  { throw  new Error  "" +  x +  " is  not
-       ;; a function" } 
+       ;; a function" }
        ))
     (t (error "Not a function name: ~s" name))))
 
@@ -567,8 +567,8 @@ This is SETF'able."
      ,form))
 
 (defun constantp (x)
-  ;; TODO: Consider quoted forms, &environment and many other
-  ;; semantics of this function.
+  ;; TODO: Consider quoted forms,  &environment and many other semantics
+  ;; of this function.
   (cond
     ((symbolp x)
      (cond
@@ -602,8 +602,8 @@ general (and circularity in particular) when printing?")
   "If false, then the #. read macro is disabled.")
 
 
-;;; Forward-declared macro funkiness
-;;; DEF!STRUCT isn't yet defined, but this makes it work once it is.
+;;; Forward-declared macro  funkiness DEF!STRUCT isn't yet  defined, but
+;;; this makes it work once it is.
 (defmacro defstruct (name+options &rest slots)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (def!struct ,name+options ,@slots)))

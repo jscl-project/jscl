@@ -91,7 +91,7 @@
 
 (defun %read-char (stream &optional (eof-error-p t) (eof-value nil))
   (cond ((< (cdr stream) (length (car stream)))
-       (prog1 (char (car stream) (cdr stream))
+         (prog1 (char (car stream) (cdr stream))
            (rplacd stream (1+ (cdr stream)))))
         (eof-error-p
          (error "End of file in READ-CHAR"))
@@ -291,16 +291,16 @@
               (read-char stream) ; discard U
               (cond ((char=      #\+ (peek-char nil stream nil nil))
                      (read-char stream nil nil) ; +
-              (let ((*read-base* 16))
-                (code-char (read-integer-from-stream stream))))
-             (t (let ((cname
+                     (let ((*read-base* 16))
+                       (code-char (read-integer-from-stream stream))))
+                    (t (let ((cname
                               (concatenate 'string "U" (string (read-char stream nil nil))
                                            (read-until stream #'terminalp))))
                          (let ((ch (name-char cname)))
                            (or ch (char cname 0)))))))
              (t (let ((cname
                        (concatenate 'string (string (read-char stream nil nil))
-                               (read-until stream #'terminalp))))
+                                    (read-until stream #'terminalp))))
                   (let ((ch (name-char cname)))
                     (or ch (char cname 0)))))))
       ((#\+ #\-)
@@ -400,7 +400,7 @@
       (let ((ch (char s i)))
         (cond
           (last-escape
-              (setf last-escape nil)
+           (setf last-escape nil)
            (setf result (concatenate 'string result (string ch))))
           ((char= ch #\\)
            (setf last-escape t))
@@ -629,7 +629,7 @@ rewrite `#(v1 v2…) as (apply #'vector `(v1 v2…))"))
                        (char= (peek-char nil stream nil nil) #\.))
                    (progn (read-char stream nil nil)
                           (list 'unquote-splicing
-                                                    (ls-read stream eof-error-p eof-value t)))
+                                (ls-read stream eof-error-p eof-value t)))
                    (list 'unquote (ls-read stream eof-error-p eof-value t))))
               ((char= ch #\#)
                (read-sharp stream eof-error-p eof-value))
