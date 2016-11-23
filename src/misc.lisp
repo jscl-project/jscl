@@ -12,9 +12,9 @@
 ;;
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
-(in-package :jscl)
+(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+
 (/debug "loading misc.lisp!")
-#-jscl (error "Don't build this file on the host")
 
 (defparameter *features* '(:jscl :common-lisp))
 

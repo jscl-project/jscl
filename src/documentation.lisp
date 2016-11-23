@@ -1,5 +1,5 @@
 ;;; documentation.lisp --- Accessing DOCUMENTATION
-(in-package :jscl)
+(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
 ;;; Documentation.
 (defun documentation (x type)
   "Return the documentation of X. TYPE must be the symbol VARIABLE or FUNCTION."

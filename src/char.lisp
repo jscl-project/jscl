@@ -1,5 +1,5 @@
-(in-package :jscl)
-#-jscl (error "Don't load this file on the host compiler")
+(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+
 (/debug "loading char.lisp!")
 
 ;; These comparison  functions heavily borrowed from  SBCL/CMUCL (public

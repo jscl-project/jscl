@@ -12,9 +12,9 @@
 ;;
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
-(in-package :jscl)
+(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+
 (/debug "loading sequence.lisp!")
-#-jscl (error "Don't load this file in the cross-compiler")
 
 (defun sequencep (thing)
   (or (listp thing) (vectorp thing)))

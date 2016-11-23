@@ -1,10 +1,8 @@
 ;;;; types.lisp — JSCL type system
 
-(in-package :jscl)
+(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
 
 (/debug "Loading types.lisp…")
-
-#-jscl-xc (error "Don't load this file in the host implementation…")
 
 (defvar *types* ())
 

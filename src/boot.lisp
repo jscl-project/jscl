@@ -21,7 +21,7 @@
 ;;; Lisp world from scratch. This code  has to define enough language to
 ;;; the compiler to be able to run.
 
-(in-package :jscl)
+(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
 
 #-jscl-xc 
 (error "This should not be getting evaluated except during JSCL-XC.")

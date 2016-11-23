@@ -12,8 +12,9 @@
 ;;
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
-(in-package :jscl)
-#-jscl (error "Don't compile this file on the host compiler")
+(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+
+(/debug "Loading symbol.lisp")
 
 (defun symbol-plist (x)
   (cond
