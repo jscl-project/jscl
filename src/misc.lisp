@@ -131,3 +131,16 @@
 
 (defmacro untrace (&rest names)
   `(untrace-functions ',names))
+
+
+;;; Time related functions
+
+(defun get-internal-real-time ()
+  (get-internal-real-time))
+
+(defun get-unix-time ()
+  (truncate (/ (get-internal-real-time) 1000)))
+
+(defun get-universal-time ()
+  (+ (get-unix-time) 2208988800))
+

@@ -1,4 +1,4 @@
-;;; defstruct.lisp ---
+;;; defstruct.lisp --- 
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
 ;; the terms of the GNU General  Public License as published by the Free
@@ -10,8 +10,8 @@
 ;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 ;; for more details.
 ;;
-;; You should  have received a  copy of  the GNU General  Public License
-;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
+;; You should have received a copy of the GNU General Public License
+;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 (in-package :jscl)
 
@@ -67,13 +67,13 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
 ;;; Utilities used by DEFSTRUCT
 
 (defun defstruct/parse-slot-description (sd)
-  (cond
-    ((symbolp sd)
-     (list sd))
-    ((and (listp sd) (car sd) (null (cddr sd)))
-     sd)
-    (t
-     (error "Bad slot description `~S'." sd))))
+                    (cond
+                      ((symbolp sd)
+                       (list sd))
+                      ((and (listp sd) (car sd) (null (cddr sd)))
+                       sd)
+                      (t
+                       (error "Bad slot description `~S'." sd))))
 
 (defun defstruct/option-value (option options &optional default)
   (if (assoc option options)
@@ -92,7 +92,7 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
 
 (defun defstruct/make-slot-reader (predicate struct-name-string
                                    accessor-name index)
-  `(progn
+    `(progn
      (defun ,accessor-name (object)
        (structure-slot-value-by-index% ,struct-name-string ',predicate object ,index))
      #+jscl (declaim (jscl::pure ,accessor-name))))
@@ -112,8 +112,8 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
 
 (defun defstruct/make-slot-accessors (name-string predicate slot-descriptions)
   (with-collect
-    (let ((index 1))
-      (dolist (slot slot-descriptions)
+          (let ((index 1))
+            (dolist (slot slot-descriptions)
         (collect (cons 'progn
                        (defstruct/make-slot-accessor name-string predicate slot index)))
         (incf index)))))
@@ -143,7 +143,7 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
          (copier (defstruct/option-value :copier options
                    (intern (concat "COPY-" name-string))))
          (slot-descriptions (mapcar #'defstruct/parse-slot-description slots)))
-    `(progn
+                                 `(progn
        ,(defstruct/make-constructor constructor name slot-descriptions)
        ,(defstruct/make-predicate predicate name (length slot-descriptions))
        ,(defstruct/make-copier copier name predicate)

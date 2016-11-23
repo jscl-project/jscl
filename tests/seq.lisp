@@ -20,7 +20,7 @@
 (test (= (count-if-not #'not '(a b nil c d nil e)) 5))
 (test (= (count-if-not #'oddp '(1 2 3 4 4 1 8 10 1) :key #'1+) 4))
 
-                                        ; FIND
+; FIND
 (test (find 1 #(2 1 3)))
 (test (find 1 '(2 1 3)))
 (test (not (find 1 #(2 2 2))))
@@ -30,7 +30,7 @@
 (test (not (find 1 #(1 2 3) :key double)))
 (test (not (find 1 '(1 2 3) :key double)))
 
-                                        ; REMOVE
+; REMOVE
 (test (not (find 1 (remove 1 #(1 2 3 1)))))
 (test (not (find 1 (remove 1 '(1 2 3 1)))))
 (test (not (find 2 (remove 1 #(1 2 3 1) :key halve))))
@@ -91,7 +91,7 @@
 (test (= 4 (position-if-not #'integerp '(1 2 3 4 X Y))))  ;; (hyperspec example used "5.0", but we don't have a full numeric tower yet!)
 (test (= 5 (position-if-not #'integerp '(1 2 3 4 X Y) :from-end t)))
 
-                                        ; REMOVE-IF
+; REMOVE-IF
 (test (equal (remove-if     #'zerop '(1 0 2 0 3)) '(1 2 3)))
 (test (equal (remove-if-not #'zerop '(1 0 2 0 3)) '(0 0)))
 (test (equalp (remove-if #'zerop #(1 0 2 0 3))
@@ -171,7 +171,7 @@
 (test (equal (reduce #'cons '(a b c d e f) :start 1 :end 4 :from-end t)
              '(b c . d)))
 (test (equal (reduce #'cons '(a b c d e f) :start 1 :end 4 :from-end t
-                     :initial-value nil)
+                                           :initial-value nil)
              '(b c d)))
 
 ;; MISMATCH
@@ -198,7 +198,7 @@
 (test-equal
  (let ((v (map 'vector #'list '())))
    (and (vectorp v)
-        (zerop (length v))))
+	(zerop (length v))))
  t)
 
 (test-equal
@@ -245,49 +245,49 @@
 (test-equal
  (let ((v (map 'vector #'list '(1 2 3))))
    (and (vectorp v)
-        (equal '(1) (aref v 0))
-        (equal '(2) (aref v 1))
-        (equal '(3) (aref v 2))))
+	(equal '(1) (aref v 0))
+	(equal '(2) (aref v 1))
+	(equal '(3) (aref v 2))))
  t)
 
 (test-equal
  (let ((v (map 'vector #'list #(1 2 3))))
    (and (vectorp v)
-        (equal '(1) (aref v 0))
-        (equal '(2) (aref v 1))
-        (equal '(3) (aref v 2))))
+	(equal '(1) (aref v 0))
+	(equal '(2) (aref v 1))
+	(equal '(3) (aref v 2))))
  t)
 
 (test-equal
  (let ((v (map 'vector #'list "123")))
    (and (vectorp v)
-        (equal '(#\1) (aref v 0))
-        (equal '(#\2) (aref v 1))
-        (equal '(#\3) (aref v 2))))
+	(equal '(#\1) (aref v 0))
+	(equal '(#\2) (aref v 1))
+	(equal '(#\3) (aref v 2))))
  t)
 
 (test-equal
  (let ((v (map '(vector) #'list '(1 2 3))))
    (and (vectorp v)
-        (equal '(1) (aref v 0))
-        (equal '(2) (aref v 1))
-        (equal '(3) (aref v 2))))
+	(equal '(1) (aref v 0))
+	(equal '(2) (aref v 1))
+	(equal '(3) (aref v 2))))
  t)
 
 (test-equal
  (let ((v (map '(vector) #'list #(1 2 3))))
    (and (vectorp v)
-        (equal '(1) (aref v 0))
-        (equal '(2) (aref v 1))
-        (equal '(3) (aref v 2))))
+	(equal '(1) (aref v 0))
+	(equal '(2) (aref v 1))
+	(equal '(3) (aref v 2))))
  t)
 
 (test-equal
  (let ((v (map '(vector) #'list "123")))
    (and (vectorp v)
-        (equal '(#\1) (aref v 0))
-        (equal '(#\2) (aref v 1))
-        (equal '(#\3) (aref v 2))))
+	(equal '(#\1) (aref v 0))
+	(equal '(#\2) (aref v 1))
+	(equal '(#\3) (aref v 2))))
  t)
 
 (test-equal
@@ -297,7 +297,7 @@
 
 (test-equal
  (let* ((acc '())
-        (result (null (map nil (lambda (x) (push x acc)) '(1 2 3)))))
+	(result (null (map nil (lambda (x) (push x acc)) '(1 2 3)))))
    (list acc result))
  '((3 2 1) t))
  

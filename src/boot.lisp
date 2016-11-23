@@ -12,12 +12,12 @@
 ;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 ;; for more details.
 ;;
-;; You should  have received a  copy of  the GNU General  Public License
-;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
+;; You should have received a copy of the GNU General Public License
+;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; This  code  is  executed  when   JSCL  compiles  this  file  itself.
 ;;; The compiler provides compilation of  some special forms, as well as
-;;; funcalls and  macroexpansion, but  no functions.  So, we  define the
+;;; funcalls and macroexpansion, but no functions. So, we define the
 ;;; Lisp world from scratch. This code  has to define enough language to
 ;;; the compiler to be able to run.
 
@@ -62,15 +62,15 @@
                                       (destructuring-bind ,args ,whole
                                         ,@body))))))
 
-                  ;; If we are  boostrapping JSCL, we need  to quote the
+                  ;; If we are boostrapping JSCL, we need to quote the
                   ;; macroexpander, because the  macroexpander will need
                   ;; to be dumped in the final environment somehow.
                   (when (find :jscl-xc *features*)
                     (setq expander `(quote ,expander)))
-
+                  
                   `(eval-when (:compile-toplevel :execute)
                      (%compile-defmacro ',name ,expander)))))))
-
+    
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
 
@@ -186,10 +186,10 @@
                    (find (car name) '(setf jscl/ffi:oget)))))
   (if (and (listp name) (eq (car name) 'jscl/ffi))
       (error "Can't bind to JS function yet, TODO")
-      `(progn
-         (eval-when (:compile-toplevel)
-           (fn-info ',name :defined t))
-         (fset ',name #'(named-lambda ,name ,args ,@body))
+  `(progn
+     (eval-when (:compile-toplevel)
+       (fn-info ',name :defined t))
+     (fset ',name #'(named-lambda ,name ,args ,@body))
          ',name)))
 
 (defmacro return (&optional value)
@@ -209,6 +209,9 @@
 (defun boundp (x)
   (boundp x))
 
+(defun fboundp (x)
+  (fboundp x))
+
 (defun eq (x y) (eq x y))
 (defun eql (x y) (eq x y))
 
@@ -219,6 +222,9 @@
 
 (defun apply (function arg &rest args)
   (apply function (apply #'list* arg args)))
+
+(defun symbol-name (x)
+  (symbol-name x))
 
 ;; Basic macros
 
@@ -273,7 +279,7 @@
             `((t
                (error "ECASE expression failed for the object `~S'." ,g!form))))))))
 
-
+
 ;;; PROG1, PROG2, PROG, PSETQ
 
 (defmacro prog1 (form &body body)
@@ -317,23 +323,23 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun do/do* (do/do* varlist endlist body)
-    `(block nil
+  `(block nil
        (,(ecase do/do* (do 'let) (do* 'let*))
          ,(mapcar (lambda (x)
                     (if (symbolp x)
-                        (list x nil)
+                                   (list x nil)
                         (list (first x) (second x))))
                   varlist)
-         (while t
-           (when ,(car endlist)
-             (return (progn ,@(cdr endlist))))
-           (tagbody ,@body)
+       (while t
+         (when ,(car endlist)
+           (return (progn ,@(cdr endlist))))
+         (tagbody ,@body)
            (,(ecase do/do* (do 'psetq) (do* 'setq))
              ,@(mapcan (lambda (v)
-                         (and (listp v)
-                              (consp (cddr v))
-                              (list (first v) (third v))))
-                       varlist)))))))
+                             (and (listp v)
+                                  (consp (cddr v))
+                                  (list (first v) (third v))))
+                           varlist)))))))
 
 (defmacro do (varlist endlist &body body)
   (do/do* 'do varlist endlist body))
@@ -389,7 +395,7 @@ macro cache is so aggressive that it cannot be redefined."
 (defun char< (x y)
   (< (char-code x) (char-code y)))
 
-
+
 ;;; Numbers
 
 (defconstant most-positive-fixnum (1- (expt 2 53))
@@ -483,7 +489,7 @@ macro cache is so aggressive that it cannot be redefined."
 
 (defun !fdefinition-soft (name)
   "Like `FDEFINITION' but returns NULL rather than signaling an error."
-  (cond
+       (cond
     ((symbolp name)
      (symbol-function name))
     ((consp name)

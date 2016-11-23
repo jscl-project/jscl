@@ -5,8 +5,17 @@ from Common Lisp and executed from the browser.
 
 ## Getting Started
 
-You can try a demo [here](https://jscl-project.github.io/). But if
-you want to hack JSCL, you will have to download the repository
+You can try a demo online [here](https://jscl-project.github.io/), or
+you can install the JSCL npm package:
+
+    npm install -g jscl
+    
+to run `jscl-repl` in NodeJS.
+
+
+## Build
+
+If you want to hack JSCL, you will have to download the repository
 
     git clone https://github.com/jscl-project/jscl.git
 
@@ -17,6 +26,7 @@ compile the implementation itself:
 
 It will generate a `jscl.js` file in the top of the source tree. Now
 you can open `jscl.html` in your browser and use it.
+
 
 ## Status
 
@@ -44,6 +54,8 @@ functions and macros. In particular:
 
 - Packages
 
+- The `LOOP` macro
+
 - Others
 
 The compiler is very verbose, some simple optimizations or
@@ -52,9 +64,6 @@ The compiler is very verbose, some simple optimizations or
 Most of the above features are incomplete. The major features that are still missing are:
 
 - The `format` function
-
-- A loop implementation 
-  (http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/code/iter/loop/mit/0.html)
 
 - CLOS 
   (http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/oop/0.html)
