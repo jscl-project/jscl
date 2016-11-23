@@ -1243,10 +1243,10 @@ generate the code which performs the transformation on these variables."
 (define-builtin boundp (x)
   (convert-to-bool `(!== (get ,x "value") undefined)))
 
-(define-builtin fboundp (x)
+(define-builtin fboundp (x)             ; FIXME: unboundFunction
   (convert-to-bool `(!== (get ,x "fvalue") undefined)))
 
-(define-builtin %fboundp-setf (x)
+(define-builtin %fboundp-setf (x)       ; FIXME: unboundSetFFunction
   (convert-to-bool `(!== (get ,x "setfValue") undefined)))
 
 (define-builtin symbol-value (x)
