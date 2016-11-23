@@ -397,6 +397,10 @@ internals.setSymbolFunction = function (symbol, fn) {
     return fn;
 };
 
+internals.fMakUnbound = function (symbol) {
+    symbol.fvalue = unboundFunction;
+}
+
 internals.fDefinitionSetF = function (symbol) {
     var fn = symbol.setfValue;
     if (fn === unboundSetFFunction) fn();
@@ -407,6 +411,10 @@ internals.setFDefinitionSetF = function (symbol, fn) {
     symbol.setfValue = fn;
     return fn;
 };
+
+internals.fMakUnboundSetF = function (symbol) {
+    symbol.fvalue = unboundSetFFunction;
+}
 
 internals.bindSpecialBindings = function (symbols, values, callback) {
     try {
