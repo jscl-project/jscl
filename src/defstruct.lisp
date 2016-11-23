@@ -99,7 +99,7 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
 
 (defun defstruct/make-slot-writer (predicate struct-name-string
                                    accessor-name index)
-  `(defun (setf ,accessor-name) (object new-value)
+  `(defun (setf ,accessor-name) (new-value object)
      (structure-setf-slot% ',predicate ,struct-name-string ,index
                            object new-value)))
 
