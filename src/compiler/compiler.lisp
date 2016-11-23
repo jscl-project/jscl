@@ -156,6 +156,33 @@
     (notinline (!proclamation decl 'function))
     (constant (!proclamation decl 'variable))))
 
+(defun declaration-information (name
+                                &optional 
+                                  (env *global-environment*))
+  "Return information about declarations named by DECLARATION-NAME.
+
+Defined in CLtL2.
+
+If DECLARATION-NAME is  OPTIMIZE return a list whose entries  are of the
+form (QUALITY VALUE).
+    
+If DECLARATION-NAME  is DECLARATION return  a list of  declaration names
+that have been proclaimed as valid.
+    
+If DECLARATION-NAME  is a name  that has defined  via DEFINE-DECLARATION
+return a user defined value.
+
+In SBCL,  if DECLARATION-NAME is SB-EXT:MUFFLE-CONDITIONS  return a type
+specifier for the condition types that have been muffled.
+" 
+  (declare (ignore env))
+  (case name
+    (optimize '((speed 1) (debug 1) (space 1) 
+                (safety 2) (compilation-speed 1))) 
+    (otherwise nil)))
+
+(export 'declaration-information )
+
 #+jscl
 (fset 'proclaim #'!proclaim)
 
