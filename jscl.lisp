@@ -70,7 +70,7 @@ identifying them (and their provenance) easier."))
 #+sbcl (require 'bordeaux-threads)
 
 (in-package :jscl)
-
+
 (defvar *base-directory*
   (if #.*load-pathname*
       (make-pathname :name nil :type nil :defaults #.*load-pathname*)
@@ -89,7 +89,7 @@ identifying them (and their provenance) easier."))
   "Read  the version  from the  package.json  file. We  could have  used
  a JSON library  to parse this, but that would  introduce a dependency
  and we are not using ASDF yet.")
-
+
 (defparameter *source*
   '(("boot"          :target)
     ("early-char" 	:target)
@@ -136,7 +136,7 @@ Means that src/foo.lisp and src/bar/quux.lisp need to be compiled in the
 target,  and  that src/bar/baz.lisp  and  src/bar/quux.lisp  need to  be
 compiled in the host
 ")
-
+
 (defun source-pathname (filename
                         &key (directory '(:relative "src"))
                              (type nil) (defaults filename))
@@ -180,9 +180,11 @@ compiled in the host
         (when fail
           (error "Compilation of ~A failed." input))
         (load fasl)))))
+
+;;;; Load JSCL into the host implementation.
 
 (load-jscl)
-
+
 (defun read-whole-file (filename)
   (with-open-file (in filename)
     ;; FILE-LENGTH is  in bytes,  not characters. UTF-8  characters will
@@ -191,7 +193,7 @@ compiled in the host
     (let ((seq (make-string (file-length in) :initial-element #\space)))
       (read-sequence seq in)
       seq)))
-
+
 (defun possibly-valid-js-p (string)
   (if (characterp string)
       (or (graphic-char-p string)
@@ -205,7 +207,7 @@ compiled in the host
   (error "Generated illegal characters (first is ~@c)~%Compiling form:~%~S~%from ~s~%Generated:~%~s"
          (find-if (complement #'possibly-valid-js-p) compilation)
          form in compilation))
-
+
 (defun !compile-file/form (form in out)
   (let ((compilation (compile-toplevel form)))
     (if (possibly-valid-js-p compilation)
@@ -253,7 +255,7 @@ compiled in the host
               (princ "…")))
         (setf compiled-form-timer (get-universal-time)
               last-reported-% compilation-%)))))
-
+
 (defmacro doforms ((var stream) &body body)
   (let ((eof (gensym "EOF-")))
     `(loop
@@ -301,7 +303,7 @@ forms if PRINT is set."
                  c (enough-namestring filename)
                  form-count last-form)))
       (format t " Done."))))
-
+
 (defun macro-bindings-add-magic-unquotes ()
   ;; We assume that environments have a friendly list representation for
   ;; the compiler and it can be dumped.
@@ -323,7 +325,7 @@ forms if PRINT is set."
 (defun dump-global-environment (stream)
   (macro-bindings-add-magic-unquotes)
   (dump-gensym-type-counters stream))
-
+
 (defmacro with-jscl-scoping-function ((out) &body body)
   `(progn (write-string "(function(jscl){
 'use strict';
@@ -332,6 +334,12 @@ forms if PRINT is set."
           (write-string "})(jscl.internals.pv, jscl.internals);
 })( typeof require !== 'undefined'? require('./jscl'): window.jscl )" ,out)
           (terpri ,out)))
+
+(defmacro with-self-invoking-function ((out) &body body)
+  `(progn
+     (format ,out "(function(){~%'use strict';~%")
+     ,@body
+     (format ,out "})();~%")))
 
 (defun write-javascript-for-files (files &optional (stream *standard-output*))
   (let ((*environment* (make-lexenv)))
@@ -372,12 +380,6 @@ forms if PRINT is set."
    (list (source-pathname "repl.lisp" :directory '(:relative "repl-node")))
    (merge-pathnames "repl-node.js" *base-directory*)
    :shebang t))
-
-(defmacro with-self-invoking-function ((out) &body body)
-  `(progn
-     (format ,out "(function(){~%'use strict';~%")
-     ,@body
-     (format ,out "})();~%")))
 
 (defun compile-jscl.js (verbosep)
   (with-compilation-environment
@@ -425,3 +427,4 @@ improve the level of trust of the tests."
       (declare (special *use-html-output-p*))
       (map nil #'load (directory "tests/*.lisp")))
     (load "tests-report.lisp")))
+
