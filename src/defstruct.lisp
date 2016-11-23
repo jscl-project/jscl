@@ -25,16 +25,23 @@
 ;;; Javascript level) implementation in the near future.
 
 (defun make-structure% (type &rest fields)
-  (cons type (copy-list fields)))
+  (let ((struct (make-storage-vector (1+ (length fields)))))
+    (storage-vector-set struct 0 (cons 'structure-object type))
+    (let ((i 1))
+      (dolist (field fields)
+        (storage-vector-set struct i field)
+        (setq i (1+ i))))
+    struct))
 
 (defun structure%-p (object)
-  (and (consp object)
-       (symbolp (car object))))
+  (and (storage-vector-p object)
+       (consp (storage-vector-ref object 0))
+       (eql 'structure-object (car (storage-vector-ref object 0)))))
 
 (defun structure-type% (object)
   (unless (structure%-p object)
     (error "Not a structure: ~s" object))
-  (car object))
+  (cdr (storage-vector-ref object 0)))
 
 (defun assert-struct-type (predicate type-name object)
   (when predicate
@@ -43,37 +50,37 @@
 
 (defun copy-structure% (type predicate object)
   (assert-struct-type predicate type object)
-  (copy-list object))
+  (copy-storage-vector object)  )
+
+(defun structure-slot-value-by-index% (type predicate object index)
+  "Get the  value of  the slot  at index  INDEX in  OBJECT, which  is of
+TYPE (and fulfills PREDICATE). Used in slot readers."
+  (assert-struct-type predicate type object)
+  (storage-vector-ref object (1+ index)))
+
+(defun structure-setf-slot% (predicate type index
+                             object new-value)
+  (assert-struct-type predicate type object)
+  (storage-vector-set object (1+ index) new-value))
 
 (defun defstruct/make-predicate (predicate name slot-count)
   (when predicate
     `(defun ,predicate (object)
        (and (structure%-p object)
             (eq (structure-type% object) ',name)
-            (= (length object) ,(1+ slot-count))))))
-
-(defun structure-slot-value-by-index% (type predicate object index)
-  "Get the  value of  the slot  at index  INDEX in  OBJECT, which  is of
-TYPE (and fulfills PREDICATE). Used in slot readers."
-  (assert-struct-type predicate type object)
-  (elt object index))
-
-(defun structure-setf-slot% (predicate type index
-                             object new-value)
-  (assert-struct-type predicate type object)
-  (setf (elt object index) new-value))
+            (= (storage-vector-size object) ,(1+ slot-count))))))
 
 
 ;;; Utilities used by DEFSTRUCT
 
 (defun defstruct/parse-slot-description (sd)
-                    (cond
-                      ((symbolp sd)
-                       (list sd))
-                      ((and (listp sd) (car sd) (null (cddr sd)))
-                       sd)
-                      (t
-                       (error "Bad slot description `~S'." sd))))
+  (cond
+    ((symbolp sd)
+     (list sd))
+    ((and (listp sd) (car sd) (null (cddr sd)))
+     sd)
+    (t
+     (error "Bad slot description `~S'." sd))))
 
 (defun defstruct/option-value (option options &optional default)
   (if (assoc option options)

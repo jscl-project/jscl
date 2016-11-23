@@ -64,7 +64,7 @@
   (let ((readtable-before (gensym "READTABLE-BEFORE-")))
     `(let ((,readtable-before (copy-readtable))
            (*readtable* (copy-readtable)))
-(set-dispatch-macro-character #\# #\J #'j-reader)
+       (set-dispatch-macro-character #\# #\J #'j-reader)
        (unwind-protect
             (progn ,@body)
          (setf *readtable* ,readtable-before)))))
@@ -89,8 +89,7 @@
   underlying-vector)
 
 (defun make-storage-vector (n)
-  (let ((v (make-array n :adjustable t)))
-    (make-storage-vector-1 :underlying-vector v)))
+  (make-storage-vector-1 :underlying-vector (make-array n :adjustable t)))
 
 (defun storage-vector-size (sv)
   (length (storage-vector-underlying-vector sv)))
