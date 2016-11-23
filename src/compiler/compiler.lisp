@@ -100,7 +100,8 @@
     (dolist (binding (reverse bindings) env)
       (push-to-lexenv binding env namespace))))
 
-(defvar *environment*)
+(defvar *global-environment* (make-lexenv))
+(defvar *environment* *global-environment*)
 (defvar *variable-counter*)
 
 (defun gvarname (symbol)
@@ -1605,7 +1606,7 @@ generate the code which performs the transformation on these variables."
         (values symbol nil))))
 
 (defun !macroexpand-1 (form &optional env)
-  (let ((*environment* (or env *environment*)))
+  (let ((*environment* (or env *global-environment*)))
     (cond
       ((symbolp form)
        (!macroexpand-1/symbol form))
