@@ -361,13 +361,16 @@ jscl.CL = packages.CL.exports;
 function unboundFunction () {
     throw new Error("Function '" + this.name + "' undefined");
 }
+function unboundSetFFunction () {
+    throw new Error("Function SetF '" + this.name + "' undefined");
+}
 
 internals.Symbol = function(name, package_name) {
     this.name = name;
     this["package"] = package_name;
     this.value = undefined;
     this.fvalue = unboundFunction;
-    this.setfValue = unboundFunction;
+    this.setfValue = unboundSetFFunction;
     this.typeName = undefined;
 };
 
@@ -396,7 +399,7 @@ internals.setSymbolFunction = function (symbol, fn) {
 
 internals.fDefinitionSetF = function (symbol) {
     var fn = symbol.setfValue;
-    if (fn === unboundFunction) fn();
+    if (fn === unboundSetFFunction) fn();
     return fn;
 };
 
