@@ -1,4 +1,4 @@
-;;; read.lisp --- 
+;;; read.lisp ---
 
 ;; Copyright (C) 2012, 2013 David Vazquez Copyright (C) 2012 Raimon Grau
 
@@ -12,8 +12,8 @@
 ;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 ;; for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
 (in-package :jscl)
 
@@ -21,11 +21,11 @@
 
 ;;;; Reader
 
-;;; If it is not NIL, we do not want to read the expression but just
+;;; If it  is not NIL, we  do not want  to read the expression  but just
 ;;; ignore it. For example, it is used in conditional reads #+.
 (defvar *read-skip-p* nil)
 
-;;; The Lisp reader, parse strings and return Lisp objects. The main
+;;; The Lisp  reader, parse  strings and return  Lisp objects.  The main
 ;;; entry points are `ls-read' and `ls-read-from-string'.
 
 ;;; #= / ## implementation
@@ -91,7 +91,7 @@
 
 (defun %read-char (stream &optional (eof-error-p t) (eof-value nil))
   (cond ((< (cdr stream) (length (car stream)))
-       (prog1 (char (car stream) (cdr stream))
+         (prog1 (char (car stream) (cdr stream))
            (rplacd stream (1+ (cdr stream)))))
         (eof-error-p
          (error "End of file in READ-CHAR"))
@@ -295,7 +295,7 @@
                        (code-char (read-integer-from-stream stream))))
                     (t (let ((cname
                               (concatenate 'string "U" (string (read-char stream nil nil))
-                      (read-until stream #'terminalp))))
+                                           (read-until stream #'terminalp))))
                          (let ((ch (name-char cname)))
                            (or ch (char cname 0)))))))
              (t (let ((cname
@@ -307,7 +307,7 @@
        (let* ((expression
                (let ((*package* (find-package :keyword)))
                  (ls-read stream eof-error-p eof-value t))))
-         
+
          (if (eql (char= ch #\+) (eval-feature-expression expression))
              (ls-read stream eof-error-p eof-value t)
              (prog2 (let ((*read-skip-p* t))
@@ -400,7 +400,7 @@
       (let ((ch (char s i)))
         (cond
           (last-escape
-              (setf last-escape nil)
+           (setf last-escape nil)
            (setf result (concatenate 'string result (string ch))))
           ((char= ch #\\)
            (setf last-escape t))
@@ -543,39 +543,39 @@
 
 (defun !parse-integer (string junk-allow &optional (radix *read-base*))
   (let ((radix (or radix 10)))
-  (block nil
-    (let ((value 0)
-          (index 0)
-          (size (length string))
-          (sign 1))
-      ;; Leading whitespace
-      (while (and (< index size)
-                  (whitespacep (char string index)))
-        (incf index))
-      (unless (< index size) (return (values nil 0)))
-      ;; Optional sign
-      (case (char string 0)
-        (#\+ (incf index))
-        (#\- (setq sign -1)
-             (incf index)))
-      ;; First digit
-      (unless (and (< index size)
+    (block nil
+      (let ((value 0)
+            (index 0)
+            (size (length string))
+            (sign 1))
+        ;; Leading whitespace
+        (while (and (< index size)
+                    (whitespacep (char string index)))
+          (incf index))
+        (unless (< index size) (return (values nil 0)))
+        ;; Optional sign
+        (case (char string 0)
+          (#\+ (incf index))
+          (#\- (setq sign -1)
+               (incf index)))
+        ;; First digit
+        (unless (and (< index size)
                      (setq value (digit-char-p (char string index) radix)))
-        (return (values nil index)))
-      (incf index)
-      ;; Other digits
-      (while (< index size)
+          (return (values nil index)))
+        (incf index)
+        ;; Other digits
+        (while (< index size)
           (let ((digit (digit-char-p (char string index) radix)))
-          (unless digit (return))
+            (unless digit (return))
             (setq value (+ (* value radix) digit))
-          (incf index)))
-      ;; Trailing whitespace
-      (do ((i index (1+ i)))
-          ((or (= i size) (not (whitespacep (char string i))))
-           (and (= i size) (setq index i))))
-      (if (or junk-allow
-              (= index size))
-          (values (* sign value) index)
+            (incf index)))
+        ;; Trailing whitespace
+        (do ((i index (1+ i)))
+            ((or (= i size) (not (whitespacep (char string i))))
+             (and (= i size) (setq index i))))
+        (if (or junk-allow
+                (= index size))
+            (values (* sign value) index)
             (values nil index))))))
 
 #+jscl
@@ -629,7 +629,7 @@ rewrite `#(v1 v2…) as (apply #'vector `(v1 v2…))"))
                        (char= (peek-char nil stream nil nil) #\.))
                    (progn (read-char stream nil nil)
                           (list 'unquote-splicing
-                                                    (ls-read stream eof-error-p eof-value t)))
+                                (ls-read stream eof-error-p eof-value t)))
                    (list 'unquote (ls-read stream eof-error-p eof-value t))))
               ((char= ch #\#)
                (read-sharp stream eof-error-p eof-value))

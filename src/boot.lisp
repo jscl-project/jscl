@@ -12,8 +12,8 @@
 ;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 ;; for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
 ;;; This  code  is  executed  when   JSCL  compiles  this  file  itself.
 ;;; The compiler provides compilation of  some special forms, as well as
@@ -67,10 +67,10 @@
                   ;; to be dumped in the final environment somehow.
                   (when (find :jscl-xc *features*)
                     (setq expander `(quote ,expander)))
-                  
+
                   `(eval-when (:compile-toplevel :execute)
                      (%compile-defmacro ',name ,expander)))))))
-    
+
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
 
@@ -186,10 +186,10 @@
                    (find (car name) '(setf jscl/ffi:oget)))))
   (if (and (listp name) (eq (car name) 'jscl/ffi))
       (error "Can't bind to JS function yet, TODO")
-  `(progn
-     (eval-when (:compile-toplevel)
-       (fn-info ',name :defined t))
-     (fset ',name #'(named-lambda ,name ,args ,@body))
+      `(progn
+         (eval-when (:compile-toplevel)
+           (fn-info ',name :defined t))
+         (fset ',name #'(named-lambda ,name ,args ,@body))
          ',name)))
 
 (defmacro return (&optional value)
@@ -323,23 +323,23 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun do/do* (do/do* varlist endlist body)
-  `(block nil
+    `(block nil
        (,(ecase do/do* (do 'let) (do* 'let*))
          ,(mapcar (lambda (x)
                     (if (symbolp x)
-                                   (list x nil)
+                        (list x nil)
                         (list (first x) (second x))))
                   varlist)
-       (while t
-         (when ,(car endlist)
-           (return (progn ,@(cdr endlist))))
-         (tagbody ,@body)
+         (while t
+           (when ,(car endlist)
+             (return (progn ,@(cdr endlist))))
+           (tagbody ,@body)
            (,(ecase do/do* (do 'psetq) (do* 'setq))
              ,@(mapcan (lambda (v)
-                             (and (listp v)
-                                  (consp (cddr v))
-                                  (list (first v) (third v))))
-                           varlist)))))))
+                         (and (listp v)
+                              (consp (cddr v))
+                              (list (first v) (third v))))
+                       varlist)))))))
 
 (defmacro do (varlist endlist &body body)
   (do/do* 'do varlist endlist body))
@@ -489,7 +489,7 @@ macro cache is so aggressive that it cannot be redefined."
 
 (defun !fdefinition-soft (name)
   "Like `FDEFINITION' but returns NULL rather than signaling an error."
-       (cond
+  (cond
     ((symbolp name)
      (symbol-function name))
     ((consp name)

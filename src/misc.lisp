@@ -143,4 +143,3 @@
 
 (defun get-universal-time ()
   (+ (get-unix-time) 2208988800))
-

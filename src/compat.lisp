@@ -1,7 +1,6 @@
 ;;; compat.lisp --- Create some definitions to fix CL compatibility
 
-;; Copyright (C) 2012, 2013 David Vazquez
-;; Copyright (C) 2012 Raimon Grau
+;; Copyright (C) 2012, 2013 David Vazquez Copyright (C) 2012 Raimon Grau
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
 ;; the terms of the GNU General  Public License as published by the Free
@@ -13,8 +12,8 @@
 ;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 ;; for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
 (in-package :jscl)
 
@@ -83,7 +82,6 @@
 ;;; Storage Vectors
 ;;;
 ;;; Provide a ANSI compatible implementation of storage vectors.
-;;; 
 (defstruct (storage-vector
              (:constructor make-storage-vector-1))
   underlying-vector)

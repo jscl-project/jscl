@@ -12,8 +12,8 @@
 ;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 ;; for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
 (defpackage :jscl
   (:use :cl #+sbcl :sb-gray)
@@ -119,15 +119,15 @@ compiled in the host
 
 (defun get-files (file-list type dir)
   "Traverse FILE-LIST and retrieve a list of the files within which match
-   either TYPE or :BOTH, processing subdirectories."
+ either TYPE or :BOTH, processing subdirectories."
   (let ((file (car file-list)))
     (cond
       ((null file-list)
        ())
       ((listp (cadr file))
        (append
-         (get-files (cdr file)      type (append dir (list (car file))))
-         (get-files (cdr file-list) type dir)))
+        (get-files (cdr file)      type (append dir (list (car file))))
+        (get-files (cdr file-list) type dir)))
       ((member (cadr file) (list type :both))
        (cons (source-pathname (car file) :directory dir :type "lisp")
              (get-files (cdr file-list) type dir)))
@@ -136,7 +136,7 @@ compiled in the host
 
 (defmacro do-source (name type &body body)
   "Iterate over all the source files that need to be compiled in the host or
-   the target, depending on the TYPE argument."
+ the target, depending on the TYPE argument."
   (unless (member type '(:host :target))
     (error "TYPE must be one of :HOST or :TARGET, not ~S" type))
   `(dolist (,name (get-files *source* ,type '(:relative "src")))
@@ -144,12 +144,12 @@ compiled in the host
 
 ;;; Compile and load jscl into the host
 (defun load-jscl ()
-(with-compilation-unit ()
-  (do-source input :host
-    (multiple-value-bind (fasl warn fail) (compile-file input)
-      (declare (ignore warn))
-      (when fail
-        (error "Compilation of ~A failed." input))
+  (with-compilation-unit ()
+    (do-source input :host
+      (multiple-value-bind (fasl warn fail) (compile-file input)
+        (declare (ignore warn))
+        (when fail
+          (error "Compilation of ~A failed." input))
         (load fasl)))))
 
 (load-jscl)
@@ -180,7 +180,7 @@ compiled in the host
 (defun !compile-file/form (form in out)
   (let ((compilation (compile-toplevel form)))
     (if (possibly-valid-js-p compilation)
-              (when (plusp (length compilation))
+        (when (plusp (length compilation))
           (write-string compilation out))
         (complain-about-illegal-chars form in compilation))))
 
@@ -276,8 +276,8 @@ forms if PRINT is set."
 (defun macro-bindings-add-magic-unquotes ()
   ;; We assume that environments have a friendly list representation for
   ;; the compiler and it can be dumped.
-    (dolist (b (lexenv-function *environment*))
-      (when (eq (binding-type b) 'macro)
+  (dolist (b (lexenv-function *environment*))
+    (when (eq (binding-type b) 'macro)
       (setf (binding-value b) `(,*magic-unquote-marker* ,(binding-value b))))))
 
 (defun dump-gensym-type-counters (stream)
@@ -286,7 +286,7 @@ forms if PRINT is set."
   (write-string
    (compile-toplevel `(progn
                         (setq *environment* ',*environment*)
-        (setq *variable-counter* ,*variable-counter*)
+                        (setq *variable-counter* ,*variable-counter*)
                         (setq *gensym-counter* ,*gensym-counter*)
                         (setq *literal-counter* ,*literal-counter*)))
    stream))
@@ -314,8 +314,8 @@ forms if PRINT is set."
 
 (defun compile-application (files output &key shebang)
   (with-compilation-environment
-      (with-open-file (out output :direction :output :if-exists :supersede)
-        (when shebang
+    (with-open-file (out output :direction :output :if-exists :supersede)
+      (when shebang
         (write-string "#!/usr/bin/env node" out)
         (terpri out))
       (with-jscl-scoping-function (out)
@@ -351,10 +351,10 @@ forms if PRINT is set."
      (format ,out "})();~%")))
 
 (defun compile-jscl.js (verbosep)
-    (with-compilation-environment
-      (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
-                           :direction :output
-                           :if-exists :supersede)
+  (with-compilation-environment
+    (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
+                         :direction :output
+                         :if-exists :supersede)
       (with-self-invoking-function (out)
         (write-string (read-whole-file (source-pathname "prelude.js")) out)
         (do-source input :target
@@ -379,13 +379,13 @@ forms if PRINT is set."
   (let ((*features* (cons :jscl-xc *features*))
         (*package* (find-package "JSCL"))
         (*default-pathname-defaults* *base-directory*)
-        (*environment* *global-environment*)) 
+        (*environment* *global-environment*))
     (compile-jscl.js verbosep)
     (report-undefined-functions)
     (compile-test-suite))
   (when verbosep
     (format *trace-output* "~2&;;;; … Done, compiled jscl.js and test suite.~%~|~%")))
-        
+
 (defun run-tests-in-host ()
   "Run the tests in  the host Lisp implementation. It is  a quick way to
 improve the level of trust of the tests."

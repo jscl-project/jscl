@@ -10,8 +10,8 @@
 ;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 ;; for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 (in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
 
 (/debug "loading list.lisp!")
@@ -30,9 +30,9 @@
 
 (defun endp (object)
   "It returns true if OBJECT is NIL, false if OBJECT is a CONS, and an error
-   for any other type of OBJECT.
+ for any other type of OBJECT.
 
-   This is the recommended way to test for the end of a proper list."
+ This is the recommended way to test for the end of a proper list."
   (cond ((null object) t)
         ((consp object) nil)
         (t (error "The value `~S' is not a type list." object))))
@@ -190,34 +190,34 @@
 
 (defun copy-list (x)
   (if (null x)
-    nil
-    (let* ((new-list (list (car x)))
-           (last-cell new-list))
-      (do ((orig (cdr x) (cdr orig)))
-        ((atom orig) (rplacd last-cell orig))
-        (rplacd last-cell (cons (car orig) nil))
-        (setq last-cell (cdr last-cell)))
-      new-list)))
+      nil
+      (let* ((new-list (list (car x)))
+             (last-cell new-list))
+        (do ((orig (cdr x) (cdr orig)))
+            ((atom orig) (rplacd last-cell orig))
+          (rplacd last-cell (cons (car orig) nil))
+          (setq last-cell (cdr last-cell)))
+        new-list)))
 
 
 ;;; Trees
 
 (defun copy-tree (tree)
   (if (consp tree)
-    (cons (copy-tree (car tree))
-          (copy-tree (cdr tree)))
-    tree))
+      (cons (copy-tree (car tree))
+            (copy-tree (cdr tree)))
+      tree))
 
 (defun tree-equal (tree1 tree2 &key (test #'eql testp)
-                         (test-not #'eql test-not-p))
+                                    (test-not #'eql test-not-p))
   (when (and testp test-not-p) (error "Both test and test-not are set"))
   (let ((func (if test-not-p (complement test-not) test)))
     (labels ((%tree-equal (tree1 tree2)
                (if (atom tree1)
-                 (and (atom tree2) (funcall func tree1 tree2))
-                 (and (consp tree2)
-                      (%tree-equal (car tree1) (car tree2))
-                      (%tree-equal (cdr tree1) (cdr tree2))))))
+                   (and (atom tree2) (funcall func tree1 tree2))
+                   (and (consp tree2)
+                        (%tree-equal (car tree1) (car tree2))
+                        (%tree-equal (cdr tree1) (cdr tree2))))))
       (%tree-equal tree1 tree2))))
 
 
@@ -225,7 +225,7 @@
 
 (defun tailp (object list)
   (do ((tail list (cdr tail)))
-    ((atom tail) (eq object tail))
+      ((atom tail) (eq object tail))
     (when (eql tail object)
       (return-from tailp t))))
 
@@ -284,17 +284,17 @@
   (while alist
     (if (satisfies-test-p x (caar alist) :key key :test test :testp testp
                           :test-not test-not :test-not-p test-not-p)
-      (return)
-      (setq alist (cdr alist))))
+        (return)
+        (setq alist (cdr alist))))
   (car alist))
 
 (defun rassoc (x alist &key key (test #'eql) (test #'eql testp)
-                 (test-not #'eql test-not-p))
+                            (test-not #'eql test-not-p))
   (while alist
     (if (satisfies-test-p x (cdar alist) :key key :test test :testp testp
                           :test-not test-not :test-not-p test-not-p)
-      (return)
-      (setq alist (cdr alist))))
+        (return)
+        (setq alist (cdr alist))))
   (car alist))
 
 (defun acons (key datum alist)
@@ -375,8 +375,8 @@
 
 (defun adjoin (item list &key (test #'eql) (key #'identity))
   (if (member item list :key key :test test)
-    list
-    (cons item list)))
+      list
+      (cons item list)))
 
 
 ;;; Property lists
@@ -385,7 +385,7 @@
   (do* ((plist plist (cddr plist))
         (cdr (cdr plist) (cdr plist))
         (car (car plist) (car plist)))
-      ((null plist) (values nil nil nil))
+       ((null plist) (values nil nil nil))
     (when (null cdr)
       (error "malformed property list ~S" plist))
     (let ((found (member car indicator-list :test #'eq)))
@@ -396,7 +396,7 @@
   (do* ((plist plist (cddr plist))
         (cdr (cdr plist) (cdr plist))
         (car (car plist) (car plist)))
-      ((null plist) default)
+       ((null plist) default)
     (when (null cdr)
       (error "malformed property list ~S" plist))
     (when (eq indicator car)
@@ -406,7 +406,7 @@
   (do* ((tail plist (cddr tail))
         (cdr (cdr tail) (cdr tail))
         (car (car tail) (car tail)))
-      ((null tail) (list* indicator new-value plist))
+       ((null tail) (list* indicator new-value plist))
     (when (null cdr)
       (error "malformed property list ~S" tail))
     (when (eq indicator car)
