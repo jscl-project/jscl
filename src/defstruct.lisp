@@ -56,12 +56,12 @@
   "Get the  value of  the slot  at index  INDEX in  OBJECT, which  is of
 TYPE (and fulfills PREDICATE). Used in slot readers."
   (assert-struct-type predicate type object)
-  (elt index object))
+  (elt object index))
 
 (defun structure-setf-slot% (predicate type index
                              object new-value)
   (assert-struct-type predicate type object)
-  (setf (elt index object) new-value))
+  (setf (elt object index) new-value))
 
 
 ;;; Utilities used by DEFSTRUCT
