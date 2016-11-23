@@ -12,12 +12,16 @@ you can install the JSCL npm package:
     
 to run `jscl-repl` in NodeJS.
 
+This  is the  upstream version.  Ours —  Romance Ⅱ  version —  is hacked
+a bit. We are currently aiming to  stabilize a lot of things in time for
+the end of 2016 for Violet  Volts' purposes and then things should begin
+to get more in sync with upstream.
 
 ## Build
 
 If you want to hack JSCL, you will have to download the repository
 
-    git clone https://github.com/jscl-project/jscl.git
+    git clone https://github.com/romance-ii/jscl.git
 
 *load* `jscl.lisp` in your Lisp, and call the bootstrap function to
 compile the implementation itself:
@@ -27,6 +31,17 @@ compile the implementation itself:
 It will generate a `jscl.js` file in the top of the source tree. Now
 you can open `jscl.html` in your browser and use it.
 
+You can build also with
+
+     make
+     
+This will probably only work in SBCL for now.
+
+We also export
+
+    (jscl:bootstrap-core)
+
+if you don't care to build the REPLs.
 
 ## Status
 
@@ -56,14 +71,16 @@ functions and macros. In particular:
 
 - The `LOOP` macro
 
+- The `FORMAT` function
+
 - Others
 
-The compiler is very verbose, some simple optimizations or
-*minification* could help to deal with it.
+The   compiler   is  very   verbose,   some   simple  optimizations   or
+*minification* could help to deal with it. We are working to ensure that
+Google's  Closure  Compiler  can  be used  to  post-process  it  safely,
+although CL-Uglify and Yahoo Uglify are both being observed.
 
 Most of the above features are incomplete. The major features that are still missing are:
-
-- The `format` function
 
 - CLOS 
   (http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/oop/0.html)
