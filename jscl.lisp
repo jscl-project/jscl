@@ -1,4 +1,4 @@
-;;; jscl.lisp ---
+;;; jscl.lisp— JavaScript from Common Lisp
 
 ;; Copyright (C) 2012, 2013 David Vazquez Copyright (C) 2012 Raimon Grau
 
@@ -19,12 +19,41 @@
   (:use :cl #+sbcl :sb-gray)
   (:export #:bootstrap #:bootstrap-core
            #:run-tests-in-host #:with-sharp-j #:read-#j
-           #:write-javascript-for-files #:compile-application))
+           #:write-javascript-for-files #:compile-application)
+  (:documentation "JavaScript  from Common  Lisp. This  package contains
+  the   internals   and   exports    some   utility   functions   needed
+  for compilation.
+
+When  you  build JSCL,  you'll  invoke  JSCL:Boostrap-Core in  the  host
+compiler (probably SBCL) to build the  system. Once you're “in” the JSCL
+implementation, you may never need to access this package directly."))
 
 (defpackage :jscl/ffi
   (:use :cl :jscl)
   (:export #:oget #:oget* #:make-new #:new #:*root*
-           #:oset #:oset*))
+           #:oset #:oset*)
+  (:documentation       "Foreign       Function       Interface       to
+  JavaScript functions."))
+
+(defpackage :jscl/cltl2
+  (:use :cl :jscl)
+  (:nicknames :cltl2)
+  (:export #:declaration-information)
+  (:documentation  "Functions  defined  in Common  Lisp:  The  Language,
+  Second Edition (CLtL2) which are unique to that book.
+
+Very little of this set is  implemented; but this package exists to make
+identifying them (and their provenance) easier."))
+
+(defpackage :jscl/mop
+  (:use :cl :jscl)
+  (:nicknames :mop)
+  (:export)
+  (:documentation  "Functions  defined in  the  Art  of the  Meta-Object
+  Protocol (MOP) which are unique to that manuscript.
+
+Very  few of  these are  implemented, but  this package  exists to  make
+identifying them (and their provenance) easier."))
 
 (defpackage jscl/test
   (:use :cl #+sbcl :bordeaux-threads)
