@@ -85,7 +85,7 @@
              ((null pairs)
               (reverse result)))))
 
-  (defun setf/apply-setf-expander (place)
+  (defun setf/apply-setf-expander (place value)
     (multiple-value-bind (vars vals store-vars writer-form reader-form)
         (!get-setf-expansion place)
       (declare (ignorable reader-form))
@@ -114,7 +114,7 @@ SETF knows a corresponding setting form."
               (setf-fn (!fdefinition-soft (list 'setf access-fn))))
          (if setf-fn
              `((setf ,access-fn) ,value ,@params)
-             (setf/apply-setf-expander place)))))
+             (setf/apply-setf-expander place value)))))
     (t (setf/split-into-pairs pairs))))
 
 ;;; SETF-Based macros
