@@ -385,7 +385,7 @@ internals.symbolValue = function (symbol) {
 
 internals.symbolFunction = function (symbol) {
     var fn = symbol.fvalue;
-    if (fn === unboundFunction)        fn();
+    if (fn === unboundFunction) fn();
     return fn;
 };
 
