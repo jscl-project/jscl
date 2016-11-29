@@ -26,7 +26,7 @@
 (in-package :jscl)
 
 (/debug "loading compiler/codegen.lisp!")
-
+
 (defvar *js-macros* nil)
 (defmacro define-js-macro (name lambda-list &body body)
   (let ((form (gensym "FORM-")))
@@ -47,13 +47,12 @@
               (js-macroexpand expansion))))
       js))
 
-
-(defconstant no-comma 12)
+(defconstant no-comma 12)               ; ?? ☠
 
 (defvar *js-output* t)
 
 (defvar *js-pretty-print* t)
-
+
 ;;; Two seperate  functions are  needed for  escaping strings: One  for producing  JavaScript string
 ;;;  literals (which are singly or doubly quoted) And one for producing Lisp strings (which are only
 ;;;  doubly quoted)
@@ -121,14 +120,14 @@
          (concat #(#\apostrophe)
                  (%js-escape-string string t)
                  #(#\apostrophe)))))))
-
-
+
 (defun js-format (fmt &rest args)
   (apply #'format *js-output* fmt args))
 
-;;; Check if STRING-DESIGNATOR is  valid as a Javascript identifier. It returns  a couple of values.
-;;; The identifier itself as a string and a boolean value with the result of this check.
 (defun valid-js-identifier (string-designator)
+  "Check  if  STRING-DESIGNATOR is  valid  as  a Javascript  identifier.
+It returns  a couple of values:  the identifier itself as  a string, and
+a boolean value with the result of this check."
   (let ((string (typecase string-designator
                   (symbol (symbol-name string-designator))
                   (string string-designator)
@@ -143,7 +142,7 @@
           (values string t)
           (values nil nil)))))
 
-
+
 ;;; Expression generators
 ;;;
 ;;; `js-expr'  and   the  following   auxiliary  functions  are   the  responsible   for  generating
@@ -175,7 +174,7 @@
         (js-identifier form))))
     (t
      (error "Unknown Javascript syntax ~S." form))))
-
+
 (defun js-vector-initializer (vector)
   (let ((size (length vector)))
     (js-format "[")
@@ -260,12 +259,12 @@
           (t
            (js-macroexpand form)))
         form)))
-
-;;; It is the more complicated function of the generator. It takes a
-;;; operator expression and generate Javascript for it. It will
-;;; consider associativity and precedence in order not to generate
-;;; unnecessary parenthesis.
+
 (defun js-operator-expression (op args precedence associativity operand-order)
+  "This is the  most complicated function of the generator.  It takes an
+operator expression  and generates JavaScript  for it. It  will consider
+associativity    and   precedence    in    order    to   not    generate
+unnecessary parentheses."
   (let ((op1 (car args))
         (op2 (cadr args)))
     (case op
@@ -285,7 +284,11 @@
          (js-identifier accessor)))
       ;; Function call
       (call
-       (js-expr (car args) 1)
+       (js-expr (if (and (consp (car args))
+                         (eql (caar args) 'lambda))
+                    (compile-lambda (second (car args)) (cddr (car args)))
+                    (car args))
+                1)
        (js-format "(")
        (when (cdr args)
          (js-expr (cadr args) no-comma)
@@ -409,7 +412,7 @@
              (return-from js-operator-expression))
 
            (error "Unknown operator `~S'" op)))))))
-
+
 (defun js-expr (form &optional (precedence 1000) associativity operand-order)
   (let ((form (js-expand-expr form)))
     (cond
@@ -423,10 +426,9 @@
       ((vectorp form)
        (js-vector-initializer form))
       ((consp form)
-       (js-operator-expression (car form) (cdr form) precedence associativity operand-order)))))
-
-
-
+       (js-operator-expression (car form) (cdr form) 
+                               precedence associativity operand-order)))))
+
 ;;; Statements generators
 ;;;
 ;;; `js-stmt' generates code for Javascript statements. A form is
@@ -586,8 +588,8 @@
             (js-expr form)
             (js-end-stmt))))))))
 
-
-;;; It is intended to be the entry point to the code generator.
+
 (defun js (&rest stmts)
+  "This is intended to be the entry point to the code generator."
   (mapc #'js-stmt stmts)
   nil)

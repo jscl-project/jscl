@@ -1,6 +1,6 @@
 ;;;; types.lisp — JSCL type system
 
-(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+(in-package :jscl)
 
 (/debug "Loading types.lisp…")
 
@@ -12,17 +12,20 @@
           "DEFSTRUCT should have been defined by defstruct.lisp before this file was loaded.")
 
 
-(defstruct built-in-class
-  name predicate superclasses)
+(/debug "Defining Built-In-Class")
+(defstruct 
+    #+jscl built-in-class 
+    #-jscl !built-in-class
+    name predicate superclasses)
 
 (defstruct eql-specializer object)
 
 (defstruct type-definition
   name supertypes lambda-list body
-  ornate-predicate)
+  predicate)
 
 (defstruct class-info
-  name supertypes slots 
+  name supertypes slots
   predicate constructor copier)
 
 (defstruct slot-info
@@ -32,9 +35,9 @@
   allocation)
 
 
-(defun subtypep (subtype supertype)
-  (let ((sub (find-type-definition subtype))
-        (known-supertypes (type-definition-supertypes sub)))
+(define-cl-fun subtypep (subtype supertype)
+  (let* ((sub (find-type-definition subtype))
+         (known-supertypes (type-definition-supertypes sub)))
     (or (find supertype known-supertypes)
         (some (lambda (type)
                 (subtypep subtype type))
@@ -51,14 +54,17 @@
       ((subtypep next type) type)
       (t type))))
 
-(defun type-of (value)
+(defun curry-type-check (value)
+  (lambda (type)
+    (funcall (type-definition-predicate type)
+             value)))
+
+(define-cl-fun type-of (value)
   (if value
-      (let ((type (type-definition-name
-                   (most-specific-type
-                    (remove-if-not (lambda (type)
-                                     (funcall (type-definition-predicate type)
-                                              value))
-                                   *types*)))))
+      (let* ((curry (curry-type-check value))
+             (type (type-definition-name
+                    (most-specific-type
+                     (remove-if-not curry *types*)))))
         (cond
           ((subtypep type 'string) (cons type (length value)))
           ((subtypep type 'array) (cons type (array-dimensions value)))
@@ -67,14 +73,18 @@
           (t type)))
       'null))
 
-(defmacro deftype (name lambda-list &body body)
+(defmacro !deftype (name lambda-list &body body)
   `(push (make-type-definition :name ',name
                                :supertypes '(jscl::user-deftype)
-                               :ornate-predicate
+                               :predicate
                                ,(let ((object (gensym "OBJECT-")))
                                   `(lambda ,(cons object lambda-list)
                                      (typep ,object ',@body))))
          *types*))
+
+#+jscl
+(defmacro deftype (name lambda-list &body body)
+  `(!deftype ,name ,lambda-list ,@body))
 
 (dolist (type-info '((hash-table hash-table-p atom)
                      (number numberp atom)
@@ -97,22 +107,23 @@
                      (atom atom)
                      (null null)
                      (package packagep atom)))
-  (destructuring-bind (name ornate-predicate supertypes)
-      (push (make-type-definition :name name
-                                  :supertypes supertypes
-                                  :predicate predicate)
-            *types*)))
+  (destructuring-bind (name predicate &rest supertypes) type-info
+    (push (make-type-definition :name name
+                                :supertypes supertypes
+                                :predicate predicate)
+          *types*)))
 
 (defun find-type-definition (type)
   (find type *types* :key #'type-definition-name))
 
-(defun typep (object type &optional environment)
+(define-cl-fun typep (object type &optional environment)
+  (declare (ignore environment)) ; FIXME
   (cond
     ((consp type)
-     (let ((ornate-predicate (type-defition-ornate-predicate
-                              (find-type-definition (car type)))))
-       (if ornate-predicate
-           (apply ornate-predicate object (cdr type))
+     (let ((predicate (type-definition-predicate
+                       (find-type-definition (car type)))))
+       (if predicate
+           (apply predicate object (cdr type))
            (error "Can't handle type specifier ~s; is it valid?"
                   type))))
     ((symbolp type)
@@ -121,45 +132,48 @@
               object))
     (t (error "~s is not a valid type specifier" type))))
 
-(defmacro check-type (place type &optional type-string)
+(defmacro !check-type (place type &optional type-string)
   "Signal a restartable  error of type TYPE-ERROR if the  value of PLACE
 is not of the  specified type. If an error is  signalled and the restart
 is used  to return, this can  only return if the  STORE-VALUE restart is
 invoked. In that case it will store into PLACE and start over."
-  (let (new-value (gensym "NEW-VALUE-"))
+  (let ((new-value (gensym "NEW-VALUE-")))
     `(tagbody
         ,new-value
         (restart-case
             (unless (typep ,place ',type)
-              (error 'type-error :place ',place :value ,place
-                     :expected ,(or type-string (string type))))
+              (error 'type-error :place ',place :datum ,place
+                     :expected-type ,(or type-string (string type))))
           (store-value (,new-value)
             :report ,(format nil "Supply a new value for ~s" place)
             (setf ,place ,new-value)
             (go ,new-value))))))
 
+#+jscl
+(defmacro check-type (place type &optional type-string)
+  `(!check-type ,place ,type ,type-string))
 
 "(old typecase — make sure these tests pass TODO
-                               (hash-table 'hash-table-p)
-                               (fixnum 'fixnump)
-                               (number 'numberp)
-                               (integer 'integerp)
-                               (cons 'consp)
-                               (list 'listp)
-                               (vector 'vectorp)
-                               (character 'characterp)
-                               (sequence 'sequencep)
-                               (symbol 'symbolp)
-                               (keyword 'keywordp)
-                               (function 'functionp)
-                               (float 'floatp)
-                               (array 'arrayp)
-                               (string 'stringp)
-                               (atom 'atom)
-                               (null 'null)
-                               (package 'packagep))"
+ (hash-table 'hash-table-p)
+ (fixnum 'fixnump)
+ (number 'numberp)
+ (integer 'integerp)
+ (cons 'consp)
+ (list 'listp)
+ (vector 'vectorp)
+ (character 'characterp)
+ (sequence 'sequencep)
+ (symbol 'symbolp)
+ (keyword 'keywordp)
+ (function 'functionp)
+ (float 'floatp)
+ (array 'arrayp)
+ (string 'stringp)
+ (atom 'atom)
+ (null 'null)
+ (package 'packagep))"
 
-(defmacro typecase (x &rest clausules)
+(defmacro !typecase (x &rest clausules)
   "A fair approximation of TYPECASE for limited cases"
   (let ((value (gensym "TYPECASE-VALUE-")))
     `(let ((,value ,x))
@@ -172,12 +186,19 @@ invoked. In that case it will store into PLACE and start over."
                                  (list nil)))))
                    clausules)))))
 
-(defmacro etypecase (x &rest clausules)
+(defmacro !etypecase (x &rest clausules)
   (let ((g!x (gensym "ETYPECASE-VALUE-")))
     `(let ((,g!x ,x))
        (typecase ,g!x
          ,@clausules
          (t (error "~S fell through etypecase expression." ,g!x))))))
+
+#+jscl
+(defmacro typecase (value &rest clauses)
+  `(!typecase ,value ,@clauses))
+#+jscl
+(defmacro etypecase (value &rest clauses)
+  `(!etypecase ,value ,@clauses))
 
 (defun make-numeric-range-check-predicate (type)
   (lambda (object &optional min max)
@@ -196,70 +217,70 @@ invoked. In that case it will store into PLACE and start over."
            (number (>= max object))))))
 
 (defvar +standard-type-specifiers+
-  '(arithmetic-error	function	simple-condition	
-    array	generic-function	simple-error	
-    atom	hash-table	simple-string	
-    base-char	integer	simple-type-error	
-    base-string	keyword	simple-vector	
-    bignum	list	simple-warning	
-    bit	logical-pathname	single-float	
-    bit-vector	long-float	standard-char	
-    broadcast-stream	method	standard-class	
-    built-in-class	method-combination	standard-generic-function	
-    cell-error	nil	standard-method	
-    character	null	standard-object	
-    class	number	storage-condition	
-    compiled-function	package	stream	
-    complex	package-error	stream-error	
-    concatenated-stream	parse-error	string	
-    condition	pathname	string-stream	
-    cons	print-not-readable	structure-class	
-    control-error	program-error	structure-object	
-    division-by-zero	random-state	style-warning	
-    double-float	ratio	symbol	
-    echo-stream	rational	synonym-stream	
-    end-of-file	reader-error	t	
-    error	readtable	two-way-stream	
-    extended-char	real	type-error	
-    file-error	restart	unbound-slot	
-    file-stream	sequence	unbound-variable	
-    fixnum	serious-condition	undefined-function	
-    float	short-float	unsigned-byte	
-    floating-point-inexact	signed-byte	vector	
-    floating-point-invalid-operation	simple-array	warning	
-    floating-point-overflow	simple-base-string	
+  '(arithmetic-error	function	simple-condition
+    array	generic-function	simple-error
+    atom	hash-table	simple-string
+    base-char	integer	simple-type-error
+    base-string	keyword	simple-vector
+    bignum	list	simple-warning
+    bit	logical-pathname	single-float
+    bit-vector	long-float	standard-char
+    broadcast-stream	method	standard-class
+    built-in-class	method-combination	standard-generic-function
+    cell-error	nil	standard-method
+    character	null	standard-object
+    class	number	storage-condition
+    compiled-function	package	stream
+    complex	package-error	stream-error
+    concatenated-stream	parse-error	string
+    condition	pathname	string-stream
+    cons	print-not-readable	structure-class
+    control-error	program-error	structure-object
+    division-by-zero	random-state	style-warning
+    double-float	ratio	symbol
+    echo-stream	rational	synonym-stream
+    end-of-file	reader-error	t
+    error	readtable	two-way-stream
+    extended-char	real	type-error
+    file-error	restart	unbound-slot
+    file-stream	sequence	unbound-variable
+    fixnum	serious-condition	undefined-function
+    float	short-float	unsigned-byte
+    floating-point-inexact	signed-byte	vector
+    floating-point-invalid-operation	simple-array	warning
+    floating-point-overflow	simple-base-string
     floating-point-underflow	simple-bit-vector))
 
 (defvar +compound-only-type-specifiers+
-  '(and	mod	satisfies	
-    eql	not	values	
+  '(and	mod	satisfies
+    eql	not	values
     member	or))
 
 (defvar +compound-type-specifiers+
-  '(long-float	simple-base-string	
-    array	simple-bit-vector	
-    base-string	simple-string	
-    bit-vector	simple-vector	
-    complex	single-float	
-    cons	rational	string	
-    double-float	real	unsigned-byte 
-    float	short-float	vector	
-    function	signed-byte	
+  '(long-float	simple-base-string
+    array	simple-bit-vector
+    base-string	simple-string
+    bit-vector	simple-vector
+    complex	single-float
+    cons	rational	string
+    double-float	real	unsigned-byte
+    float	short-float	vector
+    function	signed-byte
     integer	simple-array))
 
 (progn
   (dolist (type '(number integer real rational
                   float single-float double-float long-float))
-    (setf (type-definition-ornate-predicate
+    (setf (type-definition-predicate
            (find-type-definition type))
           (make-numeric-range-check-predicate type)))
-  (setf (type-definition-ornate-predicate
+  (setf (type-definition-predicate
          (find-type-definition 'string))
         (lambda (object length)
           (and (stringp object)
                (= length (length object)))))
 
-  (setf (type-definition-ornate-predicate
+  (setf (type-definition-predicate
          (find-type-definition 'array))
         (lambda (object element-type &optional dimensions)
           (if (stringp object)
@@ -267,8 +288,8 @@ invoked. In that case it will store into PLACE and start over."
                    (etypecase dimensions
                      (null t)
                      (integer (= (length object) dimensions))
-                     (cons (and (integerp (car object))
-                                (null (cdr object))
+                     (cons (and (integerp (car dimensions))
+                                (null (cdr dimensions))
                                 (= (length object)
                                    (car dimensions))))))
               (and (subtypep (array-element-type object) element-type)
@@ -286,8 +307,8 @@ invoked. In that case it will store into PLACE and start over."
                               +standard-type-specifiers+))))
     (when subtypes
       (format t "~& ( ~s~@[ ~{~s~^ ~}~] )" type-name
-              subtypes))) 
-  (unless (subtypep type-name t) 
+              subtypes)))
+  (unless (subtypep type-name t)
     (warn "Standard type ~s is not properly defined" type-name)))
 
 (defvar +standard-class-subclasses+
@@ -321,7 +342,7 @@ invoked. In that case it will store into PLACE and start over."
     ( structure-object hash-table logical-pathname broadcast-stream package concatenated-stream pathname random-state echo-stream synonym-stream readtable two-way-stream restart )
     ( double-float long-float )
     ( symbol keyword null )
-    ( rational integer bignum bit ratio fixnum unsigned-byte signed-byte ) 
+    ( rational integer bignum bit ratio fixnum unsigned-byte signed-byte )
     ( error arithmetic-error simple-error simple-type-error cell-error package-error stream-error parse-error print-not-readable control-error program-error division-by-zero end-of-file reader-error type-error file-error unbound-slot unbound-variable undefined-function floating-point-inexact floating-point-invalid-operation floating-point-overflow floating-point-underflow )
     ( two-way-stream echo-stream )
     ( real integer bignum bit single-float long-float double-float ratio rational fixnum float short-float unsigned-byte signed-byte )
@@ -341,7 +362,7 @@ invoked. In that case it will store into PLACE and start over."
   (find name *classes* :key #'built-in-class-name))
 
 (dolist (hierarchy +standard-class-subclasses+)
-  (destructuring-bind (class &rest subclasses) hierarchy 
+  (destructuring-bind (class &rest subclasses) hierarchy
     (dolist (subclass subclasses)
       (let ((metaclass (find-built-in-class subclass)))
         (push class (built-in-class-superclasses metaclass))))))
@@ -352,8 +373,3 @@ invoked. In that case it will store into PLACE and start over."
       (unless (subtypep class subclass)
         (warn "Standard class ~s should have subclass ~s"
               class subclass)))))
-
-
-
-
-

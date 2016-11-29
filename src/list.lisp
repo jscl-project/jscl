@@ -327,14 +327,9 @@
 
 (defun (setf nth) (value n list)
   (check-type n (integer 0 *) "a list index")
-  (let ((cell list))
-    (do ((i 0 (1+ i)))
-        ((= i n))
-      (setq cell (rest list))
-      (when (null cell)
-        (error "Index out of range: ~s greater than list length ~s" n i)))
-    (rplaca cell value)
-    value))
+  (check-type list list)
+  (let ((nthcdr (nthcdr n list)))
+    (rplaca nthcdr value)))
 
 
 ;; The NCONC function is based on the SBCL's one.

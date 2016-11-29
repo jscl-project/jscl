@@ -68,24 +68,17 @@
   (nth axis (array-dimensions array)))
 
 (defun aref (array index)
-  (unless (arrayp array)
-    (error "~S is not an array." array))
+  (check-type array array)
+  (check-type index (fixnum 0 *))
   (storage-vector-ref array index))
 
 (defun aset (array index value)
-  (unless (arrayp array)
-    (error "~S is not an array." array))
+  (check-type array array)
+  (check-type index (fixnum 0 *))  
   (storage-vector-set array index value))
 
-(define-setf-expander aref (array index)
-  (let ((g!array (gensym "ARRAY-"))
-        (g!index (gensym "INDEX-"))
-        (g!value (gensym "VALUE-")))
-    (values (list g!array g!index)
-            (list array index)
-            (list g!value)
-            `(aset ,g!array ,g!index ,g!value)
-            `(aref ,g!array ,g!index))))
+(defun (setf aref) (value array index)
+  (aset array index value))
 
 
 ;;; Vectors

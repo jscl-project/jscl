@@ -46,11 +46,13 @@
 (defun assert-struct-type (predicate type-name object)
   (when predicate
     (assert (funcall predicate object) (object)
-            "The object `~S' is not of type `~S'" object type-name)))
+            "The object `~S' is not of type `~S'" object type-name))
+  (assert (structure%-p object) (object)
+          "The object `~s' is not a structure object"))
 
 (defun copy-structure% (type predicate object)
   (assert-struct-type predicate type object)
-  (copy-storage-vector object)  )
+  (copy-storage-vector object))
 
 (defun structure-slot-value-by-index% (type predicate object index)
   "Get the  value of  the slot  at index  INDEX in  OBJECT, which  is of
@@ -113,7 +115,7 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
 (defun defstruct/make-accessor-name (struct-name slot-name)
   (intern (concatenate 'string
                        (string struct-name)
-                       "-" 
+                       "-"
                        (string slot-name))))
 
 (defun defstruct/make-slot-accessor (struct-name-string predicate slot index)
@@ -131,32 +133,46 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                        (defstruct/make-slot-accessor name-string predicate slot index)))
         (incf index)))))
 
+;; Forward declaration of Make-Slot-Info. This is a circular dependency…
+(declaim (ftype (function (&key (:class t)  
+                                (:name symbol)
+                                (:accessors list) 
+                                (:readers list)
+                                (:writers list)
+                                (:type t)
+                                (:initform t)
+                                (:initarg symbol)
+                                (:allocation (member :instance :class)))
+                          (values t))
+                make-slot-info))
+
 (defun defstruct/make-slot-info (type slot)
-  (make-slot-info 
-   :class type 
+  (make-slot-info
+   :class type
    :allocation :instance
    :name (car slot)
-   :accessors (defstruct/make-accessor-name type slot)
+   :accessors (list (defstruct/make-accessor-name type slot))
    :initarg (intern (car slot) :keyword)))
 
-(defun defstruct/define-type (type slots &key 
-                                           predicate 
+(defun defstruct/define-type (type slots &key
+                                           predicate
                                            print-function
                                            constructor
                                            copier)
-  #-jscl (declare (ignore type predicate print-function
+  #-jscl (declare (ignore type slots
+                          predicate print-function
                           constructor copier))
   #+jscl
   (push (make-type-definition :name type
                               :predicate predicate
                               :supertypes '(structure-object))
         *types*)
-  #+jscl 
+  #+jscl
   (push (make-class :name type
                     :supertypes (list 'structure-object)
                     :slots (mapcar (lambda (slot)
                                      (defstruct/make-slot-info type slot))
-                                   slots) 
+                                   slots)
                     :predicate predicate
                     :constructor constructor
                     :copier copier)

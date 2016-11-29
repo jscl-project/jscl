@@ -876,6 +876,9 @@ stored the old value."
                        ,(let-bind-dynamic-vars special-bindings body))
              ,@compiled-values))))
 
+(define-compilation lambda (lambda-list &rest body)
+  (compile-lambda lambda-list body))
+
 (defun add-let*-var-to-environment (var value)
   (let* ((v (gvarname var))
          (b (make-binding :name var :type 'variable :value v)))
@@ -1419,8 +1422,7 @@ generate the code which performs the transformation on these variables."
 (define-builtin resize-storage-vector (vector new-size)
   `(= (get ,vector "length") ,new-size))
 
-(define-builtin storage-vector-ref (vector n)
-  (check-type n (integer 0 *))
+(define-builtin storage-vector-ref (vector n) 
   `(selfcall
     (var (x (property ,vector ,n)))
     (if (=== x undefined)
@@ -1884,19 +1886,15 @@ just haven't gotten around to defining that macro at all, yet."
       ;; HACK work-around for IN-PACKAGE not working
       ((and (consp sexp)
             (eql (car sexp) 'defpackage))
-       (warn
-        "DEFPACKAGE ~a will probably not be effective within the current
-file.  See  https://github.com/romance-ii/jscl/issues/30  — If  you  put
-DEFPACKAGE in  a separate file  from IN-PACKAGE, everything seems  to be
-just fine."
-        (second sexp)))
+       (apply #'defpackage-real% (rest sexp))
+       (convert-toplevel `(apply #'defpackage-real% (rest sexp))))
       ((and (consp sexp)
             (eql (car sexp) 'in-package)
             (= 2 (length sexp)))
        (setf *package* (find-package-or-fail (second sexp)))
        (format *trace-output*
                "~&;;; In package ~a…" (package-name *package*))
-       nil)
+       (convert-toplevel `(setq *package* (find-package-or-fail ,(second sexp)))))
       ;; Non-empty toplevel progn
       ((and (consp sexp)
             (eq (car sexp) 'progn)

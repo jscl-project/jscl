@@ -34,22 +34,33 @@
 ;; given, it negates it or takes its reciprocal. Otherwise all the other
 ;; args are subtracted from or divided by it.
 (macrolet ((def (operator unary-form)
-             `(defun ,operator (x &rest args)
-                (cond
-                  ((null args) ,unary-form)
-                  (t (dolist (y args)
-                       (setq x (,operator x y)))
-                     x)))))
+               `(defun ,operator (x &rest args)
+                  (cond
+                    ((null args) ,unary-form)
+                    (t (dolist (y args)
+                         (setq x (,operator x y)))
+                       x)))))
   (def - (-   x))
   (def / (/ 1 x)))
 
 
 (defconstant most-positive-fixnum
-  (oget (%js-vref "Number" t) "MAX_SAFE_INTEGER"))
+  (oget (%js-vref "Number" t) "MAX_SAFE_INTEGER")
+  "JS integers  are really floats with  no exponent, there is  a limited
+ range; see
+ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER")
 
 (defconstant most-negative-fixnum
-  (oget (%js-vref "Number" t) "MIN_SAFE_INTEGER"))
+  (oget (%js-vref "Number" t) "MIN_SAFE_INTEGER")
+  "JS integers  are really floats with  no exponent, there is  a limited
+ range; see
+ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MIN_SAFE_INTEGER")
 
+(defun fixnump (number)
+  (and (integerp number)
+       (<= most-negative-fixnum
+           number
+           most-positive-fixnum)))
 
 (defun 1+ (x) (+ x 1))
 (defun 1- (x) (- x 1))

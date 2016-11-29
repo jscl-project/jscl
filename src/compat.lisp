@@ -30,10 +30,8 @@
   (defun concat (&rest strs)
     (apply #'concatenate 'string strs)))
 
-(defun /debug (x)
-  (declare (ignorable x))
-  ;; (write-line x)
-  )
+(defun /debug (message) 
+  (format *trace-output* "~&DEBUG: ~a" message))
 
 (defun jscl/ffi-ignore (&rest _)
   (declare (ignore _))
@@ -70,15 +68,30 @@
 
 (defun read-#j ()
   (set-dispatch-macro-character #\# #\J #'j-reader))
-
+
 (defun rational-float-p (rational)
-  (and (realp rational)
-       (let ((f (coerce rational 'double-float)))
-         (and (= f rational)
-              (list /
-                    (numerator rational)
-                    (denominator rational))))))
+  "Determine   whether  a   rational  number   can  be   represented  as
+a       floating-point      number       accurately      at       double
+precision (like JavaScript.)
 
+Returns  multiple  values; the  first  value  is a  generalized  boolean
+telling whether the number is  equal to its nearest float representation
+under =; the secondary value is a list that represents the division that
+produces the rational number. If the  number provided is not rational at
+all, it returns only a single value: nil.
+
+EG: 
+
+      (rational-float-p 1/3) → (values nil '(/ 1 3))
+
+      (rational-float-p 1/2) → (values T '(/ 1 3))"
+  (and (rationalp rational)
+       (let ((float (coerce rational 'double-float)))
+         (values (= float rational)
+                 (list '/
+                       (numerator rational)
+                       (denominator rational))))))
+
 ;;; Storage Vectors
 ;;;
 ;;; Provide a ANSI compatible implementation of storage vectors.
@@ -86,24 +99,35 @@
              (:constructor make-storage-vector-1))
   underlying-vector)
 
-(defun make-storage-vector (n)
-  (make-storage-vector-1 :underlying-vector (make-array n :adjustable t)))
+(defun make-storage-vector (initial-size) 
+  (check-type initial-size (integer 0 *))
+  (make-storage-vector-1 :underlying-vector (make-array initial-size :adjustable t)))
 
-(defun storage-vector-size (sv)
-  (length (storage-vector-underlying-vector sv)))
+(defun storage-vector-size (storage-vector)
+  (check-type storage-vector storage-vector) 
+  (length (storage-vector-underlying-vector storage-vector)))
 
-(defun resize-storage-vector (sv new-size)
-  (let ((v (storage-vector-underlying-vector sv)))
-    (adjust-array v new-size)
-    sv))
+(defun resize-storage-vector (storage-vector new-size)
+  (check-type storage-vector storage-vector)
+  (check-type new-size (integer 0 *))
+  (let ((underlying-vector (storage-vector-underlying-vector storage-vector)))
+    (adjust-array underlying-vector new-size)
+    storage-vector))
 
-(defun storage-vector-ref (sv n)
-  (aref (storage-vector-underlying-vector sv) n))
+(defun storage-vector-ref (storage-vector index)
+  (check-type storage-vector storage-vector)
+  (check-type index (integer 0 *))
+  (aref (storage-vector-underlying-vector storage-vector) index))
 
-(defun storage-vector-set (sv n value)
-  (setf (aref (storage-vector-underlying-vector sv) n) value))
+(defun storage-vector-set (storage-vector index new-value)
+  (check-type storage-vector storage-vector)
+  (check-type index (integer 0 *)) 
+  (setf (aref (storage-vector-underlying-vector storage-vector) index)
+        new-value))
 
 (defun concatenate-storage-vector (sv1 sv2)
+  (check-type sv1 storage-vector)
+  (check-type sv2 storage-vector)
   (let* ((sv (make-storage-vector (+ (storage-vector-size sv1)
                                      (storage-vector-size sv2))))
          (v (storage-vector-underlying-vector sv)))
@@ -112,3 +136,7 @@
     (setf (subseq v (storage-vector-size sv1))
           (storage-vector-underlying-vector sv2))
     sv))
+
+
+(defun !fdefinition-soft (name)
+  (ignore-errors (fdefinition name)))
