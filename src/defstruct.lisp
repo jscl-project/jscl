@@ -48,7 +48,9 @@
     (assert (funcall predicate object) (object)
             "The object `~S' is not of type `~S'" object type-name))
   (assert (structure%-p object) (object)
-          "The object `~s' is not a structure object"))
+          "The object `~s' is not a structure object")
+  (assert (eql type-name (structure-type% object)) (object)
+          "The object `~s' is not a structure of type `~s'" object type-name))
 
 (defun copy-structure% (type predicate object)
   (assert-struct-type predicate type object)
