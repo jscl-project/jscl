@@ -105,14 +105,15 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                                    accessor-name index)
   `(progn
      (defun ,accessor-name (object)
-       (structure-slot-value-by-index% ,struct-name-string ',predicate object ,index))
+       (structure-slot-value-by-index% ,struct-name-string ',predicate
+                                       object ,index))
      #+jscl (declaim (jscl::pure ,accessor-name))))
 
 (defun defstruct/make-slot-writer (predicate struct-name-string
                                    accessor-name index)
   `(defun (setf ,accessor-name) (new-value object)
-     (structure-setf-slot% ',predicate ,struct-name-string ,index
-                           object new-value)))
+     (structure-setf-slot% ',predicate ,struct-name-string 
+                           ,index object new-value)))
 
 (defun defstruct/make-accessor-name (struct-name slot-name)
   (intern (concatenate 'string
@@ -120,19 +121,26 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                        "-"
                        (string slot-name))))
 
-(defun defstruct/make-slot-accessor (struct-name-string predicate slot index)
+(defun defstruct/make-slot-accessor (struct-name-string predicate
+                                     slot index)
   (let* ((name (car slot))
-         (accessor-name (defstruct/make-accessor-name struct-name-string name)))
-    (list
-     (defstruct/make-slot-reader predicate struct-name-string accessor-name index)
-     (defstruct/make-slot-writer predicate struct-name-string accessor-name index))))
+         (accessor-name (defstruct/make-accessor-name
+                            struct-name-string name)))
+    (map 'list
+         (lambda (f)
+           (funcall f predicate struct-name-string accessor-name index))
+         (list #'defstruct/make-slot-reader
+               #'defstruct/make-slot-writer))))
 
-(defun defstruct/make-slot-accessors (name-string predicate slot-descriptions)
+(defun defstruct/make-slot-accessors (name-string predicate
+                                      slot-descriptions)
   (with-collect
     (let ((index 1))
       (dolist (slot slot-descriptions)
-        (collect (cons 'progn
-                       (defstruct/make-slot-accessor name-string predicate slot index)))
+        (collect (cons
+                  'progn
+                  (defstruct/make-slot-accessor name-string predicate
+                    slot index)))
         (incf index)))))
 
 ;; Forward declaration of Make-Slot-Info. This is a circular dependency…
@@ -183,7 +191,7 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
 
 ;;; DEFSTRUCT itself.
 
-(defmacro def!struct (name-and-options &rest slots)
+(defmacro !defstruct (name-and-options &rest slots)
   "A very simple defstruct. Most slot options are not supported."
   (let* ((name-and-options (ensure-list name-and-options))
          (name (first name-and-options))
@@ -198,15 +206,26 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                    (intern (concat "COPY-" name-string))))
          (print-function (defstruct/option-value :print-function options
                            nil))
-         (slot-descriptions (mapcar #'defstruct/parse-slot-description slots)))
+         (slot-descriptions (mapcar #'defstruct/parse-slot-description
+                                    slots)))
     `(progn
        ,(defstruct/make-constructor constructor name slot-descriptions)
-       ,(defstruct/make-predicate predicate name (length slot-descriptions))
+       ,(defstruct/make-predicate predicate name
+          (length slot-descriptions))
        ,(defstruct/make-copier copier name predicate)
        ,(defstruct/define-type name slot-descriptions
           :constructor constructor
           :copier copier
           :predicate predicate
           :print-function print-function)
-       ,@(defstruct/make-slot-accessors name-string predicate slot-descriptions)
+       ,@(defstruct/make-slot-accessors name-string predicate
+           slot-descriptions)
        ',name)))
+
+;; This  alias  was  being  used;  switched to  the  !  prefix  to  make
+;; things orthogonal…
+(defmacro def!struct (name-and-options &rest slots)
+  `(!defstruct ,name-and-options ,@slots))
+#+jscl
+(defmacro defstruct (name-and-options &rest slots)
+  `(!defstruct ,name-and-options ,@slots))

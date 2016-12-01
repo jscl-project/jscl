@@ -40,7 +40,8 @@ implementation, you may never need to access this package directly."))
   (:nicknames :cltl2)
   (:export #:declaration-information)
   (:documentation  "Functions  defined  in Common  Lisp:  The  Language,
-  Second Edition (CLtL2) which are unique to that book.
+Second Edition  (CLtL2) which are  unique to that  book (ie, not  in the
+Common-Lisp package).
 
 Very little of this set is  implemented; but this package exists to make
 identifying them (and their provenance) easier."))
@@ -89,6 +90,15 @@ identifying them (and their provenance) easier."))
   "Read  the version  from the  package.json  file. We  could have  used
  a JSON library  to parse this, but that would  introduce a dependency
  and we are not using ASDF yet.")
+
+(defun read-whole-file (filename)
+  (with-open-file (in filename)
+    ;; FILE-LENGTH is  in bytes,  not characters. UTF-8  characters will
+    ;; yield  a shorter  read,  with trailing  #\NULL  bytes, unless  we
+    ;; initialize to spaces. It's a hack, but it's a cheap enough one.
+    (let ((seq (make-string (file-length in) :initial-element #\space)))
+      (read-sequence seq in)
+      seq)))
 
 (defparameter *source*
   '(("boot"          :target)
@@ -180,6 +190,16 @@ compiled in the host.")
         (when fail
           (error "Compilation of ~A failed." input))
         (load fasl)))))
+
+
+(defmacro doforms ((var stream) &body body)
+  (let ((eof (gensym "EOF-")))
+    `(loop
+        with ,eof = (gensym "EOF-")
+        for ,var = (read ,stream nil ,eof)
+        until (eq ,var ,eof)
+        do (progn ,@body))))
+
 
 ;;;; Load JSCL into the host implementation.
 
@@ -190,24 +210,6 @@ compiled in the host.")
        #+jscl (fset ',!name ',name))))
 
 (load-jscl)
-
-(defun read-whole-file (filename)
-  (with-open-file (in filename)
-    ;; FILE-LENGTH is  in bytes,  not characters. UTF-8  characters will
-    ;; yield  a shorter  read,  with trailing  #\NULL  bytes, unless  we
-    ;; initialize to spaces. It's a hack, but it's a cheap enough one.
-    (let ((seq (make-string (file-length in) :initial-element #\space)))
-      (read-sequence seq in)
-      seq)))
-
-
-(defmacro doforms ((var stream) &body body)
-  (let ((eof (gensym "EOF-")))
-    `(loop
-        with ,eof = (gensym "EOF-")
-        for ,var = (read ,stream nil ,eof)
-        until (eq ,var ,eof)
-        do (progn ,@body))))
 
 
 (defun run-tests-in-host ()

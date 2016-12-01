@@ -156,9 +156,9 @@
     (notinline (!proclamation decl 'function))
     (constant (!proclamation decl 'variable))))
 
-(defun declaration-information (name
-                                &optional 
-                                  (env *global-environment*))
+(defun jscl/cltl2::declaration-information (name
+                                            &optional 
+                                              (env *global-environment*))
   "Return information about declarations named by DECLARATION-NAME.
 
 Defined in CLtL2.
@@ -180,8 +180,6 @@ specifier for the condition types that have been muffled.
     (optimize '((speed 1) (debug 1) (space 1) 
                 (safety 2) (compilation-speed 1))) 
     (otherwise nil)))
-
-(export 'declaration-information )
 
 #+jscl
 (fset 'proclaim #'!proclaim)

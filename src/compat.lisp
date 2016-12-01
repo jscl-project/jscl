@@ -17,7 +17,6 @@
 
 (in-package :jscl)
 
-;;; Duplicate from boot.lisp by now
 (defmacro while (condition &body body)
   `(do ()
        ((not ,condition))
@@ -33,14 +32,26 @@
 (defun /debug (message) 
   (format *trace-output* "~&DEBUG: ~a" message))
 
-(defun jscl/ffi-ignore (&rest _)
-  (declare (ignore _))
-  (error "JSCL/FFI only works within JSCL."))
-(mapc (lambda (s)
-        (setf (symbol-function s) #'jscl/ffi-ignore))
-      '(jscl/ffi::make-new jscl/ffi::oget jscl/ffi::oget* jscl/ffi::new))
-(define-symbol-macro jscl/ffi::*root*
-    (jscl/ffi-ignore 'jscl/ffi::*root*))
+(defvar jscl/ffi:*root* (make-hash-table :test 'equal))
+
+(defun jscl/ffi:make-new (class)
+  (declare (ignore class))
+  (make-hash-table :test 'equal))
+
+(defun (setf jscl/ffi:oget) (value object key)
+  (setf (gethash key object) value))
+
+(defun jscl/ffi:oget* (object &rest keys)
+  (cond ((null keys)
+         nil)
+        ((null (cdr keys))
+         (jscl/ffi:oget object (first keys)))
+        (t 
+         (jscl/ffi:oget (jscl/ffi:oget* object (rest keys))
+                        (first keys)))))
+
+(defun jscl/ffi:oget (object key)
+  (gethash key object))
 
 (defun j-reader (stream subchar arg)
   (declare (ignorable subchar arg))

@@ -105,7 +105,8 @@ forms if PRINT is set."
 \(function(values, internals){" ,out)
           ,@body
           (write-string "})(jscl.internals.pv, jscl.internals);
-})( typeof require !== 'undefined'? require('./jscl'): window.jscl )" ,out)
+})( typeof require !== 'undefined'? require('./jscl'): window.jscl )" 
+                        ,out)
           (terpri ,out)))
 
 (defmacro with-self-invoking-function ((out) &body body)
@@ -114,9 +115,11 @@ forms if PRINT is set."
      ,@body
      (format ,out "})();~%")))
 
-(defun write-javascript-for-files (files &optional (stream *standard-output*))
+(defun write-javascript-for-files (files
+                                   &optional (stream *standard-output*))
   (let* ((*global-environment* (make-lexenv))
-         (*environment* *global-environment*))
+         (*environment* *global-environment*)
+         (*toplevel-compilations* nil))
     (with-jscl-scoping-function (stream)
       (dolist (input files)
         (terpri stream)
@@ -133,7 +136,9 @@ forms if PRINT is set."
         (!compile-file file out)))))
 
 (defun test-files ()
-  (directory (source-pathname "*" :directory '(:relative "tests") :type "lisp")))
+  (directory (source-pathname :wild
+                              :directory '(:relative "tests")
+                              :type "lisp")))
 
 (defun compile-test-suite ()
   (compile-application
@@ -144,30 +149,34 @@ forms if PRINT is set."
 
 (defun compile-web-repl ()
   (compile-application
-   (list (source-pathname "repl.lisp" :directory '(:relative "repl-web")))
+   (list (source-pathname "repl.lisp" 
+                          :directory '(:relative "repl-web")))
    (merge-pathnames "repl-web.js" *base-directory*)))
 
 (defun compile-node-repl ()
   (compile-application
-   (list (source-pathname "repl.lisp" :directory '(:relative "repl-node")))
+   (list (source-pathname "repl.lisp"
+                          :directory '(:relative "repl-node")))
    (merge-pathnames "repl-node.js" *base-directory*)
    :shebang t))
 
 (defun compile-jscl.js (verbosep)
   (with-compilation-environment
-      (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
-                           :direction :output
-                           :if-exists :supersede)
-        (with-self-invoking-function (out)
-          (write-string (read-whole-file (source-pathname "prelude.js")) out)
-          (do-source input :target
-            (!compile-file input out :print verbosep))
-          (dump-global-environment out)))))
+    (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
+                         :direction :output
+                         :if-exists :supersede)
+      (with-self-invoking-function (out)
+        (write-string (read-whole-file (source-pathname "prelude.js"))
+                      out)
+        (do-source input :target
+          (!compile-file input out :print verbosep))
+        (dump-global-environment out)))))
 
 (defun bootstrap (&optional verbosep)
   (proclaim '(optimize (speed 0) (safety 3) (debug 3)))
   (let ((*features* (cons :jscl-xc *features*))
         (*package* (find-package "JSCL"))
+        (*toplevel-compilations* nil)
         (*default-pathname-defaults* *base-directory*))
     (setq *environment* *global-environment*)
     (compile-jscl.js verbosep)
@@ -177,16 +186,21 @@ forms if PRINT is set."
     (compile-node-repl)))
 
 (defun bootstrap-core (&optional verbosep)
+  "Build the core JSCL jscl.js file and test suite."
   (when verbosep
-    (format *trace-output* "~|~2%;;;; — Bootstrapping core for JSCL, version ~a.~2%" *version*))
+    (format *trace-output* 
+            "~|~2%;;;; — Bootstrapping core for JSCL, version ~a.~2%"
+            *version*))
   (let ((*features* (cons :jscl-xc *features*))
         (*package* (find-package "JSCL"))
+        (*toplevel-compilations* nil)
         (*default-pathname-defaults* *base-directory*)
         (*environment* *global-environment*))
     (compile-jscl.js verbosep)
     (report-undefined-functions)
     (compile-test-suite))
   (when verbosep
-    (format *trace-output* "~2&;;;; … Done, compiled jscl.js and test suite.~%~|~%")))
+    (format *trace-output*
+            "~2&;;;; … Done, compiled jscl.js and test suite.~%~|~%")))
 
 

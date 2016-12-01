@@ -30,14 +30,14 @@
 (defstruct auxvar
   variable initform)
 
-(defstruct lambda-list
-  wholevar
-  reqvars
-  optvars
-  restvar
-  allow-other-keys
-  keyvars
-  auxvars)
+(!defstruct lambda-list
+            wholevar
+            reqvars
+            optvars
+            restvar
+            allow-other-keys
+            keyvars
+            auxvars)
 
 (defun var-or-pattern (x)
   (etypecase x

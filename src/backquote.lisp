@@ -19,9 +19,10 @@
 
 ;;; Backquote implementation.
 ;;;
-;;;    Author: Guy  L. Steele  Jr. Date: 27  December 1985  Tested under
-;;;    Symbolics Common Lisp and Lucid  Common Lisp. This software is in
-;;;    the public domain.
+;;;    Author: Guy L. Steele Jr.
+;;     Date: 27 December 1985
+;;;    Tested  under  Symbolics  Common  Lisp  and  Lucid  Common  Lisp.
+;;;    This software is in the public domain.
 
 ;;;    The following are unique tokens used during processing. They need
 ;;;    not be symbols; they need not even be atoms.

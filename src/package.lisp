@@ -150,7 +150,6 @@
 #+jscl (defmacro defpackage (package &rest options)
          (!defpackage ,package ,@options))
 
-#+jscl
 (defun redefine-package (package use &optional nicknames)
   (setf (jscl/ffi:oget package "use")
         (remove-duplicates (append (jscl/ffi:oget package "use") use)
@@ -158,7 +157,7 @@
   (setf (jscl/ffi:oget package "nicknames")
         (remove-duplicates (append (jscl/ffi:oget package "nicknames") nicknames)
                            :test #'equal))
-  (dolist (nickname (nicknames))
+  (dolist (nickname nicknames)
     (setf (jscl/ffi:oget *package-table* nickname) package))
   package)
 
