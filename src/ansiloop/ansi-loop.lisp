@@ -269,7 +269,7 @@ constructed. |#
 
 (defun make-loop-minimax (answer-variable type)
   (let ((infinity-data
-         (cdr (assoc type *loop-minimax-type-infinities-alist* 
+         (cdr (assoc type *loop-minimax-type-infinities-alist*
                      :test #'subtypep))))
     (make-loop-minimax-internal
      :answer-variable answer-variable
@@ -708,7 +708,7 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
                    (when (eq rbefore (cdr bb)) (return)))
                  (return))))))))
 
-;;;; 
+;;;;
 (defun duplicatable-code-p (expr env)
   (if (null expr) 0
       (let ((ans (estimate-code-size expr env)))
@@ -838,7 +838,7 @@ collected result will be returned as the value of the LOOP."
   '(go end-loop))
 
 
-;;;; 
+;;;;
 (defun loop-translate (loop-source-code loop-macro-environment loop-universe)
   ;; FIXME: Originally, these variables were bound in the arguments
   ;; directly, but as the time of writing, JSCL does not support
@@ -918,7 +918,7 @@ collected result will be returned as the value of the LOOP."
                       (loop-error "Secondary clause misplaced at top level in LOOP macro: ~S ~S ~S ..."
                          keyword (car *loop-source-code*) (cadr *loop-source-code*)))
                      (t (loop-error "~S is an unknown keyword in LOOP macro." keyword))))))))
-;;;; 
+;;;;
 (defun loop-pop-source ()
   (if *loop-source-code*
       (pop *loop-source-code*)
@@ -1184,12 +1184,12 @@ collected result will be returned as the value of the LOOP."
             (t (unless (eq (loop-collector-class cruft) class)
                  (loop-error
                     "Incompatible kinds of LOOP value accumulation specified for collecting~@
-		    ~:[as the value of the LOOP~;~:*INTO ~S~]: ~S and ~S."
+ ~:[as the value of the LOOP~;~:*INTO ~S~]: ~S and ~S."
                     name (car (loop-collector-history cruft)) collector))
                (unless (equal dtype (loop-collector-dtype cruft))
                  (loop-warn
                     "Unequal datatypes specified in different LOOP value accumulations~@
-		   into ~S: ~S and ~S."
+ into ~S: ~S and ~S."
                     name dtype (loop-collector-dtype cruft))
                  (when (eq (loop-collector-dtype cruft) t)
                    (setf (loop-collector-dtype cruft) dtype)))
@@ -1513,10 +1513,10 @@ collected result will be returned as the value of the LOOP."
 
 ;;;; Iteration Paths
 
-(jscl::def!struct (loop-path
-                     (:copier nil)
-                     (:predicate nil))
-    names
+(defstruct (loop-path
+              (:copier nil)
+              (:predicate nil))
+  names
   preposition-groups
   inclusive-permitted
   function
@@ -1524,9 +1524,8 @@ collected result will be returned as the value of the LOOP."
 
 (defun add-loop-path (names function universe &key preposition-groups inclusive-permitted user-data)
   (unless (listp names) (setq names (list names)))
-  ;; Can't do this due to CLOS bootstrapping problems.
-  ;; #-(or Genera (and CLOE Source-Bootstrap))
-  ;; (check-type universe loop-universe)
+  ;; Can't do this due to CLOS bootstrapping problems. #-(or Genera (and
+  ;; CLOE Source-Bootstrap)) (check-type universe loop-universe)
   (let ((ht (loop-universe-path-keywords universe))
         (lp (make-loop-path
              :names (mapcar #'symbol-name names)
@@ -1537,8 +1536,8 @@ collected result will be returned as the value of the LOOP."
     (dolist (name names) (setf (gethash (symbol-name name) ht) lp))
     lp))
 
-;;Note:  path functions are allowed to use loop-make-variable, hack
-;;the prologue, etc.
+;;Note: path functions  are allowed to use  loop-make-variable, hack the
+;;prologue, etc.
 (defun loop-for-being (var val data-type)
   ;; FOR  var   BEING  each/the  pathname   prep-phrases  using-stuff...
   ;; each/the =  EACH or THE.  Not clear if it  is optional, so  I guess
@@ -1596,7 +1595,7 @@ collected result will be returned as the value of the LOOP."
           (t (setq *loop-named-variables* (delete tem *loop-named-variables*))
              (values (cdr tem) t)))))
 
-(defun loop-collect-prepositional-phrases (preposition-groups 
+(defun loop-collect-prepositional-phrases (preposition-groups
                                            &optional USING-allowed initial-phrases)
   (flet ((in-group-p (x group) (car (loop-tmember x group))))
     (do ((token nil)
@@ -1757,7 +1756,7 @@ collected result will be returned as the value of the LOOP."
 (defun loop-sequence-elements-path (variable data-type prep-phrases
                                     &key fetch-function size-function sequence-type element-type)
   (multiple-value-bind (indexv indexv-user-specified-p) (named-variable 'index)
-    (let ((sequencev (named-variable 'sequence))) 
+    (let ((sequencev (named-variable 'sequence)))
       (list* nil nil                    ; dummy bindings and prologue
              (loop-sequencer
                 indexv 'fixnum indexv-user-specified-p
@@ -1943,6 +1942,6 @@ collected result will be returned as the value of the LOOP."
   (loop-standard-expansion keywords-and-forms jscl::*environment* *loop-ansi-universe*))
 
 #+jscl
-(progn 
+(progn
   (defmacro loop-finish ()
     `(jscl/loop::!loop-finish)))

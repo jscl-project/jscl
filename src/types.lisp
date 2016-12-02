@@ -13,8 +13,8 @@
 
 
 (/debug "Defining Built-In-Class")
-(defstruct 
-    #+jscl built-in-class 
+(defstruct
+    #+jscl built-in-class
     #-jscl !built-in-class
     name predicate superclasses)
 
@@ -108,7 +108,7 @@
                      (atom atom)
                      (null null)
                      (package packagep atom)))
-  (destructuring-bind (name predicate &rest supertypes) type-info 
+  (destructuring-bind (name predicate &rest supertypes) type-info
     (push (make-type-definition :name name
                                 :supertypes supertypes
                                 :predicate predicate)
@@ -300,7 +300,7 @@ invoked. In that case it will store into PLACE and start over."
               (and (subtypep (array-element-type object) element-type)
                    (equalp (array-dimensions object) dimensions))))))
 
-(dolist (type-name +standard-type-specifiers+) 
+(dolist (type-name +standard-type-specifiers+)
   (push (#+jscl make-built-in-class
                 #-jscl make-!built-in-class
                 :name type-name) *classes*)
@@ -319,9 +319,9 @@ invoked. In that case it will store into PLACE and start over."
 
 (defvar +standard-class-subclasses+
   '((arithmetic-error division-by-zero floating-point-inexact
-     floating-point-invalid-operation floating-point-overflow 
+     floating-point-invalid-operation floating-point-overflow
      floating-point-underflow)
-    (function generic-function standard-generic-function 
+    (function generic-function standard-generic-function
      compiled-function)
     (simple-condition simple-error simple-type-error simple-warning)
     (array simple-string base-string simple-vector bit-vector string
@@ -330,9 +330,9 @@ invoked. In that case it will store into PLACE and start over."
     (atom arithmetic-error function simple-condition array
      generic-function simple-error hash-table simple-string base-char
      integer simple-type-error base-string keyword simple-vector bignum
-     simple-warning bit logical-pathname single-float bit-vector 
-     long-float standard-char broadcast-stream method standard-class 
-     built-in-class method-combination standard-generic-function 
+     simple-warning bit logical-pathname single-float bit-vector
+     long-float standard-char broadcast-stream method standard-class
+     built-in-class method-combination standard-generic-function
      cell-error standard-method character null standard-object class
      number storage-condition compiled-function package stream complex
      package-error stream-error concatenated-stream parse-error string
@@ -342,8 +342,8 @@ invoked. In that case it will store into PLACE and start over."
      rational synonym-stream end-of-file reader-error error readtable
      two-way-stream extended-char real type-error file-error restart
      unbound-slot file-stream unbound-variable fixnum serious-condition
-     undefined-function float short-float unsigned-byte 
-     floating-point-inexact signed-byte vector 
+     undefined-function float short-float unsigned-byte
+     floating-point-inexact signed-byte vector
      floating-point-invalid-operation simple-array warning
      floating-point-overflow simple-base-string floating-point-underflow
      simple-bit-vector)
@@ -366,17 +366,17 @@ invoked. In that case it will store into PLACE and start over."
      double-float ratio rational real fixnum float short-float
      unsigned-byte signed-byte)
     (compiled-function generic-function standard-generic-function)
-    (stream broadcast-stream concatenated-stream string-stream 
+    (stream broadcast-stream concatenated-stream string-stream
      echo-stream synonym-stream two-way-stream file-stream)
     (stream-error end-of-file reader-error)
     (parse-error reader-error)
     (string simple-string base-string simple-base-string)
-    (condition arithmetic-error simple-condition simple-error 
+    (condition arithmetic-error simple-condition simple-error
      simple-type-error simple-warning cell-error storage-condition
      package-error stream-error parse-error print-not-readable
      control-error program-error division-by-zero style-warning
      end-of-file reader-error error type-error file-error unbound-slot
-     unbound-variable serious-condition undefined-function 
+     unbound-variable serious-condition undefined-function
      floating-point-inexact floating-point-invalid-operation warning
      floating-point-overflow floating-point-underflow)
     (pathname logical-pathname)
@@ -386,12 +386,12 @@ invoked. In that case it will store into PLACE and start over."
     (double-float long-float)
     (symbol keyword null)
     (rational integer bignum bit ratio fixnum unsigned-byte signed-byte)
-    (error arithmetic-error simple-error simple-type-error cell-error 
-     package-error stream-error parse-error print-not-readable 
+    (error arithmetic-error simple-error simple-type-error cell-error
+     package-error stream-error parse-error print-not-readable
      control-error program-error division-by-zero end-of-file
      reader-error type-error file-error unbound-slot unbound-variable
-     undefined-function floating-point-inexact 
-     floating-point-invalid-operation floating-point-overflow 
+     undefined-function floating-point-inexact
+     floating-point-invalid-operation floating-point-overflow
      floating-point-underflow)
     (two-way-stream echo-stream)
     (real integer bignum bit single-float long-float double-float ratio
@@ -404,8 +404,8 @@ invoked. In that case it will store into PLACE and start over."
      cell-error storage-condition package-error stream-error parse-error
      print-not-readable control-error program-error division-by-zero
      end-of-file reader-error error type-error file-error unbound-slot
-     unbound-variable undefined-function floating-point-inexact 
-     floating-point-invalid-operation floating-point-overflow 
+     unbound-variable undefined-function floating-point-inexact
+     floating-point-invalid-operation floating-point-overflow
      floating-point-underflow)
     (float single-float long-float double-float short-float)
     (short-float single-float)
@@ -418,7 +418,7 @@ invoked. In that case it will store into PLACE and start over."
     (warning simple-warning style-warning)))
 
 (defun find-built-in-class (name)
-  (or (find name *classes* :key 
+  (or (find name *classes* :key
             #+jscl #'built-in-class-name
             #-jscl #'!built-in-class-name)
       (error "~s does not name a built-in class" name)))

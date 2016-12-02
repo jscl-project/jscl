@@ -20,7 +20,7 @@
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar *setf-expanders* nil)
-  (defun !get-setf-expansion (place) 
+  (defun !get-setf-expansion (place)
     (if (symbolp place)
         (let ((value (gensym "VALUE-")))
           (values nil
@@ -35,15 +35,15 @@
                  (setf-function (!fdefinition-soft (list 'setf access-fn)))
                  (expander (cdr (assoc access-fn *setf-expanders*))))
             (cond (setf-function
-                   (let ((value (gensym "NEW-VALUE-"))) 
+                   (let ((value (gensym "NEW-VALUE-")))
                      (values nil
                              nil
                              `(,value)
                              `((setf ,access-fn) ,(rest place) ,value)
                              place)))
-                  (expander 
+                  (expander
                    (apply expander (cdr place)))
-                  (t 
+                  (t
                    (error "Unknown generalized reference: ~s" access-fn))))))))
 
 (fset 'get-setf-expansion (fdefinition '!get-setf-expansion))

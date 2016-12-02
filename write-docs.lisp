@@ -1,7 +1,6 @@
-;;;; write-docs.lisp — Generate the JSCL documentation
-;;;; -*- Lisp -*-
+;;;; write-docs.lisp — Generate the JSCL documentation -*- Lisp -*-
 
-;; © 2016 Bruce-Robert  Fenn Pocock; licensed under the  same terms as
+;; © 2016  Bruce-Robert Fenn  Pocock; licensed under  the same  terms as
 ;; (and as a component of) JSCL.
 ;;
 ;; JSCL is free software: you can redistribute it and/or modify it under
@@ -17,7 +16,7 @@
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
-(defpackage jscl/doc 
+(defpackage jscl/doc
   (:use :cl :alexandria)
   (:export #:write-docs))
 
@@ -77,14 +76,15 @@
             (make-compiler-macro-definition
              :symbol symbol :function compiler-macro)
             pool)))
-        ;; #### NOTE: As mentionned earlier, the WRITER slot in (generic)
-        ;; functions helps to attempt concatenation of the reader and writer
-        ;; documentation. However, we won't attempt concatenation when the
-        ;; reader and writer are of different nature, that is, one a simple
-        ;; function and the other a generic one. If any, those cases should be
-        ;; extremely rare and it doesn't really make sense to merge
-        ;; heterogeneous documentations (for instance, there would be methods
-        ;; for only one of the definitions). Besides, we regular and generic
+        ;; #### NOTE:  As   mentionned  earlier,  the  WRITER   slot  in
+        ;; (generic)  functions helps  to attempt  concatenation of  the
+        ;; reader and  writer documentation.  However, we  won't attempt
+        ;; concatenation  when the  reader and  writer are  of different
+        ;; nature,  that  is,  one  a  simple  function  and  the  other
+        ;; a generic one.  If any, those cases should  be extremely rare
+        ;; and  it  doesn't really  make  sense  to merge  heterogeneous
+        ;; documentations (for instance, there would be methods for only
+        ;; one  of the  definitions).  Besides, we  regular and  generic
         ;; functions appear in different sections in the manual.
         (:function
          (let* ((function (when (and (fboundp symbol)
@@ -92,10 +92,10 @@
                                      (not (typep (fdefinition symbol)
                                                  'generic-function)))
                             (fdefinition symbol)))
-                ;; #### NOTE: an accessor's writer definition is created here
-                ;; only if it's also an ordinary function. Cross-references
-                ;; between heterogeneous accessors will be resolved when the
-                ;; pools are finalized.
+                ;; #### NOTE: an accessor's writer definition is created
+                ;; here  only   if  it's  also  an   ordinary  function.
+                ;; Cross-references between heterogeneous accessors will
+                ;; be resolved when the pools are finalized.
                 (writer (let ((writer-name `(setf ,symbol)))
                           (when (fboundp writer-name)
                             (fdefinition writer-name))))
@@ -141,10 +141,10 @@
                  (when (and (fboundp symbol)
                             (typep (fdefinition symbol) 'generic-function))
                    (fdefinition symbol)))
-                ;; #### NOTE: an accessor's writer definition is created here
-                ;; only if it's also a generic function. Cross-references
-                ;; between heterogeneous accessors will be resolved when the
-                ;; pools are finalized.
+                ;; #### NOTE: an accessor's writer definition is created
+                ;; here   only  if   it's  also   a  generic   function.
+                ;; Cross-references between heterogeneous accessors will
+                ;; be resolved when the pools are finalized.
                 (writer
                  (let ((writer-name `(setf ,symbol)))
                    (when (fboundp writer-name)
@@ -156,11 +156,12 @@
                          (make-generic-accessor-definition
                           :symbol symbol
                           :function function
-                          ;; #### NOTE: for a generic accessor function, we
-                          ;; store accessor methods in the generic accessor
-                          ;; function definition, along with standard
-                          ;; methods. Only writer-only methods are stored in
-                          ;; the generic writer function definition.
+                          ;; #### NOTE: for a generic accessor function,
+                          ;; we  store accessor  methods in  the generic
+                          ;; accessor  function  definition, along  with
+                          ;; standard methods.  Only writer-only methods
+                          ;; are   stored   in    the   generic   writer
+                          ;; function definition.
                           :methods
                           (mapcar
                            (lambda (method)
@@ -169,10 +170,11 @@
                                          (find-method
                                           writer
                                           (method-qualifiers method)
-                                          ;; #### FIXME: I'm not sure if the
-                                          ;; first argument (NEW-VALUE) of a
-                                          ;; writer method always has a
-                                          ;; specializer of T...
+                                          ;; #### FIXME: I'm not sure if
+                                          ;; the      first     argument
+                                          ;; (NEW-VALUE)  of   a  writer
+                                          ;; method      always      has
+                                          ;; a specializer of T...
                                           (cons t (sb-mop:method-specializers
                                                    method))
                                           nil))))
@@ -198,9 +200,10 @@
                                      (find-method
                                       function
                                       (method-qualifiers method)
-                                      ;; #### NOTE: don't forget to remove
-                                      ;; the first (NEW-VALUE) specializer
-                                      ;; from the writer method.
+                                      ;; #### NOTE:   don't  forget   to
+                                      ;; remove  the  first  (NEW-VALUE)
+                                      ;; specializer       from      the
+                                      ;; writer method.
                                       (cdr (sb-mop:method-specializers
                                             method))
                                       nil)
@@ -251,16 +254,18 @@
                                      (sb-mop:generic-function-methods
                                       writer)))
                    pool)))))
-        ;; #### WARNING: method combinations in CL don't have a real namespace
-        ;; (Cf. this blog: http://www.didierverna.net/blog/index.php?post/2013/08/16/Lisp-Corner-Cases%3A-Method-Combinations).
-        ;; As a consequence, in order to be 100% correct (and also 200%
-        ;; pedantic), I should normally document every single generic
-        ;; function's method combination separately. However, I will make the
-        ;; assumption that the programmer has some sanity and only defines one
-        ;; method combination for every name. The corresponding object will be
-        ;; documented like the other ones. In generic function documentations,
-        ;; there will be a reference to the method combination and only the
-        ;; method combination options will be documented there, as they may be
+        ;; #### WARNING:  method combinations  in CL  don't have  a real
+        ;; namespace             (Cf.             this             blog:
+        ;; http://www.didierverna.net/blog/index.php?post/2013/08/16/Lisp-Corner-Cases%3A-Method-Combinations).
+        ;; As a consequence, in order to  be 100% correct (and also 200%
+        ;; pedantic), I  should normally  document every  single generic
+        ;; function's  method combination  separately.  However, I  will
+        ;; make the assumption  that the programmer has  some sanity and
+        ;; only  defines   one  method   combination  for   every  name.
+        ;; The corresponding  object will  be documented like  the other
+        ;; ones.  In  generic  function documentations,  there  will  be
+        ;; a reference  to the  method combination  and only  the method
+        ;; combination options will be documented  there, as they may be
         ;; generic function specific.
         (:combination
          (let* ((method (find-method #'sb-mop:find-method-combination
@@ -271,12 +276,13 @@
                                      nil))
                 (combination (when method
                                (sb-mop:find-method-combination
-                                ;; #### NOTE: we could use any generic
-                                ;; function instead of DOCUMENTATION here.
-                                ;; Also, NIL options don't matter because they
-                                ;; are not advertised as part of the method
-                                ;; combination, but as part of the generic
-                                ;; functions that use them.
+                                ;; #### NOTE: we  could use  any generic
+                                ;; function  instead   of  DOCUMENTATION
+                                ;; here. Also, NIL  options don't matter
+                                ;; because  they are  not advertised  as
+                                ;; part of  the method  combination, but
+                                ;; as part of the generic functions that
+                                ;; use them.
                                 #'documentation symbol nil))))
            (when combination
              (add-definition
@@ -336,26 +342,26 @@
 (in-package :jscl/doc)
 
 (defun write-docs ()
-  "Generate the TeΧinfo from the documentation in the JSCL files." 
-  (let ((source-dir #.(make-pathname 
+  "Generate the TeΧinfo from the documentation in the JSCL files."
+  (let ((source-dir #.(make-pathname
                        :name nil :type nil :version :newest
-                       :directory (pathname-directory 
-                                   (or *load-pathname* 
+                       :directory (pathname-directory
+                                   (or *load-pathname*
                                        *compile-file-pathname*
-                                       *default-pathname-defaults*))))) 
+                                       *default-pathname-defaults*)))))
     (ensure-directories-exist (merge-pathnames #p"doc/" source-dir))
     (asdf:load-asd "jscl.asd")
     (net.didierverna.declt:declt
      :jscl
      :library-name "JSCL: JavaScript from Common Lisp"
      :tagline "A Common Lisp implementation cross-compiled to JavaScript"
-     :maintainer "David Vázquez Púa" 
+     :maintainer "David Vázquez Púa"
      :texi-file (merge-pathnames #p"doc/jscl.texi"
                                  source-dir)
      :info-file (merge-pathnames #p "doc/jscl"
                                  source-dir)
      :license :gpl
      :declt-notice :short
-     
+
      :introduction (read-file-into-string #p"doc-intro.texi")
      :conclusion (read-file-into-string #p"doc-conclusion.texi"))))

@@ -157,7 +157,7 @@
     (constant (!proclamation decl 'variable))))
 
 (defun jscl/cltl2::declaration-information (name
-                                            &optional 
+                                            &optional
                                               (env *global-environment*))
   "Return information about declarations named by DECLARATION-NAME.
 
@@ -165,20 +165,20 @@ Defined in CLtL2.
 
 If DECLARATION-NAME is  OPTIMIZE return a list whose entries  are of the
 form (QUALITY VALUE).
-    
+
 If DECLARATION-NAME  is DECLARATION return  a list of  declaration names
 that have been proclaimed as valid.
-    
+
 If DECLARATION-NAME  is a name  that has defined  via DEFINE-DECLARATION
 return a user defined value.
 
 In SBCL,  if DECLARATION-NAME is SB-EXT:MUFFLE-CONDITIONS  return a type
 specifier for the condition types that have been muffled.
-" 
+"
   (declare (ignore env))
   (case name
-    (optimize '((speed 1) (debug 1) (space 1) 
-                (safety 2) (compilation-speed 1))) 
+    (optimize '((speed 1) (debug 1) (space 1)
+                (safety 2) (compilation-speed 1)))
     (otherwise nil)))
 
 #+jscl
@@ -1398,7 +1398,7 @@ generate the code which performs the transformation on these variables."
   `(method-call |console| "log" ,x))
 
 
-;;; Storage vectors. They are used to implement arrays and (in the
+;;; Storage  vectors. They  are used  to  implement arrays  and (in  the
 ;;; future) structures. (work-in-progress, kinda.)
 
 (define-builtin storage-vector-p (x)
@@ -1406,12 +1406,14 @@ generate the code which performs the transformation on these variables."
     (var (x ,x))
     (return ,(convert-to-bool
               `(and (=== (typeof x) "object")
-                    (in "length" x))))))
+                    (in "length" x)
+                    (in "kind" x))))))
 
-(define-builtin make-storage-vector (n)
+(define-builtin make-storage-vector (size kind)
   `(selfcall
     (var (r #()))
-    (= (get r "length") ,n)
+    (= (get r "length") ,size)
+    (= (get r "kind") ,kind)
     (return r)))
 
 (define-builtin storage-vector-size (x)
@@ -1420,7 +1422,7 @@ generate the code which performs the transformation on these variables."
 (define-builtin resize-storage-vector (vector new-size)
   `(= (get ,vector "length") ,new-size))
 
-(define-builtin storage-vector-ref (vector n) 
+(define-builtin storage-vector-ref (vector n)
   `(selfcall
     (var (x (property ,vector ,n)))
     (if (=== x undefined)

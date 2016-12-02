@@ -21,8 +21,8 @@
            #:run-tests-in-host #:with-sharp-j #:read-#j
            #:write-javascript-for-files #:compile-application)
   (:documentation "JavaScript  from Common  Lisp. This  package contains
-  the   internals   and   exports    some   utility   functions   needed
-  for compilation.
+ the   internals   and   exports    some   utility   functions   needed
+ for compilation.
 
 When  you  build JSCL,  you'll  invoke  JSCL:Boostrap-Core in  the  host
 compiler (probably SBCL) to build the  system. Once you're “in” the JSCL
@@ -33,7 +33,7 @@ implementation, you may never need to access this package directly."))
   (:export #:oget #:oget* #:make-new #:new #:*root*
            #:oset #:oset*)
   (:documentation       "Foreign       Function       Interface       to
-  JavaScript functions."))
+ JavaScript functions."))
 
 (defpackage :jscl/cltl2
   (:use :cl :jscl)
@@ -51,7 +51,7 @@ identifying them (and their provenance) easier."))
   (:nicknames :mop)
   (:export)
   (:documentation  "Functions  defined in  the  Art  of the  Meta-Object
-  Protocol (MOP) which are unique to that manuscript.
+ Protocol (MOP) which are unique to that manuscript.
 
 Very  few of  these are  implemented, but  this package  exists to  make
 identifying them (and their provenance) easier."))
@@ -77,16 +77,20 @@ identifying them (and their provenance) easier."))
       (make-pathname :name nil :type nil :defaults #.*load-pathname*)
       *default-pathname-defaults*))
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun extract-version-from-package.json ()
+    (with-open-file (in (merge-pathnames "package.json" *base-directory*))
+      (loop
+         for line = (read-line in nil)
+         while line
+         when (search "\"version\":" line)
+         do (let ((colon (position #\: line))
+                  (comma (position #\, line)))
+              (return (string-trim '(#\newline #\" #\tab #\space)
+                                   (subseq line (1+ colon) comma))))))))
+
 (defvar *version*
-  (with-open-file (in (merge-pathnames "package.json" *base-directory*))
-    (loop
-       for line = (read-line in nil)
-       while line
-       when (search "\"version\":" line)
-       do (let ((colon (position #\: line))
-                (comma (position #\, line)))
-            (return (string-trim '(#\newline #\" #\tab #\space)
-                                 (subseq line (1+ colon) comma))))))
+  (extract-version-from-package.json)
   "Read  the version  from the  package.json  file. We  could have  used
  a JSON library  to parse this, but that would  introduce a dependency
  and we are not using ASDF yet.")
@@ -192,15 +196,6 @@ compiled in the host.")
         (load fasl)))))
 
 
-(defmacro doforms ((var stream) &body body)
-  (let ((eof (gensym "EOF-")))
-    `(loop
-        with ,eof = (gensym "EOF-")
-        for ,var = (read ,stream nil ,eof)
-        until (eq ,var ,eof)
-        do (progn ,@body))))
-
-
 ;;;; Load JSCL into the host implementation.
 
 (defmacro define-cl-fun (name lambda-list &body declarations+body)
@@ -222,5 +217,3 @@ improve the level of trust of the tests."
       (declare (special *use-html-output-p*))
       (map nil #'load (directory "tests/*.lisp")))
     (load "tests-report.lisp")))
-
-

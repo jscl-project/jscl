@@ -18,7 +18,7 @@
               (length values)))
   (let ((determinants (subseq values 0 (generic-function-required-count generic-function))))
     (dolist (method methods)
-      (catch 'next-method 
+      (catch 'next-method
         (when (every #'typep determinants (method-specializers method))
           (return-from dispatch-generic% (invoke-method% method)))))))
 
@@ -41,7 +41,7 @@
 (defmacro !defmethod (name ))
 
 (defmacro !defgeneric (name lambda-list &body options)
-  (let ((generic (make-generic-function 
+  (let ((generic (make-generic-function
                   :name name
                   :lambda-list lambda-list
                   :required-count (let ((ll (parse-regular-lambda-list lambda-list)))
@@ -51,9 +51,9 @@
                                          "DISPATCH-"
                                          (princ-to-string name)
                                          "-"))))
-    `(progn 
+    `(progn
        ,(nreverse
-         (dolist (method (remove-if-not 
+         (dolist (method (remove-if-not
                           (lambda (option)
                             (and (listp option)
                                  (eql (car option) :method)))

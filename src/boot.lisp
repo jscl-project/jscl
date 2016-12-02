@@ -17,7 +17,7 @@
 
 ;;; This  code  is  executed  when   JSCL  compiles  this  file  itself.
 ;;; The compiler provides compilation of  some special forms, as well as
-;;; funcalls and macroexpansion, but no functions. So, we define the
+;;; funcalls and  macroexpansion, but  no functions.  So, we  define the
 ;;; Lisp world from scratch. This code  has to define enough language to
 ;;; the compiler to be able to run.
 

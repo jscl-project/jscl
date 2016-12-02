@@ -25,32 +25,35 @@
 ;;; Javascript level) implementation in the near future.
 
 (defun make-structure% (type &rest fields)
-  (let ((struct (make-storage-vector (1+ (length fields)))))
-    (storage-vector-set struct 0 (cons 'structure-object type))
-    (let ((i 1))
+  (let ((struct (make-storage-vector (length fields))))
+    (setf (storage-vector-kind struct) (cons 'structure-object type))
+    (let ((i 0))
       (dolist (field fields)
         (storage-vector-set struct i field)
-        (setq i (1+ i))))
+        (setq i (the fixnum (1+ i)))))
     struct))
 
 (defun structure%-p (object)
   (and (storage-vector-p object)
-       (consp (storage-vector-ref object 0))
-       (eql 'structure-object (car (storage-vector-ref object 0)))))
+       (eql 'structure-object (car (storage-vector-kind object)))))
 
 (defun structure-type% (object)
   (unless (structure%-p object)
     (error "Not a structure: ~s" object))
-  (cdr (storage-vector-ref object 0)))
+  (cdr (storage-vector-kind object)))
 
 (defun assert-struct-type (predicate type-name object)
+  (check-type predicate function)
+  #+ (or)  (declare (type (function (t) t) predicate))
+  (check-type type-name symbol)
   (when predicate
     (assert (funcall predicate object) (object)
             "The object `~S' is not of type `~S'" object type-name))
   (assert (structure%-p object) (object)
           "The object `~s' is not a structure object")
   (assert (eql type-name (structure-type% object)) (object)
-          "The object `~s' is not a structure of type `~s'" object type-name))
+          "The object `~s' is not a structure of type `~s'"
+          object type-name))
 
 (defun copy-structure% (type predicate object)
   (assert-struct-type predicate type object)
@@ -60,19 +63,19 @@
   "Get the  value of  the slot  at index  INDEX in  OBJECT, which  is of
 TYPE (and fulfills PREDICATE). Used in slot readers."
   (assert-struct-type predicate type object)
-  (storage-vector-ref object (1+ index)))
+  (storage-vector-ref object index))
 
 (defun structure-setf-slot% (predicate type index
                              object new-value)
   (assert-struct-type predicate type object)
-  (storage-vector-set object (1+ index) new-value))
+  (storage-vector-set object index new-value))
 
 (defun defstruct/make-predicate (predicate name slot-count)
   (when predicate
     `(defun ,predicate (object)
        (and (structure%-p object)
             (eq (structure-type% object) ',name)
-            (= (storage-vector-size object) ,(1+ slot-count))))))
+            (= (storage-vector-size object) ,slot-count)))))
 
 
 ;;; Utilities used by DEFSTRUCT
@@ -87,6 +90,8 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
      (error "Bad slot description `~S'." sd))))
 
 (defun defstruct/option-value (option options &optional default)
+  (check-type option symbol)
+  (check-type options (or null list))
   (if (assoc option options)
       (second (assoc option options))
       default))
@@ -112,10 +117,12 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
 (defun defstruct/make-slot-writer (predicate struct-name-string
                                    accessor-name index)
   `(defun (setf ,accessor-name) (new-value object)
-     (structure-setf-slot% ',predicate ,struct-name-string 
+     (structure-setf-slot% ',predicate ,struct-name-string
                            ,index object new-value)))
 
 (defun defstruct/make-accessor-name (struct-name slot-name)
+  (check-type struct-name symbol)
+  (check-type slot-name symbol)
   (intern (concatenate 'string
                        (string struct-name)
                        "-"
@@ -128,6 +135,7 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                             struct-name-string name)))
     (map 'list
          (lambda (f)
+           (declare (type function f))
            (funcall f predicate struct-name-string accessor-name index))
          (list #'defstruct/make-slot-reader
                #'defstruct/make-slot-writer))))
@@ -141,12 +149,12 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                   'progn
                   (defstruct/make-slot-accessor name-string predicate
                     slot index)))
-        (incf index)))))
+        (incf (the fixnum index))))))
 
 ;; Forward declaration of Make-Slot-Info. This is a circular dependency…
-(declaim (ftype (function (&key (:class t)  
+(declaim (ftype (function (&key (:class t)
                                 (:name symbol)
-                                (:accessors list) 
+                                (:accessors list)
                                 (:readers list)
                                 (:writers list)
                                 (:type t)

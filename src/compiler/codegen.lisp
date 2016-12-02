@@ -426,7 +426,7 @@ unnecessary parentheses."
       ((vectorp form)
        (js-vector-initializer form))
       ((consp form)
-       (js-operator-expression (car form) (cdr form) 
+       (js-operator-expression (car form) (cdr form)
                                precedence associativity operand-order)))))
 
 ;;; Statements generators

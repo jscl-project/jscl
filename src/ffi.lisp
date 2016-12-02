@@ -17,7 +17,10 @@
 
 (/debug "loading ffi.lisp!")
 
-(defvar *root*)
+(defvar *root* :error-unbound
+  "The *ROOT* object is “window” (in a browser) or the Node root object.
+ This provides access to whichever root  object happens to exist in the
+ active JavaScript Virtual Machine. ")
 
 (define-setf-expander oget (object key &rest keys)
   (let* ((keys (cons key keys))

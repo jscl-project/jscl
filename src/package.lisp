@@ -23,7 +23,7 @@
 #+jscl
 (defun list-all-packages ()
   (let ((packages nil))
-    (map-for-in (lambda (name) (pushnew name packages)) *package-table*) 
+    (map-for-in (lambda (name) (pushnew name packages)) *package-table*)
     packages))
 
 #+jscl
@@ -94,7 +94,7 @@
 
 (defvar *user-package*
   (or (find-package :cl-user)
-      (make-package "COMMON-LISP-USER" 
+      (make-package "COMMON-LISP-USER"
                     :nicknames (list "CL-USER")
                     :use (list (find-package "CL")))))
 

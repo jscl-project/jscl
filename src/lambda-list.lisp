@@ -30,14 +30,14 @@
 (defstruct auxvar
   variable initform)
 
-(!defstruct lambda-list
-            wholevar
-            reqvars
-            optvars
-            restvar
-            allow-other-keys
-            keyvars
-            auxvars)
+(defstruct lambda-list
+  wholevar
+  reqvars
+  optvars
+  restvar
+  allow-other-keys
+  keyvars
+  auxvars)
 
 (defun var-or-pattern (x)
   (etypecase x
@@ -105,8 +105,8 @@
                     :initform initform)))))
 
 (defun parse-destructuring-lambda-list (lambda-list)
-  (let (;;   Destructure lambda list  structure where we  accumulate the
-        ;;  results of the parsing.
+  (let (;;   Destructure  lambda list structure where  we accumulate the
+        ;;   results of the parsing.
         (ll (make-lambda-list))
         ;; List of lambda list keywords which we have already seen.
         (lambda-keywords nil))

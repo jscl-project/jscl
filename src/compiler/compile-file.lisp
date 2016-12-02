@@ -1,4 +1,5 @@
-;;;; compile-file.lisp — Compiling individual files or application bundles
+;;;; compile-file.lisp  —  Compiling  individual  files  or  application
+;;;; bundles
 ;;; -*- lisp -*-
 
 (in-package :jscl)
@@ -66,7 +67,7 @@ forms if PRINT is set."
         (format *trace-output*
                 "~&;;;; Compiling file ~a... " (enough-namestring filename)))
       (handler-case
-          (doforms (form in) 
+          (doforms (form in)
             (!compile-file/form form in out)
             (setf last-form form)
             (incf form-count))
@@ -105,7 +106,7 @@ forms if PRINT is set."
 \(function(values, internals){" ,out)
           ,@body
           (write-string "})(jscl.internals.pv, jscl.internals);
-})( typeof require !== 'undefined'? require('./jscl'): window.jscl )" 
+})( typeof require !== 'undefined'? require('./jscl'): window.jscl )"
                         ,out)
           (terpri ,out)))
 
@@ -133,7 +134,9 @@ forms if PRINT is set."
     (with-jscl-scoping-function (out)
       (dolist (file files)
         (fresh-line out)
-        (!compile-file file out)))))
+        (!compile-file file out))))
+  (when shebang
+    (sb-posix:chmod out #o755)))
 
 (defun test-files ()
   (directory (source-pathname :wild
@@ -149,7 +152,7 @@ forms if PRINT is set."
 
 (defun compile-web-repl ()
   (compile-application
-   (list (source-pathname "repl.lisp" 
+   (list (source-pathname "repl.lisp"
                           :directory '(:relative "repl-web")))
    (merge-pathnames "repl-web.js" *base-directory*)))
 
@@ -157,7 +160,7 @@ forms if PRINT is set."
   (compile-application
    (list (source-pathname "repl.lisp"
                           :directory '(:relative "repl-node")))
-   (merge-pathnames "repl-node.js" *base-directory*)
+   (merge-pathnames "jscl-repl" *base-directory*)
    :shebang t))
 
 (defun compile-jscl.js (verbosep)
@@ -172,35 +175,33 @@ forms if PRINT is set."
           (!compile-file input out :print verbosep))
         (dump-global-environment out)))))
 
+(defmacro with-bootstrap ((verbosep) &body body)
+  `(progn
+     (proclaim '(optimize (speed 0) (safety 3) (debug 3)))
+     (let ((*features* (cons :jscl-xc *features*))
+           (*package* (find-package "JSCL"))
+           (*toplevel-compilations* nil)
+           (*default-pathname-defaults* *base-directory*))
+       (setq *environment* *global-environment*)
+       (format *trace-output*
+               "~&~|~2%;;;; — Bootstrapping core for JSCL, version ~a.~%"
+               *version*)
+       (compile-jscl.js ,verbosep)
+       (report-undefined-functions)
+       (when verbosep
+         (format *trace-output*
+                 "~&~|~2%;;;; — Core done; on to test suite …~%"))
+       (compile-test-suite)
+       (when verbosep
+         (format *trace-output*
+                 "~2&;;;; … Done, compiled jscl.js and test suite.~%~|~%"))
+       ,@body)))
+
 (defun bootstrap (&optional verbosep)
-  (proclaim '(optimize (speed 0) (safety 3) (debug 3)))
-  (let ((*features* (cons :jscl-xc *features*))
-        (*package* (find-package "JSCL"))
-        (*toplevel-compilations* nil)
-        (*default-pathname-defaults* *base-directory*))
-    (setq *environment* *global-environment*)
-    (compile-jscl.js verbosep)
-    (report-undefined-functions)
-    (compile-test-suite)
+  (with-bootstrap (verbosep)
     (compile-web-repl)
     (compile-node-repl)))
 
 (defun bootstrap-core (&optional verbosep)
   "Build the core JSCL jscl.js file and test suite."
-  (when verbosep
-    (format *trace-output* 
-            "~|~2%;;;; — Bootstrapping core for JSCL, version ~a.~2%"
-            *version*))
-  (let ((*features* (cons :jscl-xc *features*))
-        (*package* (find-package "JSCL"))
-        (*toplevel-compilations* nil)
-        (*default-pathname-defaults* *base-directory*)
-        (*environment* *global-environment*))
-    (compile-jscl.js verbosep)
-    (report-undefined-functions)
-    (compile-test-suite))
-  (when verbosep
-    (format *trace-output*
-            "~2&;;;; … Done, compiled jscl.js and test suite.~%~|~%")))
-
-
+  (with-bootstrap (verbosep)))

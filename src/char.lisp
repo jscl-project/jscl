@@ -55,7 +55,7 @@
   (= (equal-char-code c1) (equal-char-code c2)))
 
 (defun char-equal (character &rest more-characters)
-  (check-type character character) 
+  (check-type character character)
   (do ((clist more-characters (cdr clist)))
       ((null clist) t)
     (unless (two-arg-char-equal (car clist) character)
