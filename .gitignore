@@ -1,13 +1,23 @@
+# Backup/editor temp files
 *~
+*#
+.#*
+
+# FASL files (various flavours)
 *.fasl
 *.fas
 *.lx64fsl
+
+# Generated files
+/jscl.js
+/tests.js
+/jscl-repl
+/repl-web.js
+doc/*
+
+# ??
 *.lib
-\#*
-jscl.js
-tests.js
 .tmp/
 
-/repl-node.js
-/repl-web.js
+# Git/patch junk files
 *.orig
