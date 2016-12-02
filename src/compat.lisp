@@ -187,7 +187,8 @@ to NEW-SIZE."
   "Set the value at index INDEX of the STORAGE-VECTOR to NEW-VALUE"
   (check-type storage-vector storage-vector)
   (check-type index (integer 0 *))
-  (aref (storage-vector-underlying-vector storage-vector) index))
+  (setf (aref (storage-vector-underlying-vector storage-vector) index)
+        new-value))
 
 (defun storage-vector-set (storage-vector index new-value)
   "Set the value at index INDEX of the STORAGE-VECTOR to NEW-VALUE"
@@ -218,6 +219,6 @@ metadata in it."
 
 
 (defun !fdefinition-soft (name)
-  Return  the  `FDEFINITION' of  NAME,  or  NIL  if  it does  not  have
-  a function value or is not a valid function name.
+  "Return  the  `FDEFINITION' of  NAME,  or  NIL  if  it does  not  have
+  a function value or is not a valid function name."
   (ignore-errors (fdefinition name)))
