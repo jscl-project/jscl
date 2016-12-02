@@ -121,6 +121,9 @@
       (find ch "(\")")))
 
 (defun read-until (stream func)
+  "Read from STREAM into a string, until the predicate FUNC returns true
+when passed  the value of  the next  character. The character  passed to
+FUNC will NOT be returnings."
   (let ((string (make-array 80 :element-type 'character
                             :adjustable t :fill-pointer 0))
         (ch (peek-char nil stream nil nil)))
