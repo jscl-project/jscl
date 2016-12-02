@@ -5,16 +5,15 @@
 (in-package :jscl)
 
 
-(defmacro with-compile-file-bindings ((filename &key verbosep) &body body)
+(defmacro with-compile-file-bindings ((filename &key verbosep)
+                                      &body body)
   `(let* ((*compiling-file* t)
           (*compile-file-pathname* ,filename)
           (*compile-file-truename* (truename *compile-file-pathname*))
           (*compile-print-toplevels* ,verbosep)
           (*package* *package*)
           (source (read-whole-file ,filename))
-          (in (make-string-input-stream source))
-          (form-count 0)
-          (last-form nil))
+          (in (make-string-input-stream source))) 
      ,@body))
 
 (defun possibly-valid-js-p (string)
@@ -26,10 +25,12 @@
                    (char= #\newline ch)))
              string)))
 
-(defun complain-about-illegal-chars (form in compilation)
-  (error "Generated illegal characters (first is ~@c)~%Compiling form:~%~S~%from ~s~%Generated:~%~s"
+(defun complain-about-illegal-chars (form filename form-count
+                                     compilation)
+  (error "Generated illegal characters (first is ~@c)
+Compiling form #~:d:~%~S~%from ~s~%Generated:~%~s"
          (find-if (complement #'possibly-valid-js-p) compilation)
-         form in compilation))
+         form-count form filename compilation))
 
 
 (defmacro with-compilation-restarts ((filename) &body body)
@@ -51,12 +52,26 @@
                                   (enough-namestring ,filename)))
                 (return-from ,block nil))))))))
 
-(defun !compile-file/form (form in out)
+(defun !compile-file/form (form form-count filename out)
   (let ((compilation (compile-toplevel form)))
     (if (possibly-valid-js-p compilation)
         (when (plusp (length compilation))
           (write-string compilation out))
-        (complain-about-illegal-chars form in compilation))))
+        (complain-about-illegal-chars 
+         form form-count filename compilation))))
+
+(defmacro  doforms ((form  stream)  &body body)        ;  FIXME: Not  to
+                                        ; use LOOP?
+  "Read  forms  from   STREAM,  binding  each  in  turn   to  FORM,  and
+execute BODY. Also binds LAST-FORM and FORM-COUNT."
+  (let ((eof (gensym "EOF-")))
+    `(loop
+        with ,eof = (gensym "EOF-")
+        for form-count from 0
+        for ,form = (read ,stream nil ,eof)
+        for last-form = nil then ,form
+        while (not (eql ,eof form))
+        do (progn ,@body))))
 
 (defun !compile-file (filename out &key print)
   "Compile  FILENAME, writing  the  Javascript to  OUT. Print  top-level
@@ -65,16 +80,17 @@ forms if PRINT is set."
     (with-compile-file-bindings (filename :verbosep print)
       (when print
         (format *trace-output*
-                "~&;;;; Compiling file ~a... " (enough-namestring filename)))
-      (handler-case
-          (doforms (form in)
-            (!compile-file/form form in out)
-            (setf last-form form)
-            (incf form-count))
-        (end-of-file (c)
-          (error "~:(~a~) while reading ~a after ~:r form:~%~s"
-                 c (enough-namestring filename)
-                 form-count last-form)))
+                "~&;;;; Compiling file ~a... "
+                (enough-namestring filename)))
+      (let (form-count last-form)
+        (handler-case
+            (doforms (form in)
+              (!compile-file/form form form-count 
+                                  (enough-namestring filename) out))
+          (end-of-file (c)
+            (error "~:(~a~) while reading ~a after ~:r form:~%~s"
+                   c (enough-namestring filename)
+                   form-count last-form))))
       (format t " Done."))))
 #+jscl (fset 'compile-file '!compile-file)
 
@@ -136,7 +152,7 @@ forms if PRINT is set."
         (fresh-line out)
         (!compile-file file out))))
   (when shebang
-    (sb-posix:chmod out #o755)))
+    (sb-posix:chmod output #o755)))
 
 (defun test-files ()
   (directory (source-pathname :wild
