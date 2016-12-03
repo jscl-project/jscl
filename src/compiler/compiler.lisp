@@ -77,15 +77,20 @@
   gotag
   class)
 
+(defvar *global-environment* (make-lexenv))
+(defvar *environment* *global-environment*)
+
 (defun lookup-in-lexenv (name lexenv namespace)
-  (find name (ecase namespace
-               (variable (lexenv-variable lexenv))
-               (function (lexenv-function lexenv))
-               (block    (lexenv-block    lexenv))
-               (gotag	(lexenv-gotag	lexenv))
-               (class	(lexenv-class	lexenv)))
-        :key #'binding-name
-        :test #'equalp))
+  (or (find name (ecase namespace
+                   (variable (lexenv-variable lexenv))
+                   (function (lexenv-function lexenv))
+                   (block    (lexenv-block    lexenv))
+                   (gotag	(lexenv-gotag	lexenv))
+                   (class	(lexenv-class	lexenv)))
+            :key #'binding-name
+            :test #'equalp)
+      (unless (eq lexenv *global-environment*)
+        (lookup-in-lexenv name *global-environment* namespace))))
 
 (defun push-to-lexenv (binding lexenv namespace)
   (ecase namespace
@@ -100,8 +105,6 @@
     (dolist (binding (reverse bindings) env)
       (push-to-lexenv binding env namespace))))
 
-(defvar *global-environment* (make-lexenv))
-(defvar *environment* *global-environment*)
 (defvar *variable-counter*)
 
 (defun gvarname (symbol)
@@ -116,7 +119,8 @@
 (defun extend-local-env (args)
   (let ((new (copy-lexenv *environment*)))
     (dolist (symbol args new)
-      (let ((b (make-binding :name symbol :type 'variable :value (gvarname symbol))))
+      (let ((b (make-binding :name symbol :type 'variable
+                             :value (gvarname symbol))))
         (push-to-lexenv b new 'variable)))))
 
 
@@ -131,13 +135,14 @@
 
 (defun %compile-defmacro (name lambda)
   (let ((binding (make-binding :name name :type 'macro :value lambda)))
-    (push-to-lexenv binding  *environment* 'function))
+    (warn "Binding global macro ~s" name)
+    (push-to-lexenv binding *global-environment* 'function))
   name)
 
 (defun global-binding (name type namespace)
-  (or (lookup-in-lexenv name *environment* namespace)
+  (or (lookup-in-lexenv name *global-environment* namespace)
       (let ((b (make-binding :name name :type type :value nil)))
-        (push-to-lexenv b *environment* namespace)
+        (push-to-lexenv b *global-environment* namespace)
         b)))
 
 (defun claimp (symbol namespace claim)
@@ -499,24 +504,28 @@ is NIL."
                                     keyword-arguments
                                     (ll-svars ll)))))
 
-        (lambda-name/docstring-wrapper name documentation
-                                       `(named-function ,(safe-js-fun-name name)
-                                                        (|values| ,@(mapcar (lambda (x)
-                                                                              (translate-variable x))
-                                                                            (append required-arguments optional-arguments)))
-                                                        ;; Check  number
-                                                        ;; of arguments
-                                                        ,(lambda-check-argument-count n-required-arguments
-                                                                                      n-optional-arguments
-                                                                                      (or rest-argument keyword-arguments))
-                                                        ,(compile-lambda-optional ll)
-                                                        ,(compile-lambda-rest ll)
-                                                        ,(compile-lambda-parse-keywords ll)
-                                                        ,(bind-this)
-                                                        ,(let ((*multiple-value-p* t))
-                                                           (if block
-                                                               (convert-block `((block ,block ,@body)) t)
-                                                               (convert-block body t)))))))))
+        (lambda-name/docstring-wrapper 
+         name documentation
+         `(named-function ,(safe-js-fun-name name)
+                          (|values| 
+                           ,@(mapcar (lambda (x)
+                                       (translate-variable x))
+                                     (append required-arguments
+                                             optional-arguments)))
+                          ;; Check  number
+                          ;; of arguments
+                          ,(lambda-check-argument-count 
+                            n-required-arguments 
+                            n-optional-arguments
+                            (or rest-argument keyword-arguments))
+                          ,(compile-lambda-optional ll)
+                          ,(compile-lambda-rest ll)
+                          ,(compile-lambda-parse-keywords ll)
+                          ,(bind-this)
+                          ,(let ((*multiple-value-p* t))
+                             (if block
+                                 (convert-block `((block ,block ,@body)) t)
+                                 (convert-block body t)))))))))
 
 (defun setq-pair (var val)
   (unless (symbolp var)
@@ -635,12 +644,23 @@ association list ALIST in the same order."
                                         ; end ALEXANDRIA
 
 (defun constructor<-structure (object)
-  (let* ((class (type-of object))
-         (constructor (intern (concatenate 'string (string :make-) (symbol-name class)) (symbol-package class)))
-         (slot-names (mapcar #'sb-mop:slot-definition-name (sb-mop:class-slots (find-class class))))
-         (slot-values (mapcar (lambda (slot-name) (literal (slot-value object slot-name)))
-                              slot-names)))
-    (convert-1 (cons constructor (alist-plist (mapcar #'cons slot-names slot-values))))))
+  (let* ((class (class-of object))
+         (constructor (intern (concatenate 'string (string :make-) 
+                                           (symbol-name class))
+                              (symbol-package class)))
+         (slot-names 
+          #+sbcl
+           (mapcar #'sb-mop:slot-definition-name
+                   (sb-mop:class-slots (find-class class)))
+           #+jscl (mapcar #'jscl/mop:slot-definition-name 
+                          (jscl/mop:class-slots (fnd-class class))))
+         (slot-values
+          (mapcar (lambda (slot-name)
+                    (literal (slot-value object slot-name)))
+                  slot-names)))
+    (convert-1 (cons constructor 
+                     (alist-plist 
+                      (mapcar #'cons slot-names slot-values))))))
 
 (defun dump-complex-literal (sexp &optional recursivep)
   (or (cdr (assoc sexp *literal-table* :test #'eql))
@@ -777,16 +797,26 @@ association list ALIST in the same order."
     ;; Toplevel form compiled by !compile-file.
     ((and *compiling-file* (zerop *convert-level*))
      ;; If the situation `compile-toplevel' is given. The form is
-     ;; evaluated at compilation-time.
+     ;; evaluated at compilation-time. 
      (when (find :compile-toplevel situations)
+       (warn "Compile-Toplevel: OK, evaluating in compiler ~s" body)
        (eval (cons 'progn body)))
      ;; `load-toplevel'  is  given,  then   just  compile  the  subforms
      ;; as usual.
      (when (find :load-toplevel situations)
-       (convert-toplevel `(progn ,@body) *multiple-value-p*)))
+       (warn "Load-Toplevel: OK, pushing into code")
+       (convert-toplevel (cons 'progn body) *multiple-value-p*))
+     (unless (or (find :compile-toplevel situations)
+                 (find :load-toplevel situations))
+       (warn "EVAL-WHEN: During compilation, ignoring ~s" situations))) 
     ((find :execute situations)
      (convert `(progn ,@body) *multiple-value-p*))
+    ((find :compile-toplevel situations)
+     (warn "Skipping EVAL-WHEN: ~@[not compiling~] ~@[not toplevel~] "
+           (not *compiling-file*) (not (zerop *convert-level*))))
     (t
+     (warn "EVAL-WHEN has no valie situation ~s~%(unreachable code ~s)"
+           situations body)
      (convert nil))))
 
 (defmacro define-transformation (name args form)
@@ -961,10 +991,10 @@ let-binding-wrapper."
           `(selfcall ,cbody)))))
 
 (define-compilation return-from (name &optional value)
-  (let* ((binding (lookup-in-lexenv name *environment* 'block))
-         (multiple-value-p (member 'multiple-value (binding-declarations binding))))
-    (unless binding
-      (error "Return from unknown block `~S'." name))
+  (let* ((binding (or (lookup-in-lexenv name *environment* 'block)
+                      (error "Return from unknown block `~S'." name)))
+         (multiple-value-p (member 'multiple-value 
+                                   (binding-declarations binding)))) 
     (push 'used (binding-declarations binding))
     ;; The binding value is the name of a variable, whose value is the
     ;; unique identifier of the block as exception. We can't use the
@@ -1090,6 +1120,10 @@ let-binding-wrapper."
 (define-compilation the (value-type form)
   (warn "discarding THE ~a" value-type) ; XXX perhaps one day
   (convert form *multiple-value-p*))
+
+#+jscl
+(defmacro the (value-type form) 
+  form)
 
 (define-transformation backquote (form)
   (bq-completely-process form))
@@ -1797,15 +1831,20 @@ generate the code which performs the transformation on these variables."
       (apply #'error err-format err-args)
     (replace-with-warning ()
       :report "Replace failed form with a warning"
+      (warn "Error ~? replaced with a warning" err-format err-args)
       (list 'warn (format nil "Failed compilation of ~s"
                           sexp)))
     (replace-with-cerror ()
       :report "Replace failed form with a continuable error"
+      (warn "Error ~? replaced with a continuable error"
+            err-format err-args)
       (list 'cerror "Continue"
             (format nil "Failed compilation of ~s"
                     sexp)))
     (replace-with-error ()
       :report "Replace failed form with an error"
+      (warn "Error ~? replaced with a runtime error"
+            err-format err-args)
       (list 'error (format nil "Failed compilation of ~s"
                            sexp)))))
 
@@ -1825,11 +1864,20 @@ just haven't gotten around to defining that macro at all, yet."
            (eql (find-package :common-lisp)
                 (symbol-package (car sexp)))
            (macro-function (car sexp)))
-      (emit-uncompilable-form sexp
-                              "Failed to macroexpand ~s ~% in ~s~2%~a" (car sexp) sexp
-                              (if (!macro-function (car sexp))
-                                  "A macro-function is defined, but did not work"
-                                  "No macro-function is defined in JSCL"))
+      (let ((bang (intern (concatenate 'string "!"
+                                       (string (car sexp)))
+                          :jscl)))
+        (if (!macro-function bang)
+            (progn
+              (warn "Substituting ~s for ~s" bang (car sexp))
+              (funcall (!macro-function bang) sexp))
+            (emit-uncompilable-form 
+             sexp
+             "Failed to macroexpand ~s ~% in ~s~2%~a"
+             (car sexp) sexp
+             (if (!macro-function (car sexp))
+                 "A macro-function is defined, but did not work"
+                 "No macro-function is defined in JSCL"))))
       sexp))
 
 (defun object-evaluates-to-itself-p (object)
@@ -1876,10 +1924,11 @@ just haven't gotten around to defining that macro at all, yet."
 
 (defun convert-toplevel (sexp &optional multiple-value-p return-p)
   ;; Macroexpand sexp as much as possible
-  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
+  (multiple-value-bind (expansion expandedp) (!macroexpand-1 sexp)
     (when expandedp
+      (warn "Macro-expansion done on top level (~s …)…" (car sexp))
       (return-from convert-toplevel
-        (convert-toplevel sexp multiple-value-p return-p))))
+        (convert-toplevel expansion multiple-value-p return-p))))
   ;; Process as toplevel
   (let ((*convert-level* -1))
     (cond
@@ -1891,24 +1940,30 @@ just haven't gotten around to defining that macro at all, yet."
       ((and (consp sexp)
             (eql (car sexp) 'in-package)
             (= 2 (length sexp)))
-       (setf *package* (find-package-or-fail (second sexp)))
-       (format *trace-output*
-               "~&;;; In package ~a…" (package-name *package*))
-       (convert-toplevel `(setq *package* (find-package-or-fail ,(second sexp)))))
+       (setf *package* (find-package-or-fail (second sexp))) 
+       (convert-toplevel 
+        `(setq *package* (find-package-or-fail ,(second sexp)))))
       ;; Non-empty toplevel progn
       ((and (consp sexp)
             (eq (car sexp) 'progn)
             (cdr sexp))
+       (warn "Top-level PROGN same as as ~r top-level form~:p"
+             (length (cdr sexp)))
        `(progn
           ;; Discard all except the last value
-          ,@(mapcar (lambda (s) (convert-toplevel s nil))
+          ,@(mapcar (lambda (form)
+                      (convert-toplevel form nil nil))
                     (butlast (cdr sexp)))
           ;; Return the last value(s)
-          ,(convert-toplevel (first (last (cdr sexp))) multiple-value-p return-p)))
+          ,(convert-toplevel
+            (first (last (cdr sexp))) multiple-value-p return-p)))
       (t
        (when *compile-print-toplevels*
          (let ((form-string (prin1-to-string sexp)))
-           (format t "~&;; Compiling ~a…" (truncate-string form-string))))
+           (format t "~&;; Compiling ~a…" (truncate-string 
+                                           (substitute #\space #\newline
+                                                       form-string)
+                                           120))))
 
        (let ((code (convert sexp multiple-value-p)))
          (if return-p

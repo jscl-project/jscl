@@ -7,9 +7,6 @@
 (defvar *types* ())
 (defvar *classes* ())
 
-#.(assert (!macro-function 'defstruct)
-          ()
-          "DEFSTRUCT should have been defined by defstruct.lisp before this file was loaded.")
 
 
 (/debug "Defining Built-In-Class")
@@ -18,7 +15,29 @@
     #-jscl !built-in-class
     name predicate superclasses)
 
-(defstruct eql-specializer object)
+(eval-when (:compile-toplevel :load-toplevel)
+  (defun make-accessor-name (class slot-name)
+    (intern (concatenate 'string (string class)
+                         "-" (string slot-name)))))
+
+(defmacro alias-!-accessors (class)
+  (let ((cl-name (intern (remove #\! (string class)))))
+    `(progn 
+       ,@(loop for slot-name in (mapcar #'slot-definition-name
+                                        (class-slots 
+                                         (find-class class)))
+            for accessor = (make-accessor-name cl-name slot-name)
+            for !accessor = (make-accessor-name class slot-name)
+            unless (fboundp accessor)
+            collect `(defun ,accessor (,class) (,!accessor ,class))
+            unless (fboundp (list 'setf accessor))
+            collect `(defun (setf ,accessor) (new-value ,class)
+                       (setf (,!accessor ,class) new-value))))))
+
+#-jscl (alias-!-accessors !built-in-class)
+
+(defstruct #-jscl !eql-specializer #+jscl eql-specializer
+           object)
 
 (defstruct type-definition
   name supertypes lambda-list body
@@ -47,12 +66,12 @@
                known-supertypes)))))
 
 (defun most-specific-type (type &rest rest)
-  (let ((next (and rest (car rest)))
-        (more (and rest (cdr rest))))
-    (cond
-      (more (reduce #'most-specific-type (cons type rest)))
-      ((subtypep next type) type)
-      (t type))))
+  (case (length rest)
+    (0 type)
+    (1 (if (subtypep (first rest) type)
+           (first rest)
+           type))
+    (otherwise (reduce #'most-specific-type (cons type rest)))))
 
 (defun curry-type-check (value)
   (lambda (type)
@@ -134,6 +153,13 @@
               object))
     (t (error "~s is not a valid type specifier" type))))
 
+(defmacro !restart-case (expression &body clauses)
+  (declare (ignore clauses))
+  (warn "Dropping restart cases: TODO")
+  expression)
+#+jscl (defmacro restart-case (expression &body clauses)
+         `(!restart-case ,expression ,@clauses))
+
 (defmacro !check-type (place type &optional type-string)
   "Signal a restartable  error of type TYPE-ERROR if the  value of PLACE
 is not of the  specified type. If an error is  signalled and the restart
@@ -178,28 +204,52 @@ invoked. In that case it will store into PLACE and start over."
  (null 'null)
  (package 'packagep))"
 
-(defmacro !typecase (x &rest clausules)
-  "A fair approximation of TYPECASE for limited cases"
-  (let ((value (gensym "TYPECASE-VALUE-")))
-    `(let ((,value ,x))
+(defun typecase-unique-types (clauses)
+  (loop for (types . body) in clauses
+     if (listp types)
+     append types
+     else collect types))
+
+(defun find-duplicates (list &key (test #'eql))
+  (loop for (first . rest) on list by #'cdr
+     when (find first rest :test test)
+     collect first))
+
+(defmacro !typecase (value &rest clauses)
+  "A fair approximation of TYPECASE for limited cases" 
+  (let ((evaluated (gensym "TYPECASE-EVALUATED-"))
+        (unique-types (typecase-unique-types clauses)))
+    (let ((duplicated (find-duplicates unique-types)))
+      (warn "Duplicated ~r type~:p in typecase: ~{~s~^, ~}"
+            (length duplicated)
+            duplicated))
+    `(let ((,evaluated ,value))
        (cond
-         ,@(mapcar (lambda (c)
-                     (if (find (car c) '(t otherwise))
-                         `(t ,@(rest c))
-                         `((typep ,value ',(car c))
-                           ,@(or (rest c)
-                                 (list nil)))))
-                   clausules)))))
+         ,@(mapcar (lambda (clause)
+                     (unless (listp clause)
+                       (error "Clause in TYPECASE is not a list? ~a" 
+                              clause))
+                     (destructuring-bind (types &rest body) clause
+                       `((typep ,evaluated ',(if (listp types)
+                                                 (cons 'or types)
+                                                 types))
+                         ,@(or body (cons nil nil)))))
+                   clauses)))))
 #+jscl
 (defmacro typecase (value &rest clauses)
   `(!typecase ,value ,@clauses))
 
-(defmacro !etypecase (x &rest clausules)
-  (let ((g!x (gensym "ETYPECASE-VALUE-")))
-    `(let ((,g!x ,x))
-       (typecase ,g!x
-         ,@clausules
-         (t (error "~S fell through etypecase expression." ,g!x))))))
+(defmacro !etypecase (value &rest clauses)
+  (let ((evaluated (gensym "ETYPECASE-VALUE-"))
+        (unique-types (typecase-unique-types clauses))) 
+    `(let ((,evaluated ,value))
+       (!typecase ,evaluated
+                  ,@clauses
+                  (t (error "~S (type: ~s) fell through etypecase expression.
+Expected one of: ~{~s~^, ~}" 
+                            ,evaluated (type-of ,evaluated)
+                            ,(sort unique-types #'string<
+                                   :key #'symbol-name)))))))
 
 #+jscl
 (defmacro etypecase (value &rest clauses)
@@ -208,18 +258,22 @@ invoked. In that case it will store into PLACE and start over."
 (defun make-numeric-range-check-predicate (type)
   (lambda (object &optional min max)
     (and (typep object type)
-         (etypecase min
-           (null t)
-           (cons (and (numberp (car min))
-                      (null (cdr min))
-                      (< (car min) object)))
-           (number (<= min object)))
-         (etypecase max
-           (null t)
-           (cons (and (numberp (car max))
-                      (null (cdr max))
-                      (> (car max) object)))
-           (number (>= max object))))))
+         (cond
+           ((or (eql '* min)
+                (null min)) t)
+           ((and (consp min) 
+                 (numberp (car min))
+                 (null (cdr min))
+                 (< (car min) object)))
+           ((numberp min) (<= min object)))
+         (cond
+           ((or (eql '* max)
+                (null max)) t)
+           ((and (consp max) 
+                 (numberp (car max))
+                 (null (cdr max))
+                 (> (car max) object)))
+           ((numberp max) (>= max object))))))
 
 (defparameter +standard-type-specifiers+
   '(arithmetic-error	function	simple-condition
@@ -273,47 +327,63 @@ invoked. In that case it will store into PLACE and start over."
     function	signed-byte
     integer	simple-array))
 
-(progn
-  (dolist (type '(number integer real rational
-                  float single-float double-float long-float))
-    (setf (type-definition-predicate
-           (find-type-definition type))
-          (make-numeric-range-check-predicate type)))
+(dolist (type '(number integer real rational
+                float single-float double-float long-float))
   (setf (type-definition-predicate
-         (find-type-definition 'string))
-        (lambda (object length)
-          (and (stringp object)
-               (= length (length object)))))
+         (find-type-definition type))
+        (make-numeric-range-check-predicate type)))
+(setf (type-definition-predicate
+       (find-type-definition 'string))
+      (lambda (object length)
+        (and (stringp object)
+             (= length (length object)))))
 
-  (setf (type-definition-predicate
-         (find-type-definition 'array))
-        (lambda (object element-type &optional dimensions)
-          (if (stringp object)
-              (and (find element-type '(t character))
-                   (etypecase dimensions
-                     (null t)
-                     (integer (= (length object) dimensions))
-                     (cons (and (integerp (car dimensions))
-                                (null (cdr dimensions))
-                                (= (length object)
-                                   (car dimensions))))))
-              (and (subtypep (array-element-type object) element-type)
-                   (equalp (array-dimensions object) dimensions))))))
+(defun equalp-or-* (a b)
+  "Every member  of the  sequences A and  B must be  EQUAL or  * (Kleene
+star)."
+  (every (lambda (x y)
+           (or (equal x y)
+               (eql '* x)
+               (eql '* y)))
+         a b))
+
+(defun normalize-array-dimensions-spec (dimensions)
+  (etypecase dimensions 
+    (integer dimensions)
+    (cons (if (null (cdr dimensions))
+              (if (null (car dimensions))
+                  '*
+                  (car dimensions))
+              dimensions))))
+
+(defun compound-array-type-p (object element-type &optional dimensions)
+  (let ((dim (normalize-array-dimensions-spec dimensions))
+        (my-dim (normalize-array-dimensions-spec
+                 (array-dimensions object))))
+    (if (stringp object)
+        (and (find element-type '(t character))
+             (cond 
+               ((null dimensions) t)
+               ((eql dimensions '*) t)
+               ((integerp dimensions) (= (length object) dim)) 
+               (t nil))) 
+        (and (subtypep (array-element-type object) element-type) 
+             (or (null dimensions)
+                 (if (consp dim)
+                     (and (= (length my-dim)
+                             (length dim))
+                          (equalp-or-* my-dim dim))
+                     (or (eql dim '*)
+                         (eql my-dim '*)
+                         (= dim my-dim))))))))
+
+(setf (type-definition-predicate (find-type-definition 'array))
+      #'compound-array-type-p  )
 
 (dolist (type-name +standard-type-specifiers+)
   (push (#+jscl make-built-in-class
                 #-jscl make-!built-in-class
-                :name type-name) *classes*)
-  #-jscl
-  (let ((subtypes (remove-if-not
-                   (alexandria:rcurry #'subtypep type-name)
-                   (remove-if (lambda (type)
-                                (or (null type)
-                                    (eql type-name type)))
-                              +standard-type-specifiers+))))
-    (when subtypes
-      (format t "~& ( ~s~@[ ~{~s~^ ~}~] )" type-name
-              subtypes)))
+                :name type-name) *classes*) 
   (unless (subtypep type-name t)
     (warn "Standard type ~s is not properly defined" type-name)))
 
@@ -427,13 +497,12 @@ invoked. In that case it will store into PLACE and start over."
   (destructuring-bind (class &rest subclasses) hierarchy
     (dolist (subclass subclasses)
       (let ((metaclass (find-built-in-class subclass)))
-        (push class (#+jscl built-in-class-superclasses
-                            #-jscl !built-in-class-superclasses
-                            metaclass))))))
+        (push class (built-in-class-superclasses 
+                     metaclass))))))
 
 (dolist (hierarchy +standard-class-subclasses+)
   (destructuring-bind (class &rest subclasses) hierarchy
     (dolist (subclass subclasses)
-      (unless (subtypep class subclass)
+      (unless (subtypep subclass class)
         (warn "Standard class ~s should have subclass ~s"
               class subclass)))))

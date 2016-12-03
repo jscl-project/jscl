@@ -15,8 +15,15 @@
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
+(cl:in-package :common-lisp-user)
+(declaim (optimize (speed 1) (debug 3) (space 0)
+                   (safety 3) (compilation-speed 1)))
+
 (defpackage :jscl
-  (:use :cl #+sbcl :sb-gray)
+  (:use :cl)
+  #+sbcl (:use :sb-gray :sb-mop)
+  #-(or sbcl) 
+  (warn "You will probably need to add your Gray Streams and MOP into JSCL USE list")
   (:export #:bootstrap #:bootstrap-core
            #:run-tests-in-host #:with-sharp-j #:read-#j
            #:write-javascript-for-files #:compile-application)
@@ -111,7 +118,7 @@ identifying them (and their provenance) easier."))
     ("setf"          :target)
     ("utils"         :both)
     ("defstruct"     :both)
-    ("types"	:target)
+    ("types"	:both)
     ("lambda-list"   :both)
     ("numbers"       :target)
     ("char"          :target)

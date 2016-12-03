@@ -25,8 +25,8 @@
 ;;; Javascript level) implementation in the near future.
 
 (defun make-structure% (type &rest fields)
-  (let ((struct (make-storage-vector (length fields))))
-    (setf (storage-vector-kind struct) (cons 'structure-object type))
+  (let ((struct (make-storage-vector (length fields)
+                                     (cons 'structure-object type)))) 
     (let ((i 0))
       (dolist (field fields)
         (storage-vector-set struct i field)
@@ -42,13 +42,13 @@
     (error "Not a structure: ~s" object))
   (cdr (storage-vector-kind object)))
 
-(defun assert-struct-type (predicate type-name object)
-  (check-type predicate function)
-  #+ (or)  (declare (type (function (t) t) predicate))
-  (check-type type-name symbol)
-  (when predicate
-    (assert (funcall predicate object) (object)
-            "The object `~S' is not of type `~S'" object type-name))
+(defun assert-struct-type (predicate type-name object) 
+  (assert (functionp predicate) (predicate)
+          "Predicate `~s' is not a function" predicate)
+  (assert (symbolp type-name) (type-name)
+          "`~s' is not a structure type name" type-name)
+  (assert (funcall predicate object) (object)
+          "The object `~S' is not of type `~S'" object type-name)
   (assert (structure%-p object) (object)
           "The object `~s' is not a structure object")
   (assert (eql type-name (structure-type% object)) (object)
@@ -90,8 +90,9 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
      (error "Bad slot description `~S'." sd))))
 
 (defun defstruct/option-value (option options &optional default)
-  (check-type option symbol)
-  (check-type options (or null list))
+  (assert (keywordp option) (option) "Option `~s' is not a symbol" option)
+  (assert (or (listp options) (null options)) (options)
+          "Options `~s' should be a list (or NIL)" options)
   (if (assoc option options)
       (second (assoc option options))
       default))
@@ -121,8 +122,14 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                            ,index object new-value)))
 
 (defun defstruct/make-accessor-name (struct-name slot-name)
-  (check-type struct-name symbol)
-  (check-type slot-name symbol)
+  (assert (or (stringp struct-name)
+              (symbolp struct-name)) (struct-name)
+              "Structure type name `~s' must be a string designator" 
+              struct-name)
+  (assert (or (stringp slot-name)
+              (symbolp slot-name)) (slot-name)
+              "Slot type name `~s' must be a string designator" 
+              slot-name)
   (intern (concatenate 'string
                        (string struct-name)
                        "-"
@@ -149,20 +156,15 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                   'progn
                   (defstruct/make-slot-accessor name-string predicate
                     slot index)))
-        (incf (the fixnum index))))))
+        (incf index)))))
 
 ;; Forward declaration of Make-Slot-Info. This is a circular dependency…
-(declaim (ftype (function (&key (:class t)
-                                (:name symbol)
-                                (:accessors list)
-                                (:readers list)
-                                (:writers list)
-                                (:type t)
-                                (:initform t)
-                                (:initarg symbol)
-                                (:allocation (member :instance :class)))
-                          (values t))
-                make-slot-info))
+(declaim (ftype
+          (function
+           (&key (:class t) (:name t) (:accessors t) (:readers t) (:writers t)
+                 (:type t) (:initform t) (:initarg t) (:allocation t))
+           (values slot-info &optional))
+          make-slot-info))
 
 (defun defstruct/make-slot-info (type slot)
   (make-slot-info

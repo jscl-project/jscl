@@ -54,10 +54,11 @@
          '#'(lambda (form)
               (destructuring-bind (name args &body body)
                   form
+                (warn "Compiling a macro-expander for ~s" name)
                 (let* ((body (parse-body body :declarations t :docstring t))
                        (whole (gensym "WHOLE-"))
                        (expander `(function
-                                   (lambda (,whole)
+                                   (lambda (,whole) ; FIXME: environment
                                     (block ,name
                                       (destructuring-bind ,args ,whole
                                         ,@body))))))
@@ -67,7 +68,7 @@
                   ;; to be dumped in the final environment somehow.
                   (when (find :jscl-xc *features*)
                     (setq expander `(quote ,expander)))
-
+                  
                   `(eval-when (:compile-toplevel :execute)
                      (%compile-defmacro ',name ,expander)))))))
 
@@ -187,7 +188,7 @@
   (if (and (listp name) (eq (car name) 'jscl/ffi))
       (error "Can't bind to JS function yet, TODO")
       `(progn
-         (eval-when (:compile-toplevel)
+         (eval-when (:compile-toplevel :load-toplevel)
            (fn-info ',name :defined t))
          (fset ',name #'(named-lambda ,name ,args ,@body))
          ',name)))

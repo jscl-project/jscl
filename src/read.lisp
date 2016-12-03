@@ -645,23 +645,28 @@ rewrite `#(v1 v2…) as (apply #'vector `(v1 v2…))"))
         (setf *labelled-objects* save-labelled-objects)
         (setf *fixup-locations* save-fixup-locations)))))
 
+#+jscl
+(fset 'read #'ls-read)
+#+ (or)
+(defun read (&optional (stream *standard-input*) (eof-error-p t) (eof-value nil) (recursive-p nil))
+  (ls-read stream eof-error-p eof-value recursive-p))
+
 (locally
     ;; Style-Warning for having  &optional and &key in  the same λ-list,
     ;; but  we're  mimicking  the CL:Read-from-string  function,  so  we
     ;; don't care about that particular warning.
     #+sbcl (declare (sb-ext:muffle-conditions style-warning))
-    (defun ls-read-from-string (string &optional (eof-error-p t) eof-value
-                                &key (start 0) (end nil) (preserve-whitespace t))
+    (defun ls-read-from-string (string 
+                                &optional (eof-error-p t) eof-value
+                                &key (start 0) (end nil)
+                                     (preserve-whitespace t))
       (funcall (if preserve-whitespace
-                   #'ls-read             ; TODO: READ-PRESERVING-WHITESPACE
+                   #'read-preserving-whitespace
                    #'ls-read)
                (make-string-input-stream string start (or end (length string)))
                eof-error-p eof-value)))
-
 #+jscl
-(defun read (&optional (stream *standard-input*) (eof-error-p t) (eof-value nil) (recursive-p nil))
-  (ls-read stream eof-error-p eof-value recursive-p))
-
-#+jscl
+(fset 'read-from-string #'ls-read-from-string)
+#+ (or)
 (defun read-from-string (string &optional (eof-errorp t) eof-value)
   (ls-read-from-string string eof-errorp eof-value))
