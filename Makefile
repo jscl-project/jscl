@@ -4,6 +4,48 @@ all:	jscl.js tests.js jscl-repl repl-web.js
 
 BRANCH=$(shell git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ \1/')
 
+# Eventually, this should build with other compilers; so it's good to start
+# building the infrastructure for that time, even if the code is far from
+# ready for it.
+LISP ?= sbcl
+
+
+# Defaults for many Lisps. Override below
+LISPFLAGS=
+LISPLOAD=--load # trailing space
+LISPEVAL=--eval # trailing space
+
+ifeq ($(LISP),sbcl)
+LISPFLAGS=--non-interactive
+endif
+
+ifeq ($(LISP),ccl) # Clozure
+LISPFLAGS=--batch
+endif
+
+ifeq ($(LISP),ecl)
+LISPFLAGS=-q
+LISPLOAD=-load # trailing space
+LISPEVAL=-eval # trailing space
+endif
+
+ifeq ($(LISP),clisp)
+LISPFLAGS=-on-error exit -ansi -q
+LISPLOAD= #empty
+LISPEVAL= #empty
+endif
+
+ifeq ($(LISP),alisp) # Allegro CL
+LISPLOAD=-L # trailing space
+LISPEVAL=-e # trailing space
+endif
+
+ifeq ($(LISP),gcl)
+LISPFLAGS=-batch
+LISPLOAD=-load # trailing space
+LISPEVAL=-eval # trailing space
+endif
+
 ifeq ($(BRANCH),master)
 ALT_BRANCH=/$(BRANCH)
 else
@@ -23,42 +65,42 @@ clean:
 	-mkdir -p doc
 
 jscl.js:	$(ALL_LISP)
-	sbcl --non-interactive --load jscl.lisp \
-		--eval '(jscl:bootstrap-core t)'
+	$(LISP) $(LISPFLAGS) $(LISPLOAD)jscl.lisp \
+		$(LISPEVAL)'(jscl:bootstrap-core t)'
 
 tests.js:	$(ALL_LISP)
-	sbcl --non-interactive --load jscl.lisp \
-		--eval '(jscl:bootstrap-core)' \
-		--eval '(jscl:compile-test-suite)'
+	$(LISP) $(LISPFLAGS) $(LISPLOAD)jscl.lisp \
+		$(LISPEVAL)'(jscl:bootstrap-core)' \
+		$(LISPEVAL)'(jscl:compile-test-suite)'
 
 jscl-repl:	$(ALL_LISP)
-	sbcl --non-interactive --load jscl.lisp \
-		--eval '(jscl:bootstrap)' \
-		--eval '(jscl:compile-node-repl)'
+	$(LISP) $(LISPFLAGS) $(LISPLOAD)jscl.lisp \
+		$(LISPEVAL)'(jscl:bootstrap)' \
+		$(LISPEVAL)'(jscl:compile-node-repl)'
 
 repl-web.js:	$(ALL_LISP)
-	sbcl --non-interactive --load jscl.lisp \
-		--eval '(jscl:bootstrap)' \
-		--eval '(jscl:compile-web-repl)'
+	$(LISP) $(LISPFLAGS) $(LISPLOAD)jscl.lisp \
+		$(LISPEVAL)'(jscl:bootstrap)' \
+		$(LISPEVAL)'(jscl:compile-web-repl)'
 
 test:	jscl.js tests.js
 		$(shell find tests ansi-test \
 			-\( -name \*.lisp -or -name \*.lsp -\) \
 			-and -not -name .\*) \
 		.ansi-patched
-	sbcl --non-interactive --load jscl.lisp \
-		--eval '(jscl:bootstrap-core)' \
-		--eval '(jscl:run-tests-in-host)'
+	$(LISP) $(LISPFLAGS) $(LISPLOAD)jscl.lisp \
+		$(LISPEVAL)'(jscl:bootstrap-core)' \
+		$(LISPEVAL)'(jscl:run-tests-in-host)'
 	node tests.js
 
 doc:	doc/jscl.pdf doc/jscl.html.d/index.html
 
 doc/jscl.texi:	$(ALL_LISP) doc-intro.texi doc-conclusion.texi
-	sbcl --non-interactive \
-		--eval '(ql:quickload :net.didierverna.declt)' \
-		--eval '(ql:quickload :alexandria)' \
-		--load 'write-docs.lisp' \
-		--eval '(jscl/doc:write-docs)'
+	$(LISP) $(LISPFLAGS) \
+		$(LISPEVAL)'(ql:quickload :net.didierverna.declt)' \
+		$(LISPEVAL)'(ql:quickload :alexandria)' \
+		$(LISPLOAD)'write-docs.lisp' \
+		$(LISPEVAL)'(jscl/doc:write-docs)'
 
 doc/jscl.html.d/index.html:	doc/jscl.texi
 	cd doc; makeinfo -o jscl.html.d/ \

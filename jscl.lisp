@@ -22,8 +22,12 @@
 (defpackage :jscl
   (:use :cl)
   #+sbcl (:use :sb-gray :sb-mop)
-  #-(or sbcl) 
-  (warn "You will probably need to add your Gray Streams and MOP into JSCL USE list")
+  #+clisp (:use :gray :mop)
+  #+ecl (:use :gray :clos)
+  #+lispworks (:use :gray :clos)
+  #-(or sbcl clisp ecl lispworks) 
+  (:use #.(warn "You will probably need to add your Gray Streams ~
+and MOP into JSCL USE list"))
   (:export #:bootstrap #:bootstrap-core
            #:run-tests-in-host #:with-sharp-j #:read-#j
            #:write-javascript-for-files #:compile-application)
