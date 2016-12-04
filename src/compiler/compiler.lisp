@@ -290,7 +290,9 @@ specifier for the condition types that have been muffled.
            (let ((arg (ensure-list keyarg)))
              (cons (if (listp (car arg))
                        (car arg)
-                       (list (intern (symbol-name (car arg)) "KEYWORD") (car arg)))
+                       (list (intern (symbol-name (car arg))
+                                     "KEYWORD")
+                             (car arg)))
                    (cdr arg)))))
     (mapcar #'canonicalize (ll-section '&key ll))))
 
@@ -644,15 +646,13 @@ association list ALIST in the same order."
 
 (defun constructor<-structure (object)
   (let* ((class (class-of object))
-         (constructor (intern (concatenate 'string (string :make-)
-                                           (symbol-name class))
-                              (symbol-package class)))
+         (class-name (class-name class))
+         (constructor (intern (concatenate 'string
+                                           (string :make-)
+                                           (symbol-name class-name))
+                              (symbol-package class-name)))
          (slot-names
-          #+sbcl
-           (mapcar #'sb-mop:slot-definition-name
-                   (sb-mop:class-slots (find-class class)))
-           #+jscl (mapcar #'jscl/mop:slot-definition-name
-                          (jscl/mop:class-slots (fnd-class class))))
+          (mapcar #'slot-definition-name (class-slots class)))
          (slot-values
           (mapcar (lambda (slot-name)
                     (literal (slot-value object slot-name)))
@@ -1643,11 +1643,17 @@ generate the code which performs the transformation on these variables."
   (when (and (listp symbol)
              (eq 'setf (first symbol)))
     (return-from !macro-function nil))
+  #- (or ecl sbcl jscl)
+  (warn "Your Implementation's quasiquote may not be handled properly.")
+  #+ecl
+  (when (eql symbol 'si:quasiquote)
+    (warn "ECL quasiquote is probably not handled properly yet")
+    (return-from !macro-function
+      (lambda (form) (ext::macroexpand-1 form))))
   #+sbcl
   (when (eql symbol 'sb-int:quasiquote)
     (return-from !macro-function
-      (lambda (form)
-        (sb-impl::expand-quasiquote form nil))))
+      (lambda (form) (sb-impl::expand-quasiquote form nil))))
   (let ((b (lookup-in-lexenv symbol *environment* 'function)))
     (if (and b (eq (binding-type b) 'macro))
         (let ((expander (binding-value b)))

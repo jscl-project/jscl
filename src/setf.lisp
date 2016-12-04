@@ -91,7 +91,8 @@
   (defun setf/split-into-pairs (pairs)
     `(progn
        ,@(do ((pairs pairs (cddr pairs))
-              (result '() (cons `(setf ,(car pairs) ,(cadr pairs)) result)))
+              (result '()
+                      (cons `(setf ,(car pairs) ,(cadr pairs)) result)))
              ((null pairs)
               (reverse result)))))
 
