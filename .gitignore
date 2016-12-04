@@ -21,3 +21,9 @@ doc/*
 
 # Git/patch junk files
 *.orig
+
+# Emacs files
+.emacs.desktop
+TAGS
+
+
