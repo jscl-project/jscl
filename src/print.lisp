@@ -59,17 +59,20 @@
           (return-from escape-symbol-name-p t))))
     dots-only))
 
-;;; Return T if the  specified string can be read as  a number In case such a string  is the name of
-;;; a symbol then escaping is required when printing to ensure correct reading.
+;;; Return T  if the specified  string can be read  as a number  In case
+;;; such a string is the name of a symbol then escaping is required when
+;;; printing to ensure correct reading.
 (defun potential-number-p (string)
-  ;; The four rules for being a potential number are described in 2.3.1.1 Potential Numbers as Token
+  ;; The  four rules  for  being  a potential  number  are described  in
+  ;; 2.3.1.1 Potential Numbers as Token
   ;;
   ;; First Rule
   (dotimes (i (length string))
     (let ((char (char string i)))
       (cond
-        ;; DIGIT-CHAR-P should work with  the current radix (*READ-BASE*) here. If  the radix is not
-        ;; decimal, then we have to make sure there is not a decimal-point in the string.
+        ;; DIGIT-CHAR-P should work with the current radix (*READ-BASE*)
+        ;; here. If the radix is not  decimal, then we have to make sure
+        ;; there is not a decimal-point in the string.
         ((digit-char-p char *read-base*))
         ;; Signs, ratios, decimal point and extension mark
         ((find char "+-/_^"))
@@ -79,8 +82,8 @@
         ((alpha-char-p char)
          (when (and (< i (1- (length string)))
                     (alpha-char-p (char string (1+ i))))
-           ;; fail:  adjacent  letters are  not  number  marker, or  there  is  a decimal  point  in
-           ;; the string.
+           ;; fail: adjacent letters are not  number marker, or there is
+           ;; a decimal point in the string.
            (return-from potential-number-p)))
         (t
          ;; fail: there is a non-allowed character
@@ -132,16 +135,19 @@
 
 #+jscl (defvar *read-base* 10) ; NB. This file is loaded before read.lisp
 
-;; To  support  *print-circle*  some  objects  must  be tracked  for  sharing:  conses,  arrays  and
-;; apparently-uninterned symbols. These objects are placed in  an array and a parallel array is used
-;; to mark if they're found multiple times by assining them an id starting from 1.
+;; To support *print-circle*  some objects must be  tracked for sharing:
+;; conses, arrays  and apparently-uninterned symbols. These  objects are
+;; placed in an  array and a parallel  array is used to  mark if they're
+;; found multiple times by assining them an id starting from 1.
 ;;
-;; After the  tracking has been completed  the printing phase  can begin: if  an object has an  id >
-;; 0 then  #<n>= is prefixed  and the id is  changed to negative.  If an object  has an id <  0 then
-;; #<-n># is printed instead of the object.
+;; After the tracking  has been completed the printing  phase can begin:
+;; if an  object has  an id >  0 then  #<n>= is prefixed  and the  id is
+;; changed  to negative.  If an  object has  an id  < 0  then #<-n>#  is
+;; printed instead of the object.
 ;;
-;; The processing is O(n^2) with n = number of tracked objects. Hopefully it will become good enough
-;; when the new compiler is available.
+;; The  processing  is  O(n^2)  with  n =  number  of  tracked  objects.
+;; Hopefully  it  will   become  good  enough  when   the  new  compiler
+;; is available.
 (defun scan-multiple-referenced-objects (form)
   (let ((known-objects (make-array 0 :adjustable t :fill-pointer 0))
         (object-ids    (make-array 0 :adjustable t :fill-pointer 0)))
@@ -215,12 +221,13 @@ to streams."
     (symbol
      (let ((name (symbol-name form))
            (package (symbol-package form)))
-       ;; Check if the symbol is accesible from the current package. It is true even if the symbol's
-       ;; home package is not the current package, because it could be inherited.
+       ;; Check if  the symbol  is accesible  from the  current package.
+       ;; It  is true  even  if the  symbol's home  package  is not  the
+       ;; current package, because it could be inherited.
        (if (eq form (find-symbol (symbol-name form)))
            (write-string (escape-token (symbol-name form)) stream)
-           ;; Symbol is not accesible from *PACKAGE*, so  let us prefix the symbol with the optional
-           ;; package or uninterned mark.
+           ;; Symbol is not  accesible from *PACKAGE*, so  let us prefix
+           ;; the symbol with the optional package or uninterned mark.
            (progn
              (cond
                ((null package) (write-char #\# stream))
@@ -383,7 +390,7 @@ STRING is a string of digits with an optional leading + or - sign."
   (cond ((find (char string 0) "+-")
          (concatenate 'string
                       (subseq string 0 1)
-                      (group-digits comma group-length 
+                      (group-digits comma group-length
                                     (subseq string 1))))
         ((<= (length string) group-length)
          string)
@@ -456,14 +463,14 @@ bound accordingly."
             (digit-char-p (char digits 0))))
       ((and (= 2 (length digits))
             (char= #\1 (char digits 1)))
-       (elt '("tenth" "eleventh" "twelfth" 
+       (elt '("tenth" "eleventh" "twelfth"
               "thirteenth" "fourteenth" "fifteenth"
-              "sixteenth" "seventeenth" "eighteenth" 
+              "sixteenth" "seventeenth" "eighteenth"
               "ninteenth")
             (digit-char-p (char digits 0))))
       ((and (= 2 (length digits))
             (char< #\1 (char digits 1)))
-       (let ((tens (elt '("" "" 
+       (let ((tens (elt '("" ""
                           "twenty" "thirty" "forty" "fifty"
                           "sixty" "seventy" "eighty" "ninety")
                         (digit-char-p (char digits 1)))))
@@ -477,7 +484,7 @@ bound accordingly."
                           (format-ordinal-string (digit-char-p
                                                   (char digits 0)))))))
       (t (multiple-value-bind (hundreds units) (floor arg 100)
-           (concatenate 
+           (concatenate
             'string
             (format-cardinal-string (* hundreds 100))
             (if (zerop units)
@@ -489,7 +496,7 @@ bound accordingly."
 (defun format-cardinal-string (arg)
   (format nil "#< Spelled out ~d >" arg))
 
-(defun format-roman-numeral (arg &optional long-four-p) 
+(defun format-roman-numeral (arg &optional long-four-p)
   (when (<= 400000 arg)
     (return-from format-roman-numeral (integer-to-string arg)))
   (let ((output))
@@ -504,10 +511,10 @@ bound accordingly."
       (when (plusp tens)
         (multiple-value-bind (hundreds tens) (floor tens 10)
           (push (elt '("" "Ⅹ" "ⅩⅩ" "ⅩⅩⅩ" "ⅩⅬ" "Ⅼ" "ⅬⅩ" "ⅬⅩⅩ" "ⅬⅩⅩⅩ" "ⅩⅭ")
-                     tens) 
+                     tens)
                 output)
           (when (plusp hundreds)
-            (multiple-value-bind (thousands hundreds) 
+            (multiple-value-bind (thousands hundreds)
                 (floor hundreds 10)
               (push (elt '("" "Ⅽ" "ⅭⅭ" "ⅭⅭⅭ" "ⅭⅮ" "Ⅾ"
                            "ⅮⅭ" "ⅮⅭⅭ" "ⅮⅭⅭⅭ" "ⅭⅯ")
@@ -630,13 +637,13 @@ emits (1- COUNT)."
 (defun format-letter-case (captured-substrings arguments
                            &key start-at-p start-colon-p
                                 end-at-p end-colon-p)
-  "FORMAT ~( ~) handler. Change case. 
+  "FORMAT ~( ~) handler. Change case.
 
  • ~( ~) — downcase
  • ~:( ~) — capitalize
  • ~@( ~) — capitalize first letter only
  • ~:@( ~) — upcase"
-  (assert (null (or end-at-p end-colon-p))) 
+  (assert (null (or end-at-p end-colon-p)))
   (assert (= 1 (length captured-substrings)))
   (multiple-value-bind (output new-args)
       (!format 'values (first captured-substrings) arguments)
@@ -648,7 +655,7 @@ emits (1- COUNT)."
                        (start-colon-p
                         #'string-capitalize)
                        (t
-                        #'string-downcase)) 
+                        #'string-downcase))
                      output)
             new-args)))
 
@@ -710,7 +717,7 @@ emits (1- COUNT)."
   "This simulates a  generic function for most  “FORMAT TILDE” handlers,
 dispatching on the CHR ending the format sequence."
   (apply (case (char-upcase chr)
-           (#\$ #'format-float-$) 
+           (#\$ #'format-float-$)
            (#\A #'format-aesthetic)
            (#\B #'format-binary)
            (#\C #'format-char)
@@ -722,17 +729,17 @@ dispatching on the CHR ending the format sequence."
            (#\R #'format-radix)
            (#\S #'format-syntax)
            (#\W #'format-write)
-           (#\X #'format-hex) 
+           (#\X #'format-hex)
            (t (warn "~~~a is not implemented yet, using ~~S instead" chr)
               #'format-syntax))
          arg colonp atp params))
 
 (defun format-nested (nesting-char
                       control-string output arguments
-                      next atp colonp) 
+                      next atp colonp)
   (let ((end-char (elt ")]>}" (position nesting-char "([<{")))
         (format-nested-formatter (case next
-                                   (#\( #'format-letter-case) 
+                                   (#\( #'format-letter-case)
                                    (#\< #'format-justify)
                                    (#\[ #'format-conditional)
                                    (#\{ #'format-repeat))))
@@ -751,7 +758,7 @@ but wanted ~~~c in format string"
                        :end-at-p end-at-p :end-colon-p end-colon-p)))
           *format-nesting*)
     (push nil *nested-substrings*))
-  
+
   (values control-string output arguments))
 
 (defun format-tilde (control-string arguments)
@@ -764,7 +771,7 @@ but wanted ~~~c in format string"
            (pop-char ()
              (prog1
                  (char control-string 0)
-               (setf control-string (subseq control-string 1))))) 
+               (setf control-string (subseq control-string 1)))))
       (let (params atp colonp)
         (tagbody
          read-control
@@ -784,7 +791,7 @@ but wanted ~~~c in format string"
                 (go read-control))
 
                ((char= #\apostrophe next)
-                (need-more "~' at end of format") 
+                (need-more "~' at end of format")
                 (push (pop-char) params)
                 (need-more "~'char at end of format")
                 (go read-control))
@@ -801,19 +808,19 @@ but wanted ~~~c in format string"
                ((char= #\: next)
                 (setf colonp t)
                 (go read-control))
-               
+
                ((char= #\@ next)
                 (setf atp t)
                 (go read-control))
 
                ((char-equal #\T next)
-                (concatf output 
-                  (make-string (min 1 
+                (concatf output
+                  (make-string (min 1
                                     (or (last params)
-                                        1)) 
-                               :initial-element #\space))) 
-               
-               ((char-equal #\P next) 
+                                        1))
+                               :initial-element #\space)))
+
+               ((char-equal #\P next)
                 (let ((peek (pop arguments)))
                   (when colonp
                     (push peek arguments))
@@ -825,10 +832,10 @@ but wanted ~~~c in format string"
 
                ((char= #\~ next)
                 (concatf output "~"))
-               ((char= #\| next) 
+               ((char= #\| next)
                 (concatf output #(#\Page)))
                ((char= #\% next)
-                (concatf output 
+                (concatf output
                   (apply #'format-terpri (reverse params))))
                ((char= #\& next)
                 (concatf output
@@ -843,25 +850,25 @@ but wanted ~~~c in format string"
                         (nthcdr (- (length orig-arguments)
                                    (length arguments)
                                    delta)
-                                orig-arguments)))) 
+                                orig-arguments))))
                ((find next ";^")
                 (assert *nested-substrings* ()
                         "~~; and ~~^ only work within nested format groups")
                 (push-nested-substring output)
-                (push-nested-substring (list next 
+                (push-nested-substring (list next
                                              (when atp #\@)
                                              (when colonp #\:)))
                 (setq output nil))
                ((find next ")>]}")
-                (push-nested-substring output) 
+                (push-nested-substring output)
                 (multiple-value-setq (output arguments)
                   (funcall (pop *format-nesting*)
-                           next (pop *nested-substrings*) 
+                           next (pop *nested-substrings*)
                            atp colonp)))
-               ((find next "(<[{") 
-                (multiple-value-setq 
+               ((find next "(<[{")
+                (multiple-value-setq
                     (control-string output arguments)
-                  (format-nested next 
+                  (format-nested next
                                  control-string output arguments
                                  next atp colonp)))
                (t (concatf output
@@ -898,9 +905,9 @@ but wanted ~~~c in format string"
 
  FORMAT has many additional capabilities not described here. Consult the
  manual for details."
-  (let ((control control-string) 
+  (let ((control control-string)
         (output "")
-        (arguments format-arguments)) 
+        (arguments format-arguments))
     (while (not (equal "" control))
       (let ((tilde (position #\~ control)))
         (when (plusp tilde)

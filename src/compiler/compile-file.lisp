@@ -13,7 +13,7 @@
           (*compile-print-toplevels* ,verbosep)
           (*package* *package*)
           (source (read-whole-file ,filename))
-          (in (make-string-input-stream source))) 
+          (in (make-string-input-stream source)))
      ,@body))
 
 (defun possibly-valid-js-p (string)
@@ -57,7 +57,7 @@ Compiling form #~:d:~%~S~%from ~s~%Generated:~%~s"
     (if (possibly-valid-js-p compilation)
         (when (plusp (length compilation))
           (write-string compilation out))
-        (complain-about-illegal-chars 
+        (complain-about-illegal-chars
          form form-count filename compilation))))
 
 (defmacro  doforms ((form  stream)  &body body)        ;  FIXME: Not  to
@@ -85,7 +85,7 @@ forms if PRINT is set."
       (let (form-count last-form)
         (handler-case
             (doforms (form in)
-              (!compile-file/form form form-count 
+              (!compile-file/form form form-count
                                   (enough-namestring filename) out))
           (end-of-file (c)
             (error "~:(~a~) while reading ~a after ~:r form:~%~s"
@@ -142,6 +142,16 @@ forms if PRINT is set."
         (terpri stream)
         (!compile-file input stream)))))
 
+(defun file-set-execute-permission (filename)
+  "This is  a bit  implementation-specific, but  it will  try to  set +x
+permissions on FILENAME, if we  know how in the current implementation."
+  #+sbcl
+  (sb-posix:chmod filename #o755)
+  #+ecl
+  (ext:chmod filename #o755)
+  #- (or sbcl ecl)
+  (warn "You'll need to set executable permissions yourself"))
+
 (defun compile-application (files output &key shebang)
   (with-open-file (out output :direction :output :if-exists :supersede)
     (when shebang
@@ -152,7 +162,7 @@ forms if PRINT is set."
         (fresh-line out)
         (!compile-file file out))))
   (when shebang
-    (sb-posix:chmod output #o755)))
+    (file-set-execute-permission output)))
 
 (defun test-files ()
   (directory (source-pathname :wild

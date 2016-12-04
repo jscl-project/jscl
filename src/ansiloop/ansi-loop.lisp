@@ -45,6 +45,11 @@
 
 ;;; LOOP Iteration Macro
 
+#-(or jscl sbcl)
+(defun declaration-information (type environment)
+  (declare (ignore type environment))
+  (warn "No DECLARATION-INFORMATION available"))
+
 (defpackage :jscl/loop
   (:use :common-lisp)
   #+jscl (:shadowing-import-from :jscl/cltl2 :declaration-information)
@@ -1388,11 +1393,12 @@ collected result will be returned as the value of the LOOP."
 
 ;;;; Various FOR/AS Subdispatches
 
-;;;ANSI "FOR x = y [THEN z]" is sort of like the old Genera one when the THEN
-;;is omitted (other than being more stringent in its placement), and like
-;;the old "FOR x FIRST y THEN z" when the THEN is present.  I.e., the first
-;;initialization occurs in the loop body (first-step), not in the variable binding
-;;phase.
+;;;ANSI "FOR x = y [THEN z]" is sort of like the old Genera one when the
+;;;THEN
+;;is omitted  (other than  being more stringent  in its  placement), and
+;;like the old  "FOR x FIRST y  THEN z" when the THEN  is present. I.e.,
+;;the first initialization occurs in  the loop body (first-step), not in
+;;the variable binding phase.
 (defun loop-ansi-for-equals (var val data-type)
   (loop-make-iteration-variable var nil data-type)
   (cond ((loop-tequal (car *loop-source-code*) :then)

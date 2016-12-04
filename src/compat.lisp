@@ -220,5 +220,5 @@ metadata in it."
 
 (defun !fdefinition-soft (name)
   "Return  the  `FDEFINITION' of  NAME,  or  NIL  if  it does  not  have
-  a function value or is not a valid function name."
+ a function value or is not a valid function name."
   (ignore-errors (fdefinition name)))

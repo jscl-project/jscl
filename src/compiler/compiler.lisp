@@ -504,18 +504,17 @@ is NIL."
                                     keyword-arguments
                                     (ll-svars ll)))))
 
-        (lambda-name/docstring-wrapper 
+        (lambda-name/docstring-wrapper
          name documentation
          `(named-function ,(safe-js-fun-name name)
-                          (|values| 
+                          (|values|
                            ,@(mapcar (lambda (x)
                                        (translate-variable x))
                                      (append required-arguments
                                              optional-arguments)))
-                          ;; Check  number
-                          ;; of arguments
-                          ,(lambda-check-argument-count 
-                            n-required-arguments 
+                          ;; Check number of arguments
+                          ,(lambda-check-argument-count
+                            n-required-arguments
                             n-optional-arguments
                             (or rest-argument keyword-arguments))
                           ,(compile-lambda-optional ll)
@@ -645,21 +644,21 @@ association list ALIST in the same order."
 
 (defun constructor<-structure (object)
   (let* ((class (class-of object))
-         (constructor (intern (concatenate 'string (string :make-) 
+         (constructor (intern (concatenate 'string (string :make-)
                                            (symbol-name class))
                               (symbol-package class)))
-         (slot-names 
+         (slot-names
           #+sbcl
            (mapcar #'sb-mop:slot-definition-name
                    (sb-mop:class-slots (find-class class)))
-           #+jscl (mapcar #'jscl/mop:slot-definition-name 
+           #+jscl (mapcar #'jscl/mop:slot-definition-name
                           (jscl/mop:class-slots (fnd-class class))))
          (slot-values
           (mapcar (lambda (slot-name)
                     (literal (slot-value object slot-name)))
                   slot-names)))
-    (convert-1 (cons constructor 
-                     (alist-plist 
+    (convert-1 (cons constructor
+                     (alist-plist
                       (mapcar #'cons slot-names slot-values))))))
 
 (defun dump-complex-literal (sexp &optional recursivep)
@@ -796,8 +795,8 @@ association list ALIST in the same order."
   (cond
     ;; Toplevel form compiled by !compile-file.
     ((and *compiling-file* (zerop *convert-level*))
-     ;; If the situation `compile-toplevel' is given. The form is
-     ;; evaluated at compilation-time. 
+     ;; If  the  situation  `compile-toplevel'  is given.  The  form  is
+     ;; evaluated at compilation-time.
      (when (find :compile-toplevel situations)
        (warn "Compile-Toplevel: OK, evaluating in compiler ~s" body)
        (eval (cons 'progn body)))
@@ -808,7 +807,7 @@ association list ALIST in the same order."
        (convert-toplevel (cons 'progn body) *multiple-value-p*))
      (unless (or (find :compile-toplevel situations)
                  (find :load-toplevel situations))
-       (warn "EVAL-WHEN: During compilation, ignoring ~s" situations))) 
+       (warn "EVAL-WHEN: During compilation, ignoring ~s" situations)))
     ((find :execute situations)
      (convert `(progn ,@body) *multiple-value-p*))
     ((find :compile-toplevel situations)
@@ -993,11 +992,11 @@ let-binding-wrapper."
 (define-compilation return-from (name &optional value)
   (let* ((binding (or (lookup-in-lexenv name *environment* 'block)
                       (error "Return from unknown block `~S'." name)))
-         (multiple-value-p (member 'multiple-value 
-                                   (binding-declarations binding)))) 
+         (multiple-value-p (member 'multiple-value
+                                   (binding-declarations binding))))
     (push 'used (binding-declarations binding))
-    ;; The binding value is the name of a variable, whose value is the
-    ;; unique identifier of the block as exception. We can't use the
+    ;; The binding value  is the name of a variable,  whose value is the
+    ;; unique identifier  of the  block as exception.  We can't  use the
     ;; variable  name itself,  because it  might  not be  unique, so  we
     ;; capture it in a closure.
     `(selfcall
@@ -1122,7 +1121,7 @@ let-binding-wrapper."
   (convert form *multiple-value-p*))
 
 #+jscl
-(defmacro the (value-type form) 
+(defmacro the (value-type form)
   form)
 
 (define-transformation backquote (form)
@@ -1871,7 +1870,7 @@ just haven't gotten around to defining that macro at all, yet."
             (progn
               (warn "Substituting ~s for ~s" bang (car sexp))
               (funcall (!macro-function bang) sexp))
-            (emit-uncompilable-form 
+            (emit-uncompilable-form
              sexp
              "Failed to macroexpand ~s ~% in ~s~2%~a"
              (car sexp) sexp
@@ -1940,8 +1939,8 @@ just haven't gotten around to defining that macro at all, yet."
       ((and (consp sexp)
             (eql (car sexp) 'in-package)
             (= 2 (length sexp)))
-       (setf *package* (find-package-or-fail (second sexp))) 
-       (convert-toplevel 
+       (setf *package* (find-package-or-fail (second sexp)))
+       (convert-toplevel
         `(setq *package* (find-package-or-fail ,(second sexp)))))
       ;; Non-empty toplevel progn
       ((and (consp sexp)
@@ -1960,7 +1959,7 @@ just haven't gotten around to defining that macro at all, yet."
       (t
        (when *compile-print-toplevels*
          (let ((form-string (prin1-to-string sexp)))
-           (format t "~&;; Compiling ~a…" (truncate-string 
+           (format t "~&;; Compiling ~a…" (truncate-string
                                            (substitute #\space #\newline
                                                        form-string)
                                            120))))

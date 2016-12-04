@@ -26,7 +26,7 @@
 
 (defun make-structure% (type &rest fields)
   (let ((struct (make-storage-vector (length fields)
-                                     (cons 'structure-object type)))) 
+                                     (cons 'structure-object type))))
     (let ((i 0))
       (dolist (field fields)
         (storage-vector-set struct i field)
@@ -42,7 +42,7 @@
     (error "Not a structure: ~s" object))
   (cdr (storage-vector-kind object)))
 
-(defun assert-struct-type (predicate type-name object) 
+(defun assert-struct-type (predicate type-name object)
   (assert (functionp predicate) (predicate)
           "Predicate `~s' is not a function" predicate)
   (assert (symbolp type-name) (type-name)
@@ -124,11 +124,11 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
 (defun defstruct/make-accessor-name (struct-name slot-name)
   (assert (or (stringp struct-name)
               (symbolp struct-name)) (struct-name)
-              "Structure type name `~s' must be a string designator" 
+              "Structure type name `~s' must be a string designator"
               struct-name)
   (assert (or (stringp slot-name)
               (symbolp slot-name)) (slot-name)
-              "Slot type name `~s' must be a string designator" 
+              "Slot type name `~s' must be a string designator"
               slot-name)
   (intern (concatenate 'string
                        (string struct-name)

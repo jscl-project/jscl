@@ -56,7 +56,7 @@
 ;;; UNQUOTE-SPLICING from  the source before  we reach them. If  we ever
 ;;; reach one,  it must have  occurred outside  a BACKQUOTE form,  so we
 ;;; signal the appropriate error.
-(defmacro unquote (x) 
+(defmacro unquote (x)
   (error "Comma not inside a backquote: ,~S" x))
 (defmacro unquote-splicing (x)
   (error "Comma-atsign not inside a backquote: ,@~S" x))
@@ -141,16 +141,16 @@
             x
             (cons a d)))))
 
-;;; This predicate is true of a form that when read looked
-;;; like %@foo or %.foo.
+;;; This predicate is true of a form that when read looked like %@foo or
+;;; %.foo.
 (defun bq-splicing-frob (x)
   (and (consp x)
        (or (eq (car x) *comma-atsign*)
            ;; (eq (car x) *comma-dot*)
            )))
 
-;;; This predicate is true of a form that when read
-;;; looked like %@foo or %.foo or just plain %foo.
+;;; This predicate is true of a form that when read looked like %@foo or
+;;; %.foo or just plain %foo.
 (defun bq-frob (x)
   (and (consp x)
        (or (eq (car x) *comma*)

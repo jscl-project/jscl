@@ -23,9 +23,17 @@
   (:use :cl)
   #+sbcl (:use :sb-gray :sb-mop)
   #+clisp (:use :gray :mop)
-  #+ecl (:use :gray :clos)
+  #+ecl (:use :clos)
+  #+ecl (:shadowing-import-from :gray
+                                #:stream-element-type
+                                #:open-stream-p
+                                #:output-stream-p
+                                #:input-stream-p
+                                #:streamp
+                                #:close)
+  #+ecl (:use :gray)
   #+lispworks (:use :gray :clos)
-  #-(or sbcl clisp ecl lispworks) 
+  #-(or sbcl clisp ecl lispworks)
   (:use #.(warn "You will probably need to add your Gray Streams ~
 and MOP into JSCL USE list"))
   (:export #:bootstrap #:bootstrap-core
@@ -48,7 +56,7 @@ implementation, you may never need to access this package directly."))
 
 (defpackage :jscl/cltl2
   (:use :cl :jscl)
-  (:nicknames :cltl2)
+  #+jscl (:nicknames :cltl2)
   (:export #:declaration-information)
   (:documentation  "Functions  defined  in Common  Lisp:  The  Language,
 Second Edition  (CLtL2) which are  unique to that  book (ie, not  in the
@@ -59,7 +67,7 @@ identifying them (and their provenance) easier."))
 
 (defpackage :jscl/mop
   (:use :cl :jscl)
-  (:nicknames :mop)
+  #+jscl (:nicknames :mop)
   (:export)
   (:documentation  "Functions  defined in  the  Art  of the  Meta-Object
  Protocol (MOP) which are unique to that manuscript.

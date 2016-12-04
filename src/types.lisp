@@ -22,9 +22,9 @@
 
 (defmacro alias-!-accessors (class)
   (let ((cl-name (intern (remove #\! (string class)))))
-    `(progn 
+    `(progn
        ,@(loop for slot-name in (mapcar #'slot-definition-name
-                                        (class-slots 
+                                        (class-slots
                                          (find-class class)))
             for accessor = (make-accessor-name cl-name slot-name)
             for !accessor = (make-accessor-name class slot-name)
@@ -216,7 +216,7 @@ invoked. In that case it will store into PLACE and start over."
      collect first))
 
 (defmacro !typecase (value &rest clauses)
-  "A fair approximation of TYPECASE for limited cases" 
+  "A fair approximation of TYPECASE for limited cases"
   (let ((evaluated (gensym "TYPECASE-EVALUATED-"))
         (unique-types (typecase-unique-types clauses)))
     (let ((duplicated (find-duplicates unique-types)))
@@ -227,7 +227,7 @@ invoked. In that case it will store into PLACE and start over."
        (cond
          ,@(mapcar (lambda (clause)
                      (unless (listp clause)
-                       (error "Clause in TYPECASE is not a list? ~a" 
+                       (error "Clause in TYPECASE is not a list? ~a"
                               clause))
                      (destructuring-bind (types &rest body) clause
                        `((typep ,evaluated ',(if (listp types)
@@ -241,12 +241,12 @@ invoked. In that case it will store into PLACE and start over."
 
 (defmacro !etypecase (value &rest clauses)
   (let ((evaluated (gensym "ETYPECASE-VALUE-"))
-        (unique-types (typecase-unique-types clauses))) 
+        (unique-types (typecase-unique-types clauses)))
     `(let ((,evaluated ,value))
        (!typecase ,evaluated
                   ,@clauses
                   (t (error "~S (type: ~s) fell through etypecase expression.
-Expected one of: ~{~s~^, ~}" 
+Expected one of: ~{~s~^, ~}"
                             ,evaluated (type-of ,evaluated)
                             ,(sort unique-types #'string<
                                    :key #'symbol-name)))))))
@@ -261,7 +261,7 @@ Expected one of: ~{~s~^, ~}"
          (cond
            ((or (eql '* min)
                 (null min)) t)
-           ((and (consp min) 
+           ((and (consp min)
                  (numberp (car min))
                  (null (cdr min))
                  (< (car min) object)))
@@ -269,7 +269,7 @@ Expected one of: ~{~s~^, ~}"
          (cond
            ((or (eql '* max)
                 (null max)) t)
-           ((and (consp max) 
+           ((and (consp max)
                  (numberp (car max))
                  (null (cdr max))
                  (> (car max) object)))
@@ -348,7 +348,7 @@ star)."
          a b))
 
 (defun normalize-array-dimensions-spec (dimensions)
-  (etypecase dimensions 
+  (etypecase dimensions
     (integer dimensions)
     (cons (if (null (cdr dimensions))
               (if (null (car dimensions))
@@ -362,12 +362,12 @@ star)."
                  (array-dimensions object))))
     (if (stringp object)
         (and (find element-type '(t character))
-             (cond 
+             (cond
                ((null dimensions) t)
                ((eql dimensions '*) t)
-               ((integerp dimensions) (= (length object) dim)) 
-               (t nil))) 
-        (and (subtypep (array-element-type object) element-type) 
+               ((integerp dimensions) (= (length object) dim))
+               (t nil)))
+        (and (subtypep (array-element-type object) element-type)
              (or (null dimensions)
                  (if (consp dim)
                      (and (= (length my-dim)
@@ -383,7 +383,7 @@ star)."
 (dolist (type-name +standard-type-specifiers+)
   (push (#+jscl make-built-in-class
                 #-jscl make-!built-in-class
-                :name type-name) *classes*) 
+                :name type-name) *classes*)
   (unless (subtypep type-name t)
     (warn "Standard type ~s is not properly defined" type-name)))
 
@@ -497,7 +497,7 @@ star)."
   (destructuring-bind (class &rest subclasses) hierarchy
     (dolist (subclass subclasses)
       (let ((metaclass (find-built-in-class subclass)))
-        (push class (built-in-class-superclasses 
+        (push class (built-in-class-superclasses
                      metaclass))))))
 
 (dolist (hierarchy +standard-class-subclasses+)
