@@ -48,9 +48,8 @@
               expansion
               (js-macroexpand expansion))))
       js))
-
 
-(defconstant no-comma 12)
+(defconstant no-comma 12)               ; ?? ☠
 
 (defvar *js-output* t)
 
@@ -58,12 +57,12 @@
 
 
 
-;;; Two  seperate functions  are needed  for escaping  strings: One  for
+;;; Two  separate functions  are needed  for escaping  strings: One  for
 ;;;  producing JavaScript  string literals  (which are singly  or doubly
 ;;;  quoted) And one  for producing Lisp strings (which  are only doubly
 ;;;  quoted)
 ;;;
-;;; The same function would suffice  for both, but for javascript string
+;;; The same function would suffice  for both (except that JavaScript strings require all sorts of other things to be escaped, which Lisp strings do not), but for JavaScript string
 ;;; literals it is  neater to use either depending on  the context, e.g:
 ;;; foo's  → "foo's"  "foo" → '"foo"' which  avoids having  to escape
 ;;; quotes where possible
@@ -87,13 +86,13 @@
                         (if escape-single-quote-p
                             (backslash #\apostrophe)
                             (add #\apostrophe)))
-                       (#\\      	(backslash #\\))
-                       (#\newline 	(backslash #\n))
-                       (#\return 	(backslash #\r))
-                       (#\tab 	(backslash #\t))
-                       (#\page 	(backslash #\f))
-                       (#\backspace 	(backslash #\b))
-                       (#\null 	(backslash #\0))
+                       (#\\ (backslash #\\))
+                       (#\newline (backslash #\n))
+                       (#\return (backslash #\r))
+                       (#\tab (backslash #\t))
+                       (#\page (backslash #\f))
+                       (#\backspace (backslash #\b))
+                       (#\null (backslash #\0))
                        (otherwise
                         (cond
                           ((<= 1 (char-code ch) 26)
@@ -127,7 +126,7 @@
          (concat #(#\apostrophe)
                  (%js-escape-string string t)
                  #(#\apostrophe)))))))
-
+
 (defun js-format (fmt &rest args)
   (apply #'format *js-output* fmt args))
 
@@ -185,7 +184,7 @@ used as identifiers; for example, “package” and “if”"
         (js-identifier form))))
     (t
      (error "Unknown Javascript syntax ~S." form))))
-
+
 (defun js-vector-initializer (vector)
   (let ((size (length vector)))
     (js-format "[")
@@ -275,8 +274,8 @@ used as identifiers; for example, “package” and “if”"
 
 (defun js-operator-expression (op args precedence associativity operand-order)
   "This is the  most complicated function of the generator.  It takes an
-operator expression  and generates Javascript  for it. It  will consider
-associativity    and   precedence    in    order    not   to    generate
+operator expression  and generates JavaScript  for it. It  will consider
+associativity    and   precedence    in    order    to   not    generate
 unnecessary parentheses."
   (let ((op1 (car args))
         (op2 (cadr args)))
@@ -297,7 +296,11 @@ unnecessary parentheses."
          (js-identifier accessor)))
       ;; Function call
       (call
-       (js-expr (car args) 1)
+       (js-expr (if (and (consp (car args))
+                         (eql (caar args) 'lambda))
+                    (compile-lambda (second (car args)) (cddr (car args)))
+                    (car args))
+                1)
        (js-format "(")
        (when (cdr args)
          (js-expr (cadr args) no-comma)
@@ -436,8 +439,8 @@ unnecessary parentheses."
       ((vectorp form)
        (js-vector-initializer form))
       ((consp form)
-       (js-operator-expression (car form) (cdr form) precedence associativity operand-order)))))
-
+       (js-operator-expression (car form) (cdr form)
+                               precedence associativity operand-order)))))
 
 ;;; Statements generators
 ;;;

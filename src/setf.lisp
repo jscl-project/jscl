@@ -32,10 +32,20 @@
           (assert (consp place) (place)
                   "SETF PLACE not a SYMBOL nor CONS: ~s" place)
           (let* ((access-fn (car place))
+                 (setf-function (!fdefinition-soft (list 'setf access-fn)))
                  (expander (cdr (assoc access-fn *setf-expanders*))))
-            (unless expander
-              (error "Unknown generalized reference: ~s" access-fn))
-            (apply expander (cdr place)))))))
+            (cond (setf-function
+                   (let ((value (gensym "NEW-VALUE-")))
+                     (values nil
+                             nil
+                             `(,value)
+                             `((setf ,access-fn) ,(rest place) ,value)
+                             place)))
+                  (expander
+                   (apply expander (cdr place)))
+                  (t
+                   (error "Unknown generalized reference: ~s" access-fn))))))))
+
 (fset 'get-setf-expansion (fdefinition '!get-setf-expansion))
 
 (defmacro define-setf-expander (access-fn lambda-list &body body)
@@ -81,7 +91,8 @@
   (defun setf/split-into-pairs (pairs)
     `(progn
        ,@(do ((pairs pairs (cddr pairs))
-              (result '() (cons `(setf ,(car pairs) ,(cadr pairs)) result)))
+              (result '()
+                      (cons `(setf ,(car pairs) ,(cadr pairs)) result)))
              ((null pairs)
               (reverse result)))))
 

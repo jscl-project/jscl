@@ -48,8 +48,8 @@
 
 ;;; DESCRIBE
 
-;; TODO: this needs DESCRIBE-OBJECT as generic method
-;; TODO: indentation for nested paragraphs
+;; TODO: this needs DESCRIBE-OBJECT  as generic method TODO: indentation
+;; for nested paragraphs
 (defun describe (object &optional stream)
   (declare (ignore stream))
   (typecase object

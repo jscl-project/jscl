@@ -97,17 +97,20 @@
          (error "End of file in READ-CHAR"))
         (t eof-value)))
 
-#+jscl (defun peek-char  (&optional (peek-type nil) (stream *standard-input*)
+#+jscl (defun peek-char  (&optional (peek-type nil)
+                                    (stream *standard-input*)
                                     (eof-error-p t) (eof-value nil))
          (%peek-char peek-type stream eof-error-p eof-value))
-#+jscl (defun read-char (stream &optional (eof-error-p t) (eof-value nil))
+#+jscl (defun read-char (stream &optional (eof-error-p t)
+                                          (eof-value nil))
          (%read-char stream eof-error-p eof-value))
 
 
 (defun whitespacep (ch)
   (find ch #(#\Space #\Tab #\Newline
              #\Return #\Page
-             #\LINE_TABULATION)))
+             #+ecl #\VT
+             #-ecl #\LINE_TABULATION)))
 
 (defun skip-whitespaces (stream)
   (let (ch)
@@ -121,6 +124,9 @@
       (find ch "(\")")))
 
 (defun read-until (stream func)
+  "Read from STREAM into a string, until the predicate FUNC returns true
+when passed  the value of  the next  character. The character  passed to
+FUNC will NOT be returnings."
   (let ((string (make-array 80 :element-type 'character
                             :adjustable t :fill-pointer 0))
         (ch (peek-char nil stream nil nil)))
@@ -642,18 +648,28 @@ rewrite `#(v1 v2…) as (apply #'vector `(v1 v2…))"))
         (setf *labelled-objects* save-labelled-objects)
         (setf *fixup-locations* save-fixup-locations)))))
 
-(defun ls-read-from-string (string &optional (eof-error-p t) eof-value
-                            &key (start 0) (end nil) (preserve-whitespace t))
-  (funcall (if preserve-whitespace
-               #'ls-read  ; TODO: READ-PRESERVING-WHITESPACE
-               #'ls-read)
-           (make-string-input-stream string start (or end (length string)))
-           eof-error-p eof-value))
-
 #+jscl
+(fset 'read #'ls-read)
+#+ (or)
 (defun read (&optional (stream *standard-input*) (eof-error-p t) (eof-value nil) (recursive-p nil))
   (ls-read stream eof-error-p eof-value recursive-p))
 
+(locally
+    ;; Style-Warning for having  &optional and &key in  the same λ-list,
+    ;; but we're mimicking the CL:Read-from-string function, so we don't
+    ;; care about that particular warning.
+    #+sbcl (declare (sb-ext:muffle-conditions style-warning))
+    (defun ls-read-from-string (string
+                                &optional (eof-error-p t) eof-value
+                                &key (start 0) (end nil)
+                                     (preserve-whitespace t))
+      (funcall (if preserve-whitespace
+                   #'read-preserving-whitespace
+                   #'ls-read)
+               (make-string-input-stream string start (or end (length string)))
+               eof-error-p eof-value)))
 #+jscl
+(fset 'read-from-string #'ls-read-from-string)
+#+ (or)
 (defun read-from-string (string &optional (eof-errorp t) eof-value)
   (ls-read-from-string string eof-errorp eof-value))

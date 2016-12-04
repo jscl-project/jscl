@@ -48,9 +48,16 @@
 
 ;;; LOOP Iteration Macro
 
+#-(or jscl sbcl)
+(defun declaration-information (type environment)
+  (declare (ignore type environment))
+  (warn "No DECLARATION-INFORMATION available"))
+
 (defpackage :jscl/loop
-  (:use :common-lisp #+sbcl :sb-cltl2 #+jscl :jscl/cltl2))
-  
+  (:use :common-lisp)
+  #+jscl (:shadowing-import-from :jscl/cltl2 :declaration-information)
+  #+sbcl (:shadowing-import-from :sb-cltl2 :declaration-information))
+
 (in-package :jscl/loop)
 
 #.(assert (equal (package-name *package*)
@@ -190,44 +197,44 @@
                                &environment env)
   (setq form (#+jscl jscl::!macroexpand
                      #-jscl macroexpand form env))
-  (flet ((cdr-wrap (form n)
-           (declare (fixnum n))
-           (do () ((<= n 4) (setq form `(,(case n
-                                            (1 'cdr)
-                                            (2 'cddr)
-                                            (3 'cdddr)
-                                            (4 'cddddr))
-                                          ,form)))
-             (setq form `(cddddr ,form) n (- n 4)))))
-    (let ((tail-form form) (ncdrs nil))
-      ;; Determine  if  the  form  being  constructed  is  a  list  of
-      ;; known length.
-      (when (consp form)
-        (cond ((eq (car form) 'list)
-               (setq ncdrs (1- (length (cdr form)))))
-              ((member (car form) '(list* cons))
-               (when (and (cddr form) (member (car (last form)) '(nil 'nil)))
-                 (setq ncdrs (- (length (cdr form)) 2))))))
-      (let ((answer
-             (cond ((null ncdrs)
-                    `(when (setf (cdr ,tail-var) ,tail-form)
-                       (setq ,tail-var (last (cdr ,tail-var)))))
-                   ((< ncdrs 0) (return-from loop-collect-rplacd nil))
-                   ((= ncdrs 0)
-                    ;;@@@@  Here  we  have  a choice  of  two  idioms:
-                    ;; (rplacd tail (setq  tail tail-form)) (setq tail
-                    ;; (setf (cdr  tail) tail-form)). Genera  and most
-                    ;; others I have seen do better with the former.
-                    `(rplacd ,tail-var (setq ,tail-var ,tail-form)))
-                   (t `(setq ,tail-var ,(cdr-wrap `(setf (cdr ,tail-var) ,tail-form)
-                                                  ncdrs))))))
-        ;; If not using  locatives or something similar  to update the
-        ;; user's head variable, we've got  to set it... It's harmless
-        ;; to repeatedly  set it unconditionally, and  probably faster
-        ;; than checking.
-        (when user-head-var
-          (setq answer `(progn ,answer
-                               (setq ,user-head-var (cdr ,head-var)))))
+    (flet ((cdr-wrap (form n)
+             (declare (fixnum n))
+             (do () ((<= n 4) (setq form `(,(case n
+                                              (1 'cdr)
+                                              (2 'cddr)
+                                              (3 'cdddr)
+                                              (4 'cddddr))
+                                            ,form)))
+               (setq form `(cddddr ,form) n (- n 4)))))
+      (let ((tail-form form) (ncdrs nil))
+        ;; Determine  if  the  form  being  constructed  is  a  list  of
+        ;; known length.
+        (when (consp form)
+          (cond ((eq (car form) 'list)
+                 (setq ncdrs (1- (length (cdr form)))))
+                ((member (car form) '(list* cons))
+                 (when (and (cddr form) (member (car (last form)) '(nil 'nil)))
+                   (setq ncdrs (- (length (cdr form)) 2))))))
+        (let ((answer
+               (cond ((null ncdrs)
+                      `(when (setf (cdr ,tail-var) ,tail-form)
+                         (setq ,tail-var (last (cdr ,tail-var)))))
+                     ((< ncdrs 0) (return-from loop-collect-rplacd nil))
+                     ((= ncdrs 0)
+                      ;;@@@@  Here  we  have  a choice  of  two  idioms:
+                      ;; (rplacd tail (setq  tail tail-form)) (setq tail
+                      ;; (setf (cdr  tail) tail-form)). Genera  and most
+                      ;; others I have seen do better with the former.
+                      `(rplacd ,tail-var (setq ,tail-var ,tail-form)))
+                     (t `(setq ,tail-var ,(cdr-wrap `(setf (cdr ,tail-var) ,tail-form)
+                                                    ncdrs))))))
+          ;; If not using  locatives or something similar  to update the
+          ;; user's head variable, we've got  to set it... It's harmless
+          ;; to repeatedly  set it unconditionally, and  probably faster
+          ;; than checking.
+          (when user-head-var
+            (setq answer `(progn ,answer
+                                 (setq ,user-head-var (cdr ,head-var)))))
         answer))))
 
 (defmacro loop-collect-answer (head-var &optional user-head-var)
@@ -438,36 +445,36 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
 
 (defmacro loop-really-desetq (&rest var-val-pairs
                               &environment env)
-  (labels ((find-non-null (var)
-             ;; see if there's any non-null  thing here recurse if the
-             ;; list element is itself a list
-             (do ((tail var)) ((not (consp tail)) tail)
-               (when (find-non-null (pop tail)) (return t))))
-           (loop-desetq-internal (var val &optional temp)
-              ;; returns a list of actions to be performed
-              (typecase var
-                (null
-                 (when (consp val)
-                   ;; don't lose possible side-effects
-                   (if (eq (car val) 'prog1)
-                       ;; these can  come from psetq or  desetq below.
-                       ;; throw away the value, keep the side-effects.
-                       ;; Special    case   is    for   handling    an
-                       ;; expanded POP.
-                       (mapcan (lambda (x)
-                                 (and (consp x)
-                                      (or (not (eq (car x) 'car))
-                                          (not (symbolp (cadr x)))
+    (labels ((find-non-null (var)
+               ;; see if there's any non-null  thing here recurse if the
+               ;; list element is itself a list
+               (do ((tail var)) ((not (consp tail)) tail)
+                 (when (find-non-null (pop tail)) (return t))))
+             (loop-desetq-internal (var val &optional temp)
+                ;; returns a list of actions to be performed
+                (typecase var
+                  (null
+                   (when (consp val)
+                     ;; don't lose possible side-effects
+                     (if (eq (car val) 'prog1)
+                         ;; these can  come from psetq or  desetq below.
+                         ;; throw away the value, keep the side-effects.
+                         ;; Special    case   is    for   handling    an
+                         ;; expanded POP.
+                         (mapcan (lambda (x)
+                                   (and (consp x)
+                                        (or (not (eq (car x) 'car))
+                                            (not (symbolp (cadr x)))
                                           (not (symbolp (setq x (#-jscl macroexpand
                                                                         #+jscl jscl::!macroexpand x env)))))
-                                      (cons x nil)))
-                               (cdr val))
-                       `(,val))))
-                (cons
-                 (let* ((car (car var))
-                        (cdr (cdr var))
-                        (car-non-null (find-non-null car))
-                        (cdr-non-null (find-non-null cdr)))
+                                        (cons x nil)))
+                                 (cdr val))
+                         `(,val))))
+                  (cons
+                   (let* ((car (car var))
+                          (cdr (cdr var))
+                          (car-non-null (find-non-null car))
+                          (cdr-non-null (find-non-null cdr)))
                    (cond 
                      (cdr-non-null
                       (let* ((temp-p temp)
@@ -484,16 +491,16 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
                             `((let ((,temp ,val))
                                 ,@body)))))
                      (car-non-null
-                      ;; no cdring to do 
-                      (loop-desetq-internal car `(car ,val) temp)))))
-                (otherwise
-                 (unless (eq var val)
-                   `((setq ,var ,val)))))))
-    (do ((actions))
-        ((null var-val-pairs)
-         (if (null (cdr actions)) (car actions) `(progn ,@(nreverse actions))))
-      (setq actions (revappend
-                     (loop-desetq-internal (pop var-val-pairs) (pop var-val-pairs))
+                           ;; no cdring to do
+                           (loop-desetq-internal car `(car ,val) temp)))))
+                  (otherwise
+                   (unless (eq var val)
+                     `((setq ,var ,val)))))))
+      (do ((actions))
+          ((null var-val-pairs)
+           (if (null (cdr actions)) (car actions) `(progn ,@(nreverse actions))))
+        (setq actions (revappend
+                       (loop-desetq-internal (pop var-val-pairs) (pop var-val-pairs))
                      actions)))))
 
 ;;;; LOOP-local variables
@@ -604,8 +611,8 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
 
 ;;;; Code Analysis Stuff
 
-(defun loop-constant-fold-if-possible (form &optional expected-type) 
-  (let ((new-form form) constantp constant-value)
+(defun loop-constant-fold-if-possible (form &optional expected-type)
+  (let ((new-form form) (constantp nil) (constant-value nil))
     (when (setq constantp (constantp new-form))
       (setq constant-value (eval new-form)))
     (when (and constantp expected-type)
@@ -761,7 +768,8 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
            (declare (type list l))
            (let ((n 0))
              (declare (fixnum n))
-             (dolist (x l n) (incf n (estimate-code-size-1 x env)))))) 
+             (dolist (x l n) (incf n (estimate-code-size-1 x env))))))
+    (declare (ftype (function (list) fixnum) list-size))
     (cond ((constantp x env) 1)
           ((symbolp x) (multiple-value-bind (new-form expanded-p)
                            (#-jscl macroexpand-1
@@ -803,7 +811,8 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
                      ((eq fn 'return-from) (1+ (estimate-code-size-1 (third x) env)))
                      ((or (special-operator-p fn) (member fn *estimate-code-size-punt*))
                       (throw 'estimate-code-size nil))
-                     (t (multiple-value-bind (new-form expanded-p) (jscl::!macroexpand-1 x env)
+                     (t (multiple-value-bind (new-form expanded-p) (#-jscl macroexpand-1
+                                                                           #+jscl jscl::!macroexpand-1 x env)
                           (if expanded-p
                               (estimate-code-size-1 new-form env)
                               (f 3))))))))
@@ -1394,11 +1403,12 @@ collected result will be returned as the value of the LOOP."
 
 ;;;; Various FOR/AS Subdispatches
 
-;;;ANSI "FOR x = y [THEN z]" is sort of like the old Genera one when the THEN
-;;is omitted (other than being more stringent in its placement), and like
-;;the old "FOR x FIRST y THEN z" when the THEN is present.  I.e., the first
-;;initialization occurs in the loop body (first-step), not in the variable binding
-;;phase.
+;;;ANSI "FOR x = y [THEN z]" is sort of like the old Genera one when the
+;;;THEN
+;;is omitted  (other than  being more stringent  in its  placement), and
+;;like the old  "FOR x FIRST y  THEN z" when the THEN  is present. I.e.,
+;;the first initialization occurs in  the loop body (first-step), not in
+;;the variable binding phase.
 (defun loop-ansi-for-equals (var val data-type)
   (loop-make-iteration-variable var nil data-type)
   (cond ((loop-tequal (car *loop-source-code*) :then)
@@ -1519,7 +1529,7 @@ collected result will be returned as the value of the LOOP."
 
 ;;;; Iteration Paths
 
-(jscl::def!struct (loop-path
+(defstruct (loop-path
                      (:copier nil)
                      (:predicate nil))
     names
@@ -1942,19 +1952,15 @@ collected result will be returned as the value of the LOOP."
               (go ,tag))))))
 
 ;; INTERFACE: ANSI
-(defmacro !loop (&rest keywords-and-forms)
+(defmacro !loop (&rest keywords-and-forms &environment env)
   #+Genera (declare (compiler:do-not-record-macroexpansions)
                     (zwei:indentation . zwei:indent-loop))
-  (loop-standard-expansion keywords-and-forms
-     jscl::*environment* *loop-ansi-universe*))
+  (loop-standard-expansion keywords-and-forms env *loop-ansi-universe*))
 
 #+jscl
 (defmacro loop (&rest keywords-and-forms)
   `(!loop ,@keywords-and-forms))
 
 #+jscl
-(progn
-  (defmacro loop (&rest keywords-and-forms)
-    `(jscl/loop::!loop ,@keywords-and-forms))
   (defmacro loop-finish ()
-    `(jscl/loop::!loop-finish)))
+    `(jscl/loop::!loop-finish))

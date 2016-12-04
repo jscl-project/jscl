@@ -13,24 +13,29 @@
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
-(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+(in-package :jscl)
 
 (/debug "loading package.lisp!")
 
 (defvar *package-table*
-  (%js-vref "packages"))
+  #+jscl (%js-vref "packages"))
 
+#+jscl
 (defun list-all-packages ()
   (let ((packages nil))
-    (map-for-in (lambda (name) (pushnew name packages))
-                *package-table*)
+    (map-for-in (lambda (name) (pushnew name packages)) *package-table*)
     packages))
 
+#+jscl
 (defun find-package (package-designator)
   (if (packagep package-designator)
       package-designator
       (jscl/ffi:oget *package-table* (string package-designator))))
 
+#+jscl
+(defvar *package* (find-package "CL-USER"))
+
+#+jscl
 (defun delete-package (package-designator)
   ;; TODO:  Signal a  correctable error  in case  the package-designator
   ;; does not name  a package. TODO: Implement  unuse-package and remove
@@ -38,6 +43,7 @@
   (delete-property (package-name (find-package-or-fail package-designator))
                    *package-table*))
 
+#+jscl
 (defun %make-package (name use &optional nicknames)
   (when (find-package name)
     (error "A package namded `~a' already exists." name))
@@ -58,14 +64,17 @@
       (pushnew package result :test #'eq))
     (reverse result)))
 
+#+jscl
 (defun make-package (name &key use)
   (%make-package
    (string name)
    (resolve-package-list use)))
 
+#+jscl
 (defun packagep (x)
   (and (objectp x) (in "symbols" x)))
 
+#+jscl
 (defun package-name (package-designator)
   (let ((package (find-package-or-fail package-designator)))
     (jscl/ffi:oget package "packageName")))
@@ -74,6 +83,7 @@
   (let ((package (find-package-or-fail package-designator)))
     (jscl/ffi:oget package "symbols")))
 
+#+jscl
 (defun package-use-list (package-designator)
   (let ((package (find-package-or-fail package-designator)))
     (jscl/ffi:oget package "use")))
@@ -83,20 +93,23 @@
     (jscl/ffi:oget package "exports")))
 
 (defvar *user-package*
-  (make-package "CL-USER" :use (list (find-package "CL"))))
+  (or (find-package :cl-user)
+      (make-package "COMMON-LISP-USER"
+                    :nicknames (list "CL-USER")
+                    :use (list (find-package "CL")))))
 
 (defvar *keyword-package*
-  (find-package "KEYWORD"))
+  (or (find-package "KEYWORD")
+      (make-package "KEYWORD")))
 
-
-(defun keywordp (x)
+(define-cl-fun keywordp (x)
   (and (symbolp x) (eq (symbol-package x) *keyword-package*)))
 
-(defvar *package* (find-package "CL-USER"))
-
-(defmacro in-package (string-designator)
+(defmacro !in-package (string-designator)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (setq *package* (find-package-or-fail ',string-designator))))
+#+jscl (defmacro in-package (package-name)
+         `(!in-package ,package-name))
 
 (eval-when (:compile-toplevel :execute)
   (defmacro pushcdr (list place)
@@ -117,7 +130,7 @@
            (warn "Ignoring package documentation (FIXME)"))))
       (list use exports nicknames))))
 
-(defmacro defpackage (package &rest options)
+(defun defpackage-real% (package &rest options)
   (destructuring-bind (use exports nicknames)
       (defpackage/parse-options options)
     `(progn
@@ -127,20 +140,25 @@
                      `(export (intern ,(string symbol) (find-package ,(string package)))))
                    exports))
        (eval-when (:compile-toplevel)
-         (make-package ',(string package) :use ',use))
+         (make-package ',(string package) :use ',use :nicknames ',nicknames))
        ,@(mapcar (lambda (symbol)
                    (export (intern (symbol-name symbol) package)))
                  exports))))
 
+(defmacro !defpackage (package &rest options)
+  (defpackage-real% package options))
+#+jscl (defmacro defpackage (package &rest options)
+         `(!defpackage ,package ,@options))
 
 (defun redefine-package (package use &optional nicknames)
   (setf (jscl/ffi:oget package "use")
         (remove-duplicates (append (jscl/ffi:oget package "use") use)
                            :test #'equal))
   (setf (jscl/ffi:oget package "nicknames")
-        (remove-duplicates (append (jscl/ffi:oget package "nicknames") nicknames)
+        (remove-duplicates (append (jscl/ffi:oget package "nicknames")
+                                   nicknames)
                            :test #'equal))
-  (dolist (nickname (nicknames))
+  (dolist (nickname nicknames)
     (setf (jscl/ffi:oget *package-table* nickname) package))
   package)
 
@@ -151,6 +169,7 @@
         (redefine-package package use)
         (make-package name :use use :nicknames nicknames))))
 
+#+jscl
 (defun find-symbol (name &optional (package *package*))
   (let* ((package (find-package-or-fail package))
          (externals (%package-external-symbols package))
@@ -170,6 +189,7 @@
   "It is a function to call when  a symbol is interned. The function is
 invoked with the already-interned symbol as argument.")
 
+#+jscl
 (defun intern (name &optional (package *package*))
   (let ((package (find-package-or-fail package)))
     (multiple-value-bind (symbol foundp)
@@ -188,57 +208,73 @@ invoked with the already-interned symbol as argument.")
               (setf (jscl/ffi:oget symbols name) symbol)
               (values symbol nil)))))))
 
-(defun symbol-package (symbol)
+(define-cl-fun symbol-package (symbol)
   (unless (symbolp symbol)
     (error "`~S' is not a symbol." symbol))
   (jscl/ffi:oget symbol "package"))
 
+#+jscl
 (defun export (symbols &optional (package *package*))
   (let ((exports (%package-external-symbols package)))
     (dolist (symb symbols t)
       (setf (jscl/ffi:oget exports (symbol-name symb)) symb))))
 
+#+jscl
 (defun %map-external-symbols (function package)
   (map-for-in function (%package-external-symbols package)))
 
+#+jscl
 (defun %map-symbols (function package)
   (map-for-in function (%package-symbols package))
   (dolist (used (package-use-list package))
     (%map-external-symbols function used)))
 
+#+jscl
 (defun %map-all-symbols (function)
   (map-for-in (lambda (package)
                 (map-for-in function (%package-symbols package)))
               *package-table*))
 
+#+jscl
 (defun %map-all-external-symbols (function)
   (map-for-in (lambda (package)
                 (map-for-in function (%package-external-symbols package)))
               *package-table*))
 
-(defmacro do-symbols ((var &optional (package '*package*) result-form)
-                      &body body)
+(defmacro !do-symbols ((var &optional (package '*package*) result-form)
+                       &body body)
   `(block nil
      (%map-symbols
       (lambda (,var) ,@body)
       (find-package ,package))
      ,result-form))
+#+jscl (defmacro do-symbols ((var &optional (package '*package*) result-form)
+                             &body body)
+         `(!do-symbols (,var ,package ,result-form) ,@body))
 
-(defmacro do-external-symbols ((var &optional (package '*package*)
-                                    result-form)
-                               &body body)
+(defmacro !do-external-symbols ((var &optional (package '*package*)
+                                     result-form)
+                                &body body)
   `(block nil
      (%map-external-symbols
       (lambda (,var) ,@body)
       (find-package ,package))
      ,result-form))
+#+jscl
+(defmacro do-external-symbols ((var &optional (package '*package*)
+                                    result-form)
+                               &body body)
+  `(!do-external-symbols (,var ,package ,result-form) ,@body))
 
+#+jscl
 (defmacro do-all-symbols ((var &optional result-form) &body body)
   `(block nil (%map-all-symbols (lambda (,var) ,@body)) ,result-form))
 
+#+jscl
 (defmacro do-all-external-symbols ((var &optional result-form) &body body)
   `(block nil (%map-all-external-symbols (lambda (,var) ,@body)) ,result-form))
 
+#+jscl
 (defun find-all-symbols (string &optional external-only)
   (let (symbols)
     (map-for-in (lambda (package)

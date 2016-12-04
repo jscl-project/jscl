@@ -106,8 +106,8 @@
                     :initform initform)))))
 
 (defun parse-destructuring-lambda-list (lambda-list)
-  (let (;;   Destructure lambda list  structure where we  accumulate the
-        ;;  results of the parsing.
+  (let (;;   Destructure  lambda list structure where  we accumulate the
+        ;;   results of the parsing.
         (ll (make-lambda-list))
         ;; List of lambda list keywords which we have already seen.
         (lambda-keywords nil))

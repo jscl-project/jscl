@@ -75,17 +75,24 @@
   function
   block
   gotag
+  type
   class)
 
+(defvar *global-environment* (make-lexenv))
+(defvar *environment* *global-environment*)
+
 (defun lookup-in-lexenv (name lexenv namespace)
-  (find name (ecase namespace
-               (variable (lexenv-variable lexenv))
-               (function (lexenv-function lexenv))
-               (block    (lexenv-block    lexenv))
-               (gotag	(lexenv-gotag	lexenv))
-               (class	(lexenv-class	lexenv)))
-        :key #'binding-name
-        :test #'equalp))
+  (or (find name (ecase namespace
+                   (variable (lexenv-variable lexenv))
+                   (function (lexenv-function lexenv))
+                   (block    (lexenv-block    lexenv))
+                   (gotag	(lexenv-gotag	lexenv))
+                   (type	(lexenv-type	lexenv))                   
+                   (class	(lexenv-class	lexenv)))
+            :key #'binding-name
+            :test #'equalp)
+      (unless (eq lexenv *global-environment*)
+        (lookup-in-lexenv name *global-environment* namespace))))
 
 (defun push-to-lexenv (binding lexenv namespace)
   (ecase namespace
@@ -93,6 +100,7 @@
     (function (push binding (lexenv-function lexenv)))
     (block    (push binding (lexenv-block    lexenv)))
     (gotag	(push binding (lexenv-gotag	lexenv)))
+    (type  	(push binding (lexenv-type  	lexenv)))
     (class	(push binding (lexenv-class	lexenv)))))
 
 (defun extend-lexenv (bindings lexenv namespace)
@@ -962,9 +970,7 @@ let-binding-wrapper."
 (define-compilation return-from (name &optional value)
   (let* ((binding (or (lookup-in-lexenv name *environment* 'block)
                       (error "Return from unknown block `~S'." name)))
-         (multiple-value-p (member 'multiple-value (binding-declarations binding))))
-    (unless binding
-      )
+         (multiple-value-p (member 'multiple-value (binding-declarations binding)))) 
     (push 'used (binding-declarations binding))
     ;; The binding value is the name of a variable, whose value is the
     ;; unique identifier of the block as exception. We can't use the
@@ -1091,9 +1097,11 @@ let-binding-wrapper."
   (warn "discarding THE ~a" value-type) ; XXX perhaps one day
   (convert form *multiple-value-p*))
 
+;; from backquote.lisp
+(declaim (ftype (function (t) t) bq-completely-process))
+
 (define-transformation backquote (form)
   (bq-completely-process form))
-
 
 ;;; Primitives
 
@@ -1439,6 +1447,7 @@ generate the code which performs the transformation on these variables."
   `(= (get ,vector "length") ,new-size))
 
 (define-builtin storage-vector-ref (vector n)
+  (check-type n (integer 0 *))
   `(selfcall
     (var (x (property ,vector ,n)))
     (if (=== x undefined)
@@ -1620,6 +1629,12 @@ generate the code which performs the transformation on these variables."
 (defvar *macroexpander-cache*
   (make-hash-table :test #'eq))
 
+#- (or ecl sbcl jscl)
+(warn "Your Implementation's quasiquote may not be handled properly.")
+#+ecl
+(setf (gethash 'si:quasiquote *macroexpander-cache*)
+      (warn "ECL quasiquote is probably not handled properly yet")
+      (lambda (form) (ext::macroexpand-1 form)))
 #+sbcl
 (setf (gethash 'sb-int:quasiquote *macroexpander-cache*)
       (lambda (form)
@@ -1630,9 +1645,8 @@ generate the code which performs the transformation on these variables."
     (error "`~S' must be a symbol" name))
   (let ((b (lookup-in-lexenv name *environment* 'function)))
     (when (and b (eq (binding-type b) 'macro)) 
-      (let ((expander (or 
-                       #-jscl (gethash b *macroexpander-cache*)
-                       (binding-value b))))
+      (let ((expander (or #-jscl (gethash b *macroexpander-cache*)
+                          (binding-value b))))
         (when (listp expander)
           (let ((compiled (eval expander)))
             ;; The    list    representation   are    useful    while
@@ -1643,8 +1657,9 @@ generate the code which performs the transformation on these variables."
             ;; function with the compiled one.
             #+jscl (setf (binding-value b) compiled)
             #-jscl (setf (gethash b *macroexpander-cache*) compiled)
-            (setq expander compiled)
-            expander))))))
+            (setq expander compiled)))
+        expander))
+    nil))
 
 (defun !macroexpand-1/symbol (symbol)
   (let ((b (lookup-in-lexenv symbol *environment* 'variable)))
@@ -1660,7 +1675,7 @@ generate the code which performs the transformation on these variables."
       ((and (consp form) (symbolp (car form)))
        (let ((macrofun (!macro-function (car form))))
          (if macrofun
-             (values (funcall macrofun (cdr form)) t)
+             (values (funcall macrofun (cdr form) env) t)
              (values form nil))))
       (t
        (values form nil)))))
@@ -1807,15 +1822,20 @@ generate the code which performs the transformation on these variables."
       (apply #'error err-format err-args)
     (replace-with-warning ()
       :report "Replace failed form with a warning"
+      (warn "Error ~? replaced with a warning" err-format err-args)
       (list 'warn (format nil "Failed compilation of ~s"
                           sexp)))
     (replace-with-cerror ()
       :report "Replace failed form with a continuable error"
+      (warn "Error ~? replaced with a continuable error"
+            err-format err-args)
       (list 'cerror "Continue"
             (format nil "Failed compilation of ~s"
                     sexp)))
     (replace-with-error ()
       :report "Replace failed form with an error"
+      (warn "Error ~? replaced with a runtime error"
+            err-format err-args)
       (list 'error (format nil "Failed compilation of ~s"
                            sexp)))))
 
@@ -1835,11 +1855,20 @@ just haven't gotten around to defining that macro at all, yet."
            (eql (find-package :common-lisp)
                 (symbol-package (car sexp)))
            (macro-function (car sexp)))
-      (emit-uncompilable-form sexp
-                              "Failed to macroexpand ~s ~% in ~s~2%~a" (car sexp) sexp
+      (let ((bang (intern (concatenate 'string "!"
+                                       (string (car sexp)))
+                          :jscl)))
+        (if (!macro-function bang)
+            (progn
+              (warn "Substituting ~s for ~s" bang (car sexp))
+              (funcall (!macro-function bang) sexp))
+            (emit-uncompilable-form
+             sexp
+             "Failed to macroexpand ~s ~% in ~s~2%~a"
+             (car sexp) sexp
                               (if (!macro-function (car sexp))
                                   "A macro-function is defined, but did not work"
-                                  "No macro-function is defined in JSCL"))
+                 "No macro-function is defined in JSCL"))))
       sexp))
 
 (defun object-evaluates-to-itself-p (object)
@@ -1886,10 +1915,11 @@ just haven't gotten around to defining that macro at all, yet."
 
 (defun convert-toplevel (sexp &optional multiple-value-p return-p)
   ;; Macroexpand sexp as much as possible
-  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
+  (multiple-value-bind (expansion expandedp) (!macroexpand-1 sexp)
     (when expandedp
+      (warn "Macro-expansion done on top level (~s …)…" (car sexp))
       (return-from convert-toplevel
-        (convert-toplevel sexp multiple-value-p return-p))))
+        (convert-toplevel expansion multiple-value-p return-p))))
   ;; Process as toplevel
   (let ((*convert-level* -1))
     (cond
@@ -1901,28 +1931,36 @@ just haven't gotten around to defining that macro at all, yet."
 file.  See  https://github.com/romance-ii/jscl/issues/30  — If  you  put
 DEFPACKAGE in  a separate file  from IN-PACKAGE, everything seems  to be
 just fine."
-        (second sexp)))
+   (second sexp))
+       (apply #'defpackage-real% (rest sexp))
+       (convert-toplevel `(apply #'defpackage-real% (rest sexp))))
       ((and (consp sexp)
             (eql (car sexp) 'in-package)
             (= 2 (length sexp)))
        (setf *package* (find-package-or-fail (second sexp)))
-       (format *trace-output*
-               "~&;;; In package ~a…" (package-name *package*))
-       nil)
+       (convert-toplevel
+        `(setq *package* (find-package-or-fail ,(second sexp)))))
       ;; Non-empty toplevel progn
       ((and (consp sexp)
             (eq (car sexp) 'progn)
             (cdr sexp))
+       (warn "Top-level PROGN same as as ~r top-level form~:p"
+             (length (cdr sexp)))
        `(progn
           ;; Discard all except the last value
-          ,@(mapcar (lambda (s) (convert-toplevel s nil))
+          ,@(mapcar (lambda (form)
+                      (convert-toplevel form nil nil))
                     (butlast (cdr sexp)))
           ;; Return the last value(s)
-          ,(convert-toplevel (first (last (cdr sexp))) multiple-value-p return-p)))
+          ,(convert-toplevel
+            (first (last (cdr sexp))) multiple-value-p return-p)))
       (t
        (when *compile-print-toplevels*
          (let ((form-string (prin1-to-string sexp)))
-           (format t "~&;; Compiling ~a…" (truncate-string form-string))))
+           (format t "~&;; Compiling ~a…" (truncate-string
+                                           (substitute #\space #\newline
+                                                       form-string)
+                                           120))))
 
        (let ((code (convert sexp multiple-value-p)))
          (if return-p

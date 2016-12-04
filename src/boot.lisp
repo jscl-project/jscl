@@ -51,26 +51,28 @@
 ;;; DEFMACRO
 (eval-when (:compile-toplevel)
   (let ((defmacro-macroexpander
-         '#'(lambda (form)
+         '#'(lambda (form environment)
               (destructuring-bind (name args &body body)
                   form
+                (warn "Compiling a macro-expander for ~s" name)
                 (let* ((body (parse-body body :declarations t :docstring t))
                        (whole (gensym "WHOLE-"))
+                       (environment (gensym "ENVIRONMENT-"))
                        (expander `(function
-                                   (lambda (,whole)
+                                   (lambda (,whole ,environment)
                                     (block ,name
                                       (destructuring-bind ,args ,whole
                                         ,@body))))))
-
+                  
                   ;; If we are  boostrapping JSCL, we need  to quote the
                   ;; macroexpander, because the  macroexpander will need
                   ;; to be dumped in the final environment somehow.
                   (when (find :jscl-xc *features*)
                     (setq expander `(quote ,expander)))
-
+                  
                   `(eval-when (:compile-toplevel :execute)
                      (%compile-defmacro ',name ,expander)))))))
-
+    
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
 
@@ -400,7 +402,6 @@ macro cache is so aggressive that it cannot be redefined."
 
 (defun char< (x y)
   (< (char-code x) (char-code y)))
-
 
 ;;; Numbers
 

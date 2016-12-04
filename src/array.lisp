@@ -23,10 +23,29 @@
       'character
       t))
 
+(defun array-dimensions (array)
+  (check-type array array)
+  (third (storage-vector-kind array)))
+(defun array-element-type (array)
+  (check-type array array)
+  (second (storage-vector-kind array)))
+(defun adjustable-array-p (array)
+  (check-type array array)
+  (fourth (storage-vector-kind array)))
+(defun fill-pointer (array)
+  (check-type array array)
+  (fifth (storage-vector-kind array)))
+(defun (setf fill-pointer) (new-index array)
+  (check-type array array)
+  (setf (fifth (storage-vector-kind array)) new-index))
+
 (defun make-array (dimensions &key element-type initial-element adjustable fill-pointer)
   (let* ((dimensions (ensure-list dimensions))
          (size (!reduce #'* dimensions 1))
-         (array (make-storage-vector size)))
+         (array (make-storage-vector
+                 size
+                 (list 'array element-type dimensions
+                       adjustable fill-pointer))))
     ;; Upgrade type
     (if (eq element-type 'character)
         (progn
@@ -44,12 +63,8 @@
 
 
 (defun arrayp (x)
-  (storage-vector-p x))
-
-(defun adjustable-array-p (array)
-  (unless (arrayp array)
-    (error "~S is not an array." array))
-  t)
+  (and (storage-vector-p x)
+       (eql 'array (car (storage-vector-kind x)))))
 
 (defun array-element-type (array)
   (unless (arrayp array)
@@ -68,24 +83,17 @@
   (nth axis (array-dimensions array)))
 
 (defun aref (array index)
-  (unless (arrayp array)
-    (error "~S is not an array." array))
+  (check-type array array)
+  (check-type index (fixnum 0 *))
   (storage-vector-ref array index))
 
 (defun aset (array index value)
-  (unless (arrayp array)
-    (error "~S is not an array." array))
+  (check-type array array)
+  (check-type index (fixnum 0 *))
   (storage-vector-set array index value))
 
-(define-setf-expander aref (array index)
-  (let ((g!array (gensym "ARRAY-"))
-        (g!index (gensym "INDEX-"))
-        (g!value (gensym "VALUE-")))
-    (values (list g!array g!index)
-            (list array index)
-            (list g!value)
-            `(aset ,g!array ,g!index ,g!value)
-            `(aref ,g!array ,g!index))))
+(defun (setf aref) (value array index)
+  (aset array index value))
 
 
 ;;; Vectors
@@ -96,8 +104,8 @@
 (defun vector (&rest objects)
   (list-to-vector objects))
 
-;;; FIXME: should take optional min-extension.
-;;; FIXME: should use fill-pointer instead of the absolute end of array
+;;; FIXME:  should  take  optional   min-extension.  FIXME:  should  use
+;;; fill-pointer instead of the absolute end of array
 (defun vector-push-extend (new vector)
   (unless (vectorp vector)
     (error "~S is not a vector." vector))
