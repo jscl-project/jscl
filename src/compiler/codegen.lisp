@@ -26,9 +26,11 @@
 (in-package :jscl)
 
 (/debug "loading compiler/codegen.lisp!")
-
+
 (defvar *js-macros* nil)
+
 (defmacro define-js-macro (name lambda-list &body body)
+  "Define a macro for emitting JavaScript code from the JavaScript AST."
   (let ((form (gensym "FORM-")))
     `(push (cons ',name
                  (lambda (,form)
@@ -47,20 +49,24 @@
               (js-macroexpand expansion))))
       js))
 
-
+
 (defconstant no-comma 12)
 
 (defvar *js-output* t)
 
 (defvar *js-pretty-print* t)
 
-;;; Two seperate  functions are  needed for  escaping strings: One  for producing  JavaScript string
-;;;  literals (which are singly or doubly quoted) And one for producing Lisp strings (which are only
-;;;  doubly quoted)
+
+
+;;; Two  seperate functions  are needed  for escaping  strings: One  for
+;;;  producing JavaScript  string literals  (which are singly  or doubly
+;;;  quoted) And one  for producing Lisp strings (which  are only doubly
+;;;  quoted)
 ;;;
-;;; The same function would suffice for both, but for javascript string literals it is neater to use
-;;; either depending on the  context, e.g: foo's => "foo's" "foo" => '"foo"'  which avoids having to
-;;; escape quotes where possible
+;;; The same function would suffice  for both, but for javascript string
+;;; literals it is  neater to use either depending on  the context, e.g:
+;;; foo's  → "foo's"  "foo" → '"foo"' which  avoids having  to escape
+;;; quotes where possible
 (defun js-escape-string (string)
   (let ((size (length string)))
     (flet ((%js-escape-string (string escape-single-quote-p)
@@ -81,13 +87,13 @@
                         (if escape-single-quote-p
                             (backslash #\apostrophe)
                             (add #\apostrophe)))
-                       (#\\ (backslash #\\))
-                       (#\newline (backslash #\n))
-                       (#\return (backslash #\r))
-                       (#\tab (backslash #\t))
-                       (#\page (backslash #\f))
-                       (#\backspace (backslash #\b))
-                       (#\null (backslash #\0))
+                       (#\\      	(backslash #\\))
+                       (#\newline 	(backslash #\n))
+                       (#\return 	(backslash #\r))
+                       (#\tab 	(backslash #\t))
+                       (#\page 	(backslash #\f))
+                       (#\backspace 	(backslash #\b))
+                       (#\null 	(backslash #\0))
                        (otherwise
                         (cond
                           ((<= 1 (char-code ch) 26)
@@ -122,13 +128,17 @@
                  (%js-escape-string string t)
                  #(#\apostrophe)))))))
 
-
 (defun js-format (fmt &rest args)
   (apply #'format *js-output* fmt args))
 
-;;; Check if STRING-DESIGNATOR is  valid as a Javascript identifier. It returns  a couple of values.
-;;; The identifier itself as a string and a boolean value with the result of this check.
+
 (defun valid-js-identifier (string-designator)
+  "Check  if STRING-DESIGNATOR  is  valid as  a Javascript  identifier.
+ It returns  a couple of values.  The identifier itself as  a string and
+ a boolean value with the result of this check.
+
+FIXME: This  does not check the  list of reserved words  which cannot be
+used as identifiers; for example, “package” and “if”"
   (let ((string (typecase string-designator
                   (symbol (symbol-name string-designator))
                   (string string-designator)
@@ -143,7 +153,7 @@
           (values string t)
           (values nil nil)))))
 
-
+
 ;;; Expression generators
 ;;;
 ;;; `js-expr'  and   the  following   auxiliary  functions  are   the  responsible   for  generating
@@ -230,6 +240,7 @@
                    (member (car x) '(get = property))))
     (error "Bad Javascript lvalue ~S" x)))
 
+
 ;;; Process the Javascript AST to reduce some syntax sugar.
 (defun js-expand-expr (form)
   (flet ((reduce-expr (op &key from-end)
@@ -261,11 +272,12 @@
            (js-macroexpand form)))
         form)))
 
-;;; It is the more complicated function of the generator. It takes a
-;;; operator expression and generate Javascript for it. It will
-;;; consider associativity and precedence in order not to generate
-;;; unnecessary parenthesis.
+
 (defun js-operator-expression (op args precedence associativity operand-order)
+  "This is the  most complicated function of the generator.  It takes an
+operator expression  and generates Javascript  for it. It  will consider
+associativity    and   precedence    in    order    not   to    generate
+unnecessary parentheses."
   (let ((op1 (car args))
         (op2 (cadr args)))
     (case op
@@ -410,6 +422,7 @@
 
            (error "Unknown operator `~S'" op)))))))
 
+
 (defun js-expr (form &optional (precedence 1000) associativity operand-order)
   (let ((form (js-expand-expr form)))
     (cond
@@ -425,15 +438,12 @@
       ((consp form)
        (js-operator-expression (car form) (cdr form) precedence associativity operand-order)))))
 
-
-
+
 ;;; Statements generators
 ;;;
 ;;; `js-stmt' generates code for Javascript statements. A form is
 ;;; provided to label statements. Remember that in particular,
 ;;; expressions can be used as statements (semicolon suffixed).
-;;;
-
 (defun js-expand-stmt (form)
   (cond
     ((and (consp form) (eq (car form) 'progn))
@@ -586,8 +596,8 @@
             (js-expr form)
             (js-end-stmt))))))))
 
-
-;;; It is intended to be the entry point to the code generator.
+
 (defun js (&rest stmts)
+  "The entry point to the code generator."
   (mapc #'js-stmt stmts)
   nil)

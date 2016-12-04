@@ -1,4 +1,4 @@
-;;; boot.lisp --- First forms to be cross compiled
+;;; boot.lisp — First forms to be cross compiled
 
 ;; Copyright (C) 2012, 2013 David Vazquez Copyright (C) 2012 Raimon Grau
 
@@ -17,9 +17,9 @@
 
 ;;; This  code  is  executed  when   JSCL  compiles  this  file  itself.
 ;;; The compiler provides compilation of  some special forms, as well as
-;;; funcalls and macroexpansion, but no functions. So, we define the
-;;; Lisp world from scratch. This code  has to define enough language to
-;;; the compiler to be able to run.
+;;; funcalls and  macroexpansion, but  no functions.  So, we  define the
+;;; Lisp  world from  scratch. This  code has  to define  enough of  the
+;;; language for the compiler to be able to run.
 
 (in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
 
@@ -62,7 +62,7 @@
                                       (destructuring-bind ,args ,whole
                                         ,@body))))))
 
-                  ;; If we are boostrapping JSCL, we need to quote the
+                  ;; If we are  boostrapping JSCL, we need  to quote the
                   ;; macroexpander, because the  macroexpander will need
                   ;; to be dumped in the final environment somehow.
                   (when (find :jscl-xc *features*)
@@ -180,17 +180,23 @@
 (defmacro defun (name args &rest body)
   ;; Can't  use FUNCTION-NAME-P  here because  we can't  DEFUN it  until
   ;; after DEFUN is defined.
-  (assert (or (symbolp name)
-              (and (listp name)
-                   (= 2 (length name))
-                   (find (car name) '(setf jscl/ffi:oget)))))
-  (if (and (listp name) (eq (car name) 'jscl/ffi))
-      (error "Can't bind to JS function yet, TODO")
-      `(progn
-         (eval-when (:compile-toplevel)
-           (fn-info ',name :defined t))
-         (fset ',name #'(named-lambda ,name ,args ,@body))
-         ',name)))
+  (cond ((symbolp name)
+         `(progn
+            (eval-when (:compile-toplevel)
+              (fn-info ',name :defined t))
+            (fset ',name #'(named-lambda ,name ,args ,@body))
+            ',name))
+        ((not (listp name))
+         (error "~s is not a valid name for a function" name))
+        ((eql (car name) 'jscl/ffi:oget)
+         (error "Can't bind to JS function yet, TODO"))
+        ((eql (car name) 'setf)
+         `(progn
+            (eval-when (:compile-toplevel)
+              (fn-info ',name :defined t)
+              (fset-setf ',name #'(named-lambda ,name ,args ,@body))
+              ',name)))
+        (t (error "~s cannot be a function name" name))))
 
 (defmacro return (&optional value)
   `(return-from nil ,value))

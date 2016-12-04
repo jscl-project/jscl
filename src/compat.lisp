@@ -79,9 +79,13 @@
                     (numerator rational)
                     (denominator rational))))))
 
+
+(defun !fdefinition-soft (name)
+  (ignore-errors (fdefinition name)))
+
 ;;; Storage Vectors
-;;;
-;;; Provide a ANSI compatible implementation of storage vectors.
+
+;; Provide a ANSI compatible implementation of storage vectors.
 (defstruct (storage-vector
              (:constructor make-storage-vector-1))
   underlying-vector)

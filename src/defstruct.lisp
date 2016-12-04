@@ -128,7 +128,8 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
     (let ((index 1))
       (dolist (slot slot-descriptions)
         (collect (cons 'progn
-                       (defstruct/make-slot-accessor name-string predicate slot index)))
+                       (defstruct/make-slot-accessor
+                           name-string predicate slot index)))
         (incf index)))))
 
 (defun defstruct/make-slot-info (type slot)
@@ -139,19 +140,16 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
    :accessors (defstruct/make-accessor-name type slot)
    :initarg (intern (car slot) :keyword)))
 
+#+jscl
 (defun defstruct/define-type (type slots &key 
                                            predicate 
                                            print-function
                                            constructor
-                                           copier)
-  #-jscl (declare (ignore type predicate print-function
-                          constructor copier))
-  #+jscl
+                                           copier) 
   (push (make-type-definition :name type
                               :predicate predicate
                               :supertypes '(structure-object))
-        *types*)
-  #+jscl 
+        *types*) 
   (push (make-class :name type
                     :supertypes (list 'structure-object)
                     :slots (mapcar (lambda (slot)
@@ -161,6 +159,15 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                     :constructor constructor
                     :copier copier)
         *classes*))
+
+#-jscl
+(defun defstruct/define-type (type slots &key 
+                                           predicate 
+                                           print-function
+                                           constructor
+                                           copier)
+  (declare (ignore type slots predicate print-function
+                   constructor copier)))
 
 
 ;;; DEFSTRUCT itself.
@@ -181,7 +188,7 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
          (print-function (defstruct/option-value :print-function options
                            nil))
          (slot-descriptions (mapcar #'defstruct/parse-slot-description slots)))
-    `(progn
+    `(eval-when (:compile-toplevel :load-toplevel :execute)
        ,(defstruct/make-constructor constructor name slot-descriptions)
        ,(defstruct/make-predicate predicate name (length slot-descriptions))
        ,(defstruct/make-copier copier name predicate)
@@ -192,3 +199,11 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
           :print-function print-function)
        ,@(defstruct/make-slot-accessors name-string predicate slot-descriptions)
        ',name)))
+
+
+;; Recursive bootstapping, yes.
+(defstruct slot-info
+  class name
+  accessors readers writers type
+  initform initarg
+  allocation)

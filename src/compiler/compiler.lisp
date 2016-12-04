@@ -960,10 +960,11 @@ let-binding-wrapper."
           `(selfcall ,cbody)))))
 
 (define-compilation return-from (name &optional value)
-  (let* ((binding (lookup-in-lexenv name *environment* 'block))
+  (let* ((binding (or (lookup-in-lexenv name *environment* 'block)
+                      (error "Return from unknown block `~S'." name)))
          (multiple-value-p (member 'multiple-value (binding-declarations binding))))
     (unless binding
-      (error "Return from unknown block `~S'." name))
+      )
     (push 'used (binding-declarations binding))
     ;; The binding value is the name of a variable, whose value is the
     ;; unique identifier of the block as exception. We can't use the
@@ -1271,7 +1272,25 @@ generate the code which performs the transformation on these variables."
   `(= (get ,symbol "value") ,value))
 
 (define-builtin fset (symbol value)
-  `(= (get ,symbol "fvalue") ,value))
+  `(= (get ,symbol "fvalue") 
+      ,(if (and (listp value)
+                (= 2 (length value))
+                (eql 'quote (first value))
+                (symbolp (second value)))
+           (fdefinition value)
+           value)))
+
+(define-builtin fset-setf (symbol value)
+  `(= (get ,symbol "setfValue") 
+      ,(if (and (listp value)
+                (= 2 (length value))
+                (eql 'quote (first value))
+                (symbolp (second value)))
+           (fdefinition value)
+           value)))
+
+(defmacro fset-macro (target source)
+  (setf (macro-function target) (macro-function source)))
 
 (define-builtin boundp (x)
   (convert-to-bool `(!== (get ,x "value") undefined)))
@@ -1420,7 +1439,6 @@ generate the code which performs the transformation on these variables."
   `(= (get ,vector "length") ,new-size))
 
 (define-builtin storage-vector-ref (vector n)
-  (check-type n (integer 0 *))
   `(selfcall
     (var (x (property ,vector ,n)))
     (if (=== x undefined)
@@ -1602,37 +1620,31 @@ generate the code which performs the transformation on these variables."
 (defvar *macroexpander-cache*
   (make-hash-table :test #'eq))
 
-(defun !macro-function (symbol)
-  (unless (function-name-p symbol)
-    (error "`~S' is not a symbol." symbol))
-  (when (and (listp symbol)
-             (eq 'setf (first symbol)))
-    (return-from !macro-function nil))
-  #+sbcl
-  (when (eql symbol 'sb-int:quasiquote)
-    (return-from !macro-function
+#+sbcl
+(setf (gethash 'sb-int:quasiquote *macroexpander-cache*)
       (lambda (form)
-        (sb-impl::expand-quasiquote form nil))))
-  (let ((b (lookup-in-lexenv symbol *environment* 'function)))
-    (if (and b (eq (binding-type b) 'macro))
-        (let ((expander (binding-value b)))
-          (cond
-            #-jscl
-            ((gethash b *macroexpander-cache*)
-             (setq expander (gethash b *macroexpander-cache*)))
-            ((listp expander)
-             (let ((compiled (eval expander)))
-               ;; The    list    representation   are    useful    while
-               ;; bootstrapping, as  we can  dump the definition  of the
-               ;; macros easily,  but they are  slow because we  have to
-               ;; evaluate them and compile them  now and again. So, let
-               ;; us  replace the  list  representation  version of  the
-               ;; function with the compiled one.
-               #+jscl (setf (binding-value b) compiled)
-               #-jscl (setf (gethash b *macroexpander-cache*) compiled)
-               (setq expander compiled))))
-          expander)
-        nil)))
+        (sb-impl::expand-quasiquote form nil)))
+
+(defun !macro-function (name)
+  (unless (symbolp name)
+    (error "`~S' must be a symbol" name))
+  (let ((b (lookup-in-lexenv name *environment* 'function)))
+    (when (and b (eq (binding-type b) 'macro)) 
+      (let ((expander (or 
+                       #-jscl (gethash b *macroexpander-cache*)
+                       (binding-value b))))
+        (when (listp expander)
+          (let ((compiled (eval expander)))
+            ;; The    list    representation   are    useful    while
+            ;; bootstrapping, as  we can  dump the definition  of the
+            ;; macros easily,  but they are  slow because we  have to
+            ;; evaluate them and compile them  now and again. So, let
+            ;; us  replace the  list  representation  version of  the
+            ;; function with the compiled one.
+            #+jscl (setf (binding-value b) compiled)
+            #-jscl (setf (gethash b *macroexpander-cache*) compiled)
+            (setq expander compiled)
+            expander))))))
 
 (defun !macroexpand-1/symbol (symbol)
   (let ((b (lookup-in-lexenv symbol *environment* 'variable)))
