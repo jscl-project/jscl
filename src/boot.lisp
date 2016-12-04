@@ -60,9 +60,10 @@
                        (environment (gensym "ENVIRONMENT-"))
                        (expander `(function
                                    (lambda (,whole ,environment)
-                                    (block ,name
-                                      (destructuring-bind ,args ,whole
-                                        ,@body))))))
+                                    (let ((*environment* ,environment))
+                                      (block ,name
+                                        (destructuring-bind ,args ,whole
+                                          ,@body)))))))
                   
                   ;; If we are  boostrapping JSCL, we need  to quote the
                   ;; macroexpander, because the  macroexpander will need

@@ -6,7 +6,7 @@
 ;; option) any later version.
 ;;
 ;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
-;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY ora
 ;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 ;; for more details.
 ;;
@@ -1626,7 +1626,7 @@ generate the code which performs the transformation on these variables."
       (convert-block body nil t))))
 
 #-jscl
-(defvar *macroexpander-cache*
+(defparameter *macroexpander-cache*
   (make-hash-table :test #'eq))
 
 #- (or ecl sbcl jscl)
@@ -1643,23 +1643,28 @@ generate the code which performs the transformation on these variables."
 (defun !macro-function (name)
   (unless (symbolp name)
     (error "`~S' must be a symbol" name))
-  (let ((b (lookup-in-lexenv name *environment* 'function)))
-    (when (and b (eq (binding-type b) 'macro)) 
-      (let ((expander (or #-jscl (gethash b *macroexpander-cache*)
-                          (binding-value b))))
-        (when (listp expander)
-          (let ((compiled (eval expander)))
-            ;; The    list    representation   are    useful    while
-            ;; bootstrapping, as  we can  dump the definition  of the
-            ;; macros easily,  but they are  slow because we  have to
-            ;; evaluate them and compile them  now and again. So, let
-            ;; us  replace the  list  representation  version of  the
-            ;; function with the compiled one.
-            #+jscl (setf (binding-value b) compiled)
-            #-jscl (setf (gethash b *macroexpander-cache*) compiled)
-            (setq expander compiled)))
-        expander))
-    nil))
+  (let* ((b (lookup-in-lexenv name *environment* 'function))
+         (expander (or #-jscl 
+                       (gethash b *macroexpander-cache*)
+                       (and b 
+                            (eql 'macro (binding-type b))
+                            (binding-value b)))))
+    (when (listp expander)
+      (let ((compiled (eval expander)))
+        ;; The    list    representation   are    useful    while
+        ;; bootstrapping, as  we can  dump the definition  of the
+        ;; macros easily,  but they are  slow because we  have to
+        ;; evaluate them and compile them  now and again. So, let
+        ;; us  replace the  list  representation  version of  the
+        ;; function with the compiled one.
+        #+jscl (setf (binding-value b) compiled)
+        #-jscl (setf (gethash b *macroexpander-cache*) compiled)
+        (setq expander compiled)))
+    expander))
+
+#+sbcl
+(unless (!macro-function 'sb-int:quasiquote)
+  (error "Quasi-quote expansion will not work"))
 
 (defun !macroexpand-1/symbol (symbol)
   (let ((b (lookup-in-lexenv symbol *environment* 'variable)))
@@ -1668,17 +1673,16 @@ generate the code which performs the transformation on these variables."
         (values symbol nil))))
 
 (defun !macroexpand-1 (form &optional env)
-  (let ((*environment* (or env *global-environment*)))
-    (cond
-      ((symbolp form)
-       (!macroexpand-1/symbol form))
-      ((and (consp form) (symbolp (car form)))
-       (let ((macrofun (!macro-function (car form))))
-         (if macrofun
-             (values (funcall macrofun (cdr form) env) t)
-             (values form nil))))
-      (t
-       (values form nil)))))
+  (cond
+    ((symbolp form)
+     (!macroexpand-1/symbol form))
+    ((and (consp form) (symbolp (car form)))
+     (let ((macrofun (!macro-function (car form))))
+       (if macrofun
+           (values (funcall macrofun (cdr form) env) t)
+           (values form nil))))
+    (t
+     (values form nil))))
 
 #+jscl
 (fset 'macroexpand-1 #'!macroexpand-1)
@@ -1845,7 +1849,9 @@ in the CL package,  it is usually a safe bet that  we should be treating
 it as a macro within JSCL  as well. The notable exception (inversion) is
 `DESTRUCTURING-BIND'.  This checks  for  missing  macros, which  usually
 means either that  we have a compile-time dependency  ordering issue, or
-just haven't gotten around to defining that macro at all, yet."
+just haven't gotten  around to defining that macro at  all, yet. It also
+jumps out and  shouts when macro-expansion is  broken completely, rather
+than baffling errors because of macro-forms being treated as functions."
   (if (and (consp sexp)
            (symbolp (car sexp))
            ;; DESTRUCTURING-BIND is defined  via !DESTRUCTURING-BIND and
@@ -1856,7 +1862,7 @@ just haven't gotten around to defining that macro at all, yet."
                 (symbol-package (car sexp)))
            (macro-function (car sexp)))
       (let ((bang (intern (concatenate 'string "!"
-                                       (string (car sexp)))
+                                       (symbol-name (car sexp)))
                           :jscl)))
         (if (!macro-function bang)
             (progn
@@ -1866,9 +1872,11 @@ just haven't gotten around to defining that macro at all, yet."
              sexp
              "Failed to macroexpand ~s ~% in ~s~2%~a"
              (car sexp) sexp
-                              (if (!macro-function (car sexp))
-                                  "A macro-function is defined, but did not work"
-                 "No macro-function is defined in JSCL"))))
+             (if (!macro-function (car sexp))
+                 "A macro-function is defined, but did not work"
+                 (format nil 
+                         "No macro-function ~s (nor ~s) is defined in JSCL"
+                         (car sexp) bang)))))
       sexp))
 
 (defun object-evaluates-to-itself-p (object)
