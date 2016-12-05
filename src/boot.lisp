@@ -64,16 +64,16 @@
                                       (block ,name
                                         (destructuring-bind ,args ,whole
                                           ,@body)))))))
-                  
+
                   ;; If we are  boostrapping JSCL, we need  to quote the
                   ;; macroexpander, because the  macroexpander will need
                   ;; to be dumped in the final environment somehow.
                   (when (find :jscl-xc *features*)
                     (setq expander `(quote ,expander)))
-                  
+
                   `(eval-when (:compile-toplevel :execute)
                      (%compile-defmacro ',name ,expander)))))))
-    
+
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
 
@@ -519,14 +519,14 @@ This is SETF'able."
   (or (!fdefinition-soft name)
       (error "No function is named `~S'." name)))
 
-(defun (setf fdefinition) (function name)
+(defun (setf fdefinition) (fn name)
   ;; Cannot use ETypeCase yet
   (cond ((symbolp name)
-         (%setf-symbol-function name function))
+         (%setf-symbol-function name fn))
         ((and (listp name)
               (= 2 (length name))
               (eql 'setf (first name)))
-         (%setf-fdefinition-setf (second name) function))
+         (%setf-fdefinition-setf (second name) fn))
         ((and (listp name)
               (eql 'jscl/ffi:oget (first name)))
          (error "FIXME: FDefinition FFI bridge"))
