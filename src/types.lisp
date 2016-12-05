@@ -10,6 +10,19 @@
 (/debug "Loading types.lisp…")
 
 
+;; forward declarations to compiler.lisp
+(declaim (special *environment* *global-environment*)
+         (ftype (function (t) t) binding-value)
+         (ftype (function (symbol t t) t) lookup-in-lexenv)
+         (ftype (function (&key (:name t) (:type t)
+                                (:value t) (:declarations (or null cons)))
+                          t)
+                make-binding)
+         (ftype (function (t t t) cons)
+                push-to-lexenv)
+         (ftype (function (t) (or null cons)) lexenv-type))
+
+
 
 (/debug "Defining Built-In-Class")
 (defstruct
