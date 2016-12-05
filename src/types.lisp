@@ -240,19 +240,43 @@ invoked. In that case it will store into PLACE and start over."
           (list* first (find-duplicates rest :test test))
           (find-duplicates rest :test test)))))
 
+(defun typecase-check-for-duplicates (unique-types)
+  (let ((duplicated (find-duplicates unique-types)))
+    (when duplicated
+      (warn "Duplicated ~r type~:p in TYPECASE: ~{~s~^, ~};~
+only the first case will ever be reached"
+            (length duplicated)
+            duplicated))))
+
+(defun typecase-unreachable-after-t (unique-types)
+  (when (and (member t unique-types)
+             (member t (butlast unique-types)))
+    (warn "TYPECASE contains a match for type T, which matches all values; ~
+the cases ~{~s~^, ~} will never be matched"
+          (subseq unique-types (1+ (position t unique-types))))))
+
+(defun typecase-unreachable-after-supertype (unique-types)
+  (let ((first (first unique-types))
+        (rest (rest unique-types))) 
+    (let ((subtypes (remove-if-not
+                     (lambda (other)
+                       (subtypep other first))
+                     rest)))
+      (when subtypes 
+        (warn "TYPECASE contains a match for type ~s, ~_~
+but also for ~[~;a~:;~:*~r~] proper subtype~:p of ~0@*~s:~_~2@*~{~s~^, ~};
+since the supertype comes first, the subtype~1@*~p will never be matched."
+              first (length subtypes) subtypes))
+      (when (rest rest)
+        (typecase-unreachable-after-supertype rest)))))
+
 (defmacro !typecase (value &rest clauses)
   "A fair approximation of TYPECASE for limited cases"
   (let ((evaluated (gensym "TYPECASE-EVALUATED-"))
         (unique-types (typecase-unique-types (mapcar #'car clauses))))
-    (let ((duplicated (find-duplicates unique-types)))
-      (warn "Duplicated ~r type~:p in typecase: ~{~s~^, ~}"
-            (length duplicated)
-            duplicated))
-    (when (and (member t unique-types)
-               (member t (butlast unique-types)))
-      (warn "TYPECASE contains a match for type T, which matches all values; ~
-the cases ~{~s~^, ~} will never be matched"
-            (subseq unique-types (position t unique-types))))
+    (typecase-check-for-duplicates unique-types)
+    (typecase-unreachable-after-t unique-types)
+    (typecase-unreachable-after-supertype unique-types)
     `(let ((,evaluated ,value))
        (cond
          ,@(mapcar (lambda (clause)
