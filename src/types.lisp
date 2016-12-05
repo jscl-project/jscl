@@ -70,13 +70,13 @@
 
 
 (defun car? (name)
-  (if (consp name) 
-      (car name) 
+  (if (consp name)
+      (car name)
       name))
 
 (defun find-type-definition (type &optional (environment *environment*))
   (or (let ((b (lookup-in-lexenv type environment 'type)))
-        (when b 
+        (when b
           (binding-value b)))
       (error "~s does not name a type" type)))
 
@@ -101,9 +101,9 @@
 
 (defun curry-type-check (value)
   (lambda (binding)
-    (when binding 
+    (when binding
       (let ((type (binding-value binding)))
-        (when type 
+        (when type
           (funcall (type-definition-predicate type)
                    value))))))
 
@@ -139,46 +139,13 @@
                                                  ,(let ((object (gensym "OBJECT-")))
                                                     `(lambda ,(cons object lambda-list)
                                                        (typep ,object ',@body)))
-                                                 :class (make-deftype-class-metaobject 
+                                                 :class (make-deftype-class-metaobject
                                                          :name ',name)))
                    'type))
 
 #+jscl
 (defmacro deftype (name lambda-list &body body)
   `(!deftype ,name ,lambda-list ,@body))
-
-(dolist (type-info '((hash-table hash-table-p atom)
-                     (number numberp atom)
-                     (real realp number)
-                     (integer integerp rational)
-                     (fixnum fixnump integer)
-                     (cons consp)
-                     (list listp cons sequence)
-                     (vector vectorp sequence)
-                     (character characterp atom)
-                     (symbol symbolp atom)
-                     (keyword keywordp symbol)
-                     (function functionp atom)
-                     (float floatp real)
-                     (single-float floatp real)
-                     (double-float floatp real)
-                     (long-float floatp real)
-                     (rational rationalp real)
-                     (array arrayp sequence)
-                     (string stringp vector)
-                     (atom atom)
-                     (null null)
-                     (package packagep atom)))
-  (destructuring-bind (name predicate &rest supertypes) type-info
-    (push-to-lexenv 
-     (make-binding :name name
-                   :type 'type
-                   :value
-                   (make-type-definition :name name
-                                         :supertypes supertypes
-                                         :predicate predicate))
-     *global-environment*
-     'type)))
 
 #-jscl
 (defun eql-specializer-p (object)
@@ -253,24 +220,39 @@ invoked. In that case it will store into PLACE and start over."
  (package 'packagep))"
 
 (defun typecase-unique-types (clauses)
-  (loop for (types . body) in clauses
-     if (listp types)
-     append types
-     else collect types))
+  (when clauses
+    (let ((type (first clauses))
+          (rest (rest clauses)))
+      (assert (or (symbolp type) (and (listp type)
+                                      (every #'symbolp type)))
+              (type)
+              "Not sure what to make of typecase clause introduced by ~s"
+              type)
+      (if (listp type)
+          (append type (typecase-unique-types rest))
+          (list* type (typecase-unique-types rest))))))
 
 (defun find-duplicates (list &key (test #'eql))
-  (loop for (first . rest) on list by #'cdr
-     when (find first rest :test test)
-     collect first))
+  (when list
+    (let ((first (first list))
+          (rest (rest list)))
+      (if (find first rest :test test)
+          (list* first (find-duplicates rest :test test))
+          (find-duplicates rest :test test)))))
 
 (defmacro !typecase (value &rest clauses)
   "A fair approximation of TYPECASE for limited cases"
   (let ((evaluated (gensym "TYPECASE-EVALUATED-"))
-        (unique-types (typecase-unique-types clauses)))
+        (unique-types (typecase-unique-types (mapcar #'car clauses))))
     (let ((duplicated (find-duplicates unique-types)))
       (warn "Duplicated ~r type~:p in typecase: ~{~s~^, ~}"
             (length duplicated)
             duplicated))
+    (when (and (member t unique-types)
+               (member t (butlast unique-types)))
+      (warn "TYPECASE contains a match for type T, which matches all values; ~
+the cases ~{~s~^, ~} will never be matched"
+            (subseq unique-types (position t unique-types))))
     `(let ((,evaluated ,value))
        (cond
          ,@(mapcar (lambda (clause)
@@ -289,15 +271,19 @@ invoked. In that case it will store into PLACE and start over."
 
 (defmacro !etypecase (value &rest clauses)
   (let ((evaluated (gensym "ETYPECASE-VALUE-"))
-        (unique-types (typecase-unique-types clauses)))
+        (unique-types (typecase-unique-types (mapcar #'car clauses))))
+    (when (member t unique-types)
+      (warn "ETYPECASE contains type T, which matches everything; ~
+nothing will fall through this case"))
     `(let ((,evaluated ,value))
        (!typecase ,evaluated
                   ,@clauses
                   (t (error "~S (type: ~s) fell through etypecase expression.
-Expected one of: ~{~s~^, ~}"
+Expected one of: ~a"
                             ,evaluated (type-of ,evaluated)
-                            ,(sort unique-types #'string<
-                                   :key #'symbol-name)))))))
+                            ,(format nil "~{~a~^, ~}"
+                                     (sort unique-types #'string<
+                                           :key #'symbol-name))))))))
 
 #+jscl
 (defmacro etypecase (value &rest clauses)
@@ -327,19 +313,6 @@ Expected one of: ~{~s~^, ~}"
                  (null (cdr max))
                  (> (car max) object)))
            ((numberp max) (>= max object))))))
-
-
-(dolist (type '(number integer real rational
-                float single-float double-float long-float))
-  (setf (type-definition-predicate
-         (find-type-definition type))
-        (make-numeric-range-check-predicate type)))
-
-(setf (type-definition-predicate
-       (find-type-definition 'string))
-      (lambda (object length)
-        (and (stringp object)
-             (= length (length object)))))
 
 
 ;;; Complete coverage of the basic types required per CLHS
@@ -436,20 +409,7 @@ star)."
                          (eql my-dim '*)
                          (= dim my-dim))))))))
 
-(setf (type-definition-predicate (find-type-definition 'array))
-      #'compound-array-type-p  )
 
-(dolist (type-name +standard-type-specifiers+)
-  (push-to-lexenv
-   (make-binding :name type-name
-                 :type 'class
-                 :value (#+jscl make-built-in-class
-                                #-jscl make-!built-in-class
-                                :name type-name))
-   *global-environment*
-   'class)
-  (unless (subtypep type-name t)
-    (warn "Standard type ~s is not properly defined" type-name)))
 
 
 ;;; Subclass hierarchy of the standard classes
@@ -557,19 +517,81 @@ star)."
 (defun find-built-in-class (name)
   (or (let ((b (lookup-in-lexenv name *environment* 'class)))
         (when b
-          (binding-value b))) 
+          (binding-value b)))
       (error "~s does not name a built-in class" name)))
 
-(dolist (hierarchy +standard-class-subclasses+)
-  (destructuring-bind (class &rest subclasses) hierarchy
-    (dolist (subclass subclasses)
-      (let ((metaclass (find-built-in-class subclass)))
-        (push class (built-in-class-superclasses
-                     metaclass))))))
+(defun init-built-in-types% ()
+  "Initializes the class/type hierarchy for the bult-in types."
+  (dolist (type-info '((hash-table hash-table-p atom)
+                       (number numberp atom)
+                       (real realp number)
+                       (integer integerp rational)
+                       (fixnum fixnump integer)
+                       (cons consp)
+                       (list listp cons sequence)
+                       (vector vectorp sequence)
+                       (character characterp atom)
+                       (symbol symbolp atom)
+                       (keyword keywordp symbol)
+                       (function functionp atom)
+                       (float floatp real)
+                       (single-float floatp real)
+                       (double-float floatp real)
+                       (long-float floatp real)
+                       (rational rationalp real)
+                       (array arrayp sequence)
+                       (string stringp vector)
+                       (atom atom)
+                       (null null)
+                       (package packagep atom)))
+    (destructuring-bind (name predicate &rest supertypes) type-info
+      (push-to-lexenv
+       (make-binding :name name
+                     :type 'type
+                     :value
+                     (make-type-definition :name name
+                                           :supertypes supertypes
+                                           :predicate predicate))
+       *global-environment*
+       'type)))
 
-(dolist (hierarchy +standard-class-subclasses+)
-  (destructuring-bind (class &rest subclasses) hierarchy
-    (dolist (subclass subclasses)
-      (unless (subtypep subclass class)
-        (warn "Standard class ~s should have subclass ~s"
-              class subclass)))))
+  (dolist (type '(number integer real rational
+                  float single-float double-float long-float))
+    (setf (type-definition-predicate
+           (find-type-definition type))
+          (make-numeric-range-check-predicate type)))
+
+  (setf (type-definition-predicate
+         (find-type-definition 'string))
+        (lambda (object length)
+          (and (stringp object)
+               (= length (length object)))))
+
+  (setf (type-definition-predicate (find-type-definition 'array))
+        #'compound-array-type-p)
+
+  (dolist (type-name +standard-type-specifiers+)
+    (push-to-lexenv
+     (make-binding :name type-name
+                   :type 'class
+                   :value (#+jscl make-built-in-class
+                                  #-jscl make-!built-in-class
+                                  :name type-name))
+     *global-environment*
+     'class)
+    (unless (subtypep type-name t)
+      (warn "Standard type ~s is not properly defined" type-name)))
+
+  (dolist (hierarchy +standard-class-subclasses+)
+    (destructuring-bind (class &rest subclasses) hierarchy
+      (dolist (subclass subclasses)
+        (let ((metaclass (find-built-in-class subclass)))
+          (push class (built-in-class-superclasses
+                       metaclass))))))
+
+  (dolist (hierarchy +standard-class-subclasses+)
+    (destructuring-bind (class &rest subclasses) hierarchy
+      (dolist (subclass subclasses)
+        (unless (subtypep subclass class)
+          (warn "Standard class ~s should have subclass ~s"
+                class subclass))))))
