@@ -410,11 +410,13 @@ macro cache is so aggressive that it cannot be redefined."
   "JS integers  are really floats with  no exponent, there is  a limited
  range; see
  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER")
+(defconstant +most-positive-fixnum+ most-positive-fixnum)
 
 (defconstant most-negative-fixnum (- most-positive-fixnum)
   "JS integers  are really floats with  no exponent, there is  a limited
  range; see
  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MIN_SAFE_INTEGER")
+(defconstant +most-negative-fixnum+ most-negative-fixnum)
 
 (defun fixnump (number)
   (and (integerp number)

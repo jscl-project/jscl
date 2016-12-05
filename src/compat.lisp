@@ -1,4 +1,4 @@
-;;; compat.lisp --- Create some definitions to fix CL compatibility
+;;; compat.lisp — Create some definitions to fix CL compatibility
 
 ;; Copyright (C) 2012, 2013 David Vazquez Copyright (C) 2012 Raimon Grau
 
@@ -22,6 +22,15 @@
   `(do ()
        ((not ,condition))
      ,@body))
+
+(defconstant +most-positive-fixnum+ (1- (expt 2 53)))
+(defconstant +most-negative-fixnum+ (- +most-positive-fixnum+))
+
+(defun !fixnump (number)
+  (and (integerp number)
+       (<= +most-negative-fixnum+
+           number
+           +most-positive-fixnum+)))
 
 (defun aset (array idx value)
   "Set the index IDX of the vector ARRAY to VALUE."
@@ -226,5 +235,3 @@ metadata in it."
     (setf (subseq v (storage-vector-size sv1))
           (storage-vector-underlying-vector sv2))
     sv))
-
-
