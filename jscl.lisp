@@ -207,12 +207,33 @@ compiled in the host.")
 ;;; Compile and load jscl into the host
 (defun load-jscl ()
   (with-compilation-unit ()
-    (do-source input :host
-      (multiple-value-bind (fasl warn fail) (compile-file input)
-        (declare (ignore warn))
-        (when fail
-          (error "Compilation of ~A failed." input))
-        (load fasl)))))
+    (let (fasls)
+      (do-source input :host
+        (let (failures)
+          (load input)
+          (locally
+              (declare #+sbcl (sb-ext:muffle-conditions
+
+                               'sb-kernel::function-redefinition-warning))
+            (multiple-value-bind (fasl warn fail) (compile-file input)
+              (declare (ignore warn))
+              ;; It's only interesting to see  if there were failures at
+              ;; the  end  of  the  compilation  unit,  since  undefined
+              ;; functions  in  one  file  may be  defined  in  another.
+              ;; This   gets   particularly   convoluted  due   to   the
+              ;; circularity of the type system and object systems.
+              (when fail
+                (push fail failures)
+                (warn "Compilation of ~A failed." input))
+              (when fasl
+                (push fasl fasls))))))
+      (init-built-in-types%)
+      (locally
+          ;; These  occur  because  we  reload from  FASL  the  compiled
+          ;; versions
+          (declare #+sbcl (sb-ext:muffle-conditions
+                           'sb-kernel::function-redefinition-warning))
+        (map nil #'load (reverse fasls))))))
 
 
 ;;;; Load JSCL into the host implementation.
