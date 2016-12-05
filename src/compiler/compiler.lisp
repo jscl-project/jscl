@@ -2070,3 +2070,11 @@ the value."
          (*literal-counter* 0))
      (with-sharp-j
        ,@body)))
+
+
+(defmacro with-compilation-unit (options &body body)
+  (warn "WITH-COMPILATION-UNIT currently has no effect.~@[
+Ignoring options ~s~]" options)
+  ,@body)
+
+
