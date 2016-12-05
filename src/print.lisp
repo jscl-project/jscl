@@ -778,7 +778,7 @@ but wanted ~~~c in format string"
            (need-more "~ at end of format")
            (let ((next (pop-char)))
              (cond
-               ((digit-char-p next)
+               ((digit-char-p next)     ; Digits
                 (multiple-value-bind (param ending)
                     (parse-integer control-string
                                    :junk-allowed t)
@@ -790,37 +790,41 @@ but wanted ~~~c in format string"
                   (pop-char))
                 (go read-control))
 
-               ((char= #\apostrophe next)
+               ((char= #\apostrophe next) ; Quoted char
                 (need-more "~' at end of format")
                 (push (pop-char) params)
                 (need-more "~'char at end of format")
                 (go read-control))
 
-               ((char= #\, next)
+               ((char= #\, next)        ; Comma without param
                 (push nil params)
                 (go read-control))
 
-               ((char-equal #\V next)
+               ((char-equal #\V next)   ; Variable param
                 (push (pop arguments) params))
 
-               ((char= #\Newline next))
+               ((char= #\Newline next)  ; ~Newline
+                ;; Skip the newline, but also  any leading spaces on the
+                ;; next line. TODO: Write a test for this
+                (while (whitespacep (char control-string 0))
+                  (pop-char)))
 
-               ((char= #\: next)
+               ((char= #\: next)        ; Colon modifier
                 (setf colonp t)
                 (go read-control))
 
-               ((char= #\@ next)
+               ((char= #\@ next)        ; At-sign modifier
                 (setf atp t)
                 (go read-control))
 
-               ((char-equal #\T next)
+               ((char-equal #\T next)   ; Tabulation
                 (concatf output
                   (make-string (min 1
                                     (or (last params)
                                         1))
                                :initial-element #\space)))
 
-               ((char-equal #\P next)
+               ((char-equal #\P next)   ; English plurals
                 (let ((peek (pop arguments)))
                   (when colonp
                     (push peek arguments))
@@ -830,18 +834,18 @@ but wanted ~~~c in format string"
                                     (atp "y")
                                     (t "")))))
 
-               ((char= #\~ next)
+               ((char= #\~ next)        ; ~~ → ~
                 (concatf output "~"))
-               ((char= #\| next)
+               ((char= #\| next)        ; Page break
                 (concatf output #(#\Page)))
-               ((char= #\% next)
+               ((char= #\% next)        ; Terminate Print (Newline)
                 (concatf output
                   (apply #'format-terpri (reverse params))))
-               ((char= #\& next)
+               ((char= #\& next)        ; Fresh line
                 (concatf output
                   (apply #'format-fresh-line (reverse params))))
 
-               ((char= #\* next)
+               ((char= #\* next)        ; Adjust argument pointer
                 (let ((delta (* (or (and params (first params))
                                     1)
                                 ;; sign inverted for - below
@@ -851,7 +855,7 @@ but wanted ~~~c in format string"
                                    (length arguments)
                                    delta)
                                 orig-arguments))))
-               ((find next ";^")
+               ((find next ";^")        ; Operate on grouping
                 (assert *nested-substrings* ()
                         "~~; and ~~^ only work within nested format groups")
                 (push-nested-substring output)
@@ -859,22 +863,37 @@ but wanted ~~~c in format string"
                                              (when atp #\@)
                                              (when colonp #\:)))
                 (setq output nil))
-               ((find next ")>]}")
+               ((find next ")>]}")      ; End nested grouping
                 (push-nested-substring output)
                 (multiple-value-setq (output arguments)
                   (funcall (pop *format-nesting*)
                            next (pop *nested-substrings*)
                            atp colonp)))
-               ((find next "(<[{")
+               ((find next "(<[{")      ; Start nested grouping
                 (multiple-value-setq
                     (control-string output arguments)
                   (format-nested next
                                  control-string output arguments
                                  next atp colonp)))
-               (t (concatf output
-                    (format-special next (pop arguments)
-                                    (reverse params)
-                                    :atp atp :colonp colonp))))))
+               ((char= #\/ next)        ; Funcall
+                (let ((function-name-string ""))
+                  (while (not (char= #\/ (char control-string 0)))
+                    (concatf function-name-string (pop-char)))
+                  (pop-char)            ; take the trailing /
+                  (assert (every (lambda (char)
+                                   (or (alphanumericp char)
+                                       (char= #\- char)))
+                                 function-name-string))
+                  (funcall
+                   (let ((*package* :cl-user))
+                     (read-from-string function-name-string))
+                   destination (pop arguments)
+                   colonp atp (reverse params))))
+               (t                    ; “Normal” format special operators
+                (concatf output
+                  (format-special next (pop arguments)
+                                  (reverse params)
+                                  :atp atp :colonp colonp))))))
         (values control-string output arguments)))))
 
 
