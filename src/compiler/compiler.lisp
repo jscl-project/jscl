@@ -1,4 +1,4 @@
-;;;; compiler.lisp ---
+;;;; compiler.lisp — the heart of the JavaScript compiler.
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
 ;; the terms of the GNU General  Public License as published by the Free
@@ -6,7 +6,7 @@
 ;; option) any later version.
 ;;
 ;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
-;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY ora
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 ;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 ;; for more details.
 ;;
@@ -19,10 +19,13 @@
 
 (/debug "loading compiler.lisp!")
 
-;; Translate the  Lisp code to  Javascript. It will compile  the special
+;; Translates the Lisp code to Javascript. This will compile the special
 ;; forms. Some  primitive functions are  compiled as special  forms too.
-;; The  respective real  functions are  defined in  the target  (see the
-;; beginning of this file) as well as some primitive functions.
+;; The respective  real functions are defined  in the target as  well as
+;; some primitive functions.
+
+
+;;; JavaScript primitive mapping of function calls
 
 (define-js-macro selfcall (&body body)
   `(call (function () ,@body)))
@@ -87,7 +90,7 @@
                    (function (lexenv-function lexenv))
                    (block    (lexenv-block    lexenv))
                    (gotag	(lexenv-gotag	lexenv))
-                   (type	(lexenv-type	lexenv))                   
+                   (type	(lexenv-type	lexenv))
                    (class	(lexenv-class	lexenv)))
             :key #'binding-name
             :test #'equalp)
@@ -164,32 +167,30 @@
     (notinline (!proclamation decl 'function))
     (constant (!proclamation decl 'variable))))
 
-(defun declaration-information (name
-                                &optional 
-                                  (env *global-environment*))
+(defun jscl/cltl2::declaration-information (name
+                                            &optional
+                                              (env *global-environment*))
   "Return information about declarations named by DECLARATION-NAME.
 
 Defined in CLtL2.
 
 If DECLARATION-NAME is  OPTIMIZE return a list whose entries  are of the
 form (QUALITY VALUE).
-    
+
 If DECLARATION-NAME  is DECLARATION return  a list of  declaration names
 that have been proclaimed as valid.
-    
+
 If DECLARATION-NAME  is a name  that has defined  via DEFINE-DECLARATION
 return a user defined value.
 
 In SBCL,  if DECLARATION-NAME is SB-EXT:MUFFLE-CONDITIONS  return a type
 specifier for the condition types that have been muffled.
-" 
+"
   (declare (ignore env))
   (case name
-    (optimize '((speed 1) (debug 1) (space 1) 
-                (safety 2) (compilation-speed 1))) 
+    (optimize '((speed 1) (debug 1) (space 1)
+                (safety 2) (compilation-speed 1)))
     (otherwise nil)))
-
-(export 'declaration-information )
 
 #+jscl
 (fset 'proclaim #'!proclaim)
@@ -678,17 +679,30 @@ association list ALIST in the same order."
               jsvar)))))
 
 (defun literal (sexp &optional recursivep)
-  (typecase sexp
-    (complex (error "Can't use complex number ~a yet" sexp))
-    (fixnum sexp)
-    (rational
-     (warn "Rounding ~a to float" sexp)
-     (coerce sexp 'double-float))
-    (number sexp)
-    (character (string sexp))
-    (pathname (namestring sexp))
-    (structure-object (constructor<-structure sexp))
-    (t (dump-complex-literal sexp recursivep))))
+  (cond
+    ((and (integerp sexp)
+          (not (!fixnump sexp)))
+     (cerror "Use the biggest possible number instead"
+             "Cannot pass BigNum ~:d yet" sexp)
+     (if (plusp sexp)
+         (literal +most-positive-fixnum+)
+         (literal +most-negative-fixnum+)))
+    ((and (rationalp sexp)
+          (not (= 1 (denominator sexp)))
+          (not (rational-float-p sexp)))
+     (cerror "Round it off"
+             "Cannot pass ~d exactly" sexp)
+     (literal (coerce sexp 'double-float)))
+    ((complexp sexp)
+     (error "Cannot pass complex numberss like ~d" sexp))
+    (t
+     (typecase sexp
+       (fixnum sexp)
+       (number sexp)
+       (character (string sexp))  ; is this really the right thing?
+       (pathname (namestring sexp))
+       (structure-object (constructor<-structure sexp))
+       (t (dump-complex-literal sexp recursivep))))))
 
 (define-compilation quote (sexp)
   (literal sexp))
@@ -729,7 +743,9 @@ association list ALIST in the same order."
         (let ((b (lookup-in-lexenv x *environment* 'function)))
           (if b
               (binding-value b)
-              (error "No SETF function ~as" x))))))
+              (error "No SETF function ~as" x))))
+       (otherwise
+        (error "Can't compile #'~s" x))))
     ((symbolp x)
      (let ((b (lookup-in-lexenv x *environment* 'function)))
        (if b
@@ -783,11 +799,19 @@ association list ALIST in the same order."
   "NOTE: It  is probably wrong  in many cases but  we will not  use this
  heavily. Please, do not rely on wrong cases of this implementation."
   ;; TODO: Error checking
+  (assert (every (lambda (situation)
+                   (find situation '(:compile-toplevel :load-toplevel :execute)))
+                 situations)
+          (situations)
+          "Eval-When  situations   must  be   (MEMBER  COMPILE-TOPLEVEL~
+          LOAD-TOPLEVEL EXECUTE) only; not ~s" situations)
   (cond
     ;; Toplevel form compiled by !compile-file.
     ((and *compiling-file* (zerop *convert-level*))
-     ;; If the situation `compile-toplevel' is given. The form is
-     ;; evaluated at compilation-time.
+     ;; If  the  situation  `compile-toplevel'  is given.  The  form  is
+     ;; evaluated  at compilation-time.  This  probably  means it'll  be
+     ;; evaluated  in the  host compiler,  which  is maybe  not what  we
+     ;; always want.
      (when (find :compile-toplevel situations)
        (eval (cons 'progn body)))
      ;; `load-toplevel'  is  given,  then   just  compile  the  subforms
@@ -970,7 +994,7 @@ let-binding-wrapper."
 (define-compilation return-from (name &optional value)
   (let* ((binding (or (lookup-in-lexenv name *environment* 'block)
                       (error "Return from unknown block `~S'." name)))
-         (multiple-value-p (member 'multiple-value (binding-declarations binding)))) 
+         (multiple-value-p (member 'multiple-value (binding-declarations binding))))
     (push 'used (binding-declarations binding))
     ;; The binding value is the name of a variable, whose value is the
     ;; unique identifier of the block as exception. We can't use the
@@ -1280,7 +1304,7 @@ generate the code which performs the transformation on these variables."
   `(= (get ,symbol "value") ,value))
 
 (define-builtin fset (symbol value)
-  `(= (get ,symbol "fvalue") 
+  `(= (get ,symbol "fvalue")
       ,(if (and (listp value)
                 (= 2 (length value))
                 (eql 'quote (first value))
@@ -1289,7 +1313,7 @@ generate the code which performs the transformation on these variables."
            value)))
 
 (define-builtin fset-setf (symbol value)
-  `(= (get ,symbol "setfValue") 
+  `(= (get ,symbol "setfValue")
       ,(if (and (listp value)
                 (= 2 (length value))
                 (eql 'quote (first value))
@@ -1313,9 +1337,9 @@ generate the code which performs the transformation on these variables."
   `(call-internal |symbolValue| ,x))
 
 (define-builtin %fdefinition-setf (accessor)
-  `(call-internal |fDefinitionSetF| ,accessor))
+  `(get ,accessor "setfValue"))
 (define-builtin %setf-fdefinition-setf (accessor function)
-  `(call-internal |setFDefinitionSetF| ,accessor ,function))
+  `(= (get ,accessor "setfValue") ,function))
 
 (define-builtin %setf-symbol-function (x fn)
   `(call-internal |setSymbolFunction| ,x ,fn))
@@ -1417,14 +1441,16 @@ generate the code which performs the transformation on these variables."
 (define-builtin functionp (x)
   (convert-to-bool `(=== (typeof ,x) "function")))
 
+
+
 (define-builtin /debug (x)
   `(method-call |console| "log" (call-internal |xstring| ,x)))
 
 (define-builtin /log (x)
   `(method-call |console| "log" ,x))
 
-
-;;; Storage vectors. They are used to implement arrays and (in the
+
+;;; Storage  vectors. They  are used  to  implement arrays  and (in  the
 ;;; future) structures. (work-in-progress, kinda.)
 
 (define-builtin storage-vector-p (x)
@@ -1432,12 +1458,14 @@ generate the code which performs the transformation on these variables."
     (var (x ,x))
     (return ,(convert-to-bool
               `(and (=== (typeof x) "object")
-                    (in "length" x))))))
+                    (in "length" x)
+                    (in "svKind" x))))))
 
-(define-builtin make-storage-vector (n)
+(define-builtin make-storage-vector (n kind)
   `(selfcall
     (var (r #()))
     (= (get r "length") ,n)
+    (= (get r "svKind") ,kind)
     (return r)))
 
 (define-builtin storage-vector-size (x)
@@ -1447,7 +1475,8 @@ generate the code which performs the transformation on these variables."
   `(= (get ,vector "length") ,new-size))
 
 (define-builtin storage-vector-ref (vector n)
-  (check-type n (integer 0 *))
+  (when (constantp n)
+    (check-type n (integer 0 *)))
   `(selfcall
     (var (x (property ,vector ,n)))
     (if (=== x undefined)
@@ -1466,15 +1495,20 @@ generate the code which performs the transformation on these variables."
     (return (= (property x i) ,value))))
 
 (define-builtin concatenate-storage-vector (sv1 sv2)
+  ;; TODO check kind?
   `(selfcall
     (var (sv1 ,sv1))
     (var (r (method-call sv1 "concat" ,sv2)))
-    (= (get r "type") (get sv1 "type"))
+    (= (get r "svKind") (get sv1 "svKind"))
     (= (get r "stringp") (get sv1 "stringp"))
     (return r)))
 
+
+
 (define-builtin get-internal-real-time ()
   `(method-call (new (call |Date|)) "getTime"))
+
+
 
 (define-builtin values-array (array)
   (if *multiple-value-p*
@@ -1644,19 +1678,23 @@ generate the code which performs the transformation on these variables."
   (unless (symbolp name)
     (error "`~S' must be a symbol" name))
   (let* ((b (lookup-in-lexenv name *environment* 'function))
-         (expander (or #-jscl 
-                       (gethash b *macroexpander-cache*)
-                       (and b 
-                            (eql 'macro (binding-type b))
-                            (binding-value b)))))
+         (expander (or
+                    #+sbcl (when (eql 'sb-int:quasiquote name)
+                             (lambda (form env)
+                               (declare (ignore env))
+                               (sb-impl::expand-quasiquote form nil)))
+                    #-jscl
+                    (gethash b *macroexpander-cache*)
+                    (and b
+                         (eql 'macro (binding-type b))
+                         (binding-value b)))))
     (when (listp expander)
       (let ((compiled (eval expander)))
-        ;; The    list    representation   are    useful    while
-        ;; bootstrapping, as  we can  dump the definition  of the
-        ;; macros easily,  but they are  slow because we  have to
-        ;; evaluate them and compile them  now and again. So, let
-        ;; us  replace the  list  representation  version of  the
-        ;; function with the compiled one.
+        ;; The list representation are useful while bootstrapping, as we
+        ;; can dump  the definition of  the macros easily, but  they are
+        ;; slow because  we have to  evaluate them and compile  them now
+        ;; and again. So, let us replace the list representation version
+        ;; of the function with the compiled one.
         #+jscl (setf (binding-value b) compiled)
         #-jscl (setf (gethash b *macroexpander-cache*) compiled)
         (setq expander compiled)))
@@ -1843,6 +1881,31 @@ generate the code which performs the transformation on these variables."
       (list 'error (format nil "Failed compilation of ~s"
                            sexp)))))
 
+(defun should-be-macroexpanded-in-cl-p (sexp)
+  (and (consp sexp)
+       (symbolp (car sexp))
+       ;; DESTRUCTURING-BIND is  defined via !DESTRUCTURING-BIND  and is
+       ;; almost not a macro and almost,  but not quite, a special form,
+       ;; so we have to work around that here.
+       (not (eql 'destructuring-bind (car sexp)))
+       (eql (find-package :common-lisp)
+            (symbol-package (car sexp)))
+       (macro-function (car sexp))))
+
+(defun prefix-! (symbol)
+  (intern (concatenate 'string "!"
+                       (symbol-name symbol))
+          :jscl))
+
+(defun complain-failed-macroexpansion (sexp)
+  (emit-uncompilable-form
+   sexp
+   "Failed to macroexpand ~s ~% in ~s~2%~a"
+   (car sexp) sexp
+   (format nil
+           "No macro-function ~s (nor ~:*!~s) is defined in JSCL"
+           (car sexp))))
+
 (defun check-for-failed-macroexpansion (sexp)
   "When a symbol is defined as a  macro in the host compiler, and exists
 in the CL package,  it is usually a safe bet that  we should be treating
@@ -1851,44 +1914,39 @@ it as a macro within JSCL  as well. The notable exception (inversion) is
 means either that  we have a compile-time dependency  ordering issue, or
 just haven't gotten  around to defining that macro at  all, yet. It also
 jumps out and  shouts when macro-expansion is  broken completely, rather
-than baffling errors because of macro-forms being treated as functions."
-  (if (and (consp sexp)
-           (symbolp (car sexp))
-           ;; DESTRUCTURING-BIND is defined  via !DESTRUCTURING-BIND and
-           ;; is almost not a macro and almost, but not quite, a special
-           ;; form, so we have to work around that here.
-           (not (eql 'destructuring-bind (car sexp)))
-           (eql (find-package :common-lisp)
-                (symbol-package (car sexp)))
-           (macro-function (car sexp)))
-      (let ((bang (intern (concatenate 'string "!"
-                                       (symbol-name (car sexp)))
-                          :jscl)))
-        (if (!macro-function bang)
-            (progn
-              (warn "Substituting ~s for ~s" bang (car sexp))
-              (funcall (!macro-function bang) sexp))
-            (emit-uncompilable-form
-             sexp
-             "Failed to macroexpand ~s ~% in ~s~2%~a"
-             (car sexp) sexp
-             (if (!macro-function (car sexp))
-                 "A macro-function is defined, but did not work"
-                 (format nil 
-                         "No macro-function ~s (nor ~s) is defined in JSCL"
-                         (car sexp) bang)))))
-      sexp))
+than baffling errors because of macro-forms being treated as functions.
+
+Notably,  a  macro defined  as  !NAME  will be  used  for  NAME to  make
+cross-compilation less  sticky about symbol  names in the  JSCL package.
+If the  JSCL/CL package were separate  from the JSCL/INT package  or so,
+this might go  away, but that will  take a good bit  of rewriting symbol
+names throughout the tree. "
+  (cond ((not (should-be-macroexpanded-in-cl-p sexp)) sexp)
+        ((!macro-function (prefix-! (car sexp)))
+         (warn "Substituting !~s for ~:*~s" (car sexp))
+         (funcall (!macro-function (prefix-! (car sexp)))
+                  sexp *environment*))
+        (t (complain-failed-macroexpansion sexp))))
 
 (defun object-evaluates-to-itself-p (object)
-  (or (integerp object)                   ; TODO: REALP, NUMBERP
+  ;; TODO:  Things  that  “should”  evaluate  to  themselves  but  won't
+  ;; actually (yet) include bignums, rationals, and complex numbers.
+  (or (!fixnump object)
       (floatp object)
       (characterp object)
       (stringp object)
       (arrayp object)
       (pathnamep object)
+      (keywordp object)
       (typep object 'structure-object)))
 
 (defun convert-1 (sexp &optional multiple-value-p)
+  "Translate  SEXP  (which  can  be  a  single  symbol  or  value)  into
+JavaScript AST form for the  code generator. Remove all macroexpansions.
+If MULTIPLE-VALUE-P,  then it's possible  that SEXP may  return multiple
+values, and  the appropriate  JavaScript wrappers must  be in  place; if
+not, the simplified forms that accept  only a primary value returned can
+be used."
   (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
     (when expandedp
       (return-from convert-1 (convert sexp multiple-value-p)))
@@ -1899,10 +1957,10 @@ than baffling errors because of macro-forms being treated as functions."
         (cond
           ((symbolp sexp)
            (convert-1/symbol sexp))
-          ((object-evaluates-to-itself-p sexp)
-           (literal sexp))
           ((rational-float-p sexp)
            (literal (rational-float-p sexp)))
+          ((object-evaluates-to-itself-p sexp)
+           (literal sexp))
           ((listp sexp)
            (compile-sexp sexp))
           (t
@@ -1917,12 +1975,57 @@ than baffling errors because of macro-forms being treated as functions."
 (defvar *compile-print-toplevels* nil)
 
 (defun truncate-string (string &optional (width 60))
+  "Truncate   a  STRING   to  no   more  than   WIDTH  characters,   and
+remove newlines."
   (let ((n (or (position #\newline string)
                (min width (length string)))))
     (subseq string 0 n)))
 
+(defun convert-toplevel-progn (sexp multiple-value-p return-p)
+  (warn "Top-level PROGN same as as ~r top-level form~:p"
+        (length (cdr sexp)))
+  `(progn
+     ;; Discard all except the last value
+     ,@(mapcar (lambda (form)
+                 (convert-toplevel form nil nil))
+               (butlast (cdr sexp)))
+     ;; Return the last value(s)
+     ,(convert-toplevel
+       (first (last (cdr sexp))) multiple-value-p return-p)))
+
+(defun convert-toplevel-defpackage (sexp)
+  (warn
+   "DEFPACKAGE ~a will probably not be effective within the current
+file.  See  https://github.com/romance-ii/jscl/issues/30  — If  you  put
+DEFPACKAGE in  a separate file  from IN-PACKAGE, everything seems  to be
+just fine."
+   (second sexp))
+  (apply #'defpackage-real% (rest sexp))
+  (convert-toplevel `(apply #'defpackage-real% (rest sexp))))
+
+(defun convert-toplevel-in-package (sexp)
+  (setf *package* (find-package-or-fail (second sexp)))
+  (convert-toplevel
+   `(setq *package* (find-package-or-fail ,(second sexp)))))
+
+(defun convert-toplevel-normal (sexp multiple-value-p return-p)
+  (when *compile-print-toplevels*
+    (let ((form-string (prin1-to-string sexp)))
+      (format t "~&;; Compiling ~a…" (truncate-string
+                                      (substitute #\space #\newline
+                                                  form-string)
+                                      120))))
+  (let ((code (convert sexp multiple-value-p)))
+    (if return-p
+        `(return ,code)
+        code)))
+
 (defun convert-toplevel (sexp &optional multiple-value-p return-p)
-  ;; Macroexpand sexp as much as possible
+  "Macroexpand SEXP as  much as possible, and process it  as a top-level
+form. If  MULTIPLE-VALUE-P, then  SEXP may  return multiple  values (and
+they  will  be bound);  otherwise,  use  a  simpler form  that  discards
+non-primary values. If RETURN-P, emit  a JavaScript “return” operator on
+the value."
   (multiple-value-bind (expansion expandedp) (!macroexpand-1 sexp)
     (when expandedp
       (warn "Macro-expansion done on top level (~s …)…" (car sexp))
@@ -1931,49 +2034,23 @@ than baffling errors because of macro-forms being treated as functions."
   ;; Process as toplevel
   (let ((*convert-level* -1))
     (cond
-      ;; HACK work-around for IN-PACKAGE not working
+      ;; HACK work-around for DEFPACKAGE not working
+;;; TODO  after   confirming  that  this   is  not  a   problem,  remove
+;;; the warning.
       ((and (consp sexp)
             (eql (car sexp) 'defpackage))
-       (warn
-        "DEFPACKAGE ~a will probably not be effective within the current
-file.  See  https://github.com/romance-ii/jscl/issues/30  — If  you  put
-DEFPACKAGE in  a separate file  from IN-PACKAGE, everything seems  to be
-just fine."
-   (second sexp))
-       (apply #'defpackage-real% (rest sexp))
-       (convert-toplevel `(apply #'defpackage-real% (rest sexp))))
+       (convert-toplevel-defpackage sexp))
       ((and (consp sexp)
             (eql (car sexp) 'in-package)
             (= 2 (length sexp)))
-       (setf *package* (find-package-or-fail (second sexp)))
-       (convert-toplevel
-        `(setq *package* (find-package-or-fail ,(second sexp)))))
+       (convert-toplevel-in-package sexp))
       ;; Non-empty toplevel progn
       ((and (consp sexp)
             (eq (car sexp) 'progn)
             (cdr sexp))
-       (warn "Top-level PROGN same as as ~r top-level form~:p"
-             (length (cdr sexp)))
-       `(progn
-          ;; Discard all except the last value
-          ,@(mapcar (lambda (form)
-                      (convert-toplevel form nil nil))
-                    (butlast (cdr sexp)))
-          ;; Return the last value(s)
-          ,(convert-toplevel
-            (first (last (cdr sexp))) multiple-value-p return-p)))
+       (convert-toplevel-progn sexp multiple-value-p return-p))
       (t
-       (when *compile-print-toplevels*
-         (let ((form-string (prin1-to-string sexp)))
-           (format t "~&;; Compiling ~a…" (truncate-string
-                                           (substitute #\space #\newline
-                                                       form-string)
-                                           120))))
-
-       (let ((code (convert sexp multiple-value-p)))
-         (if return-p
-             `(return ,code)
-             code))))))
+       (convert-toplevel-normal sexp multiple-value-p return-p)))))
 
 (defun process-toplevel (sexp &optional multiple-value-p return-p)
   (let ((*toplevel-compilations* nil))
