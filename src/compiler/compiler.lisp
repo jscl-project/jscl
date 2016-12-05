@@ -1924,8 +1924,8 @@ names throughout the tree. "
   (cond ((not (should-be-macroexpanded-in-cl-p sexp)) sexp)
         ((!macro-function (prefix-! (car sexp)))
          (warn "Substituting !~s for ~:*~s" (car sexp))
-         (funcall (!macro-function (prefix-! (car sexp)))
-                  sexp *environment*))
+         (!macroexpand (cons (prefix-! (car sexp))
+                             (cdr sexp))))
         (t (complain-failed-macroexpansion sexp))))
 
 (defun object-evaluates-to-itself-p (object)
@@ -2072,9 +2072,9 @@ the value."
        ,@body)))
 
 
-(defmacro with-compilation-unit (options &body body)
+(defmacro !with-compilation-unit (options &body body)
   (warn "WITH-COMPILATION-UNIT currently has no effect.~@[
 Ignoring options ~s~]" options)
-  ,@body)
+  body)
 
 
