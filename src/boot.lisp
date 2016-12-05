@@ -196,9 +196,9 @@
         ((eql (car name) 'setf)
          `(progn
             (eval-when (:compile-toplevel)
-              (fn-info ',name :defined t)
-              (fset-setf ',name #'(named-lambda ,name ,args ,@body))
-              ',name)))
+              (fn-info ',name :defined t))
+            (fset-setf ',(second name) #'(named-lambda ,name ,args ,@body))
+            ',name))
         (t (error "~s cannot be a function name" name))))
 
 (defmacro return (&optional value)
