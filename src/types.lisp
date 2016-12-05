@@ -13,14 +13,44 @@
 ;; forward declarations to compiler.lisp
 (declaim (special *environment* *global-environment*)
          (ftype (function (t) t) binding-value)
-         (ftype (function (symbol t t) t) lookup-in-lexenv)
+         (ftype (function (t t t) t) lookup-in-lexenv)
          (ftype (function (&key (:name t) (:type t)
                                 (:value t) (:declarations t))
                           t)
                 make-binding)
          (ftype (function (t t t) cons)
                 push-to-lexenv)
-         (ftype (function (t) (or null cons)) lexenv-type))
+         (ftype (function (t) t) lexenv-type))
+
+
+
+(defmacro !deftype (name lambda-list &body body) 
+  (assert (or (symbolp body) 
+              (and (listp body)
+                   (= 1 (length body))))
+          (body)
+          "Don't know how to define a type ~s" body)
+  `(push-to-lexenv (make-binding
+                    :name ',name
+                    :type 'type
+                    :value (make-type-definition 
+                            :name ',name
+                            :supertypes '(jscl::user-deftype)
+                            :predicate
+                            (lambda (object)
+                              ,(make-deftype-predicate
+                                name lambda-list
+                                (if (symbolp body) 
+                                    body
+                                    (first body))))
+                            :class (make-deftype-class-metaobject
+                                    :name ',name)))
+                   *environment*
+                   'type))
+
+#+jscl
+(defmacro deftype (name lambda-list &body body)
+  `(!deftype ,name ,lambda-list ,@body))
 
 
 
@@ -128,24 +158,32 @@
 (defstruct deftype-class-metaobject
   name)
 
-(defmacro !deftype (name lambda-list &body body)
-  `(push-to-lexenv ',name
-                   (make-binding
-                    :name ',name
-                    :type 'type
-                    :value (make-type-definition :name ',name
-                                                 :supertypes '(jscl::user-deftype)
-                                                 :predicate
-                                                 ,(let ((object (gensym "OBJECT-")))
-                                                    `(lambda ,(cons object lambda-list)
-                                                       (typep ,object ',@body)))
-                                                 :class (make-deftype-class-metaobject
-                                                         :name ',name)))
-                   'type))
+(defun make-deftype-predicate (name lambda-list body)
+  (cond ((not (listp body))
+         `(typep object ,body)) 
+        ((member (car body) '(and or not)) 
+         (cons (car body) (mapcar (lambda (form)
+                                    (make-deftype-predicate name
+                                                            lambda-list 
+                                                            form))
+                                  (rest body))))
+        ;; FIXME: compound specifiers handling
+        ((not (= (length body) 2))
+         (error "Don't understand type specifier ~s" body))
+        ((eql (car body) 'not) 
+         (cons (car body) (mapcar (lambda (form)
+                                    (make-deftype-predicate name lambda-list form))
+                                  (rest body))))
+        ((eql 'satisfies (first body))
+         `(,(second body) object)) 
+        ((eql 'member (car body))
+         `(member object ,(cdr body)))
+        ((and (= 2 (length body))
+              (eql 'mod (car body)))
+         `(and (integerp object) (<= 0 object) (< object ,(second body))))
+        ;; TODO: VALUES forms
+        (t (error "Don't understand type specifier ~s" body))))
 
-#+jscl
-(defmacro deftype (name lambda-list &body body)
-  `(!deftype ,name ,lambda-list ,@body))
 
 #-jscl
 (defun eql-specializer-p (object)

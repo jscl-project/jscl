@@ -76,6 +76,7 @@
 (defstruct lexenv
   variable
   function
+  setf-function
   block
   gotag
   type
@@ -84,8 +85,17 @@
 (defvar *global-environment* (make-lexenv))
 (defvar *environment* *global-environment*)
 
-(defun lookup-in-lexenv (name lexenv namespace)
-  (or (find name (ecase namespace
+(defun lookup-in-lexenv (name lexenv namespace) 
+  (or (and (eql namespace 'function)
+           (listp name)
+           (= 2 (length name))
+           (eql 'setf (car name))
+           (or (find name (lexenv-setf-function lexenv)
+                     :key #'binding-name :test #'eql)
+               (unless (eq lexenv *global-environment*)
+                 (find name (lexenv-setf-function *global-environment*)
+                       :key #'binding-name :test #'eql))))
+      (find name (ecase namespace
                    (variable (lexenv-variable lexenv))
                    (function (lexenv-function lexenv))
                    (block    (lexenv-block    lexenv))
@@ -93,7 +103,7 @@
                    (type	(lexenv-type	lexenv))
                    (class	(lexenv-class	lexenv)))
             :key #'binding-name
-            :test #'equalp)
+            :test #'eql)
       (unless (eq lexenv *global-environment*)
         (lookup-in-lexenv name *global-environment* namespace))))
 
@@ -614,12 +624,17 @@ is NIL."
        `(call-internal |intern| ,(symbol-name symbol) ,(package-name package))))))
 
 (defun dump-cons (cons)
-  (let ((head (butlast cons))
-        (tail (last cons)))
-    `(call-internal |QIList|
-                    ,@(mapcar (lambda (x) (literal x t)) head)
-                    ,(literal (car tail) t)
-                    ,(literal (cdr tail) t))))
+  (if (eql (car cons)
+           'sb-int::quasiquote)
+      (progn
+        (warn "Quasi-quote leakage: ~s" cons)
+        (dump-cons (sb-impl::expand-quasiquote cons nil)))
+      (let ((head (butlast cons))
+            (tail (last cons)))
+        `(call-internal |QIList|
+                        ,@(mapcar (lambda (x) (literal x t)) head)
+                        ,(literal (car tail) t)
+                        ,(literal (cdr tail) t)))))
 
 (defun dump-array (array)
   (let ((elements (vector-to-list array)))
@@ -680,6 +695,8 @@ association list ALIST in the same order."
 
 (defun literal (sexp &optional recursivep)
   (cond
+    ((typep sexp 'sb-impl::comma)
+     (error "Quasi-quoted expression leakage: ~s" sexp))
     ((and (integerp sexp)
           (not (!fixnump sexp)))
      (cerror "Use the biggest possible number instead"
@@ -795,6 +812,22 @@ association list ALIST in the same order."
 (defvar *compiling-file* nil
   "Was the compiler invoked from `!compile-file'?")
 
+(defun bangerang (form)
+  (cond ((consp form)
+         (cons
+          (if (symbolp (car form))
+              (let ((name (car form)))
+                (if (and (fboundp name)
+                         (or (eql (find-package :jscl) (symbol-package name))
+                             (eql (find-package :cl) (symbol-package name))))
+                    (let ((bang (find-symbol (concatenate 'string "!"
+                                                          (symbol-name name)) :jscl)))
+                      (or (and bang (fboundp bang) bang)
+                          name))
+                    name)))
+          (mapcar #'bangerang (cdr form)))) 
+        (t form)))
+
 (define-compilation eval-when (situations &rest body)
   "NOTE: It  is probably wrong  in many cases but  we will not  use this
  heavily. Please, do not rely on wrong cases of this implementation."
@@ -803,7 +836,7 @@ association list ALIST in the same order."
                    (find situation '(:compile-toplevel :load-toplevel :execute)))
                  situations)
           (situations)
-          "Eval-When  situations   must  be   (MEMBER  COMPILE-TOPLEVEL~
+          "Eval-When  situations   must  be   (MEMBER  COMPILE-TOPLEVEL ~
           LOAD-TOPLEVEL EXECUTE) only; not ~s" situations)
   (cond
     ;; Toplevel form compiled by !compile-file.
@@ -811,7 +844,7 @@ association list ALIST in the same order."
      ;; If  the  situation  `compile-toplevel'  is given.  The  form  is
      ;; evaluated  at compilation-time.  This  probably  means it'll  be
      ;; evaluated  in the  host compiler,  which  is maybe  not what  we
-     ;; always want.
+     ;; usually want. 
      (when (find :compile-toplevel situations)
        (eval (cons 'progn body)))
      ;; `load-toplevel'  is  given,  then   just  compile  the  subforms
@@ -1664,21 +1697,20 @@ generate the code which performs the transformation on these variables."
   (make-hash-table :test #'eq))
 
 #- (or ecl sbcl jscl)
-(warn "Your Implementation's quasiquote may not be handled properly.")
-#+ecl
-(setf (gethash 'si:quasiquote *macroexpander-cache*)
-      (warn "ECL quasiquote is probably not handled properly yet")
-      (lambda (form) (ext::macroexpand-1 form)))
-#+sbcl
-(setf (gethash 'sb-int:quasiquote *macroexpander-cache*)
-      (lambda (form)
-        (sb-impl::expand-quasiquote form nil)))
+(warn "Your Implementation's quasiquote may not be handled properly.
+You might want to look at !MACRO-FUNCTION in compiler.lisp")
 
-(defun !macro-function (name)
+(defun !macro-function (name &optional environment)
   (unless (symbolp name)
     (error "`~S' must be a symbol" name))
-  (let* ((b (lookup-in-lexenv name *environment* 'function))
+  (let* ((b (lookup-in-lexenv name (or environment
+                                       *global-environment*)
+                              'function))
          (expander (or
+                    #+ecl (when eql 'si:quasiquote name
+                                (warn "ECL quasiquote is probably not handled properly yet")
+                                (lambda (form) (ext::macroexpand-1 form)))
+                    
                     #+sbcl (when (eql 'sb-int:quasiquote name)
                              (lambda (form env)
                                (declare (ignore env))
@@ -1704,8 +1736,9 @@ generate the code which performs the transformation on these variables."
 (unless (!macro-function 'sb-int:quasiquote)
   (error "Quasi-quote expansion will not work"))
 
-(defun !macroexpand-1/symbol (symbol)
-  (let ((b (lookup-in-lexenv symbol *environment* 'variable)))
+(defun !macroexpand-1/symbol (symbol &optional env)
+  (let ((b (lookup-in-lexenv symbol (or env *global-environment*)
+                             'variable)))
     (if (and b (eq (binding-type b) 'macro))
         (values (binding-value b) t)
         (values symbol nil))))
@@ -1713,9 +1746,9 @@ generate the code which performs the transformation on these variables."
 (defun !macroexpand-1 (form &optional env)
   (cond
     ((symbolp form)
-     (!macroexpand-1/symbol form))
+     (!macroexpand-1/symbol form env))
     ((and (consp form) (symbolp (car form)))
-     (let ((macrofun (!macro-function (car form))))
+     (let ((macrofun (!macro-function (car form) env)))
        (if macrofun
            (values (funcall macrofun (cdr form) env) t)
            (values form nil))))
@@ -1734,8 +1767,9 @@ generate the code which performs the transformation on these variables."
 #+jscl
 (fset 'macroexpand #'!macroexpand)
 
-(defun compile-funcall/function (function arglist)
-  (when (!macro-function function)
+(defun compile-funcall/function (function arglist) 
+  (when (and (symbolp function)
+             (!macro-function function))
     (error "Compiler error: Macro function was not expanded: ~s"
            function))
   (fn-info function :called t)

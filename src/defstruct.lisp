@@ -181,7 +181,7 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                                            copier)
   #-jscl (declare (ignore type slots
                           predicate print-function
-                          constructor copier))
+                          constructor copier)) 
   #+jscl
   (push (make-type-definition :name type
                               :predicate predicate
@@ -201,7 +201,7 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
 
 ;;; DEFSTRUCT itself.
 
-(defmacro !defstruct (name-and-options &rest slots)
+(defmacro !defstruct% (name-and-options &rest slots)
   "A very simple defstruct. Most slot options are not supported."
   (let* ((name-and-options (ensure-list name-and-options))
          (name (first name-and-options))
@@ -222,6 +222,7 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
        ,(defstruct/make-predicate predicate name
           (length slot-descriptions))
        ,(defstruct/make-copier copier name predicate)
+       (deftype ,name () (satisfies ,predicate))
        ,(defstruct/define-type name slot-descriptions
           :constructor constructor
           :copier copier
@@ -230,6 +231,15 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
        ,@(defstruct/make-slot-accessors name-string predicate
            slot-descriptions)
        ',name)))
+
+;;; HACK HACK. Use SBCL structures during XC.
+(defmacro !defstruct (name-and-options &rest slots)
+  `(progn
+     #-jscl
+     (eval-when (:compile-toplevel)
+       (cl:defstruct ,name-and-options ,@slots))
+     (eval-when (:load-toplevel #+jscl :compile-toplevel)
+       (!defstruct% ,name-and-options ,@slots))))
 
 ;; This  alias  was  being  used;  switched to  the  !  prefix  to  make
 ;; things orthogonal…

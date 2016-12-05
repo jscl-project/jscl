@@ -56,8 +56,11 @@
                   form
                 (warn "Compiling a macro-expander for ~s" name)
                 (let* ((body (parse-body body :declarations t :docstring t))
-                       (whole (gensym "WHOLE-"))
-                       (environment (gensym "ENVIRONMENT-"))
+                       (ll (parse-destructuring-lambda-list args))
+                       (whole (or (lambda-list-wholevar ll)
+                                  (gensym "WHOLE-")))
+                       (environment (or (lambda-list-environment ll)
+                                        (gensym "ENVIRONMENT-")))
                        (expander `(function
                                    (lambda (,whole ,environment)
                                     (let ((*environment* ,environment))
