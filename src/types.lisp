@@ -15,7 +15,7 @@
          (ftype (function (t) t) binding-value)
          (ftype (function (symbol t t) t) lookup-in-lexenv)
          (ftype (function (&key (:name t) (:type t)
-                                (:value t) (:declarations (or null cons)))
+                                (:value t) (:declarations t))
                           t)
                 make-binding)
          (ftype (function (t t t) cons)
