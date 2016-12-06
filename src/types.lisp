@@ -25,11 +25,6 @@
 
 
 (defmacro !deftype (name lambda-list &body body) 
-  (assert (or (symbolp body) 
-              (and (listp body)
-                   (= 1 (length body))))
-          (body)
-          "Don't know how to define a type ~s" body)
   `(push-to-lexenv (make-binding
                     :name ',name
                     :type 'type
@@ -40,9 +35,7 @@
                             (lambda (object)
                               ,(make-deftype-predicate
                                 name lambda-list
-                                (if (symbolp body) 
-                                    body
-                                    (first body))))
+                                body))
                             :class (make-deftype-class-metaobject
                                     :name ',name)))
                    *environment*
@@ -60,7 +53,7 @@
     #-jscl !built-in-class
     name predicate superclasses)
 
-(eval-when (:compile-toplevel :load-toplevel)
+(eval-when (:compile-toplevel :load-toplevel :execute)
   (defun make-accessor-name (class slot-name)
     (intern (concatenate 'string (string class)
                          "-" (string slot-name)))))
@@ -73,11 +66,14 @@
                                          (find-class class)))
             for accessor = (make-accessor-name cl-name slot-name)
             for !accessor = (make-accessor-name class slot-name)
-            unless (fboundp accessor)
-            collect `(defun ,accessor (,class) (,!accessor ,class))
-            unless (fboundp (list 'setf accessor))
-            collect `(defun (setf ,accessor) (new-value ,class)
-                       (setf (,!accessor ,class) new-value))))))
+            ;; unless (fboundp accessor)
+            collect `(defun ,accessor (object)
+                       (declare (type ,class object))
+                       (,!accessor object))
+            ;; unless (fboundp (list 'setf accessor))
+            collect `(defun (setf ,accessor) (new-value object)
+                       (declare (type ,class object))
+                       (setf (,!accessor object) new-value))))))
 
 #-jscl (alias-!-accessors !built-in-class)
 
@@ -582,8 +578,7 @@ star)."
           (binding-value b)))
       (error "~s does not name a built-in class" name)))
 
-(defun init-built-in-types% ()
-  "Initializes the class/type hierarchy for the bult-in types."
+(defun init-built-in-basic-types% ()
   (dolist (type-info '((hash-table hash-table-p atom)
                        (number numberp atom)
                        (real realp number)
@@ -615,23 +610,23 @@ star)."
                                            :supertypes supertypes
                                            :predicate predicate))
        *global-environment*
-       'type)))
+       'type))))
 
+(defun init-numeric-compound-predicates% ()
   (dolist (type '(number integer real rational
                   float single-float double-float long-float))
     (setf (type-definition-predicate
            (find-type-definition type))
-          (make-numeric-range-check-predicate type)))
+          (make-numeric-range-check-predicate type))))
 
+(defun init-string-predicate% ()
   (setf (type-definition-predicate
          (find-type-definition 'string))
         (lambda (object length)
           (and (stringp object)
-               (= length (length object)))))
+               (= length (length object))))))
 
-  (setf (type-definition-predicate (find-type-definition 'array))
-        #'compound-array-type-p)
-
+(defun init-standard-type/classes% ()
   (dolist (type-name +standard-type-specifiers+)
     (push-to-lexenv
      (make-binding :name type-name
@@ -642,18 +637,31 @@ star)."
      *global-environment*
      'class)
     (unless (subtypep type-name t)
-      (warn "Standard type ~s is not properly defined" type-name)))
+      (warn "Standard type ~s is not properly defined" type-name))))
 
+(defun init-standard-class-subclasses% ()
   (dolist (hierarchy +standard-class-subclasses+)
     (destructuring-bind (class &rest subclasses) hierarchy
       (dolist (subclass subclasses)
         (let ((metaclass (find-built-in-class subclass)))
-          (push class (built-in-class-superclasses
-                       metaclass))))))
+          (push class (!built-in-class-superclasses
+                       metaclass)))))))
 
+(defun validate-standard-class-subclasses% ()
   (dolist (hierarchy +standard-class-subclasses+)
     (destructuring-bind (class &rest subclasses) hierarchy
       (dolist (subclass subclasses)
         (unless (subtypep subclass class)
           (warn "Standard class ~s should have subclass ~s"
                 class subclass))))))
+
+(defun init-built-in-types% ()
+  "Initializes the class/type hierarchy for the bult-in types."
+  (init-built-in-basic-types%) 
+  (init-numeric-compound-predicates%) 
+  (init-string-predicate%) 
+  (setf (type-definition-predicate (find-type-definition 'array))
+        #'compound-array-type-p) 
+  (init-standard-type/classes%)
+  (init-standard-class-subclasses%)
+  (validate-standard-class-subclasses%))

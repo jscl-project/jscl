@@ -159,12 +159,12 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
         (incf index)))))
 
 ;; Forward declaration of Make-Slot-Info. This is a circular dependency…
-(declaim (ftype
-          (function
-           (&key (:class t) (:name t) (:accessors t) (:readers t) (:writers t)
-                 (:type t) (:initform t) (:initarg t) (:allocation t))
-           (values slot-info &optional))
-          make-slot-info))
+(declaim (ftype (function
+                 (&key (:class t) (:name t) (:accessors t) (:readers t) (:writers t)
+                       (:type t) (:initform t) (:initarg t) (:allocation t))
+                 (values slot-info &optional))
+                make-slot-info)
+         (ftype (function (t) t) slot-info-p))
 
 (defun defstruct/make-slot-info (type slot)
   (make-slot-info
@@ -201,6 +201,8 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
 
 ;;; DEFSTRUCT itself.
 
+;; There is a  complicated — and not  very pretty — reason  for this odd
+;; definition name. Look below under `!DEFSTRUCT' for the apology.
 (defmacro !defstruct% (name-and-options &rest slots)
   "A very simple defstruct. Most slot options are not supported."
   (let* ((name-and-options (ensure-list name-and-options))
@@ -215,24 +217,46 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
          (copier (defstruct/option-value :copier options
                    (intern (concat "COPY-" name-string))))
          (print-function (defstruct/option-value :print-function options
-                           nil))
+                           #'print))
          (slot-descriptions (mapcar #'defstruct/parse-slot-description slots)))
-    `(eval-when (:compile-toplevel :load-toplevel)
-       ,(defstruct/make-constructor constructor name slot-descriptions)
-       ,(defstruct/make-predicate predicate name
-          (length slot-descriptions))
-       ,(defstruct/make-copier copier name predicate)
-       (deftype ,name () (satisfies ,predicate))
-       ,(defstruct/define-type name slot-descriptions
-          :constructor constructor
-          :copier copier
-          :predicate predicate
-          :print-function print-function)
-       ,@(defstruct/make-slot-accessors name-string predicate
-           slot-descriptions)
+    `(eval-when (:compile-toplevel :load-toplevel) 
+       (let ((*package* (find-package ,(package-name (symbol-package name)))))
+         ,(defstruct/make-constructor constructor name slot-descriptions)
+         ,(defstruct/make-predicate predicate name
+            (length slot-descriptions))
+         ,(defstruct/make-copier copier name predicate)
+         (deftype ,name () '(satisfies ,predicate))
+         (defstruct/define-type ',name ',slot-descriptions
+           :constructor ',constructor
+           :copier ',copier
+           :predicate ',predicate
+           :print-function ',print-function)
+         ,@(defstruct/make-slot-accessors name-string predicate
+             slot-descriptions))
        ',name)))
 
 ;;; HACK HACK. Use SBCL structures during XC.
+;;
+;; There's an Issue on GitHub for this (TODO: Log it)
+
+;; The  long and  the short  of it  is, the  type system  being compiled
+;; relies  upon the  host  compiler's  type system,  and  the JSCL  type
+;; system,  in  turn, relies  circularly  upon  DEFSTRUCT. So  there  is
+;; a truly  nasty solution: we compile  with the host (let's  say, SBCL)
+;; providing the structures,  then when we recompile,  things kinda fall
+;; into place. This EVAL-WHEN thunk is the source of the evil magic that
+;; makes this possible.
+;;
+;; The cross-compiler will emit  macroexpansions of JSCL:!/name/ because
+;; this  branch does  not  yet  have a  JSCL/CL  package  set up  during
+;; cross-compilation  phase  to  represent the  COMMON-LISP  package  at
+;; run-time. (That branch rotted and isn't being maintained yet.) A side
+;; effect of  that is that the  runtime package violates the  ANSI rules
+;; about exporting extra symbols, but that's a future worry. In the mean
+;; time, this  !DEFSTRUCT is a  redirector that takes advantage  of that
+;; redirection. In  future, if this hack  is kept in play,  it should be
+;; updated to  reflect JSCL/CL::DEFSTRUCT  and JSCL/INTERNALS::DEFSTRUCT
+;; or something similar.
 (defmacro !defstruct (name-and-options &rest slots)
   `(progn
      #-jscl
@@ -241,9 +265,11 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
      (eval-when (:load-toplevel #+jscl :compile-toplevel)
        (!defstruct% ,name-and-options ,@slots))))
 
-;; This  alias  was  being  used;  switched to  the  !  prefix  to  make
-;; things orthogonal…
+;; This alias  was being used in  some existing code; switched  to the !
+;; prefix to make things orthogonal…
 (defmacro def!struct (name-and-options &rest slots)
+  (warn "DEF!STRUCT alias is probably dangerous, ~
+use DEFSTRUCT now, or !DEFSTRUCT if you really mean it.")
   `(!defstruct ,name-and-options ,@slots))
 #+jscl
 (defmacro defstruct (name-and-options &rest slots)
