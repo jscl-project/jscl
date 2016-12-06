@@ -1,0 +1,21 @@
+checkout:
+  post:
+    - echo "Changing submodule pointers to use HTTPS URL's for Travis"
+    - sed -e 's#git@github.com:#https://github.com/#' -i .gitmodules
+    - git submodule sync
+    - echo "Updating submodules"
+    - git submodule update --init --recursive
+    - echo "Ensure that build dependencies are available"
+    - sh -c 'make deps || true'
+    - echo "Ensuring that we have a sane SBCL available"
+    - bin/ensure-sane-sbcl
+    - echo "Build"
+    - make
+
+test:
+  post:
+    - make test
+
+
+    
+

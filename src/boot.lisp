@@ -1,58 +1,93 @@
-;;; boot.lisp --- First forms to be cross compiled
+;;; boot.lisp — First forms to be cross compiled
 
-;; Copyright (C) 2012, 2013 David Vazquez
-;; Copyright (C) 2012 Raimon Grau
+;; Copyright (C) 2012, 2013 David Vazquez Copyright (C) 2012 Raimon Grau
 
-;; JSCL is free software: you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation, either version 3 of the
-;; License, or (at your option) any later version.
+;; JSCL is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General  Public License as published by the Free
+;; Software Foundation,  either version  3 of the  License, or  (at your
+;; option) any later version.
 ;;
-;; JSCL is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; JSCL is distributed  in the hope that it will  be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+;; for more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+;; You should  have received a  copy of  the GNU General  Public License
+;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
-;;; This code is executed when JSCL compiles this file itself. The
-;;; compiler provides compilation of some special forms, as well as
-;;; funcalls and macroexpansion, but no functions. So, we define the
-;;; Lisp world from scratch. This code has to define enough language
-;;; to the compiler to be able to run.
+;;; This  code  is  executed  when   JSCL  compiles  this  file  itself.
+;;; The compiler provides compilation of  some special forms, as well as
+;;; funcalls and  macroexpansion, but  no functions.  So, we  define the
+;;; Lisp  world from  scratch. This  code has  to define  enough of  the
+;;; language for the compiler to be able to run.
 
+(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+
+#-jscl-xc
+(error "This should not be getting evaluated except during JSCL-XC.")
 (/debug "loading boot.lisp!")
 
+
+;;; Package definitions for within the environment.
+
+(defpackage :common-lisp
+  (:nicknames :cl)) ; exports handled by toplevel.lisp
+
+(defpackage :common-lisp-user
+  (:use :common-lisp)
+  (:nicknames :cl-user))
+
+(defpackage :jscl
+  (:use :cl :jscl)
+  (:export #:bootstrap #:bootstrap-core
+           #:run-tests-in-host #:with-sharp-j #:read-#j
+           #:write-javascript-for-files #:compile-application))
+
+(defpackage :jscl/ffi
+  (:use :cl :jscl)
+  (:export #:oget #:oget* #:make-new #:new #:*root*))
+
+
+;;; DEFMACRO
 (eval-when (:compile-toplevel)
   (let ((defmacro-macroexpander
-         '#'(lambda (form)
+         '#'(lambda (form environment)
               (destructuring-bind (name args &body body)
                   form
-                (let* ((whole (gensym))
+                (warn "Compiling a macro-expander for ~s" name)
+                (let* ((body (parse-body body :declarations t :docstring t))
+                       (ll (parse-destructuring-lambda-list args))
+                       (whole (or (lambda-list-wholevar ll)
+                                  (gensym "WHOLE-")))
+                       (environment (or (lambda-list-environment ll)
+                                        (gensym "ENVIRONMENT-")))
                        (expander `(function
-                                   (lambda (,whole)
-                                    (block ,name
-                                      (destructuring-bind ,args ,whole
-                                        ,@body))))))
+                                   (lambda (,whole ,environment)
+                                    (let ((*environment* ,environment))
+                                      (block ,name
+                                        (destructuring-bind ,args ,whole
+                                          ,@body)))))))
 
-                  ;; If we are boostrapping JSCL, we need to quote the
-                  ;; macroexpander, because the macroexpander will
-                  ;; need to be dumped in the final environment
-                  ;; somehow.
+                  ;; If we are  boostrapping JSCL, we need  to quote the
+                  ;; macroexpander, because the  macroexpander will need
+                  ;; to be dumped in the final environment somehow.
                   (when (find :jscl-xc *features*)
                     (setq expander `(quote ,expander)))
-                  
-                  `(eval-when (:compile-toplevel :execute)
-                     (%compile-defmacro ',name ,expander))
 
-                  )))))
-    
+                  `(eval-when (:compile-toplevel :execute)
+                     (%compile-defmacro ',name ,expander)))))))
+
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
+
+
+;;; DECLAIM
 
 (defmacro declaim (&rest decls)
   `(eval-when (:compile-toplevel :execute)
      ,@(mapcar (lambda (decl) `(!proclaim ',decl)) decls)))
+
+
+;;; DEFCONSTANT, T, NIL, LAMBDA
 
 (defmacro defconstant (name value &optional docstring)
   `(progn
@@ -70,11 +105,70 @@
 (defmacro lambda (args &body body)
   `(function (lambda ,args ,@body)))
 
+
+;;; AND, OR
+
+(defmacro and (&rest forms)
+  (cond
+    ((null forms)
+     t)
+    ((null (cdr forms))
+     (car forms))
+    (t
+     `(if ,(car forms)
+          (and ,@(cdr forms))
+          nil))))
+
+(defmacro or (&rest forms)
+  (cond
+    ((null forms)
+     nil)
+    ((null (cdr forms))
+     (car forms))
+    (t
+     (let ((g (gensym "OR-")))
+       `(let ((,g ,(car forms)))
+          (if ,g
+              ,g
+              (or ,@(cdr forms))))))))
+
+
+;;; COND, WHEN, UNLESS
+(defmacro cond (&rest clausules)
+  (unless (null clausules)
+    (let ((clause (first clausules))
+          (more (rest clausules)))
+      (when (atom clause)
+        (error "COND clause ~s is not a list" clause))
+      (destructuring-bind (condition &body body) clause
+        (cond
+          ((or (eq condition t)
+               (and (constantp condition)
+                    condition))
+           (when more
+             (if (find :jscl-xc *features*)
+                 (cerror "Continue" "Unreachable in COND: ~s" more)
+                 (warn "Unreachable in COND: ~s" more)))
+           `(progn ,@body))
+          ((endp body)
+           (let ((test-symbol (gensym "COND-TEST-")))
+             `(let ((,test-symbol ,condition))
+                (if ,test-symbol
+                    ,test-symbol
+                    ,(when more `(cond ,@more))))))
+          (t
+           `(if ,condition
+                (progn ,@body)
+                ,(when more `(cond ,@more)))))))))
+
 (defmacro when (condition &body body)
-  `(if ,condition (progn ,@body) nil))
+  `(cond (,condition ,@body)))
 
 (defmacro unless (condition &body body)
-  `(if ,condition nil (progn ,@body)))
+  `(cond ((not ,condition) ,@body)))
+
+
+;;; DEFVAR, DEFPARAMETER, DEFUN
 
 (defmacro defvar (name &optional (value nil value-p) docstring)
   `(progn
@@ -90,11 +184,25 @@
      ',name))
 
 (defmacro defun (name args &rest body)
-  `(progn
-     (eval-when (:compile-toplevel)
-       (fn-info ',name :defined t))
-     (fset ',name #'(named-lambda ,name ,args ,@body))
-     ',name))
+  ;; Can't  use FUNCTION-NAME-P  here because  we can't  DEFUN it  until
+  ;; after DEFUN is defined.
+  (cond ((symbolp name)
+         `(progn
+            (eval-when (:compile-toplevel)
+              (fn-info ',name :defined t))
+            (fset ',name #'(named-lambda ,name ,args ,@body))
+            ',name))
+        ((not (listp name))
+         (error "~s is not a valid name for a function" name))
+        ((eql (car name) 'jscl/ffi:oget)
+         (error "Can't bind to JS function yet, TODO"))
+        ((eql (car name) 'setf)
+         `(progn
+            (eval-when (:compile-toplevel)
+              (fn-info ',name :defined t))
+            (fset-setf ',(second name) #'(named-lambda ,name ,args ,@body))
+            ',name))
+        (t (error "~s cannot be a function name" name))))
 
 (defmacro return (&optional value)
   `(return-from nil ,value))
@@ -104,8 +212,11 @@
 
 (defvar *gensym-counter* 0)
 (defun gensym (&optional (prefix "G"))
-  (setq *gensym-counter* (+ *gensym-counter* 1))
-  (make-symbol (concat prefix (integer-to-string *gensym-counter*))))
+  ;; INCF not available in bootstrap, so …
+  (setq *gensym-counter* (1+ *gensym-counter*))
+  (make-symbol (concatenate
+                'string prefix
+                (integer-to-string *gensym-counter*))))
 
 (defun boundp (x)
   (boundp x))
@@ -130,7 +241,7 @@
 ;; Basic macros
 
 (defmacro dolist ((var list &optional result) &body body)
-  (let ((g!list (gensym)))
+  (let ((g!list (gensym "DOLIST-LIST-")))
     (unless (symbolp var) (error "`~S' is not a symbol." var))
     `(block nil
        (let ((,g!list ,list)
@@ -142,7 +253,7 @@
          ,result))))
 
 (defmacro dotimes ((var count &optional result) &body body)
-  (let ((g!count (gensym)))
+  (let ((g!count (gensym "DOTIMES-COUNTER-")))
     (unless (symbolp var) (error "`~S' is not a symbol." var))
     `(block nil
        (let ((,var 0)
@@ -152,40 +263,27 @@
                  (incf ,var))
          ,result))))
 
-(defmacro cond (&rest clausules)
-  (unless (null clausules)
-    (destructuring-bind (condition &body body)
-        (first clausules)
-      (cond
-        ((eq condition t)
-         `(progn ,@body))
-        ((null body)
-         (let ((test-symbol (gensym)))
-           `(let ((,test-symbol ,condition))
-              (if ,test-symbol
-                  ,test-symbol
-                  (cond ,@(rest clausules))))))
-        (t
-         `(if ,condition
-              (progn ,@body)
-              (cond ,@(rest clausules))))))))
+
+;;; CASE, ECASE
 
 (defmacro case (form &rest clausules)
-  (let ((!form (gensym)))
+  (let ((!form (gensym "CASE-FORM-")))
     `(let ((,!form ,form))
        (cond
          ,@(mapcar (lambda (clausule)
-                     (destructuring-bind (keys &body body)
-                         clausule
-                       (if (or (eq keys 't) (eq keys 'otherwise))
-                           `(t nil ,@body)
-                           (let ((keys (if (listp keys) keys (list keys))))
-                             `((or ,@(mapcar (lambda (key) `(eql ,!form ',key)) keys))
-                               nil ,@body)))))
+                     (destructuring-bind (keys &body body) clausule
+                       (cond ((member keys '(t otherwise))
+                              `(t nil ,@body))
+                             ((listp keys)
+                              `((or ,@(mapcar (lambda (key)
+                                                `(eql ,!form ',key))
+                                              keys))
+                                nil ,@body))
+                             (t `((eql ,!form ,keys) nil ,@body)))))
                    clausules)))))
 
 (defmacro ecase (form &rest clausules)
-  (let ((g!form (gensym)))
+  (let ((g!form (gensym "ECASE-FORM-")))
     `(let ((,g!form ,form))
        (case ,g!form
          ,@(append
@@ -193,30 +291,11 @@
             `((t
                (error "ECASE expression failed for the object `~S'." ,g!form))))))))
 
-(defmacro and (&rest forms)
-  (cond
-    ((null forms)
-     t)
-    ((null (cdr forms))
-     (car forms))
-    (t
-     `(if ,(car forms)
-          (and ,@(cdr forms))
-          nil))))
 
-(defmacro or (&rest forms)
-  (cond
-    ((null forms)
-     nil)
-    ((null (cdr forms))
-     (car forms))
-    (t
-     (let ((g (gensym)))
-       `(let ((,g ,(car forms)))
-          (if ,g ,g (or ,@(cdr forms))))))))
+;;; PROG1, PROG2, PROG, PSETQ
 
 (defmacro prog1 (form &body body)
-  (let ((value (gensym)))
+  (let ((value (gensym "PROG1-")))
     `(let ((,value ,form))
        ,@body
        ,value)))
@@ -232,57 +311,73 @@
          (tagbody ,@forms)))))
 
 (defmacro psetq (&rest pairs)
-  (let (;; For each pair, we store here a list of the form
-        ;; (VARIABLE GENSYM VALUE).
+  (let (;;  For  each pair, we store  here a list of  the form (VARIABLE
+        ;;  GENSYM VALUE).
         (assignments '()))
     (while t
       (cond
         ((null pairs) (return))
         ((null (cdr pairs))
-         (error "Odd paris in PSETQ"))
+         (error "Odd pairs in PSETQ; dangling ~s" pairs))
         (t
          (let ((variable (car pairs))
                (value (cadr pairs)))
-           (push `(,variable ,(gensym) ,value)  assignments)
+           (push (list variable (gensym (string variable)) value)
+                 assignments)
            (setq pairs (cddr pairs))))))
     (setq assignments (reverse assignments))
     ;;
     `(let ,(mapcar #'cdr assignments)
-       (setq ,@(!reduce #'append (mapcar #'butlast assignments) nil)))))
+       (setq ,@(mapcan #'butlast assignments)))))
+
+
+;;; DO, DO*
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun do/do* (do/do* varlist endlist body)
+    `(block nil
+       (,(ecase do/do* (do 'let) (do* 'let*))
+         ,(mapcar (lambda (x)
+                    (if (symbolp x)
+                        (list x nil)
+                        (list (first x) (second x))))
+                  varlist)
+         (while t
+           (when ,(car endlist)
+             (return (progn ,@(cdr endlist))))
+           (tagbody ,@body)
+           (,(ecase do/do* (do 'psetq) (do* 'setq))
+             ,@(mapcan (lambda (v)
+                         (and (listp v)
+                              (consp (cddr v))
+                              (list (first v) (third v))))
+                       varlist)))))))
 
 (defmacro do (varlist endlist &body body)
-  `(block nil
-     (let ,(mapcar (lambda (x) (if (symbolp x)
-                                   (list x nil)
-                                 (list (first x) (second x)))) varlist)
-       (while t
-         (when ,(car endlist)
-           (return (progn ,@(cdr endlist))))
-         (tagbody ,@body)
-         (psetq
-          ,@(apply #'append
-                   (mapcar (lambda (v)
-                             (and (listp v)
-                                  (consp (cddr v))
-                                  (list (first v) (third v))))
-                           varlist)))))))
+  (do/do* 'do varlist endlist body))
 
 (defmacro do* (varlist endlist &body body)
-  `(block nil
-     (let* ,(mapcar (lambda (x1) (if (symbolp x1)
-                                     (list x1 nil)
-                                   (list (first x1) (second x1)))) varlist)
-       (while t
-         (when ,(car endlist)
-           (return (progn ,@(cdr endlist))))
-         (tagbody ,@body)
-         (setq
-          ,@(apply #'append
-                   (mapcar (lambda (v)
-                             (and (listp v)
-                                  (consp (cddr v))
-                                  (list (first v) (third v))))
-                           varlist)))))))
+  (do/do* 'do* varlist endlist body))
+
+
+
+(defmacro declare (&rest declarations)
+  "Early DECLARE ignores everything. This only exists so that during the
+ bootstrapping process,  we can have  declarations that SBCL  will read
+ and  they won't  make JSCL  choke. Once  the various  places in  which
+ DECLARE forms  are valid have  appropriate support to at  least ignore
+ them, this can be removed."
+  (warn "Tried to compile a DECLARE form: ~s" declarations))
+
+(defmacro assert (test &rest _)
+  "An  early ASSERT  that does  not trigger  bugs in  the macroexpander.
+Note, this will  still signal errors itself if it  actually is triggered
+before  princ-to-string is  available, but  it needs  to be  declared as
+a macro before  anything else gets loaded, and  currently the compiler's
+macro cache is so aggressive that it cannot be redefined."
+  #-jscl (declare (ignore _))
+  `(unless ,test
+     (error "Assertion failed: NOT ~s" ',test)))
 
 (defun identity (x) x)
 
@@ -291,9 +386,15 @@
     (not (apply x args))))
 
 (defun constantly (x)
-  (lambda (&rest args)
+  (lambda (&rest)
     x))
 
+;;; Atoms. CONSP is defined in list.lisp
+
+(defun atom (x)
+  (not (consp x)))
+
+;;; Character codes
 (defun code-char (x)
   (code-char x))
 
@@ -306,24 +407,33 @@
 (defun char< (x y)
   (< (char-code x) (char-code y)))
 
-(defun atom (x)
-  (not (consp x)))
+;;; Numbers
 
-(defun alpha-char-p (x)
-  (or (<= (char-code #\a) (char-code x) (char-code #\z))
-      (<= (char-code #\A) (char-code x) (char-code #\Z))))
+(defconstant most-positive-fixnum (1- (expt 2 53))
+  "JS integers  are really floats with  no exponent, there is  a limited
+ range; see
+ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER")
+(defconstant +most-positive-fixnum+ most-positive-fixnum)
 
-(defun digit-char-p (x)
-  (and (<= (char-code #\0) (char-code x) (char-code #\9))
-       (- (char-code x) (char-code #\0))))
+(defconstant most-negative-fixnum (- most-positive-fixnum)
+  "JS integers  are really floats with  no exponent, there is  a limited
+ range; see
+ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MIN_SAFE_INTEGER")
+(defconstant +most-negative-fixnum+ most-negative-fixnum)
 
-(defun digit-char (weight)
-  (and (<= 0 weight 9)
-       (char "0123456789" weight)))
+(defun fixnump (number)
+  (and (integerp number)
+       (<= most-negative-fixnum
+           number
+           most-positive-fixnum)))
+
+
+;;; General equality
 
 (defun equal (x y)
   (cond
     ((eql x y) t)
+    ((numberp x) (and (numberp y) (= x y)))
     ((consp x)
      (and (consp y)
           (equal (car x) (car y))
@@ -332,30 +442,45 @@
      (and (stringp y) (string= x y)))
     (t nil)))
 
-(defun fdefinition (x)
+(defun equalp (x y)
+  "This is a marginally correct implementation of EQUALP"
   (cond
-    ((functionp x)
-     x)
-    ((symbolp x)
-     (symbol-function x))
-    (t
-     (error "Invalid function `~S'." x))))
+    ((eql x y) t)
+    ((numberp x)
+     (and (numberp y) (= x y)))
+    ((consp x)
+     (and (consp y)
+          (equalp (car x) (car y))
+          (equalp (cdr x) (cdr y))))
+    ((characterp x)
+     (and (characterp y)
+          (char-equal x y)))
+    ((stringp x)
+     (and (stringp y)
+          (string-equal x y)))
+    ((vectorp x)
+     (and (vectorp y)
+          (= (length x) (length y))
+          (every #'equalp x y)))
+    (t nil)))
 
 (defun disassemble (function)
   (write-line (lambda-code (fdefinition function)))
   nil)
 
+
+;;; Multiple Values
+
 (defmacro multiple-value-bind (variables value-from &body body)
-  `(multiple-value-call (lambda (&optional ,@variables &rest ,(gensym))
+  `(multiple-value-call (lambda (&optional ,@variables &rest ,(gensym "_"))
                           ,@body)
      ,value-from))
 
 (defmacro multiple-value-list (value-from)
   `(multiple-value-call #'list ,value-from))
 
-
 (defmacro multiple-value-setq ((&rest vars) &rest form)
-  (let ((gvars (mapcar (lambda (x) (gensym)) vars))
+  (let ((gvars (mapcar (lambda (x) (gensym (limit-string-length x 40))) vars))
         (setqs '()))
 
     (do ((vars vars (cdr vars))
@@ -368,62 +493,82 @@
     `(multiple-value-call (lambda ,gvars ,@setqs)
        ,@form)))
 
+
+;;; Function names/values
 
-;; Incorrect typecase, but used in NCONC.
-(defmacro typecase (x &rest clausules)
-  (let ((value (gensym)))
-    `(let ((,value ,x))
-       (cond
-         ,@(mapcar (lambda (c)
-                     (if (find (car c) '(t otherwise))
-                         `(t ,@(rest c))
-                         `((,(ecase (car c)
-                                    (fixnum 'integerp)
-                                    (integer 'integerp)
-                                    (cons 'consp)
-                                    (list 'listp)
-                                    (vector 'vectorp)
-                                    (character 'characterp)
-                                    (sequence 'sequencep)
-                                    (symbol 'symbolp)
-                                    (keyword 'keywordp)
-                                    (function 'functionp)
-                                    (float 'floatp)
-                                    (array 'arrayp)
-                                    (string 'stringp)
-                                    (atom 'atom)
-                                    (null 'null)
-                                    (package 'packagep))
-                             ,value)
-                           ,@(or (rest c)
-                                 (list nil)))))
-                   clausules)))))
+(defun %fdefinition-setf (name)
+  "Primitive; look up the fdefinition for (SETF NAME)"
+  (%fdefinition-setf name))
 
-(defmacro etypecase (x &rest clausules)
-  (let ((g!x (gensym)))
-    `(let ((,g!x ,x))
-       (typecase ,g!x
-         ,@clausules
-         (t (error "~S fell through etypecase expression." ,g!x))))))
-
-
-;;; No type system is implemented yet.
-(defun subtypep (type1 type2)
+(defun !fdefinition-soft (name)
+  "Like `FDEFINITION' but returns NULL rather than signaling an error."
   (cond
-    ((null type1)
-     (values t t))
-    ((eq type1 type2)
-     (values t t))
-    ((eq type2 'number)
-     (values (and (member type1 '(fixnum integer)) t)
-             t))
-    (t
-     (values nil nil))))
+    ((symbolp name)
+     (symbol-function name))
+    ((consp name)
+     (ecase (first name)
+       (setf (%fdefinition-setf (second name)))
+       (jscl/ffi:oget (error "FIXME: FDefinition FFI bridge for ~s" name))
+       ;; Should be something  like if ( x && typeof  x === 'function' )
+       ;; {  return x;  } else  { throw  new Error  "" +  x +  " is  not
+       ;; a function" }
+       ))
+    (t (error "Not a function name: ~s" name))))
+
+(defun fdefinition (name)
+  "Return NAME's global function definition,  taking care to respect any
+encapsulations  and to  return  the  innermost encapsulated  definition.
+This is SETF'able."
+  (or (!fdefinition-soft name)
+      (error "No function is named `~S'." name)))
+
+(defun (setf fdefinition) (fn name)
+  ;; Cannot use ETypeCase yet
+  (cond ((symbolp name)
+         (%setf-symbol-function name fn))
+        ((and (listp name)
+              (= 2 (length name))
+              (eql 'setf (first name)))
+         (%setf-fdefinition-setf (second name) fn))
+        ((and (listp name)
+              (eql 'jscl/ffi:oget (first name)))
+         (error "FIXME: FDefinition FFI bridge"))
+        (t (error "Cannot SETF FDEFINITION of ~s" name))))
+
+(defun (setf symbol-function) (function name)
+  (if (symbolp name)
+      (%setf-symbol-function name function)
+      (error "Cannot SETF SYMBOL-FUNCTION of ~s" name)))
+
+
+(defun fboundp (x)
+  (cond ((symbolp x) (fboundp x))
+        ((and (listp x)
+              (= 2 (length x))
+              (eql 'setf (first x)))
+         (%fboundp-setf (second x)))))
+
+(defun fmakunbound (name)
+  (cond ((symbolp name)
+         (%fmakunbound name))
+        ((and (listp name)
+              (= 2 (length name))
+              (eql 'setf (first name)))
+         (%fmakunbound-setf (second name)))))
 
 (defun notany (fn seq)
   (not (some fn seq)))
 
 (defconstant internal-time-units-per-second 1000)
+
+(defun get-internal-real-time ()
+  (get-internal-real-time))
+
+(defun get-unix-time ()
+  (truncate (/ (get-internal-real-time) 1000)))
+
+(defun get-universal-time ()
+  (+ (get-unix-time) 2208988800))
 
 (defun values-list (list)
   (values-array (list-to-vector list)))
@@ -433,23 +578,51 @@
 
 ;;; Early error definition.
 (defun error (fmt &rest args)
-  (%throw (apply #'format nil fmt args)))
+  (%throw (make-new #j:Error (apply #'format nil fmt args))))
 
 (defmacro nth-value (n form)
   `(multiple-value-call (lambda (&rest values)
                           (nth ,n values))
      ,form))
 
-
 (defun constantp (x)
-  ;; TODO: Consider quoted forms, &environment and many other
-  ;; semantics of this function.
+  ;; TODO: Consider quoted forms,  &environment and many other semantics
+  ;; of this function.
   (cond
     ((symbolp x)
      (cond
        ((eq x t) t)
-       ((setq x nil) t)))
+       ((setq x nil) t))) ;; BRFP ☠ I do not understand this
     ((atom x)
      t)
     (t
      nil)))
+
+
+;;; “environment” variables around READ/PRINT
+
+(defvar *print-escape* t
+  "Should  we  print in  a  reasonably  machine-readable way?  (possibly
+overridden by *PRINT-READABLY*)")
+(defvar *print-readably* t
+  "If true, all  objects will be printed readably.  If readable printing
+is impossible, an  error will be signalled. This overrides  the value of
+*PRINT-ESCAPE*.")
+(defvar *print-circle* nil
+  "Should  we  use  #n=  and  #n# notation  to  preserve  uniqueness  in
+general (and circularity in particular) when printing?")
+(defvar *print-radix* nil
+  "Should base be verified when printing RATIONALs?")
+(defvar *print-base* 10
+  "The output base for RATIONALs (including integers).")
+(defvar *read-base* 10
+  "the radix that Lisp reads numbers in")
+(defvar *read-eval* t
+  "If false, then the #. read macro is disabled.")
+
+
+;;; Forward-declared macro  funkiness DEF!STRUCT isn't yet  defined, but
+;;; this makes it work once it is.
+(defmacro defstruct (name+options &rest slots)
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
+     (def!struct ,name+options ,@slots)))

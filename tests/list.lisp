@@ -109,12 +109,12 @@
                     :test #'equal)
              '((OLD . SPICE) ((OLD . SHOES) A . CONS) (A . CONS))))
 
-; COPY-LIST
+                                        ; COPY-LIST
 (test (eql   (copy-list nil)          nil))
 (test (equal (copy-list (list nil))   (list nil)))
 (test (equal (copy-list (list 1 2 3)) (list 1 2 3)))
 
-; COPY-TREE
+                                        ; COPY-TREE
 (test (let* ((foo (list '(1 2) '(3 4)))
              (bar (copy-tree foo)))
         ;; (SETF (CAR (CAR FOO)) 0) doesn't work in the test for some reason,
@@ -123,7 +123,7 @@
         (not (= (car (car foo))
                 (car (car bar))))))
 
-; TREE-EQUAL
+                                        ; TREE-EQUAL
 (test (tree-equal '(1 2 3) '(1 2 3)))
 (test (not (tree-equal '(1 2 3) '(3 2 1))))
 (test (tree-equal '(1 (2 (3 4) 5) 6) '(1 (2 (3 4) 5) 6)))
@@ -131,7 +131,7 @@
 (test (tree-equal '(1 . 2) '(2 . 1) :test-not #'eql))
 (test (not (tree-equal '(1 . 2) '(1 . 2) :test-not #'eql)))
 
-; FIRST to TENTH
+                                        ; FIRST to TENTH
 (let ((nums '(1 2 3 4 5 6 7 8 9 10)))
   (test (= (first   nums) 1))
   (test (= (second  nums) 2))
@@ -144,32 +144,32 @@
   (test (= (ninth   nums) 9))
   (test (= (tenth   nums) 10)))
 
-; TAILP
+                                        ; TAILP
 (let* ((a (list 1 2 3))
        (b (cdr a)))
   (test (tailp b a))
   (test (tailp a a)))
 (test (tailp 'a (cons 'b 'a)))
 
-; ACONS
+                                        ; ACONS
 (test (equal '((1 . 2) (3 . 4))
              (acons 1 2 '((3 . 4)))))
 (test (equal '((1 . 2)) (acons 1 2 ())))
 
-; PAIRLIS
+                                        ; PAIRLIS
 (test (equal '((1 . 3) (0 . 2))
              (pairlis '(0 1) '(2 3))))
 (test (equal '((1 . 2) (a . b))
              (pairlis '(1) '(2) '((a . b)))))
 
-; COPY-ALIST
+                                        ; COPY-ALIST
 (let* ((alist '((1 . 2) (3 . 4)))
        (copy (copy-alist alist)))
   (test (not (eql alist copy)))
   (test (not (eql (car alist) (car copy))))
   (test (equal alist copy)))
 
-; ASSOC and RASSOC
+                                        ; ASSOC and RASSOC
 (let ((alist '((1 . 2) (3 . 4))))
   (test (equal (assoc  1 alist) '(1 . 2)))
   (test (equal (rassoc 2 alist) '(1 . 2)))
@@ -178,21 +178,21 @@
   (test (equal (assoc  3 alist :test-not #'=) '(1 . 2)))
   (test (equal (rassoc 4 alist :test-not #'=) '(1 . 2)))
   (test (equal (assoc  1 alist :key (lambda (x) (/ x 3))) '(3 . 4)))
-  (test (equal (rassoc 2 alist :key (lambda (x) (/ x 2))) '(3 . 4)))) 
+  (test (equal (rassoc 2 alist :key (lambda (x) (/ x 2))) '(3 . 4))))
 
-; MEMBER
+                                        ; MEMBER
 (test (equal (member 2 '(1 2 3)) '(2 3)))
 (test (not   (member 4 '(1 2 3))))
 (test (equal (member 4 '((1 . 2) (3 . 4)) :key #'cdr) '((3 . 4))))
 (test (member '(2) '((1) (2) (3)) :test #'equal))
 (test (member 1 '(1 2 3) :test-not #'eql))
 
-; ADJOIN
+                                        ; ADJOIN
 (test (equal (adjoin 1 '(2 3))   '(1 2 3)))
 (test (equal (adjoin 1 '(1 2 3)) '(1 2 3)))
 (test (equal (adjoin '(1) '((1) (2)) :test #'equal) '((1) (2))))
 
-; INTERSECTION
+                                        ; INTERSECTION
 (test (equal (intersection '(1 2) '(2 3)) '(2)))
 (test (not (intersection '(1 2 3) '(4 5 6))))
 (test (equal (intersection '((1) (2)) '((2) (3)) :test #'equal) '((2))))
@@ -200,7 +200,7 @@
              (intersection '((1 . 2) (2 . 3)) '((9 . 2) (9 . 4))
                            :test #'equal :key #'cdr)))
 
-; POP
+                                        ; POP
 (test (let* ((foo '(1 2 3))
              (bar (pop foo)))
         (and (= bar 1)
@@ -211,11 +211,11 @@
 
 ;; MAPLIST
 (test (equal '((1 2 3 4 1 2 1 2 3) (2 3 4 2 2 3))
-	     (maplist #'append '(1 2 3 4) '(1 2) '(1 2 3))))
+             (maplist #'append '(1 2 3 4) '(1 2) '(1 2 3))))
 (test (equal '((FOO A B C D) (FOO B C D) (FOO C D) (FOO D))
-	     (maplist #'(lambda (x) (cons 'foo x)) '(a b c d))))
+             (maplist #'(lambda (x) (cons 'foo x)) '(a b c d))))
 (test (equal '(0 0 1 0 1 1 1)
-	     (maplist #'(lambda (x) (if (member (car x) (cdr x)) 0 1)) '(a b a c d b c))))
+             (maplist #'(lambda (x) (if (member (car x) (cdr x)) 0 1)) '(a b a c d b c))))
 
 ;; MAPC
 (test (equal (mapc #'+ '(1 2) '(3) '(4 5 6)) '(1 2)))

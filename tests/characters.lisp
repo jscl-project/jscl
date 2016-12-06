@@ -31,19 +31,19 @@
 (test (char>= #\d #\d #\c #\a))
 (test (not (char> #\e #\d #\b #\c #\a)))
 (test (not (char>= #\e #\d #\b #\c #\a)))
-;; (char> #\z #\A) =>  implementation-dependent
-;; (char> #\Z #\a) =>  implementation-dependent
+;; (char>  #\z  #\A)  =>  implementation-dependent (char>  #\Z  #\a)  =>
+;; implementation-dependent
 (test (char-equal #\A #\a))
-;; (stable-sort (list #\b #\A #\B #\a #\c #\C) #'char-lessp) =>  (#\A #\a #\b #\B #\c #\C)
-;; (stable-sort (list #\b #\A #\B #\a #\c #\C) #'char<) => implementation-dependent
+;; (stable-sort (list #\b #\A #\B #\a #\c #\C) #'char-lessp) => (#\A #\a
+;; #\b #\B #\c #\C) (stable-sort (list #\b #\A #\B #\a #\c #\C) #'char<)
+;; => implementation-dependent
 
 ;; CHARACTER
 (test (equal #\a (character #\a)))
 (test (equal #\a (character "a")))
-;; (test (equal #\A (character 'a)))
-;; (test (equal #\a (character '\a)))
-;; (expected-failure (character 65.))
-;; (expected-failure (character 'apple))
+;; (test (equal #\A (character 'a)))  (test (equal #\a (character '\a)))
+;; (expected-failure   (character  65.))   (expected-failure  (character
+;; 'apple))
 
 ;; CHARACTERP
 (test (characterp #\a))
@@ -96,11 +96,11 @@
 ;; GRAPHIC-CHAR-P
 (test (graphic-char-p #\G))
 (test (graphic-char-p #\#))
-;; (test (graphic-char-p #\Space))
-;; (test (not (graphic-char-p #\Newline))
+(test (graphic-char-p #\Space))
+(test (not (graphic-char-p #\Newline)))
 
 ;; STANDARD-CHAR-P
-;; (test (standard-char-p #\Space))
+(test (standard-char-p #\Space))
 (test (standard-char-p #\~))
 
 ;; CHAR-UPCASE
@@ -139,7 +139,7 @@
 
 ;; CHAR-NAME
 (test (string= "Space" (char-name #\ )))
-;; (test (string= "Space" (char-name #\Space)))
+(test (string= "Space" (char-name #\Space)))
 (test (string= "Page" (char-name (code-char 12))))  ;; #\Page
 (test (string= "LATIN_SMALL_LETTER_A" (char-name #\a)))
 (test (string= "LATIN_CAPITAL_LETTER_A" (char-name #\A)))
@@ -148,6 +148,39 @@
 (test (char= #\  (name-char 'space)))  ;; should be: #\Space
 (test (char= #\  (name-char "space")))  ;; #\Space
 (test (char= #\  (name-char "Space")))  ;; #\Space
+(test (char= #\    #\Space))
 (test
  (let ((x (char-name #\a)))
-  (or (not x) (eql (name-char x) #\a))))
+   (or (not x) (eql (name-char x) #\a))))
+
+;; Unicode chars without explicit names
+(test (char= #\u+2010 (name-char "U+2010")))
+(test (char= #\u+210 (name-char "U+210")))
+(test (or (equal (char-name #\u+210) "U+0210")
+          (equal (char-name #\u+210) "U+210")
+          (equal (char-name #\u+210) "LATIN_CAPITAL_LETTER_R_WITH_DOUBLE_GRAVE"))) ; for SBCL
+(test (or (equal (char-name #\u+2010) "U+2010")
+          (equal (char-name #\u+210) "U+210")
+          (equal (char-name #\u+2010) "HYPHEN")))
+
+;;; CHAR=/CHAR-EQUAL
+(test (char= #\a #\a))
+(test (not (char= #\a #\A)))
+(test (char-equal #\a #\A))
+(test (char-equal #\á #\Á))
+
+(test (char-equal #\u+2010 #\‐ #\u+002010))
+
+;; String↔Vector
+#-jscl (expected-failure (equal (coerce #(#\s #\t #\r #\i #\n #\g) 'string) "string"))
+#-jscl (expected-failure (equal (coerce "string" 'vector) "string"))
+(test (not (equal #(#\x) "x")))
+(test (equalp #(#\x) "x"))
+(test (not (equalp #\x "x")))
+(test (not (stringp #(#\v #\e #\c #\t #\o #\r))))
+(test (vectorp "string"))
+(test (stringp "string"))
+
+;; (test (= 2 (char-code #u+2))) CRASHER
+(test (= 0 (char-code #\Null)))
+(test (= 10 (char-code #\Newline)))

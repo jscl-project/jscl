@@ -1,18 +1,16 @@
 ;;; documentation.lisp --- Accessing DOCUMENTATION
-
-(/debug "loading documentation.lisp!")
-
+(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
 ;;; Documentation.
 (defun documentation (x type)
   "Return the documentation of X. TYPE must be the symbol VARIABLE or FUNCTION."
   (ecase type
     (function
      (let ((func (fdefinition x)))
-       (oget func "docstring")))
+       (jscl/ffi:oget func "docstring")))
     (variable
      (unless (symbolp x)
        (error "The type of documentation `~S' is not a symbol." type))
-     (oget x "vardoc"))))
+     (jscl/ffi:oget x "vardoc"))))
 
 
 ;;; APROPOS and friends
@@ -50,8 +48,8 @@
 
 ;;; DESCRIBE
 
-;; TODO: this needs DESCRIBE-OBJECT as generic method
-;; TODO: indentation for nested paragraphs
+;; TODO: this needs DESCRIBE-OBJECT  as generic method TODO: indentation
+;; for nested paragraphs
 (defun describe (object &optional stream)
   (declare (ignore stream))
   (typecase object

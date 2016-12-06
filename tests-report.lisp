@@ -1,15 +1,144 @@
-(format t "~%Finished. The execution took ~a seconds.~%"
-        (/ (- (get-internal-real-time) *timestamp*) internal-time-units-per-second 1.0))
+(defun cl-unboundp (symbol)
+  "Symbols that are  expected to be exported but not  BOUNDP nor FBOUNDP
+in the COMMON-LISP package.
 
-(if (= *passed-tests* *total-tests*)
-    (format t "All the tests (~a) passed successfully.~%" *total-tests*)
-    (format t "~a/~a test(s) passed successfully.~%" *passed-tests* *total-tests*))
+(Cripped from that package in SBCL)"
+ (member symbol
+ '(
+ &ALLOW-OTHER-KEYS
+ &AUX
+ &BODY
+ &ENVIRONMENT
+ &KEY
+ &OPTIONAL
+ &REST
+ &WHOLE
+ ARITHMETIC-ERROR
+ ARRAY
+ BASE-CHAR
+ BASE-STRING
+ BIGNUM
+ BIT-VECTOR
+ BOOLEAN
+ BROADCAST-STREAM
+ BUILT-IN-CLASS
+ CALL-NEXT-METHOD
+ CELL-ERROR
+ CLASS
+ COMPILATION-SPEED
+ COMPILED-FUNCTION
+ COMPILER-MACRO
+ CONCATENATED-STREAM
+ CONDITION
+ CONTROL-ERROR
+ DEBUG
+ DECLARATION
+ DECLARE
+ DIVISION-BY-ZERO
+ DOUBLE-FLOAT
+ DYNAMIC-EXTENT
+ ECHO-STREAM
+ END-OF-FILE
+ EXTENDED-CHAR
+ FILE-ERROR
+ FILE-STREAM
+ FIXNUM
+ FLOATING-POINT-INEXACT
+ FLOATING-POINT-INVALID-OPERATION
+ FLOATING-POINT-OVERFLOW
+ FLOATING-POINT-UNDERFLOW
+ FTYPE
+ GENERIC-FUNCTION
+ HASH-TABLE
+ IGNORABLE
+ IGNORE
+ INLINE
+ INTEGER
+ KEYWORD
+ LONG-FLOAT
+ MAKE-METHOD
+ METHOD
+ METHOD-COMBINATION
+ NEXT-METHOD-P
+ NOTINLINE
+ NUMBER
+ OPTIMIZE
+ OTHERWISE
+ PACKAGE
+ PACKAGE-ERROR
+ PARSE-ERROR
+ PRINT-NOT-READABLE
+ PROGRAM-ERROR
+ RANDOM-STATE
+ RATIO
+ READER-ERROR
+ READTABLE
+ REAL
+ RESTART
+ SAFETY
+ SATISFIES
+ SEQUENCE
+ SERIOUS-CONDITION
+ SHORT-FLOAT
+ SIGNED-BYTE
+ SIMPLE-ARRAY
+ SIMPLE-BASE-STRING
+ SIMPLE-BIT-VECTOR
+ SIMPLE-CONDITION
+ SIMPLE-ERROR
+ SIMPLE-STRING
+ SIMPLE-TYPE-ERROR
+ SIMPLE-VECTOR
+ SIMPLE-WARNING
+ SINGLE-FLOAT
+ SPACE
+ SPECIAL
+ SPEED
+ STANDARD
+ STANDARD-CHAR
+ STANDARD-CLASS
+ STANDARD-GENERIC-FUNCTION
+ STANDARD-METHOD
+ STANDARD-OBJECT
+ STORAGE-CONDITION
+ STREAM
+ STREAM-ERROR
+ STRING-STREAM
+ STRUCTURE
+ STRUCTURE-CLASS
+ STYLE-WARNING
+ SYMBOL
+ SYNONYM-STREAM
+ TWO-WAY-STREAM
+ TYPE
+ TYPE-ERROR
+ UNBOUND-SLOT
+ UNBOUND-VARIABLE
+ UNDEFINED-FUNCTION
+ UNSIGNED-BYTE
+ VARIABLE
+ WARNING
+ STRUCTURE-OBJECT
+ )))
 
-(terpri)
+ (format t "~%Finished. The execution took ~a seconds.~%"
+ (/ (- (get-internal-real-time) *timestamp*) internal-time-units-per-second 1.0))
 
+ (if (= *passed-tests* *total-tests*)
+ (format t "All the tests (~a) passed successfully.~%" *total-tests*)
+ (format t "~a/~a test(s) passed successfully.~%" *passed-tests* *total-tests*))
+
+ (unless (zerop *expected-failures*)
+ (format t "~a test(s) failed expectedly.~%" *expected-failures*))
+
+ (unless (zerop *unexpected-passes*)
+ (format t "~a test(s) passed unexpectedly.~%" *unexpected-passes*))
+
+ (terpri)
+
+ #+jscl
+ (when #j:phantom
+ (#j:phantom:exit *failed-tests*))
 #+jscl
-(progn
-  (when #j:phantom
-    (#j:phantom:exit *failed-tests*))
-  (when #j:process
-    (#j:process:exit *failed-tests*)))
+ (when #j:process
+ (#j:process:exit *failed-tests*))
