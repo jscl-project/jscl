@@ -207,6 +207,8 @@ compiled in the host.")
 ;;; Compile and load jscl into the host
 (defun load-jscl ()
   (with-compilation-unit ()
+    (when *load-pathname*    ; Prevent that one stale FASL …
+      (compile-file *load-pathname*))
     (let (fasls)
       (do-source input :host
         (let (failures)

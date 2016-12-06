@@ -78,6 +78,12 @@ execute BODY. Also binds LAST-FORM and FORM-COUNT."
 forms if PRINT is set."
   (with-compilation-restarts (filename)
     (with-compile-file-bindings (filename :verbosep print)
+      (format out "~&/** @preserve
+ *  ⸨☕λ⸩ Compiled by 𝓙𝓢ℂ𝕃
+ * ~@[(Romance Ⅱ fork) ~]version ~a, Git commit ~a
+ * Source file: ~a */" 
+              *version* (violet-volts-p)
+              (git-commit) filename)
       (when print
         (format *trace-output*
                 "~&;;;; Compiling file ~a... "
@@ -152,15 +158,41 @@ permissions on FILENAME, if we  know how in the current implementation."
   #- (or sbcl ecl)
   (warn "You'll need to set executable permissions yourself"))
 
-(defun compile-application (files output &key shebang)
+(defun git-commit ()
+  (or #+asdf
+      (remove #\Newline
+              (uiop:run-program '("git" "rev-parse" "HEAD") :output :string))
+      #+sbcl
+      (read-line
+       (sb-ext:process-output
+        (sb-ext:run-program "/usr/bin/git" '("rev-parse" "HEAD")
+                            :wait t
+                            :output :stream))) 
+      "(unknown)"))
+
+(defun violet-volts-p ()
+  ;; FIXME
+  t)
+
+(defun slime-clear ()
+  #+swank
+  (swank:eval-in-emacs '(progn
+                         (slime-repl)
+                         (slime-repl-clear-buffer)
+                         (form-feed-mode t))))
+
+(defun compile-application (files output &key shebang (verbosep t))
+  (when verbosep
+    (slime-clear))
   (with-open-file (out output :direction :output :if-exists :supersede)
+    (when verbosep
+      (format t ";;;; ⸨☕λ⸩ 𝓙𝓢ℂ𝕃 Compiling ~:(~a~)" output))
     (when shebang
       (write-string "#!/usr/bin/env node" out)
       (terpri out))
     (with-jscl-scoping-function (out)
-      (dolist (file files)
-        (fresh-line out)
-        (!compile-file file out))))
+      (dolist (file files) 
+        (!compile-file file out :print verbosep))))
   (when shebang
     (file-set-execute-permission output)))
 
