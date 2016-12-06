@@ -716,6 +716,8 @@ association list ALIST in the same order."
      (typecase sexp
        (fixnum sexp)
        (number sexp)
+       (function  ;; FIXME?
+        (list 'function (list 'quote (nth-value 2 (function-lambda-expression sexp)))))
        (character (string sexp))  ; is this really the right thing?
        (pathname (namestring sexp))
        (structure-object (constructor<-structure sexp))
