@@ -155,30 +155,36 @@
   name)
 
 (defun make-deftype-predicate (name lambda-list body)
-  (cond ((not (listp body))
-         `(typep object ,body)) 
-        ((member (car body) '(and or not)) 
-         (cons (car body) (mapcar (lambda (form)
-                                    (make-deftype-predicate name
-                                                            lambda-list 
-                                                            form))
-                                  (rest body))))
-        ;; FIXME: compound specifiers handling
-        ((not (= (length body) 2))
-         (error "Don't understand type specifier ~s" body))
-        ((eql (car body) 'not) 
-         (cons (car body) (mapcar (lambda (form)
-                                    (make-deftype-predicate name lambda-list form))
-                                  (rest body))))
-        ((eql 'satisfies (first body))
-         `(,(second body) object)) 
-        ((eql 'member (car body))
-         `(member object ,(cdr body)))
-        ((and (= 2 (length body))
-              (eql 'mod (car body)))
-         `(and (integerp object) (<= 0 object) (< object ,(second body))))
-        ;; TODO: VALUES forms
-        (t (error "Don't understand type specifier ~s" body))))
+  (assert (and (listp body)
+               (listp (car body))
+               (eql 'quote (caar body))) 
+          (body)
+          "BODY expected to be list-quote-list, FIXME")
+  (let ((body (cadar body)))
+    (cond ((not (listp body))
+           `(typep object ,body)) 
+          ((member (car body) '(and or not)) 
+           (cons (car body) (mapcar (lambda (form)
+                                      (make-deftype-predicate name
+                                                              lambda-list 
+                                                              form))
+                                    (rest body))))
+          ;; FIXME: compound specifiers handling
+          ((not (= (length body) 2))
+           (error "Don't understand type specifier ~s" body))
+          ((eql (car body) 'not) 
+           (cons (car body) (mapcar (lambda (form)
+                                      (make-deftype-predicate name lambda-list form))
+                                    (rest body))))
+          ((eql 'satisfies (first body))
+           `(,(second body) object)) 
+          ((eql 'member (car body))
+           `(member object ,(cdr body)))
+          ((and (= 2 (length body))
+                (eql 'mod (car body)))
+           `(and (integerp object) (<= 0 object) (< object ,(second body))))
+          ;; TODO: VALUES forms
+          (t (error "Don't understand type specifier ~s" body)))))
 
 
 #-jscl
