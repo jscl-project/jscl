@@ -21,28 +21,30 @@
 ;;; Lisp  world from  scratch. This  code has  to define  enough of  the
 ;;; language for the compiler to be able to run.
 
-(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+(in-package :jscl) ;#-jscl-xc #.(error "Do not load this file in the host compiler")
 
-#-jscl-xc
-(error "This should not be getting evaluated except during JSCL-XC.")
 (/debug "loading boot.lisp!")
 
 
 ;;; Package definitions for within the environment.
 
+#+jscl
 (defpackage :common-lisp
   (:nicknames :cl)) ; exports handled by toplevel.lisp
 
+#+jscl
 (defpackage :common-lisp-user
   (:use :common-lisp)
   (:nicknames :cl-user))
 
+#+ (or)
 (defpackage :jscl
   (:use :cl :jscl)
   (:export #:bootstrap #:bootstrap-core
            #:run-tests-in-host #:with-sharp-j #:read-#j
            #:write-javascript-for-files #:compile-application))
 
+#+ (or)
 (defpackage :jscl/ffi
   (:use :cl :jscl)
   (:export #:oget #:oget* #:make-new #:new #:*root*))
@@ -76,20 +78,20 @@
 
                   `(eval-when (:compile-toplevel :execute)
                      (%compile-defmacro ',name ,expander)))))))
-
+    
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
 
 ;;; DECLAIM
 
-(defmacro declaim (&rest decls)
+(defmacro jscl/cl::declaim (&rest decls)
   `(eval-when (:compile-toplevel :execute)
      ,@(mapcar (lambda (decl) `(!proclaim ',decl)) decls)))
 
 
 ;;; DEFCONSTANT, T, NIL, LAMBDA
 
-(defmacro defconstant (name value &optional docstring)
+(defmacro jscl/cl::defconstant (name value &optional docstring)
   `(progn
      (declaim (special ,name))
      (declaim (constant ,name))
@@ -97,18 +99,18 @@
      ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
 
-(defconstant t 't)
-(defconstant nil 'nil)
-(%js-vset "nil" nil)
-(%js-vset "t" t)
+(defconstant jscl/cl::t 't)
+(defconstant jscl/cl::nil 'nil)
+(jscl/js::%js-vset "nil" nil)
+(jscl/js::%js-vset "t" t)
 
-(defmacro lambda (args &body body)
+(defmacro jscl/cl::lambda (args &body body)
   `(function (lambda ,args ,@body)))
 
 
 ;;; AND, OR
 
-(defmacro and (&rest forms)
+(defmacro jscl/cl::and (&rest forms)
   (cond
     ((null forms)
      t)
@@ -119,7 +121,7 @@
           (and ,@(cdr forms))
           nil))))
 
-(defmacro or (&rest forms)
+(defmacro jscl/cl::or (&rest forms)
   (cond
     ((null forms)
      nil)
@@ -134,7 +136,7 @@
 
 
 ;;; COND, WHEN, UNLESS
-(defmacro cond (&rest clausules)
+(defmacro jscl/cl::cond (&rest clausules)
   (unless (null clausules)
     (let ((clause (first clausules))
           (more (rest clausules)))
@@ -161,29 +163,32 @@
                 (progn ,@body)
                 ,(when more `(cond ,@more)))))))))
 
-(defmacro when (condition &body body)
+(defmacro jscl/cl::when (condition &body body)
   `(cond (,condition ,@body)))
 
-(defmacro unless (condition &body body)
+(defmacro jscl/cl::unless (condition &body body)
   `(cond ((not ,condition) ,@body)))
 
 
 ;;; DEFVAR, DEFPARAMETER, DEFUN
 
-(defmacro defvar (name &optional (value nil value-p) docstring)
+(defmacro jscl/cl::defvar (name &optional (value nil value-p) docstring)
   `(progn
      (declaim (special ,name))
-     ,@(when value-p `((unless (boundp ',name) (setq ,name ,value))))
-     ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
+     ,@(when value-p
+         `((unless (boundp ',name) (setq ,name ,value))))
+     ,@(when (stringp docstring)
+         `(setf (oget ',name "vardoc") ,docstring))
      ',name))
 
-(defmacro defparameter (name value &optional docstring)
+(defmacro jscl/cl::defparameter (name value &optional docstring)
   `(progn
      (setq ,name ,value)
-     ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
+     ,@(when (stringp docstring) 
+         `(setf (oget ',name "vardoc") ,docstring))
      ',name))
 
-(defmacro defun (name args &rest body)
+(defmacro jscl/cl::defun (name args &rest body)
   ;; Can't  use FUNCTION-NAME-P  here because  we can't  DEFUN it  until
   ;; after DEFUN is defined.
   (cond ((symbolp name)
@@ -204,69 +209,66 @@
             ',name))
         (t (error "~s cannot be a function name" name))))
 
-(defmacro return (&optional value)
+(defmacro jscl/cl::return (&optional value)
   `(return-from nil ,value))
 
-(defmacro while (condition &body body)
-  `(block nil (%while ,condition ,@body)))
+(defmacro jscl/cl::while (condition &body body)
+  `(block nil (jscl/js::%while ,condition ,@body)))
 
-(defvar *gensym-counter* 0)
-(defun gensym (&optional (prefix "G"))
+(defvar jscl/cl::*gensym-counter* 0)
+(defun jscl/cl::gensym (&optional (prefix "G"))
   ;; INCF not available in bootstrap, so …
   (setq *gensym-counter* (1+ *gensym-counter*))
   (make-symbol (concatenate
                 'string prefix
                 (integer-to-string *gensym-counter*))))
 
-(defun boundp (x)
-  (boundp x))
+(defun jscl/cl::boundp (x)
+  (jscl/js::boundp x))
 
-(defun fboundp (x)
-  (fboundp x))
+(defun jscl/cl::eq (x y) (eq x y))
+(defun jscl/cl::eql (x y) (eq x y))
 
-(defun eq (x y) (eq x y))
-(defun eql (x y) (eq x y))
+(defun jscl/cl::not (x) (if x nil t))
 
-(defun not (x) (if x nil t))
-
-(defun funcall (function &rest args)
+(defun jscl/cl::funcall (function &rest args)
   (apply function args))
 
-(defun apply (function arg &rest args)
+(defun jscl/cl::apply (function arg &rest args)
   (apply function (apply #'list* arg args)))
 
-(defun symbol-name (x)
+(defun jscl/cl::symbol-name (x)
   (symbol-name x))
 
 ;; Basic macros
 
-(defmacro dolist ((var list &optional result) &body body)
+(defmacro jscl/cl::dolist ((var list &optional result) &body body)
   (let ((g!list (gensym "DOLIST-LIST-")))
     (unless (symbolp var) (error "`~S' is not a symbol." var))
     `(block nil
        (let ((,g!list ,list)
              (,var nil))
-         (%while ,g!list
-                 (setq ,var (car ,g!list))
-                 (tagbody ,@body)
-                 (setq ,g!list (cdr ,g!list)))
+         (jscl/js::%while ,g!list
+                          (setq ,var (car ,g!list))
+                          (tagbody ,@body)
+                          (setq ,g!list (cdr ,g!list)))
          ,result))))
 
-(defmacro dotimes ((var count &optional result) &body body)
+(defmacro jscl/cl::dotimes ((var count &optional result) &body body)
   (let ((g!count (gensym "DOTIMES-COUNTER-")))
     (unless (symbolp var) (error "`~S' is not a symbol." var))
     `(block nil
        (let ((,var 0)
              (,g!count ,count))
-         (%while (< ,var ,g!count)
-                 (tagbody ,@body)
-                 (incf ,var))
+         (jscl/js::%while (< ,var ,g!count)
+                          (tagbody ,@body)
+                          (incf ,var))
          ,result))))
 
 
 ;;; CASE, ECASE
 
-(defmacro case (form &rest clausules)
+(defmacro jscl/cl::case (form &rest clausules)
   (let ((!form (gensym "CASE-FORM-")))
     `(let ((,!form ,form))
        (cond
@@ -282,7 +284,7 @@
                              (t `((eql ,!form ,keys) nil ,@body)))))
                    clausules)))))
 
-(defmacro ecase (form &rest clausules)
+(defmacro jscl/cl::ecase (form &rest clausules)
   (let ((g!form (gensym "ECASE-FORM-")))
     `(let ((,g!form ,form))
        (case ,g!form
@@ -294,23 +296,24 @@
 
 ;;; PROG1, PROG2, PROG, PSETQ
 
-(defmacro prog1 (form &body body)
+(defmacro jscl/cl::prog1 (form &body body)
   (let ((value (gensym "PROG1-")))
     `(let ((,value ,form))
        ,@body
        ,value)))
 
-(defmacro prog2 (form1 result &body body)
+(defmacro jscl/cl::prog2 (form1 result &body body)
   `(prog1 (progn ,form1 ,result) ,@body))
 
-(defmacro prog (inits &rest body )
+(defmacro jscl/cl::prog (inits &rest body )
   (multiple-value-bind (forms decls docstring) (parse-body body)
+    (declare (ignore docstring))  ; TODO
     `(block nil
        (let ,inits
          ,@decls
          (tagbody ,@forms)))))
 
-(defmacro psetq (&rest pairs)
+(defmacro jscl/cl::psetq (&rest pairs)
   (let (;;  For  each pair, we store  here a list of  the form (VARIABLE
         ;;  GENSYM VALUE).
         (assignments '()))
@@ -334,7 +337,7 @@
 ;;; DO, DO*
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun do/do* (do/do* varlist endlist body)
+  (defun jscl/cl::do/do* (do/do* varlist endlist body)
     `(block nil
        (,(ecase do/do* (do 'let) (do* 'let*))
          ,(mapcar (lambda (x)
@@ -353,15 +356,15 @@
                               (list (first v) (third v))))
                        varlist)))))))
 
-(defmacro do (varlist endlist &body body)
+(defmacro jscl/cl::do (varlist endlist &body body)
   (do/do* 'do varlist endlist body))
 
-(defmacro do* (varlist endlist &body body)
+(defmacro jscl/cl::do* (varlist endlist &body body)
   (do/do* 'do* varlist endlist body))
 
 
 
-(defmacro declare (&rest declarations)
+(defmacro jscl/cl::declare (&rest declarations)
   "Early DECLARE ignores everything. This only exists so that during the
  bootstrapping process,  we can have  declarations that SBCL  will read
  and  they won't  make JSCL  choke. Once  the various  places in  which
@@ -369,7 +372,7 @@
  them, this can be removed."
   (warn "Tried to compile a DECLARE form: ~s" declarations))
 
-(defmacro assert (test &rest _)
+(defmacro jscl/cl::assert (test &rest _)
   "An  early ASSERT  that does  not trigger  bugs in  the macroexpander.
 Note, this will  still signal errors itself if it  actually is triggered
 before  princ-to-string is  available, but  it needs  to be  declared as
@@ -379,40 +382,40 @@ macro cache is so aggressive that it cannot be redefined."
   `(unless ,test
      (error "Assertion failed: NOT ~s" ',test)))
 
-(defun identity (x) x)
+(defun jscl/cl::identity (x) x)
 
-(defun complement (x)
+(defun jscl/cl::complement (x)
   (lambda (&rest args)
     (not (apply x args))))
 
-(defun constantly (x)
+(defun jscl/cl::constantly (x)
   (lambda (&rest args)
     (declare (ignore args))
     x))
 
 ;;; Atoms. CONSP is defined in list.lisp
 
-(defun atom (x)
+(defun jscl/cl::atom (x)
   (not (consp x)))
 
 ;;; Character codes
-(defun code-char (x)
+(defun jscl/cl::code-char (x)
   (code-char x))
 
-(defun char-code (x)
+(defun jscl/cl::char-code (x)
   (char-code x))
 
-(defun char= (x y)
+(defun jscl/cl::char= (x y)
   (eql x y))
 
-(defun char< (x y)
+(defun jscl/cl::char< (x y)
   (< (char-code x) (char-code y)))
 
 
 
 ;;; General equality
 
-(defun equal (x y)
+(defun jscl/cl::equal (x y)
   (cond
     ((eql x y) t)
     ((numberp x) (and (numberp y) (= x y)))
@@ -424,7 +427,7 @@ macro cache is so aggressive that it cannot be redefined."
      (and (stringp y) (string= x y)))
     (t nil)))
 
-(defun equalp (x y)
+(defun jscl/cl::equalp (x y)
   "This is a marginally correct implementation of EQUALP"
   (cond
     ((eql x y) t)
@@ -446,22 +449,22 @@ macro cache is so aggressive that it cannot be redefined."
           (every #'equalp x y)))
     (t nil)))
 
-(defun disassemble (function)
+(defun jscl/cl::disassemble (function)
   (write-line (lambda-code (fdefinition function)))
   nil)
 
 
 ;;; Multiple Values
 
-(defmacro multiple-value-bind (variables value-from &body body)
+(defmacro jscl/cl::multiple-value-bind (variables value-from &body body)
   `(multiple-value-call (lambda (&optional ,@variables &rest ,(gensym "_"))
                           ,@body)
      ,value-from))
 
-(defmacro multiple-value-list (value-from)
+(defmacro jscl/cl::multiple-value-list (value-from)
   `(multiple-value-call #'list ,value-from))
 
-(defmacro multiple-value-setq ((&rest vars) &rest form)
+(defmacro jscl/cl::multiple-value-setq ((&rest vars) &rest form)
   (let ((gvars (mapcar (lambda (x) (gensym (limit-string-length x 40))) vars))
         (setqs '()))
 
@@ -478,18 +481,18 @@ macro cache is so aggressive that it cannot be redefined."
 
 ;;; Function names/values
 
-(defun %fdefinition-setf (name)
+(defun jscl/cl::%fdefinition-setf (name)
   "Primitive; look up the fdefinition for (SETF NAME)"
-  (%fdefinition-setf name))
+  (jscl/js::%fdefinition-setf name))
 
-(defun !fdefinition-soft (name)
+(defun jscl/cl::!fdefinition-soft (name)
   "Like `FDEFINITION' but returns NULL rather than signaling an error."
   (cond
     ((symbolp name)
      (symbol-function name))
     ((consp name)
      (ecase (first name)
-       (setf (%fdefinition-setf (second name)))
+       (setf (jscl/js::%fdefinition-setf (second name)))
        (jscl/ffi:oget (error "FIXME: FDefinition FFI bridge for ~s" name))
        ;; Should be something  like if ( x && typeof  x === 'function' )
        ;; {  return x;  } else  { throw  new Error  "" +  x +  " is  not
@@ -497,68 +500,68 @@ macro cache is so aggressive that it cannot be redefined."
        ))
     (t (error "Not a function name: ~s" name))))
 
-(defun fdefinition (name)
+(defun jscl/cl::fdefinition (name)
   "Return NAME's global function definition,  taking care to respect any
 encapsulations  and to  return  the  innermost encapsulated  definition.
 This is SETF'able."
   (or (!fdefinition-soft name)
       (error "No function is named `~S'." name)))
 
-(defun (setf fdefinition) (fn name)
+(defun (setf jscl/cl::fdefinition) (fn name)
   ;; Cannot use ETypeCase yet
   (cond ((symbolp name)
-         (%setf-symbol-function name fn))
+         (jscl/js::%setf-symbol-function name fn))
         ((and (listp name)
               (= 2 (length name))
               (eql 'setf (first name)))
-         (%setf-fdefinition-setf (second name) fn))
+         (jscl/js::%setf-fdefinition-setf (second name) fn))
         ((and (listp name)
               (eql 'jscl/ffi:oget (first name)))
          (error "FIXME: FDefinition FFI bridge"))
         (t (error "Cannot SETF FDEFINITION of ~s" name))))
 
-(defun (setf symbol-function) (function name)
+(defun (setf jscl/cl::symbol-function) (function name)
   (if (symbolp name)
-      (%setf-symbol-function name function)
+      (jscl/js::%setf-symbol-function name function)
       (error "Cannot SETF SYMBOL-FUNCTION of ~s" name)))
 
 
-(defun fboundp (x)
-  (cond ((symbolp x) (fboundp x))
+(defun jscl/cl::fboundp (x)
+  (cond ((symbolp x) (jscl/js::fboundp x))
         ((and (listp x)
               (= 2 (length x))
               (eql 'setf (first x)))
-         (%fboundp-setf (second x)))))
+         (jscl/js::%fboundp-setf (second x)))))
 
-(defun fmakunbound (name)
+(defun jscl/cl::fmakunbound (name)
   (cond ((symbolp name)
-         (%fmakunbound name))
+         (jscl/js::%fmakunbound name))
         ((and (listp name)
               (= 2 (length name))
               (eql 'setf (first name)))
-         (%fmakunbound-setf (second name)))))
+         (jscl/js::%fmakunbound-setf (second name)))))
 
-(defun notany (fn seq)
+(defun jscl/cl::notany (fn seq)
   (not (some fn seq)))
 
-(defconstant internal-time-units-per-second 1000)
+(defconstant jscl/cl::internal-time-units-per-second 1000)
 
-(defun values-list (list)
+(defun jscl/cl::values-list (list)
   (values-array (list-to-vector list)))
 
-(defun values (&rest args)
+(defun jscl/cl::values (&rest args)
   (values-list args))
 
 ;;; Early error definition.
-(defun error (fmt &rest args)
-  (%throw (make-new #j:Error (apply #'format nil fmt args))))
+(defun jscl/cl::error (fmt &rest args)
+  (jscl/js::%throw (make-new |Error| (apply #'format nil fmt args))))
 
-(defmacro nth-value (n form)
+(defmacro jscl/cl::nth-value (n form)
   `(multiple-value-call (lambda (&rest values)
                           (nth ,n values))
      ,form))
 
-(defun constantp (x)
+(defun jscl/cl::constantp (x)
   ;; TODO: Consider quoted forms,  &environment and many other semantics
   ;; of this function.
   (cond
@@ -574,28 +577,28 @@ This is SETF'able."
 
 ;;; “environment” variables around READ/PRINT
 
-(defvar *print-escape* t
+(defvar jscl/cl::*print-escape* t
   "Should  we  print in  a  reasonably  machine-readable way?  (possibly
 overridden by *PRINT-READABLY*)")
-(defvar *print-readably* t
+(defvar jscl/cl::*print-readably* t
   "If true, all  objects will be printed readably.  If readable printing
 is impossible, an  error will be signalled. This overrides  the value of
 *PRINT-ESCAPE*.")
-(defvar *print-circle* nil
+(defvar jscl/cl::*print-circle* nil
   "Should  we  use  #n=  and  #n# notation  to  preserve  uniqueness  in
 general (and circularity in particular) when printing?")
-(defvar *print-radix* nil
+(defvar jscl/cl::*print-radix* nil
   "Should base be verified when printing RATIONALs?")
-(defvar *print-base* 10
+(defvar jscl/cl::*print-base* 10
   "The output base for RATIONALs (including integers).")
-(defvar *read-base* 10
+(defvar jscl/cl::*read-base* 10
   "the radix that Lisp reads numbers in")
-(defvar *read-eval* t
+(defvar jscl/cl::*read-eval* t
   "If false, then the #. read macro is disabled.")
 
 
 ;;; Forward-declared macro  funkiness DEF!STRUCT isn't yet  defined, but
 ;;; this makes it work once it is.
-(defmacro defstruct (name+options &rest slots)
+(defmacro jscl/cl::defstruct (name+options &rest slots)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (def!struct ,name+options ,@slots)))

@@ -270,20 +270,12 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
 ;; redirection. In  future, if this hack  is kept in play,  it should be
 ;; updated to  reflect JSCL/CL::DEFSTRUCT  and JSCL/INTERNALS::DEFSTRUCT
 ;; or something similar.
-(defmacro !defstruct (name-and-options &rest slots)
+(defmacro jscl/cl::defstruct (name-and-options &rest slots)
   `(progn
      #-jscl
      (eval-when (:compile-toplevel)
        (cl:defstruct ,name-and-options ,@slots))
-     (eval-when (:load-toplevel #+jscl :compile-toplevel)
-       (!defstruct% ,name-and-options ,@slots))))
+     #+jscl
+     (eval-when (:load-toplevel :compile-toplevel)
+       (!defstruct%  ,name-and-options ,@slots))))
 
-;; This alias  was being used in  some existing code; switched  to the !
-;; prefix to make things orthogonal…
-(defmacro def!struct (name-and-options &rest slots)
-  (warn "DEF!STRUCT alias is probably dangerous, ~
-use DEFSTRUCT now, or !DEFSTRUCT if you really mean it.")
-  `(!defstruct ,name-and-options ,@slots))
-#+jscl
-(defmacro defstruct (name-and-options &rest slots)
-  `(!defstruct ,name-and-options ,@slots))

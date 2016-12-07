@@ -26,13 +26,7 @@
 
 (defconstant +most-positive-fixnum+ (1- (expt 2 53)))
 (defconstant +most-negative-fixnum+ (- +most-positive-fixnum+))
-
-(defun !fixnump (number)
-  (and (integerp number)
-       (<= +most-negative-fixnum+
-           number
-           +most-positive-fixnum+)))
-
+
 (defun aset (array idx value)
   "Set the index IDX of the vector ARRAY to VALUE."
   (setf (aref array idx) value))
@@ -238,7 +232,45 @@ metadata in it."
     sv))
 
 
-(defun !fdefinition-soft (name)
-  "Return  the  `FDEFINITION' of  NAME,  or  NIL  if  it does  not  have
- a function value or is not a valid function name."
-  (ignore-errors (fdefinition name)))
+
+(defmacro jscl/js::%js-vref (symbol-name &optional _)
+  (declare (ignore _))
+  `(jscl/ffi:oget jscl/ffi:*root* ,symbol-name))
+
+(defmacro jscl/js::%js-vset (symbol-name value) 
+  `(setf (jscl/ffi:oget jscl/ffi:*root* ,symbol-name) ,value))
+
+(dolist (fn '(floor ceiling))
+  (setf (fdefinition (intern (concatenate 'string "%"
+                                          (string fn))
+                             :jscl/js))
+        (fdefinition fn)))
+
+(dolist (fn '(min max))
+  (setf (fdefinition (intern (string fn) :jscl/js))
+        (fdefinition fn)))
+
+(dolist (operator '(+ - * / > >= = <= < /=))
+  (setf (fdefinition (intern (string operator) :jscl/js))
+        (fdefinition operator)))
+
+(defun JSCL/JS::%FBOUNDP-SETF (symbol)
+  (!fdefinition-soft (list 'setf symbol)))
+(defun JSCL/JS::%FDEFINITION-SETF (symbol)
+  (fdefinition (list 'setf symbol)))
+(defun JSCL/JS::%FMAKUNBOUND (symbol)
+  (fmakunbound symbol))
+(defun JSCL/JS::%FMAKUNBOUND-SETF (symbol)
+  (fmakunbound (list 'setf symbol)))
+(defun JSCL/JS::%SETF-FDEFINITION-SETF (symbol value)
+  (setf (fdefinition (list 'setf symbol)) value))
+(defun JSCL/JS::%SETF-SYMBOL-FUNCTION (symbol value)
+  (setf (fdefinition symbol) value))
+(defun JSCL/JS::%THROW (tag value)
+  (throw tag value))
+(defun JSCL/JS::BOUNDP (symbol)
+  (boundp symbol))
+(defun JSCL/JS::FBOUNDP (symbol)
+  (!fdefinition-soft symbol))
+
+

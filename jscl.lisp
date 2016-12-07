@@ -19,6 +19,18 @@
 (declaim (optimize (speed 1) (debug 3) (space 0)
                    (safety 3) (compilation-speed 1)))
 
+(defpackage :jscl/common-lisp
+  (:use) ; Nothing. (Clozure tries to stuff CCL in by default)
+  (:nicknames :jscl/cl))
+
+(defpackage :jscl/javascript-low-level
+  (:use) ; nothing
+  (:nicknames :jscl/js))
+
+(defpackage :jscl/intermediate-cross-compilation
+  (:use :jscl/cl)
+  (:nicknames :jscl/xc))
+
 (defpackage :jscl
   (:use :cl)
   #+sbcl (:use :sb-gray :sb-mop)
@@ -124,10 +136,10 @@ identifying them (and their provenance) easier."))
       seq)))
 
 (defparameter *source*
-  '(("boot"          :target)
-    ("early-char" 	:target)
+  '(("boot"          :both)
+    ("early-char" 	:both)
     ("compat"        :host)
-    ("setf"          :target)
+    ("setf"          :both)
     ("utils"         :both)
     ("defstruct"     :both)
     ("types"	:both)
@@ -216,7 +228,7 @@ compiled in the host.")
           (locally
               (declare #+sbcl (sb-ext:muffle-conditions
 
-                               'sb-kernel::function-redefinition-warning))
+                               sb-kernel::function-redefinition-warning))
             (multiple-value-bind (fasl warn fail) (compile-file input)
               (declare (ignore warn))
               ;; It's only interesting to see  if there were failures at
@@ -234,7 +246,7 @@ compiled in the host.")
           ;; These  occur  because  we  reload from  FASL  the  compiled
           ;; versions
           (declare #+sbcl (sb-ext:muffle-conditions
-                           'sb-kernel::function-redefinition-warning))
+                           sb-kernel::function-redefinition-warning))
         (map nil #'load (reverse fasls))))))
 
 

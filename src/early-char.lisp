@@ -13,14 +13,14 @@
 ;;
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
-(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+(in-package :jscl) 
 (/debug "loading early-char.lisp!")
 
 ;; This list  comes from SBCL:  everything that's ALPHA-CHAR-P,  but not
 ;; SB-IMPL::UCD-DECIMAL-DIGIT          (to          work          around
 ;; <https://bugs.launchpad.net/sbcl/+bug/1177986>),  then combined  into
 ;; a much smaller set of ranges. Yes, this can be compressed better.
-(defconstant +unicode-alphas+
+(defvar +unicode-alphas+
   '((65 . 90) (97 . 122) (170 . 170) (181 . 181) (186 . 186) (192 . 214)
     (216 . 246) (248 . 705) (710 . 721) (736 . 740) (748 . 748) (750 . 750)
     (880 . 884) (886 . 887) (890 . 893) (902 . 902) (904 . 906) (908 . 908)
@@ -115,18 +115,18 @@
     (120772 . 120779) (131072 . 173782) (173824 . 177972) (194560 . 195101))
   "(Start . End) ranges of codepoints for alphabetic characters, as of Unicode 6.2.")
 
-(defun alpha-char-p (char)
+(defun jscl/cl::alpha-char-p (char)
   (let ((code (char-code char)))
     (dolist (alpha-pair +unicode-alphas+)
       (when (<= (car alpha-pair) code (cdr alpha-pair))
-        (return-from alpha-char-p t)))
+        (return-from jscl/cl::alpha-char-p t)))
     nil))
 
 ;; I made this  list by running DIGIT-CHAR-P in SBCL  on every codepoint
 ;; up    to   CHAR-CODE-LIMIT,    filtering   on    only   those    with
 ;; SB-IMPL::UCD-GENERAL-CATEGORY 12 (Nd),  and then grouping consecutive
 ;; sets. There's 37 spans of 10, plus 1 extra digit (6618).
-(defconstant +unicode-zeroes+
+(defvar +unicode-zeroes+
   '(48 1632 1776 1984 2406 2534 2662 2790 2918 3046 3174 3302 3430 3664
     3792 3872 4160 4240 6112 6160 6470 6608 6784 6800 6992 7088 7232 7248
     42528 43216 43264 43472 43600 44016 65296 66720 120782)
@@ -143,7 +143,7 @@
       1)))
 
 ;; From comment #4 on <https://bugs.launchpad.net/sbcl/+bug/1177986>:
-(defun digit-char-p (char &optional (radix 10))
+(defun jscl/cl::digit-char-p (char &optional (radix 10))
   "Includes ASCII 0-9 a-z A-Z, plus any Unicode decimal digit characters or fullwidth variants A-Z."
   ;; Check-Type   not  available   yet.   This  could   maybe  move   to
   ;; char.lisp though?
@@ -164,7 +164,7 @@
                           (t nil))))
     (and potential (< potential radix) potential)))
 
-(defun digit-char (weight &optional (radix 10))
+(defun jscl/cl::digit-char (weight &optional (radix 10))
   "All arguments must be integers. Returns a character object that represents
 a digit of the given weight in the specified radix. Returns NIL if no such
 character exists."

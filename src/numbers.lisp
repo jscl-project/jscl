@@ -13,7 +13,7 @@
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
-(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+(in-package :jscl)
 
 (/debug "loading numbers.lisp!")
 
@@ -22,7 +22,7 @@
 (macrolet ((def (operator initial-value)
                (let ((init-sym   (gensym "INIT-"))
                      (dolist-sym (gensym "DOLIST-")))
-                 `(defun ,operator (&rest args)
+                 `(defun ,(intern (symbol-name operator) :jscl/cl) (&rest args)
                     (let ((,init-sym ,initial-value))
                       (dolist (,dolist-sym args)
                         (setq ,init-sym (,operator ,init-sym ,dolist-sym)))
@@ -34,7 +34,7 @@
 ;; given, it negates it or takes its reciprocal. Otherwise all the other
 ;; args are subtracted from or divided by it.
 (macrolet ((def (operator unary-form)
-               `(defun ,operator (x &rest args)
+               `(defun ,(intern (symbol-name operator) :jscl/cl) (x &rest args)
                   (cond
                     ((null args) ,unary-form)
                     (t (dolist (y args)
@@ -44,59 +44,61 @@
   (def / (/ 1 x)))
 
 
-(defconstant most-positive-fixnum
-  (oget (%js-vref "Number" t) "MAX_SAFE_INTEGER")
+(defconstant jscl/cl::most-positive-fixnum
+  #+jscl (jscl/ffi:oget (jscl/js::%js-vref "Number" t) "MAX_SAFE_INTEGER")
+  #-jscl +most-positive-fixnum+
   "JS integers  are really floats with  no exponent, there is  a limited
  range; see
  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER")
 
-(defconstant most-negative-fixnum
-  (oget (%js-vref "Number" t) "MIN_SAFE_INTEGER")
+(defconstant jscl/cl::most-negative-fixnum
+  #+jscl (jscl/ffi:oget (jscl/js::%js-vref "Number" t) "MIN_SAFE_INTEGER")
+  #-jscl +most-negative-fixnum+
   "JS integers  are really floats with  no exponent, there is  a limited
  range; see
  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MIN_SAFE_INTEGER")
 
-(defun fixnump (number)
+(defun jscl/cl::fixnump (number)
   (and (integerp number)
-       (<= most-negative-fixnum
+       (<= jscl/cl::most-negative-fixnum
            number
-           most-positive-fixnum)))
+           jscl/cl::most-positive-fixnum)))
 
-(defun 1+ (x) (+ x 1))
-(defun 1- (x) (- x 1))
+(defun jscl/cl::1+ (x) (+ x 1))
+(defun jscl/cl::1- (x) (- x 1))
 
 
-(defun floor (x &optional (y 1))
-  (%floor (/ x y)))
+(defun jscl/cl::floor (x &optional (y 1))
+  (jscl/js::%floor (/ x y)))
 
-(defun ceiling (x &optional (y 1))
-  (%ceiling (/ x y)))
+(defun jscl/cl::ceiling (x &optional (y 1))
+  (jscl/js::%ceiling (/ x y)))
 
-(defun truncate (x &optional (y 1))
+(defun jscl/cl::truncate (x &optional (y 1))
   (let ((z (/ x y)))
     (if (> z 0)
-        (%floor z)
-        (%ceiling z))))
+        (jscl/js::%floor z)
+        (jscl/js::%ceiling z))))
 
-(defun integerp (x)
+(defun jscl/cl::integerp (x)
   (and (numberp x) (= (floor x) x)))
 
-(defun floatp (x)
+(defun jscl/cl::floatp (x)
   (and (numberp x) (not (integerp x))))
 
-(defun minusp (x) (< x 0))
-(defun zerop (x) (= x 0))
-(defun plusp (x) (< 0 x))
+(defun jscl/cl::minusp (x) (< x 0))
+(defun jscl/cl::zerop (x) (= x 0))
+(defun jscl/cl::plusp (x) (< 0 x))
 
-(defun signum (x)
+(defun jscl/cl::signum (x)
   (if (zerop x) x (/ x (abs x))))
 
 (macrolet ((def (operator)
-               `(defun ,operator (x &rest args)
+               `(defun ,(intern (symbol-name operator) :jscl/cl) (x &rest args)
                   (dolist (y args)
                     (if (,operator x y)
-                        (setq x    (car args))
-                        (return-from ,operator nil)))
+                        (setq x (car args))
+                        (return-from ,(intern (symbol-name operator) :jscl/cl) nil)))
                   t)))
   (def >)
   (def >=)
@@ -105,13 +107,13 @@
   (def <=)
   (def /=))
 
-(defconstant pi 3.141592653589793)
+(defconstant jscl/cl::pi 3.141592653589793)
 
-(defun evenp (x) (= (mod x 2) 0))
-(defun oddp  (x) (not (evenp x)))
+(defun jscl/cl::evenp (x) (= (mod x 2) 0))
+(defun jscl/cl::oddp  (x) (not (evenp x)))
 
 (macrolet ((def (name comparison)
-               `(defun ,name (x &rest xs)
+               `(defun ,(intern (string name) :jscl/cl) (x &rest xs)
                   (dolist (y xs)
                     (when (,comparison y x)
                       (setq x y)))
@@ -119,19 +121,19 @@
   (def max >)
   (def min <))
 
-(defun abs (x) (if (> x 0) x (- x)))
+(defun jscl/cl::abs (x) (if (> x 0) x (- x)))
 
-(defun expt (base power) (expt base              power))
-(defun exp  (power)      (expt 2.718281828459045 power))
+(defun jscl/cl::expt (base power) (expt base              power))
+(defun jscl/cl::exp  (power)      (expt 2.718281828459045 power))
 
-(defun sqrt (x) (sqrt x))
+(defun jscl/cl::sqrt (x) (sqrt x))
 
 (defun gcd-2 (a b)
   (if (zerop b)
       (abs a)
       (gcd-2 b (mod a b))))
 
-(defun gcd (&rest integers)
+(defun jscl/cl::gcd (&rest integers)
   (cond ((null integers)
          0)
         ((null (cdr integers))
@@ -146,7 +148,7 @@
       0
       (/ (abs (* a b)) (gcd a b))))
 
-(defun lcm (&rest integers)
+(defun jscl/cl::lcm (&rest integers)
   (cond ((null integers)
          1)
         ((null (cdr integers))
@@ -156,4 +158,3 @@
         (t
          (apply #'lcm (lcm (first integers) (second integers)) (nthcdr 2 integers)))))
 
-(defun rational-float-p (rational) nil)

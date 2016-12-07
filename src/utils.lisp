@@ -59,7 +59,7 @@ accumulated, in the order."
       x
       (list x)))
 
-(defun !reduce (func list initial-value)
+(defun jscl/cl::reduce (func list initial-value)
   (let ((result initial-value))
     (dolist (element list result)
       (setq result (funcall func result element)))))
@@ -68,16 +68,16 @@ accumulated, in the order."
 (defun join (list &optional (separator ""))
   (if (null list)
       ""
-      (!reduce (lambda (s o) (concat s separator o))
-               (cdr list)
-               (car list))))
+      (jscl/cl::reduce (lambda (s o) (concat s separator o))
+                       (cdr list)
+                       (car list))))
 
 (defun join-trailing (list &optional (separator ""))
   (if (null list)
       ""
       (concat (car list) separator (join-trailing (cdr list) separator))))
 
-(defun mapconcat (func list)
+(defun jscl/cl::mapconcat (func list)
   (join (mapcar func list)))
 
 (defun vector-to-list (vector)

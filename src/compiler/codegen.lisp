@@ -32,7 +32,8 @@
 (defmacro define-js-macro (name lambda-list &body body)
   "Define a macro for emitting JavaScript code from the JavaScript AST."
   (let ((form (gensym "FORM-")))
-    `(push (cons ',name
+    `(push (cons ',(intern (symbol-name name)
+                           :jscl/js)
                  (lambda (,form)
                    (block ,name
                      (destructuring-bind ,lambda-list ,form
