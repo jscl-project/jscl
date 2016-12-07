@@ -40,7 +40,7 @@
   "Print a trace message."
   (format *trace-output* "~&DEBUG: ~a" message))
 
-(defparameter jscl/ffi:*root* (make-hash-table :test 'equal)
+(defvar jscl/ffi:*root* (make-hash-table :test 'equal)
   "The *ROOT* object is “window” (in a browser) or the Node root object.
   This provides access to whichever root  object happens to exist in the
   active JavaScript Virtual Machine.")
@@ -57,7 +57,7 @@
   "Set the field named by KEY on the JavaScript object OBJECT to VALUE."
   (setf (gethash key object) value))
 
-(defun jscl/ffi:oget* (object &rest keys)
+(defmacro jscl/ffi:oget* (object &rest keys)
   "Retrieve from  OBJECT the value of  the first of KEYS,  then from the
 resulting  object, use  the  next of  KEYS to  retrieve  its value,  and
 so forth.
@@ -68,10 +68,10 @@ is equivalent to the JavaScript something[\"foo\"][\"bar\"][\"baz\"]
   (cond ((null keys)
          nil)
         ((null (cdr keys))
-         (jscl/ffi:oget object (first keys)))
+         `(jscl/ffi:oget ,object ,(first keys)))
         (t
-         (jscl/ffi:oget (jscl/ffi:oget* object (rest keys))
-                        (first keys)))))
+         `(jscl/ffi:oget (jscl/ffi:oget* ,object ,@(butlast keys))
+                         ,(car (last keys))))))
 
 (defun jscl/ffi:oget (object key)
   "Retrieve from  OBJECT the value  identified by  KEY. When KEY  is not
@@ -282,7 +282,59 @@ metadata in it."
 
 
 (defun jscl/js::call-internal (fn &rest args)
-  (apply (intern (string fn) :jscl/js) args))
+  (apply (intern (concatenate 'string (string :INTERNALS.) 
+                              (substitute #\- #\_
+                                          (string-upcase fn)))
+                 :jscl/js)
+         args))
 
-(defun jscl/js::|intern| (symbol &optional (package *package*))
-       (intern symbol package))
+(unless (jscl/ffi:oget jscl/ffi:*root* "packages")
+  (setf (jscl/ffi:oget jscl/ffi:*root* "packages") (jscl/ffi:make-new '|Object|)))
+
+(defvar jscl/ffi::undefined '#:undefined)
+
+(defvar jscl/ffi::unbound-function
+  (lambda (&rest _) (declare (ignore _))
+          (error "Unbound function")))
+
+(defvar jscl/ffi::unbound-setf-function
+  (lambda (&rest _) (declare (ignore _))
+          (error "Unbound SetF function")))
+
+(defun jscl/js::internals.symbol (name package-name)
+  (let ((this (jscl/ffi:make-new '|Symbol|)))
+    (setf (jscl/ffi:oget this "name") name
+          (jscl/ffi:oget this "package") package-name
+          (jscl/ffi:oget this "value") jscl/ffi::undefined
+          (jscl/ffi:oget this "fvalue") jscl/ffi::unbound-function 
+          (jscl/ffi:oget this "setfValue") jscl/ffi::unbound-setf-function
+          (jscl/ffi:oget this "typeName") jscl/ffi::undefined)))
+
+(defun jscl/js::internals.intern (name &optional package-name)
+  (let* ((package-name (or package-name "JSCL"))
+         (lisp-package (or (jscl/ffi:oget* jscl/ffi:*root*
+                                           "packages"
+                                           package-name)
+                           (error "No package ~a" package-name)))
+         (symbol (or (jscl/ffi:oget* jscl/ffi:*root*
+                                     lisp-package
+                                     "symbols"
+                                     name)
+                     (setf (jscl/ffi:oget* jscl/ffi:*root*
+                                           lisp-package
+                                           "symbols"
+                                           name) 
+                           (jscl/js::internals.symbol name lisp-package)))))
+    (when (eq lisp-package (jscl/ffi:oget* jscl/ffi:*root*
+                                           "packages"
+                                           "KEYWORD"))
+      (setf (jscl/ffi:oget* lisp-package "exports" name)
+            symbol))
+    symbol))
+
+(defun jscl/js::call (object key &rest args)
+  (apply (jscl/ffi:oget object key) args))
+
+(defun jscl/js::get (object key)
+  (jscl/ffi:oget object key))
+

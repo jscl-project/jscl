@@ -1,6 +1,6 @@
-;;; compiler/codegen.lisp --- Naive Javascript unparser
+;;;; compiler/codegen.lisp — Naïve Javascript unparser
 
-;; Copyright (C) 2013, 2014 David Vazquez
+;; Copyright © 2013, 2014 David Vazquez
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
 ;; the terms of the GNU General  Public License as published by the Free
@@ -439,6 +439,7 @@ unnecessary parentheses."
       ((consp form)
        (js-operator-expression (car form) (cdr form)
                                precedence associativity operand-order)))))
+
 
 ;;; Statements generators
 ;;;
