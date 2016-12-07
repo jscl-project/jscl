@@ -20,20 +20,6 @@
 ;;;; Various numeric functions and constants
 
 (macrolet ((def (operator initial-value)
-<<<<<<< HEAD
-<<<<<<< HEAD
-               (let ((init-sym   (gensym "INIT-"))
-                     (dolist-sym (gensym "DOLIST-")))
-=======
-             (let ((init-sym   (gensym "INIT-"))
-                   (dolist-sym (gensym "DOLIST-")))
->>>>>>> bda3de3... reformat
-               `(defun ,operator (&rest args)
-                  (let ((,init-sym ,initial-value))
-                    (dolist (,dolist-sym args)
-                      (setq ,init-sym (,operator ,init-sym ,dolist-sym)))
-                    ,init-sym)))))
-=======
                (let ((init-sym   (gensym "INIT-"))
                      (dolist-sym (gensym "DOLIST-")))
                  `(defun ,operator (&rest args)
@@ -41,7 +27,6 @@
                       (dolist (,dolist-sym args)
                         (setq ,init-sym (,operator ,init-sym ,dolist-sym)))
                       ,init-sym)))))
->>>>>>> 074c04d... Stabilization, debugging.
   (def + 0)
   (def * 1))
 
