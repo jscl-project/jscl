@@ -32,7 +32,7 @@
           (assert (consp place) (place)
                   "SETF PLACE not a SYMBOL nor CONS: ~s" place)
           (let* ((access-fn (car place))
-                 (setf-function (jscl/cl::fdefinition-soft (list 'setf access-fn)))
+                 (setf-function (fdefinition-soft (list 'setf access-fn)))
                  (expander (cdr (assoc access-fn *setf-expanders*))))
             (cond (setf-function
                    (let ((value (gensym "NEW-VALUE-")))
@@ -120,7 +120,7 @@ SETF knows a corresponding setting form."
            (value (second pairs)))
        (let* ((access-fn (first place))
               (params (rest place))
-              (setf-fn (jscl/cl::fdefinition-soft (list 'setf access-fn))))
+              (setf-fn (fdefinition-soft (list 'setf access-fn))))
          (if setf-fn
              `((setf ,access-fn) ,value ,@params)
              (setf/apply-setf-expander place value)))))

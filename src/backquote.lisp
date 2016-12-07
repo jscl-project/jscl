@@ -43,8 +43,9 @@
 ;;; rules on pages  349-350 of the first edition (pages  528-529 of this
 ;;; second edition). It then optionally applies a code simplifier.
 
-;;; If the value of *BQ-SIMPLIFY* is non-NIL, then BACKQUOTE processing applies the code simplifier.
-;;; If the  value is NIL, then  the code resulting from  BACKQUOTE is exactly that  specified by the
+;;; If the value of *BQ-SIMPLIFY*  is non-NIL, then BACKQUOTE processing
+;;; applies the  code simplifier.  If the  value is  NIL, then  the code
+;;; resulting  from   BACKQUOTE  is   exactly  that  specified   by  the
 ;;; official rules.
 (defparameter *bq-simplify* t)
 
@@ -99,7 +100,7 @@
         ((eq (car x) *comma*) (cadr x))
         ((eq (car x) *comma-atsign*)
          (error ",@~S after `" (cadr x)))
-        #+steele-comma-dot 
+        #+steele-comma-dot
         ((eq (car x) *comma-dot*)
          (error ",.~S after `" (cadr x))
          (error "ill-formed"))
@@ -116,7 +117,7 @@
              (when (eq (car p) *comma-atsign*)
                (error "Dotted ,@~S" p))
              #+steele-comma-dot
-              (when (eq (car p) *comma-dot*)
+             (when (eq (car p) *comma-dot*)
                (error "Dotted ,.~S" p)
                (error "Dotted"))))))
 
@@ -168,11 +169,11 @@
 ;;; loosely speaking, look like this:
 ;;;
 #|  (APPEND (LIST a b c) foo) => (LIST* a b c foo)
-       provided a, b, c are not splicing frobs
-    (APPEND (LIST* a b c) foo) => (LIST* a b (APPEND c foo))
-       provided a, b, c are not splicing frobs
-    (APPEND (QUOTE (x)) foo) => (LIST* (QUOTE x) foo)
-    (APPEND (CLOBBERABLE x) foo) => (NCONC x foo)
+provided a, b, c are not splicing frobs
+(APPEND (LIST* a b c) foo) => (LIST* a b (APPEND c foo))
+provided a, b, c are not splicing frobs
+(APPEND (QUOTE (x)) foo) => (LIST* (QUOTE x) foo)
+(APPEND (CLOBBERABLE x) foo) => (NCONC x foo)
 |#
 (defun bq-simplify (x)
   (if (atom x)

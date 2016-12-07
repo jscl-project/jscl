@@ -138,7 +138,7 @@ identifying them (and their provenance) easier."))
 (defparameter *source*
   '(("boot"          :both)
     ("early-char" 	:both)
-    ("compat"        :host)
+    ("compat"        :both)
     ("setf"          :both)
     ("utils"         :both)
     ("defstruct"     :both)

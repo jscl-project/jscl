@@ -222,7 +222,7 @@
 
 ;;; Validate a list of keyword arguments.
 (defun validate-keyvars (list keyword-list &optional allow-other-keys)
-  (let   (;; If  it is  non-NIL, we  have to  check for  unknown keyword
+  (let   (;;  If it  is non-NIL,  we have to  check for  unknown keyword
           ;; arguments in the list to signal an error in that case.
           (allow-other-keys
            (or allow-other-keys (keyword-lookup :allow-other-keys list))))
@@ -255,9 +255,8 @@ against FORM."
         (optvar-count (length (lambda-list-optvars ll)))
         (whole (or (lambda-list-wholevar ll)
                    (gensym "LAMBDA-LIST-WHOLE-"))))
-    ;; Create a  binding for  the whole  expression FORM.
-    ;; It will match to LL,  so we validate the number of
-    ;; elements on the result of FORM.
+    ;; Create a binding for the whole  expression FORM. It will match to
+    ;; LL, so we validate the number of elements on the result of FORM.
     (compute-pbindings whole `(validate-reqvars ,form ,reqvar-count))
 
     (let ((count 0))
@@ -278,26 +277,22 @@ against FORM."
 
       ;; Rest-variable and keywords
 
-      ;; If there is a rest  or keyword variable, we will
-      ;; add  a  binding for  the  rest  or an  auxiliary
-      ;; variable.  The computations  in  of the  keyword
-      ;; start  in this  variable, so  we avoid  the long
-      ;; tail  of nested  CAR/CDR  operations each  time.
-      ;; We also include validation  of keywords if there
-      ;; is any.
+      ;; If there is  a rest or keyword variable, we  will add a binding
+      ;; for the rest  or an auxiliary variable. The  computations in of
+      ;; the keyword start  in this variable, so we avoid  the long tail
+      ;; of  nested  CAR/CDR  operations  each  time.  We  also  include
+      ;; validation of keywords if there is any.
       (let* ((chain (nth-chain whole (+ reqvar-count optvar-count) t))
              (restvar (lambda-list-restvar ll))
              (pattern (or restvar
                           (gensym "REST-PATERN-")))
              (keywords (mapcar #'keyvar-keyword-name (lambda-list-keyvars ll)))
              (rest
-              ;; Create  a binding  for the  rest of  the
-              ;; arguments.  If there  is keywords,  then
-              ;; validate  this  list.  If  there  is  no
-              ;; keywords  and  no &rest  variable,  then
-              ;; validate that  the rest is empty,  it is
-              ;; to say, there is  no more arguments that
-              ;; we expect.
+              ;; Create  a  binding  for  the  rest  of  the  arguments.
+              ;; If there is keywords, then validate this list. If there
+              ;; is  no keywords  and no  &rest variable,  then validate
+              ;; that the rest is empty, it  is to say, there is no more
+              ;; arguments that we expect.
               (cond
                 (keywords (compute-pbindings pattern
                                              `(validate-keyvars ,chain ',keywords
@@ -338,8 +333,8 @@ where the form is bound is returned."
   (multiple-value-bind (ll)
       (parse-destructuring-lambda-list lambda-list)
     (let ((*bindings* '()))
-      ;; Macroexpansion. Compute  bindings and generate code  for them
-      ;; and some necessary checking.
+      ;; Macroexpansion. Compute bindings and generate code for them and
+      ;; some necessary checking.
       (compute-bindings ll expression)
       `(let* ,(reverse *bindings*)
          ,@body))))

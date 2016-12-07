@@ -278,4 +278,3 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
      #+jscl
      (eval-when (:load-toplevel :compile-toplevel)
        (!defstruct%  ,name-and-options ,@slots))))
-

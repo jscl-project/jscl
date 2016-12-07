@@ -118,9 +118,9 @@
          (setf ,place0 (cons ,place0 ,list)))))
   (defun defpackage/parse-options (options)
     (let (use exports nicknames)
-    (dolist (option options)
-      (ecase (car option)
-        (:use
+      (dolist (option options)
+        (ecase (car option)
+          (:use
            (pushcdr (cdr option) use))
           (:export
            (pushcdr (cdr option) exports))

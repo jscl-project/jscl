@@ -78,7 +78,7 @@
 
                   `(eval-when (:compile-toplevel :execute)
                      (%compile-defmacro ',name ,expander)))))))
-    
+
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
 
@@ -184,7 +184,7 @@
 (defmacro jscl/cl::defparameter (name value &optional docstring)
   `(progn
      (setq ,name ,value)
-     ,@(when (stringp docstring) 
+     ,@(when (stringp docstring)
          `(setf (oget ',name "vardoc") ,docstring))
      ',name))
 
@@ -193,7 +193,7 @@
   ;; after DEFUN is defined.
   (cond ((symbolp name)
          `(progn
-         (eval-when (:compile-toplevel :load-toplevel)
+            (eval-when (:compile-toplevel :load-toplevel)
               (fn-info ',name :defined t))
             (fset ',name #'(named-lambda ,name ,args ,@body))
             ',name))
@@ -337,7 +337,7 @@
 ;;; DO, DO*
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun jscl/cl::do/do* (do/do* varlist endlist body)
+  (defun do/do* (do/do* varlist endlist body)
     `(block nil
        (,(ecase do/do* (do 'let) (do* 'let*))
          ,(mapcar (lambda (x)
@@ -450,7 +450,7 @@ macro cache is so aggressive that it cannot be redefined."
     (t nil)))
 
 (defun jscl/cl::disassemble (function)
-  (write-line (lambda-code (fdefinition function)))
+  (write-line (jscl/js::lambda-code (fdefinition function)))
   nil)
 
 
@@ -481,11 +481,7 @@ macro cache is so aggressive that it cannot be redefined."
 
 ;;; Function names/values
 
-(defun jscl/cl::%fdefinition-setf (name)
-  "Primitive; look up the fdefinition for (SETF NAME)"
-  (jscl/js::%fdefinition-setf name))
-
-(defun jscl/cl::!fdefinition-soft (name)
+(defun fdefinition-soft (name)
   "Like `FDEFINITION' but returns NULL rather than signaling an error."
   (cond
     ((symbolp name)
@@ -547,14 +543,16 @@ This is SETF'able."
 (defconstant jscl/cl::internal-time-units-per-second 1000)
 
 (defun jscl/cl::values-list (list)
-  (values-array (list-to-vector list)))
+  (jscl/js::values-array (list-to-vector list)))
 
 (defun jscl/cl::values (&rest args)
   (values-list args))
 
 ;;; Early error definition.
 (defun jscl/cl::error (fmt &rest args)
-  (jscl/js::%throw (make-new |Error| (apply #'format nil fmt args))))
+  (jscl/js::%throw
+   (jscl/ffi:make-new '|Error|
+                      (apply #'format nil fmt args))))
 
 (defmacro jscl/cl::nth-value (n form)
   `(multiple-value-call (lambda (&rest values)

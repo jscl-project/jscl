@@ -172,7 +172,7 @@
     (let ((b (global-binding name type type)))
       (push (car decl) (binding-declarations b)))))
 
-(defun !proclaim (decl)
+(defun jscl/cl::proclaim (decl)
   (case (car decl)
     (jscl::pure (!proclamation decl 'function))
     (special (!proclamation decl 'variable))
@@ -204,17 +204,10 @@ specifier for the condition types that have been muffled.
                 (safety 2) (compilation-speed 1)))
     (otherwise nil)))
 
-#+jscl
-(fset 'proclaim #'!proclaim)
-
-(defun %define-symbol-macro (name expansion)
+(defun jscl/cl::define-symbol-macro (name expansion)
   (let ((b (make-binding :name name :type 'macro :value expansion)))
     (push-to-lexenv b *environment* 'variable)
     name))
-
-#+jscl
-(defmacro define-symbol-macro (name expansion)
-  `(%define-symbol-macro ',name ',expansion))
 
 
 ;;; Report functions which are called but not defined
@@ -718,7 +711,7 @@ association list ALIST in the same order."
     ((typep sexp 'sb-impl::comma)
      (error "Quasi-quoted expression leakage: ~s" sexp))
     ((and (integerp sexp)
-          (not (!fixnump sexp)))
+          (not (jscl/cl::fixnump sexp)))
      (cerror "Use the biggest possible number instead"
              "Cannot pass BigNum ~:d yet" sexp)
      (if (plusp sexp)
@@ -733,12 +726,11 @@ association list ALIST in the same order."
     ((complexp sexp)
      (error "Cannot pass complex numberss like ~d" sexp))
     (t
-     (typecase sexp
-    (complex (error "Can't use complex number ~a yet" sexp))
+     (typecase sexp 
        (fixnum sexp)
-    (rational
-     (warn "Rounding ~a to float" sexp)
-     (coerce sexp 'double-float))
+       (rational
+        (warn "Rounding ~a to float" sexp)
+        (coerce sexp 'double-float))
        (number sexp)
        (function  ;; FIXME?
         (list 'function (list 'quote (nth-value 2 (function-lambda-expression sexp)))))
@@ -1206,7 +1198,7 @@ let-binding-wrapper."
 (defvar *builtins*
   (make-hash-table))
 
-(defun !special-operator-p (name)
+(defun jscl/cl::special-operator-p (name)
   (nth-value 1 (gethash name *builtins*)))
 #+jscl
 (fset 'special-operator-p #'!special-operator-p)
@@ -1737,12 +1729,12 @@ generate the code which performs the transformation on these variables."
 (defparameter *macroexpander-cache*
   (make-hash-table :test #'eq))
 
-(defun !macro-function (symbol &optional (environment *environment*))
+(defun jscl/cl::macro-function (symbol &optional (environment *environment*))
   (unless (function-name-p symbol)
     (error "`~S' is not a symbol." symbol))
   (when (and (listp symbol)
              (eq 'setf (first symbol)))
-    (return-from !macro-function nil))
+    (return-from jscl/cl::macro-function nil))
   #- (or ecl sbcl jscl)
   (warn "Your Implementation's quasiquote may not be handled properly.")
   #+ecl
@@ -1752,7 +1744,7 @@ generate the code which performs the transformation on these variables."
       (lambda (form) (ext::macroexpand-1 form))))
   #+sbcl
   (when (eql symbol 'sb-int:quasiquote)
-    (return-from !macro-function
+    (return-from jscl/cl::macro-function
       (lambda (form environment)
         (declare (ignore environment))
         (sb-impl::expand-quasiquote form nil))))
@@ -1785,13 +1777,13 @@ generate the code which performs the transformation on these variables."
         (values (binding-value b) t)
         (values symbol nil))))
 
-(defun !macroexpand-1 (form &optional (env *environment*))
+(defun jscl/cl::macroexpand-1 (form &optional (env *environment*))
   (let ((*environment* (or env *global-environment*)))
     (cond
       ((symbolp form)
        (!macroexpand-1/symbol form env))
       ((and (consp form) (symbolp (car form)))
-       (let ((macrofun (!macro-function (car form) env)))
+       (let ((macrofun (jscl/cl::macro-function (car form) env)))
          (if macrofun
              (values (funcall macrofun (cdr form) env) t)
              (values form nil))))
@@ -1801,10 +1793,10 @@ generate the code which performs the transformation on these variables."
 #+jscl
 (fset 'macroexpand-1 #'!macroexpand-1)
 
-(defun !macroexpand (form &optional env)
+(defun jscl/cl::macroexpand (form &optional env)
   (let ((continue t))
     (while continue
-      (multiple-value-setq (form continue) (!macroexpand-1 form env))))
+      (multiple-value-setq (form continue) (jscl/cl::macroexpand-1 form env))))
   form)
 
 #+jscl
@@ -1812,7 +1804,7 @@ generate the code which performs the transformation on these variables."
 
 (defun compile-funcall/function (function arglist)
   (when (and (symbolp function)
-             (!macro-function function))
+             (jscl/cl::macro-function function))
     (error "Compiler error: Macro function was not expanded: ~s"
            function))
   (fn-info function :called t)
@@ -1860,7 +1852,7 @@ generate the code which performs the transformation on these variables."
                         (rest args)))
       ((translate-function function)
        (compile-funcall/translate-function function arglist))
-      ((and (symbolp function) (!macro-function function))
+      ((and (symbolp function) (jscl/cl::macro-function function))
        (error "Compiler error: Macro function was not expanded: ~s" function))
       ((function-name-p function)
        (compile-funcall/function function arglist))
@@ -1999,16 +1991,16 @@ If the  JSCL/CL package were separate  from the JSCL/INT package  or so,
 this might go  away, but that will  take a good bit  of rewriting symbol
 names throughout the tree. "
   (cond ((not (should-be-macroexpanded-in-cl-p sexp)) sexp)
-        ((!macro-function (prefix-! (car sexp)))
+        ((jscl/cl::macro-function (prefix-! (car sexp)))
          (warn "Substituting !~s for ~:*~s" (car sexp))
-         (!macroexpand (cons (prefix-! (car sexp))
-                             (cdr sexp))))
+         (jscl/cl::macroexpand (cons (prefix-! (car sexp))
+                                     (cdr sexp))))
         (t (complain-failed-macroexpansion sexp))))
 
 (defun object-evaluates-to-itself-p (object)
   ;; TODO:  Things  that  “should”  evaluate  to  themselves  but  won't
-  ;; actually (yet) include bignums, rationals, and complex numbers.
-  (or (!fixnump object)
+  ;; actually (yet) include bignums, rationals, and complex numbers
+  (or (jscl/cl::fixnump object)
       (floatp object)
       (characterp object)
       (stringp object)
@@ -2024,7 +2016,7 @@ If MULTIPLE-VALUE-P,  then it's possible  that SEXP may  return multiple
 values, and  the appropriate  JavaScript wrappers must  be in  place; if
 not, the simplified forms that accept  only a primary value returned can
 be used."
-  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
+  (multiple-value-bind (sexp expandedp) (jscl/cl::macroexpand-1 sexp)
     (when expandedp
       (return-from convert-1 (convert sexp multiple-value-p)))
     ;; The expression has been macroexpanded. Now compile it!
@@ -2046,8 +2038,6 @@ be used."
 
 (defun convert (sexp &optional multiple-value-p)
   (convert-1 sexp multiple-value-p))
-
-#+jscl (defun macroexpand (form) (!macroexpand form))
 
 (defvar *compile-print-toplevels* nil)
 
@@ -2104,7 +2094,7 @@ form. If  MULTIPLE-VALUE-P, then  SEXP may  return multiple  values (and
 they  will  be bound);  otherwise,  use  a  simpler form  that  discards
 non-primary values. If RETURN-P, emit  a JavaScript “return” operator on
 the value."
-  (multiple-value-bind (expansion expandedp) (!macroexpand-1 sexp)
+  (multiple-value-bind (expansion expandedp) (jscl/cl::macroexpand-1 sexp)
     (when expandedp
       (warn "Macro-expansion done on top level (~s …)…" (car sexp))
       (return-from convert-toplevel

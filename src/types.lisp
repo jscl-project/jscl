@@ -24,11 +24,11 @@
 
 
 
-(defmacro !deftype (name lambda-list &body body) 
+(defmacro !deftype (name lambda-list &body body)
   `(push-to-lexenv (make-binding
                     :name ',name
                     :type 'type
-                    :value (make-type-definition 
+                    :value (make-type-definition
                             :name ',name
                             :supertypes '(jscl::user-deftype)
                             :predicate
@@ -157,33 +157,33 @@
 (defun make-deftype-predicate (name lambda-list body)
   (assert (and (listp body)
                (listp (car body))
-               (eql 'quote (caar body))) 
+               (eql 'quote (caar body)))
           (body)
           "BODY expected to be list-quote-list, FIXME")
   (let ((body (cadar body)))
-  (cond ((not (listp body))
-         `(typep object ,body)) 
-        ((member (car body) '(and or not)) 
-         (cons (car body) (mapcar (lambda (form)
-                                    (make-deftype-predicate name
-                                                            lambda-list 
-                                                            form))
-                                  (rest body))))
-        ;; FIXME: compound specifiers handling
-        ((not (= (length body) 2))
-         (error "Don't understand type specifier ~s" body))
-        ((eql (car body) 'not) 
-         (cons (car body) (mapcar (lambda (form)
-                                    (make-deftype-predicate name lambda-list form))
-                                  (rest body))))
-        ((eql 'satisfies (first body))
-         `(,(second body) object)) 
-        ((eql 'member (car body))
-         `(member object ,(cdr body)))
-        ((and (= 2 (length body))
-              (eql 'mod (car body)))
-         `(and (integerp object) (<= 0 object) (< object ,(second body))))
-        ;; TODO: VALUES forms
+    (cond ((not (listp body))
+           `(typep object ,body))
+          ((member (car body) '(and or not))
+           (cons (car body) (mapcar (lambda (form)
+                                      (make-deftype-predicate name
+                                                              lambda-list
+                                                              form))
+                                    (rest body))))
+          ;; FIXME: compound specifiers handling
+          ((not (= (length body) 2))
+           (error "Don't understand type specifier ~s" body))
+          ((eql (car body) 'not)
+           (cons (car body) (mapcar (lambda (form)
+                                      (make-deftype-predicate name lambda-list form))
+                                    (rest body))))
+          ((eql 'satisfies (first body))
+           `(,(second body) object))
+          ((eql 'member (car body))
+           `(member object ,(cdr body)))
+          ((and (= 2 (length body))
+                (eql 'mod (car body)))
+           `(and (integerp object) (<= 0 object) (< object ,(second body))))
+          ;; TODO: VALUES forms
           (t (error "Don't understand type specifier ~s" body)))))
 
 
@@ -298,12 +298,12 @@ the cases ~{~s~^, ~} will never be matched"
 
 (defun typecase-unreachable-after-supertype (unique-types)
   (let ((first (first unique-types))
-        (rest (rest unique-types))) 
+        (rest (rest unique-types)))
     (let ((subtypes (remove-if-not
                      (lambda (other)
                        (subtypep other first))
                      rest)))
-      (when subtypes 
+      (when subtypes
         (warn "TYPECASE contains a match for type ~s, ~_~
 but also for ~[~;a~:;~:*~r~] proper subtype~:p of ~0@*~s:~_~2@*~{~s~^, ~};
 since the supertype comes first, the subtype~1@*~p will never be matched."
@@ -664,11 +664,11 @@ star)."
 
 (defun init-built-in-types% ()
   "Initializes the class/type hierarchy for the bult-in types."
-  (init-built-in-basic-types%) 
-  (init-numeric-compound-predicates%) 
-  (init-string-predicate%) 
+  (init-built-in-basic-types%)
+  (init-numeric-compound-predicates%)
+  (init-string-predicate%)
   (setf (type-definition-predicate (find-type-definition 'array))
-        #'compound-array-type-p) 
+        #'compound-array-type-p)
   (init-standard-type/classes%)
   (init-standard-class-subclasses%)
   (validate-standard-class-subclasses%))

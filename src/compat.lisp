@@ -45,11 +45,13 @@
   This provides access to whichever root  object happens to exist in the
   active JavaScript Virtual Machine.")
 
-(defun jscl/ffi:make-new (class)
+(defun jscl/ffi:make-new (class &rest ctor-args)
   "Create a new  instance of CLASS with the  JavaScript special operator
 “new”"
-  (declare (ignore class))
-  (make-hash-table :test 'equal))
+  (let ((instance (make-hash-table :test 'equal)))
+    (setf (gethash "_prototype" instance) class
+          (gethash "_ctor-args" instance) ctor-args)
+    instance))
 
 (defun (setf jscl/ffi:oget) (value object key)
   "Set the field named by KEY on the JavaScript object OBJECT to VALUE."
@@ -151,7 +153,7 @@ EG:
                        (denominator rational))))))
 
 
-(defun !fdefinition-soft (name)
+(defun fdefinition-soft (name)
   "Return  the  `FDEFINITION' of  NAME,  or  NIL  if  it does  not  have
  a function value or is not a valid function name."
   (ignore-errors (fdefinition name)))
@@ -237,7 +239,7 @@ metadata in it."
   (declare (ignore _))
   `(jscl/ffi:oget jscl/ffi:*root* ,symbol-name))
 
-(defmacro jscl/js::%js-vset (symbol-name value) 
+(defmacro jscl/js::%js-vset (symbol-name value)
   `(setf (jscl/ffi:oget jscl/ffi:*root* ,symbol-name) ,value))
 
 (dolist (fn '(floor ceiling))
@@ -254,23 +256,33 @@ metadata in it."
   (setf (fdefinition (intern (string operator) :jscl/js))
         (fdefinition operator)))
 
-(defun JSCL/JS::%FBOUNDP-SETF (symbol)
-  (!fdefinition-soft (list 'setf symbol)))
-(defun JSCL/JS::%FDEFINITION-SETF (symbol)
+(defun jscl/js::%fboundp-setf (symbol)
+  (fdefinition-soft (list 'setf symbol)))
+(defun jscl/js::%fdefinition-setf (symbol)
   (fdefinition (list 'setf symbol)))
-(defun JSCL/JS::%FMAKUNBOUND (symbol)
+(defun jscl/js::%fmakunbound (symbol)
   (fmakunbound symbol))
-(defun JSCL/JS::%FMAKUNBOUND-SETF (symbol)
+(defun jscl/js::%fmakunbound-setf (symbol)
   (fmakunbound (list 'setf symbol)))
-(defun JSCL/JS::%SETF-FDEFINITION-SETF (symbol value)
+(defun jscl/js::%setf-fdefinition-setf (symbol value)
   (setf (fdefinition (list 'setf symbol)) value))
-(defun JSCL/JS::%SETF-SYMBOL-FUNCTION (symbol value)
+(defun jscl/js::%setf-symbol-function (symbol value)
   (setf (fdefinition symbol) value))
-(defun JSCL/JS::%THROW (tag value)
-  (throw tag value))
-(defun JSCL/JS::BOUNDP (symbol)
+(defun jscl/js::%throw (condition)
+  (signal "javascript condition: ~a" condition))
+(defun jscl/js::boundp (symbol)
   (boundp symbol))
-(defun JSCL/JS::FBOUNDP (symbol)
-  (!fdefinition-soft symbol))
-
+(defun jscl/js::fboundp (symbol)
+  (fdefinition-soft symbol))
+(defun jscl/js::lambda-code (function)
+  (or (function-lambda-expression (fdefinition function))
+      (disassemble (fdefinition function))))
+(defun jscl/js::values-array (array)
+  (apply 'values (map 'list 'identity array)))
 
+
+(defun jscl/js::call-internal (fn &rest args)
+  (apply (intern (string fn) :jscl/js) args))
+
+(defun jscl/js::|intern| (symbol &optional (package *package*))
+       (intern symbol package))
