@@ -104,7 +104,7 @@
 
 (defun jscl/cl::get-output-stream-string (stream)
   (assert (eq (car (storage-vector-kind stream)) 'string-output-stream))
-  (copy-seq (storage-vector-underlying-vector)))
+  (copy-seq (storage-vector-underlying-vector stream)))
 
 (defmacro jscl/cl::with-output-to-string ((var) &body body)
   `(let ((,var (make-string-output-stream)))
