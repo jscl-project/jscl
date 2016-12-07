@@ -1737,64 +1737,65 @@ generate the code which performs the transformation on these variables."
 (defparameter *macroexpander-cache*
   (make-hash-table :test #'eq))
 
-(defun !macro-function (symbol)
+(defun !macro-function (symbol &optional (environment *environment*))
   (unless (function-name-p symbol)
     (error "`~S' is not a symbol." symbol))
   (when (and (listp symbol)
              (eq 'setf (first symbol)))
     (return-from !macro-function nil))
-#- (or ecl sbcl jscl)
-(warn "Your Implementation's quasiquote may not be handled properly.")
-#+ecl
+  #- (or ecl sbcl jscl)
+  (warn "Your Implementation's quasiquote may not be handled properly.")
+  #+ecl
   (when (eql symbol 'si:quasiquote)
-      (warn "ECL quasiquote is probably not handled properly yet")
+    (warn "ECL quasiquote is probably not handled properly yet")
     (return-from !macro-function
       (lambda (form) (ext::macroexpand-1 form))))
-#+sbcl
+  #+sbcl
   (when (eql symbol 'sb-int:quasiquote)
     (return-from !macro-function
-      (lambda (form)
+      (lambda (form environment)
+        (declare (ignore environment))
         (sb-impl::expand-quasiquote form nil))))
-  (let ((b (lookup-in-lexenv symbol *environment* 'function)))
+  (let ((b (lookup-in-lexenv symbol (or environment *global-environment*) 'function)))
     (if (and b (eq (binding-type b) 'macro))
         (let ((expander (binding-value b)))
           (cond
-                    #-jscl
+            #-jscl
             ((gethash b *macroexpander-cache*)
              (setq expander (gethash b *macroexpander-cache*)))
             ((listp expander)
-      (let ((compiled (eval expander)))
-        ;; The    list    representation   are    useful    while
-        ;; bootstrapping, as  we can  dump the definition  of the
-        ;; macros easily,  but they are  slow because we  have to
-        ;; evaluate them and compile them  now and again. So, let
-        ;; us  replace the  list  representation  version of  the
-        ;; function with the compiled one.
-        #+jscl (setf (binding-value b) compiled)
-        #-jscl (setf (gethash b *macroexpander-cache*) compiled)
+             (let ((compiled (eval expander)))
+               ;; The    list    representation   are    useful    while
+               ;; bootstrapping, as  we can  dump the definition  of the
+               ;; macros easily,  but they are  slow because we  have to
+               ;; evaluate them and compile them  now and again. So, let
+               ;; us  replace the  list  representation  version of  the
+               ;; function with the compiled one.
+               #+jscl (setf (binding-value b) compiled)
+               #-jscl (setf (gethash b *macroexpander-cache*) compiled)
                (setq expander compiled))))
           expander)
         nil)))
 
 
-(defun !macroexpand-1/symbol (symbol &optional env)
+(defun !macroexpand-1/symbol (symbol &optional (env *environment*))
   (let ((b (lookup-in-lexenv symbol (or env *global-environment*)
                              'variable)))
     (if (and b (eq (binding-type b) 'macro))
         (values (binding-value b) t)
         (values symbol nil))))
 
-(defun !macroexpand-1 (form &optional env)
+(defun !macroexpand-1 (form &optional (env *environment*))
   (let ((*environment* (or env *global-environment*)))
-  (cond
-    ((symbolp form)
-     (!macroexpand-1/symbol form env))
-    ((and (consp form) (symbolp (car form)))
-     (let ((macrofun (!macro-function (car form) env)))
-       (if macrofun
-           (values (funcall macrofun (cdr form) env) t)
-           (values form nil))))
-    (t
+    (cond
+      ((symbolp form)
+       (!macroexpand-1/symbol form env))
+      ((and (consp form) (symbolp (car form)))
+       (let ((macrofun (!macro-function (car form) env)))
+         (if macrofun
+             (values (funcall macrofun (cdr form) env) t)
+             (values form nil))))
+      (t
        (values form nil)))))
 
 #+jscl
