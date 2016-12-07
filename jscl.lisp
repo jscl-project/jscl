@@ -145,13 +145,13 @@ identifying them (and their provenance) easier."))
     ("defstruct"     :both)
     ("types"	:both)
     ("lambda-list"   :both)
-    ("numbers"       :target)
-    ("char"          :target)
-    ("list"          :target)
-    ("array"         :target)
-    ("string"        :target)
-    ("sequence"      :target)
-    ("stream"        :target)
+    ("numbers"       :both)
+    ("char"          :both)
+    ("list"          :both)
+    ("array"         :both)
+    ("string"        :both)
+    ("sequence"      :both)
+    ("stream"        :both)
     ("hash-table"    :target)
     ("print"         :target)
     ("misc"          :target)
@@ -228,7 +228,6 @@ compiled in the host.")
           (load input)
           (locally
               (declare #+sbcl (sb-ext:muffle-conditions
-
                                sb-kernel::function-redefinition-warning))
             (multiple-value-bind (fasl warn fail) (compile-file input)
               (declare (ignore warn))
@@ -248,7 +247,7 @@ compiled in the host.")
           ;; versions
           (declare #+sbcl (sb-ext:muffle-conditions
                            sb-kernel::function-redefinition-warning))
-        (map nil #'load (reverse fasls))))))
+        (mapc #'load (reverse fasls))))))
 
 
 (defmacro doforms ((var stream) &body body)
@@ -279,5 +278,5 @@ improve the level of trust of the tests."
     (load (source-pathname "tests.lisp" :directory nil))
     (let ((*use-html-output-p* nil))
       (declare (special *use-html-output-p*))
-      (map nil #'load (test-files)))
+      (mapc #'load (test-files)))
     (load "tests-report.lisp")))
