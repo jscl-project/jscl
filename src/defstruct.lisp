@@ -43,7 +43,10 @@
   (cdr (storage-vector-kind object)))
 
 (defun assert-struct-type (predicate type-name object)
-  (assert (functionp predicate) (predicate)
+  (assert (or (functionp predicate)
+              (and (symbolp predicate)
+                   (fboundp predicate)))
+          (predicate)
           "Predicate `~s' is not a function" predicate)
   (assert (symbolp type-name) (type-name)
           "`~s' is not a structure type name" type-name)
@@ -71,14 +74,14 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
   (storage-vector-set object index new-value))
 
 (defun defstruct/make-predicate (predicate name slot-count)
-   ;; The predicate function is used by slot accessors and the copier
-    ;; to check the type of their arguments, so it is actually
-    ;; required. If the user is not interested on it (:predicate nil),
-    ;; let's generate a name.
-    `(defun ,predicate (object)
-       (and (structure%-p object)
-            (eq (structure-type% object) ',name)
-            (= (storage-vector-size object) ,slot-count))))
+  ;; The predicate function is used by  slot accessors and the copier to
+  ;; check  the type  of their  arguments, so  it is  actually required.
+  ;; If  the  user is  not  interested  on  it (:predicate  nil),  let's
+  ;; generate a name.
+  `(defun ,predicate (object)
+     (and (structure%-p object)
+          (eq (structure-type% object) ',name)
+          (= (storage-vector-size object) ,slot-count))))
 
 
 ;;; Utilities used by DEFSTRUCT
@@ -110,62 +113,64 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
     `(defun ,copier (object)
        (copy-structure% ',name ',predicate object))))
 
-(defun defstruct/make-slot-reader (predicate struct-name-string
+(defun defstruct/make-slot-reader (predicate struct-name
                                    accessor-name index)
   `(progn
      (defun ,accessor-name (object)
-       (structure-slot-value-by-index% ,struct-name-string ',predicate
+       (structure-slot-value-by-index% ,struct-name ',predicate
                                        object ,index))
      #+jscl (declaim (jscl::pure ,accessor-name))))
 
-(defun defstruct/make-slot-writer (predicate struct-name-string
+(defun defstruct/make-slot-writer (predicate struct-name
                                    accessor-name index)
   `(defun (setf ,accessor-name) (new-value object)
-     (structure-setf-slot% ',predicate ,struct-name-string
+     (structure-setf-slot% ',predicate ,struct-name
                            ,index object new-value)))
 
 (defun defstruct/make-accessor-name (struct-name slot-name)
   (assert (or (stringp struct-name)
-              (symbolp struct-name)) (struct-name)
-              "Structure type name `~s' must be a string designator"
-              struct-name)
+              (symbolp struct-name))
+          (struct-name)
+          "Structure type name `~s' must be a string designator"
+          struct-name)
   (assert (or (stringp slot-name)
-              (symbolp slot-name)) (slot-name)
-              "Slot type name `~s' must be a string designator"
-              slot-name)
+              (symbolp slot-name))
+          (slot-name)
+          "Slot type name `~s' must be a string designator"
+          slot-name)
   (intern (concatenate 'string
                        (string struct-name)
                        "-"
                        (string slot-name))))
 
-(defun defstruct/make-slot-accessor (struct-name-string predicate
+(defun defstruct/make-slot-accessor (struct-name predicate
                                      slot index)
   (let* ((name (car slot))
          (accessor-name (defstruct/make-accessor-name
-                            struct-name-string name)))
+                            struct-name name)))
     (map 'list
          (lambda (f)
            (declare (type function f))
-           (funcall f predicate struct-name-string accessor-name index))
+           (funcall f predicate struct-name accessor-name index))
          (list #'defstruct/make-slot-reader
                #'defstruct/make-slot-writer))))
 
-(defun defstruct/make-slot-accessors (name-string predicate
+(defun defstruct/make-slot-accessors (name predicate
                                       slot-descriptions)
   (with-collect
     (let ((index 1))
       (dolist (slot slot-descriptions)
         (collect (cons
                   'progn
-                  (defstruct/make-slot-accessor name-string predicate
+                  (defstruct/make-slot-accessor name predicate
                     slot index)))
         (incf index)))))
 
 ;; Forward declaration of Make-Slot-Info. This is a circular dependency…
 (declaim (ftype (function
-           (&key (:class t) (:name t) (:accessors t) (:readers t) (:writers t)
-                 (:type t) (:initform t) (:initarg t) (:allocation t))
-           (values slot-info &optional))
+                 (&key (:class t) (:name t) (:accessors t) (:readers t) (:writers t)
+                       (:type t) (:initform t) (:initarg t) (:allocation t))
+                 (values slot-info &optional))
                 make-slot-info)
          (ftype (function (t) t) slot-info-p))
 
@@ -191,15 +196,15 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                     :supertypes (list 'structure-object)
                     :slots (mapcar (lambda (slot)
                                      (defstruct/make-slot-info type slot))
-                                   slots) 
+                                   slots)
                     :predicate predicate
                     :constructor constructor
                     :copier copier)
         *classes*))
 
 #-jscl
-(defun defstruct/define-type (type slots &key 
-                                           predicate 
+(defun defstruct/define-type (type slots &key
+                                           predicate
                                            print-function
                                            constructor
                                            copier)
@@ -229,17 +234,17 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
          (slot-descriptions (mapcar #'defstruct/parse-slot-description slots)))
     `(eval-when (:compile-toplevel :load-toplevel)
        (let ((*package* (find-package ,(package-name (symbol-package name)))))
-       ,(defstruct/make-constructor constructor name slot-descriptions)
-       ,(defstruct/make-predicate predicate name
-          (length slot-descriptions))
-       ,(defstruct/make-copier copier name predicate)
+         ,(defstruct/make-constructor constructor name slot-descriptions)
+         ,(defstruct/make-predicate predicate name
+            (length slot-descriptions))
+         ,(defstruct/make-copier copier name predicate)
          (deftype ,name () '(satisfies ,predicate))
          (defstruct/define-type ',name ',slot-descriptions
            :constructor ',constructor
            :copier ',copier
            :predicate ',predicate
            :print-function ',print-function)
-       ,@(defstruct/make-slot-accessors name-string predicate
+         ,@(defstruct/make-slot-accessors name predicate
              slot-descriptions))
        ',name)))
 
