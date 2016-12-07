@@ -41,10 +41,10 @@
 
 (defun test-fn (successp form)
   (async
-    (cond
+   (cond
      (successp
       (sync-incf *passed-tests*))
-      (t
+     (t
       (with-lock-held (*sync*)
         (push (list form :failed) *failed-tests-details*))
       (sync-incf *failed-tests*)))
@@ -52,10 +52,10 @@
 
 (defun expected-failure-fn (successp form)
   (async
-       (cond
+   (cond
      (successp
       (sync-incf *unexpected-passes*))
-         (t
+     (t
       (with-lock-held (*sync*)
         (push (list form :failed-expected) *failed-tests-details*))
       (sync-incf *expected-failures*)))

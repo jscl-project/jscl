@@ -264,7 +264,7 @@ to streams."
     ;; Functions
     (function
      (let ((name (#+jscl (jscl/ffi:oget form "fname")
-                         #-jscl (nth-value 2 (function-lambda-expression 
+                         #-jscl (nth-value 2 (function-lambda-expression
                                               form)))))
        (if name
            (simple-format stream "#<FUNCTION ~a>" name)
@@ -957,4 +957,3 @@ but wanted ~~~c in format string"
       (t
        (write-string output destination)
        nil))))
-

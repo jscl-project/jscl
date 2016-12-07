@@ -122,22 +122,22 @@ in the COMMON-LISP package.
  )))
 
  (format t "~%Finished. The execution took ~a seconds.~%"
-         (/ (- (get-internal-real-time) *timestamp*) internal-time-units-per-second 1.0))
+ (/ (- (get-internal-real-time) *timestamp*) internal-time-units-per-second 1.0))
 
  (if (= *passed-tests* *total-tests*)
-     (format t "All the tests (~a) passed successfully.~%" *total-tests*)
-    (format t "~a/~a test(s) passed successfully.~%     (~d% of expected success)~%"
-            *passed-tests* *total-tests*
-            (floor (* 100 (/ *passed-tests*
-                             (- *total-tests*
-                                *expected-failures*
-                                *unexpected-passes*))))))
+ (format t "All the tests (~a) passed successfully.~%" *total-tests*)
+ (format t "~a/~a test(s) passed successfully.~%     (~d% of expected success)~%"
+ *passed-tests* *total-tests*
+ (floor (* 100 (/ *passed-tests*
+ (- *total-tests*
+ *expected-failures*
+ *unexpected-passes*))))))
 
  (unless (zerop *expected-failures*)
-   (format t "~a test(s) failed expectedly.~%" *expected-failures*))
+ (format t "~a test(s) failed expectedly.~%" *expected-failures*))
 
  (unless (zerop *unexpected-passes*)
-   (format t "~a test(s) passed unexpectedly.~%" *unexpected-passes*))
+ (format t "~a test(s) passed unexpectedly.~%" *unexpected-passes*))
 
 (let (unbound)
   (dolist (package '( #-sbcl :cl :jscl/ffi :jscl/xhr))
@@ -166,11 +166,11 @@ in the COMMON-LISP package.
           (format t "~% • ~s" failure)))))
   (format t "~%~%"))
 
- (terpri)
+(terpri)
 
- #+jscl
+#+jscl
 (progn
- (when #j:phantom
-   (#j:phantom:exit *failed-tests*))
+  (when #j:phantom
+    (#j:phantom:exit *failed-tests*))
   (when #j:process
-  (#j:process:exit *failed-tests*)))
+    (#j:process:exit *failed-tests*)))

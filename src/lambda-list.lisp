@@ -222,8 +222,8 @@
 
 ;;; Validate a list of keyword arguments.
 (defun validate-keyvars (list keyword-list &optional allow-other-keys)
-  (let   (;;  If it  is non-NIL,  we have to  check for  unknown keyword
-          ;; arguments in the list to signal an error in that case.
+  (let   (;;   If it is  non-NIL, we have  to check for  unknown keyword
+          ;;  arguments in the list to signal an error in that case.
           (allow-other-keys
            (or allow-other-keys (keyword-lookup :allow-other-keys list))))
     (unless allow-other-keys

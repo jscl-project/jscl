@@ -264,9 +264,9 @@ specifier for the condition types that have been muffled.
          (lambda ,args (block ,name ,@body))))
 
 (define-compilation if (condition true &optional false)
-  `(if (!== ,(convert condition) ,(convert nil))
-       ,(convert true *multiple-value-p*)
-       ,(convert false *multiple-value-p*)))
+  `(jscl/js::if (jscl/js::!== ,(convert condition) ,(convert nil))
+                ,(convert true *multiple-value-p*)
+                ,(convert false *multiple-value-p*)))
 
 (defvar *ll-keywords* '(&optional &rest &key))
 
@@ -456,7 +456,7 @@ specifier for the condition types that have been muffled.
                                     (destructuring-bind ((keyword-name var) &optional initform svar)
                                         keyword-argument
                                       (declare (ignore var initform svar))
-                                      `(!== (arg i) ,(convert keyword-name))))
+                                      `(jscl/js::!== (arg i) ,(convert keyword-name))))
                                   keyword-arguments))
                    (throw (+ "Unknown keyword argument " (jscl/js::property (arg i) "name"))))))))))
 
@@ -742,10 +742,10 @@ association list ALIST in the same order."
   (literal sexp))
 
 (define-compilation %while (pred &rest body)
-  `(selfcall
-    (while (!== ,(convert pred) ,(convert nil))
+  `(jscl/js::selfcall
+    (jscl/js::while (jscl/js::!== ,(convert pred) ,(convert nil))
       ,(convert-block body))
-    (return ,(convert nil))))
+    (jscl/js::return ,(convert nil))))
 
 (defun function-namestring (name)
   (cond
@@ -1199,9 +1199,6 @@ let-binding-wrapper."
 
 (defun jscl/cl::special-operator-p (name)
   (nth-value 1 (gethash name *builtins*)))
-#+jscl
-(fset 'special-operator-p #'!special-operator-p)
-
 
 (defmacro define-raw-builtin (name args &body body)
   " Creates  a new  primitive function `name'  with parameters  args and
@@ -1217,14 +1214,19 @@ let-binding-wrapper."
        ,@body)))
 
 (defun variable-arity/check-numeric-arg (v x function args)
-  `(if (!= (typeof ,v) "number")
-       (throw (new (jscl/js::call|Error| (+ "" (typeof ,v)
-                                            " is not a number: " ,v " "
-                                            ,(princ-to-string (convert x)) " in "
-                                            ,(princ-to-string function)
-                                            ,@(mapcar (lambda (s)
-                                                        (concatenate 'string " "
-                                                                     (princ-to-string s))) args)))))))
+  `(jscl/js::if (jscl/js::!= (jscl/js::typeof ,v) "number")
+                (jscl/js::throw
+                    (jscl/js::new
+                     (jscl/js::call
+                      |Error|
+                      (+ "" (jscl/js::typeof ,v)
+                         " is not a number: " ,v " "
+                         ,(princ-to-string (convert x)) " in "
+                         ,(princ-to-string function)
+                         ,@(mapcar (lambda (s)
+                                     (concatenate 'string " "
+                                                  (princ-to-string s)))
+                                   args)))))))
 
 (defun variable-arity-call (args function)
   "VARIABLE-ARITY-CALL  compiles variable  arity  operations on  numeric
@@ -1390,13 +1392,13 @@ generate the code which performs the transformation on these variables."
   (setf (macro-function target) (macro-function source)))
 
 (define-builtin boundp (x)
-  (convert-to-bool `(!== (jscl/js::get ,x "value") undefined)))
+  (convert-to-bool `(jscl/js::!== (jscl/js::get ,x "value") undefined)))
 
 (define-builtin fboundp (x)             ; FIXME: unboundFunction
-  (convert-to-bool `(!== (jscl/js::get ,x "fvalue") undefined)))
+  (convert-to-bool `(jscl/js::!== (jscl/js::get ,x "fvalue") undefined)))
 
 (define-builtin %fboundp-setf (x)       ; FIXME: unboundSetFFunction
-  (convert-to-bool `(!== (jscl/js::get ,x "setfValue") undefined)))
+  (convert-to-bool `(jscl/js::!== (jscl/js::get ,x "setfValue") undefined)))
 
 (define-builtin symbol-value (x)
   `(jscl/js::call-internal |symbolValue| ,x))
@@ -1483,15 +1485,15 @@ generate the code which performs the transformation on these variables."
                                 (cons (if *multiple-value-p* '|values| '(internal |pv|))
                                       (mapcar #'convert args)))))
           (jscl/js::var (tail ,(convert last)))
-          (while (!= tail ,(convert nil))
+          (jscl/js::while (jscl/js::!= tail ,(convert nil))
             (jscl/js::method-call args "push" (jscl/js::get tail "car"))
             (jscl/js::= tail (jscl/js::get tail "cdr")))
-          (return (jscl/js::method-call (if (jscl/js::=== (typeof f) "function")
-                                            f
-                                            (jscl/js::get f "fvalue"))
-                                        "apply"
-                                        this
-                                        args))))))
+          (jscl/js::return (jscl/js::method-call (if (jscl/js::=== (typeof f) "function")
+                                                     f
+                                                     (jscl/js::get f "fvalue"))
+                                                 "apply"
+                                                 this
+                                                 args))))))
 
 (define-builtin js-eval (string)
   (if *multiple-value-p*
@@ -1789,17 +1791,11 @@ generate the code which performs the transformation on these variables."
       (t
        (values form nil)))))
 
-#+jscl
-(fset 'macroexpand-1 #'!macroexpand-1)
-
 (defun jscl/cl::macroexpand (form &optional env)
   (let ((continue t))
     (while continue
       (multiple-value-setq (form continue) (jscl/cl::macroexpand-1 form env))))
   form)
-
-#+jscl
-(fset 'macroexpand #'!macroexpand)
 
 (defun compile-funcall/function (function arglist)
   (when (and (symbolp function)
@@ -1876,8 +1872,6 @@ generate the code which performs the transformation on these variables."
            (return ,(convert (car (last sexps)) *multiple-value-p*)))
         `(progn ,@(mapcar #'convert sexps)))))
 
-#+jscl (defun macroexpand-1 (form) (!macroexpand-1 form))
-
 (defun inline-builtin-p (name)
   (and (gethash name *builtins*)
        (not (claimp name 'function 'notinline))))
@@ -1893,15 +1887,16 @@ generate the code which performs the transformation on these variables."
   (apply (gethash name *builtins*) args))
 
 #+jscl
-(declaim (jscl::pure (+ - / * mod sqrt expt log
-                        round floor
-                        elt nth aref
-                        first rest last lastcar
-                        car cdr
-                        caar cadr cdar cddr
-                        caaar caadr cadar caddr cdaar cdadr cddar cdddr
-                        logand logior logxor
-                        and or xor not)))
+(dolist (fn (+ - / * mod sqrt expt log
+               round floor
+               elt nth aref
+               first rest last lastcar
+               car cdr
+               caar cadr cdar cddr
+               caaar caadr cadar caddr cdaar cdadr cddar cdddr
+               logand logior logxor
+               and or xor not))
+  (proclaim (list 'jscl::pure fn)))
 
 (defun compile-sexp (sexp)
   (let ((name (car sexp))
@@ -1971,7 +1966,7 @@ generate the code which performs the transformation on these variables."
    "Failed to macroexpand ~s ~% in ~s~2%~a"
    (car sexp) sexp
    (format nil
-           "No macro-function ~s (nor ~:*!~s) is defined in JSCL"
+           "No macro-function ~s is defined in JSCL"
            (car sexp))))
 
 (defun check-for-failed-macroexpansion (sexp)
@@ -1983,6 +1978,8 @@ means either that  we have a compile-time dependency  ordering issue, or
 just haven't gotten  around to defining that macro at  all, yet. It also
 jumps out and  shouts when macro-expansion is  broken completely, rather
 than baffling errors because of macro-forms being treated as functions.
+
+FIXME redocument with !
 
 Notably,  a  macro defined  as  !NAME  will be  used  for  NAME to  make
 cross-compilation less  sticky about symbol  names in the  JSCL package.
@@ -2141,7 +2138,18 @@ the value."
          (*gensym-counter* 0)
          (*literal-counter* 0))
      (with-sharp-j
-       ,@body)))
+       (unwind-protect
+            (progn
+              (rename-package (find-package "JSCL/HOSTED")
+                              "JSCL/HOSTED*")
+              (rename-package (find-package "JSCL/XC") "JSCL")
+              ,@body)
+         (ignore-errors
+           (rename-package (find-package "JSCL/HOSTED")
+                           "JSCL"))
+         (ignore-errors
+           (rename-package (find-package "JSCL/XC")
+                           "JSCL/INTERMEDIATE-CROSS-COMPILATION"))))))
 
 
 (defmacro !with-compilation-unit (options &body body)

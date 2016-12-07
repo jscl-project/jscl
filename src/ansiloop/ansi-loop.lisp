@@ -39,9 +39,9 @@
 ;; Symbolics, CLOE Runtime, and Minima are trademarks, and CLOE, Genera,
 ;; and Zetalisp are registered trademarks of Symbolics, Inc.
 ;;
-;;      Symbolics, Inc.  
-;;;     8 New England Executive  Park, 
-;;      East Burlington, Massachusetts 01803 
+;;      Symbolics, Inc.
+;;;     8 New England Executive Park,
+;;      East Burlington, Massachusetts 01803
 ;;;     United States of America
 ;;      +1-617-221-1000
 
@@ -195,7 +195,7 @@
 (defmacro loop-collect-rplacd ((head-var tail-var &optional user-head-var)
                                                             form
                                &environment env)
-  (setq form (#+jscl jscl::!macroexpand
+  (setq form (#+jscl jscl/cl::macroexpand
                      #-jscl macroexpand form env))
   (flet ((cdr-wrap (form n)
            (declare (fixnum n))
@@ -281,7 +281,7 @@ constructed. |#
 
 (defun make-loop-minimax (answer-variable type)
   (let ((infinity-data
-         (cdr (assoc type *loop-minimax-type-infinities-alist* 
+         (cdr (assoc type *loop-minimax-type-infinities-alist*
                      :test #'subtypep))))
     (make-loop-minimax-internal
      :answer-variable answer-variable
@@ -466,7 +466,7 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
                                       (or (not (eq (car x) 'car))
                                           (not (symbolp (cadr x)))
                                           (not (symbolp (setq x (#-jscl macroexpand
-                                                                        #+jscl jscl::!macroexpand x env)))))
+                                                                        #+jscl jscl/cl::macroexpand x env)))))
                                       (cons x nil)))
                                (cdr val))
                        `(,val))))
@@ -475,24 +475,24 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
                         (cdr (cdr var))
                         (car-non-null (find-non-null car))
                         (cdr-non-null (find-non-null cdr)))
-                   (cond 
+                   (cond
                      (cdr-non-null
-                         (let* ((temp-p temp)
-                                (temp (or temp *loop-desetq-temporary*))
-                                (body  `(,@(loop-desetq-internal
-                                              car
-                                                `(prog1 (car ,temp)
-                                                   (setq ,temp (cdr ,temp))))
-                                           ,@(loop-desetq-internal cdr temp temp))))
-                           (if temp-p
-                               `(,@(unless (eq temp val)
-                                     `((setq ,temp ,val)))
-                                   ,@body)
-                               `((let ((,temp ,val))
+                      (let* ((temp-p temp)
+                             (temp (or temp *loop-desetq-temporary*))
+                             (body  `(,@(loop-desetq-internal
+                                           car
+                                             `(prog1 (car ,temp)
+                                                (setq ,temp (cdr ,temp))))
+                                        ,@(loop-desetq-internal cdr temp temp))))
+                        (if temp-p
+                            `(,@(unless (eq temp val)
+                                  `((setq ,temp ,val)))
+                                ,@body)
+                            `((let ((,temp ,val))
                                 ,@body)))))
                      (car-non-null
-                         ;; no cdring to do
-                         (loop-desetq-internal car `(car ,val) temp)))))
+                      ;; no cdring to do
+                      (loop-desetq-internal car `(car ,val) temp)))))
                 (otherwise
                  (unless (eq var val)
                    `((setq ,var ,val)))))))
@@ -722,7 +722,7 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
                    (when (eq rbefore (cdr bb)) (return)))
                  (return))))))))
 
-;;;; 
+;;;;
 (defun duplicatable-code-p (expr env)
   (if (null expr) 0
       (let ((ans (estimate-code-size expr env)))
@@ -773,7 +773,7 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
     (cond ((constantp x env) 1)
           ((symbolp x) (multiple-value-bind (new-form expanded-p)
                            (#-jscl macroexpand-1
-                                   #+jscl jscl::!macroexpand-1 x env)
+                                   #+jscl jscl/cl::macroexpand-1 x env)
                          (if expanded-p (estimate-code-size-1 new-form env) 1)))
           ((atom x) 1)                  ;??? self-evaluating???
           ((symbolp (car x))
@@ -811,7 +811,7 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
                      ((eq fn 'return-from) (1+ (estimate-code-size-1 (third x) env)))
                      ((or (special-operator-p fn) (member fn *estimate-code-size-punt*))
                       (throw 'estimate-code-size nil))
-                     (t (multiple-value-bind (new-form expanded-p) (jscl::!macroexpand-1 x env)
+                     (t (multiple-value-bind (new-form expanded-p) (jscl/cl::macroexpand-1 x env)
                           (if expanded-p
                               (estimate-code-size-1 new-form env)
                               (f 3))))))))
@@ -852,7 +852,7 @@ collected result will be returned as the value of the LOOP."
   '(go end-loop))
 
 
-;;;; 
+;;;;
 (defun loop-translate (loop-source-code loop-macro-environment loop-universe)
   ;; FIXME: Originally, these variables were bound in the arguments
   ;; directly, but as the time of writing, JSCL does not support
@@ -932,7 +932,7 @@ collected result will be returned as the value of the LOOP."
                       (loop-error "Secondary clause misplaced at top level in LOOP macro: ~S ~S ~S ..."
                          keyword (car *loop-source-code*) (cadr *loop-source-code*)))
                      (t (loop-error "~S is an unknown keyword in LOOP macro." keyword))))))))
-;;;; 
+;;;;
 (defun loop-pop-source ()
   (if *loop-source-code*
       (pop *loop-source-code*)
@@ -1198,12 +1198,12 @@ collected result will be returned as the value of the LOOP."
             (t (unless (eq (loop-collector-class cruft) class)
                  (loop-error
                     "Incompatible kinds of LOOP value accumulation specified for collecting~@
-		    ~:[as the value of the LOOP~;~:*INTO ~S~]: ~S and ~S."
+ ~:[as the value of the LOOP~;~:*INTO ~S~]: ~S and ~S."
                     name (car (loop-collector-history cruft)) collector))
                (unless (equal dtype (loop-collector-dtype cruft))
                  (loop-warn
                     "Unequal datatypes specified in different LOOP value accumulations~@
-		   into ~S: ~S and ~S."
+ into ~S: ~S and ~S."
                     name dtype (loop-collector-dtype cruft))
                  (when (eq (loop-collector-dtype cruft) t)
                    (setf (loop-collector-dtype cruft) dtype)))
@@ -1529,9 +1529,9 @@ collected result will be returned as the value of the LOOP."
 ;;;; Iteration Paths
 
 (defstruct (loop-path
-                     (:copier nil)
-                     (:predicate nil))
-    names
+              (:copier nil)
+              (:predicate nil))
+  names
   preposition-groups
   inclusive-permitted
   function
@@ -1610,7 +1610,7 @@ collected result will be returned as the value of the LOOP."
           (t (setq *loop-named-variables* (delete tem *loop-named-variables*))
              (values (cdr tem) t)))))
 
-(defun loop-collect-prepositional-phrases (preposition-groups 
+(defun loop-collect-prepositional-phrases (preposition-groups
                                            &optional USING-allowed initial-phrases)
   (flet ((in-group-p (x group) (car (loop-tmember x group))))
     (do ((token nil)
@@ -1771,7 +1771,7 @@ collected result will be returned as the value of the LOOP."
 (defun loop-sequence-elements-path (variable data-type prep-phrases
                                     &key fetch-function size-function sequence-type element-type)
   (multiple-value-bind (indexv indexv-user-specified-p) (named-variable 'index)
-    (let ((sequencev (named-variable 'sequence))) 
+    (let ((sequencev (named-variable 'sequence)))
       (list* nil nil                    ; dummy bindings and prologue
              (loop-sequencer
                 indexv 'fixnum indexv-user-specified-p
@@ -1957,7 +1957,7 @@ collected result will be returned as the value of the LOOP."
      jscl::*environment* *loop-ansi-universe*))
 
 #+jscl
-(progn 
+(progn
   (defmacro loop (&rest keywords-and-forms)
     `(jscl/loop::!loop ,@keywords-and-forms))
   (defmacro loop-finish ()

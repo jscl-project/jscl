@@ -81,7 +81,7 @@ forms if PRINT is set."
       (format out "~&/** @preserve
  *  ⸨☕λ⸩ Compiled by 𝓙𝓢ℂ𝕃
  * ~@[(Romance Ⅱ fork) ~]version ~a, Git commit ~a
- * Source file: ~a */" 
+ * Source file: ~a */"
               (violet-volts-p) *version*
               (git-commit) filename)
       (when print
@@ -167,7 +167,7 @@ permissions on FILENAME, if we  know how in the current implementation."
        (sb-ext:process-output
         (sb-ext:run-program "/usr/bin/git" '("rev-parse" "HEAD")
                             :wait t
-                            :output :stream))) 
+                            :output :stream)))
       "(unknown)"))
 
 (defun violet-volts-p ()
@@ -197,15 +197,15 @@ permissions on FILENAME, if we  know how in the current implementation."
     (file-set-execute-permission output)))
 
 (defun test-files ()
-  (append 
-   (directory (source-pathname "*" 
-                              :directory '(:relative "tests")
+  (append
+   (directory (source-pathname "*"
+                               :directory '(:relative "tests")
                                :type "lisp"))
    (list (source-pathname "validate.lisp"
                           :directory '(:relative "tests" "loop")
                           :type "lisp")
-         (source-pathname "base-tests.lisp" 
-                          :directory '(:relative "tests" "loop") 
+         (source-pathname "base-tests.lisp"
+                          :directory '(:relative "tests" "loop")
                           :type "lisp"))))
 
 (defun compile-test-suite ()

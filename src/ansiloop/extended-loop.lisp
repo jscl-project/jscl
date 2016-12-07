@@ -64,10 +64,10 @@
 
 #-Symbolics
 (export '(symbolics-loop::loop
-		   symbolics-loop::loop-finish
-		   symbolics-loop::define-loop-iteration-path
+          symbolics-loop::loop-finish
+          symbolics-loop::define-loop-iteration-path
           symbolics-loop::define-loop-sequence-path)
-	(find-package 'symbolics-loop))
+        (find-package 'symbolics-loop))
 
 
 ;;;This is our  typical "extensible" universe, which should  be a proper
@@ -78,16 +78,16 @@
 ;;;
 
 (defmacro symbolics-loop:define-loop-iteration-path (path-name function
-						     &key alternate-names preposition-groups
-						     inclusive-permitted user-data (loop-universe '*loop-default-universe*))
+                                                     &key alternate-names preposition-groups
+                                                          inclusive-permitted user-data (loop-universe '*loop-default-universe*))
   `(eval-when (eval compile load)
      (add-loop-path '(,path-name ,@alternate-names) ,function ,loop-universe
-		    :preposition-groups ',preposition-groups
-		    :inclusive-permitted ',inclusive-permitted
-		    :user-data ',user-data)))
+                    :preposition-groups ',preposition-groups
+                    :inclusive-permitted ',inclusive-permitted
+                    :user-data ',user-data)))
 
 (defmacro symbolics-loop:define-loop-sequence-path (path-name-or-names fetch-function size-function
-						    &optional sequence-type element-type)
+                                                    &optional sequence-type element-type)
   "Defines a sequence iteration path.  PATH-NAME-OR-NAMES is either an
 atomic path name or a list of  path names. FETCHFUN is a function of two
 arguments,  the sequence  and  the  index of  the  item  to be  fetched.
@@ -98,14 +98,14 @@ and  ELEMENT-TYPE is  the  name  of the  data-type  of  the elements  of
 the sequence."
   `(eval-when (eval compile load)
      (add-loop-path ',path-name-or-names 'loop-sequence-elements-path *loop-default-universe*
-		    :preposition-groups '((:of :in) (:from :downfrom :upfrom) (:to :downto :below :above) (:by))
-		    :inclusive-permitted nil
-		    :user-data '(:fetch-function ,fetch-function
-				 :size-function ,size-function
-				 :sequence-type ,sequence-type
-				 :element-type ,element-type))))
+                    :preposition-groups '((:of :in) (:from :downfrom :upfrom) (:to :downto :below :above) (:by))
+                    :inclusive-permitted nil
+                    :user-data '(:fetch-function ,fetch-function
+                                 :size-function ,size-function
+                                 :sequence-type ,sequence-type
+                                 :element-type ,element-type))))
 
 (defmacro symbolics-loop:loop (&environment env &rest keywords-and-forms)
   #+Genera (declare (compiler:do-not-record-macroexpansions)
-		    (zwei:indentation . zwei:indent-loop))
+                    (zwei:indentation . zwei:indent-loop))
   (loop-standard-expansion keywords-and-forms env *loop-default-universe*))

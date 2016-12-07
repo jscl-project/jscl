@@ -77,7 +77,7 @@ accumulated, in the order."
       ""
       (concat (car list) separator (join-trailing (cdr list) separator))))
 
-(defun jscl/cl::mapconcat (func list)
+(defun mapconcat (func list)
   (join (mapcar func list)))
 
 (defun vector-to-list (vector)

@@ -51,9 +51,10 @@ and MOP into JSCL USE list"))
   (:export #:bootstrap #:bootstrap-core
            #:run-tests-in-host #:with-sharp-j #:read-#j
            #:write-javascript-for-files #:compile-application)
+  (:nicknames :jscl/hosted)
   (:documentation "JavaScript  from Common  Lisp. This  package contains
-  the   internals   and   exports    some   utility   functions   needed
-  for compilation.
+ the   internals   and   exports    some   utility   functions   needed
+ for compilation.
 
 When  you  build JSCL,  you'll  invoke  JSCL:Boostrap-Core in  the  host
 compiler (probably SBCL) to build the  system. Once you're “in” the JSCL
@@ -64,7 +65,7 @@ implementation, you may never need to access this package directly."))
   (:export #:oget #:oget* #:make-new #:new #:*root*
            #:oset #:oset*)
   (:documentation       "Foreign       Function       Interface       to
-  JavaScript functions."))
+ JavaScript functions."))
 
 (defpackage :jscl/cltl2
   (:use :cl :jscl)
@@ -82,7 +83,7 @@ identifying them (and their provenance) easier."))
   #+jscl (:nicknames :mop)
   (:export)
   (:documentation  "Functions  defined in  the  Art  of the  Meta-Object
-  Protocol (MOP) which are unique to that manuscript.
+ Protocol (MOP) which are unique to that manuscript.
 
 Very  few of  these are  implemented, but  this package  exists to  make
 identifying them (and their provenance) easier."))
@@ -110,14 +111,14 @@ identifying them (and their provenance) easier."))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun extract-version-from-package.json ()
-  (with-open-file (in (merge-pathnames "package.json" *base-directory*))
-    (loop
-       for line = (read-line in nil)
-       while line
-       when (search "\"version\":" line)
-       do (let ((colon (position #\: line))
-                (comma (position #\, line)))
-            (return (string-trim '(#\newline #\" #\tab #\space)
+    (with-open-file (in (merge-pathnames "package.json" *base-directory*))
+      (loop
+         for line = (read-line in nil)
+         while line
+         when (search "\"version\":" line)
+         do (let ((colon (position #\: line))
+                  (comma (position #\, line)))
+              (return (string-trim '(#\newline #\" #\tab #\space)
                                    (subseq line (1+ colon) comma))))))))
 
 (defvar *version*
@@ -136,9 +137,9 @@ identifying them (and their provenance) easier."))
       seq)))
 
 (defparameter *source*
-  '(("boot"          :both)
+  '(("compat"        :host)
+    ("boot"          :both)
     ("early-char" 	:both)
-    ("compat"        :both)
     ("setf"          :both)
     ("utils"         :both)
     ("defstruct"     :both)
@@ -280,4 +281,3 @@ improve the level of trust of the tests."
       (declare (special *use-html-output-p*))
       (map nil #'load (test-files)))
     (load "tests-report.lisp")))
-

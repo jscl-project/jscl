@@ -42,8 +42,8 @@
 
 (defvar jscl/ffi:*root* (make-hash-table :test 'equal)
   "The *ROOT* object is “window” (in a browser) or the Node root object.
-  This provides access to whichever root  object happens to exist in the
-  active JavaScript Virtual Machine.")
+ This provides access to whichever root  object happens to exist in the
+ active JavaScript Virtual Machine.")
 
 (defun jscl/ffi:make-new (class &rest ctor-args)
   "Create a new  instance of CLASS with the  JavaScript special operator
@@ -281,17 +281,15 @@ metadata in it."
   (apply 'values (map 'list 'identity array)))
 
 
-(defun jscl/js::call-internal (fn &rest args)
-  (apply (intern (concatenate 'string (string :INTERNALS.) 
-                              (substitute #\- #\_
-                                          (string-upcase fn)))
-                 :jscl/js)
-         args))
+(defmacro jscl/js::call-internal (fn &rest args)
+  `(,(intern (concatenate 'string (string :INTERNALS.)
+                          (substitute #\- #\_
+                                      (string-upcase fn)))
+             :jscl/js)
+     ,@args))
 
 (unless (jscl/ffi:oget jscl/ffi:*root* "packages")
   (setf (jscl/ffi:oget jscl/ffi:*root* "packages") (jscl/ffi:make-new '|Object|)))
-
-(defvar jscl/ffi::undefined '#:undefined)
 
 (defvar jscl/ffi::unbound-function
   (lambda (&rest _) (declare (ignore _))
@@ -305,10 +303,10 @@ metadata in it."
   (let ((this (jscl/ffi:make-new '|Symbol|)))
     (setf (jscl/ffi:oget this "name") name
           (jscl/ffi:oget this "package") package-name
-          (jscl/ffi:oget this "value") jscl/ffi::undefined
-          (jscl/ffi:oget this "fvalue") jscl/ffi::unbound-function 
+          (jscl/ffi:oget this "value") 'jscl/ffi::undefined
+          (jscl/ffi:oget this "fvalue") jscl/ffi::unbound-function
           (jscl/ffi:oget this "setfValue") jscl/ffi::unbound-setf-function
-          (jscl/ffi:oget this "typeName") jscl/ffi::undefined)))
+          (jscl/ffi:oget this "typeName") 'jscl/ffi::undefined)))
 
 (defun jscl/js::internals.intern (name &optional package-name)
   (let* ((package-name (or package-name "JSCL"))
@@ -323,7 +321,7 @@ metadata in it."
                      (setf (jscl/ffi:oget* jscl/ffi:*root*
                                            lisp-package
                                            "symbols"
-                                           name) 
+                                           name)
                            (jscl/js::internals.symbol name lisp-package)))))
     (when (eq lisp-package (jscl/ffi:oget* jscl/ffi:*root*
                                            "packages"
@@ -335,6 +333,37 @@ metadata in it."
 (defun jscl/js::call (object key &rest args)
   (apply (jscl/ffi:oget object key) args))
 
-(defun jscl/js::get (object key)
-  (jscl/ffi:oget object key))
+(defmacro jscl/js::get (object key)
+  `(jscl/ffi:oget ,object ,key))
 
+(defvar jscl/js::*locals* (make-hash-table :test 'equal))
+
+(defun jscl/js::var (symbol value)
+  (assert (eql :undef
+               (gethash symbol jscl/js::*locals* :undef)))
+  (setf (gethash symbol jscl/js::*locals*) value))
+
+(defun jscl/js::function (name lambda-list &rest body)
+  (if (symbolp name)
+      (setf (jscl/ffi:oget jscl/js::*locals* name)
+            (jscl/js::function lambda-list body))
+      (let ((lambda-list name)
+            (body (cons lambda-list body)))
+        (compile `(lambda (&rest |arguments|)
+                    (destructuring-bind ,lambda-list |arguments|
+                      ,@body))))))
+
+(defun jscl/js::= (var value)
+  (setf var value))
+
+(defun jscl/js::== (a b)
+  (equal a b))
+
+(defun jscl/js::=== (a b)
+  (eq a b))
+
+(defun jscl/js::! (x) (and (not (null x))
+                           (not (eq x 'jscl/ffi::undefined))
+                           (not (eq x 'jscl/ffi::false))))
+
+(defun jscl/js::internals.make-lisp-string (s) s)

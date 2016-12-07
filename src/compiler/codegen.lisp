@@ -65,8 +65,8 @@
 ;;;
 ;;; The same function would suffice  for both, but for javascript string
 ;;; literals it is  neater to use either depending on  the context, e.g:
-;;; foo's  → "foo's"  "foo" → '"foo"' which  avoids having  to escape
-;;; quotes where possible
+;;; foo's → "foo's" "foo" → '"foo"' which avoids having to escape quotes
+;;; where possible
 (defun js-escape-string (string)
   (let ((size (length string)))
     (flet ((%js-escape-string (string escape-single-quote-p)
@@ -156,8 +156,8 @@ used as identifiers; for example, “package” and “if”"
 
 ;;; Expression generators
 ;;;
-;;; `js-expr'  and   the  following   auxiliary  functions  are   the  responsible   for  generating
-;;; Javascript expression.
+;;; `js-expr' and the following  auxiliary functions are the responsible
+;;; for generating Javascript expression.
 
 (defun js-identifier (string-designator)
   (multiple-value-bind (string valid)
@@ -361,9 +361,9 @@ unnecessary parentheses."
            (unary-op post--      "--"            2    right :lvalue t :post t)
            (unary-op not         "!"             2    right)
            (unary-op bit-not     "~"             2    right)
-           ;; Note that the leading space is necessary because it
-           ;; could break with post++, for example. TODO: Avoid
-           ;; leading space when it's possible.
+           ;; Note that the leading space  is necessary because it could
+           ;; break with post++, for  example. TODO: Avoid leading space
+           ;; when it's possible.
            (unary-op unary+      " +"            2    right)
            (unary-op unary-      " -"            2    right)
            (unary-op delete      "delete "       2    right)
@@ -443,8 +443,8 @@ unnecessary parentheses."
 
 ;;; Statements generators
 ;;;
-;;; `js-stmt' generates code for Javascript statements. A form is
-;;; provided to label statements. Remember that in particular,
+;;; `js-stmt'  generates  code  for  Javascript statements.  A  form  is
+;;; provided  to   label  statements.   Remember  that   in  particular,
 ;;; expressions can be used as statements (semicolon suffixed).
 (defun js-expand-stmt (form)
   (cond

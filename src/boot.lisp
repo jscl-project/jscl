@@ -21,21 +21,24 @@
 ;;; Lisp  world from  scratch. This  code has  to define  enough of  the
 ;;; language for the compiler to be able to run.
 
-(in-package :jscl) ;#-jscl-xc #.(error "Do not load this file in the host compiler")
+;;; Package definitions for within the environment.
+
+(if (not (find-package :common-lisp))
+    (make-package "COMMON-LISP" :nicknames (list "CL")))
+
+(if (not (find-package :keyword))
+    (make-package "KEYWORD"))
+
+(if (not (find-package :common-lisp-user))
+    (make-package "COMMON-LISP-USER"
+                  :use :common-lisp
+                  :nicknames (list "CL-USER")))
+
+(in-package :jscl)
 
 (/debug "loading boot.lisp!")
 
 
-;;; Package definitions for within the environment.
-
-#+jscl
-(defpackage :common-lisp
-  (:nicknames :cl)) ; exports handled by toplevel.lisp
-
-#+jscl
-(defpackage :common-lisp-user
-  (:use :common-lisp)
-  (:nicknames :cl-user))
 
 #+ (or)
 (defpackage :jscl
@@ -52,34 +55,36 @@
 
 ;;; DEFMACRO
 (eval-when (:compile-toplevel)
-  (let ((defmacro-macroexpander
-         '#'(lambda (form environment)
-              (destructuring-bind (name args &body body)
-                  form
-                (warn "Compiling a macro-expander for ~s" name)
-                (let* ((body (parse-body body :declarations t :docstring t))
-                       (ll (parse-destructuring-lambda-list args))
-                       (whole (or (lambda-list-wholevar ll)
-                                  (gensym "WHOLE-")))
-                       (environment (or (lambda-list-environment ll)
-                                        (gensym "ENVIRONMENT-")))
-                       (expander `(function
-                                   (lambda (,whole ,environment)
-                                    (let ((*environment* ,environment))
-                                      (block ,name
-                                        (destructuring-bind ,args ,whole
-                                          ,@body)))))))
+  (unless (macro-function 'defmacro)
+    (let ((defmacro-macroexpander
+           '#'(lambda (form environment)
+                (destructuring-bind (name args &body body)
+                    form
+                  (warn "Compiling a macro-expander for ~s" name)
+                  (let* ((body (parse-body body :declarations t :docstring t))
+                         (ll (parse-destructuring-lambda-list args))
+                         (whole (or (lambda-list-wholevar ll)
+                                    (gensym "WHOLE-")))
+                         (environment (or (lambda-list-environment ll)
+                                          (gensym "ENVIRONMENT-")))
+                         (expander `(function
+                                     (lambda (,whole ,environment)
+                                      (let ((*environment* ,environment))
+                                        (block ,name
+                                          (destructuring-bind ,args ,whole
+                                            ,@body)))))))
 
-                  ;; If we are  boostrapping JSCL, we need  to quote the
-                  ;; macroexpander, because the  macroexpander will need
-                  ;; to be dumped in the final environment somehow.
-                  (when (find :jscl-xc *features*)
-                    (setq expander `(quote ,expander)))
+                    ;; If we are boostrapping JSCL, we need to quote the
+                    ;; macroexpander,  because  the  macroexpander  will
+                    ;; need    to    be     dumped    in    the    final
+                    ;; environment somehow.
+                    (when (find :jscl-xc *features*)
+                      (setq expander `(quote ,expander)))
 
-                  `(eval-when (:compile-toplevel :execute)
-                     (%compile-defmacro ',name ,expander)))))))
+                    `(eval-when (:compile-toplevel :execute)
+                       (%compile-defmacro ',name ,expander)))))))
 
-    (%compile-defmacro 'defmacro defmacro-macroexpander)))
+      (%compile-defmacro 'defmacro defmacro-macroexpander))))
 
 
 ;;; DECLAIM
@@ -500,7 +505,7 @@ macro cache is so aggressive that it cannot be redefined."
   "Return NAME's global function definition,  taking care to respect any
 encapsulations  and to  return  the  innermost encapsulated  definition.
 This is SETF'able."
-  (or (!fdefinition-soft name)
+  (or (fdefinition-soft name)
       (error "No function is named `~S'." name)))
 
 (defun (setf jscl/cl::fdefinition) (fn name)
