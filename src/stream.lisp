@@ -31,17 +31,42 @@
 
 (defun jscl/cl::output-stream-p (x)
   (and (streamp x) 
-       (find (second (storage-vector-kind x)) '(output i/o))))
+       (subtypep (car (storage-vector-kind x)) 'output-stream)))
 
 (defvar *stream-generic-functions*
-  (cons 'string-stream
-        (list 'write-char 
+  (list 'string-output-stream
+        (list 'force-output
+              (lambda (stream)
+                (declare (ignore stream)))
+              'write-char 
               (lambda (char stream)
-                (vector-push-extend ch buffer))
+                (vector-push-extend char (storage-vector-underlying-vector 
+                                          stream)))
               'write-string 
               (lambda (string stream)
                 (dotimes (i (length string))
-                  (vector-push-extend (aref string i) buffer))))))
+                  (vector-push-extend (aref string i) 
+                                      (storage-vector-underlying-vector
+                                       stream)))))
+        'web-console-output-stream
+        (list 'force-output
+              (lambda (stream)
+                (#j:console:log (storage-vector-underlying-vector
+                                 stream))
+                (setq (storage-vector-underlying-vector stream) ""))
+              'write-char
+              (lambda (stream char)
+                (vector-push-extend char (storage-vector-underlying-vector
+                                          stream))
+                (when (member ch '(#\newline #\return #\page))
+                  (jscl/cl::force-output stream)))
+              'write-string
+              (lambda (string)
+                (jscl/cl::force-output stream)
+                (#j:console:log string)
+                (jscl/cl::force-output stream)))))
+
+;; FIXME: Define web-console-output-stream to be a subtype of output-stream
 
 (defun stream-generic-method (stream method)
   (or (getf (or (getf *stream-generic-functions*
@@ -56,15 +81,22 @@
   (assert (jscl/cl::output-stream-p stream))
   (funcall (stream-generic-method stream 'write-char) char stream))
 
+(defun jscl/cl::force-output (char &optional (stream *standard-output*)) 
+  (assert (jscl/cl::output-stream-p stream))
+  (funcall (stream-generic-method stream 'write-char) char stream))
+
 (defun jscl/cl::write-string (string &optional (stream *standard-output*))
   (assert (jscl/cl::output-stream-p stream))
   (funcall (stream-generic-method stream 'write-string) string stream))
 
 (defun jscl/cl::make-string-output-stream ()
-  (make-storage-vector 0 '(string-stream output)))
+  (make-storage-vector 0 '(string-output-stream)))
+
+(defun jscl/cl::make-web-console-output-stream ()
+  (make-storage-vector 0 '(web-console-output-stream)))
 
 (defun jscl/cl::get-output-stream-string (stream)
-  (assert (eq (car (storage-vector-kind stream)) 'string-stream))
+  (assert (eq (car (storage-vector-kind stream)) 'string-output-stream))
   (copy-seq (storage-vector-underlying-vector)))
 
 (defmacro jscl/cl::with-output-to-string ((var) &body body)

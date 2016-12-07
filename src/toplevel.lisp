@@ -279,31 +279,20 @@
           (compilation-notice))
   (format t "JSCL is a Common Lisp implementation on Javascript.~%")
   (if (find :node *features*)
-      (format t "For more information, visit the project page at https://github.com/jscl-project/jscl.~%~%")
+      (format t "For more information, visit the project page at ~
+https://github.com/jscl-project/jscl.~%~%")
       (%write-string
-       (format nil "For more information, visit the project page at <a href=\"https://github.com/jscl-project/jscl\">GitHub</a>.~%~%")
+       (format nil "For more information, visit the project page on ~
+ <a href=\"https://github.com/jscl-project/jscl\">GitHub</a>.~%~%")
        nil)))
 
 ;;; Basic *standard-output*  stream. This  will usually be  overriden by
 ;;; web or node REPL.
-(setq *standard-output*
-      (let ((buffer ""))
-        (flet ((force-out ()
-                 (#j:console:log buffer)
-                 (setq buffer "")))
-          (vector 'stream
-                  (lambda (ch)
-                    (setq buffer (concat buffer ch))
-                    (when (member ch '(#\newline #\return #\page))
-                      (force-out)))
-                  (lambda (string)
-                    (force-out)
-                    (#j:console:log string))))))
+(setq *standard-output* (make-web-console-output-stream))
 
 (if (find :node *features*)
     (setq jscl/ffi:*root* (%js-vref "global"))
     (setq jscl/ffi:*root* (%js-vref "window")))
-
 
 (defun require (name)
   (if (find :node *features*)
