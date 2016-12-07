@@ -33,6 +33,9 @@
   (and (streamp x) 
        (subtypep (car (storage-vector-kind x)) 'output-stream)))
 
+(defun console-log ()
+  (jscl/ffi:oget* jscl/ffi:*root* "console" "log"))
+
 (defvar *stream-generic-functions*
   (list 'string-output-stream
         (list 'force-output
@@ -51,8 +54,8 @@
         'web-console-output-stream
         (list 'force-output
               (lambda (stream)
-                (#j:console:log (storage-vector-underlying-vector
-                                 stream))
+                (funcall (console-log) (storage-vector-underlying-vector
+                                        stream))
                 (setq (storage-vector-underlying-vector stream) ""))
               'write-char
               (lambda (stream char)
@@ -63,8 +66,7 @@
               'write-string
               (lambda (string)
                 (jscl/cl::force-output stream)
-                (#j:console:log string)
-                (jscl/cl::force-output stream)))))
+                (funcall (console-log) string)))))
 
 ;; FIXME: Define web-console-output-stream to be a subtype of output-stream
 
@@ -83,7 +85,12 @@
 
 (defun jscl/cl::force-output (char &optional (stream *standard-output*)) 
   (assert (jscl/cl::output-stream-p stream))
-  (funcall (stream-generic-method stream 'write-char) char stream))
+  (funcall (stream-generic-method stream 'force-output) char stream))
+
+(defun jscl/cl::finish-output (char &optional (stream *standard-output*)) 
+  "Just calls FORCE-OUTPUT for now. We're not CLIM yet ☹"
+  (assert (jscl/cl::output-stream-p stream))
+  (funcall (stream-generic-method stream 'force-output) char stream))
 
 (defun jscl/cl::write-string (string &optional (stream *standard-output*))
   (assert (jscl/cl::output-stream-p stream))
