@@ -337,9 +337,11 @@ metadata in it."
 (defmacro jscl/js::get (object key)
   `(jscl/ffi:oget ,object ,key jscl/ffi::undefined))
 
-(defmacro jscl/js::in (object key)
+(defun jscl/js::in (key object)
   (let ((trash (cons 'not 'found)))
     (not (eq trash (jscl/ffi:oget object key trash)))))
+
+(defun jscl/js::new () (make-hash-table :test 'equal))
 
 (defun jscl/js::var (symbol value)
   (error "Unprocessed VAR? ~s ← ~s" symbol value))
