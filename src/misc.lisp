@@ -12,17 +12,21 @@
 ;;
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
-(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+(in-package :jscl)
 
 (/debug "loading misc.lisp!")
 
-(defparameter *features* '(:jscl :common-lisp))
+(defparameter jscl/cl::*features* '(:jscl :common-lisp))
 
-(defun lisp-implementation-type ()
-  "JSCL")
+(defun jscl/cl::lisp-implementation-type ()
+  #+jscl "JSCL"
+  #-jscl (concatenate 'string "JSCL cross hosted by "
+                      (cl:lisp-implementation-type)))
 
-(defun lisp-implementation-version ()
+(defun jscl/cl::lisp-implementation-version ()
   #.*version*)
+
+#.(read-#j)
 
 ;; Following  the  “most  useful”  (in one  opinion)  form,  these  wrap
 ;; Navigator  (browser) methods.  NB someone  familiar with  Node.JS may
@@ -32,19 +36,19 @@
 (defun null-if-empty (x)
   (if (and x (emptyp x)) nil x))
 
-(defun short-site-name ()
+(defun jscl/cl::short-site-name ()
   (null-if-empty (or (and #j:window #j:window:location #j:window:location:hostname)
                      (and #j:os #j:os:hostname (#j:os:hostname)))))
 
-(defun long-site-name ()
+(defun jscl/cl::long-site-name ()
   (null-if-empty (or (and #j:window #j:window:location #j:window:location:origin)
                      (and #j:os #j:os:hostname (#j:os:hostname)))))
 
-(defun machine-instance ()
+(defun jscl/cl::machine-instance ()
   (null-if-empty (or (and #j:window #j:window:location #j:window:location:hostname)
                      (and #j:os #j:os:hostname (#j:os:hostname)))))
 
-(defun machine-version ()
+(defun jscl/cl::machine-version ()
   "The platform or OS type"
   (null-if-empty (let ((platform (or (and #j:navigator #j:navigator:platform)
                                      (and #j:process #j:process:platform))))
@@ -52,25 +56,32 @@
                        (subseq platform 0 (position #\Space platform))
                        platform))))
 
-(defun machine-type ()
+(defun jscl/cl::machine-type ()
   "Probably a CPU type"
+  #+jscl
   (null-if-empty (let ((platform (or (and #j:navigator #j:navigator:platform)
                                      (and #j:process #j:process:arch))))
                    (if (and platform (find #\Space platform))
                        (subseq platform (1+ (position #\Space platform)))
-                       platform))))
+                       platform)))
+  #-jscl (cl:machine-type))
 
-(defun software-type ()
+(defun jscl/cl::software-type ()
   "The browser's Product name; eg, Gecko for Firefox"
+  #+jscl
   (null-if-empty (or (and #j:navigator #j:navigator:product)
-                     (and #j:process #j:process:title))))
+                     (and #j:process #j:process:title)))
+  #-jscl
+  (cl:software-type))
 
-(defun software-version ()
+(defun jscl/cl::software-version ()
   "The User-Agent string provided by the browser, or Node.js version"
+  #+jscl
   (null-if-empty (or (and #j:navigator #j:navigator:userAgent)
-                     (and #j:process #j:process:version))))
+                     (and #j:process #j:process:version)))
+  #-jscl (cl:software-version))
 
-(defmacro time (form)
+(defmacro jscl/cl::time (form)
   (let ((start (gensym "START-TIME-"))
         (end (gensym "END-TIME-")))
     `(let ((,start (get-internal-real-time))
@@ -82,12 +93,12 @@
 
 ;;;; TRACE
 
-;;; This trace implementation works on symbols, replacing the function
-;;; with a wrapper. So it will not trace calls to the function if they
+;;; This trace  implementation works on symbols,  replacing the function
+;;; with a wrapper. So  it will not trace calls to  the function if they
 ;;; got the function object before it was traced.
 
-;;; An alist of the form (NAME FUNCTION), where NAME is the name of a
-;;; function, and FUNCTION is the function traced.
+;;; An alist  of the  form (NAME  FUNCTION), where NAME  is the  name of
+;;; a function, and FUNCTION is the function traced.
 (defvar *traced-functions* nil)
 (defvar *trace-level* 0)
 
@@ -126,20 +137,20 @@
           (fset name func)
           (format t "~S is not being traced.~%" name)))))
 
-(defmacro trace (&rest names)
+(defmacro jscl/cl::trace (&rest names)
   `(trace-functions ',names))
 
-(defmacro untrace (&rest names)
+(defmacro jscl/cl::untrace (&rest names)
   `(untrace-functions ',names))
 
 
 ;;; Time related functions
 
-(defun get-internal-real-time ()
-  (get-internal-real-time))
+(defun jscl/cl::get-internal-real-time ()
+  (jscl/js::get-internal-real-time))
 
 (defun get-unix-time ()
   (truncate (/ (get-internal-real-time) 1000)))
 
-(defun get-universal-time ()
+(defun jscl/cl::get-universal-time ()
   (+ (get-unix-time) 2208988800))

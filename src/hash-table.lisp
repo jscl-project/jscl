@@ -66,11 +66,11 @@
 (defun make-hash-table (&key (test #'eql) size)
   (let* ((test-fn (fdefinition test))
          (hash-fn
-          (cond
-            ((eq test-fn #'eq)    #'eq-hash)
-            ((eq test-fn #'eql)   #'eql-hash)
-            ((eq test-fn #'equal) #'equal-hash)
-            ((eq test-fn #'equalp) #'equalp-hash))))
+           (cond
+             ((eq test-fn #'eq)    #'eq-hash)
+             ((eq test-fn #'eql)   #'eql-hash)
+             ((eq test-fn #'equal) #'equal-hash)
+             ((eq test-fn #'equalp) #'equalp-hash))))
     ;; TODO: Replace list with a  storage-vector and tag conveniently to
     ;; implement `hash-table-p'.
     `(hash-table ,hash-fn ,(new))))

@@ -1,6 +1,6 @@
 ;;; stream.lisp —
 
-;; Copyright © 2012, 2013 David Vazquez 
+;; Copyright © 2012, 2013 David Vazquez
 ;;; Copyright © 2012 Raimon Grau
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
@@ -26,11 +26,11 @@
 (defvar jscl/cl::*standard-output*)
 
 (defun jscl/cl::streamp (x)
-  (and (storage-vector-p x) 
+  (and (storage-vector-p x)
        (subtypep (car (storage-vector-kind x)) 'stream)))
 
 (defun jscl/cl::output-stream-p (x)
-  (and (streamp x) 
+  (and (streamp x)
        (subtypep (car (storage-vector-kind x)) 'output-stream)))
 
 (defun console-log ()
@@ -41,14 +41,14 @@
         (list 'force-output
               (lambda (stream)
                 (declare (ignore stream)))
-              'write-char 
+              'write-char
               (lambda (char stream)
-                (vector-push-extend char (storage-vector-underlying-vector 
+                (vector-push-extend char (storage-vector-underlying-vector
                                           stream)))
-              'write-string 
+              'write-string
               (lambda (string stream)
                 (dotimes (i (length string))
-                  (vector-push-extend (aref string i) 
+                  (vector-push-extend (aref string i)
                                       (storage-vector-underlying-vector
                                        stream)))))
         'web-console-output-stream
@@ -56,19 +56,20 @@
               (lambda (stream)
                 (funcall (console-log) (storage-vector-underlying-vector
                                         stream))
-                (setq (storage-vector-underlying-vector stream) ""))
+                (setf (storage-vector-underlying-vector stream) ""))
               'write-char
               (lambda (stream char)
                 (vector-push-extend char (storage-vector-underlying-vector
                                           stream))
-                (when (member ch '(#\newline #\return #\page))
+                (when (member char '(#\newline #\return #\page))
                   (jscl/cl::force-output stream)))
               'write-string
-              (lambda (string)
+              (lambda (stream string)
                 (jscl/cl::force-output stream)
                 (funcall (console-log) string)))))
 
-;; FIXME: Define web-console-output-stream to be a subtype of output-stream
+;; FIXME:   Define  web-console-output-stream   to  be   a  subtype   of
+;; output-stream
 
 (defun stream-generic-method (stream method)
   (or (getf (or (getf *stream-generic-functions*
@@ -79,15 +80,15 @@
       (error "Stream class ~s has no method ~s"
              (car (storage-vector-kind stream)) method)))
 
-(defun jscl/cl::write-char (char &optional (stream *standard-output*)) 
+(defun jscl/cl::write-char (char &optional (stream *standard-output*))
   (assert (jscl/cl::output-stream-p stream))
   (funcall (stream-generic-method stream 'write-char) char stream))
 
-(defun jscl/cl::force-output (char &optional (stream *standard-output*)) 
+(defun jscl/cl::force-output (char &optional (stream *standard-output*))
   (assert (jscl/cl::output-stream-p stream))
   (funcall (stream-generic-method stream 'force-output) char stream))
 
-(defun jscl/cl::finish-output (char &optional (stream *standard-output*)) 
+(defun jscl/cl::finish-output (char &optional (stream *standard-output*))
   "Just calls FORCE-OUTPUT for now. We're not CLIM yet ☹"
   (assert (jscl/cl::output-stream-p stream))
   (funcall (stream-generic-method stream 'force-output) char stream))
@@ -99,7 +100,7 @@
 (defun jscl/cl::make-string-output-stream ()
   (make-storage-vector 0 '(string-output-stream)))
 
-(defun jscl/cl::make-web-console-output-stream ()
+(defun make-web-console-output-stream ()
   (make-storage-vector 0 '(web-console-output-stream)))
 
 (defun jscl/cl::get-output-stream-string (stream)

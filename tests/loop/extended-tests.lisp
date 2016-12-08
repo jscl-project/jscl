@@ -39,8 +39,8 @@
 (test "simple named"
       ()
       (loop named foo
-         thereis 'return-this-value
-         finally (return-from foo 'this-is-not-returned))
+              thereis 'return-this-value
+            finally (return-from foo 'this-is-not-returned))
       (() return-this-value))
 
 
@@ -48,21 +48,21 @@
       ()
       (block nil
         (1+ (loop named hieronymous
-               return 5)))
+                  return 5)))
       (() 6))
 
 (test "named / return function"
       ()
       (block nil
         (1+ (loop named hieronymous
-               do (return 5))))
+                  do (return 5))))
       (() 6))
 
 (test "named / return-from"
       ()
       (block nil
         (1+ (loop named hieronymous
-               do (return-from hieronymous 5))))
+                  do (return-from hieronymous 5))))
       (() 6))
 
 
@@ -92,19 +92,19 @@
 (test "sample iteration path"
       (l)
       (loop for x being the cdrs in l
-         collect x)
+            collect x)
       (((a b c d)) ((b c d) (c d) (d) ()))
       ((nil) ()))
 
 (test "alternate syntax iteration path"
       ()
       (loop for x being the cdrs of '(a b c d)
-         collect x)
+            collect x)
       (() ((b c d) (c d) (d) ())))
 
 (test "inclusive iteration interation path"
       (l)
       (loop for x being l and its cdrs
-         collect x)
+            collect x)
       (((a b c d)) ((a b c d) (b c d) (c d) (d) ()))
       ((nil) (nil)))

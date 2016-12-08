@@ -113,13 +113,13 @@ identifying them (and their provenance) easier."))
   (defun extract-version-from-package.json ()
     (with-open-file (in (merge-pathnames "package.json" *base-directory*))
       (loop
-         for line = (read-line in nil)
-         while line
-         when (search "\"version\":" line)
-         do (let ((colon (position #\: line))
-                  (comma (position #\, line)))
-              (return (string-trim '(#\newline #\" #\tab #\space)
-                                   (subseq line (1+ colon) comma))))))))
+        for line = (read-line in nil)
+        while line
+        when (search "\"version\":" line)
+          do (let ((colon (position #\: line))
+                   (comma (position #\, line)))
+               (return (string-trim '(#\newline #\" #\tab #\space)
+                                    (subseq line (1+ colon) comma))))))))
 
 (defvar *version*
   (extract-version-from-package.json)
@@ -152,11 +152,11 @@ identifying them (and their provenance) easier."))
     ("string"        :both)
     ("sequence"      :both)
     ("stream"        :both)
-    ("hash-table"    :target)
-    ("print"         :target)
-    ("misc"          :target)
+    ("hash-table"    :target) ; TODO
+    ("print"         :both)
+    ("misc"          :both)
     ("ffi"           :target)
-    ("symbol"        :target)
+    ("symbol"        :both)
     ("package"       :both)
     ("ansiloop"
      ("ansi-loop"    :both))
@@ -167,8 +167,8 @@ identifying them (and their provenance) easier."))
      ("codegen"      :both)
      ("compiler"     :both)
      ("compile-file"	:both))
-    ("documentation" :target)
-    ("toplevel" 	:target))
+    ("documentation" :target) ; TODO
+    ("toplevel" 	:both))
   "List of  all the source files  that need to be  compiled, and whether
 they are  to be compiled  just by  the host, by  the target JSCL,  or by
 both.  All files  have a  `.lisp' extension,  and are  relative to  src/
@@ -253,10 +253,10 @@ compiled in the host.")
 (defmacro doforms ((var stream) &body body)
   (let ((eof (gensym "EOF-")))
     `(loop
-        with ,eof = (gensym "EOF-")
-        for ,var = (read ,stream nil ,eof)
-        until (eq ,var ,eof)
-        do (progn ,@body))))
+       with ,eof = (gensym "EOF-")
+       for ,var = (read ,stream nil ,eof)
+       until (eq ,var ,eof)
+       do (progn ,@body))))
 
 
 ;;;; Load JSCL into the host implementation.

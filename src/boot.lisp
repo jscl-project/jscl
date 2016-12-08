@@ -57,32 +57,32 @@
 (eval-when (:compile-toplevel)
   (unless (macro-function 'defmacro)
     (let ((defmacro-macroexpander
-           '#'(lambda (form environment)
-                (destructuring-bind (name args &body body)
-                    form
-                  (warn "Compiling a macro-expander for ~s" name)
-                  (let* ((body (parse-body body :declarations t :docstring t))
-                         (ll (parse-destructuring-lambda-list args))
-                         (whole (or (lambda-list-wholevar ll)
-                                    (gensym "WHOLE-")))
-                         (environment (or (lambda-list-environment ll)
-                                          (gensym "ENVIRONMENT-")))
-                         (expander `(function
-                                     (lambda (,whole ,environment)
-                                      (let ((*environment* ,environment))
-                                        (block ,name
-                                          (destructuring-bind ,args ,whole
-                                            ,@body)))))))
+            '#'(lambda (form environment)
+                 (destructuring-bind (name args &body body)
+                     form
+                   (warn "Compiling a macro-expander for ~s" name)
+                   (let* ((body (parse-body body :declarations t :docstring t))
+                          (ll (parse-destructuring-lambda-list args))
+                          (whole (or (lambda-list-wholevar ll)
+                                     (gensym "WHOLE-")))
+                          (environment (or (lambda-list-environment ll)
+                                           (gensym "ENVIRONMENT-")))
+                          (expander `(function
+                                      (lambda (,whole ,environment)
+                                       (let ((*environment* ,environment))
+                                         (block ,name
+                                           (destructuring-bind ,args ,whole
+                                             ,@body)))))))
 
-                    ;; If we are boostrapping JSCL, we need to quote the
-                    ;; macroexpander,  because  the  macroexpander  will
-                    ;; need    to    be     dumped    in    the    final
-                    ;; environment somehow.
-                    (when (find :jscl-xc *features*)
-                      (setq expander `(quote ,expander)))
+                     ;; If we are boostrapping JSCL, we need to quote the
+                     ;; macroexpander,  because  the  macroexpander  will
+                     ;; need    to    be     dumped    in    the    final
+                     ;; environment somehow.
+                     (when (find :jscl-xc *features*)
+                       (setq expander `(quote ,expander)))
 
-                    `(eval-when (:compile-toplevel :execute)
-                       (%compile-defmacro ',name ,expander)))))))
+                     `(eval-when (:compile-toplevel :execute)
+                        (%compile-defmacro ',name ,expander)))))))
 
       (%compile-defmacro 'defmacro defmacro-macroexpander))))
 
@@ -200,7 +200,8 @@
          `(progn
             (eval-when (:compile-toplevel :load-toplevel)
               (fn-info ',name :defined t))
-            (fset ',name #'(named-lambda ,name ,args ,@body))
+            ;; FIXME global binding
+            (jscl/js::fset ',name #'(named-lambda ,name ,args ,@body))
             ',name))
         ((not (listp name))
          (error "~s is not a valid name for a function" name))
@@ -345,21 +346,21 @@
   (defun do/do* (do/do* varlist endlist body)
     `(block nil
        (,(ecase do/do* (do 'let) (do* 'let*))
-         ,(mapcar (lambda (x)
-                    (if (symbolp x)
-                        (list x nil)
-                        (list (first x) (second x))))
-                  varlist)
-         (while t
-           (when ,(car endlist)
-             (return (progn ,@(cdr endlist))))
-           (tagbody ,@body)
-           (,(ecase do/do* (do 'psetq) (do* 'setq))
-             ,@(mapcan (lambda (v)
-                         (and (listp v)
-                              (consp (cddr v))
-                              (list (first v) (third v))))
-                       varlist)))))))
+        ,(mapcar (lambda (x)
+                   (if (symbolp x)
+                       (list x nil)
+                       (list (first x) (second x))))
+                 varlist)
+        (while t
+          (when ,(car endlist)
+            (return (progn ,@(cdr endlist))))
+          (tagbody ,@body)
+          (,(ecase do/do* (do 'psetq) (do* 'setq))
+           ,@(mapcan (lambda (v)
+                       (and (listp v)
+                            (consp (cddr v))
+                            (list (first v) (third v))))
+                     varlist)))))))
 
 (defmacro jscl/cl::do (varlist endlist &body body)
   (do/do* 'do varlist endlist body))

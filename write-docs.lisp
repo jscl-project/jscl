@@ -61,10 +61,10 @@
                       (make-macro-definition :symbol symbol :function macro)))
            (when-let ((expander (sb-int:info :setf :expander symbol)))
              (let ((expander-definition
-                    (make-setf-expander-definition
-                     :symbol symbol
-                     :access macro-definition
-                     :update expander)))
+                     (make-setf-expander-definition
+                      :symbol symbol
+                      :access macro-definition
+                      :update expander)))
                (setf (macro-definition-access-expander macro-definition)
                      expander-definition)))
            (add-definition symbol category macro-definition pool)))
@@ -100,7 +100,7 @@
                           (when (fboundp writer-name)
                             (fdefinition writer-name))))
                 (ordinary-writer-p
-                 (and writer (not (typep writer 'generic-function))))
+                  (and writer (not (typep writer 'generic-function))))
                 (expander (sb-int:info :setf :expander symbol)))
            (cond ((and function (or writer expander))
                   (let ((accessor-definition (make-accessor-definition
@@ -115,10 +115,10 @@
                               writer-definition)))
                     (when expander
                       (let ((expander-definition
-                             (make-setf-expander-definition
-                              :symbol symbol
-                              :access accessor-definition
-                              :update expander)))
+                              (make-setf-expander-definition
+                               :symbol symbol
+                               :access accessor-definition
+                               :update expander)))
                         (setf (accessor-definition-access-expander
                                accessor-definition)
                               expander-definition)))
@@ -138,90 +138,90 @@
                    pool)))))
         (:generic
          (let* ((function
-                 (when (and (fboundp symbol)
-                            (typep (fdefinition symbol) 'generic-function))
-                   (fdefinition symbol)))
+                  (when (and (fboundp symbol)
+                             (typep (fdefinition symbol) 'generic-function))
+                    (fdefinition symbol)))
                 ;; #### NOTE: an accessor's writer definition is created
                 ;; here   only  if   it's  also   a  generic   function.
                 ;; Cross-references between heterogeneous accessors will
                 ;; be resolved when the pools are finalized.
                 (writer
-                 (let ((writer-name `(setf ,symbol)))
-                   (when (fboundp writer-name)
-                     (fdefinition writer-name))))
+                  (let ((writer-name `(setf ,symbol)))
+                    (when (fboundp writer-name)
+                      (fdefinition writer-name))))
                 (generic-writer-p (typep writer 'generic-function))
                 (expander (sb-int:info :setf :expander symbol)))
            (cond ((and function (or writer expander))
                   (let ((generic-definition
-                         (make-generic-accessor-definition
-                          :symbol symbol
-                          :function function
-                          ;; #### NOTE: for a generic accessor function,
-                          ;; we  store accessor  methods in  the generic
-                          ;; accessor  function  definition, along  with
-                          ;; standard methods.  Only writer-only methods
-                          ;; are   stored   in    the   generic   writer
-                          ;; function definition.
-                          :methods
-                          (mapcar
-                           (lambda (method)
-                             (let ((writer-method
-                                    (and generic-writer-p
-                                         (find-method
-                                          writer
-                                          (method-qualifiers method)
-                                          ;; #### FIXME: I'm not sure if
-                                          ;; the      first     argument
-                                          ;; (NEW-VALUE)  of   a  writer
-                                          ;; method      always      has
-                                          ;; a specializer of T...
-                                          (cons t (sb-mop:method-specializers
-                                                   method))
-                                          nil))))
-                               (if writer-method
-                                   (make-accessor-method-definition
-                                    :symbol symbol
-                                    :method method
-                                    :writer (make-writer-method-definition
-                                             :symbol symbol
-                                             :method writer-method))
-                                   (make-method-definition
-                                    :symbol symbol :method method))))
-                           (sb-mop:generic-function-methods function)))))
+                          (make-generic-accessor-definition
+                           :symbol symbol
+                           :function function
+                           ;; #### NOTE: for a generic accessor function,
+                           ;; we  store accessor  methods in  the generic
+                           ;; accessor  function  definition, along  with
+                           ;; standard methods.  Only writer-only methods
+                           ;; are   stored   in    the   generic   writer
+                           ;; function definition.
+                           :methods
+                           (mapcar
+                            (lambda (method)
+                              (let ((writer-method
+                                      (and generic-writer-p
+                                           (find-method
+                                            writer
+                                            (method-qualifiers method)
+                                            ;; #### FIXME: I'm not sure if
+                                            ;; the      first     argument
+                                            ;; (NEW-VALUE)  of   a  writer
+                                            ;; method      always      has
+                                            ;; a specializer of T...
+                                            (cons t (sb-mop:method-specializers
+                                                     method))
+                                            nil))))
+                                (if writer-method
+                                    (make-accessor-method-definition
+                                     :symbol symbol
+                                     :method method
+                                     :writer (make-writer-method-definition
+                                              :symbol symbol
+                                              :method writer-method))
+                                    (make-method-definition
+                                     :symbol symbol :method method))))
+                            (sb-mop:generic-function-methods function)))))
                     (when generic-writer-p
                       (let ((writer-definition
-                             (make-generic-writer-definition
-                              :symbol symbol
-                              :function writer
-                              :methods
-                              (mapcan
-                               (lambda (method)
-                                 (unless
-                                     (find-method
-                                      function
-                                      (method-qualifiers method)
-                                      ;; #### NOTE:   don't  forget   to
-                                      ;; remove  the  first  (NEW-VALUE)
-                                      ;; specializer       from      the
-                                      ;; writer method.
-                                      (cdr (sb-mop:method-specializers
-                                            method))
-                                      nil)
-                                   (list (make-writer-method-definition
-                                          :symbol symbol
-                                          :method method))))
-                               (sb-mop:generic-function-methods
-                                writer))
-                              :reader generic-definition)))
+                              (make-generic-writer-definition
+                               :symbol symbol
+                               :function writer
+                               :methods
+                               (mapcan
+                                (lambda (method)
+                                  (unless
+                                      (find-method
+                                       function
+                                       (method-qualifiers method)
+                                       ;; #### NOTE:   don't  forget   to
+                                       ;; remove  the  first  (NEW-VALUE)
+                                       ;; specializer       from      the
+                                       ;; writer method.
+                                       (cdr (sb-mop:method-specializers
+                                             method))
+                                       nil)
+                                    (list (make-writer-method-definition
+                                           :symbol symbol
+                                           :method method))))
+                                (sb-mop:generic-function-methods
+                                 writer))
+                               :reader generic-definition)))
                         (setf (generic-accessor-definition-writer
                                generic-definition)
                               writer-definition)))
                     (when expander
                       (let ((expander-definition
-                             (make-setf-expander-definition
-                              :symbol symbol
-                              :access generic-definition
-                              :update expander)))
+                              (make-setf-expander-definition
+                               :symbol symbol
+                               :access generic-definition
+                               :update expander)))
                         (setf (generic-accessor-definition-access-expander
                                generic-definition)
                               expander-definition)))
@@ -271,8 +271,8 @@
          (let* ((method (find-method #'sb-mop:find-method-combination
                                      nil
                                      `(,(find-class 'generic-function)
-                                        (eql ,symbol)
-                                        t)
+                                       (eql ,symbol)
+                                       t)
                                      nil))
                 (combination (when method
                                (sb-mop:find-method-combination

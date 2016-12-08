@@ -16,46 +16,46 @@
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
-(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+(in-package :jscl)
 
 (/debug "loading toplevel.lisp!")
 
-(defun eval (x)
+(defun jscl/cl::eval (x)
   (let ((jscode
-         (with-compilation-environment
-           (compile-toplevel x t t))))
+          (with-compilation-environment
+            (compile-toplevel x t t))))
     (js-eval jscode)))
 
-(defvar * nil)
-(defvar ** nil)
-(defvar *** nil)
-(defvar / nil)
-(defvar // nil)
-(defvar /// nil)
-(defvar + nil)
-(defvar ++ nil)
-(defvar +++ nil)
-(defvar - nil)
+(defvar jscl/cl::* nil)
+(defvar jscl/cl::** nil)
+(defvar jscl/cl::*** nil)
+(defvar jscl/cl::/ nil)
+(defvar jscl/cl::// nil)
+(defvar jscl/cl::/// nil)
+(defvar jscl/cl::+ nil)
+(defvar jscl/cl::++ nil)
+(defvar jscl/cl::+++ nil)
+(defvar jscl/cl::- nil)
 
 (defun eval-interactive (x)
-  (setf - x)
+  (setf jscl/cl::- x)
   (let ((results (multiple-value-list (eval x))))
-    (setf /// //
-          // /
-          / results
-          *** **
-          ** *
-          * (car results)))
-  (unless (boundp '*)
+    (setf jscl/cl::/// jscl/cl:://
+          jscl/cl::// jscl/cl::/
+          jscl/cl::/ results
+          jscl/cl::*** jscl/cl::**
+          jscl/cl::** jscl/cl::*
+          jscl/cl::* (car results)))
+  (unless (boundp 'jscl/cl::*)
     ;; FIXME: Handle error
-    (setf * nil))
-  (setf +++ ++
-        ++ +
-        + -)
-  (values-list /))
+    (setf jscl/cl::* nil))
+  (setf jscl/cl::+++ jscl/cl::++
+        jscl/cl::++ jscl/cl::+
+        jscl/cl::+ jscl/cl::-)
+  (values-list jscl/cl::/))
 
-(let ((*package* (find-package :common-lisp)))
-  (export
+(let ((jscl/cl::*package* (jscl/cl::find-package :common-lisp)))
+  (jscl/cl::export
    '(&allow-other-keys &aux &body &environment &key &optional &rest &whole
      * ** *** *break-on-signals* *compile-file-pathname*
      *compile-file-truename* *compile-print* *compile-verbose* *debug-io*
@@ -254,7 +254,7 @@
      write-line write-sequence write-string write-to-string y-or-n-p
      yes-or-no-p zerop)))
 
-(setq *package* *user-package*)
+(setq jscl/cl::*package* *user-package*)
 
 (defun compilation-notice ()
   #.(multiple-value-bind (second minute hour date month year)
@@ -268,8 +268,8 @@
                    month)
               year)))
 
-(when (and (string/= (%js-typeof |module|) "undefined")
-           (string= (%js-typeof |phantom|) "undefined"))
+(when (and (string/= (jscl/js::%js-typeof |module|) "undefined")
+           (string= (jscl/js::%js-typeof |phantom|) "undefined"))
   (push :node *features*))
 
 (defun welcome-message ()
@@ -288,12 +288,17 @@ https://github.com/jscl-project/jscl.~%~%")
 
 ;;; Basic *standard-output*  stream. This  will usually be  overriden by
 ;;; web or node REPL.
-(setq *standard-output* (make-web-console-output-stream))
+(setq jscl/cl::*standard-output* (make-web-console-output-stream))
 
 (if (find :node *features*)
-    (setq jscl/ffi:*root* (%js-vref "global"))
-    (setq jscl/ffi:*root* (%js-vref "window")))
+    (setq jscl/ffi:*root* (jscl/js::%js-vref "global"))
+    (setq jscl/ffi:*root* (jscl/js::%js-vref "window")))
 
-(defun require (name)
+(defun node-require (name)
+ ;;; NOTE renamed  from just  “require” because that's  a CLtL  (but not
+ ;;; ANSI CL) module function and we'll  almost certainly want to use it
+ ;;; in that way. However, if we  can use Node and/or Closure modules to
+ ;;; package Lisp  systems, then (REQUIRE NAME  PATHNAME) where PATHNAME
+ ;;; is a URI would be a bit of awesomeness.
   (if (find :node *features*)
-      (funcall (%js-vref "require") name)))
+      (funcall (jscl/js::%js-vref "require") name)))

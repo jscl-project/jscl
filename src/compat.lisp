@@ -73,10 +73,10 @@ is equivalent to the JavaScript something[\"foo\"][\"bar\"][\"baz\"]
          `(jscl/ffi:oget (jscl/ffi:oget* ,object ,@(butlast keys))
                          ,(car (last keys))))))
 
-(defun jscl/ffi:oget (object key)
+(defun jscl/ffi:oget (object key &optional default)
   "Retrieve from  OBJECT the value  identified by  KEY. When KEY  is not
 defined, returns NIL."
-  (gethash key object))
+  (gethash key object default))
 
 ;;; Defined later, in read.lisp
 (declaim (ftype (function (character) t) terminalp)
@@ -162,7 +162,7 @@ EG:
 
 ;; Provide a ANSI compatible implementation of storage vectors.
 (defstruct (storage-vector
-             (:constructor make-storage-vector-1))
+            (:constructor make-storage-vector-1))
   kind
   underlying-vector)
 
@@ -286,18 +286,18 @@ metadata in it."
                           (substitute #\- #\_
                                       (string-upcase fn)))
              :jscl/js)
-     ,@args))
+    ,@args))
 
 (unless (jscl/ffi:oget jscl/ffi:*root* "packages")
   (setf (jscl/ffi:oget jscl/ffi:*root* "packages") (jscl/ffi:make-new '|Object|)))
 
 (defvar jscl/ffi::unbound-function
   (lambda (&rest _) (declare (ignore _))
-          (error "Unbound function")))
+    (error "Unbound function")))
 
 (defvar jscl/ffi::unbound-setf-function
   (lambda (&rest _) (declare (ignore _))
-          (error "Unbound SetF function")))
+    (error "Unbound SetF function")))
 
 (defun jscl/js::internals.symbol (name package-name)
   (let ((this (jscl/ffi:make-new '|Symbol|)))
@@ -334,12 +334,16 @@ metadata in it."
   (apply (jscl/ffi:oget object key) args))
 
 (defmacro jscl/js::get (object key)
-  `(jscl/ffi:oget ,object ,key))
+  `(jscl/ffi:oget ,object ,key jscl/ffi::undefined))
+
+(defmacro jscl/js::in (object key)
+  (let ((trash (cons 'not 'found)))
+    (not (eq trash (jscl/ffi:oget object key trash)))))
 
 (defun jscl/js::var (symbol value)
   (error "Unprocessed VAR? ~s ← ~s" symbol value))
 
-(defun elevate-ruby-vars (body &key (lexicalp t))
+(defun elevate-vars (body &key (lexicalp t))
   "Given a  Ruby AST in  BODY, recursively capture  variable definitions
 and elevate them to the  containing lexical scope. Normally, called from
 “outside”  from a  macro in  the AST  that establishes  a lexical  scope
@@ -350,7 +354,7 @@ captured vars and embedded forms as multiple values."
   ;; assumes that only  FUNCTION forms establish a  new, nested, lexical
   ;; scope  and  elevates all  VAR  forms  to the  containing  FUNCTION.
   ;; Very sketchy stuff. TODO debug, dangerous.
-  (loop 
+  (loop
     with vars = nil
     with revised = nil
     for form in body
@@ -358,9 +362,9 @@ captured vars and embedded forms as multiple values."
       do (case (car form)
            ;; A var in the current  lexical scratchpad. Capture the var,
            ;; but only initialize it at this point in the program flow.
-           (jscl/js::var 
-            (destructuring-bind (var name 
-                                 &optional (initializer nil initializerp)) 
+           (jscl/js::var
+            (destructuring-bind (var name
+                                 &optional (initializer nil initializerp))
                 form
               (push name vars)
               (when initializerp
@@ -380,39 +384,51 @@ captured vars and embedded forms as multiple values."
               (declare (ignore _))
               (push more-vars vars)
               (push revised-form revised))))
-    else collect form into revised
-    finally
-    return (if lexicalp
-               (if vars
-                   `(let ,(nreverse vars) ,@(nreverse revised))
-                   (nreverse revised))
-               (values nil vars (nreverse revised)))))
+    else do (push form revised)
+    finally (if lexicalp
+                (if vars
+                    `(let ,(nreverse vars) ,@(nreverse revised))
+                    (values nil vars (nreverse revised))))))
 
 (defmacro jscl/js::function (name lambda-list &rest body)
   (if (symbolp name)
-      (setf (jscl/ffi:oget jscl/js::*locals* name)
-            (jscl/js::function lambda-list body))
-      (let ((lambda-list name)
-            (body (cons lambda-list body)))
-        (compile `(lambda (&rest |arguments|)
-                    (destructuring-bind ,lambda-list |arguments|
-                      ,@(elevate-ruby-vars body)))))))
+      `(defun ,name (&rest |arguments|)
+         (destructuring-bind (&optional ,@lambda-list) |arguments|
+           ,@(elevate-vars body)
+           ))
+      `(lambda (&rest |arguments|)
+         (destructuring-bind (&optional ,@lambda-list) |arguments|
+           ,@(elevate-vars body)))))
 
-(defun jscl/js::= (var value)
-  (setf var value))
-
-(defun jscl/js::== (a b)
-  (equal a b))
-
-(defun jscl/js::=== (a b)
-  (eq a b))
+(defun jscl/js::= (var value) (setf var value))
+(defun jscl/js::== (a b) (equal a b))
+(defun jscl/js::=== (a b) (eq a b))
 
 (defun jscl/js::! (x) (and (not (null x))
                            (not (eq x 'jscl/ffi::undefined))
                            (not (eq x 'jscl/ffi::false))))
 
+(defun jscl/js::!== (a b) (not (equal a b)))
+(defun jscl/js::!=== (a b) (not (eq a b)))
+
 (defun jscl/js::internals.make-lisp-string (s) s)
 
-(dolist (mimic '(car cdr cons consp rplaca rplacd))
+(dolist (mimic '(car cdr cons consp rplaca rplacd
+                 get-universal-time))
   (setf (fdefinition (intern (symbol-name mimic) :jscl/js))
         (fdefinition mimic)))
+
+(defmacro jscl/js::%js-typeof (thing)
+  (let ((value (ignore-errors (eval thing))))
+    (typecase value
+      (null "null")
+      (number "number")
+      (string "string")
+      (t "Object"))))
+
+(defun jscl/js::objectp (object)
+  (hash-table-p object))
+
+
+(defun jscl/js::delete-property (object key)
+  (remhash key object))

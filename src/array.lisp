@@ -24,26 +24,26 @@
       t))
 
 (defun jscl/cl::array-dimensions (array)
-  (check-type array array)
+  (check-type array jscl/cl::array)
   (third (storage-vector-kind array)))
-(defun jscl/cl::array-element-type (array)
-  (check-type array array)
-  (second (storage-vector-kind array)))
+
 (defun jscl/cl::adjustable-array-p (array)
-  (check-type array array)
+  (check-type array jscl/cl::array)
   (fourth (storage-vector-kind array)))
+
 (defun jscl/cl::fill-pointer (array)
-  (check-type array array)
+  (check-type array jscl/cl::array)
   (fifth (storage-vector-kind array)))
+
 (defun (setf jscl/cl::fill-pointer) (new-index array)
-  (check-type array array)
+  (check-type array jscl/cl::array)
   (setf (fifth (storage-vector-kind array)) new-index))
 
 (defun jscl/cl::make-array (dimensions
-                            &key element-type initial-element 
+                            &key element-type initial-element
                                  adjustable fill-pointer)
   (let* ((dimensions (ensure-list dimensions))
-         (size (reduce #'* dimensions 1))
+         (size (reduce #'* dimensions :initial-value 1))
          (array (make-storage-vector
                  size
                  (list 'array element-type dimensions
@@ -58,27 +58,18 @@
     ;; Initialize array
     (dotimes (i size)
       (storage-vector-set array i initial-element))
-    ;; Record and return the object
-    (oset element-type array "type")
-    (oset dimensions array "dimensions")
     array))
 
 
 (defun jscl/cl::arrayp (x)
   (and (storage-vector-p x)
-       (eql 'array (car (storage-vector-kind x)))))
+       (subtypep (storage-vector-kind x) 'array)))
 
 (defun jscl/cl::array-element-type (array)
-  (unless (arrayp array)
-    (error "~S is not an array." array))
-  (if (eq (jscl/ffi:oget array "stringp") 1)
+  (check-type array jscl/cl::array)
+  (if (eql 1 (jscl/ffi:oget array "stringp"))
       'character
-      (jscl/ffi:oget array "type")))
-
-(defun jscl/cl::array-dimensions (array)
-  (unless (arrayp array)
-    (error "~S is not an array." array))
-  (jscl/ffi:oget array "dimensions"))
+      (second (storage-vector-kind array))))
 
 ;; TODO: Error checking
 (defun jscl/cl::array-dimension (array axis)
@@ -90,7 +81,7 @@
   (storage-vector-ref array index))
 
 (defun jscl/cl::aset (array index value)
-  (check-type array array)
+  (check-type array jscl/cl::array)
   (check-type index (and fixnum (integer 0 *)))
   (storage-vector-set array index value))
 
@@ -108,7 +99,7 @@
 
 (defun jscl/cl::vector-push-extend (new vector &key min-extension)
   (unless (jscl/cl::vectorp vector)
-    (error "~S is not a vector." vector)) 
+    (error "~S is not a vector." vector))
   (let ((pointer (fill-pointer vector))
         (size (storage-vector-size vector)))
     (when (>= pointer size)
@@ -117,7 +108,8 @@
                                                     (round size 4))))))
     (aset vector (incf (fill-pointer vector)) new)
     (progn
-      ;; with no fill-pointer, only increase by one always. Is that correct?
+      ;; with   no   fill-pointer,   only  increase   by   one   always.
+      ;; Is that correct?
       (resize-storage-vector vector (1+ size))
       (aset vector size new)
       size)))

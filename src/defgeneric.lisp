@@ -32,15 +32,15 @@
                            intermix)))
     (<= a-wins b-wins)))
 
-(defun !add-method (generic-function method)
+(defun jscl/cl::add-method (generic-function method)
   (setf (generic-function-methods generic-function)
         (sort (generic-function-methods generic-function)
               #'most-specific-method%)))
-#+jscl (fset 'add-method '!add-method)
 
-(defmacro !defmethod (name ))
+(defmacro jscl/cl::defmethod (name &rest _)
+  (error "unimplemented"))
 
-(defmacro !defgeneric (name lambda-list &body options)
+(defmacro jscl/cl::defgeneric (name lambda-list &body options)
   (let ((generic (make-generic-function
                   :name name
                   :lambda-list lambda-list
@@ -51,6 +51,7 @@
                                          "DISPATCH-"
                                          (princ-to-string name)
                                          "-"))))
+    ;; TODO: move to `compute-applicable-methods' or so
     `(progn
        ,(nreverse
          (dolist (method (remove-if-not
@@ -58,9 +59,9 @@
                             (and (listp option)
                                  (eql (car option) :method)))
                           options)
-                  method-forms)
+                         method-forms)
            (push `(defmethod ,name ,@(rest method))
                  method-forms)))
        (defun ,dispatcher ,lambda-list
          (dispatch-generic% ,generic ,@lambda-list))
-       (fset ',name ',dispatcher))))
+       (setf (fdefinition ,name) (fdefinition ,dispatcher)))))

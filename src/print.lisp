@@ -732,7 +732,7 @@ dispatching on the CHR ending the format sequence."
            (#\W #'format-write)
            (#\X #'format-hex)
            (t (warn "~~~a is not implemented yet, using ~~S instead" chr)
-              #'format-syntax))
+            #'format-syntax))
          arg colonp atp params))
 
 (defun format-nested (nesting-char

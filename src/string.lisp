@@ -12,7 +12,7 @@
 ;;
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
-(in-package :jscl) 
+(in-package :jscl)
 
 (/debug "loading string.lisp!")
 
@@ -27,7 +27,7 @@
 
 (defun jscl/cl::char (string index)
   (check-type string string)
-  (check-type index (and fixnum (integer 0 *))) 
+  (check-type index (and fixnum (integer 0 *)))
   (storage-vector-ref string index))
 
 (defun jscl/cl::string (x)
@@ -38,7 +38,7 @@
 
 (defun jscl/cl::string= (s1 s2 &key (start1 0) end1 (start2 0) end2)
   (let* ((s1 (string s1))
-         (s2 (string s2)) 
+         (s2 (string s2))
          (end1 (or end1 (length s1)))
          (end2 (or end2 (length s2))))
     (when (= (- end2 start2) (- end1 start1))
@@ -48,7 +48,7 @@
 
 (defun jscl/cl::string/= (s1 s2 &key (start1 0) end1 (start2 0) end2)
   (let* ((s1 (string s1))
-         (s2 (string s2)) 
+         (s2 (string s2))
          (n1 (length s1))
          (n2 (length s2))
          (end1 (or end1 n1))
@@ -61,7 +61,7 @@
         (return-from jscl/cl::string/= (+ start1 i))))))
 
 
-(defun compare-strings (s1 s2 start1 end1 start2 end2 
+(defun compare-strings (s1 s2 start1 end1 start2 end2
                         char-eq char-lt if-eq if-a-sub-b if-b-sub-a)
   ;; step through  strings S1  and S2, using  bounds START1  END1 START2
   ;; END2. using  character comparison functions CHAR-EQ  (equality) and
@@ -163,7 +163,7 @@ handled correctly yet."
                      (= 1 (length (third target))))
                 (target)
                 "Cannot concatenate multi-dimensional arrays")
-        (apply #'jscl/cl::concatenate 
+        (apply #'jscl/cl::concatenate
                (list 'vector (second target) (third target))
                objects))))))
 
@@ -264,7 +264,7 @@ handled correctly yet."
   (let* ((string (string string))
          (n (length string))
          (start (or (position-if-not (lambda (c) (find c character-bag))
-                                     string) 
+                                     string)
                     n)))
     (subseq string start)))
 
