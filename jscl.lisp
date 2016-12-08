@@ -154,7 +154,6 @@ identifying them (and their provenance) easier."))
     ("stream"        :both)
     ("hash-table"    :target) ; TODO
     ("print"         :both)
-    ("misc"          :both)
     ("ffi"           :target)
     ("symbol"        :both)
     ("package"       :both)
@@ -168,6 +167,7 @@ identifying them (and their provenance) easier."))
      ("compiler"     :both)
      ("compile-file"	:both))
     ("documentation" :target) ; TODO
+    ("misc"          :both)
     ("toplevel" 	:both))
   "List of  all the source files  that need to be  compiled, and whether
 they are  to be compiled  just by  the host, by  the target JSCL,  or by
