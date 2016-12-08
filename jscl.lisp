@@ -249,23 +249,23 @@ compiled in the host.")
               (push fail failures)
               (warn "Compilation of ~A failed." input))
             (when fasl
+              (locally
+                  ;; These  occur  because  we  reload from  FASL  the  compiled
+                  ;; versions
+                  (declare #+sbcl (sb-ext:muffle-conditions
+                                   sb-kernel::function-redefinition-warning))
+                (load fasl))
               (push fasl fasls))))))
-    (init-built-in-types%)
-    (locally
-        ;; These  occur  because  we  reload from  FASL  the  compiled
-        ;; versions
-        (declare #+sbcl (sb-ext:muffle-conditions
-                         sb-kernel::function-redefinition-warning))
-      (mapc #'load (reverse fasls)))))
+    (init-built-in-types%)))
 
 
 (defmacro doforms ((var stream) &body body)
   (let ((eof (gensym "EOF-")))
     `(loop
-       with ,eof = (gensym "EOF-")
-       for ,var = (read ,stream nil ,eof)
-       until (eq ,var ,eof)
-       do (progn ,@body))))
+        with ,eof = (gensym "EOF-")
+        for ,var = (read ,stream nil ,eof)
+        until (eq ,var ,eof)
+        do (progn ,@body))))
 
 
 ;;;; Load JSCL into the host implementation.
