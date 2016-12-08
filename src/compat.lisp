@@ -336,14 +336,59 @@ metadata in it."
 (defmacro jscl/js::get (object key)
   `(jscl/ffi:oget ,object ,key))
 
-(defvar jscl/js::*locals* (make-hash-table :test 'equal))
-
 (defun jscl/js::var (symbol value)
-  (assert (eql :undef
-               (gethash symbol jscl/js::*locals* :undef)))
-  (setf (gethash symbol jscl/js::*locals*) value))
+  (error "Unprocessed VAR? ~s ← ~s" symbol value))
 
-(defun jscl/js::function (name lambda-list &rest body)
+(defun elevate-ruby-vars (body &key (lexicalp t))
+  "Given a  Ruby AST in  BODY, recursively capture  variable definitions
+and elevate them to the  containing lexical scope. Normally, called from
+“outside”  from a  macro in  the AST  that establishes  a lexical  scope
+itself,  thus, LEXICALP  T. Can  be called  recursively and  returns the
+captured vars and embedded forms as multiple values."
+  ;; Repurposed from  Ruby. Given a variable  in a scope, elevate  it to
+  ;; the  containing  scope.   This  currently  (probably  incorrectly?)
+  ;; assumes that only  FUNCTION forms establish a  new, nested, lexical
+  ;; scope  and  elevates all  VAR  forms  to the  containing  FUNCTION.
+  ;; Very sketchy stuff. TODO debug, dangerous.
+  (loop 
+    with vars = nil
+    with revised = nil
+    for form in body
+    if (consp form)
+      do (case (car form)
+           ;; A var in the current  lexical scratchpad. Capture the var,
+           ;; but only initialize it at this point in the program flow.
+           (jscl/js::var 
+            (destructuring-bind (var name 
+                                 &optional (initializer nil initializerp)) 
+                form
+              (push name vars)
+              (when initializerp
+                (push `(setq ,name ,initializer) revised))))
+           ;; Any of these forms establishes  a new lexical scope. Don't
+           ;; expand it yet, wait for it to do its own expansion. Any of
+           ;; these forms must be a macro for this to work.
+           ((jscl/js::function)
+            (push form revised))
+           ;; All  other   CONS  forms  are  recursively   examined  for
+           ;; a  Ruby::Var  form  to  appear under  them.  Call  ourself
+           ;; recursively, BUT  only capture  the elevated vars  in THIS
+           ;; level (the containing lexical scape)
+           (otherwise
+            (multiple-value-bind (_ more-vars revised-form)
+                (elevate-vars form :lexicalp nil)
+              (declare (ignore _))
+              (push more-vars vars)
+              (push revised-form revised))))
+    else collect form into revised
+    finally
+    return (if lexicalp
+               (if vars
+                   `(let ,(nreverse vars) ,@(nreverse revised))
+                   (nreverse revised))
+               (values nil vars (nreverse revised)))))
+
+(defmacro jscl/js::function (name lambda-list &rest body)
   (if (symbolp name)
       (setf (jscl/ffi:oget jscl/js::*locals* name)
             (jscl/js::function lambda-list body))
@@ -351,7 +396,7 @@ metadata in it."
             (body (cons lambda-list body)))
         (compile `(lambda (&rest |arguments|)
                     (destructuring-bind ,lambda-list |arguments|
-                      ,@body))))))
+                      ,@(elevate-ruby-vars body)))))))
 
 (defun jscl/js::= (var value)
   (setf var value))
@@ -367,3 +412,7 @@ metadata in it."
                            (not (eq x 'jscl/ffi::false))))
 
 (defun jscl/js::internals.make-lisp-string (s) s)
+
+(dolist (mimic '(car cdr cons consp rplaca rplacd))
+  (setf (fdefinition (intern (symbol-name mimic) :jscl/js))
+        (fdefinition mimic)))
