@@ -98,7 +98,33 @@ forms if PRINT is set."
                    c (enough-namestring filename)
                    form-count last-form))))
       (format t " Done."))))
-#+jscl (fset 'compile-file '!compile-file)
+
+(defun jscl/cl::compile-file 
+    (input-file &key
+                  (output-file 
+                   (make-pathname :type "js"
+                                  :defaults input-file))
+                  ((verbose *compile-verbose*) *compile-verbose*)
+                  ((print *compile-print*) *compile-print*)
+                  (external-format :utf-8) 
+                  (trace-file nil))
+  "Compile a lisp file into a JavaScript file."
+  (assert (eql external-format :utf-8)
+          (external-format)
+          "External format must be :UTF-8 for now.")
+  (with-open-file (out output-file :direction :output
+                                   :if-exists :new-version)
+    (let ((*trace-output* *trace-output*))
+      (unwind-protect 
+           (progn
+             (when trace-file
+               (setf *trace-output* (open trace-file
+                                          :direction :output
+                                          :if-exists :append)))
+             (!compile-file input-file out :print (or *compile-verbose* 
+                                                      *compile-print*)))
+        (when trace-file
+          (close *trace-output*))))))
 
 (defun macro-bindings-add-magic-unquotes ()
   ;; We assume that environments have a friendly list representation for
