@@ -263,9 +263,9 @@ to streams."
          (write-string form stream)))
     ;; Functions
     (function
-     (let ((name (#+jscl (jscl/ffi:oget form "fname")
-                         #-jscl (nth-value 2 (function-lambda-expression
-                                              form)))))
+     (let ((name #+jscl (jscl/ffi:oget form "fname")
+                 #-jscl (nth-value 2 (function-lambda-expression
+                                      form))))
        (if name
            (simple-format stream "#<FUNCTION ~a>" name)
            (write-string "#<FUNCTION>" stream))))
@@ -317,8 +317,7 @@ to streams."
      )
     (t x)))
 
-#+jscl
-(defun write (form &key (stream *standard-output*))
+(defun jscl/cl::write (form &key (stream *standard-output*))
   (let ((stream (output-stream-designator stream)))
     (multiple-value-bind (objs ids)
         (scan-multiple-referenced-objects form)
@@ -330,47 +329,43 @@ to streams."
   (with-output-to-string (output)
     (write form :stream output)))
 
-(defmacro !with-input-from-string ((stream string) &body body)
+(defmacro jscl/cl::with-input-from-string ((stream string) &body body)
   `(let ((,stream (cons ,string 0)))
      ,@body))
 
-#+jscl
-(progn
-  (defmacro with-input-from-string ((stream string) &body body)
-    `(with-input-from-string (,stream ,string) ,@body))
 
-  (defun prin1 (form &optional stream)
-    (let ((*print-escape* t))
-      (write form :stream stream)))
+(defun jscl/cl::prin1 (form &optional stream)
+  (let ((*print-escape* t))
+    (write form :stream stream)))
 
-  (defun prin1-to-string (form)
-    (with-output-to-string (output)
-      (prin1 form output)))
+(defun jscl/cl::prin1-to-string (form)
+  (with-output-to-string (output)
+    (prin1 form output)))
 
-  (defun princ (form &optional stream)
-    (let ((*print-escape* nil) (*print-readably* nil))
-      (typecase form
-        (symbol (write (symbol-name form) :stream stream))
-        (character (write-char form stream))
-        (t (write form :stream stream))))
-    form)
+(defun jscl/cl::princ (form &optional stream)
+  (let ((*print-escape* nil) (*print-readably* nil))
+    (typecase form
+      (symbol (write (symbol-name form) :stream stream))
+      (character (write-char form stream))
+      (t (write form :stream stream))))
+  form)
 
-  (defun princ-to-string (form)
-    (with-output-to-string (output)
-      (princ form output)))
+(defun jscl/cl::princ-to-string (form)
+  (with-output-to-string (output)
+    (princ form output)))
 
-  (defun terpri (&optional (stream *standard-output*))
-    (write-char #\newline stream)
-    (values))
+(defun jscl/cl::terpri (&optional (stream *standard-output*))
+  (write-char #\newline stream)
+  (values))
 
-  (defun write-line (x)
-    (write-string x)
-    (terpri)
-    x)
+(defun jscl/cl::write-line (x)
+  (write-string x)
+  (terpri)
+  x)
 
-  (defun print (x &optional (stream *standard-output*))
-    (prog1 (prin1 x stream)
-      (terpri stream))))
+(defun jscl/cl::print (x &optional (stream *standard-output*))
+  (prog1 (prin1 x stream)
+    (terpri stream)))
 
 
 ;;; FORMAT
@@ -937,7 +932,7 @@ but wanted ~~~c in format string"
         (arguments format-arguments))
     (while (not (equal "" control))
       (let ((tilde (position #\~ control)))
-        (when (plusp tilde)
+        (when (and tilde (plusp tilde))
           (concatf output (subseq control (1- tilde))))
         (cond (tilde (let (string)
                        (multiple-value-setq (control string arguments)
