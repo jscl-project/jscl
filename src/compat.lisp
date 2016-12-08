@@ -430,6 +430,8 @@ captured vars and embedded forms as multiple values."
 (defun jscl/js::objectp (object)
   (hash-table-p object))
 
+(defun jscl/js::map-for-in (function object)
+  (maphash function object)) 
 
 (defun jscl/js::delete-property (object key)
   (remhash key object))
