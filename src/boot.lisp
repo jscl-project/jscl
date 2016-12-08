@@ -23,11 +23,11 @@
 
 ;;; Package definitions for within the environment.
 
-(if (not (find-package :common-lisp))
-    (make-package "COMMON-LISP" :nicknames (list "CL")))
-
 (if (not (find-package :keyword))
     (make-package "KEYWORD"))
+
+(if (not (find-package :common-lisp))
+    (make-package "COMMON-LISP" :nicknames (list "CL")))
 
 (if (not (find-package :common-lisp-user))
     (make-package "COMMON-LISP-USER"
