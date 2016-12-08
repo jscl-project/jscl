@@ -220,34 +220,43 @@ compiled in the host.")
 ;;; Compile and load jscl into the host
 (defun load-jscl ()
   (with-compilation-unit ()
-    (when *load-pathname*    ; Prevent that one stale FASL …
+    (when *load-pathname*    ; Prevent this  file from becoming that one
+                                        ; stale FASL …
       (compile-file *load-pathname*))
-    (let (fasls)
+    (load (merge-pathnames "src/compat.lisp"
+                           #. (or *load-pathname*
+                                  *compile-file-pathname*
+                                  #p ".")))
+    (let (fasls failures)
       (do-source input :host
-        (let (failures)
-          (load input)
-          (locally
-              (declare #+sbcl (sb-ext:muffle-conditions
-                               sb-kernel::function-redefinition-warning))
-            (multiple-value-bind (fasl warn fail) (compile-file input)
-              (declare (ignore warn))
-              ;; It's only interesting to see  if there were failures at
-              ;; the  end  of  the  compilation  unit,  since  undefined
-              ;; functions  in  one  file  may be  defined  in  another.
-              ;; This   gets   particularly   convoluted  due   to   the
-              ;; circularity of the type system and object systems.
-              (when fail
-                (push fail failures)
-                (warn "Compilation of ~A failed." input))
-              (when fasl
-                (push fasl fasls))))))
-      (init-built-in-types%)
-      (locally
-          ;; These  occur  because  we  reload from  FASL  the  compiled
-          ;; versions
+        (load input)
+        (locally
+            ;; I make  the assumption that re-loading  the files under
+            ;; Swank, you  don't care about these  redefinitions … but
+            ;; if we get them running  top-level (eg, from a Makefile)
+            ;; they're more interesting.
+            #+swank
           (declare #+sbcl (sb-ext:muffle-conditions
                            sb-kernel::function-redefinition-warning))
-        (mapc #'load (reverse fasls))))))
+          (multiple-value-bind (fasl warn fail) (compile-file input)
+            (declare (ignore warn))
+            ;; It's only interesting to see  if there were failures at
+            ;; the  end  of  the  compilation  unit,  since  undefined
+            ;; functions  in  one  file  may be  defined  in  another.
+            ;; This   gets   particularly   convoluted  due   to   the
+            ;; circularity of the type system and object systems.
+            (when fail
+              (push fail failures)
+              (warn "Compilation of ~A failed." input))
+            (when fasl
+              (push fasl fasls))))))
+    (init-built-in-types%)
+    (locally
+        ;; These  occur  because  we  reload from  FASL  the  compiled
+        ;; versions
+        (declare #+sbcl (sb-ext:muffle-conditions
+                         sb-kernel::function-redefinition-warning))
+      (mapc #'load (reverse fasls)))))
 
 
 (defmacro doforms ((var stream) &body body)

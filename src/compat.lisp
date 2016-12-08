@@ -18,6 +18,12 @@
 
 (in-package :jscl)
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defvar jscl/ffi:*root* (make-hash-table :test 'equal)
+    "The *ROOT* object is “window” (in a browser) or the Node root object.
+ This provides access to whichever root  object happens to exist in the
+ active JavaScript Virtual Machine."))
+
 (defmacro while (condition &body body)
   "Continue to repeatedly execute BODY while CONDITION is true."
   `(do ()
@@ -39,11 +45,6 @@
 (defun /debug (message)
   "Print a trace message."
   (format *trace-output* "~&DEBUG: ~a" message))
-
-(defvar jscl/ffi:*root* (make-hash-table :test 'equal)
-  "The *ROOT* object is “window” (in a browser) or the Node root object.
- This provides access to whichever root  object happens to exist in the
- active JavaScript Virtual Machine.")
 
 (defun jscl/ffi:make-new (class &rest ctor-args)
   "Create a new  instance of CLASS with the  JavaScript special operator

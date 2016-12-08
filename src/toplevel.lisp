@@ -21,10 +21,8 @@
 (/debug "loading toplevel.lisp!")
 
 (defun jscl/cl::eval (x)
-  (let ((jscode
-          (with-compilation-environment
-            (compile-toplevel x t t))))
-    (js-eval jscode)))
+  (js-eval (with-compilation-environment
+             (compile-toplevel x t t))))
 
 (defvar jscl/cl::* nil)
 (defvar jscl/cl::** nil)
@@ -281,10 +279,8 @@
   (if (find :node *features*)
       (format t "For more information, visit the project page at ~
 https://github.com/jscl-project/jscl.~%~%")
-      (%write-string
-       (format nil "For more information, visit the project page on ~
- <a href=\"https://github.com/jscl-project/jscl\">GitHub</a>.~%~%")
-       nil)))
+      (format t "For more information, visit the project page on ~
+ <a href=\"https://github.com/jscl-project/jscl\">GitHub</a>.~%~%")))
 
 ;;; Basic *standard-output*  stream. This  will usually be  overriden by
 ;;; web or node REPL.
