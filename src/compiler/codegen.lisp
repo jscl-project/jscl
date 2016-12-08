@@ -522,8 +522,8 @@ unnecessary parentheses."
                 (js-stmt false))))
            (group
             (let ((in-group-p
-                   (or (null parent)
-                       (and (consp parent) (eq (car parent) 'group)))))
+                    (or (null parent)
+                        (and (consp parent) (eq (car parent) 'group)))))
               (unless  in-group-p (js-format "{"))
               (mapc #'js-stmt (cdr form))
               (unless in-group-p (js-format "}"))))

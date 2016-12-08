@@ -1,22 +1,24 @@
-(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+;;;; char.lisp — Character objects
+
+(in-package :jscl)
 
 (/debug "loading char.lisp!")
 
 ;; These comparison  functions heavily borrowed from  SBCL/CMUCL (public
 ;; domain).
 
-(defun char= (character &rest more-characters)
+(defun jscl/cl::char= (character &rest more-characters)
   (dolist (c more-characters t)
     (unless (eql c character) (return nil))))
 
-(defun char/= (character &rest more-characters)
+(defun jscl/cl::char/= (character &rest more-characters)
   (do* ((head character (car list))
         (list more-characters (cdr list)))
        ((null list) t)
     (dolist (c list)
-      (when (eql head c) (return-from char/= nil)))))
+      (when (eql head c) (return-from jscl/cl::char/= nil)))))
 
-(defun char< (character &rest more-characters)
+(defun jscl/cl::char< (character &rest more-characters)
   (do* ((c character (car list))
         (list more-characters (cdr list)))
        ((null list) t)
@@ -24,7 +26,7 @@
                (char-int (car list)))
       (return nil))))
 
-(defun char> (character &rest more-characters)
+(defun jscl/cl::char> (character &rest more-characters)
   (do* ((c character (car list))
         (list more-characters (cdr list)))
        ((null list) t)
@@ -32,7 +34,7 @@
                (char-int (car list)))
       (return nil))))
 
-(defun char<= (character &rest more-characters)
+(defun jscl/cl::char<= (character &rest more-characters)
   (do* ((c character (car list))
         (list more-characters (cdr list)))
        ((null list) t)
@@ -40,7 +42,7 @@
                 (char-int (car list)))
       (return nil))))
 
-(defun char>= (character &rest more-characters)
+(defun jscl/cl::char>= (character &rest more-characters)
   (do* ((c character (car list))
         (list more-characters (cdr list)))
        ((null list) t)
@@ -54,14 +56,14 @@
 (defun two-arg-char-equal (c1 c2)
   (= (equal-char-code c1) (equal-char-code c2)))
 
-(defun char-equal (character &rest more-characters)
+(defun jscl/cl::char-equal (character &rest more-characters)
   (check-type character character)
   (do ((clist more-characters (cdr clist)))
       ((null clist) t)
     (unless (two-arg-char-equal (car clist) character)
       (return nil))))
 
-(defun char-not-equal (character &rest more-characters)
+(defun jscl/cl::char-not-equal (character &rest more-characters)
   (do* ((head character (car list))
         (list more-characters (cdr list)))
        ((null list) t)
@@ -74,7 +76,7 @@
 (defun two-arg-char-lessp (c1 c2)
   (< (equal-char-code c1) (equal-char-code c2)))
 
-(defun char-lessp (character &rest more-characters)
+(defun jscl/cl::char-lessp (character &rest more-characters)
   (do* ((c character (car list))
         (list more-characters (cdr list)))
        ((null list) t)
@@ -84,7 +86,7 @@
 (defun two-arg-char-greaterp (c1 c2)
   (> (equal-char-code c1) (equal-char-code c2)))
 
-(defun char-greaterp (character &rest more-characters)
+(defun jscl/cl::char-greaterp (character &rest more-characters)
   (do* ((c character (car list))
         (list more-characters (cdr list)))
        ((null list) t)
@@ -94,7 +96,7 @@
 (defun two-arg-char-not-greaterp (c1 c2)
   (<= (equal-char-code c1) (equal-char-code c2)))
 
-(defun char-not-greaterp (character &rest more-characters)
+(defun jscl/cl::char-not-greaterp (character &rest more-characters)
   (do* ((c character (car list))
         (list more-characters (cdr list)))
        ((null list) t)
@@ -104,14 +106,14 @@
 (defun two-arg-char-not-lessp (c1 c2)
   (>= (equal-char-code c1) (equal-char-code c2)))
 
-(defun char-not-lessp (character &rest more-characters)
+(defun jscl/cl::char-not-lessp (character &rest more-characters)
   (do* ((c character (car list))
         (list more-characters (cdr list)))
        ((null list) t)
     (unless (two-arg-char-not-lessp c (car list))
       (return nil))))
 
-(defun character (character)
+(defun jscl/cl::character (character)
   (cond ((characterp character)
          character)
         ((and (stringp character)
@@ -123,76 +125,88 @@
         (t
          (error "not a valid character designator"))))
 
-(defun alphanumericp (char)
+(defun jscl/cl::alphanumericp (char)
   ;; from the hyperspec:
   (or (alpha-char-p char)
       (not (null (digit-char-p char)))))
 
-(defun graphic-char-p (char)
-  ;; from Wikipedia's Unicode article. Commented hex values because JSCL
-  ;; can't read #x yet.
+(defun jscl/cl::graphic-char-p (char)
+  ;; from Wikipedia's Unicode article.
   (let ((n (char-code char)))
     (cond
-      ((< n 32) nil)                       ; C0 control codes
+      ((< n 32) nil)                    ; C0 control codes
       ((< n 127) t)
-      ((< n 160) nil)                         ; C1 control codes
-      ((< n 55296 #| xd800 |#) t)
-      ((< n 57344 #| xe000 |#) nil)    ; high and low surrogates
-      ((< n 54976 #| xfdd0 |#) t)
-      ((< n 65007 #| xfffe |#) nil) ; upper disallowed
+      ((< n 160) nil)                   ; C1 control codes
+      ((< n #xd800) t)
+      ((< n #xe000) nil)                ; high and low surrogates
+      ((< n #xfdd0) t)
+      ((< n #xfffe) nil) ; upper disallowed
       ;; the following bit-patterns are never allowed
-      ((= (logior n 65535 #| xffff |#) 65534 #| xfffe |#) nil)
-      ((= (logior n 65535 #| xffff |#) 65535 #| xffff |#) nil)
-      ((< n 1114111 #| x10ffff |#) t) ; upper range of allowable characters
-      ((:else nil)))))
+      ((= (logior n #xffff) #xfffe) nil)
+      ((= (logior n #xffff) #xffff) nil)
+      ((< n #x10ffff) t)           ; upper range of allowable characters
+      (:else nil))))
 
-(defun standard-char-p (char)
+(defun jscl/cl::standard-char-p (char)
   ;; from SBCL/CMUCL:
   (and (let ((n (char-code char)))
          (or (< 31 n 127)
              (= n 10)))))
 
-(defun upper-case-p (character)
+(defun jscl/cl::upper-case-p (character)
   (char/= character (char-downcase character)))
 
-(defun lower-case-p (character)
+(defun jscl/cl::lower-case-p (character)
   (char/= character (char-upcase character)))
 
-(defun both-case-p (character)
+(defun jscl/cl::both-case-p (character)
   (or (upper-case-p character) (lower-case-p character)))
 
-(defun char-int (character)
+(defun jscl/cl::char-int (character)
   ;; no implementation-defined character attributes
   (char-code character))
 
-(defconstant char-code-limit 1114111)  ;; 0x10FFFF
+;; TODO:  review, pretty  sure this  is max  code +  1; UCS  3 allocates
+;; (sparsely) through #x10ffff so this gets set to #x110000
+(defconstant jscl/cl::char-code-limit #x110000)
 
-(defconstant +ascii-names+
-  #("NULL" "START_OF_HEADING" "START_OF_TEXT" "END_OF_TEXT" "END_OF_TRANSMISSION" "ENQUIRY" "ACKNOWLEDGE"
-    "BELL" "Backspace" "Tab" "Newline" "LINE_TABULATION" "Page" "Return" "SHIFT_OUT" "SHIFT_IN"
-    "DATA_LINK_ESCAPE" "DEVICE_CONTROL_ONE" "DEVICE_CONTROL_TWO" "DEVICE_CONTROL_THREE" "DEVICE_CONTROL_FOUR"
-    "NEGATIVE_ACKNOWLEDGE" "SYNCHRONOUS_IDLE" "END_OF_TRANSMISSION_BLOCK" "CANCEL" "END_OF_MEDIUM" "SUBSTITUTE"
-    "ESCAPE" "INFORMATION_SEPARATOR_FOUR" "INFORMATION_SEPARATOR_THREE" "INFORMATION_SEPARATOR_TWO"
-    "INFORMATION_SEPARATOR_ONE" "Space" "EXCLAMATION_MARK" "QUOTATION_MARK" "NUMBER_SIGN" "DOLLAR_SIGN"
-    "PERCENT_SIGN" "AMPERSAND" "APOSTROPHE" "LEFT_PARENTHESIS" "RIGHT_PARENTHESIS" "ASTERISK" "PLUS_SIGN"
-    "COMMA" "HYPHEN-MINUS" "FULL_STOP" "SOLIDUS" "DIGIT_ZERO" "DIGIT_ONE" "DIGIT_TWO" "DIGIT_THREE" "DIGIT_FOUR"
-    "DIGIT_FIVE" "DIGIT_SIX" "DIGIT_SEVEN" "DIGIT_EIGHT" "DIGIT_NINE" "COLON" "SEMICOLON" "LESS-THAN_SIGN"
-    "EQUALS_SIGN" "GREATER-THAN_SIGN" "QUESTION_MARK" "COMMERCIAL_AT" "LATIN_CAPITAL_LETTER_A"
-    "LATIN_CAPITAL_LETTER_B" "LATIN_CAPITAL_LETTER_C" "LATIN_CAPITAL_LETTER_D" "LATIN_CAPITAL_LETTER_E"
-    "LATIN_CAPITAL_LETTER_F" "LATIN_CAPITAL_LETTER_G" "LATIN_CAPITAL_LETTER_H" "LATIN_CAPITAL_LETTER_I"
-    "LATIN_CAPITAL_LETTER_J" "LATIN_CAPITAL_LETTER_K" "LATIN_CAPITAL_LETTER_L" "LATIN_CAPITAL_LETTER_M"
-    "LATIN_CAPITAL_LETTER_N" "LATIN_CAPITAL_LETTER_O" "LATIN_CAPITAL_LETTER_P" "LATIN_CAPITAL_LETTER_Q"
-    "LATIN_CAPITAL_LETTER_R" "LATIN_CAPITAL_LETTER_S" "LATIN_CAPITAL_LETTER_T" "LATIN_CAPITAL_LETTER_U"
-    "LATIN_CAPITAL_LETTER_V" "LATIN_CAPITAL_LETTER_W" "LATIN_CAPITAL_LETTER_X" "LATIN_CAPITAL_LETTER_Y"
-    "LATIN_CAPITAL_LETTER_Z" "LEFT_SQUARE_BRACKET" "REVERSE_SOLIDUS" "RIGHT_SQUARE_BRACKET" "CIRCUMFLEX_ACCENT"
-    "LOW_LINE" "GRAVE_ACCENT" "LATIN_SMALL_LETTER_A" "LATIN_SMALL_LETTER_B" "LATIN_SMALL_LETTER_C"
-    "LATIN_SMALL_LETTER_D" "LATIN_SMALL_LETTER_E" "LATIN_SMALL_LETTER_F" "LATIN_SMALL_LETTER_G"
-    "LATIN_SMALL_LETTER_H" "LATIN_SMALL_LETTER_I" "LATIN_SMALL_LETTER_J" "LATIN_SMALL_LETTER_K"
-    "LATIN_SMALL_LETTER_L" "LATIN_SMALL_LETTER_M" "LATIN_SMALL_LETTER_N" "LATIN_SMALL_LETTER_O"
-    "LATIN_SMALL_LETTER_P" "LATIN_SMALL_LETTER_Q" "LATIN_SMALL_LETTER_R" "LATIN_SMALL_LETTER_S"
-    "LATIN_SMALL_LETTER_T" "LATIN_SMALL_LETTER_U" "LATIN_SMALL_LETTER_V" "LATIN_SMALL_LETTER_W"
-    "LATIN_SMALL_LETTER_X" "LATIN_SMALL_LETTER_Y" "LATIN_SMALL_LETTER_Z" "LEFT_CURLY_BRACKET" "VERTICAL_LINE"
-    "RIGHT_CURLY_BRACKET" "TILDE" "Rubout")
+(defvar +ascii-names+
+  #("Null" "Start_Of_Heading" "Start_Of_Text" "End_Of_Text"
+    "End_Of_Transmission" "Enquiry" "Acknowledge" "Bell" "Backspace"
+    "Tab" "Newline" "Line_Tabulation" "Page" "Return" "Shift_Out" "Shift_In"
+    "Data_Link_Escape" "Device_Control_One" "Device_Control_Two"
+    "Device_Control_Three" "Device_Control_Four" "Negative_Acknowledge"
+    "Synchronous_Idle" "End_Of_Transmission_Block" "Cancel" "End_Of_Medium"
+    "Substitute" "Escape" "Information_Separator_Four"
+    "Information_Separator_Three" "Information_Separator_Two"
+    "Information_Separator_One" "Space" "Exclamation_Mark" "Quotation_Mark"
+    "Number_Sign" "Dollar_Sign" "Percent_Sign" "Ampersand" "Apostrophe"
+    "Left_Parenthesis" "Right_Parenthesis" "Asterisk" "Plus_Sign" "Comma"
+    "Hyphen-Minus" "Full_Stop" "Solidus" "Digit_Zero" "Digit_One" "Digit_Two"
+    "Digit_Three" "Digit_Four" "Digit_Five" "Digit_Six" "Digit_Seven"
+    "Digit_Eight" "Digit_Nine" "Colon" "Semicolon" "Less-Than_Sign"
+    "Equals_Sign" "Greater-Than_Sign" "Question_Mark" "Commercial_At"
+    "Latin_Capital_Letter_A" "Latin_Capital_Letter_B" "Latin_Capital_Letter_C"
+    "Latin_Capital_Letter_D" "Latin_Capital_Letter_E" "Latin_Capital_Letter_F"
+    "Latin_Capital_Letter_G" "Latin_Capital_Letter_H" "Latin_Capital_Letter_I"
+    "Latin_Capital_Letter_J" "Latin_Capital_Letter_K" "Latin_Capital_Letter_L"
+    "Latin_Capital_Letter_M" "Latin_Capital_Letter_N" "Latin_Capital_Letter_O"
+    "Latin_Capital_Letter_P" "Latin_Capital_Letter_Q" "Latin_Capital_Letter_R"
+    "Latin_Capital_Letter_S" "Latin_Capital_Letter_T" "Latin_Capital_Letter_U"
+    "Latin_Capital_Letter_V" "Latin_Capital_Letter_W" "Latin_Capital_Letter_X"
+    "Latin_Capital_Letter_Y" "Latin_Capital_Letter_Z" "Left_Square_Bracket"
+    "Reverse_Solidus" "Right_Square_Bracket" "Circumflex_Accent"
+    "Low_Line" "Grave_Accent" "Latin_Small_Letter_A" "Latin_Small_Letter_B"
+    "Latin_Small_Letter_C" "Latin_Small_Letter_D" "Latin_Small_Letter_E"
+    "Latin_Small_Letter_F" "Latin_Small_Letter_G" "Latin_Small_Letter_H"
+    "Latin_Small_Letter_I" "Latin_Small_Letter_J" "Latin_Small_Letter_K"
+    "Latin_Small_Letter_L" "Latin_Small_Letter_M" "Latin_Small_Letter_N"
+    "Latin_Small_Letter_O" "Latin_Small_Letter_P" "Latin_Small_Letter_Q"
+    "Latin_Small_Letter_R" "Latin_Small_Letter_S" "Latin_Small_Letter_T"
+    "Latin_Small_Letter_U" "Latin_Small_Letter_V" "Latin_Small_Letter_W"
+    "Latin_Small_Letter_X" "Latin_Small_Letter_Y" "Latin_Small_Letter_Z"
+    "Left_Curly_Bracket" "Vertical_Line" "Right_Curly_Bracket" "Tilde"
+    "Rubout")
   "Names/codepoints of the first 128 characters from Unicode 6.2,
 except with Common Lisp's suggested changes.
 For the first 32 characters ('C0 controls'), the first
@@ -200,17 +214,16 @@ For the first 32 characters ('C0 controls'), the first
 ;; I hope  being slightly different from  SBCL doesn't bite me  down the
 ;; road. I'll figure out a good way to add the other 21701 names later.
 
-(defun char-name (char)
+(defun jscl/cl::char-name (char)
   "For consistency, I'm  using the SBCL convention of  the Unicode name,
  with spaces as underscores, for  ASCII; or their \"U+xxxx\" convention
  for names I don't know."
   (let ((code (char-code char)))
     (if (<= code 127)
         (aref +ascii-names+ code)
-        (format nil #-jscl "U+~4,'0x" ; HACK until padding works right.
-                #+jscl "U+~x" code))))
+        (format nil "U+~4,'0x" code))))
 
-(defun name-char (name)
+(defun jscl/cl::name-char (name)
   (let ((name (string name)))
     (if (and (<= 3 (length name))
              (char-equal #\U (char name 0))
@@ -221,5 +234,5 @@ For the first 32 characters ('C0 controls'), the first
 
         (progn (dotimes (i (length +ascii-names+))
                  (when (string-equal name (aref +ascii-names+ i))
-                   (return-from name-char (code-char i))))
+                   (return-from jscl/cl::name-char (code-char i))))
                nil))))

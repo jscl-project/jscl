@@ -113,13 +113,13 @@ identifying them (and their provenance) easier."))
   (defun extract-version-from-package.json ()
     (with-open-file (in (merge-pathnames "package.json" *base-directory*))
       (loop
-         for line = (read-line in nil)
-         while line
-         when (search "\"version\":" line)
-         do (let ((colon (position #\: line))
-                  (comma (position #\, line)))
-              (return (string-trim '(#\newline #\" #\tab #\space)
-                                   (subseq line (1+ colon) comma))))))))
+        for line = (read-line in nil)
+        while line
+        when (search "\"version\":" line)
+          do (let ((colon (position #\: line))
+                   (comma (position #\, line)))
+               (return (string-trim '(#\newline #\" #\tab #\space)
+                                    (subseq line (1+ colon) comma))))))))
 
 (defvar *version*
   (extract-version-from-package.json)
@@ -145,18 +145,18 @@ identifying them (and their provenance) easier."))
     ("defstruct"     :both)
     ("types"	:both)
     ("lambda-list"   :both)
-    ("numbers"       :target)
-    ("char"          :target)
-    ("list"          :target)
-    ("array"         :target)
-    ("string"        :target)
-    ("sequence"      :target)
-    ("stream"        :target)
-    ("hash-table"    :target)
-    ("print"         :target)
-    ("misc"          :target)
+    ("numbers"       :both)
+    ("char"          :both)
+    ("list"          :both)
+    ("array"         :both)
+    ("string"        :both)
+    ("sequence"      :both)
+    ("stream"        :both)
+    ("hash-table"    :target) ; TODO
+    ("print"         :both)
+    ("misc"          :both)
     ("ffi"           :target)
-    ("symbol"        :target)
+    ("symbol"        :both)
     ("package"       :both)
     ("ansiloop"
      ("ansi-loop"    :both))
@@ -167,8 +167,8 @@ identifying them (and their provenance) easier."))
      ("codegen"      :both)
      ("compiler"     :both)
      ("compile-file"	:both))
-    ("documentation" :target)
-    ("toplevel" 	:target))
+    ("documentation" :target) ; TODO
+    ("toplevel" 	:both))
   "List of  all the source files  that need to be  compiled, and whether
 they are  to be compiled  just by  the host, by  the target JSCL,  or by
 both.  All files  have a  `.lisp' extension,  and are  relative to  src/
@@ -220,44 +220,52 @@ compiled in the host.")
 ;;; Compile and load jscl into the host
 (defun load-jscl ()
   (with-compilation-unit ()
-    (when *load-pathname*    ; Prevent that one stale FASL …
+    (when *load-pathname*    ; Prevent this  file from becoming that one
+                                        ; stale FASL …
       (compile-file *load-pathname*))
-    (let (fasls)
+    (load (merge-pathnames "src/compat.lisp"
+                           #. (or *load-pathname*
+                                  *compile-file-pathname*
+                                  #p ".")))
+    (let (fasls failures)
       (do-source input :host
-        (let (failures)
-          (load input)
-          (locally
-              (declare #+sbcl (sb-ext:muffle-conditions
-
-                               sb-kernel::function-redefinition-warning))
-            (multiple-value-bind (fasl warn fail) (compile-file input)
-              (declare (ignore warn))
-              ;; It's only interesting to see  if there were failures at
-              ;; the  end  of  the  compilation  unit,  since  undefined
-              ;; functions  in  one  file  may be  defined  in  another.
-              ;; This   gets   particularly   convoluted  due   to   the
-              ;; circularity of the type system and object systems.
-              (when fail
-                (push fail failures)
-                (warn "Compilation of ~A failed." input))
-              (when fasl
-                (push fasl fasls))))))
-      (init-built-in-types%)
-      (locally
-          ;; These  occur  because  we  reload from  FASL  the  compiled
-          ;; versions
+        (load input)
+        (locally
+            ;; I make  the assumption that re-loading  the files under
+            ;; Swank, you  don't care about these  redefinitions … but
+            ;; if we get them running  top-level (eg, from a Makefile)
+            ;; they're more interesting.
+            #+swank
           (declare #+sbcl (sb-ext:muffle-conditions
                            sb-kernel::function-redefinition-warning))
-        (map nil #'load (reverse fasls))))))
+          (multiple-value-bind (fasl warn fail) (compile-file input)
+            (declare (ignore warn))
+            ;; It's only interesting to see  if there were failures at
+            ;; the  end  of  the  compilation  unit,  since  undefined
+            ;; functions  in  one  file  may be  defined  in  another.
+            ;; This   gets   particularly   convoluted  due   to   the
+            ;; circularity of the type system and object systems.
+            (when fail
+              (push fail failures)
+              (warn "Compilation of ~A failed." input))
+            (when fasl
+              (push fasl fasls))))))
+    (init-built-in-types%)
+    (locally
+        ;; These  occur  because  we  reload from  FASL  the  compiled
+        ;; versions
+        (declare #+sbcl (sb-ext:muffle-conditions
+                         sb-kernel::function-redefinition-warning))
+      (mapc #'load (reverse fasls)))))
 
 
 (defmacro doforms ((var stream) &body body)
   (let ((eof (gensym "EOF-")))
     `(loop
-        with ,eof = (gensym "EOF-")
-        for ,var = (read ,stream nil ,eof)
-        until (eq ,var ,eof)
-        do (progn ,@body))))
+       with ,eof = (gensym "EOF-")
+       for ,var = (read ,stream nil ,eof)
+       until (eq ,var ,eof)
+       do (progn ,@body))))
 
 
 ;;;; Load JSCL into the host implementation.
@@ -279,5 +287,5 @@ improve the level of trust of the tests."
     (load (source-pathname "tests.lisp" :directory nil))
     (let ((*use-html-output-p* nil))
       (declare (special *use-html-output-p*))
-      (map nil #'load (test-files)))
+      (mapc #'load (test-files)))
     (load "tests-report.lisp")))

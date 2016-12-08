@@ -134,8 +134,8 @@ SETF knows a corresponding setting form."
     (let ((d (gensym "DELTA-")))
       `(let* (,@(mapcar #'list dummies vals)
               (,d ,delta)
-                (,(car newval) (+ ,getter ,d))
-                ,@(cdr newval))
+              (,(car newval) (+ ,getter ,d))
+              ,@(cdr newval))
          ,setter))))
 
 (defmacro jscl/cl::decf (place &optional (delta 1))
@@ -144,8 +144,8 @@ SETF knows a corresponding setting form."
     (let ((d (gensym "DELTA-")))
       `(let* (,@(mapcar #'list dummies vals)
               (,d ,delta)
-                (,(car newval) (- ,getter ,d))
-                ,@(cdr newval))
+              (,(car newval) (- ,getter ,d))
+              ,@(cdr newval))
          ,setter))))
 
 (defmacro jscl/cl::push (x place)
@@ -164,8 +164,8 @@ SETF knows a corresponding setting form."
     (let ((head (gensym "HEAD-")))
       `(let* (,@(mapcar #'list dummies vals)
               (,head ,getter)
-                (,(car newval) (cdr ,head))
-                ,@(cdr newval))
+              (,(car newval) (cdr ,head))
+              ,@(cdr newval))
          ,setter
          (car ,head)))))
 

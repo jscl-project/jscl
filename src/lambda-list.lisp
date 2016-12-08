@@ -225,7 +225,7 @@
   (let   (;;   If it is  non-NIL, we have  to check for  unknown keyword
           ;;  arguments in the list to signal an error in that case.
           (allow-other-keys
-           (or allow-other-keys (keyword-lookup :allow-other-keys list))))
+            (or allow-other-keys (keyword-lookup :allow-other-keys list))))
     (unless allow-other-keys
       (do-keywords key value list
         (declare (ignore value))
@@ -288,17 +288,17 @@ against FORM."
                           (gensym "REST-PATERN-")))
              (keywords (mapcar #'keyvar-keyword-name (lambda-list-keyvars ll)))
              (rest
-              ;; Create  a  binding  for  the  rest  of  the  arguments.
-              ;; If there is keywords, then validate this list. If there
-              ;; is  no keywords  and no  &rest variable,  then validate
-              ;; that the rest is empty, it  is to say, there is no more
-              ;; arguments that we expect.
-              (cond
-                (keywords (compute-pbindings pattern
-                                             `(validate-keyvars ,chain ',keywords
-                                                                ,(lambda-list-allow-other-keys ll))))
-                (restvar  (compute-pbindings pattern chain))
-                (t        (compute-pbindings pattern `(validate-max-args ,chain))))))
+               ;; Create  a  binding  for  the  rest  of  the  arguments.
+               ;; If there is keywords, then validate this list. If there
+               ;; is  no keywords  and no  &rest variable,  then validate
+               ;; that the rest is empty, it  is to say, there is no more
+               ;; arguments that we expect.
+               (cond
+                 (keywords (compute-pbindings pattern
+                                              `(validate-keyvars ,chain ',keywords
+                                                                 ,(lambda-list-allow-other-keys ll))))
+                 (restvar  (compute-pbindings pattern chain))
+                 (t        (compute-pbindings pattern `(validate-max-args ,chain))))))
         (when (lambda-list-keyvars ll)
           ;; Keywords
           (dolist (keyvar (lambda-list-keyvars ll))
@@ -354,8 +354,8 @@ where the form is bound is returned."
 #+jscl-xc
 (eval-when (:compile-toplevel)
   (let ((macroexpander
-         '#'(lambda (form &optional environment)
-              (declare (ignore environment))
-              (apply #'!expand-destructuring-bind form))))
+          '#'(lambda (form &optional environment)
+               (declare (ignore environment))
+               (apply #'!expand-destructuring-bind form))))
     (%compile-defmacro '!destructuring-bind macroexpander)
     (%compile-defmacro  'destructuring-bind macroexpander)))

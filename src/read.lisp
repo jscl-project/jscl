@@ -75,36 +75,26 @@
   (lambda ()
     (error "Internal error in fixup creation during read")))
 
-(defun !make-string-input-stream (string)
+(defun jscl/cl::make-string-input-stream (string)
+ ;;; FIXME. Use the new stream fake-generics stuff.
   (cons string 0))
 
-#+jscl (defun make-string-input-stream (s) (!make-string-input-stream s))
-
-(defun %peek-char (&optional (peek-type nil) (stream *standard-input*)
-                             (eof-error-p t) (eof-value nil))
+(defun jscl/cl::peek-char (&optional (peek-type nil) (stream *standard-input*)
+                                     (eof-error-p t) (eof-value nil))
   (assert (null peek-type))
   (cond ((< (cdr stream) (length (car stream)))
          (char (car stream) (cdr stream)))
         (eof-error-p
          (error "End of file in PEEK-CHAR"))
         (t eof-value)))
-
-(defun %read-char (stream &optional (eof-error-p t) (eof-value nil))
+(defun jscl/cl::read-char (stream &optional (eof-error-p t)
+                                            (eof-value nil))
   (cond ((< (cdr stream) (length (car stream)))
          (prog1 (char (car stream) (cdr stream))
            (rplacd stream (1+ (cdr stream)))))
         (eof-error-p
          (error "End of file in READ-CHAR"))
         (t eof-value)))
-
-#+jscl (defun peek-char  (&optional (peek-type nil)
-                                    (stream *standard-input*)
-                                    (eof-error-p t) (eof-value nil))
-         (%peek-char peek-type stream eof-error-p eof-value))
-#+jscl (defun read-char (stream &optional (eof-error-p t)
-                                          (eof-value nil))
-         (%read-char stream eof-error-p eof-value))
-
 
 (defun whitespacep (ch)
   (find ch #(#\Space #\Tab #\Newline
@@ -128,11 +118,10 @@
 when passed  the value of  the next  character. The character  passed to
 FUNC will NOT be returnings."
   (let ((string (make-array 80 :element-type 'character
-                            :adjustable t :fill-pointer 0))
+                               :adjustable t :fill-pointer 0))
         (ch (peek-char nil stream nil nil)))
     (while (and ch (not (funcall func ch)))
-      #-jscl (vector-push-extend ch string 80)
-      #+jscl (setq string (concatenate 'string string (string ch)))
+      (vector-push-extend ch string 80)
       (read-char stream nil nil)
       (setq ch (peek-char nil stream nil nil)))
     string))
@@ -190,7 +179,7 @@ FUNC will NOT be returnings."
                                        (lambda (obj)
                                          (rplaca cell obj))))
               (eof (gensym "EOF-"))
-              (next (ls-read stream nil eof t)))
+              (next (jscl/cl::read stream nil eof t)))
          (rplaca cell next)
          (skip-whitespaces-and-comments stream)
          (cond
@@ -206,7 +195,7 @@ FUNC will NOT be returnings."
                                                      (lambda (obj)
                                                        (rplacd cell obj)))))
                         ;; Dotted pair notation
-                        (rplacd cell (ls-read stream eof-error-p eof-value t))
+                        (rplacd cell (jscl/cl::read stream eof-error-p eof-value t))
                         (skip-whitespaces-and-comments stream)
                         (let ((ch (peek-char nil stream nil nil)))
                           (if (or (null ch) (char= #\) ch))
@@ -263,10 +252,10 @@ FUNC will NOT be returnings."
   (let ((ch (read-char stream nil nil)))
     (case ch
       (#\apostrophe
-       (list 'function (ls-read stream eof-error-p eof-value t)))
+       (list 'function (jscl/cl::read stream eof-error-p eof-value t)))
       (#\.
        (if *read-eval*
-           (eval (ls-read stream))
+           (eval (jscl/cl::read stream))
            nil))
       (#\(
        (do ((elements nil)
@@ -285,7 +274,7 @@ FUNC will NOT be returnings."
                                          (lambda (obj)
                                            (aset result ix obj))))
                 (eof (gensym "EOF-"))
-                (value (ls-read stream nil eof t)))
+                (value (jscl/cl::read stream nil eof t)))
            (push value elements))))
       (#\:
        (make-symbol
@@ -300,25 +289,25 @@ FUNC will NOT be returnings."
                      (let ((*read-base* 16))
                        (code-char (read-integer-from-stream stream))))
                     (t (let ((cname
-                              (concatenate 'string "U" (string (read-char stream nil nil))
-                                           (read-until stream #'terminalp))))
+                               (concatenate 'string "U" (string (read-char stream nil nil))
+                                            (read-until stream #'terminalp))))
                          (let ((ch (name-char cname)))
                            (or ch (char cname 0)))))))
              (t (let ((cname
-                       (concatenate 'string (string (read-char stream nil nil))
-                                    (read-until stream #'terminalp))))
+                        (concatenate 'string (string (read-char stream nil nil))
+                                     (read-until stream #'terminalp))))
                   (let ((ch (name-char cname)))
                     (or ch (char cname 0)))))))
       ((#\+ #\-)
        (let* ((expression
-               (let ((*package* (find-package :keyword)))
-                 (ls-read stream eof-error-p eof-value t))))
+                (let ((*package* (find-package :keyword)))
+                  (jscl/cl::read stream eof-error-p eof-value t))))
 
          (if (eql (char= ch #\+) (eval-feature-expression expression))
-             (ls-read stream eof-error-p eof-value t)
+             (jscl/cl::read stream eof-error-p eof-value t)
              (prog2 (let ((*read-skip-p* t))
-                      (ls-read stream))
-                 (ls-read stream eof-error-p eof-value t)))))
+                      (jscl/cl::read stream))
+                 (jscl/cl::read stream eof-error-p eof-value t)))))
       ((#\B #\b)
        (let ((*read-base* 2))
          (read-integer-from-stream stream)))
@@ -349,7 +338,7 @@ FUNC will NOT be returnings."
                       (read-char stream nil nil)
                       (read-til-bar-sharpsign)))))
          (read-til-bar-sharpsign)
-         (ls-read stream eof-error-p eof-value t)))
+         (jscl/cl::read stream eof-error-p eof-value t)))
       (otherwise
        (cond
          ((and ch (digit-char-p ch))
@@ -364,7 +353,7 @@ FUNC will NOT be returnings."
                    (error "Duplicated label #~S=" id)
                    (progn
                      (add-labelled-object id *future-value*)
-                     (let ((obj (ls-read stream eof-error-p eof-value t)))
+                     (let ((obj (jscl/cl::read stream eof-error-p eof-value t)))
                        ;; FIXME:  somehow the  more  natural (setf  (cdr
                        ;; (find-labelled-object id)) obj) doesn't work
                        (rplacd (find-labelled-object id) obj)
@@ -495,7 +484,7 @@ FUNC will NOT be returnings."
       (case (char string index)
         (#\+ (incf index))
         (#\- (setq sign -1)
-             (incf index)))
+         (incf index)))
       (unless (< index size) (return))
       ;; Optional integer part
       (awhen (digit-char-p (char string index))
@@ -533,7 +522,7 @@ FUNC will NOT be returnings."
         (case (char string index)
           (#\+ (incf index))
           (#\- (setq exponent-sign -1)
-               (incf index)))
+           (incf index)))
         (unless (< index size) (return))
         ;; Exponent digits
         (let ((value (digit-char-p (char string index))))
@@ -563,7 +552,7 @@ FUNC will NOT be returnings."
         (case (char string 0)
           (#\+ (incf index))
           (#\- (setq sign -1)
-               (incf index)))
+           (incf index)))
         ;; First digit
         (unless (and (< index size)
                      (setq value (digit-char-p (char string index) radix)))
@@ -598,7 +587,7 @@ FUNC will NOT be returnings."
       (read-float string)
       (read-symbol string)))
 
-(defun ls-read (stream &optional (eof-error-p t) eof-value recursive-p)
+(defun jscl/cl::read (stream &optional (eof-error-p t) eof-value recursive-p)
   (let ((save-labelled-objects *labelled-objects*)
         (save-fixup-locations *fixup-locations*))
     (unless recursive-p
@@ -618,14 +607,14 @@ FUNC will NOT be returnings."
                (%read-list stream eof-error-p eof-value))
               ((char= ch #\apostrophe)
                (read-char stream nil nil)
-               (list 'quote (ls-read stream eof-error-p eof-value t)))
+               (list 'quote (jscl/cl::read stream eof-error-p eof-value t)))
               ((char= ch #\grave_accent)
                (read-char stream nil nil)
                (if (char= (peek-char nil stream nil nil) #\#)
                    (warn "`# might be `#(vec) form, not yet supported;
 rewrite `#(v1 v2…) as (apply #'vector `(v1 v2…))"))
 
-               (list 'backquote (ls-read stream eof-error-p eof-value t)))
+               (list 'backquote (jscl/cl::read stream eof-error-p eof-value t)))
               ((char= ch #\")
                (read-char stream nil nil)
                (read-string stream))
@@ -635,8 +624,8 @@ rewrite `#(v1 v2…) as (apply #'vector `(v1 v2…))"))
                        (char= (peek-char nil stream nil nil) #\.))
                    (progn (read-char stream nil nil)
                           (list 'unquote-splicing
-                                (ls-read stream eof-error-p eof-value t)))
-                   (list 'unquote (ls-read stream eof-error-p eof-value t))))
+                                (jscl/cl::read stream eof-error-p eof-value t)))
+                   (list 'unquote (jscl/cl::read stream eof-error-p eof-value t))))
               ((char= ch #\#)
                (read-sharp stream eof-error-p eof-value))
               (t
@@ -648,28 +637,18 @@ rewrite `#(v1 v2…) as (apply #'vector `(v1 v2…))"))
         (setf *labelled-objects* save-labelled-objects)
         (setf *fixup-locations* save-fixup-locations)))))
 
-#+jscl
-(fset 'read #'ls-read)
-#+ (or)
-(defun read (&optional (stream *standard-input*) (eof-error-p t) (eof-value nil) (recursive-p nil))
-  (ls-read stream eof-error-p eof-value recursive-p))
 
 (locally
     ;; Style-Warning for having  &optional and &key in  the same λ-list,
     ;; but we're mimicking the CL:Read-from-string function, so we don't
     ;; care about that particular warning.
     #+sbcl (declare (sb-ext:muffle-conditions style-warning))
-    (defun ls-read-from-string (string
-                                &optional (eof-error-p t) eof-value
-                                &key (start 0) (end nil)
-                                     (preserve-whitespace t))
+    (defun jscl/cl::read-from-string (string
+                                      &optional (eof-error-p t) eof-value
+                                      &key (start 0) (end nil)
+                                           (preserve-whitespace t))
       (funcall (if preserve-whitespace
-                   #'read-preserving-whitespace
-                   #'ls-read)
+                   #'jscl/cl::read-preserving-whitespace
+                   #'jscl/cl::read)
                (make-string-input-stream string start (or end (length string)))
                eof-error-p eof-value)))
-#+jscl
-(fset 'read-from-string #'ls-read-from-string)
-#+ (or)
-(defun read-from-string (string &optional (eof-errorp t) eof-value)
-  (ls-read-from-string string eof-errorp eof-value))

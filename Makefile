@@ -103,6 +103,7 @@ doc/jscl.texi:	$(ALL_LISP) doc-intro.texi doc-conclusion.texi
 		$(LISPEVAL)'(jscl/doc:write-docs)'
 
 doc/jscl.html.d/index.html:	doc/jscl.texi
+	cp doc.css doc/
 	cd doc; makeinfo -o jscl.html.d/ \
 		--html --css-include=doc.css \
 		--split=node jscl.texi

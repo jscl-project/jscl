@@ -12,7 +12,7 @@
 ;;
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
-(in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
+(in-package :jscl)
 
 (/debug "loading sequence.lisp!")
 
@@ -22,19 +22,17 @@
 (defun not-seq-error (thing)
   (error "`~S' is not of type SEQUENCE" thing))
 
-(defun length (seq)
-  (cond
-    ((stringp seq)
-     (string-length seq))
-    ((arrayp seq)
-     (jscl/ffi:oget seq "length"))
-    ((listp seq)
-     (list-length seq))
-    (t
-     (not-seq-error seq))))
+(defun jscl/cl::length (seq)
+  (typecase seq
+    ((or string array) (first (array-dimensions seq)))
+    (list (list-length seq))
+    (t (not-seq-error seq))))
 
-(defun emptyp (seq)
-  (and seq (zerop (length seq))))
+(defun jscl/cl::emptyp (seq)
+  (or (null seq)
+      (and seq
+           (arrayp seq)
+           (zerop (length seq)))))
 
 (defun vector-reverse (vector)
   (let* ((length (length vector))
@@ -42,7 +40,7 @@
     (dotimes (index length new-vector)
       (setf (aref new-vector index) (aref vector (- length (1+ index)))))))
 
-(defun reverse (sequence)
+(defun jscl/cl::reverse (sequence)
   "Return a new sequence containing the same elements but in reverse order."
   (etypecase sequence
     (list (revappend sequence '()))
@@ -61,12 +59,13 @@
         ((< i (/ size 2)) sequence)
       (set (elt sequence i) (elt sequence (- size i 1))))))
 
-(defun nreverse (sequence)
+(defun jscl/cl::nreverse (sequence)
   (etypecase sequence
     (list (list-nreverse sequence))
     (vector (vector-nreverse sequence))))
 
-(defmacro do-sequence ((elt seq &optional (index (gensym "i") index-p)) &body body)
+(defmacro do-sequence ((elt seq &optional (index (gensym "i") index-p))
+                       &body body)
   (let ((nseq (gensym "seq")))
     (unless (symbolp elt)
       (error "`~S' must be a symbol." elt))
@@ -83,11 +82,11 @@
              (let ((,elt (aref ,nseq ,index)))
                ,@body))))))
 
-(defun count (item sequence &key from-end (start 0) end
-                                 key (test #'eql testp)
-                                 (test-not #'eql test-not-p))
-  ;; TODO: Implement START and END efficiently for all the sequence
-  ;; functions.
+(defun jscl/cl::count (item sequence &key from-end (start 0) end
+                                          key (test #'eql testp)
+                                          (test-not #'eql test-not-p))
+  ;; TODO:   Implement   START  and   END   efficiently   for  all   the
+  ;; sequence functions.
   (let* ((l (length sequence))
          (end (or end l))
          (result 0))
@@ -108,9 +107,9 @@
             (incf result))))
     result))
 
-(defun count-if (predicate sequence &key from-end (start 0) end key)
-  ;; TODO: Implement START and END efficiently for all the sequence
-  ;; functions.
+(defun jscl/cl::count-if (predicate sequence &key from-end (start 0) end key)
+  ;; TODO:   Implement   START  and   END   efficiently   for  all   the
+  ;; sequence functions.
   (let* ((l (length sequence))
          (end (or end l))
          (result 0))
@@ -127,17 +126,17 @@
             (incf result))))
     result))
 
-(defun count-if-not (predicate sequence &key from-end (start 0) end key)
+(defun jscl/cl::count-if-not (predicate sequence &key from-end (start 0) end key)
   (count-if (complement predicate) sequence :from-end from-end
-            :start start :end end :key key))
+                                            :start start :end end :key key))
 
-(defun find (item seq &key key (test #'eql testp) (test-not #'eql test-not-p))
+(defun jscl/cl::find (item seq &key key (test #'eql testp) (test-not #'eql test-not-p))
   (do-sequence (x seq)
     (when (satisfies-test-p item x :key key :test test :testp testp
-                            :test-not test-not :test-not-p test-not-p)
+                                   :test-not test-not :test-not-p test-not-p)
       (return x))))
 
-(defun find-if (predicate sequence &key key)
+(defun jscl/cl::find-if (predicate sequence &key key)
   (if key
       (do-sequence (x sequence)
         (when (funcall predicate (funcall key x))
@@ -146,12 +145,15 @@
         (when (funcall predicate x)
           (return x)))))
 
-(defun position (elt sequence
-                 &key from-end key (test #'eql testp)
-                      (test-not #'eql test-not-p)
-                      (start 0) end)
-  ;; TODO: Implement START and END efficiently for all the sequence
-  ;; functions.
+(defun jscl/cl::find-if-not (predicate sequence &key key)
+  (find-if (complement predicate) sequence :key key))
+
+(defun jscl/cl::position (elt sequence
+                          &key from-end key (test #'eql testp)
+                               (test-not #'eql test-not-p)
+                               (start 0) end)
+  ;; TODO:   Implement   START  and   END   efficiently   for  all   the
+  ;; sequence functions.
   (let ((end (or end (length sequence)))
         (result nil))
     (do-sequence (x sequence index)
@@ -165,10 +167,10 @@
           (return))))
     result))
 
-(defun position-if (predicate sequence
-                    &key from-end key (start 0) end)
-  ;; TODO: Implement START and END efficiently for all the sequence
-  ;; functions.
+(defun jscl/cl::position-if (predicate sequence
+                             &key from-end key (start 0) end)
+  ;; TODO:   Implement   START  and   END   efficiently   for  all   the
+  ;; sequence functions.
   (let ((end (or end (length sequence)))
         (result nil))
     (do-sequence (x sequence index)
@@ -180,16 +182,16 @@
           (return))))
     result))
 
-(defun position-if-not (predicate sequence
-                        &key from-end key (start 0) end)
+(defun jscl/cl::position-if-not (predicate sequence
+                                 &key from-end key (start 0) end)
   (position-if (complement predicate) sequence
                :from-end from-end :key key :start start :end end))
 
-(defun substitute (new old seq
-                   &key (key #'identity) (test #'eql)
-                        (start 0) (end nil endp)
-                        (count nil countp)
-                        test-not from-end)
+(defun jscl/cl::substitute (new old seq
+                            &key (key #'identity) (test #'eql)
+                                 (start 0) (end nil endp)
+                                 (count nil countp)
+                                 test-not from-end)
   (when test-not (warn "SUBSTITUTE :TEST-NOT still not supported"))
   (when from-end (warn "SUBSTITUTE :FROM-END still not supported"))
   (and seq
@@ -215,10 +217,10 @@
               (incf i)))
           seq))))
 
-(defun substitute-if (new pred seq
-                      &key (key #'identity)
-                           (start 0) (end nil endp) (count nil countp)
-                           from-end)
+(defun jscl/cl::substitute-if (new pred seq
+                               &key (key #'identity)
+                                    (start 0) (end nil endp) (count nil countp)
+                                    from-end)
   (let ((substitute-args (append (list new t seq
                                        :key (lambda (elt)
                                               (funcall pred (funcall key elt)))
@@ -231,44 +233,38 @@
                                  (when countp (list :count count)))))
     (apply #'substitute substitute-args)))
 
-(defun substitute-if-not (new pred seq &rest keys
-                          &key (key #'identity) (start 0) (end nil endp)
-                               (count nil countp) from-end)
-  (let ((substitute-args (append (list new t seq
-                                       :key (lambda (elt)
-                                              (not (funcall pred (funcall key elt))))
-                                       :test (lambda (_ v)
-                                               (declare (ignore _))
-                                               v)
-                                       :start start)
-                                 (when endp (list :end end))
-                                 (when from-end (list :from-end t))
-                                 (when countp (list :count count)))))
-    (apply #'substitute substitute-args)))
+(defun jscl/cl::substitute-if-not (new pred seq
+                                   &key (key #'identity)
+                                        (start 0) (end nil)
+                                        (count nil) from-end)
+  (substitute-if new (complement pred) seq
+                 :key key :start start :end (or end (length seq))
+                 :count count :from-end from-end))
 
-(defun remove (x seq &key key (test #'eql testp) (test-not #'eql test-not-p))
-  (cond
-    ((null seq)
-     nil)
-    ((listp seq)
+(defun jscl/cl::remove (x seq
+                        &key key (test #'eql testp) (test-not #'eql test-not-p))
+  (etypecase seq
+    (null nil)
+    (list
      (let* ((head (cons nil nil))
             (tail head))
        (do-sequence (elt seq)
-         (unless (satisfies-test-p x elt :key key :test test :testp testp
+         (unless (satisfies-test-p x elt
+                                   :key key :test test :testp testp
                                    :test-not test-not :test-not-p test-not-p)
            (let ((new (list elt)))
              (rplacd tail new)
              (setq tail new))))
        (cdr head)))
-    (t
+    (array
      (let (vector)
        (do-sequence (elt seq index)
          (if (satisfies-test-p x elt :key key :test test :testp testp
-                               :test-not test-not :test-not-p test-not-p)
-             ;; Copy the beginning of the vector only when we find an element
-             ;; that does not match.
+                                     :test-not test-not :test-not-p test-not-p)
+             ;; Copy the  beginning of the  vector only when we  find an
+             ;; element that does not match.
              (unless vector
-               (setq vector (make-array 0))
+               (setq vector (make-array 0 :adjustable t))
                (dotimes (i index)
                  (vector-push-extend (aref seq i) vector)))
              (when vector
@@ -276,29 +272,30 @@
        (or vector seq)))))
 
 
-(defun some (function seq)
+(defun jscl/cl::some (function seq)
   (do-sequence (elt seq)
     (when (funcall function elt)
-      (return-from some t))))
+      (return-from jscl/cl::some t))))
 
-(defun every (function seq &rest more-seqs)
+(defun jscl/cl::every (function seq &rest more-seqs)
   (if more-seqs
-      (apply #'map nil (lambda (&rest seqs)
-                         (unless (apply function seqs)
-                           (return-from every nil))) seq more-seqs)
+      (apply #'mapc (lambda (&rest seqs)
+                      (unless (apply function seqs)
+                        (return-from jscl/cl::every nil)))
+             seq more-seqs)
       ;; optimized single sequence case
       (do-sequence (elt seq)
         (unless (funcall function elt)
-          (return-from every nil))))
+          (return-from jscl/cl::every nil))))
   t)
 
-(defun remove-if (func seq)
+(defun jscl/cl::remove-if (func seq)
   (cond
     ((listp  seq) (list-remove-if   func seq nil))
     ((arrayp seq) (vector-remove-if func seq nil))
     (t (not-seq-error seq))))
 
-(defun remove-if-not (func seq)
+(defun jscl/cl::remove-if-not (func seq)
   (cond
     ((listp  seq) (list-remove-if   func seq t))
     ((arrayp seq) (vector-remove-if func seq t))
@@ -313,14 +310,14 @@
             (cons (car list) (list-remove-if func (cdr list) negate))))))
 
 (defun vector-remove-if (func vector negate)
-  (let ((out-vector (make-array 0)))
+  (let ((out-vector (make-array 0 :adjustable t)))
     (do-sequence (element vector i)
       (let ((test (funcall func element)))
         (when (if negate test (not test))
           (vector-push-extend element out-vector))))
     out-vector))
 
-(defun subseq (seq a &optional b)
+(defun jscl/cl::subseq (seq a &optional b)
   (cond
     ((listp seq)
      (if b
@@ -349,13 +346,11 @@
          (aset new i (aref seq j)))))
     (t (not-seq-error seq))))
 
-(defun copy-seq (sequence)
+(defun jscl/cl::copy-seq (sequence)
   (subseq sequence 0))
 
-(defun elt (sequence index)
-  (check-type index (integer 0 *))
-  (when (< index 0)
-    (error "The index ~D is below zero." index))
+(defun jscl/cl::elt (sequence index)
+  (check-type index (and fixnum (integer 0 *)))
   (etypecase sequence
     (list
      (let ((i 0))
@@ -363,17 +358,17 @@
          (when (eql index i)
            (return-from elt elt))
          (incf i))
-       (error "The index ~D is too large for ~A of length ~D." index 'list i)))
+       (error "The index ~D is too large for ~A of length ~D."
+              index 'list i)))
     (array
      (let ((length (length sequence)))
        (when (>= index length)
-         (error "The index ~D is too large for ~A of length ~D." index 'vector length))
+         (error "The index ~D is too large for ~A of length ~D."
+                index 'vector length))
        (aref sequence index)))))
 
-(defun (setf elt) (new-value sequence index)
-  (check-type index (integer 0 *))
-  (when (< index 0)
-    (error "The index ~D is below zero." index))
+(defun (setf jscl/cl::elt) (new-value sequence index)
+  (check-type index (and fixnum (integer 0 *)))
   (etypecase sequence
     (list
      (let ((i 0))
@@ -382,11 +377,13 @@
            (setf (car elt) new-value)
            (return-from elt new-value))
          (incf i))
-       (error "The index ~D is too large for ~A of length ~D." index 'list i)))
+       (error "The index ~D is too large for ~A of length ~D."
+              index 'list i)))
     (array
      (let ((length (length sequence)))
        (when (>= index length)
-         (error "The index ~D is too large for ~A of length ~D." index 'vector length))
+         (error "The index ~D is too large for ~A of length ~D."
+                index 'vector length))
        (setf (aref sequence index) new-value)))))
 
 (defun zero-args-reduce (function initial-value initial-value-p)
@@ -403,12 +400,15 @@
           (funcall function element initial-value)
           element)))
 
-(defun reduce (function sequence &key (key #'identity) from-end (start 0) end (initial-value nil initial-value-p))
+(defun jscl/cl::reduce (function sequence
+                        &key (key #'identity) from-end
+                             (start 0) end (initial-value nil initial-value-p))
   (let* ((sequence (subseq sequence start (when end end)))
          (sequence-length (length sequence)))
     (case sequence-length
       (0 (zero-args-reduce function initial-value initial-value-p))
-      (1 (one-args-reduce function (funcall key (elt sequence 0)) from-end initial-value initial-value-p))
+      (1 (one-args-reduce function (funcall key (elt sequence 0))
+                          from-end initial-value initial-value-p))
       (t (let* ((function (if from-end
                               #'(lambda (x y) (funcall function y x))
                               function))
@@ -422,11 +422,14 @@
              (list (dolist (elt (cdr sequence) value)
                      (setf value (funcall function value (funcall key elt)))))
              (vector (dotimes (index (1- sequence-length) value)
-                       (setf value (funcall function value (funcall key (elt sequence (1+ index)))))))))))))
+                       (setf value
+                             (funcall function value
+                                      (funcall key (elt sequence (1+ index)))))))))))))
 
-(defun mismatch (sequence1 sequence2 &key key (test #'eql testp) (test-not nil test-not-p)
-                                          (start1 0) (end1 (length sequence1))
-                                          (start2 0) (end2 (length sequence2)))
+(defun jscl/cl::mismatch (sequence1 sequence2
+                          &key key (test #'eql testp) (test-not nil test-not-p)
+                               (start1 0) (end1 (length sequence1))
+                               (start2 0) (end2 (length sequence2)))
   (let ((index1 start1)
         (index2 start2))
     (while (and (<= index1 end1) (<= index2 end2))
@@ -456,12 +459,12 @@
         (when (or (not mismatch) (>= mismatch length1))
           (return-from vector-search position))))))
 
-(defun search (sequence1 sequence2 &rest args &key key test test-not)
+(defun jscl/cl::search (sequence1 sequence2 &rest args &key key test test-not)
   (unless (sequencep sequence1)
     (not-seq-error sequence1))
   (when (or (and (listp sequence1) (null sequence1))
             (and (vectorp sequence1) (zerop (length sequence1))))
-    (return-from search 0))
+    (return-from jscl/cl::search 0))
   (funcall
    (typecase sequence2
      (list #'list-search)
@@ -469,7 +472,7 @@
      (t (not-seq-error sequence2)))
    sequence1 sequence2 args))
 
-(defparameter *iterator-done* (gensym "ITERATOR-DONE-"))
+(defvar *iterator-done* (gensym "ITERATOR-DONE-"))
 
 (defun make-list-iterator (the-list)
   (let ((tail the-list))
@@ -522,7 +525,7 @@
        (make-vector-collector :element-type (or (second type) t))))))
 
 
-(defun map (result-type function &rest sequences)
+(defun jscl/cl::map (result-type function &rest sequences)
   (let ((iterators (mapcar #'make-iterator sequences))
         (result-collector (make-collector result-type)))
     (do ((args (mapcar #'funcall iterators) (mapcar #'funcall iterators)))

@@ -51,7 +51,7 @@
 (defstruct
     #+jscl built-in-class
     #-jscl !built-in-class
-    name predicate superclasses)
+  name predicate superclasses)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun make-accessor-name (class slot-name)
@@ -64,21 +64,21 @@
        ,@(loop for slot-name in (mapcar #'slot-definition-name
                                         (class-slots
                                          (find-class class)))
-            for accessor = (make-accessor-name cl-name slot-name)
-            for !accessor = (make-accessor-name class slot-name)
-            ;; unless (fboundp accessor)
-            collect `(defun ,accessor (object)
-                       (declare (type ,class object))
-                       (,!accessor object))
-            ;; unless (fboundp (list 'setf accessor))
-            collect `(defun (setf ,accessor) (new-value object)
-                       (declare (type ,class object))
-                       (setf (,!accessor object) new-value))))))
+               for accessor = (make-accessor-name cl-name slot-name)
+               for !accessor = (make-accessor-name class slot-name)
+               ;; unless (fboundp accessor)
+               collect `(defun ,accessor (object)
+                          (declare (type ,class object))
+                          (,!accessor object))
+               ;; unless (fboundp (list 'setf accessor))
+               collect `(defun (setf ,accessor) (new-value object)
+                          (declare (type ,class object))
+                          (setf (,!accessor object) new-value))))))
 
 #-jscl (alias-!-accessors !built-in-class)
 
 (defstruct #-jscl !eql-specializer #+jscl eql-specializer
-           object)
+  object)
 
 (defstruct type-definition
   name supertypes lambda-list body
@@ -227,7 +227,7 @@ invoked. In that case it will store into PLACE and start over."
         (restart-case
             (unless (typep ,place ',type)
               (error 'type-error :place ',place :datum ,place
-                     :expected-type ,(or type-string (string type))))
+                                 :expected-type ,(or type-string (string type))))
           (store-value (,new-value)
             :report ,(format nil "Supply a new value for ~s" place)
             (setf ,place ,new-value)
@@ -639,8 +639,8 @@ star)."
      (make-binding :name type-name
                    :type 'class
                    :value (#+jscl make-built-in-class
-                                  #-jscl make-!built-in-class
-                                  :name type-name))
+                           #-jscl make-!built-in-class
+                           :name type-name))
      *global-environment*
      'class)
     (unless (subtypep type-name t)
