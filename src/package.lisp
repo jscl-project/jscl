@@ -21,8 +21,13 @@
 
 (defun jscl/cl::list-all-packages ()
   (let ((packages nil))
-    (jscl/js::map-for-in (lambda (name) (pushnew name packages)) *package-table*)
+    (jscl/js::map-for-in 
+     (lambda (name) (pushnew name packages))
+     *package-table*)
     packages))
+
+(defun jscl/cl::packagep (x)
+  (and (jscl/js::objectp x) (jscl/js::in "symbols" x)))
 
 (defun jscl/cl::find-package (package-designator)
   (if (jscl/cl::packagep package-designator)
@@ -43,14 +48,14 @@
 (defun %make-package (name use &optional nicknames)
   (when (find-package name)
     (error "A package namded `~a' already exists." name))
-  (let ((package (new)))
+  (let ((package (jscl/js::new)))
     (setf (jscl/ffi:oget package "packageName") name)
-    (setf (jscl/ffi:oget package "symbols") (new))
-    (setf (jscl/ffi:oget package "exports") (new))
+    (setf (jscl/ffi:oget package "symbols") (jscl/js::new))
+    (setf (jscl/ffi:oget package "exports") (jscl/js::new))
     (setf (jscl/ffi:oget package "use") use)
     (setf (jscl/ffi:oget package "nicknames") nicknames)
     (setf (jscl/ffi:oget *package-table* name) package)
-    (dolist (nickname (nicknames))
+    (dolist (nickname nicknames)
       (setf (jscl/ffi:oget *package-table* nickname) package))
     package))
 
@@ -64,9 +69,6 @@
   (%make-package (string name)
                  (resolve-package-list use)
                  nicknames))
-
-(defun jscl/cl::packagep (x)
-  (and (jscl/js::objectp x) (jscl/js::in "symbols" x)))
 
 (defun jscl/cl::package-name (package-designator)
   (let ((package (find-package-or-fail package-designator)))
@@ -100,8 +102,6 @@
 (defmacro jscl/cl::in-package (string-designator)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (setq *package* (find-package-or-fail ',string-designator))))
-#+jscl (defmacro in-package (package-name)
-         `(!in-package ,package-name))
 
 (eval-when (:compile-toplevel :execute)
   (defmacro pushcdr (list place)
@@ -156,7 +156,7 @@
   (let ((package (find-package name))
         (use (resolve-package-list use)))
     (if package
-        (redefine-package package use)
+        (jscl/cl::redefine-package package use)
         (make-package name :use use :nicknames nicknames))))
 
 (defun jscl/cl::find-symbol (name &optional (package *package*))
