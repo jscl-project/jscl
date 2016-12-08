@@ -46,25 +46,26 @@
       (incf index))
     (concat "\"" output "\"")))
 
-;;; Return  T if  the  string S  contains characters  which  need to  be
-;;; escaped to print the symbol name, NIL otherwise.
 (defun escape-symbol-name-p (s)
-  (let ((dots-only t))
-    (dotimes (i (length s))
-      (let ((ch (char s i)))
-        (setf dots-only (and dots-only (char= ch #\.)))
-        (when (or (terminalp ch)
-                  (char= ch #\:)
-                  (char= ch #\\)
-                  (not (char= ch (char-upcase ch)))
-                  (char= ch #\|))
-          (return-from escape-symbol-name-p t))))
-    dots-only))
+  "Return  T if  the  string S  contains characters  which  need to  be
+ escaped to print the symbol name, NIL otherwise."
+  (when (every (lambda (ch) (char= #\. ch)) s)
+    (return-from escape-symbol-name-p t))
+  (dotimes (i (length s))
+    (let ((ch (char s i))) 
+      (when (or (terminalp ch)
+                (char= ch #\:)
+                (char= ch #\\)
+                (not (char= ch (char-upcase ch)))
+                (char= ch #\|))
+        (return-from escape-symbol-name-p t))))
+  (potential-number-p s))
 
-;;; Return T  if the specified  string can be read  as a number  In case
-;;; such a string is the name of a symbol then escaping is required when
-;;; printing to ensure correct reading.
+
 (defun potential-number-p (string)
+  " Return T  if the specified  string can be read  as a number  In case
+ such a string is the name of a symbol then escaping is required when
+ printing to ensure correct reading."
   ;; The  four rules  for  being  a potential  number  are described  in
   ;; 2.3.1.1 Potential Numbers as Token
   ;;
