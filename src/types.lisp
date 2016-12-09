@@ -57,9 +57,9 @@
 
 (in-package :jscl/mop)
 ;; so MOP:EQL-SPECIALIZER-OBJECT is in the right place
-(defstruct jscl/cl::eql-specializer
+(cl:defstruct jscl/cl::eql-specializer
   object)
-(in-package :jscl)
+(cl:in-package :jscl)
 
 (defstruct type-definition
   name supertypes lambda-list body
@@ -439,7 +439,33 @@ star)."
 
 ;;; Subclass hierarchy of the standard classes
 
-(defparameter +standard-class-subclasses+
+(in-package :jscl/cl)
+
+(cl:defparameter jscl::+basic-types+
+  '((hash-table hash-table-p atom)
+    (number numberp atom)
+    (real realp number)
+    (integer integerp rational)
+    (fixnum fixnump integer)
+    (cons consp)
+    (list listp cons sequence)
+    (vector vectorp sequence)
+    (character characterp atom)
+    (symbol symbolp atom)
+    (keyword keywordp symbol)
+    (function functionp atom)
+    (float floatp real)
+    (single-float floatp real)
+    (double-float floatp real)
+    (long-float floatp real)
+    (rational rationalp real)
+    (array arrayp sequence)
+    (string stringp vector)
+    (atom atom)
+    (null null)
+    (package packagep atom)))
+
+(cl:defparameter jscl::+standard-class-subclasses+
   '((arithmetic-error division-by-zero floating-point-inexact
      floating-point-invalid-operation floating-point-overflow
      floating-point-underflow)
@@ -539,6 +565,8 @@ star)."
      simple-bit-vector)
     (warning simple-warning style-warning)))
 
+(CL:in-package :jscl)
+
 (defun find-built-in-class (name)
   (or (let ((b (lookup-in-lexenv name *environment* 'class)))
         (when b
@@ -546,28 +574,7 @@ star)."
       (error "~s does not name a built-in class" name)))
 
 (defun init-built-in-basic-types% ()
-  (dolist (type-info '((hash-table hash-table-p atom)
-                       (number numberp atom)
-                       (real realp number)
-                       (integer integerp rational)
-                       (fixnum fixnump integer)
-                       (cons consp)
-                       (list listp cons sequence)
-                       (vector vectorp sequence)
-                       (character characterp atom)
-                       (symbol symbolp atom)
-                       (keyword keywordp symbol)
-                       (function functionp atom)
-                       (float floatp real)
-                       (single-float floatp real)
-                       (double-float floatp real)
-                       (long-float floatp real)
-                       (rational rationalp real)
-                       (array arrayp sequence)
-                       (string stringp vector)
-                       (atom atom)
-                       (null null)
-                       (package packagep atom)))
+  (dolist (type-info +basic-types+)
     (destructuring-bind (name predicate &rest supertypes) type-info
       (push-to-lexenv
        (make-binding :name name
