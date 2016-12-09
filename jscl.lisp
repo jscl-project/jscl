@@ -23,7 +23,7 @@
   (:nicknames :jscl/cl)
   (:documentation
    "The  COMMON-LISP  package  contains   the  symbols  defined  in  the
-   ANSI standard."))
+ ANSI standard."))
 
 (defpackage :jscl/javascript-low-level
   (:use) ; nothing
@@ -71,7 +71,7 @@ implementation, you may never need to access this package directly."))
   (:use :cl :jscl)
   (:export #:oget #:oget* #:make-new #:new #:*root*
            #:oset #:oset*)
-  (:documentation 
+  (:documentation
    "Foreign Function Interface to JavaScript functions."))
 
 (defpackage :jscl/cltl2
@@ -111,11 +111,6 @@ identifying them (and their provenance) easier."))
 
 (in-package :jscl)
 
-(defvar *base-directory*
-  (if #.*load-pathname*
-      (make-pathname :name nil :type nil :defaults #.*load-pathname*)
-      *default-pathname-defaults*))
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun extract-version-from-package.json ()
     (with-open-file (in (merge-pathnames "package.json" *base-directory*))
@@ -126,7 +121,21 @@ identifying them (and their provenance) easier."))
          do (let ((colon (position #\: line))
                   (comma (position #\, line)))
               (return (string-trim '(#\newline #\" #\tab #\space)
-                                   (subseq line (1+ colon) comma))))))))
+                                   (subseq line (1+ colon) comma)))))))
+
+  (defun not-tmp (pathname)
+    "To keep compile-time actions from  assuming that SRC-DIR is /tmp when
+using Slime."
+    (when (and pathname
+               (not (equal #p"/tmp/" (truename pathname))))
+      pathname)))
+
+(defvar *base-directory* (make-pathname
+                          :directory
+                          (pathname-directory
+                           (or (not-tmp *load-pathname*)
+                               (not-tmp *compile-file-pathname*)
+                               *default-pathname-defaults*))))
 
 (defvar *version*
   (extract-version-from-package.json)
@@ -134,17 +143,165 @@ identifying them (and their provenance) easier."))
  a JSON library  to parse this, but that would  introduce a dependency
  and we are not using ASDF yet.")
 
+
+(defun run-program-compile-time (bin args)
+  #+sbcl
+  (sb-posix:chdir *base-directory*)
+  (or #+asdf
+      (uiop:run-program (cons bin args) :output :string
+                        :ignore-error-status t)
+      #+sbcl
+      (ignore-errors
+        (read-fully
+         (sb-ext:process-output
+          (sb-ext:run-program bin args
+                              :wait t
+                              :output :stream))))
+      nil))
+
+(defun read-fully (stream)
+  (loop with buffer = (make-array #x400
+                                  :element-type 'character
+                                  :adjustable t
+                                  :fill-pointer 0)
+     for char = (read-char stream nil nil)
+     while char
+     do (vector-push-extend char buffer #x400)
+     finally (progn
+               (adjust-array buffer (fill-pointer buffer))
+               (return buffer))))
+
 (defun read-whole-file (filename)
   (with-open-file (in filename)
     ;; FILE-LENGTH is  in bytes,  not characters. UTF-8  characters will
     ;; yield  a shorter  read,  with trailing  #\NULL  bytes, unless  we
     ;; initialize to spaces. It's a hack, but it's a cheap enough one.
-    (let ((seq (make-string (file-length in) :initial-element #\space)))
+    (let ((seq (make-string (file-length in)
+                            :initial-element #\Space)))
       (read-sequence seq in)
       seq)))
+
+(defun git-commit ()
+  (or (remove #\Newline
+              (run-program-compile-time
+               "/usr/bin/git"
+               '("rev-parse" "--short" "HEAD")))
+      "(unknown)"))
+
+(defun latinize (string)
+  "This makes  an effort to  let names  written in non-Latin  scripts be
+alphabetized more-or-less phonetically, in many cases."
+  (let ((greek
+         "αa βb γg δd εe ζz ηeeθthιi κk λl μm νn ξksοo πp ρr ΢s σs τt υu φphχchψpsωoo")
+        (cyrillic
+         "аa бb вv гg дd еe жj зz иiiйi кk лl мm нn оo пp рr сs тt уu фf хkhцtsчchшshщscъy ыy ьy эe юyuяya"))
+    (reduce (lambda (s1 s2)
+              (concatenate 'string s1 s2))
+            (loop
+               for i from 0 below (length string)
+               for char = (char-downcase (char string i))
+
+               for hellenic = (position char greek)
+               for russian = (position char cyrillic)
+               for char-name = (string-downcase (char-name char))
+               for digit-value = (digit-char-p char)
+               for roman = (search "roman_numeral_" char-name)
+               for syllable = (search "syllable_" char-name)
+               for hiragana = (search "hiragana_letter" char-name)
+
+               collect
+                 (cond
+                   ((and hellenic (zerop (mod hellenic 3)))
+                    (remove #\Space
+                            (subseq greek (+ 1 hellenic)
+                                    (+ 3 hellenic))))
+                   ((and russian (zerop (mod russian 3)))
+                    (remove #\Space
+                            (subseq cyrillic (+ 1 russian)
+                                    (+ 3 russian))))
+                   (hiragana
+                    (subseq char-name (1+ (position #\_ char-name
+                                                    :from-end t))))
+                   (roman
+                    (subseq char-name (1+ (position #\_ char-name
+                                                    :from-end t))))
+                   (syllable
+                    (subseq char-name (+ 9 syllable)
+                            (position #\_ char-name
+                                      :start (+ 9 syllable))))
+                   (digit-value
+                    (format nil "~r" digit-value))
+                   (t (string char))))
+            :initial-value "")))
+
+(defun git-credits ()
+  (with-input-from-string (everyone
+                           (run-program-compile-time
+                            "/usr/bin/git"
+                            '("log" "--format=%aN")))
+    (sort (loop
+             with unique = nil
+             for someone = (read-line everyone nil nil)
+             while someone
+             do (pushnew someone unique :test #'string-equal)
+             finally (return unique))
+          #'string<
+          :key (lambda (name)
+                 (latinize
+                  (subseq name (or (position #\Space name)
+                                   0)))))))
+(defun file-set-execute-permission (filename)
+  "This is  a bit  implementation-specific, but  it will  try to  set +x
+permissions on FILENAME, if we  know how in the current implementation."
+  #+sbcl
+  (sb-posix:chmod filename #o755)
+  #+ecl
+  (ext:chmod filename #o755)
+  #- (or sbcl ecl)
+  (warn "You'll need to set executable permissions yourself"))
+
+(defun violet-volts-p ()
+  (search "romance-ii/jscl"
+          (run-program-compile-time "/usr/bin/git"
+                                    '("remote" "-v"))))
+
+
+;;; Clearing the output buffer. These  definitions only really matter on
+;;; the host. (Until we port CLIM…)
+
+(unless (find-method #'stream-clear-output nil '(t) nil)
+  (defmethod stream-clear-output ((stream t)) nil))
+
+(defun teletype-p (stream)
+  #+sbcl
+  (/= 0 (sb-unix:unix-isatty (sb-sys:fd-stream-fd stream)))
+  #-sbcl
+  nil)
+
+(defmethod stream-clear-output ((stream sb-sys:fd-stream))
+  (if (teletype-p stream)
+      (dolist (char '(#\Esc #\[ #\H #\Esc #\[ #\2 #\J))
+        (write-char char stream))
+      (call-next-method)))
+
+#+swank
+(defmethod stream-clear-output
+    ((stream swank/gray::slime-output-stream))
+  (swank:eval-in-emacs '(progn
+                         (slime-repl)
+                         (slime-repl-clear-buffer)
+                         (form-feed-mode t))))
+
+(defmethod stream-clear-output ((stream two-way-stream))
+  (stream-clear-output (two-way-stream-output-stream stream)))
+
 
 (defparameter *source*
-  '(("boot"          :both)
+  '(("compat"
+     ("compat-ffi"	:host)
+     ("compat-js"	:host)
+     ("compat-misc"	:host))
+    ("boot"          :both)
     ("early-char" 	:both)
     ("setf"          :both)
     ("utils"         :both)
@@ -191,11 +348,12 @@ compiled in the host.")
 
 (defun source-pathname (filename
                         &key (directory '(:relative "src"))
-                             (type nil) (defaults filename))
+                             (type nil)
+                             (defaults *base-directory*))
   (merge-pathnames
    (if type
-       (make-pathname :type type :directory directory :defaults defaults)
-       (make-pathname            :directory directory :defaults defaults))
+       (make-pathname :name filename :type type :directory directory :defaults defaults)
+       (make-pathname :name filename           :directory directory :defaults defaults))
    *base-directory*))
 
 (defun get-files (file-list type dir)
@@ -207,7 +365,7 @@ compiled in the host.")
        ())
       ((listp (cadr file))
        (append
-        (get-files (cdr file)      type (append dir (list (car file))))
+        (get-files (cdr file) type (append dir (list (car file))))
         (get-files (cdr file-list) type dir)))
       ((member (cadr file) (list type :both))
        (cons (source-pathname (car file) :directory dir :type "lisp")
@@ -224,46 +382,49 @@ compiled in the host.")
      ,@body))
 
 ;;; Compile and load jscl into the host
+
 (defun load-jscl ()
   (with-compilation-unit ()
     (when *load-pathname*    ; Prevent this  file from becoming that one
                                         ; stale FASL …
-      (compile-file *load-pathname*))
-    (mapc #'load
-          (directory (merge-pathnames
-                      :name :wild
-                      :type "lisp"
-                      :directory (list #.(src-dir) "compat"))))
+      (compile-file *load-pathname*)))
+  (with-compilation-unit ()
     (let (fasls failures)
       (do-source input :host
-        (load input)
+        (load (compile-file input))
         (locally
-            ;; I make  the assumption that re-loading  the files under
-            ;; Swank, you  don't care about these  redefinitions … but
-            ;; if we get them running  top-level (eg, from a Makefile)
+            ;; I  make the  assumption that  re-loading the  files under
+            ;; Swank, you don't care about  these redefinitions … but if
+            ;; we  get  them running  top-level  (eg,  from a  Makefile)
             ;; they're more interesting.
-            #+swank
-          (declare #+sbcl (sb-ext:muffle-conditions
-                           sb-kernel::function-redefinition-warning))
+            (declare #+(and swank sbcl) (sb-ext:muffle-conditions
+                                         sb-kernel::function-redefinition-warning))
           (multiple-value-bind (fasl warn fail) (compile-file input)
-            (declare (ignore warn))
-            ;; It's only interesting to see  if there were failures at
-            ;; the  end  of  the  compilation  unit,  since  undefined
-            ;; functions  in  one  file  may be  defined  in  another.
-            ;; This   gets   particularly   convoluted  due   to   the
-            ;; circularity of the type system and object systems.
-            (when fail
-              (push fail failures)
-              (warn "Compilation of ~A failed." input))
+            ;; It's only  interesting to see  if there were  failures at
+            ;; the  end   of  the  compilation  unit,   since  undefined
+            ;; functions  in  one  file   may  be  defined  in  another.
+            ;; This gets particularly convoluted  due to the circularity
+            ;; of the type system and object systems.
+            (when (or warn fail)
+              (push (list (enough-namestring input) warn fail) failures))
             (when fasl
               (locally
-                  ;; These  occur  because  we  reload from  FASL  the  compiled
-                  ;; versions
+                  ;; These  occur  because  we   reload  from  FASL  the
+                  ;; compiled versions
                   (declare #+sbcl (sb-ext:muffle-conditions
                                    sb-kernel::function-redefinition-warning))
                 (load fasl))
-              (push fasl fasls))))))
-    (init-built-in-types%)))
+              (push fasl fasls)))))
+      (when failures
+        (stream-clear-output *error-output*)
+        (format *error-output* "While building JSCL in hosted pass:
+~{While compiling ~a:~@[~
+ ~*~{~% • WARNING: ~a~}~]~@[~
+ ~*~{~% • FAILURE: ~a~}~]~
+~}"
+                failures))))
+  (init-built-in-types%) ; should be a duplicate call by now
+  )
 
 
 (defmacro doforms ((var stream) &body body)
