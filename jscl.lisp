@@ -383,6 +383,28 @@ compiled in the host.")
 
 ;;; Compile and load jscl into the host
 
+(defun review-failures (failures)
+  (let ((file-warnings 0)
+        (file-failures 0)
+        (files 0))
+    (dolist (fail failures)
+      (incf files)
+      (destructuring-bind (file warned failed) fail
+        (declare (ignore warned))
+        (cond
+          (failed
+           (format *error-output* "~& Failed to compile ~a" file)
+           (incf file-failures))
+          (t
+           (format *error-output* "~& Warning(s) from compiling ~a" file)
+           (incf file-warnings)))))
+    (cerror "Try anyway"
+            "There were ~
+ ~[~:;~:*~r file~:p with warnings, and~] ~
+ ~[no files~:;~:*~r file~:p~] which failed, ~
+while compiling ~r file~:p"
+            file-warnings file-failures files)))
+
 (defun load-jscl ()
   (with-compilation-unit ()
     (when *load-pathname*    ; Prevent this  file from becoming that one
@@ -391,7 +413,6 @@ compiled in the host.")
   (with-compilation-unit ()
     (let (fasls failures)
       (do-source input :host
-        (load (compile-file input))
         (locally
             ;; I  make the  assumption that  re-loading the  files under
             ;; Swank, you don't care about  these redefinitions … but if
@@ -408,22 +429,17 @@ compiled in the host.")
             (when (or warn fail)
               (push (list (enough-namestring input) warn fail) failures))
             (when fasl
-              (locally
-                  ;; These  occur  because  we   reload  from  FASL  the
-                  ;; compiled versions
-                  (declare #+sbcl (sb-ext:muffle-conditions
-                                   sb-kernel::function-redefinition-warning))
-                (load fasl))
               (push fasl fasls)))))
       (when failures
-        (stream-clear-output *error-output*)
-        (format *error-output* "While building JSCL in hosted pass:
-~{While compiling ~a:~@[~
- ~*~{~% • WARNING: ~a~}~]~@[~
- ~*~{~% • FAILURE: ~a~}~]~
-~}"
-                failures))))
-  (init-built-in-types%) ; should be a duplicate call by now
+        (review-failures failures))
+      (dolist (fasl fasls)
+        (locally
+            ;; These  occur because  we  reload from  FASL the  compiled
+            ;; versions
+            (declare #+sbcl (sb-ext:muffle-conditions
+                             sb-kernel::function-redefinition-warning))
+          (load fasl)))))
+  (init-built-in-types%)             ; should be a duplicate call by now
   )
 
 
@@ -437,12 +453,6 @@ compiled in the host.")
 
 
 ;;;; Load JSCL into the host implementation.
-
-(defmacro define-cl-fun (name lambda-list &body declarations+body)
-  (let ((!name (intern (concatenate 'string "!" (symbol-name name)))))
-    `(progn
-       (defun ,!name ,lambda-list ,@declarations+body)
-       #+jscl (fset ',!name ',name))))
 
 (load-jscl)
 
