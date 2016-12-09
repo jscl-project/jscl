@@ -59,6 +59,9 @@ is equivalent to the JavaScript something[\"foo\"][\"bar\"][\"baz\"]
          `(jscl/ffi:oget (jscl/ffi:oget* ,object ,@(butlast keys))
                          ,(car (last keys))))))
 
+(defmacro jscl/ffi:oset* (value object &rest keys)
+  `(setf (jscl/ffi:oget* ,object ,@keys) ,value))
+
 (defun jscl/ffi:oget (object key &optional default)
   "Retrieve from  OBJECT the value  identified by  KEY. When KEY  is not
 defined, returns NIL."
