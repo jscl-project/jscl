@@ -80,7 +80,7 @@
   (error "The long form of defsetf is not implemented"))
 
 (defmacro jscl/cl::defsetf (&whole args first second &rest others)
-  (declare (ignore others))
+  (declare (ignore first others))
   (if (consp second)
       `(long-defsetf ,@args)
       `(short-defsetf ,@args)))
