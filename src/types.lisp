@@ -202,7 +202,7 @@ invoked. In that case it will store into PLACE and start over."
         (restart-case
             (unless (typep ,place ',type)
               (error 'type-error :place ',place :datum ,place
-                     :expected-type ,(or type-string (string type))))
+                     :expected-type ,(or type-string (princ-to-string type))))
           (store-value (,new-value)
             :report ,(format nil "Supply a new value for ~s" place)
             (setf ,place ,new-value)
