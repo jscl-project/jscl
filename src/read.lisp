@@ -276,8 +276,7 @@ for details.'"
          (funcall (ecase (char descriptor (1- start))
                     ((#\@ #\,) #'symbol-value )
                     (#\: #'identity))
-                  (subseq descriptor start end))
-         subform
+                  (subseq descriptor start end)) 
          subdescriptors)))))
 
 (defun read-sharp (stream &optional eof-error-p eof-value)
