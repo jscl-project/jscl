@@ -52,7 +52,7 @@
          (n1 (length s1))
          (n2 (length s2))
          (end1 (or end1 n1))
-         (end2 (or end2 s2)))
+         (end2 (or end2 n2)))
     (dotimes (i (max (- end1 start1) (- end2 start2)) nil)
       (when (or (>= (+ start1 i) n1)
                 (>= (+ start2 i) n2))
@@ -239,7 +239,7 @@ handled correctly yet."
     (when (= (- end2 start2) (- end1 start1))
       (dotimes (i (- end2 start2) t)
         (unless (char-equal (char s1 (+ start1 i)) (char s2 (+ start2 i)))
-          (return-from string-equal nil))))))
+          (return-from jscl/cl::string-equal nil))))))
 
 ;; just like  string/= but with  char-equal instead of char=  (TODO: use
 ;; the same code then?)
@@ -253,9 +253,9 @@ handled correctly yet."
     (dotimes (i (max (- end1 start1) (- end2 start2)) nil)
       (when (or (>= (+ start1 i) n1)
                 (>= (+ start2 i) n2))
-        (return-from string-not-equal (+ start1 i)))
+        (return-from jscl/cl::string-not-equal (+ start1 i)))
       (unless (char-equal (char s1 (+ start1 i)) (char s2 (+ start2 i)))
-        (return-from string-not-equal (+ start1 i))))))
+        (return-from jscl/cl::string-not-equal (+ start1 i))))))
 
 (defun jscl/cl::string-trim (character-bag string)
   (string-left-trim character-bag (string-right-trim character-bag string)))
@@ -273,4 +273,4 @@ handled correctly yet."
          (n (length string)))
     (dotimes (i n "")
       (when (not (find (char string (- n i 1)) character-bag))
-        (return-from string-right-trim (subseq string 0 (- n i)))))))
+        (return-from jscl/cl::string-right-trim (subseq string 0 (- n i)))))))
