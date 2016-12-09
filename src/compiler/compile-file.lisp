@@ -196,26 +196,36 @@ permissions on FILENAME, if we  know how in the current implementation."
                (adjust-array buffer (fill-pointer buffer))
                (return buffer))))
 
+(defun not-tmp (pathname)
+  "To keep compile-time actions from  assuming that SRC-DIR is /tmp when
+using Slime."
+  (when (not (equal #p"/tmp/" (truename pathname)))
+    pathname))
+
+(defvar src-dir (make-pathname
+                 :directory
+                 (pathname-directory
+                  (first (remove-if-not
+                          #'probe-file
+                          (not-tmp *load-pathname*)
+                          (not-tmp *compile-file-pathname*)
+                          #p"./src/"
+                          #p"./")))))
+
 (defun run-program-compile-time (bin args)
-  (let ((src-dir #.(make-pathname
-                    :directory
-                    (pathname-directory
-                     (or *load-pathname*
-                         *compile-file-pathname*
-                         #p".")))))
-    #+sbcl
-    (sb-posix:chdir src-dir)
-    (or #+asdf
-        (uiop:run-program (cons bin args) :output :string
-                          :ignore-error-status t)
-        #+sbcl
-        (ignore-errors
-          (read-fully
-           (sb-ext:process-output
-            (sb-ext:run-program bin args
-                                :wait t
-                                :output :stream))))
-        nil)))
+  #+sbcl
+  (sb-posix:chdir src-dir)
+  (or #+asdf
+      (uiop:run-program (cons bin args) :output :string
+                        :ignore-error-status t)
+      #+sbcl
+      (ignore-errors
+        (read-fully
+         (sb-ext:process-output
+          (sb-ext:run-program bin args
+                              :wait t
+                              :output :stream))))
+      nil))
 
 (defun git-commit ()
   (or (remove #\Newline
