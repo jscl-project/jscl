@@ -46,16 +46,25 @@
   "Print a trace message."
   (format *trace-output* "~&DEBUG: ~a" message))
 
+(defparameter jscl/js::this jscl/ffi::*root*)
+
 (defun jscl/ffi:make-new (class &rest ctor-args)
   "Create a new  instance of CLASS with the  JavaScript special operator
-“new”"
-  (let ((instance (make-hash-table :test 'equal)))
-    (setf (gethash "_prototype" instance) class
-          (gethash "_ctor-args" instance) ctor-args)
-    instance))
+“new” — which means  to call the JS function named  CLASS with JS “this”
+bound to a freshly-constructed object, and pass it CTOR-ARGS.
+
+As  a convenience,  if  CLASS is  not FBOUNDP,  this  will instead  call
+a function named CLASS in package JSCL/JS."
+  (let ((jscl/js::this (make-hash-table :test 'equal)))
+    (setf (gethash "_prototype" jscl/js::this) class)
+    (if (fboundp class)
+        (funcall class ctor-args)
+        (funcall (intern (symbol-name class) :jscl/js) ctor-args))))
 
 (defun (setf jscl/ffi:oget) (value object key)
   "Set the field named by KEY on the JavaScript object OBJECT to VALUE."
+  (check-type object hash-table
+              "a hash table (pretending to be a JavaScript Object)")
   (setf (gethash key object) value))
 
 (defmacro jscl/ffi:oget* (object &rest keys)
@@ -306,8 +315,10 @@ metadata in it."
              :jscl/js)
      ,@args))
 
-(unless (jscl/ffi:oget jscl/ffi:*root* "packages")
-  (setf (jscl/ffi:oget jscl/ffi:*root* "packages") (jscl/ffi:make-new '|Object|)))
+(defun jscl/js::|Object| (&rest args-plist)
+       (loop for (key value) on args-plist by #'cddr
+          do (setf (gethash key jscl/js::this) value))
+       jscl/js::this)
 
 (defvar jscl/ffi::unbound-function
   (lambda (&rest _) (declare (ignore _))
@@ -454,3 +465,12 @@ captured vars and embedded forms as multiple values."
 
 (defun jscl/js::delete-property (object key)
   (remhash key object))
+
+
+
+(unless (and (boundp 'jscl/ffi:*root*)
+             (hash-table-p jscl/ffi:*root*))
+  (setf jscl/ffi:*root* (make-hash-table :test 'equal)))
+
+(unless (jscl/ffi:oget jscl/ffi:*root* "packages")
+  (setf (jscl/ffi:oget jscl/ffi:*root* "packages") (jscl/ffi:make-new '|Object|)))
