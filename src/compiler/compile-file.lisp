@@ -199,7 +199,8 @@ permissions on FILENAME, if we  know how in the current implementation."
 (defun not-tmp (pathname)
   "To keep compile-time actions from  assuming that SRC-DIR is /tmp when
 using Slime."
-  (when (not (equal #p"/tmp/" (truename pathname)))
+  (when (and pathname
+             (not (equal #p"/tmp/" (truename pathname))))
     pathname))
 
 (defvar src-dir (make-pathname
