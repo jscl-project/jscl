@@ -24,7 +24,7 @@
 
 
 
-(defmacro !deftype (name lambda-list &body body)
+(defmacro jscl/cl::deftype (name lambda-list &body body)
   `(push-to-lexenv (make-binding
                     :name ',name
                     :type 'type
@@ -47,10 +47,7 @@
 
 
 
-(/debug "Defining Built-In-Class")
-(defstruct
-    #+jscl built-in-class
-    #-jscl !built-in-class
+(defstruct jscl/cl::built-in-class
   name predicate superclasses)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -58,27 +55,11 @@
     (intern (concatenate 'string (string class)
                          "-" (string slot-name)))))
 
-(defmacro alias-!-accessors (class)
-  (let ((cl-name (intern (remove #\! (string class)))))
-    `(progn
-       ,@(loop for slot-name in (mapcar #'slot-definition-name
-                                        (class-slots
-                                         (find-class class)))
-               for accessor = (make-accessor-name cl-name slot-name)
-               for !accessor = (make-accessor-name class slot-name)
-               ;; unless (fboundp accessor)
-               collect `(defun ,accessor (object)
-                          (declare (type ,class object))
-                          (,!accessor object))
-               ;; unless (fboundp (list 'setf accessor))
-               collect `(defun (setf ,accessor) (new-value object)
-                          (declare (type ,class object))
-                          (setf (,!accessor object) new-value))))))
-
-#-jscl (alias-!-accessors !built-in-class)
-
-(defstruct #-jscl !eql-specializer #+jscl eql-specializer
+(in-package :jscl/mop)
+;; so MOP:EQL-SPECIALIZER-OBJECT is in the right place
+(defstruct jscl/cl::eql-specializer
   object)
+(in-package :jscl)
 
 (defstruct type-definition
   name supertypes lambda-list body
@@ -148,7 +129,7 @@
           (t type)))
       'null))
 
-(defun !class-of (value)
+(defun jscl/cl::class-of (value)
   (type-definition-class (find-type-definition (type-of value))))
 
 (defstruct deftype-class-metaobject
@@ -187,11 +168,7 @@
           (t (error "Don't understand type specifier ~s" body)))))
 
 
-#-jscl
-(defun eql-specializer-p (object)
-  (!eql-specializer-p object))
-
-(define-cl-fun typep (object type &optional (environment *environment*))
+(defun jscl/cl::typep (object type &optional (environment *environment*))
   (cond
     ((eql-specializer-p type)
      (eql object (eql-specializer-object type)))
@@ -208,15 +185,13 @@
               object))
     (t (error "~s is not a valid type specifier" type))))
 
-(defmacro !restart-case (expression &body clauses)
+(defmacro jscl/cl::restart-case (expression &body clauses)
   ;; FIXME: I don't belong here
   (declare (ignore clauses))
   (warn "Dropping restart cases: TODO")
   expression)
-#+jscl (defmacro restart-case (expression &body clauses)
-         `(!restart-case ,expression ,@clauses))
 
-(defmacro !check-type (place type &optional type-string)
+(defmacro jscl/cl::check-type (place type &optional type-string)
   "Signal a restartable  error of type TYPE-ERROR if the  value of PLACE
 is not of the  specified type. If an error is  signalled and the restart
 is used  to return, this can  only return if the  STORE-VALUE restart is
@@ -227,18 +202,11 @@ invoked. In that case it will store into PLACE and start over."
         (restart-case
             (unless (typep ,place ',type)
               (error 'type-error :place ',place :datum ,place
-                                 :expected-type ,(or type-string (string type))))
+                     :expected-type ,(or type-string (string type))))
           (store-value (,new-value)
             :report ,(format nil "Supply a new value for ~s" place)
             (setf ,place ,new-value)
             (go ,new-value))))))
-
-#+jscl
-(/debug "About to DEFMACRO CHECK-TYPE")
-
-#+jscl
-(defmacro check-type (place type &optional type-string)
-  `(!check-type ,place ,type ,type-string))
 
 "(old typecase — make sure these tests pass TODO
  (hash-table 'hash-table-p)
@@ -311,7 +279,7 @@ since the supertype comes first, the subtype~1@*~p will never be matched."
       (when (rest rest)
         (typecase-unreachable-after-supertype rest)))))
 
-(defmacro !typecase (value &rest clauses)
+(defmacro jscl/cl::typecase (value &rest clauses)
   "A fair approximation of TYPECASE for limited cases"
   (let ((evaluated (gensym "TYPECASE-EVALUATED-"))
         (unique-types (typecase-unique-types (mapcar #'car clauses))))
@@ -330,34 +298,26 @@ since the supertype comes first, the subtype~1@*~p will never be matched."
                                                  types))
                          ,@(or body (cons nil nil)))))
                    clauses)))))
-#+jscl
-(defmacro typecase (value &rest clauses)
-  `(!typecase ,value ,@clauses))
 
-(defmacro !etypecase (value &rest clauses)
+(defmacro jscl/cl::etypecase (value &rest clauses)
   (let ((evaluated (gensym "ETYPECASE-VALUE-"))
         (unique-types (typecase-unique-types (mapcar #'car clauses))))
     (when (member t unique-types)
       (warn "ETYPECASE contains type T, which matches everything; ~
 nothing will fall through this case"))
     `(let ((,evaluated ,value))
-       (!typecase ,evaluated
-                  ,@clauses
-                  (t (error "~S (type: ~s) fell through etypecase expression.
+       (jscl/cl::typecase ,evaluated
+         ,@clauses
+         (t (error "~S (type: ~s) fell through etypecase expression.
 Expected one of: ~a"
-                            ,evaluated (type-of ,evaluated)
-                            ,(format nil "~{~a~^, ~}"
-                                     (sort unique-types #'string<
-                                           :key #'symbol-name))))))))
-
-#+jscl
-(defmacro etypecase (value &rest clauses)
-  `(!etypecase ,value ,@clauses))
+                   ,evaluated (type-of ,evaluated)
+                   ,(format nil "~{~a~^, ~}"
+                            (sort unique-types #'string<
+                                  :key #'symbol-name))))))))
 
 
 ;;; Standard  compound type  specifiers  based on  the  regular types  —
 ;;; numeric and array types
-
 
 (defun make-numeric-range-check-predicate (type)
   (lambda (object &optional min max)
@@ -638,8 +598,7 @@ star)."
     (push-to-lexenv
      (make-binding :name type-name
                    :type 'class
-                   :value (#+jscl make-built-in-class
-                           #-jscl make-!built-in-class
+                   :value (make-built-in-class
                            :name type-name))
      *global-environment*
      'class)
