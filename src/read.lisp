@@ -118,7 +118,7 @@
 when passed  the value of  the next  character. The character  passed to
 FUNC will NOT be returnings."
   (let ((string (make-array 80 :element-type 'character
-                               :adjustable t :fill-pointer 0))
+                            :adjustable t :fill-pointer 0))
         (ch (peek-char nil stream nil nil)))
     (while (and ch (not (funcall func ch)))
       (vector-push-extend ch string 80)
@@ -247,6 +247,36 @@ FUNC will NOT be returnings."
                                (not (digit-char-p ch *read-base*))))
                  :radix *read-base*))
 
+(defun j-reader (stream subchar arg)
+  "The   reader  macro   for   the  #J   notation.  See   `WITH-SHARP-J'
+for details.'"
+  (declare (ignorable subchar arg))
+  (let ((first-char (read-char stream nil :eof)))
+    (assert (find first-char ":@")
+            nil "FFI descriptor must start with a colon or at-sign")
+    (let ((descriptor (read-until stream #'terminalp))
+          (subdescriptors nil))
+      (do* ((start 0 (1+ end))
+            (end (position-if #'colon-or-comma-p
+                              descriptor :start start)
+                 (position-if #'colon-or-comma-p
+                              descriptor :start start)))
+           ((null end)
+            (push (subseq descriptor start) subdescriptors)
+            `(lambda (&rest args)
+               (apply (jscl/ffi::oget*
+                       ,@(when (char= first-char #\:)
+                           jscl/ffi::*root*)
+                       ,@(reverse subdescriptors))
+                      args)))
+        (push
+         (ecase (char descriptor (1- start))
+           ((#\@ #\,)
+            (subseq descriptor start end))
+           (#\: #'identity))
+         subform
+         subdescriptors)))))
+
 (defun read-sharp (stream &optional eof-error-p eof-value)
   (read-char stream nil nil)
   (let ((ch (read-char stream nil nil)))
@@ -289,19 +319,19 @@ FUNC will NOT be returnings."
                      (let ((*read-base* 16))
                        (code-char (read-integer-from-stream stream))))
                     (t (let ((cname
-                               (concatenate 'string "U" (string (read-char stream nil nil))
-                                            (read-until stream #'terminalp))))
+                              (concatenate 'string "U" (string (read-char stream nil nil))
+                                           (read-until stream #'terminalp))))
                          (let ((ch (name-char cname)))
                            (or ch (char cname 0)))))))
              (t (let ((cname
-                        (concatenate 'string (string (read-char stream nil nil))
-                                     (read-until stream #'terminalp))))
+                       (concatenate 'string (string (read-char stream nil nil))
+                                    (read-until stream #'terminalp))))
                   (let ((ch (name-char cname)))
                     (or ch (char cname 0)))))))
       ((#\+ #\-)
        (let* ((expression
-                (let ((*package* (find-package :keyword)))
-                  (jscl/cl::read stream eof-error-p eof-value t))))
+               (let ((*package* (find-package :keyword)))
+                 (jscl/cl::read stream eof-error-p eof-value t))))
 
          (if (eql (char= ch #\+) (eval-feature-expression expression))
              (jscl/cl::read stream eof-error-p eof-value t)
@@ -312,17 +342,7 @@ FUNC will NOT be returnings."
        (let ((*read-base* 2))
          (read-integer-from-stream stream)))
       ((#\J #\j)
-       (unless (char= (peek-char nil stream nil nil) #\:)
-         (error "FFI descriptor must start with a colon."))
-       (let ((descriptor (subseq (read-until stream #'terminalp) 1))
-             (subdescriptors nil))
-         (do* ((start 0 (1+ end))
-               (end (position #\: descriptor :start start)
-                    (position #\: descriptor :start start)))
-              ((null end)
-               (push (subseq descriptor start) subdescriptors)
-               `(jscl/ffi:oget jscl/ffi:*root* ,@(reverse subdescriptors)))
-           (push (subseq descriptor start end) subdescriptors))))
+       (j-reader stream ch nil))
       ((#\O #\o)
        (let ((*read-base* 8))
          (read-integer-from-stream stream)))
@@ -340,6 +360,9 @@ FUNC will NOT be returnings."
          (read-til-bar-sharpsign)
          (jscl/cl::read stream eof-error-p eof-value t)))
       (otherwise
+       ;; FIXME:  the  reading of  the  numeric  prefix argument  should
+       ;; respect the  reader's current radix, and  the numeric argument
+       ;; should be available to any reader macro that wants it.
        (cond
          ((and ch (digit-char-p ch))
           (let ((id (digit-char-p ch)))
@@ -484,7 +507,7 @@ FUNC will NOT be returnings."
       (case (char string index)
         (#\+ (incf index))
         (#\- (setq sign -1)
-         (incf index)))
+             (incf index)))
       (unless (< index size) (return))
       ;; Optional integer part
       (awhen (digit-char-p (char string index))
@@ -522,7 +545,7 @@ FUNC will NOT be returnings."
         (case (char string index)
           (#\+ (incf index))
           (#\- (setq exponent-sign -1)
-           (incf index)))
+               (incf index)))
         (unless (< index size) (return))
         ;; Exponent digits
         (let ((value (digit-char-p (char string index))))
@@ -552,7 +575,7 @@ FUNC will NOT be returnings."
         (case (char string 0)
           (#\+ (incf index))
           (#\- (setq sign -1)
-           (incf index)))
+               (incf index)))
         ;; First digit
         (unless (and (< index size)
                      (setq value (digit-char-p (char string index) radix)))

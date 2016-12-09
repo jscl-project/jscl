@@ -83,22 +83,8 @@ defined, returns NIL."
 (declaim (ftype (function (character) t) terminalp)
          (ftype (function (stream (function (character) t)) t) read-until))
 
-(defun j-reader (stream subchar arg)
-  "The   reader  macro   for   the  #J   notation.  See   `WITH-SHARP-J'
-for details.'"
-  (declare (ignorable subchar arg))
-  (assert (char= #\: (read-char stream nil :eof))
-          nil "FFI descriptor must start with a colon.")
-  (let ((descriptor (subseq (read-until stream #'terminalp) 0))
-        (subdescriptors nil))
-    (do* ((start 0 (1+ end))
-          (end (position #\: descriptor :start start)
-               (position #\: descriptor :start start)))
-         ((null end)
-          (push (subseq descriptor start) subdescriptors)
-          `(lambda (&rest args)
-             (apply (jscl/ffi::oget* jscl/ffi::*root* ,@(reverse subdescriptors)) args)))
-      (push (subseq descriptor start end) subdescriptors))))
+(defun colon-or-comma-p (char)
+  (find char ":,"))
 
 (defmacro with-sharp-j (&body body)
   "Install  a  readtable  which  provides   the  #J  macro  for  reading
@@ -116,6 +102,37 @@ a key on the preceding object in the sequence.
 TODO: An equivalent form where the  reference object does not have to be
 *ROOT*  or where  identifiers  may  not have  to  be  strings. There  is
 a discussion in http://github.com/jscl-project/jscl/Issues/
+
+An experimental version is incorporated here. In this notation:
+
+Begin with “#J”. Follow this with :  to refer to the root object (normally
+“window”). Follow it instead with @ to NOT refer to the root object, but
+instead,  name   an  object  (locally   in  scope)  to   be  referenced.
+For example, #J@foo is identical to FOO.
+
+Each  subsequent section  is  introduced  by either  a  colon or  comma.
+A  section introduced  by  : is  treated  as a  string  name. A  section
+introduced by  a , is instead  the name of a  locally available (current
+package) symbol, which is bound to the string value to be used as a key.
+
+Examples:
+
+#J:foo:bar → window[\"foo\"][\"bar\"]
+#J@foo:bar → foo[\"bar\"]
+#J:foo,bar → window[\"foo\"][ bar ]
+#J@foo,bar → foo[ bar ]
+
+Note that @  in the first position BOTH suppresses  the automatic use of
+the root  object (window) AND  ALSO acts  like a comma,  “unquoting” the
+following argument.
+
+Note that the @ and , options  are EXPERIMENTAL and local to the Romance
+Ⅱbranch. The discussion upstream may substantially change the meaning of
+these options.
+
+Rationale: @  and , are used  in Lisp as quasi-quote  operators, and are
+not  valid JavaScript  identifier components,  so they  are unlikely  to
+occur in either language in normal use.
 "
   (let ((readtable-before (gensym "READTABLE-BEFORE-")))
     `(let ((,readtable-before (copy-readtable))
@@ -163,7 +180,7 @@ EG:
 
 ;; Provide a ANSI compatible implementation of storage vectors.
 (defstruct (storage-vector
-            (:constructor make-storage-vector-1))
+             (:constructor make-storage-vector-1))
   kind
   underlying-vector)
 
@@ -287,18 +304,18 @@ metadata in it."
                           (substitute #\- #\_
                                       (string-upcase fn)))
              :jscl/js)
-    ,@args))
+     ,@args))
 
 (unless (jscl/ffi:oget jscl/ffi:*root* "packages")
   (setf (jscl/ffi:oget jscl/ffi:*root* "packages") (jscl/ffi:make-new '|Object|)))
 
 (defvar jscl/ffi::unbound-function
   (lambda (&rest _) (declare (ignore _))
-    (error "Unbound function")))
+          (error "Unbound function")))
 
 (defvar jscl/ffi::unbound-setf-function
   (lambda (&rest _) (declare (ignore _))
-    (error "Unbound SetF function")))
+          (error "Unbound SetF function")))
 
 (defun jscl/js::internals.symbol (name package-name)
   (let ((this (jscl/ffi:make-new '|Symbol|)))
@@ -358,40 +375,40 @@ captured vars and embedded forms as multiple values."
   ;; scope  and  elevates all  VAR  forms  to the  containing  FUNCTION.
   ;; Very sketchy stuff. TODO debug, dangerous.
   (loop
-    with vars = nil
-    with revised = nil
-    for form in body
-    if (consp form)
-      do (case (car form)
-           ;; A var in the current  lexical scratchpad. Capture the var,
-           ;; but only initialize it at this point in the program flow.
-           (jscl/js::var
-            (destructuring-bind (var name
-                                 &optional (initializer nil initializerp))
-                form
-              (push name vars)
-              (when initializerp
-                (push `(setq ,name ,initializer) revised))))
-           ;; Any of these forms establishes  a new lexical scope. Don't
-           ;; expand it yet, wait for it to do its own expansion. Any of
-           ;; these forms must be a macro for this to work.
-           ((jscl/js::function)
-            (push form revised))
-           ;; All  other   CONS  forms  are  recursively   examined  for
-           ;; a  Ruby::Var  form  to  appear under  them.  Call  ourself
-           ;; recursively, BUT  only capture  the elevated vars  in THIS
-           ;; level (the containing lexical scape)
-           (otherwise
-            (multiple-value-bind (_ more-vars revised-form)
-                (elevate-vars form :lexicalp nil)
-              (declare (ignore _))
-              (push more-vars vars)
-              (push revised-form revised))))
-    else do (push form revised)
-    finally (if lexicalp
-                (if vars
-                    `(let ,(nreverse vars) ,@(nreverse revised))
-                    (values nil vars (nreverse revised))))))
+     with vars = nil
+     with revised = nil
+     for form in body
+     if (consp form)
+     do (case (car form)
+          ;; A var in the current  lexical scratchpad. Capture the var,
+          ;; but only initialize it at this point in the program flow.
+          (jscl/js::var
+           (destructuring-bind (var name
+                                    &optional (initializer nil initializerp))
+               form
+             (push name vars)
+             (when initializerp
+               (push `(setq ,name ,initializer) revised))))
+          ;; Any of these forms establishes  a new lexical scope. Don't
+          ;; expand it yet, wait for it to do its own expansion. Any of
+          ;; these forms must be a macro for this to work.
+          ((jscl/js::function)
+           (push form revised))
+          ;; All  other   CONS  forms   are  recursively   examined  for
+          ;; a  Ruby::Var  form  to  appear  under  them.  Call  ourself
+          ;; recursively,  BUT only  capture the  elevated vars  in THIS
+          ;; level (the containing lexical scape)
+          (otherwise
+           (multiple-value-bind (_ more-vars revised-form)
+               (elevate-vars form :lexicalp nil)
+             (declare (ignore _))
+             (push more-vars vars)
+             (push revised-form revised))))
+     else do (push form revised)
+     finally (if lexicalp
+                 (if vars
+                     `(let ,(nreverse vars) ,@(nreverse revised))
+                     (values nil vars (nreverse revised))))))
 
 (defmacro jscl/js::function (name lambda-list &rest body)
   (if (symbolp name)
@@ -433,7 +450,7 @@ captured vars and embedded forms as multiple values."
   (hash-table-p object))
 
 (defun jscl/js::map-for-in (function object)
-  (maphash function object)) 
+  (maphash function object))
 
 (defun jscl/js::delete-property (object key)
   (remhash key object))
