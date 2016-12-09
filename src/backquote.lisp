@@ -1,4 +1,4 @@
-;;; backquote.lisp ---
+;;; backquote.lisp —
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
 ;; the terms of the GNU General  Public License as published by the Free
@@ -168,12 +168,12 @@
 ;;; At each step a number of special cases are handled that,
 ;;; loosely speaking, look like this:
 ;;;
-#|  (APPEND (LIST a b c) foo) => (LIST* a b c foo)
+#|  (APPEND (LIST a b c) foo) → (LIST* a b c foo)
 provided a, b, c are not splicing frobs
-(APPEND (LIST* a b c) foo) => (LIST* a b (APPEND c foo))
+(APPEND (LIST* a b c) foo) → (LIST* a b (APPEND c foo))
 provided a, b, c are not splicing frobs
-(APPEND (QUOTE (x)) foo) => (LIST* (QUOTE x) foo)
-(APPEND (CLOBBERABLE x) foo) => (NCONC x foo)
+(APPEND (QUOTE (x)) foo) → (LIST* (QUOTE x) foo)
+(APPEND (CLOBBERABLE x) foo) → (NCONC x foo)
 |#
 (defun bq-simplify (x)
   (if (atom x)
@@ -222,10 +222,10 @@ provided a, b, c are not splicing frobs
 ;;; or #:BQ-NCONC.  This produces a form (op item result) but
 ;;; some simplifications are done on the fly:
 ;;;
-;;;  (op '(a b c) '(d e f g)) => '(a b c d e f g)
-;;;  (op item 'nil) => item, provided item is not a splicable frob
-;;;  (op item 'nil) => (op item), if item is a splicable frob
-;;;  (op item (op a b c)) => (op item a b c)
+;;;  (op '(a b c) '(d e f g)) → '(a b c d e f g)
+;;;  (op item 'nil) → item, provided item is not a splicable frob
+;;;  (op item 'nil) → (op item), if item is a splicable frob
+;;;  (op item (op a b c)) → (op item a b c)
 (defun bq-attach-append (op item result)
   (cond ((and (null-or-quoted item) (null-or-quoted result))
          (list *bq-quote* (append (cadr item) (cadr result))))
@@ -239,10 +239,10 @@ provided a, b, c are not splicing frobs
 ;;; `(LIST* ,@items ,result) but some simplifications are done
 ;;; on the fly.
 ;;;
-;;;  (LIST* 'a 'b 'c 'd) => '(a b c . d)
-;;;  (LIST* a b c 'nil) => (LIST a b c)
-;;;  (LIST* a b c (LIST* d e f g)) => (LIST* a b c d e f g)
-;;;  (LIST* a b c (LIST d e f g)) => (LIST a b c d e f g)
+;;;  (LIST* 'a 'b 'c 'd) → '(a b c . d)
+;;;  (LIST* a b c 'nil) → (LIST a b c)
+;;;  (LIST* a b c (LIST* d e f g)) → (LIST* a b c d e f g)
+;;;  (LIST* a b c (LIST d e f g)) → (LIST a b c d e f g)
 (defun bq-attach-conses (items result)
   (cond ((and (every #'null-or-quoted items)
               (null-or-quoted result))

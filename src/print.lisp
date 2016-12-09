@@ -1,4 +1,4 @@
-;;; print.lisp ---
+;;; print.lisp —
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
 ;; the terms of the GNU General  Public License as published by the Free
@@ -924,7 +924,7 @@ but wanted ~~~c in format string"
  output is returned in a string as the value of the call. Otherwise,
  DESTINATION must be a stream to which the output will be sent.
 
- Example:   (FORMAT NIL \"The answer is ~D.\" 10) => \"The answer is 10.\"
+ Example:   (FORMAT NIL \"The answer is ~D.\" 10) → \"The answer is 10.\"
 
  FORMAT has many additional capabilities not described here. Consult the
  manual for details."

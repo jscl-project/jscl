@@ -1,6 +1,6 @@
 ;;;; lambda-list.lisp — Lambda list parsing and destructuring
 
-;;; Copyright (C) 2013 David Vazquez
+;;; Copyright © 2013 David Vazquez
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
 ;; the terms of the GNU General  Public License as published by the Free

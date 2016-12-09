@@ -1,6 +1,6 @@
 ;;; jscl.lisp— JavaScript from Common Lisp
 
-;; Copyright (C) 2012, 2013 David Vazquez Copyright (C) 2012 Raimon Grau
+;; Copyright © 2012, 2013 David Vazquez Copyright © 2012 Raimon Grau
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
 ;; the terms of the GNU General  Public License as published by the Free
@@ -18,7 +18,6 @@
 (cl:in-package :common-lisp-user)
 (declaim (optimize (speed 1) (debug 3) (space 0)
                    (safety 3) (compilation-speed 1)))
-
 (defpackage :jscl/common-lisp
   (:use) ; Nothing. (Clozure tries to stuff CCL in by default)
   (:nicknames :jscl/cl))

@@ -38,7 +38,7 @@
 ;; <http://homepage1.nifty.com/bmonkey/lisp/sacla/>.     The     origial
 ;; copyright notice appears below:
 
-;; Copyright  (C) 2002-2004,  Yuji  Minejima <ggb01164@nifty.ne.jp>  ALL
+;; Copyright © 2002-2004,  Yuji  Minejima <ggb01164@nifty.ne.jp>  ALL
 ;; RIGHTS RESERVED.
 ;;
 ;; $Id: must-string.lisp,v 1.7 2004/02/20 07:23:42 yuji Exp $

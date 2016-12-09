@@ -1,4 +1,4 @@
-;;; early-char.lisp   ---  Character   things   needed   early  in   the
+;;; early-char.lisp   —  Character   things   needed   early  in   the
 ;;; cross-compilation
 
 ;; JSCL is free software: you can redistribute it and/or modify it under

@@ -1,4 +1,4 @@
-;;; documentation.lisp --- Accessing DOCUMENTATION
+;;; documentation.lisp — Accessing DOCUMENTATION
 (in-package :jscl) #-jscl-xc #.(error "Do not load this file in the host compiler")
 
 (/debug "loading documentation.lisp!")
