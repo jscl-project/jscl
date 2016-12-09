@@ -206,12 +206,11 @@ using Slime."
 (defvar src-dir (make-pathname
                  :directory
                  (pathname-directory
-                  (first (remove-if-not
-                          #'probe-file
-                          (not-tmp *load-pathname*)
-                          (not-tmp *compile-file-pathname*)
-                          #p"./src/"
-                          #p"./")))))
+                  (some #'probe-file
+                        (list (not-tmp *load-pathname*)
+                              (not-tmp *compile-file-pathname*)
+                              #p"./src/"
+                              #p"./")))))
 
 (defun run-program-compile-time (bin args)
   #+sbcl
