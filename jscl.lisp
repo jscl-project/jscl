@@ -20,11 +20,19 @@
                    (safety 3) (compilation-speed 1)))
 (defpackage :jscl/common-lisp
   (:use) ; Nothing. (Clozure tries to stuff CCL in by default)
-  (:nicknames :jscl/cl))
+  (:nicknames :jscl/cl)
+  (:documentation
+   "The  COMMON-LISP  package  contains   the  symbols  defined  in  the
+   ANSI standard."))
 
 (defpackage :jscl/javascript-low-level
   (:use) ; nothing
-  (:nicknames :jscl/js))
+  (:nicknames :jscl/js)
+  (:documentation
+   "The JSCL compiler generates forms that represent JavaScript in an abstract syntax tree, which are interned in this package. The code generator then operates on that tree to create JavaScript source code.
+
+During  bootstrap,  these  forms  are  evaluated  instead  as  calls  to
+“compatibility” functions loaded into the host compiler."))
 
 (defpackage :jscl/intermediate-cross-compilation
   (:use :jscl/cl)
@@ -63,8 +71,8 @@ implementation, you may never need to access this package directly."))
   (:use :cl :jscl)
   (:export #:oget #:oget* #:make-new #:new #:*root*
            #:oset #:oset*)
-  (:documentation       "Foreign       Function       Interface       to
- JavaScript functions."))
+  (:documentation 
+   "Foreign Function Interface to JavaScript functions."))
 
 (defpackage :jscl/cltl2
   (:use :cl :jscl)
@@ -112,13 +120,13 @@ identifying them (and their provenance) easier."))
   (defun extract-version-from-package.json ()
     (with-open-file (in (merge-pathnames "package.json" *base-directory*))
       (loop
-        for line = (read-line in nil)
-        while line
-        when (search "\"version\":" line)
-          do (let ((colon (position #\: line))
-                   (comma (position #\, line)))
-               (return (string-trim '(#\newline #\" #\tab #\space)
-                                    (subseq line (1+ colon) comma))))))))
+         for line = (read-line in nil)
+         while line
+         when (search "\"version\":" line)
+         do (let ((colon (position #\: line))
+                  (comma (position #\, line)))
+              (return (string-trim '(#\newline #\" #\tab #\space)
+                                   (subseq line (1+ colon) comma))))))))
 
 (defvar *version*
   (extract-version-from-package.json)
@@ -136,8 +144,7 @@ identifying them (and their provenance) easier."))
       seq)))
 
 (defparameter *source*
-  '(("compat"        :host)
-    ("boot"          :both)
+  '(("boot"          :both)
     ("early-char" 	:both)
     ("setf"          :both)
     ("utils"         :both)
@@ -222,10 +229,11 @@ compiled in the host.")
     (when *load-pathname*    ; Prevent this  file from becoming that one
                                         ; stale FASL …
       (compile-file *load-pathname*))
-    (load (merge-pathnames "src/compat.lisp"
-                           #. (or *load-pathname*
-                                  *compile-file-pathname*
-                                  #p ".")))
+    (mapc #'load
+          (directory (merge-pathnames
+                      :name :wild
+                      :type "lisp"
+                      :directory (list #.(src-dir) "compat"))))
     (let (fasls failures)
       (do-source input :host
         (load input)
