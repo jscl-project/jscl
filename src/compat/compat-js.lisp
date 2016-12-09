@@ -160,6 +160,7 @@ captured vars and embedded forms as multiple values."
            (destructuring-bind (var name
                                     &optional (initializer nil initializerp))
                form
+             (declare (ignore var))
              (push name vars)
              (when initializerp
                (push `(setq ,name ,initializer) revised))))
