@@ -298,8 +298,9 @@ permissions on FILENAME, if we  know how in the current implementation."
 
 (defparameter *source*
   '(("compat"
+     ("compat-sv"	:host)
      ("compat-ffi"	:host)
-     ("compat-js"	:host)
+     ("compat-js"	:host) 
      ("compat-misc"	:host))
     ("boot"          :both)
     ("early-char" 	:both)
