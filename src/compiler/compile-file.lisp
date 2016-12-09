@@ -66,12 +66,12 @@ Compiling form #~:d:~%~S~%from ~s~%Generated:~%~s"
 execute BODY. Also binds LAST-FORM and FORM-COUNT."
   (let ((eof (gensym "EOF-")))
     `(loop
-       with ,eof = (gensym "EOF-")
-       for form-count from 0
-       for ,form = (read ,stream nil ,eof)
-       for last-form = nil then ,form
-       while (not (eql ,eof form))
-       do (progn ,@body))))
+        with ,eof = (gensym "EOF-")
+        for form-count from 0
+        for ,form = (read ,stream nil ,eof)
+        for last-form = nil then ,form
+        while (not (eql ,eof form))
+        do (progn ,@body))))
 
 (defun !compile-file (filename out &key print)
   "Compile  FILENAME, writing  the  Javascript to  OUT. Print  top-level
@@ -82,8 +82,8 @@ forms if PRINT is set."
  *  ⸨☕λ⸩ Compiled by 𝓙𝓢ℂ𝕃
  * ~@[(Romance Ⅱ fork) ~]version ~a, Git commit ~a
  * Source file: ~a */"
-              (violet-volts-p) *version*
-              (git-commit) filename)
+              #.(violet-volts-p) *version*
+              #.(git-commit) filename)
       (when print
         (format *trace-output*
                 "~&;;;; Compiling file ~a... "
@@ -113,7 +113,7 @@ forms if PRINT is set."
           (external-format)
           "External format must be :UTF-8 for now.")
   (with-open-file (out output-file :direction :output
-                                   :if-exists :new-version)
+                       :if-exists :new-version)
     (let ((*trace-output* *trace-output*))
       (unwind-protect
            (progn
@@ -184,21 +184,113 @@ permissions on FILENAME, if we  know how in the current implementation."
   #- (or sbcl ecl)
   (warn "You'll need to set executable permissions yourself"))
 
+(defun read-fully (stream)
+  (loop with buffer = (make-array #x100
+                                  :element-type 'character
+                                  :adjustable t
+                                  :fill-pointer 0)
+     for char = (read-char stream nil nil)
+     while char
+     do (vector-push-extend char buffer #x100)
+     finally (progn
+               (adjust-array buffer (fill-pointer buffer))
+               (return buffer))))
+
+(defun run-program-compile-time (bin args)
+  (let ((src-dir #.(make-pathname
+                    :directory
+                    (pathname-directory
+                     (or *load-pathname*
+                         *compile-file-pathname*
+                         #p".")))))
+    #+sbcl
+    (sb-posix:chdir src-dir)
+    (or #+asdf
+        (uiop:run-program (cons bin args) :output :string
+                          :ignore-error-status t)
+        #+sbcl
+        (ignore-errors
+          (read-fully
+           (sb-ext:process-output
+            (sb-ext:run-program bin args
+                                :wait t
+                                :output :stream))))
+        nil)))
+
 (defun git-commit ()
-  (or #+asdf
-      (remove #\Newline
-              (uiop:run-program '("git" "rev-parse" "HEAD") :output :string))
-      #+sbcl
-      (read-line
-       (sb-ext:process-output
-        (sb-ext:run-program "/usr/bin/git" '("rev-parse" "HEAD")
-                            :wait t
-                            :output :stream)))
+  (or (remove #\Newline
+              (run-program-compile-time
+               "/usr/bin/git"
+               '("rev-parse" "--short" "HEAD")))
       "(unknown)"))
 
+(defun latinize (string)
+  "This makes  an effort to  let names  written in non-Latin  scripts be
+alphabetized more-or-less phonetically, in many cases."
+  (let ((greek
+         "αa βb γg δd εe ζz ηeeθthιi κk λl μm νn ξksοo πp ρr ΢s σs τt υu φphχchψpsωoo")
+        (cyrillic
+         "аa бb вv гg дd еe жj зz иiiйi кk лl мm нn оo пp рr сs тt уu фf хkhцtsчchшshщscъy ыy ьy эe юyuяya"))
+    (reduce (lambda (s1 s2)
+              (concatenate 'string s1 s2))
+            (loop
+               for i from 0 below (length string)
+               for char = (char-downcase (char string i))
+
+               for hellenic = (position char greek)
+               for russian = (position char cyrillic)
+               for char-name = (string-downcase (char-name char))
+               for digit-value = (digit-char-p char)
+               for roman = (search "roman_numeral_" char-name)
+               for syllable = (search "syllable_" char-name)
+               for hiragana = (search "hiragana_letter" char-name)
+
+               collect
+                 (cond
+                   ((and hellenic (zerop (mod hellenic 3)))
+                    (remove #\Space
+                            (subseq greek (+ 1 hellenic)
+                                    (+ 3 hellenic))))
+                   ((and russian (zerop (mod russian 3)))
+                    (remove #\Space
+                            (subseq cyrillic (+ 1 russian)
+                                    (+ 3 russian))))
+                   (hiragana
+                    (subseq char-name (1+ (position #\_ char-name
+                                                    :from-end t))))
+                   (roman
+                    (subseq char-name (1+ (position #\_ char-name
+                                                    :from-end t))))
+                   (syllable
+                    (subseq char-name (+ 9 syllable)
+                            (position #\_ char-name
+                                      :start (+ 9 syllable))))
+                   (digit-value
+                    (format nil "~r" digit-value))
+                   (t (string char))))
+            :initial-value "")))
+
+(defun git-credits ()
+  (with-input-from-string (everyone
+                           (run-program-compile-time
+                            "/usr/bin/git"
+                            '("log" "--format=%aN")))
+    (sort (loop
+             with unique = nil
+             for someone = (read-line everyone nil nil)
+             while someone
+             do (pushnew someone unique :test #'string-equal)
+             finally (return unique))
+          #'string<
+          :key (lambda (name)
+                 (latinize
+                  (subseq name (or (position #\Space name)
+                                   0)))))))
+
 (defun violet-volts-p ()
-  ;; FIXME
-  t)
+  (search "romance-ii/jscl"
+          (run-program-compile-time "/usr/bin/git"
+                                    '("remote" "-v"))))
 
 (defun slime-clear ()
   #+swank
@@ -237,8 +329,8 @@ permissions on FILENAME, if we  know how in the current implementation."
 (defun compile-test-suite ()
   (compile-application
    `(,(source-pathname "tests.lisp" :directory nil)
-     ,@(test-files)
-     ,(source-pathname "tests-report.lisp" :directory nil))
+      ,@(test-files)
+      ,(source-pathname "tests-report.lisp" :directory nil))
    (merge-pathnames "tests.js" *base-directory*)))
 
 (defun compile-web-repl ()
