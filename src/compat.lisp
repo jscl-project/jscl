@@ -92,8 +92,10 @@ defined, returns NIL."
 (declaim (ftype (function (character) t) terminalp)
          (ftype (function (stream (function (character) t)) t) read-until))
 
-(defun colon-or-comma-p (char)
-  (find char ":,"))
+(defun read-#j ()
+  "Establish  #J reader  macros  for  the current  file.  Does NOT  save
+the readtable. See `WITH-SHARP-J' for details."
+  (set-dispatch-macro-character #\# #\J #'j-reader))
 
 (defmacro with-sharp-j (&body body)
   "Install  a  readtable  which  provides   the  #J  macro  for  reading
@@ -146,15 +148,10 @@ occur in either language in normal use.
   (let ((readtable-before (gensym "READTABLE-BEFORE-")))
     `(let ((,readtable-before (copy-readtable))
            (*readtable* (copy-readtable)))
-       (set-dispatch-macro-character #\# #\J #'j-reader)
+       (read-#j)
        (unwind-protect
             (progn ,@body)
          (setf *readtable* ,readtable-before)))))
-
-(defun read-#j ()
-  "Establish  #J reader  macros  for  the current  file.  Does NOT  save
-the readtable. See `WITH-SHARP-J' for details."
-  (set-dispatch-macro-character #\# #\J #'j-reader))
 
 (defun rational-float-p (rational)
   "Determine   whether  a   rational  number   can  be   represented  as

@@ -247,6 +247,9 @@ FUNC will NOT be returnings."
                                (not (digit-char-p ch *read-base*))))
                  :radix *read-base*))
 
+(defun colon-or-comma-p (char)
+  (find char ":,"))
+
 (defun j-reader (stream subchar arg)
   "The   reader  macro   for   the  #J   notation.  See   `WITH-SHARP-J'
 for details.'"
@@ -270,10 +273,10 @@ for details.'"
                        ,@(reverse subdescriptors))
                       args)))
         (push
-         (ecase (char descriptor (1- start))
-           ((#\@ #\,)
-            (subseq descriptor start end))
-           (#\: #'identity))
+         (funcall (ecase (char descriptor (1- start))
+                    ((#\@ #\,) #'symbol-value )
+                    (#\: #'identity))
+                  (subseq descriptor start end))
          subform
          subdescriptors)))))
 
