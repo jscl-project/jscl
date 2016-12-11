@@ -358,7 +358,7 @@
      (let ((i 0))
        (dolist (elt sequence)
          (when (eql index i)
-           (return-from elt elt))
+           (return-from jscl/cl::elt elt))
          (incf i))
        (error "The index ~D is too large for ~A of length ~D."
               index 'list i)))
@@ -377,7 +377,7 @@
        (dolist (elt sequence)
          (when (eql index i)
            (setf (car elt) new-value)
-           (return-from elt new-value))
+           (return-from jscl/cl::elt new-value))
          (incf i))
        (error "The index ~D is too large for ~A of length ~D."
               index 'list i)))
@@ -436,11 +436,11 @@
         (index2 start2))
     (while (and (<= index1 end1) (<= index2 end2))
       (when (or (eql index1 end1) (eql index2 end2))
-        (return-from mismatch (if (eql end1 end2) NIL index1)))
+        (return-from jscl/cl::mismatch (if (eql end1 end2) NIL index1)))
       (unless (satisfies-test-p (elt sequence1 index1) (elt sequence2 index2)
                                 :key key :test test :testp testp
                                 :test-not test-not :test-not-p test-not-p)
-        (return-from mismatch index1))
+        (return-from jscl/cl::mismatch index1))
       (incf index1)
       (incf index2))))
 
