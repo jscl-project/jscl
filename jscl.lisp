@@ -88,7 +88,7 @@ identifying them (and their provenance) easier."))
 (defpackage :jscl/mop
   (:use :cl :jscl)
   #+jscl (:nicknames :mop)
-  (:export)
+  (:export #:eql-specializer-oject #:eql-specializer-p)
   (:documentation  "Functions  defined in  the  Art  of the  Meta-Object
  Protocol (MOP) which are unique to that manuscript.
 
@@ -330,7 +330,7 @@ permissions on FILENAME, if we  know how in the current implementation."
      ("codegen"      :both)
      ("compiler"     :both)
      ("compile-file"	:both))
-    ("documentation" :target) ; TODO
+    ("documentation" :both)
     ("misc"          :both)
     ("toplevel" 	:both))
   "List of  all the source files  that need to be  compiled, and whether
