@@ -231,14 +231,14 @@ invoked. In that case it will store into PLACE and start over."
 (defun typecase-unique-types (clauses)
   (when clauses
     (let ((type (first clauses))
-          (rest (rest clauses)))
-      (assert (or (symbolp type) (and (listp type)
-                                      (every #'symbolp type)))
-              (type)
-              "Not sure what to make of typecase clause introduced by ~s"
-              type)
+          (rest (rest clauses))) 
       (if (listp type)
-          (append type (typecase-unique-types rest))
+          (case (car type)
+            (or (append (typecase-unique-types (cdr type))
+                        (typecase-unique-types rest)))
+            (eql (append `(member ,(second type))
+                         (typecase-unique-types rest)))
+            (t (append type (typecase-unique-types rest))))
           (list* type (typecase-unique-types rest))))))
 
 (defun find-duplicates (list &key (test #'eql))
