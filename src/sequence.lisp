@@ -128,12 +128,12 @@
 
 (defun jscl/cl::count-if-not (predicate sequence &key from-end (start 0) end key)
   (count-if (complement predicate) sequence :from-end from-end
-                                            :start start :end end :key key))
+            :start start :end end :key key))
 
 (defun jscl/cl::find (item seq &key key (test #'eql testp) (test-not #'eql test-not-p))
   (do-sequence (x seq)
     (when (satisfies-test-p item x :key key :test test :testp testp
-                                   :test-not test-not :test-not-p test-not-p)
+                            :test-not test-not :test-not-p test-not-p)
       (return x))))
 
 (defun jscl/cl::find-if (predicate sequence &key key)
@@ -248,9 +248,10 @@
     (list
      (let* ((head (cons nil nil))
             (tail head))
-       (do-sequence (elt seq)
+       (dolist (elt seq)
          (unless (satisfies-test-p x elt
-                                   :key key :test test :testp testp
+                                   :key key
+                                   :test test :testp testp
                                    :test-not test-not :test-not-p test-not-p)
            (let ((new (list elt)))
              (rplacd tail new)
@@ -258,17 +259,18 @@
        (cdr head)))
     (array
      (let (vector)
-       (do-sequence (elt seq index)
-         (if (satisfies-test-p x elt :key key :test test :testp testp
-                                     :test-not test-not :test-not-p test-not-p)
-             ;; Copy the  beginning of the  vector only when we  find an
-             ;; element that does not match.
-             (unless vector
-               (setq vector (make-array 0 :adjustable t))
-               (dotimes (i index)
-                 (vector-push-extend (aref seq i) vector)))
-             (when vector
-               (vector-push-extend elt vector))))
+       (dotimes (index (length seq))
+         (let ((elt (aref seq index)))
+           (if (satisfies-test-p x elt :key key :test test :testp testp
+                                 :test-not test-not :test-not-p test-not-p)
+               ;; Copy the beginning of the  vector only when we find an
+               ;; element that does not match.
+               (unless vector
+                 (setq vector (make-array 0 :adjustable t))
+                 (dotimes (i index)
+                   (vector-push-extend (aref seq i) vector)))
+               (when vector
+                 (vector-push-extend elt vector)))))
        (or vector seq)))))
 
 
@@ -459,7 +461,9 @@
         (when (or (not mismatch) (>= mismatch length1))
           (return-from vector-search position))))))
 
-(defun jscl/cl::search (sequence1 sequence2 &rest args &key key test test-not)
+(defun jscl/cl::search (sequence1 sequence2 &rest args
+                        &key key test test-not)
+  (declare (ignorable key test test-not)) ; The ARGS var duplicates the &KEY vars
   (unless (sequencep sequence1)
     (not-seq-error sequence1))
   (when (or (and (listp sequence1) (null sequence1))
