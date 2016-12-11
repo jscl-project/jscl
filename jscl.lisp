@@ -88,7 +88,7 @@ identifying them (and their provenance) easier."))
 (defpackage :jscl/mop
   (:use :cl :jscl)
   #+jscl (:nicknames :mop)
-  (:export #:eql-specializer-oject #:eql-specializer-p)
+  (:export #:eql-specializer-object #:eql-specializer-p)
   (:documentation  "Functions  defined in  the  Art  of the  Meta-Object
  Protocol (MOP) which are unique to that manuscript.
 
