@@ -293,9 +293,7 @@ since the supertype comes first, the subtype~1@*~p will never be matched."
                        (error "Clause in TYPECASE is not a list? ~a"
                               clause))
                      (destructuring-bind (types &rest body) clause
-                       `((typep ,evaluated ',(if (listp types)
-                                                 (cons 'or types)
-                                                 types))
+                       `((typep ,evaluated ',types)
                          ,@(or body (cons nil nil)))))
                    clauses)))))
 
