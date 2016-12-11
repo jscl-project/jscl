@@ -316,7 +316,7 @@ permissions on FILENAME, if we  know how in the current implementation."
     ("string"        :both)
     ("sequence"      :both)
     ("stream"        :both)
-    ("hash-table"    :target) ; TODO
+    ("hash-table"    :both)
     ("print"         :both)
     ("ffi"           :target)
     ("symbol"        :both)
