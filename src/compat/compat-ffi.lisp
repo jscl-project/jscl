@@ -66,3 +66,6 @@ is equivalent to the JavaScript something[\"foo\"][\"bar\"][\"baz\"]
   "Retrieve from  OBJECT the value  identified by  KEY. When KEY  is not
 defined, returns NIL."
   (gethash key object default))
+
+(defun jscl/ffi:oset (value object key)
+  (setf (gethash key object) value))
