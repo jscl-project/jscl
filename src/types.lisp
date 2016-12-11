@@ -87,7 +87,7 @@
           (binding-value b)))
       (error "~s does not name a type" type)))
 
-(define-cl-fun subtypep (subtype supertype)
+(defun jscl/cl::subtypep (subtype supertype)
   (let* ((sub (find-type-definition subtype))
          (known-supertypes (type-definition-supertypes sub)))
     (or (find supertype known-supertypes)
@@ -114,7 +114,7 @@
           (funcall (type-definition-predicate type)
                    value))))))
 
-(define-cl-fun type-of (value)
+(defun jscl/cl::type-of (value)
   (if value
       (let* ((curry (curry-type-check value))
              (type (type-definition-name
@@ -617,8 +617,7 @@ star)."
     (destructuring-bind (class &rest subclasses) hierarchy
       (dolist (subclass subclasses)
         (let ((metaclass (find-built-in-class subclass)))
-          (push class (!built-in-class-superclasses
-                       metaclass)))))))
+          (push class (built-in-class-superclasses metaclass)))))))
 
 (defun validate-standard-class-subclasses% ()
   (dolist (hierarchy +standard-class-subclasses+)
