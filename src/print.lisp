@@ -111,7 +111,8 @@
           "-3.7+2.6i-6.17j+19.6k"))
 
 #+nil
-(mapcar #'potential-number-p '("/" "/5" "+" "1+" "1-" "foo+" "ab.cd" "_" "^" "^/-"))
+(mapcar #'potential-number-p
+        '("/" "/5" "+" "1+" "1-" "foo+" "ab.cd" "_" "^" "^/-"))
 
 (defun escape-token-p (string)
   (or (potential-number-p string)
@@ -196,14 +197,14 @@ to streams."
       (if (char= char #\~)
           (let ((next (if (< i (1- (length fmt)))
                           (char fmt (1+ i))
-                          (error "`~~' appears in the last position of the format control string ~S." fmt))))
+                          (error "`~~' appears in the last position of the ~
+format control string ~S." fmt))))
             (ecase next
               (#\~ (write-char #\~ stream))
               (#\d (write-integer (pop args) stream))
               (#\a (write-string (pop args) stream)))
             (incf i))
           (write-char char stream)))))
-
 
 (defun write-aux (form stream known-objects object-ids)
   (when *print-circle*
