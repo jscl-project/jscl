@@ -83,6 +83,16 @@
           do (setf (gethash key jscl/js::this) value))
        jscl/js::this)
 
+(defun jscl/js::|String| (&optional contents)
+       (etypecase contents
+         (null "")
+         (string contents)
+         (character (string contents))
+         (t (princ-to-string contents))))
+
+(setf (gethash "String" jscl/ffi:*root*) #'jscl/js::|String|
+      (gethash "Object" jscl/ffi:*root*) #'jscl/js::|Object|)
+
 (defvar jscl/ffi::unbound-function
   (lambda (&rest _) (declare (ignore _))
           (error "Unbound function")))
