@@ -263,15 +263,15 @@ for details.'"
             (end (position-if #'colon-or-comma-p
                               descriptor :start start)
                  (position-if #'colon-or-comma-p
-                              descriptor :start start)))
-           ((null end)
+                              descriptor :start start))) 
+           ((null end) 
             (push (subseq descriptor start) subdescriptors)
             `(lambda (&rest args)
                (apply (jscl/ffi::oget*
                        ,@(when (char= first-char #\:)
-                           jscl/ffi::*root*)
+                           (list 'jscl/ffi::*root*))
                        ,@(reverse subdescriptors))
-                      args)))
+                      args))) 
         (push
          (funcall (ecase (char descriptor (1- start))
                     ((#\@ #\,) #'symbol-value )
