@@ -304,11 +304,7 @@ to streams."
      (simple-format stream "#<PACKAGE ~a>" (package-name form)))
     ;; Others
     (otherwise
-     #+jscl
-     (simple-format stream "#<JS-OBJECT ~a>" (#j:String form)
-                    #-jscl
-                    (simple-format stream "#<Strange-Object? ~a>" (princ-to-string form))))))
-
+     (simple-format stream "#<JS-OBJECT ~a>" (#j:String form)))))
 
 (defun output-stream-designator (x)
   ;; TODO: signal error if X is not a stream designator
