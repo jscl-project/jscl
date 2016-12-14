@@ -19,7 +19,6 @@
 ;;; of Common  Lisp, except  that any  value will  work as  a condition.
 ;;; Because, well, we do not have conditions at this point.
 
-
 (defvar *handler-bindings* nil)
 
 (defmacro jscl/cl::handler-bind (bindings &body body)
@@ -38,7 +37,6 @@
           (if (%%nlx-p err)
               (%%throw err)
               (jscl/cl::error (or (jscl/ffi:oget err "message") err))))))))
-
 
 ;; Implementation if :NO-ERROR case is missing.
 (defmacro %handler-case-1 (form &body cases)
@@ -72,7 +70,6 @@
                 (return-from ,nlx ,form))
               ,@(reverse tagbody-content)))))))
 
-
 ;;; General case
 (defmacro jscl/cl::handler-case (form &body cases)
   (let ((last-case (car (last cases))))
@@ -88,31 +85,44 @@
                        ,@(butlast cases))))))))
         `(%handler-case-1 ,form ,@cases))))
 
+(defun jscl/cl::make-condition (type &rest init-args)
+  (assert (subtypep type 'condition) (type)
+          "~S does not name a class of condition" type)
+  (apply #'make-instance type init-args))
 
-
-;;; Fake condition objects until we have at least type system, but
-;;; final implementation would require CLOS.
-
-(in-package :jscl/cl)
-(defstruct jscl/cl::condition
-  type
-  args)
-(in-package :jscl)
-
-(defun condition-type-p (x type)
-  (and (!condition-p x)
-       (equal (!condition-type x) type)))
+(defmacro jscl/cl::define-condition (name (&rest superclasses)
+                                                 (&rest slot-specs)
+                                     &body options)
+  (check-type name symbol)
+  (assert (every (lambda (superclass)
+                   (subtypep superclass 'condition))
+                 superclasses)
+          (superclasses)
+          "Every superclass of a condition must also be a condition")
+  (let ((report (getf :report options :key #'car)))
+    `(progn
+       (defclass ,name ,slot-specs
+         ,(remove :report options :test #'eql :key #'car))
+       ,(when report
+          `(defmethod condition-report ((condition ,name) stream)
+             ,(etypecase report
+                (string
+                 `(write ,report stream))
+                ((or symbol sfunction)
+                 `(funcall ',symbol condition stream))))))))
 
 (defun coerce-to-condition (default datum args)
   (cond
-    ((!condition-p datum)
+    ((condition-p datum)
      datum)
     ((stringp datum)
-     (make-!condition
+     (make-condition
       :type default
       :args (cons datum args)))
     (t
-     (make-!condition
+     (assert (subtypep datum 'condition) (datum)
+             "~S does not name a type of condition" datum)
+     (make-condition
       :type datum
       :args args))))
 
@@ -127,12 +137,11 @@
 (defun jscl/cl::warn (datum &rest args)
   (let ((condition (coerce-to-condition 'warning datum args)))
     (signal condition)
-    (format *error-output* "~&WARNING: ~?" datum args) 
+    (format *error-output* "~&WARNING: ~?" datum args)
     nil))
 
 (defun jscl/cl::error (datum &rest args)
   (let ((condition (coerce-to-condition 'error datum args)))
-    (signal condition) 
-    (format *error-output "~&ERROR: ~?" datum args) 
+    (signal condition)
+    (format *error-output "~&ERROR: ~?" datum args)
     nil))
-
