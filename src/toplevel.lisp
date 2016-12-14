@@ -21,8 +21,11 @@
 (/debug "loading toplevel.lisp!")
 
 (defun jscl/cl::eval (x)
+  #+jscl
   (js-eval (with-compilation-environment
-             (compile-toplevel x t t))))
+             (compile-toplevel x t t)))
+  #-jscl
+  (eval x))
 
 (defvar jscl/cl::* nil)
 (defvar jscl/cl::** nil)
@@ -122,7 +125,7 @@ JSCL contains contributions by~
 (defun welcome-message ()
   (format t "~&~v<~;⸨☕λ⸩~;~>~:*
 ~v<~;𝓙𝓢ℂ𝕃~;~>
-  ~a ~@[(Romance Ⅱ fork) ~]version ~a,
+ ~a ~@[(Romance Ⅱ fork) ~]version ~a,
 Git commit ~a; ~a
 
  Copyright © 2012-2014 David Vázquez Púa
@@ -147,6 +150,7 @@ https://github.com/jscl-project/jscl.~%~%")
 ;;; web or node REPL.
 (setq jscl/cl::*standard-output* (make-web-console-output-stream))
 
+#+jscl
 (if (find :node *features*)
     (setq jscl/ffi:*root* (jscl/js::%js-vref "global"))
     (setq jscl/ffi:*root* (jscl/js::%js-vref "window")))
