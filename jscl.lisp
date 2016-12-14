@@ -298,10 +298,10 @@ permissions on FILENAME, if we  know how in the current implementation."
 
 (defparameter *source*
   '(("compat"
+     ("compat-misc"	:host)
      ("compat-sv"	:host)
      ("compat-ffi"	:host)
-     ("compat-js"	:host) 
-     ("compat-misc"	:host))
+     ("compat-js"	:host))
     ("boot"          :both)
     ("early-char" 	:both)
     ("setf"          :both)
@@ -430,6 +430,7 @@ while compiling ~r file~:p"
             (when (or warn fail)
               (push (list (enough-namestring input) warn fail) failures))
             (when fasl
+              (ignore-errors (load fasl))
               (push fasl fasls)))))
       (when failures
         (review-failures failures))
