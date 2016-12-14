@@ -385,8 +385,8 @@ compiled in the host.")
 ;;; Compile and load jscl into the host
 
 (defun review-failures (failures)
-  (let ((file-warnings 0)
-        (file-failures 0)
+  (let ((file-warnings ())
+        (file-failures ())
         (files 0))
     (dolist (fail failures)
       (incf files)
@@ -395,16 +395,19 @@ compiled in the host.")
         (cond
           (failed
            (format *error-output* "~& ⚠ Failed to compile ~a" file)
-           (incf file-failures))
+           (push (enough-namestring file) file-failures))
           (t
            (format *error-output* "~& ⚠ Warning(s) from compiling ~a" file)
-           (incf file-warnings)))))
+           (push (enough-namestring file) file-warnings)))))
     (cerror "Try anyway"
             "There were ~
  ~[~:;~:*~r file~:p with warnings, and~] ~
  ~[no files~:;~:*~r file~:p~] which failed, ~
-which occurred within ~r file~:p"
-            file-warnings file-failures files)))
+which occurred within ~r file~:p: ~
+~@[~%Warning on ~{~a~^, ~}~] ~
+~@[~%Failed on ~{~a~^, ~}~]"
+            (length file-warnings) (length file-failures) files
+            file-warnings file-failures)))
 
 (defun load-jscl ()
   (with-compilation-unit ()
