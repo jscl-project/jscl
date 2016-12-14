@@ -394,16 +394,16 @@ compiled in the host.")
         (declare (ignore warned))
         (cond
           (failed
-           (format *error-output* "~& Failed to compile ~a" file)
+           (format *error-output* "~& ⚠ Failed to compile ~a" file)
            (incf file-failures))
           (t
-           (format *error-output* "~& Warning(s) from compiling ~a" file)
+           (format *error-output* "~& ⚠ Warning(s) from compiling ~a" file)
            (incf file-warnings)))))
     (cerror "Try anyway"
             "There were ~
  ~[~:;~:*~r file~:p with warnings, and~] ~
  ~[no files~:;~:*~r file~:p~] which failed, ~
-while compiling ~r file~:p"
+which occurred within ~r file~:p"
             file-warnings file-failures files)))
 
 (defun load-jscl ()
