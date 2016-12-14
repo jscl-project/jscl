@@ -172,7 +172,8 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                        (:type t) (:initform t) (:initarg t) (:allocation t))
                  (values slot-info &optional))
                 make-slot-info)
-         (ftype (function (t) t) slot-info-p))
+         (ftype (function (t) t) slot-info-p)
+         (special *types*))
 
 (defun defstruct/make-slot-info (type slot)
   (make-slot-info
@@ -182,7 +183,6 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
    :accessors (list (defstruct/make-accessor-name type slot))
    :initarg (intern (car slot) :keyword)))
 
-#+jscl
 (defun defstruct/define-type (type slots &key
                                            predicate
                                            print-function
@@ -192,6 +192,15 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                               :predicate predicate
                               :supertypes '(structure-object))
         *types*)
+  ;; warning: next bit requires CLOS
+  (when print-function
+    (if (fboundp 'add-method)
+        (add-method (fdefinition 'print-object)
+                    (make-instance 'standard-method
+                                   :specializers (list type t)
+                                   :function print-function))
+        (warn "PRINT-OBJECT for :PRINT-FUNCTION for structure ~s can't be defined without CLOS: Option will be ignored" type)))
+  #+ (or)
   (push (make-class :name type
                     :supertypes (list 'structure-object)
                     :slots (mapcar (lambda (slot)
@@ -202,7 +211,7 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                     :copier copier)
         *classes*))
 
-#-jscl
+#+ (or)
 (defun defstruct/define-type (type slots &key
                                            predicate
                                            print-function
