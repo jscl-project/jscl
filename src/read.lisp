@@ -361,6 +361,7 @@ for details.'"
        (let ((bits (make-array 0 :element-type 'bit :adjustable t :fill-pointer 0)))
          (loop for bit-char = (peek-char nil stream nil nil)
             while (find bit-char "01")
+            do (read-char stream)
             do (vector-push-extend (if (char= bit-char #\1) 1 0)
                                    bits 1))))
       (#\|
