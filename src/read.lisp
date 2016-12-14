@@ -116,7 +116,7 @@
 (defun read-until (stream func)
   "Read from STREAM into a string, until the predicate FUNC returns true
 when passed  the value of  the next  character. The character  passed to
-FUNC will NOT be returnings."
+FUNC will NOT be returned." 
   (let ((string (make-array 80 :element-type 'character
                             :adjustable t :fill-pointer 0))
         (ch (peek-char nil stream nil nil)))
@@ -248,36 +248,42 @@ FUNC will NOT be returnings."
                  :radix *read-base*))
 
 (defun colon-or-comma-p (char)
-  (find char ":,"))
+  (find char ":," :test #'char=))
 
 (defun j-reader (stream subchar arg)
   "The   reader  macro   for   the  #J   notation.  See   `WITH-SHARP-J'
 for details.'"
-  (declare (ignorable subchar arg))
-  (let ((first-char (read-char stream nil :eof)))
+  (assert (null arg) (arg)
+          "Numeric argument is not allowed between # and J")
+  (assert (find subchar "Jj"))
+  (check-type stream stream )
+  (let ((first-char (peek-char nil stream :eof)))
     (assert (find first-char ":@")
             nil "FFI descriptor must start with a colon or at-sign")
-    (let ((descriptor (read-until stream #'terminalp))
-          (subdescriptors nil))
-      (do* ((start 0 (1+ end))
-            (end (position-if #'colon-or-comma-p
-                              descriptor :start start)
-                 (position-if #'colon-or-comma-p
-                              descriptor :start start))) 
-           ((null end) 
-            (push (subseq descriptor start) subdescriptors)
-            `(lambda (&rest args)
-               (apply (jscl/ffi::oget*
-                       ,@(when (char= first-char #\:)
-                           (list 'jscl/ffi::*root*))
-                       ,@(reverse subdescriptors))
-                      args))) 
-        (push
-         (funcall (ecase (char descriptor (1- start))
-                    ((#\@ #\,) #'symbol-value )
-                    (#\: #'identity))
-                  (subseq descriptor start end)) 
-         subdescriptors)))))
+    (loop
+       with descriptor = (read-until stream #'terminalp)
+       with length fixnum = (length descriptor)
+       with end
+         
+       for start fixnum = 1 then (1+ end) 
+         
+       while (< start length)
+       collect (progn
+                 (setq end (or (position-if #'colon-or-comma-p
+                                            descriptor :start start)
+                               length)) 
+                 (funcall (ecase (char descriptor (1- start))
+                            ((#\@ #\,) #'symbol-value )
+                            (#\: #'identity))
+                          (subseq descriptor start end)))
+       into subdescriptors
+
+       finally (return `(lambda (&rest args)
+                          (apply (jscl/ffi::oget*
+                                  ,@(when (char= first-char #\:)
+                                      (list 'jscl/ffi::*root*))
+                                  ,@subdescriptors)
+                                 args))))))
 
 (defun read-sharp (stream &optional eof-error-p eof-value)
   (read-char stream nil nil)
