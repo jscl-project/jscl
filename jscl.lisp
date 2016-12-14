@@ -1,6 +1,7 @@
 ;;; jscl.lisp— JavaScript from Common Lisp
 
-;; Copyright © 2012, 2013 David Vazquez Copyright © 2012 Raimon Grau
+;; Copyright © 2012, 2013 David Vazquez
+;;; Copyright © 2012 Raimon Grau
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
 ;; the terms of the GNU General  Public License as published by the Free
@@ -300,7 +301,7 @@ permissions on FILENAME, if we  know how in the current implementation."
   '(("compat"
      ("compat-sv"	:host)
      ("compat-ffi"	:host)
-     ("compat-js"	:host) 
+     ("compat-js"	:host)
      ("compat-misc"	:host))
     ("boot"          :both)
     ("early-char" 	:both)
