@@ -1,4 +1,4 @@
-;;; print.lisp —
+;;; print.lisp — printing and formatting built-in types
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
 ;; the terms of the GNU General  Public License as published by the Free
@@ -18,7 +18,8 @@
 (/debug "loading print.lisp!")
 
 ;;; HACK HACK — if an error  occurs during startup before toplevel binds
-;;; this correctly,
+;;; this correctly — TODO this may not work with the new stream handlers
+;;; with the generic function emulation
 
 (defvar jscl/cl::*standard-output*
   #+jscl
@@ -52,7 +53,7 @@
   (when (every (lambda (ch) (char= #\. ch)) s)
     (return-from escape-symbol-name-p t))
   (dotimes (i (length s))
-    (let ((ch (char s i))) 
+    (let ((ch (char s i)))
       (when (or (terminalp ch)
                 (char= ch #\:)
                 (char= ch #\\)
@@ -661,7 +662,7 @@ emits (1- COUNT)."
 (defun format-justify (captured-substrings arguments
                        &key start-at-p start-colon-p
                             end-at-p end-colon-p)
-  "FORMAT ~< ~> handler. (unimplemented)"
+  "FORMAT ~< ~> handler. (unimplemented)" 
   (let (output)
     (error "~~< ~~> not implemented yet")
     (values (concatenate 'string (reverse output)) arguments)))
@@ -730,7 +731,7 @@ dispatching on the CHR ending the format sequence."
            (#\W #'format-write)
            (#\X #'format-hex)
            (t (warn "~~~a is not implemented yet, using ~~S instead" chr)
-            #'format-syntax))
+              #'format-syntax))
          arg colonp atp params))
 
 (defun format-nested (nesting-char
