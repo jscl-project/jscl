@@ -34,19 +34,29 @@
 ;; with what a “normal” compiler would provide.
 
 (defun null-if-empty (x)
-  (if (and x (emptyp x)) nil x))
+  (if (and x (zerop (length x))) nil x))
 
 (defun jscl/cl::short-site-name ()
-  (null-if-empty (or (and #j:window #j:window:location #j:window:location:hostname)
-                     (and #j:os #j:os:hostname (#j:os:hostname)))))
+  (null-if-empty
+   #+jscl (or (and #j:location #j:location:hostname)
+              (and #j:os #j:os:hostname (#j:os:hostname)))
+   #+sbcl (run-program-compile-time "hostname -d")
+   #-(or jscl sbcl) "localdomain"))
 
 (defun jscl/cl::long-site-name ()
-  (null-if-empty (or (and #j:window #j:window:location #j:window:location:origin)
-                     (and #j:os #j:os:hostname (#j:os:hostname)))))
+  (null-if-empty
+   #+jscl (or (and #j:location #j:location:origin)
+              (and #j:os #j:os:hostname (#j:os:hostname)))
+   #+sbcl (substitute #\Space #\. (string-capitalize
+                                   (run-program-compile-time "hostname -d")))
+   #-(or jscl sbcl) "Local Domain"))
 
 (defun jscl/cl::machine-instance ()
-  (null-if-empty (or (and #j:window #j:window:location #j:window:location:hostname)
-                     (and #j:os #j:os:hostname (#j:os:hostname)))))
+  (null-if-empty
+   #+jscl (or (and #j:location #j:location:hostname)
+              (and #j:os #j:os:hostname (#j:os:hostname)))
+   #+sbcl (run-program-compile-time "hostname -d")
+   #-(or jscl sbcl) "localhost"))
 
 (defun jscl/cl::machine-version ()
   "The platform or OS type"
