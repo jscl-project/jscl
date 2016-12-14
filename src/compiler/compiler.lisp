@@ -313,9 +313,9 @@ specifier for the condition types that have been muffled.
 
 (defun ll-svars (lambda-list)
   (let ((args
-          (append
-           (ll-keyword-arguments-canonical lambda-list)
-           (ll-optional-arguments-canonical lambda-list))))
+         (append
+          (ll-keyword-arguments-canonical lambda-list)
+          (ll-optional-arguments-canonical lambda-list))))
     (remove nil (mapcar #'third args))))
 
 (defun js-identifier-char-p (char)
@@ -405,11 +405,11 @@ specifier for the condition types that have been muffled.
 
 (defun compile-lambda-parse-keywords (ll)
   (let ((n-required-arguments
-          (length (ll-required-arguments ll)))
+         (length (ll-required-arguments ll)))
         (n-optional-arguments
-          (length (ll-optional-arguments ll)))
+         (length (ll-optional-arguments ll)))
         (keyword-arguments
-          (ll-keyword-arguments-canonical ll)))
+         (ll-keyword-arguments-canonical ll)))
     `(progn
        ;; Declare variables
        ,@(with-collect
@@ -421,7 +421,7 @@ specifier for the condition types that have been muffled.
                (when svar
                  (collect
                      `(jscl/js::var (,(translate-variable svar)
-                                     ,(convert nil))))))))
+                                      ,(convert nil))))))))
 
        ;; Parse keywords
        ,(flet ((parse-keyword (keyarg)
@@ -667,15 +667,15 @@ association list ALIST in the same order."
                                            (symbol-name class-name))
                               (symbol-package class-name)))
          (slot-names
-           #+sbcl
+          #+sbcl
            (mapcar #'sb-mop:slot-definition-name
                    (sb-mop:class-slots (find-class class)))
            #+jscl (mapcar #'jscl/mop:slot-definition-name
                           (jscl/mop:class-slots (fnd-class class))))
          (slot-values
-           (mapcar (lambda (slot-name)
-                     (literal (slot-value object slot-name)))
-                   slot-names)))
+          (mapcar (lambda (slot-name)
+                    (literal (slot-value object slot-name)))
+                  slot-names)))
     (convert-1 (cons constructor
                      (alist-plist
                       (mapcar #'cons slot-names slot-values))))))
@@ -817,7 +817,7 @@ association list ALIST in the same order."
 
 (defun labels/compiled-label-function (func)
   `(jscl/js::var (,(translate-function (car func))
-                  ,(compiled-function-code func))))
+                   ,(compiled-function-code func))))
 
 (define-compilation labels (definitions &rest body)
   (let* ((label-fun-names (mapcar #'car definitions))
@@ -1094,10 +1094,10 @@ let-binding-wrapper."
 (defun declare-tagbody-tags (tbidx body)
   (let* ((go-tag-counter 0)
          (bindings
-           (mapcar (lambda (label)
-                     (let ((tagidx (incf go-tag-counter)))
-                       (make-binding :name label :type 'gotag :value (list tbidx tagidx))))
-                   (remove-if-not #'go-tag-p body))))
+          (mapcar (lambda (label)
+                    (let ((tagidx (incf go-tag-counter)))
+                      (make-binding :name label :type 'gotag :value (list tbidx tagidx))))
+                  (remove-if-not #'go-tag-p body))))
     (extend-lexenv bindings *environment* 'gotag)))
 
 (define-compilation tagbody (&rest body)
@@ -1694,23 +1694,23 @@ generate the code which performs the transformation on these variables."
 ;; (%js-try (progn …) (catch (err) …) (finally …))
 (define-compilation %js-try (form &optional catch-form finally-form)
   (let ((catch-compilation
-          (and catch-form
-               (destructuring-bind (catch (var) &body body) catch-form
-                 (unless (eq catch 'catch)
-                   (error "Bad CATCH clausule `~S'." catch-form))
-                 (let* ((*environment* (extend-local-env (list var)))
-                        (tvar (translate-variable var)))
-                   `(catch (,tvar)
-                      (jscl/js::= ,tvar (jscl/js::call-internal |js_to_lisp| ,tvar))
-                      ,(convert-block body t))))))
+         (and catch-form
+              (destructuring-bind (catch (var) &body body) catch-form
+                (unless (eq catch 'catch)
+                  (error "Bad CATCH clausule `~S'." catch-form))
+                (let* ((*environment* (extend-local-env (list var)))
+                       (tvar (translate-variable var)))
+                  `(catch (,tvar)
+                     (jscl/js::= ,tvar (jscl/js::call-internal |js_to_lisp| ,tvar))
+                     ,(convert-block body t))))))
 
         (finally-compilation
-          (and finally-form
-               (destructuring-bind (finally &body body) finally-form
-                 (unless (eq finally 'finally)
-                   (error "Bad FINALLY clausule `~S'." finally-form))
-                 `(finally
-                   ,(convert-block body))))))
+         (and finally-form
+              (destructuring-bind (finally &body body) finally-form
+                (unless (eq finally 'finally)
+                  (error "Bad FINALLY clausule `~S'." finally-form))
+                `(finally
+                  ,(convert-block body))))))
 
     `(selfcall
       (try (return ,(convert form)))
@@ -2145,11 +2145,11 @@ the value."
               (rename-package (find-package "JSCL/XC") "JSCL")
               ,@body)
          (ignore-errors
-          (rename-package (find-package "JSCL/HOSTED")
-                          "JSCL"))
+           (rename-package (find-package "JSCL/HOSTED")
+                           "JSCL"))
          (ignore-errors
-          (rename-package (find-package "JSCL/XC")
-                          "JSCL/INTERMEDIATE-CROSS-COMPILATION"))))))
+           (rename-package (find-package "JSCL/XC")
+                           "JSCL/INTERMEDIATE-CROSS-COMPILATION"))))))
 
 
 (defmacro !with-compilation-unit (options &body body)

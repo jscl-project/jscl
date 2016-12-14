@@ -21,7 +21,7 @@
 
 (defun jscl/cl::list-all-packages ()
   (let ((packages nil))
-    (jscl/js::map-for-in 
+    (jscl/js::map-for-in
      (lambda (name) (pushnew name packages))
      *package-table*)
     packages))
@@ -233,7 +233,7 @@ invoked with the already-interned symbol as argument.")
      ,result-form))
 
 (defmacro jscl/cl::do-external-symbols ((var &optional (package '*package*)
-                                                       result-form)
+                                             result-form)
                                         &body body)
   `(block nil
      (%map-external-symbols

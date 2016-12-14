@@ -52,7 +52,7 @@
   (when (every (lambda (ch) (char= #\. ch)) s)
     (return-from escape-symbol-name-p t))
   (dotimes (i (length s))
-    (let ((ch (char s i))) 
+    (let ((ch (char s i)))
       (when (or (terminalp ch)
                 (char= ch #\:)
                 (char= ch #\\)
@@ -733,7 +733,7 @@ dispatching on the CHR ending the format sequence."
            (#\W #'format-write)
            (#\X #'format-hex)
            (t (warn "~~~a is not implemented yet, using ~~S instead" chr)
-            #'format-syntax))
+              #'format-syntax))
          arg colonp atp params))
 
 (defun format-nested (nesting-char

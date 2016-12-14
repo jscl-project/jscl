@@ -122,7 +122,7 @@ JSCL contains contributions by~
 (defun welcome-message ()
   (format t "~&~v<~;⸨☕λ⸩~;~>~:*
 ~v<~;𝓙𝓢ℂ𝕃~;~>
-  ~a ~@[(Romance Ⅱ fork) ~]version ~a,
+ ~a ~@[(Romance Ⅱ fork) ~]version ~a,
 Git commit ~a; ~a
 
  Copyright © 2012-2014 David Vázquez Púa

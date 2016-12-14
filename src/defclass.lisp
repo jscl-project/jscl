@@ -32,13 +32,13 @@
 ;; organized in the order given in  the class layout, with all inherited
 ;; slots preceding all direct slots.
 (defstruct class-layout
-  class     
+  class
   ;; The  name  of  the  class  (symbol);  use  FIND-CLASS  to  get  the
   ;; metaobject
-  revision    
+  revision
   ;; An integer,  begining with 0,  incremented with each time  that the
   ;; class  definition  is changed.  Not  sure  if  this is  useful  for
-  ;; anything other than debugging the object system itself… 
+  ;; anything other than debugging the object system itself…
   direct-superclasses
   superclass-layouts
   ;; A association list  of superclasses, in inheritence  order, and the
@@ -59,7 +59,7 @@
 (defun class-next-revision (class-metaobject)
   ;; FIXME: There's a  sort of race condition in that  two threads could
   ;; redefine  the   class  at  the   same  time,  and  grab   the  same
-  ;; revision number. This should 
+  ;; revision number. This should
   (let ((layout (class-metaobject-layout class-metaobject)))
     (if layout
         (1+ (class-layout-revision layout))
@@ -75,11 +75,11 @@
         (setf (class-layout-superclass-layouts layout)
               (append
                (class-layout-superclass-layouts layout)
-               (cons superclass (class-layout-revision 
+               (cons superclass (class-layout-revision
                                  (class-metaobject-layout supermetaobject)))))
         (let ((super-slots (class-direct-slots supermetaobject)))
           (dolist (slot super-slots)
-            (push slot inherited-slots))))) 
+            (push slot inherited-slots)))))
     ;; inherited-slots  now  has  the  reverse  order,  so  reverse  and
     ;; remove duplicates.
     (let ((direct-slots (class-direct-slots class)))
@@ -109,23 +109,23 @@
     (setf (class-metaobject-layout name) proto-layout)
     (compute-effective-layout name)))
 
-(defun defclass/make-slot-info (class-name slot-description) 
+(defun defclass/make-slot-info (class-name slot-description)
   (destructuring-bind (name &rest properties) slot-description
     (let ((info (make-slot-info :class class-name
                                 :name name
-                                :allocation :instance 
+                                :allocation :instance
                                 :type t)))
       (loop for (key value) in properties by #'cddr
          do (ecase key
               (:reader (push value (slot-info-readers info)))
               (:writer (push value (slot-info-writers info)))
               (:accessor (push value (slot-info-accessors info)))
-              (:allocation (check-type value (member :class :instance) 
+              (:allocation (check-type value (member :class :instance)
                                        "a slot value allocation type: :INSTANCE or :CLASS")
                            (setf (slot-info-allocation info) value))
               (:initform (setf (slot-info-initform info) value))
               (:initarg (push value (slot-info-initargs info)))
-              (:type (setf (slot-info-type info) value)))) 
+              (:type (setf (slot-info-type info) value))))
       info)))
 
 (defun defclass/make-slot-accessors (class slot-info)
@@ -138,7 +138,7 @@
             (check-type new-value ,(slot-info-type slot-info))
             (setf (slot-value ,class ',(slot-info-name slot-info)) new-value)))))
 
-(defmacro jscl/cl::defclass (name (&rest direct-superclasses) 
+(defmacro jscl/cl::defclass (name (&rest direct-superclasses)
                                          (&rest direct-slots) &rest options)
   (let ((slot-infos (mapcar (lambda (description)
                               (defclass/make-slot-info name description))
