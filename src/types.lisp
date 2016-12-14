@@ -72,7 +72,7 @@
 (defstruct slot-info
   class name
   accessors readers writers type
-  initform initarg
+  initform initargs
   allocation)
 
 
@@ -231,7 +231,7 @@ invoked. In that case it will store into PLACE and start over."
 (defun typecase-unique-types (clauses)
   (when clauses
     (let ((type (first clauses))
-          (rest (rest clauses))) 
+          (rest (rest clauses)))
       (if (listp type)
           (case (car type)
             (or (append (typecase-unique-types (cdr type))
