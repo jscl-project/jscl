@@ -1,5 +1,5 @@
 ;;;; compat-misc.lisp — Create  some definitions to run  JSCL code under
-;;;; an ANSI CL. Misc. functions that aren't built into the 
+;;;; an ANSI CL. Misc. functions that aren't built into the
 
 ;; Copyright © 2012, 2013 David Vazquez
 ;;; Copyright © 2012 Raimon Grau
@@ -134,4 +134,3 @@ EG:
   "Return  the  `FDEFINITION' of  NAME,  or  NIL  if  it does  not  have
  a function value or is not a valid function name."
   (ignore-errors (fdefinition name)))
-
