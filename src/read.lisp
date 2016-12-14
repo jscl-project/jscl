@@ -116,7 +116,7 @@
 (defun read-until (stream func)
   "Read from STREAM into a string, until the predicate FUNC returns true
 when passed  the value of  the next  character. The character  passed to
-FUNC will NOT be returned." 
+FUNC will NOT be returned."
   (let ((string (make-array 80 :element-type 'character
                             :adjustable t :fill-pointer 0))
         (ch (peek-char nil stream nil nil)))
@@ -264,14 +264,14 @@ for details.'"
        with descriptor = (read-until stream #'terminalp)
        with length fixnum = (length descriptor)
        with end
-         
-       for start fixnum = 1 then (1+ end) 
-         
+
+       for start fixnum = 1 then (1+ end)
+
        while (< start length)
        collect (progn
                  (setq end (or (position-if #'colon-or-comma-p
                                             descriptor :start start)
-                               length)) 
+                               length))
                  (funcall (ecase (char descriptor (1- start))
                             ((#\@ #\,) #'symbol-value )
                             (#\: #'identity))
@@ -357,6 +357,12 @@ for details.'"
       ((#\X #\x)
        (let ((*read-base* 16))
          (read-integer-from-stream stream)))
+      (#\*
+       (let ((bits (make-array 0 :element-type 'bit :adjustable t :fill-pointer 0)))
+         (loop for bit-char = (peek-char nil stream nil nil)
+            while (find bit-char "01")
+            do (vector-push-extend (if (char= bit-char #\1) 1 0)
+                                   bits 1))))
       (#\|
        (labels ((read-til-bar-sharpsign ()
                   (do ((ch (read-char stream nil nil) (read-char stream nil nil)))
