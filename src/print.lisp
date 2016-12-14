@@ -802,6 +802,9 @@ but wanted ~~~c in format string"
 
                ((char-equal #\V next)   ; Variable param
                 (push (pop arguments) params))
+               
+               ((char= #\# next)
+                (push (length arguments) params))
 
                ((char= #\Newline next)  ; ~Newline
                 ;; Skip the newline, but also  any leading spaces on the
