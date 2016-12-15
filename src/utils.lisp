@@ -64,8 +64,7 @@ accumulated, in the order."
   (if (null list)
       ""
       (jscl/cl::reduce (lambda (s o) (concat s separator o))
-                       (cdr list)
-                       (car list))))
+                       list)))
 
 (defun join-trailing (list &optional (separator ""))
   (if (null list)
