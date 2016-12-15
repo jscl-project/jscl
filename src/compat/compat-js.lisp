@@ -262,3 +262,5 @@ captured vars and embedded forms as multiple values."
                   *environment*
                   symbol))
 
+(defun jscl/js::get-internal-real-time ()
+  (cl:get-internal-real-time))
