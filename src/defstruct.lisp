@@ -188,6 +188,7 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                                            print-function
                                            constructor
                                            copier)
+  (declare (ignore constructor copier))   ; TODO?
   (push (make-type-definition :name type
                               :predicate predicate
                               :supertypes '(structure-object))
