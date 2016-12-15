@@ -205,7 +205,8 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
                     (make-instance 'standard-method
                                    :specializers (list type t)
                                    :function print-function))
-        (warn "PRINT-OBJECT for :PRINT-FUNCTION for structure ~s can't be defined without CLOS: Option will be ignored" type)))
+        (warn "PRINT-OBJECT for :PRINT-FUNCTION for structure ~s ~
+can't be defined without CLOS: Option will be ignored" type)))
   #+ (or)
   (push (make-class :name type
                     :supertypes (list 'structure-object)
