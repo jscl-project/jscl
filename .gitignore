@@ -15,6 +15,9 @@
 /repl-web.js
 doc/*
 
+# Log files
+*.log
+
 # ??
 *.lib
 .tmp/
