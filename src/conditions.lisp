@@ -1,4 +1,4 @@
-;;; conditions.lisp —
+;;; conditions.lisp — Signals, Conditions, et al.
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
 ;; the terms of the GNU General  Public License as published by the Free
@@ -99,17 +99,17 @@
                  superclasses)
           (superclasses)
           "Every superclass of a condition must also be a condition")
-  (let ((report (getf :report options :key #'car)))
+  (let ((report (find :report options :key #'car)))
     `(progn
        (defclass ,name ,slot-specs
-         ,(remove :report options :test #'eql :key #'car))
+         ,(remove :report options :key #'car))
        ,(when report
           `(defmethod condition-report ((condition ,name) stream)
              ,(etypecase report
                 (string
                  `(write ,report stream))
-                ((or symbol sfunction)
-                 `(funcall ',symbol condition stream))))))))
+                ((or symbol function)
+                 `(funcall ',report condition stream))))))))
 
 (defun coerce-to-condition (default datum args)
   (cond
@@ -125,6 +125,13 @@
      (make-condition
       :type datum
       :args args))))
+
+(defun condition-p (object)
+  (typep object 'condition))
+
+(defun condition-type-p (object type)
+  (and (subtypep type 'condition)
+       (typep object type)))
 
 (defun jscl/cl::signal (datum &rest args)
   (let ((condition (coerce-to-condition 'condition datum args)))
@@ -143,5 +150,5 @@
 (defun jscl/cl::error (datum &rest args)
   (let ((condition (coerce-to-condition 'error datum args)))
     (signal condition)
-    (format *error-output "~&ERROR: ~?" datum args)
+    (format *error-output* "~&ERROR: ~?" datum args)
     nil))
