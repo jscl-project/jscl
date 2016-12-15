@@ -113,6 +113,20 @@ identifying them (and their provenance) easier."))
 (in-package :jscl)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun not-tmp (pathname)
+    "To keep compile-time actions from  assuming that SRC-DIR is /tmp when
+using Slime."
+    (when (and pathname
+               (not (equal #p"/tmp/" (truename pathname))))
+      pathname))
+
+  (defvar *base-directory* (make-pathname
+                            :directory
+                            (pathname-directory
+                             (or (not-tmp *load-pathname*)
+                                 (not-tmp *compile-file-pathname*)
+                                 *default-pathname-defaults*))))
+  
   (defun extract-version-from-package.json ()
     (with-open-file (in (merge-pathnames "package.json" *base-directory*))
       (loop
@@ -122,21 +136,7 @@ identifying them (and their provenance) easier."))
          do (let ((colon (position #\: line))
                   (comma (position #\, line)))
               (return (string-trim '(#\newline #\" #\tab #\space)
-                                   (subseq line (1+ colon) comma)))))))
-
-  (defun not-tmp (pathname)
-    "To keep compile-time actions from  assuming that SRC-DIR is /tmp when
-using Slime."
-    (when (and pathname
-               (not (equal #p"/tmp/" (truename pathname))))
-      pathname)))
-
-(defvar *base-directory* (make-pathname
-                          :directory
-                          (pathname-directory
-                           (or (not-tmp *load-pathname*)
-                               (not-tmp *compile-file-pathname*)
-                               *default-pathname-defaults*))))
+                                   (subseq line (1+ colon) comma))))))))
 
 (defvar *version*
   (extract-version-from-package.json)
@@ -144,6 +144,18 @@ using Slime."
  a JSON library  to parse this, but that would  introduce a dependency
  and we are not using ASDF yet.")
 
+
+(defun read-fully (stream)
+  (loop with buffer = (make-array #x400
+                                  :element-type 'character
+                                  :adjustable t
+                                  :fill-pointer 0)
+     for char = (read-char stream nil nil)
+     while char
+     do (vector-push-extend char buffer #x400)
+     finally (progn
+               (adjust-array buffer (fill-pointer buffer))
+               (return buffer))))
 
 (defun run-program-compile-time (bin args)
   #+sbcl
@@ -159,18 +171,6 @@ using Slime."
                               :wait t
                               :output :stream))))
       nil))
-
-(defun read-fully (stream)
-  (loop with buffer = (make-array #x400
-                                  :element-type 'character
-                                  :adjustable t
-                                  :fill-pointer 0)
-     for char = (read-char stream nil nil)
-     while char
-     do (vector-push-extend char buffer #x400)
-     finally (progn
-               (adjust-array buffer (fill-pointer buffer))
-               (return buffer))))
 
 (defun read-whole-file (filename)
   (with-open-file (in filename)
