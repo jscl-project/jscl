@@ -552,6 +552,14 @@ star)."
         (let ((metaclass (find-built-in-class subclass)))
           (push class (built-in-class-superclasses metaclass)))))))
 
+(defun validate-standard-class-subclasses% ()
+  (dolist (hierarchy +standard-class-subclasses+)
+    (destructuring-bind (class &rest subclasses) hierarchy
+      (dolist (subclass subclasses)
+        (unless (subtypep subclass class)
+          (warn "Standard class ~s should have subclass ~s"
+                class subclass))))))
+
 
 
 (defparameter +basic-types+
@@ -618,14 +626,6 @@ star)."
      'class)
     (unless (subtypep type-name t)
       (warn "Standard type ~s is not properly defined" type-name))))
-
-(defun validate-standard-class-subclasses% ()
-  (dolist (hierarchy +standard-class-subclasses+)
-    (destructuring-bind (class &rest subclasses) hierarchy
-      (dolist (subclass subclasses)
-        (unless (subtypep subclass class)
-          (warn "Standard class ~s should have subclass ~s"
-                class subclass))))))
 
 (defun init-built-in-types% ()
   "Initializes the class/type hierarchy for the bult-in types."
