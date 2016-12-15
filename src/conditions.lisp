@@ -143,12 +143,22 @@
 
 (defun jscl/cl::warn (datum &rest args)
   (let ((condition (coerce-to-condition 'warning datum args)))
-    (signal condition)
-    (format *error-output* "~&WARNING: ~?" datum args)
+    (jscl/cl::signal condition)
+    (format *error-output* "⚠ Warning: ~?" datum args)
     nil))
 
-(defun jscl/cl::error (datum &rest args)
-  (let ((condition (coerce-to-condition 'error datum args)))
-    (signal condition)
-    (format *error-output* "~&ERROR: ~?" datum args)
-    nil))
+;; Redefine ERROR; the  version in boot.lisp is helpful  before we reach
+;; this point, but we don't want to use it afterward.
+(locally
+    (declaim #+sbcl (sb-ext:muffle-conditions
+                     sb-kernel::function-redefinition-warning))
+  (defun jscl/cl::error (datum &rest args)
+    (let ((condition (coerce-to-condition 'error datum args)))
+      (jscl/cl::signal condition)
+      #-jscl
+      (cl:error datum args)
+      #+jscl
+      (jscl/js::%throw
+       (jscl/ffi:make-new '|Error|
+                          (apply #'format nil fmt args)))
+      nil)))
