@@ -1,6 +1,7 @@
 ;;; jscl.lisp— JavaScript from Common Lisp
 
-;; Copyright © 2012, 2013 David Vazquez Copyright © 2012 Raimon Grau
+;; Copyright © 2012, 2013 David Vazquez
+;;; Copyright © 2012 Raimon Grau
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
 ;; the terms of the GNU General  Public License as published by the Free
@@ -88,7 +89,7 @@ identifying them (and their provenance) easier."))
 (defpackage :jscl/mop
   (:use :cl :jscl)
   #+jscl (:nicknames :mop)
-  (:export)
+  (:export #:eql-specializer-object #:eql-specializer-p)
   (:documentation  "Functions  defined in  the  Art  of the  Meta-Object
  Protocol (MOP) which are unique to that manuscript.
 
@@ -316,7 +317,7 @@ permissions on FILENAME, if we  know how in the current implementation."
     ("string"        :both)
     ("sequence"      :both)
     ("stream"        :both)
-    ("hash-table"    :target) ; TODO
+    ("hash-table"    :both)
     ("print"         :both)
     ("ffi"           :target)
     ("symbol"        :both)
@@ -330,7 +331,7 @@ permissions on FILENAME, if we  know how in the current implementation."
      ("codegen"      :both)
      ("compiler"     :both)
      ("compile-file"	:both))
-    ("documentation" :target) ; TODO
+    ("documentation" :both)
     ("misc"          :both)
     ("toplevel" 	:both))
   "List of  all the source files  that need to be  compiled, and whether

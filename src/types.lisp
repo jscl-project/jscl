@@ -72,7 +72,7 @@
 (defstruct slot-info
   class name
   accessors readers writers type
-  initform initarg
+  initform initargs
   allocation)
 
 
@@ -233,13 +233,13 @@ invoked. In that case it will store into PLACE and start over."
   (when clauses
     (let ((type (first clauses))
           (rest (rest clauses)))
-      (assert (or (symbolp type) (and (listp type)
-                                      (every #'symbolp type)))
-              (type)
-              "Not sure what to make of typecase clause introduced by ~s"
-              type)
       (if (listp type)
-          (append type (typecase-unique-types rest))
+          (case (car type)
+            (or (append (typecase-unique-types (cdr type))
+                        (typecase-unique-types rest)))
+            (eql (append `(member ,(second type))
+                         (typecase-unique-types rest)))
+            (t (append type (typecase-unique-types rest))))
           (list* type (typecase-unique-types rest))))))
 
 (defun find-duplicates (list &key (test #'eql))
@@ -294,9 +294,7 @@ since the supertype comes first, the subtype~1@*~p will never be matched."
                        (error "Clause in TYPECASE is not a list? ~a"
                               clause))
                      (destructuring-bind (types &rest body) clause
-                       `((typep ,evaluated ',(if (listp types)
-                                                 (cons 'or types)
-                                                 types))
+                       `((typep ,evaluated ',types)
                          ,@(or body (cons nil nil)))))
                    clauses)))))
 
@@ -622,8 +620,7 @@ star)."
     (destructuring-bind (class &rest subclasses) hierarchy
       (dolist (subclass subclasses)
         (let ((metaclass (find-built-in-class subclass)))
-          (push class (!built-in-class-superclasses
-                       metaclass)))))))
+          (push class (built-in-class-superclasses metaclass)))))))
 
 (defun validate-standard-class-subclasses% ()
   (dolist (hierarchy +standard-class-subclasses+)

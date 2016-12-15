@@ -244,7 +244,7 @@ invoked with the already-interned symbol as argument.")
 (defmacro jscl/cl::do-all-symbols ((var &optional result-form) &body body)
   `(block nil (%map-all-symbols (lambda (,var) ,@body)) ,result-form))
 
-(defmacro jscl/cl::do-all-external-symbols ((var &optional result-form) &body body)
+(defmacro do-all-external-symbols ((var &optional result-form) &body body)
   `(block nil (%map-all-external-symbols (lambda (,var) ,@body)) ,result-form))
 
 (defun jscl/cl::find-all-symbols (string &optional external-only)

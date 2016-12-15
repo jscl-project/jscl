@@ -1,6 +1,6 @@
 ;;;; compat-sv.lisp — Storage Vectors
 
-;; Provide a ANSI compatible implementation of storage vectors.
+;; Provide  a   ANSI  compatible  implementation  of   storage  vectors.
 ;; The runtime definitions come from compiler.lisp.
 
 (defstruct (storage-vector

@@ -19,10 +19,9 @@
 ;;; of Common  Lisp, except  that any  value will  work as  a condition.
 ;;; Because, well, we do not have conditions at this point.
 
-
 (defvar *handler-bindings* nil)
 
-(defmacro %handler-bind (bindings &body body)
+(defmacro jscl/cl::handler-bind (bindings &body body)
   (let ((install-handlers nil))
 
     (dolist (binding bindings)
@@ -37,8 +36,7 @@
         (catch (err)
           (if (%%nlx-p err)
               (%%throw err)
-              (%error (or (jscl/ffi:oget err "message") err))))))))
-
+              (jscl/cl::error (or (jscl/ffi:oget err "message") err))))))))
 
 ;; Implementation if :NO-ERROR case is missing.
 (defmacro %handler-case-1 (form &body cases)
@@ -68,13 +66,12 @@
       `(block ,nlx
          (let (,datum)
            (tagbody
-              (%handler-bind ,(mapcar #'translate-case cases)
+              (handler-bind ,(mapcar #'translate-case cases)
                 (return-from ,nlx ,form))
               ,@(reverse tagbody-content)))))))
 
-
 ;;; General case
-(defmacro %handler-case (form &body cases)
+(defmacro jscl/cl::handler-case (form &body cases)
   (let ((last-case (car (last cases))))
     (if (and last-case (eq (car last-case) :no-error))
         (destructuring-bind (lambda-list &body body) (cdr last-case)
@@ -88,33 +85,48 @@
                        ,@(butlast cases))))))))
         `(%handler-case-1 ,form ,@cases))))
 
+(defun jscl/cl::make-condition (type &rest init-args)
+  (assert (subtypep type 'condition) (type)
+          "~S does not name a class of condition" type)
+  (apply #'make-instance type init-args))
 
-
-;;; Fake condition objects until we have at least type system, but
-;;; final implementation would require CLOS.
-
-(defstruct !condition
-  type
-  args)
-
-(defun condition-type-p (x type)
-  (and (!condition-p x)
-       (equal (!condition-type x) type)))
+(defmacro jscl/cl::define-condition (name (&rest superclasses)
+                                                 (&rest slot-specs)
+                                     &body options)
+  (check-type name symbol)
+  (assert (every (lambda (superclass)
+                   (subtypep superclass 'condition))
+                 superclasses)
+          (superclasses)
+          "Every superclass of a condition must also be a condition")
+  (let ((report (getf :report options :key #'car)))
+    `(progn
+       (defclass ,name ,slot-specs
+         ,(remove :report options :test #'eql :key #'car))
+       ,(when report
+          `(defmethod condition-report ((condition ,name) stream)
+             ,(etypecase report
+                (string
+                 `(write ,report stream))
+                ((or symbol sfunction)
+                 `(funcall ',symbol condition stream))))))))
 
 (defun coerce-to-condition (default datum args)
   (cond
-    ((!condition-p datum)
+    ((condition-p datum)
      datum)
     ((stringp datum)
-     (make-!condition
+     (make-condition
       :type default
       :args (cons datum args)))
     (t
-     (make-!condition
+     (assert (subtypep datum 'condition) (datum)
+             "~S does not name a type of condition" datum)
+     (make-condition
       :type datum
       :args args))))
 
-(defun %signal (datum &rest args)
+(defun jscl/cl::signal (datum &rest args)
   (let ((condition (coerce-to-condition 'condition datum args)))
     (dolist (binding *handler-bindings*)
       (let ((type (car binding))
@@ -122,33 +134,14 @@
         (when (condition-type-p condition type)
           (funcall handler condition))))))
 
-(defun %warn (datum &rest args)
+(defun jscl/cl::warn (datum &rest args)
   (let ((condition (coerce-to-condition 'warning datum args)))
-    (%signal condition)
-    ;; TODO: It should be *ERROR-OUTPUT*
-    (write-string "WARNING: ")
-    (apply #'format t datum args)
-    (write-char #\newline)
+    (signal condition)
+    (format *error-output* "~&WARNING: ~?" datum args)
     nil))
 
-(defun %error (datum &rest args)
+(defun jscl/cl::error (datum &rest args)
   (let ((condition (coerce-to-condition 'error datum args)))
-    (%signal condition)
-    ;; TODO: It should be *ERROR-OUTPUT*
-    (write-string "ERROR: ")
-    (apply #'format t datum args)
-    (write-char #\newline)
+    (signal condition)
+    (format *error-output "~&ERROR: ~?" datum args)
     nil))
-
-#+jscl
-(progn
-
-  (defmacro handler-bind (&rest body)
-    `(%handler-bind ,@body))
-
-  (defmacro handler-case (&rest body)
-    `(%handler-case ,@body))
-
-  (fset 'signal #'%signal)
-  (fset 'warn #'%warn)
-  (fset 'error #'%error))

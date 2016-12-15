@@ -5,13 +5,15 @@
 
 (in-package :jscl)
 
-#+jscl
 (defstruct generic-function
-  name lambda-list required-count methods)
+  name lambda-list required-count methods
+  documentation)
 
-#+jscl
-(defstruct method
-  generic-function specializers)
+(defclass standard-method ()
+  generic-function
+  specializers
+  function
+  documentation)
 
 (defun dispatch-generic% (generic-function &rest values)
   (assert (<= (generic-function-required-count generic-function)

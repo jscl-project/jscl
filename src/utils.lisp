@@ -49,8 +49,8 @@ accumulated, in the order."
                   x))
            ,@body)))))
 
-(defmacro concatf (variable &body form)
-  `(setq ,variable (concat ,variable (progn ,@form))))
+(defmacro concatf (place &body form)
+  `(setf ,place (concat ,place (progn ,@form))))
 
 ;;; This couple of helper functions will  be defined in both Common Lisp
 ;;; and in JSCL
@@ -58,11 +58,6 @@ accumulated, in the order."
   (if (listp x)
       x
       (list x)))
-
-(defun jscl/cl::reduce (func list initial-value)
-  (let ((result initial-value))
-    (dolist (element list result)
-      (setq result (funcall func result element)))))
 
 ;;; Concatenate a list of strings, with a separator
 (defun join (list &optional (separator ""))
@@ -134,7 +129,6 @@ accumulated, in the order."
         (fn (if test-not-p (complement test-not) test)))
     (funcall fn x key-val)))
 
-
 (defun interleave (list element &optional after-last-p)
   (unless (null list)
     (with-collect
@@ -144,7 +138,6 @@ accumulated, in the order."
         (collect x))
       (when after-last-p
         (collect element)))))
-
 
 (defun find-package-or-fail (package-designator)
   (or (jscl/cl::find-package package-designator)

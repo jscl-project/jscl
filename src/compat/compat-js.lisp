@@ -250,3 +250,6 @@ captured vars and embedded forms as multiple values."
 
 (unless (jscl/ffi:oget jscl/ffi:*root* "packages")
   (setf (jscl/ffi:oget jscl/ffi:*root* "packages") (jscl/ffi:make-new '|Object|)))
+
+(defun jscl/js::lisp-to-js (string)
+  string)
