@@ -444,8 +444,7 @@ which occurred within ~r file~:p: ~
             (when fasl
               (ignore-errors (load fasl))
               (push fasl fasls)))))
-      (when failures
-        (review-failures failures))
+      (review-failures failures)
       (dolist (fasl fasls)
         (locally
             ;; These  occur because  we  reload from  FASL the  compiled
