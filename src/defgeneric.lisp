@@ -59,7 +59,7 @@
                             (and (listp option)
                                  (eql (car option) :method)))
                           options)
-                         method-forms)
+                  method-forms)
            (push `(defmethod ,name ,@(rest method))
                  method-forms)))
        (defun ,dispatcher ,lambda-list

@@ -154,7 +154,7 @@ handled correctly yet."
         (assert (= (third target) (reduce #'+ objects :key #'length))
                 (target)
                 "Concatenating ~:d object~:p would result in ~:d objects; ~
-                                 cannot fit into ~s"
+ cannot fit into ~s"
                 (length objects) (reduce #'+ objects :key #'length)
                 target)
         (apply #'jscl/cl::concatenate (car target) objects))

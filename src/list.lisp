@@ -345,7 +345,7 @@
                (let ((ele (car elements)))
                  (typecase ele
                    (cons (rplacd (last splice) ele)
-                    (setf splice ele))
+                         (setf splice ele))
                    (null (rplacd (last splice) nil))
                    (atom (if (cdr elements)
                              (fail ele)

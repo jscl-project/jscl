@@ -1,4 +1,4 @@
-;;; early-char.lisp   —  Character   things   needed   early  in   the
+;;; early-char.lisp   —   Character   things   needed   early   in   the
 ;;; cross-compilation
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
@@ -152,7 +152,7 @@
                (<= 2 radix 36))
     (error "Type error"))
   (let* ((radix (or (and radix (<= 2 radix 36) radix) 10))
-         (number (unicode-digit-value char)) 
+         (number (unicode-digit-value char))
          (upper (char-upcase char))
          (code-upper (char-code upper))
          (potential (cond (number number)

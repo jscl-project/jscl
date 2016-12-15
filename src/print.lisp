@@ -662,7 +662,7 @@ emits (1- COUNT)."
 (defun format-justify (captured-substrings arguments
                        &key start-at-p start-colon-p
                             end-at-p end-colon-p)
-  "FORMAT ~< ~> handler. (unimplemented)" 
+  "FORMAT ~< ~> handler. (unimplemented)"
   (let (output)
     (error "~~< ~~> not implemented yet")
     (values (concatenate 'string (reverse output)) arguments)))
@@ -802,7 +802,7 @@ but wanted ~~~c in format string"
 
                ((char-equal #\V next)   ; Variable param
                 (push (pop arguments) params))
-               
+
                ((char= #\# next)
                 (push (length arguments) params))
 
