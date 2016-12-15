@@ -55,7 +55,7 @@
   (null-if-empty
    #+jscl (or (and #j:location #j:location:hostname)
               (and #j:os #j:os:hostname (#j:os:hostname)))
-   #+sbcl (run-program-compile-time "hostname -d")
+   #+sbcl (run-program-compile-time "hostname" ())
    #-(or jscl sbcl) "localhost"))
 
 (defun jscl/cl::machine-version ()
