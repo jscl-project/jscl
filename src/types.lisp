@@ -46,10 +46,6 @@
                    *environment*
                    'type))
 
-#+jscl
-(defmacro deftype (name lambda-list &body body)
-  `(!deftype ,name ,lambda-list ,@body))
-
 
 
 (defstruct jscl/cl::built-in-class
