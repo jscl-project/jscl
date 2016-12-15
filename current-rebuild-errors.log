@@ -1,0 +1,2264 @@
+CL-USER> (load "jscl.lisp")
+WARNING: redefining JSCL::NOT-TMP in DEFUN
+WARNING: redefining JSCL::EXTRACT-VERSION-FROM-PACKAGE.JSON in DEFUN
+WARNING: redefining JSCL::READ-FULLY in DEFUN
+WARNING: redefining JSCL::RUN-PROGRAM-COMPILE-TIME in DEFUN
+WARNING: redefining JSCL::READ-WHOLE-FILE in DEFUN
+WARNING: redefining JSCL::GIT-COMMIT in DEFUN
+WARNING: redefining JSCL::LATINIZE in DEFUN
+WARNING: redefining JSCL::GIT-CREDITS in DEFUN
+WARNING: redefining JSCL::FILE-SET-EXECUTE-PERMISSION in DEFUN
+WARNING: redefining JSCL::VIOLET-VOLTS-P in DEFUN
+WARNING: redefining JSCL::TELETYPE-P in DEFUN
+WARNING: redefining JSCL::SOURCE-PATHNAME in DEFUN
+WARNING: redefining JSCL::GET-FILES in DEFUN
+WARNING: redefining JSCL::DO-SOURCE in DEFMACRO
+WARNING: redefining JSCL::REVIEW-FAILURES in DEFUN
+WARNING: redefining JSCL::LOAD-JSCL in DEFUN
+WARNING: redefining JSCL::DOFORMS in DEFMACRO
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/jscl.lisp" (written 15 DEC 2016 03:50:20 AM):
+; compiling (IN-PACKAGE :COMMON-LISP-USER)
+; compiling (DECLAIM (OPTIMIZE # ...))
+; compiling (DEFPACKAGE :JSCL/COMMON-LISP ...)
+; compiling (DEFPACKAGE :JSCL/JAVASCRIPT-LOW-LEVEL ...)
+; compiling (DEFPACKAGE :JSCL/INTERMEDIATE-CROSS-COMPILATION ...)
+; compiling (DEFPACKAGE :JSCL ...)
+; compiling (DEFPACKAGE :JSCL/FFI ...)
+; compiling (DEFPACKAGE :JSCL/CLTL2 ...)
+; compiling (DEFPACKAGE :JSCL/MOP ...)
+; compiling (DEFPACKAGE JSCL/TEST ...)
+; compiling (DEFPACKAGE REPL-WEB ...)
+; compiling (DEFPACKAGE REPL-NODE ...)
+; compiling (REQUIRE (QUOTE BORDEAUX-THREADS))
+; compiling (IN-PACKAGE :JSCL)
+; compiling (DEFUN NOT-TMP ...)
+; compiling (DEFVAR *BASE-DIRECTORY* ...)
+; compiling (DEFUN EXTRACT-VERSION-FROM-PACKAGE.JSON ...)
+; compiling (DEFVAR *VERSION* ...)
+; compiling (DEFUN READ-FULLY ...)
+; compiling (DEFUN RUN-PROGRAM-COMPILE-TIME ...)
+; compiling (DEFUN READ-WHOLE-FILE ...)
+; compiling (DEFUN GIT-COMMIT ...)
+; compiling (DEFUN LATINIZE ...)
+; compiling (DEFUN GIT-CREDITS ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/jscl.lisp
+; in: DEFUN GIT-CREDITS
+;     (SORT
+;      (LOOP JSCL::WITH JSCL::UNIQUE = NIL
+;            JSCL::FOR JSCL::SOMEONE = (READ-LINE JSCL::EVERYONE NIL NIL)
+;            JSCL::WHILE JSCL::SOMEONE
+;            DO ...)
+;      #'STRING< :KEY
+;      (LAMBDA (JSCL::NAME) (JSCL::LATINIZE (SUBSEQ JSCL::NAME (OR # 0)))))
+; 
+; note: deleting unreachable code
+
+; --> BLOCK LET SB-IMPL::SEQ-DISPATCH IF LET SB-IMPL::STABLE-SORT-LIST 
+; --> BLOCK LABELS BLOCK COND IF COND IF PROGN 
+; --> SB-IMPL::STABLE-SORT-LIST-3 BLOCK LET* WHEN IF FUNCALL 
+; --> SB-C::%FUNCALL 
+; ==>
+;   (SB-KERNEL:STRING<* SB-C::STRING1 SB-C::STRING2 SB-C::START1 SB-C::END1
+;                       SB-C::START2 SB-C::END2)
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a (OR (VECTOR CHARACTER) (VECTOR NIL) BASE-STRING SYMBOL
+;                               CHARACTER), not a SIMPLE-BASE-STRING.
+;   The second argument is a (OR (VECTOR CHARACTER) (VECTOR NIL) BASE-STRING SYMBOL
+;                                CHARACTER), not a SIMPLE-BASE-STRING.
+
+; --> BLOCK LET SB-IMPL::SEQ-DISPATCH IF LET SB-IMPL::STABLE-SORT-LIST 
+; --> BLOCK LABELS BLOCK COND IF COND IF PROGN 
+; --> SB-IMPL::STABLE-SORT-LIST-3 BLOCK LET* LET WHEN IF FUNCALL 
+; --> SB-C::%FUNCALL 
+; ==>
+;   (SB-KERNEL:STRING<* SB-C::STRING1 SB-C::STRING2 SB-C::START1 SB-C::END1
+;                       SB-C::START2 SB-C::END2)
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a (OR (VECTOR CHARACTER) (VECTOR NIL) BASE-STRING SYMBOL
+;                               CHARACTER), not a SIMPLE-BASE-STRING.
+;   The second argument is a (OR (VECTOR CHARACTER) (VECTOR NIL) BASE-STRING SYMBOL
+;                                CHARACTER), not a SIMPLE-BASE-STRING.
+
+; --> BLOCK LET SB-IMPL::SEQ-DISPATCH IF LET SB-IMPL::STABLE-SORT-LIST 
+; --> BLOCK LABELS BLOCK COND IF COND IF PROGN 
+; --> SB-IMPL::STABLE-SORT-LIST-3 BLOCK LET* LET WHEN IF IF FUNCALL 
+; --> SB-C::%FUNCALL 
+; ==>
+;   (SB-KERNEL:STRING<* SB-C::STRING1 SB-C::STRING2 SB-C::START1 SB-C::END1
+;                       SB-C::START2 SB-C::END2)
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a (OR (VECTOR CHARACTER) (VECTOR NIL) BASE-STRING SYMBOL
+;                               CHARACTER), not a SIMPLE-BASE-STRING.
+;   The second argument is a (OR (VECTOR CHARACTER) (VECTOR NIL) BASE-STRING SYMBOL
+;                                CHARACTER), not a SIMPLE-BASE-STRING.
+
+; --> BLOCK LET SB-IMPL::SEQ-DISPATCH IF LET SB-IMPL::STABLE-SORT-LIST 
+; --> BLOCK LABELS BLOCK COND IF COND IF COND IF PROGN 
+; --> SB-IMPL::STABLE-SORT-LIST-2 BLOCK LET WHEN IF FUNCALL 
+; --> SB-C::%FUNCALL 
+; ==>
+;   (SB-KERNEL:STRING<* SB-C::STRING1 SB-C::STRING2 SB-C::START1 SB-C::END1
+;                       SB-C::START2 SB-C::END2)
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a (OR (VECTOR CHARACTER) (VECTOR NIL) BASE-STRING SYMBOL
+;                               CHARACTER), not a SIMPLE-BASE-STRING.
+;   The second argument is a (OR (VECTOR CHARACTER) (VECTOR NIL) BASE-STRING SYMBOL
+;                                CHARACTER), not a SIMPLE-BASE-STRING.
+
+; --> BLOCK LET SB-IMPL::SEQ-DISPATCH IF LET SB-IMPL::STABLE-SORT-LIST 
+; --> BLOCK LABELS BLOCK VALUES SB-IMPL::MERGE-LISTS* BLOCK LET 
+; --> MACROLET LOOP BLOCK TAGBODY PROGN IF FUNCALL SB-C::%FUNCALL 
+; ==>
+;   (SB-KERNEL:STRING<* SB-C::STRING1 SB-C::STRING2 SB-C::START1 SB-C::END1
+;                       SB-C::START2 SB-C::END2)
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a (OR (VECTOR CHARACTER) (VECTOR NIL) BASE-STRING SYMBOL
+;                               CHARACTER), not a SIMPLE-BASE-STRING.
+;   The second argument is a (OR (VECTOR CHARACTER) (VECTOR NIL) BASE-STRING SYMBOL
+;                                CHARACTER), not a SIMPLE-BASE-STRING.
+
+; --> BLOCK LET SB-IMPL::SEQ-DISPATCH IF LET SB-IMPL::STABLE-SORT-LIST 
+; --> BLOCK LABELS BLOCK WHEN IF COND IF NOT IF FUNCALL SB-C::%FUNCALL 
+; ==>
+;   (SB-KERNEL:STRING<* SB-C::STRING1 SB-C::STRING2 SB-C::START1 SB-C::END1
+;                       SB-C::START2 SB-C::END2)
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a (OR (VECTOR CHARACTER) (VECTOR NIL) BASE-STRING SYMBOL
+;                               CHARACTER), not a SIMPLE-BASE-STRING.
+;   The second argument is a (OR (VECTOR CHARACTER) (VECTOR NIL) BASE-STRING SYMBOL
+;                                CHARACTER), not a SIMPLE-BASE-STRING.
+
+; --> BLOCK LET SB-IMPL::SEQ-DISPATCH IF LET SB-IMPL::STABLE-SORT-LIST 
+; --> BLOCK LABELS BLOCK WHEN IF COND IF COND IF FUNCALL SB-C::%FUNCALL 
+; ==>
+;   (SB-KERNEL:STRING<* SB-C::STRING1 SB-C::STRING2 SB-C::START1 SB-C::END1
+;                       SB-C::START2 SB-C::END2)
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a (OR (VECTOR CHARACTER) (VECTOR NIL) BASE-STRING SYMBOL
+;                               CHARACTER), not a SIMPLE-BASE-STRING.
+;   The second argument is a (OR (VECTOR CHARACTER) (VECTOR NIL) BASE-STRING SYMBOL
+;                                CHARACTER), not a SIMPLE-BASE-STRING.
+
+; compiling (DEFUN FILE-SET-EXECUTE-PERMISSION ...)
+; compiling (DEFUN VIOLET-VOLTS-P ...)
+; compiling (UNLESS (FIND-METHOD # ...) ...)
+; compiling (DEFUN TELETYPE-P ...)
+; compiling (DEFMETHOD STREAM-CLEAR-OUTPUT ...)
+; compiling (DEFMETHOD STREAM-CLEAR-OUTPUT ...)
+; compiling (DEFMETHOD STREAM-CLEAR-OUTPUT ...)
+; compiling (DEFPARAMETER *SOURCE* ...)
+; compiling (DEFUN SOURCE-PATHNAME ...)
+; compiling (DEFUN GET-FILES ...)
+; compiling (DEFMACRO DO-SOURCE ...)
+; compiling (DEFUN REVIEW-FAILURES ...)
+; compiling (DEFUN LOAD-JSCL ...)
+; compiling (DEFMACRO DOFORMS ...)
+; compiling (LOAD-JSCL)
+; compiling (DEFUN RUN-TESTS-IN-HOST ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/jscl.fasl written
+; compilation finished in 0:00:00.419
+; 
+; compilation unit finished
+;   printed 8 notes
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/compat/compat-misc.lisp" (written 14 DEC 2016 01:39:34 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (DEFMACRO WHILE ...)
+; compiling (DEFCONSTANT +MOST-POSITIVE-FIXNUM+ ...)
+; compiling (DEFCONSTANT +MOST-NEGATIVE-FIXNUM+ ...)
+; compiling (DEFUN ASET ...)
+; compiling (DEFUN CONCAT ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/compat/compat-misc.lisp
+; in: DEFUN CONCAT
+;     (DEFUN JSCL::CONCAT (&REST JSCL::STRS)
+;       "Shorthand for `CONCATENATE' 'STRING"
+;       (APPLY #'CONCATENATE 'STRING JSCL::STRS))
+; --> PROGN 
+; ==>
+;   (SB-IMPL::%DEFUN 'JSCL::CONCAT
+;                    (SB-INT:NAMED-LAMBDA JSCL::CONCAT
+;                        (&REST JSCL::STRS)
+;                      "Shorthand for `CONCATENATE' 'STRING"
+;                      (BLOCK JSCL::CONCAT
+;                        (APPLY #'CONCATENATE 'STRING JSCL::STRS)))
+;                    (SB-C:SOURCE-LOCATION))
+; 
+; caught STYLE-WARNING:
+;   redefining JSCL::CONCAT in DEFUN
+
+; compiling (DEFUN /DEBUG ...)
+; compiling (DECLAIM (FTYPE # ...) ...)
+; compiling (DEFUN |READ-#J| ...)
+; compiling (DEFMACRO WITH-SHARP-J ...)
+; compiling (DEFUN RATIONAL-FLOAT-P ...)
+; compiling (DEFUN FDEFINITION-SOFT ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/compat/compat-misc.fasl written
+; compilation finished in 0:00:00.020
+WARNING: redefining JSCL::FDEFINITION-SOFT in DEFUN
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/compat/compat-sv.lisp" (written 14 DEC 2016 01:39:34 AM):
+; compiling (DEFSTRUCT (STORAGE-VECTOR #) ...)
+; compiling (DEFUN MAKE-STORAGE-VECTOR ...)
+; compiling (DEFUN STORAGE-VECTOR-SIZE ...)
+; compiling (DEFUN RESIZE-STORAGE-VECTOR ...)
+; compiling (DEFUN STORAGE-VECTOR-REF ...)
+; compiling (DEFUN (SETF STORAGE-VECTOR-REF) ...)
+; compiling (DEFUN STORAGE-VECTOR-SET ...)
+; compiling (DEFUN CONCATENATE-STORAGE-VECTOR ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/compat/compat-sv.fasl written
+; compilation finished in 0:00:00.037
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/compat/compat-ffi.lisp" (written 14 DEC 2016 01:39:35 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (DEFVAR JSCL/FFI:*ROOT* ...)
+; compiling (DEFUN JSCL/FFI:MAKE-NEW ...)
+; compiling (DEFUN (SETF JSCL/FFI:OGET) ...)
+; compiling (DEFMACRO JSCL/FFI:OGET* ...)
+; compiling (DEFMACRO JSCL/FFI:OSET* ...)
+; compiling (DEFUN JSCL/FFI:OGET ...)
+; compiling (DEFUN JSCL/FFI:OSET ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/compat/compat-ffi.fasl written
+; compilation finished in 0:00:00.016
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/compat/compat-js.lisp" (written 15 DEC 2016 12:18:48 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (UNLESS (AND # ...) ...)
+; compiling (DEFPARAMETER JSCL/JAVASCRIPT-LOW-LEVEL::THIS ...)
+; compiling (DEFMACRO JSCL/JAVASCRIPT-LOW-LEVEL::%JS-VREF ...)
+; compiling (DEFMACRO JSCL/JAVASCRIPT-LOW-LEVEL::%JS-VSET ...)
+; compiling (DOLIST (FN #) ...)
+; compiling (DOLIST (FN #) ...)
+; compiling (DOLIST (OPERATOR #) ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::%FBOUNDP-SETF ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::%FDEFINITION-SETF ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::%FMAKUNBOUND ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::%FMAKUNBOUND-SETF ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::%SETF-FDEFINITION-SETF ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::%SETF-SYMBOL-FUNCTION ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::%THROW ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::BOUNDP ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::FBOUNDP ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::LAMBDA-CODE ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::VALUES-ARRAY ...)
+; compiling (DEFMACRO JSCL/JAVASCRIPT-LOW-LEVEL::CALL-INTERNAL ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::|Object| ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::|String| ...)
+; compiling (SETF (GETHASH "String" ...) ...)
+; compiling (DEFVAR JSCL/FFI::UNBOUND-FUNCTION ...)
+; compiling (DEFVAR JSCL/FFI::UNBOUND-SETF-FUNCTION ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::INTERNALS.SYMBOL ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::INTERNALS.INTERN ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::CALL ...)
+; compiling (DEFMACRO JSCL/JAVASCRIPT-LOW-LEVEL::GET ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::IN ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::NEW ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::VAR ...)
+; compiling (DEFUN ELEVATE-VARS ...)
+; compiling (DEFMACRO JSCL/JAVASCRIPT-LOW-LEVEL::FUNCTION ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::= ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::== ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::=== ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::! ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::!== ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::!=== ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::INTERNALS.MAKE-LISP-STRING ...)
+; compiling (DOLIST (MIMIC #) ...)
+; compiling (DEFMACRO JSCL/JAVASCRIPT-LOW-LEVEL::%JS-TYPEOF ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::OBJECTP ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::MAP-FOR-IN ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::DELETE-PROPERTY ...)
+; compiling (UNLESS (JSCL/FFI:OGET JSCL/FFI:*ROOT* ...) ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::LISP-TO-JS ...)
+; compiling (DEFUN JSCL/JAVASCRIPT-LOW-LEVEL::FSET ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/compat/compat-js.fasl written
+; compilation finished in 0:00:00.759
+WARNING: redefining JSCL/JAVASCRIPT-LOW-LEVEL::= in DEFUN
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/boot.lisp" (written 15 DEC 2016 12:19:14 AM):
+; compiling (UNLESS (FIND-PACKAGE :KEYWORD) ...)
+; compiling (UNLESS (FIND-PACKAGE :COMMON-LISP) ...)
+; compiling (IF (NOT #) ...)
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading boot.lisp!")
+; compiling (DEFMACRO JSCL/COMMON-LISP::DECLAIM ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DEFCONSTANT ...)
+; compiling (DEFCONSTANT JSCL/COMMON-LISP::T ...)
+; compiling (DEFCONSTANT JSCL/COMMON-LISP::NIL ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::LAMBDA ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::AND ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::OR ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::COND ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::WHEN ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::UNLESS ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DEFVAR ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DEFPARAMETER ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DEFUN ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::RETURN ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::WHILE ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*GENSYM-COUNTER* ...)
+; compiling (DEFUN JSCL/COMMON-LISP::GENSYM ...)
+; compiling (DEFUN JSCL/COMMON-LISP::BOUNDP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::EQ ...)
+; compiling (DEFUN JSCL/COMMON-LISP::EQL ...)
+; compiling (DEFUN JSCL/COMMON-LISP::NOT ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FUNCALL ...)
+; compiling (DEFUN JSCL/COMMON-LISP::APPLY ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SYMBOL-NAME ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DOLIST ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DOTIMES ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::CASE ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::ECASE ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::PROG1 ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::PROG2 ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::PROG ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::PSETQ ...)
+; compiling (DEFUN DO/DO* ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DO ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DO* ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DECLARE ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::ASSERT ...)
+; compiling (DEFUN JSCL/COMMON-LISP::IDENTITY ...)
+; compiling (DEFUN JSCL/COMMON-LISP::COMPLEMENT ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CONSTANTLY ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ATOM ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CODE-CHAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR-CODE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR= ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR< ...)
+; compiling (DEFUN JSCL/COMMON-LISP::EQUAL ...)
+; compiling (DEFUN JSCL/COMMON-LISP::EQUALP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::DISASSEMBLE ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::MULTIPLE-VALUE-BIND ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::MULTIPLE-VALUE-LIST ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::MULTIPLE-VALUE-SETQ ...)
+; compiling (DEFUN FDEFINITION-SOFT ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FDEFINITION ...)
+; compiling (DEFUN (SETF JSCL/COMMON-LISP::FDEFINITION) ...)
+; compiling (DEFUN (SETF JSCL/COMMON-LISP::SYMBOL-FUNCTION) ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FBOUNDP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FMAKUNBOUND ...)
+; compiling (DEFUN JSCL/COMMON-LISP::NOTANY ...)
+; compiling (DEFCONSTANT JSCL/COMMON-LISP::INTERNAL-TIME-UNITS-PER-SECOND ...)
+; compiling (DEFUN JSCL/COMMON-LISP::VALUES-LIST ...)
+; compiling (DEFUN JSCL/COMMON-LISP::VALUES ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ERROR ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::NTH-VALUE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CONSTANTP ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*PRINT-ESCAPE* ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*PRINT-READABLY* ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*PRINT-CIRCLE* ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*PRINT-RADIX* ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*PRINT-BASE* ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*READ-BASE* ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*READ-EVAL* ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DEFSTRUCT ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/boot.lisp
+; in: DEFMACRO JSCL/COMMON-LISP::DEFSTRUCT
+;     (DEFMACRO JSCL/COMMON-LISP::DEFSTRUCT (JSCL::NAME+OPTIONS &REST JSCL::SLOTS)
+;       `(EVAL-WHEN (:COMPILE-TOPLEVEL :LOAD-TOPLEVEL :EXECUTE)
+;          (JSCL::DEF!STRUCT ,JSCL::NAME+OPTIONS ,@JSCL::SLOTS)))
+; --> PROGN EVAL-WHEN 
+; ==>
+;   (SB-C::%DEFMACRO 'JSCL/COMMON-LISP::DEFSTRUCT
+;                    (SB-INT:NAMED-LAMBDA (MACRO-FUNCTION
+;                                          JSCL/COMMON-LISP::DEFSTRUCT)
+;                        (#:EXPR #:ENV)
+;                      (DECLARE
+;                       (SB-C::LAMBDA-LIST
+;                        (JSCL::NAME+OPTIONS &REST JSCL::SLOTS)))
+;                      (DECLARE (IGNORE #:ENV))
+;                      (SB-INT:NAMED-DS-BIND (:MACRO JSCL/COMMON-LISP::DEFSTRUCT
+;                                             . DEFMACRO)
+;                          (JSCL::NAME+OPTIONS &REST JSCL::SLOTS)
+;                          (CDR #:EXPR)
+;                        (BLOCK JSCL/COMMON-LISP::DEFSTRUCT `(EVAL-WHEN # #))))
+;                    (SB-C:SOURCE-LOCATION))
+; 
+; caught STYLE-WARNING:
+;   redefining JSCL/COMMON-LISP::DEFSTRUCT in DEFMACRO
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/boot.fasl written
+; compilation finished in 0:00:00.272
+DEBUG: loading boot.lisp!
+WARNING: redefining JSCL/COMMON-LISP::CHAR= in DEFUN
+WARNING: redefining JSCL/COMMON-LISP::CHAR< in DEFUN
+WARNING: redefining JSCL::FDEFINITION-SOFT in DEFUN
+WARNING: redefining JSCL/COMMON-LISP::ERROR in DEFUN
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/early-char.lisp" (written 14 DEC 2016 01:38:55 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading early-char.lisp!")
+; compiling (DEFVAR +UNICODE-ALPHAS+ ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ALPHA-CHAR-P ...)
+; compiling (DEFVAR +UNICODE-ZEROES+ ...)
+; compiling (DEFUN UNICODE-DIGIT-VALUE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::DIGIT-CHAR-P ...)
+; compiling (DEFUN JSCL/COMMON-LISP::DIGIT-CHAR ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/early-char.fasl written
+; compilation finished in 0:00:00.382
+DEBUG: loading early-char.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/setf.lisp" (written 14 DEC 2016 01:38:53 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading setf!")
+; compiling (DEFVAR *SETF-EXPANDERS* ...)
+; compiling (DEFUN JSCL/COMMON-LISP::GET-SETF-EXPANSION ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DEFINE-SETF-EXPANDER ...)
+; compiling (DEFMACRO SHORT-DEFSETF ...)
+; compiling (DEFMACRO LONG-DEFSETF ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DEFSETF ...)
+; compiling (DEFUN SETF/SPLIT-INTO-PAIRS ...)
+; compiling (DEFUN SETF/APPLY-SETF-EXPANDER ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::SETF ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::INCF ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DECF ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::PUSH ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::POP ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::PUSHNEW ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/setf.fasl written
+; compilation finished in 0:00:00.109
+DEBUG: loading setf!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/utils.lisp" (written 14 DEC 2016 01:38:53 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading utils.lisp!")
+; compiling (DEFMACRO WITH-COLLECT ...)
+; compiling (DEFMACRO WITH-COLLECTOR ...)
+; compiling (DEFMACRO CONCATF ...)
+; compiling (DEFUN ENSURE-LIST ...)
+; compiling (DEFUN JOIN ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/utils.lisp
+; in: DEFUN JOIN
+;     (JSCL/COMMON-LISP::REDUCE
+;      (LAMBDA (JSCL::S JSCL::O) (JSCL::CONCAT JSCL::S JSCL::SEPARATOR JSCL::O))
+;      (CDR LIST) (CAR LIST))
+; 
+; caught STYLE-WARNING:
+;   The function has an odd number of arguments in the keyword portion.
+
+; compiling (DEFUN JOIN-TRAILING ...)
+; compiling (DEFUN MAPCONCAT ...)
+; compiling (DEFUN VECTOR-TO-LIST ...)
+; compiling (DEFUN LIST-TO-VECTOR ...)
+; compiling (DEFMACRO AWHEN ...)
+; compiling (DEFUN INTEGER-TO-STRING ...)
+; compiling (DEFUN FLOAT-TO-STRING ...)
+; compiling (DEFUN SATISFIES-TEST-P ...)
+; compiling (DEFUN INTERLEAVE ...)
+; compiling (DEFUN FIND-PACKAGE-OR-FAIL ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/utils.fasl written
+; compilation finished in 0:00:00.091
+DEBUG: loading utils.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/defstruct.lisp" (written 15 DEC 2016 02:58:16 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading defstruct.lisp!")
+; compiling (DEFUN MAKE-STRUCTURE% ...)
+; compiling (DEFUN STRUCTURE%-P ...)
+; compiling (DEFUN STRUCTURE-TYPE% ...)
+; compiling (DEFUN ASSERT-STRUCT-TYPE ...)
+; compiling (DEFUN COPY-STRUCTURE% ...)
+; compiling (DEFUN STRUCTURE-SLOT-VALUE-BY-INDEX% ...)
+; compiling (DEFUN STRUCTURE-SETF-SLOT% ...)
+; compiling (DEFUN DEFSTRUCT/MAKE-PREDICATE ...)
+; compiling (DEFUN DEFSTRUCT/PARSE-SLOT-DESCRIPTION ...)
+; compiling (DEFUN DEFSTRUCT/OPTION-VALUE ...)
+; compiling (DEFUN DEFSTRUCT/MAKE-CONSTRUCTOR ...)
+; compiling (DEFUN DEFSTRUCT/MAKE-COPIER ...)
+; compiling (DEFUN DEFSTRUCT/MAKE-SLOT-READER ...)
+; compiling (DEFUN DEFSTRUCT/MAKE-SLOT-WRITER ...)
+; compiling (DEFUN DEFSTRUCT/MAKE-ACCESSOR-NAME ...)
+; compiling (DEFUN DEFSTRUCT/MAKE-SLOT-ACCESSOR ...)
+; compiling (DEFUN DEFSTRUCT/MAKE-SLOT-ACCESSORS ...)
+; compiling (DECLAIM (FTYPE # ...) ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/defstruct.lisp
+; in:
+;      DECLAIM (FTYPE
+;           (FUNCTION
+;            (&KEY (:CLASS T) (:NAME T) (:ACCESSORS T) (:READERS T) (:WRITERS T) (:TYPE T) (:INITFORM T)
+;             (:INITARG T) (:ALLOCATION T))
+;            (VALUES SLOT-INFO &OPTIONAL))
+;           MAKE-SLOT-INFO)
+;     (DECLAIM
+;      (FTYPE
+;       (FUNCTION
+;        (&KEY (:CLASS T) (:NAME T) (:ACCESSORS T) (:READERS T) (:WRITERS T)
+;         (:TYPE T) (:INITFORM T) (:INITARG T) (:ALLOCATION T))
+;        (VALUES JSCL::SLOT-INFO &OPTIONAL))
+;       JSCL::MAKE-SLOT-INFO)
+;      (FTYPE (FUNCTION (T) T) JSCL::SLOT-INFO-P)
+;      (SPECIAL JSCL::*TYPES*))
+; --> EVAL-WHEN 
+; ==>
+;   (SB-C::%PROCLAIM
+;    '(FTYPE
+;      (FUNCTION
+;       (&KEY (:CLASS T) (:NAME T) (:ACCESSORS T) (:READERS T) (:WRITERS T)
+;        (:TYPE T) (:INITFORM T) (:INITARG T) (:ALLOCATION T))
+;       (VALUES JSCL::SLOT-INFO &OPTIONAL))
+;      JSCL::MAKE-SLOT-INFO)
+;    (SB-C:SOURCE-LOCATION))
+; 
+; caught STYLE-WARNING:
+;   The new FTYPE proclamation for MAKE-SLOT-INFO
+;     (FUNCTION
+;      (&KEY (:CLASS T) (:NAME T) (:ACCESSORS T) (:READERS T) (:WRITERS T) (:TYPE T) (:INITFORM T) (:INITARG T)
+;       (:ALLOCATION T))
+;      (VALUES SLOT-INFO &OPTIONAL))
+;   does not match the old FTYPE proclamation
+;     (FUNCTION
+;      (&KEY (:CLASS T) (:NAME T) (:ACCESSORS T) (:READERS T) (:WRITERS T) (:TYPE T) (:INITFORM T) (:INITARGS T)
+;       (:ALLOCATION T))
+;      (VALUES SLOT-INFO &OPTIONAL))
+
+; compiling (DEFUN DEFSTRUCT/MAKE-SLOT-INFO ...)
+; compiling (DEFUN DEFSTRUCT/DEFINE-TYPE ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/defstruct.lisp
+; in: DEFUN DEFSTRUCT/DEFINE-TYPE
+;     (DEFUN JSCL::DEFSTRUCT/DEFINE-TYPE
+;            (TYPE JSCL::SLOTS
+;             &KEY JSCL::PREDICATE JSCL::PRINT-FUNCTION JSCL::CONSTRUCTOR
+;             JSCL::COPIER)
+;       (DECLARE (IGNORE JSCL::CONSTRUCTOR JSCL::COPIER))
+;       (PUSH
+;        (JSCL::MAKE-TYPE-DEFINITION :NAME TYPE :PREDICATE JSCL::PREDICATE
+;                                    :SUPERTYPES '(STRUCTURE-OBJECT))
+;        JSCL::*TYPES*)
+;       (WHEN JSCL::PRINT-FUNCTION
+;         (IF (FBOUNDP 'ADD-METHOD)
+;             (ADD-METHOD (FDEFINITION 'PRINT-OBJECT)
+;                         (MAKE-INSTANCE 'STANDARD-METHOD :SPECIALIZERS # :FUNCTION
+;                                        JSCL::PRINT-FUNCTION))
+;             (WARN
+;              "PRINT-OBJECT for :PRINT-FUNCTION for structure ~s can't be defined without CLOS: Option will be ignored"
+;              TYPE))))
+; --> PROGN SB-IMPL::%DEFUN SB-IMPL::%DEFUN SB-INT:NAMED-LAMBDA 
+; ==>
+;   #'(SB-INT:NAMED-LAMBDA JSCL::DEFSTRUCT/DEFINE-TYPE
+;         (TYPE JSCL::SLOTS &KEY JSCL::PREDICATE JSCL::PRINT-FUNCTION
+;          JSCL::CONSTRUCTOR JSCL::COPIER)
+;       (DECLARE (IGNORE JSCL::CONSTRUCTOR JSCL::COPIER))
+;       (BLOCK JSCL::DEFSTRUCT/DEFINE-TYPE
+;         (PUSH
+;          (JSCL::MAKE-TYPE-DEFINITION :NAME TYPE :PREDICATE JSCL::PREDICATE
+;                                      :SUPERTYPES '(STRUCTURE-OBJECT))
+;          JSCL::*TYPES*)
+;         (WHEN JSCL::PRINT-FUNCTION
+;           (IF (FBOUNDP 'ADD-METHOD)
+;               (ADD-METHOD # #)
+;               (WARN
+;                "PRINT-OBJECT for :PRINT-FUNCTION for structure ~s can't be defined without CLOS: Option will be ignored"
+;                TYPE)))))
+; 
+; caught STYLE-WARNING:
+;   The variable SLOTS is defined but never used.
+
+; compiling (DEFMACRO !DEFSTRUCT% ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DEFSTRUCT ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/defstruct.lisp
+; in: DEFMACRO JSCL/COMMON-LISP::DEFSTRUCT
+;     (DEFMACRO JSCL/COMMON-LISP::DEFSTRUCT
+;               (JSCL::NAME-AND-OPTIONS &REST JSCL::SLOTS)
+;       `(PROGN
+;         (EVAL-WHEN (:COMPILE-TOPLEVEL)
+;           (DEFSTRUCT ,JSCL::NAME-AND-OPTIONS ,@JSCL::SLOTS))))
+; --> PROGN EVAL-WHEN 
+; ==>
+;   (SB-C::%DEFMACRO 'JSCL/COMMON-LISP::DEFSTRUCT
+;                    (SB-INT:NAMED-LAMBDA (MACRO-FUNCTION
+;                                          JSCL/COMMON-LISP::DEFSTRUCT)
+;                        (#:EXPR #:ENV)
+;                      (DECLARE
+;                       (SB-C::LAMBDA-LIST
+;                        (JSCL::NAME-AND-OPTIONS &REST JSCL::SLOTS)))
+;                      (DECLARE (IGNORE #:ENV))
+;                      (SB-INT:NAMED-DS-BIND (:MACRO JSCL/COMMON-LISP::DEFSTRUCT
+;                                             . DEFMACRO)
+;                          (JSCL::NAME-AND-OPTIONS &REST JSCL::SLOTS)
+;                          (CDR #:EXPR)
+;                        (BLOCK JSCL/COMMON-LISP::DEFSTRUCT `(PROGN #))))
+;                    (SB-C:SOURCE-LOCATION))
+; 
+; caught STYLE-WARNING:
+;   redefining JSCL/COMMON-LISP::DEFSTRUCT in DEFMACRO
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/defstruct.fasl written
+; compilation finished in 0:00:00.103
+DEBUG: loading defstruct.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/types.lisp" (written 14 DEC 2016 10:05:31 PM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "Loading types.lisp…")
+; compiling (DECLAIM (SPECIAL *ENVIRONMENT* ...) ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/types.lisp
+; in: DECLAIM (SPECIAL *ENVIRONMENT* *GLOBAL-ENVIRONMENT*)
+;     (DECLAIM (SPECIAL JSCL::*ENVIRONMENT* JSCL::*GLOBAL-ENVIRONMENT*)
+;              (FTYPE (FUNCTION (T) T) JSCL::BINDING-VALUE)
+;              (FTYPE (FUNCTION (T T T) T) JSCL::LOOKUP-IN-LEXENV)
+;              (FTYPE
+;               (FUNCTION (&KEY (:NAME T) (:TYPE T) (:VALUE T) (:DECLARATIONS T))
+;                T)
+;               JSCL::MAKE-BINDING)
+;              (FTYPE (FUNCTION (T T T) CONS) JSCL::PUSH-TO-LEXENV)
+;              (FTYPE (FUNCTION (T) T) JSCL::LEXENV-TYPE))
+; --> EVAL-WHEN 
+; ==>
+;   (SB-C::%PROCLAIM
+;    '(FTYPE (FUNCTION (&KEY (:NAME T) (:TYPE T) (:VALUE T) (:DECLARATIONS T)) T)
+;      JSCL::MAKE-BINDING)
+;    (SB-C:SOURCE-LOCATION))
+; 
+; caught STYLE-WARNING:
+;   The new FTYPE proclamation for MAKE-BINDING
+;     (FUNCTION (&KEY (:NAME T) (:TYPE T) (:VALUE T) (:DECLARATIONS T)) T)
+;   does not match the old FTYPE proclamation
+;     (FUNCTION (&KEY (:NAME T) (:TYPE T) (:VALUE T) (:DECLARATIONS T)) (VALUES BINDING &OPTIONAL))
+
+; compiling (DEFMACRO JSCL/COMMON-LISP::DEFTYPE ...)
+; compiling (DEFSTRUCT JSCL/COMMON-LISP::BUILT-IN-CLASS ...)
+; compiling (DEFUN MAKE-ACCESSOR-NAME ...)
+; compiling (IN-PACKAGE :JSCL/MOP)
+; compiling (DEFSTRUCT JSCL/COMMON-LISP::EQL-SPECIALIZER ...)
+; compiling (IN-PACKAGE :JSCL)
+; compiling (DEFSTRUCT TYPE-DEFINITION ...)
+; compiling (DEFSTRUCT CLASS-INFO ...)
+; compiling (DEFSTRUCT SLOT-INFO ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/types.lisp
+; in: DEFSTRUCT SLOT-INFO
+;     (DEFSTRUCT JSCL::SLOT-INFO
+;       CLASS
+;       JSCL::NAME
+;       JSCL::ACCESSORS
+;       JSCL::READERS
+;       JSCL::WRITERS
+;       TYPE
+;       JSCL::INITFORM
+;       JSCL::INITARGS
+;       JSCL::ALLOCATION)
+; --> PROGN EVAL-WHEN 
+; ==>
+;   (SB-KERNEL::%COMPILER-DEFSTRUCT
+;    '#<SB-KERNEL:DEFSTRUCT-DESCRIPTION JSCL::SLOT-INFO {100641E3C3}>
+;    '#(#<SB-KERNEL:LAYOUT for T {1000095613}>
+;       #<SB-KERNEL:LAYOUT for STRUCTURE-OBJECT {1000095693}>))
+; 
+; caught STYLE-WARNING:
+;   The new FTYPE proclamation for MAKE-SLOT-INFO
+;     (FUNCTION
+;      (&KEY (:CLASS T) (:NAME T) (:ACCESSORS T) (:READERS T) (:WRITERS T) (:TYPE T) (:INITFORM T) (:INITARGS T)
+;       (:ALLOCATION T))
+;      (VALUES SLOT-INFO &OPTIONAL))
+;   does not match the old FTYPE proclamation
+;     (FUNCTION
+;      (&KEY (:CLASS T) (:NAME T) (:ACCESSORS T) (:READERS T) (:WRITERS T) (:TYPE T) (:INITFORM T) (:INITARG T)
+;       (:ALLOCATION T))
+;      (VALUES SLOT-INFO &OPTIONAL))
+
+; compiling (DEFUN CAR? ...)
+; compiling (DEFUN FIND-TYPE-DEFINITION ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SUBTYPEP ...)
+; compiling (DEFUN MOST-SPECIFIC-TYPE ...)
+; compiling (DEFUN CURRY-TYPE-CHECK ...)
+; compiling (DEFUN JSCL/COMMON-LISP::TYPE-OF ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CLASS-OF ...)
+; compiling (DEFSTRUCT DEFTYPE-CLASS-METAOBJECT ...)
+; compiling (DEFUN MAKE-DEFTYPE-PREDICATE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::TYPEP ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::RESTART-CASE ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::CHECK-TYPE ...)
+; compiling "(old typecase — make sure these tests pass TODO
+ (hash-table 'hash-table-p)
+ (fixnum 'fixnump)
+ (number 'numberp)
+ (integer 'integerp)
+ (cons 'consp)
+ (list 'listp)
+ (vector 'vectorp)
+ (character 'characterp)
+ (sequence 'sequencep)
+ (symbol 'symbolp)
+ (keyword 'keywordp)
+ (function 'functionp)
+ (float 'floatp)
+ (array 'arrayp)
+ (string 'stringp)
+ (atom 'atom)
+ (null 'null)
+ (package 'packagep))"
+; compiling (DEFUN TYPECASE-UNIQUE-TYPES ...)
+; compiling (DEFUN FIND-DUPLICATES ...)
+; compiling (DEFUN TYPECASE-CHECK-FOR-DUPLICATES ...)
+; compiling (DEFUN TYPECASE-UNREACHABLE-AFTER-T ...)
+; compiling (DEFUN TYPECASE-UNREACHABLE-AFTER-SUPERTYPE ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::TYPECASE ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::ETYPECASE ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/types.lisp
+; in: DEFMACRO JSCL/COMMON-LISP::ETYPECASE
+;     (SORT JSCL::UNIQUE-TYPES #'STRING< :KEY #'SYMBOL-NAME)
+; 
+; note: deleting unreachable code
+
+; --> BLOCK LET SB-IMPL::SEQ-DISPATCH IF LET SB-IMPL::STABLE-SORT-LIST 
+; --> BLOCK LABELS BLOCK COND IF COND IF PROGN 
+; --> SB-IMPL::STABLE-SORT-LIST-3 BLOCK LET* WHEN IF FUNCALL 
+; --> SB-C::%FUNCALL 
+; ==>
+;   (SB-KERNEL:STRING<* SB-C::STRING1 SB-C::STRING2 SB-C::START1 SB-C::END1
+;                       SB-C::START2 SB-C::END2)
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a SIMPLE-STRING, not a SIMPLE-BASE-STRING.
+;   The second argument is a SIMPLE-STRING, not a SIMPLE-BASE-STRING.
+
+; --> BLOCK LET SB-IMPL::SEQ-DISPATCH IF LET SB-IMPL::STABLE-SORT-LIST 
+; --> BLOCK LABELS BLOCK COND IF COND IF PROGN 
+; --> SB-IMPL::STABLE-SORT-LIST-3 BLOCK LET* LET WHEN IF FUNCALL 
+; --> SB-C::%FUNCALL 
+; ==>
+;   (SB-KERNEL:STRING<* SB-C::STRING1 SB-C::STRING2 SB-C::START1 SB-C::END1
+;                       SB-C::START2 SB-C::END2)
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a SIMPLE-STRING, not a SIMPLE-BASE-STRING.
+;   The second argument is a SIMPLE-STRING, not a SIMPLE-BASE-STRING.
+
+; --> BLOCK LET SB-IMPL::SEQ-DISPATCH IF LET SB-IMPL::STABLE-SORT-LIST 
+; --> BLOCK LABELS BLOCK COND IF COND IF PROGN 
+; --> SB-IMPL::STABLE-SORT-LIST-3 BLOCK LET* LET WHEN IF IF FUNCALL 
+; --> SB-C::%FUNCALL 
+; ==>
+;   (SB-KERNEL:STRING<* SB-C::STRING1 SB-C::STRING2 SB-C::START1 SB-C::END1
+;                       SB-C::START2 SB-C::END2)
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a SIMPLE-STRING, not a SIMPLE-BASE-STRING.
+;   The second argument is a SIMPLE-STRING, not a SIMPLE-BASE-STRING.
+
+; --> BLOCK LET SB-IMPL::SEQ-DISPATCH IF LET SB-IMPL::STABLE-SORT-LIST 
+; --> BLOCK LABELS BLOCK COND IF COND IF COND IF PROGN 
+; --> SB-IMPL::STABLE-SORT-LIST-2 BLOCK LET WHEN IF FUNCALL 
+; --> SB-C::%FUNCALL 
+; ==>
+;   (SB-KERNEL:STRING<* SB-C::STRING1 SB-C::STRING2 SB-C::START1 SB-C::END1
+;                       SB-C::START2 SB-C::END2)
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a SIMPLE-STRING, not a SIMPLE-BASE-STRING.
+;   The second argument is a SIMPLE-STRING, not a SIMPLE-BASE-STRING.
+
+; --> BLOCK LET SB-IMPL::SEQ-DISPATCH IF LET SB-IMPL::STABLE-SORT-LIST 
+; --> BLOCK LABELS BLOCK WHEN IF COND IF NOT IF FUNCALL SB-C::%FUNCALL 
+; ==>
+;   (SB-KERNEL:STRING<* SB-C::STRING1 SB-C::STRING2 SB-C::START1 SB-C::END1
+;                       SB-C::START2 SB-C::END2)
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a SIMPLE-STRING, not a SIMPLE-BASE-STRING.
+;   The second argument is a SIMPLE-STRING, not a SIMPLE-BASE-STRING.
+
+; --> BLOCK LET SB-IMPL::SEQ-DISPATCH IF LET SB-IMPL::STABLE-SORT-LIST 
+; --> BLOCK LABELS BLOCK WHEN IF COND IF COND IF FUNCALL SB-C::%FUNCALL 
+; ==>
+;   (SB-KERNEL:STRING<* SB-C::STRING1 SB-C::STRING2 SB-C::START1 SB-C::END1
+;                       SB-C::START2 SB-C::END2)
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a SIMPLE-STRING, not a SIMPLE-BASE-STRING.
+;   The second argument is a SIMPLE-STRING, not a SIMPLE-BASE-STRING.
+
+; --> BLOCK LET SB-IMPL::SEQ-DISPATCH IF LET SB-IMPL::STABLE-SORT-LIST 
+; --> BLOCK LABELS BLOCK VALUES SB-IMPL::MERGE-LISTS* BLOCK LET 
+; --> MACROLET LOOP BLOCK TAGBODY PROGN IF FUNCALL SB-C::%FUNCALL 
+; ==>
+;   (SB-KERNEL:STRING<* SB-C::STRING1 SB-C::STRING2 SB-C::START1 SB-C::END1
+;                       SB-C::START2 SB-C::END2)
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a SIMPLE-STRING, not a SIMPLE-BASE-STRING.
+;   The second argument is a SIMPLE-STRING, not a SIMPLE-BASE-STRING.
+
+; compiling (DEFUN MAKE-NUMERIC-RANGE-CHECK-PREDICATE ...)
+; compiling (DEFPARAMETER +STANDARD-TYPE-SPECIFIERS+ ...)
+; compiling (DEFPARAMETER +COMPOUND-ONLY-TYPE-SPECIFIERS+ ...)
+; compiling (DEFPARAMETER +COMPOUND-TYPE-SPECIFIERS+ ...)
+; compiling (DEFUN EQUALP-OR-* ...)
+; compiling (DEFUN NORMALIZE-ARRAY-DIMENSIONS-SPEC ...)
+; compiling (DEFUN COMPOUND-ARRAY-TYPE-P ...)
+; compiling (IN-PACKAGE :JSCL/CL)
+; compiling (COMMON-LISP:DEFPARAMETER JSCL::+STANDARD-CLASS-SUBCLASSES+ ...)
+; compiling (COMMON-LISP:IN-PACKAGE :JSCL)
+; compiling (DEFUN FIND-BUILT-IN-CLASS ...)
+; compiling (DEFPARAMETER +BASIC-TYPES+ ...)
+; compiling (DEFUN INIT-BUILT-IN-BASIC-TYPES% ...)
+; compiling (DEFUN INIT-NUMERIC-COMPOUND-PREDICATES% ...)
+; compiling (DEFUN INIT-STRING-PREDICATE% ...)
+; compiling (DEFUN INIT-STANDARD-TYPE/CLASSES% ...)
+; compiling (DEFUN INIT-STANDARD-CLASS-SUBCLASSES% ...)
+; compiling (DEFUN VALIDATE-STANDARD-CLASS-SUBCLASSES% ...)
+; compiling (DEFUN INIT-BUILT-IN-TYPES% ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/types.fasl written
+; compilation finished in 0:00:00.577
+DEBUG: Loading types.lisp…
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/lambda-list.lisp" (written 14 DEC 2016 01:38:54 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading lambda-list.lisp!")
+; compiling (DEFVAR !LAMBDA-LIST-KEYWORDS ...)
+; compiling (DEFSTRUCT OPTVAR ...)
+; compiling (DEFSTRUCT KEYVAR ...)
+; compiling (DEFSTRUCT AUXVAR ...)
+; compiling (DEFSTRUCT LAMBDA-LIST ...)
+; compiling (DEFUN VAR-OR-PATTERN ...)
+; compiling (DEFUN PARSE-OPTVAR ...)
+; compiling (DEFUN PARSE-KEYVAR ...)
+; compiling (DEFUN PARSE-AUXVAR ...)
+; compiling (DEFUN PARSE-DESTRUCTURING-LAMBDA-LIST ...)
+; compiling (DEFMACRO DO-KEYWORDS ...)
+; compiling (DEFUN KEYWORD-SUPPLIED-P ...)
+; compiling (DEFUN KEYWORD-LOOKUP ...)
+; compiling (DEFUN VALIDATE-REQVARS ...)
+; compiling (DEFUN VALIDATE-MAX-ARGS ...)
+; compiling (DEFUN VALIDATE-KEYVARS ...)
+; compiling (DEFUN NTH-CHAIN ...)
+; compiling (DEFVAR *BINDINGS*)
+; compiling (DEFUN COMPUTE-BINDINGS ...)
+; compiling (DEFUN COMPUTE-PBINDINGS ...)
+; compiling (DEFUN !EXPAND-DESTRUCTURING-BIND ...)
+; compiling (DEFMACRO !DESTRUCTURING-BIND ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/lambda-list.fasl written
+; compilation finished in 0:00:00.150
+DEBUG: loading lambda-list.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/numbers.lisp" (written 14 DEC 2016 10:05:31 PM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading numbers.lisp!")
+; compiling (DEF + ...)
+; compiling (DEF * ...)
+; compiling (DEF - ...)
+; compiling (DEF / ...)
+; compiling (DEFCONSTANT JSCL/COMMON-LISP::MOST-POSITIVE-FIXNUM ...)
+; compiling (DEFCONSTANT JSCL/COMMON-LISP::MOST-NEGATIVE-FIXNUM ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FIXNUMP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::1+ ...)
+; compiling (DEFUN JSCL/COMMON-LISP::1- ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FLOOR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CEILING ...)
+; compiling (DEFUN JSCL/COMMON-LISP::TRUNCATE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::INTEGERP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FLOATP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MINUSP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ZEROP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::PLUSP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SIGNUM ...)
+; compiling (DEF >)
+; compiling (DEF >=)
+; compiling (DEF =)
+; compiling (DEF <)
+; compiling (DEF <=)
+; compiling (DEF /=)
+; compiling (DEFCONSTANT JSCL/COMMON-LISP::PI ...)
+; compiling (DEFUN JSCL/COMMON-LISP::EVENP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ODDP ...)
+; compiling (DEF MAX ...)
+; compiling (DEF MIN ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ABS ...)
+; compiling (DEFUN JSCL/COMMON-LISP::EXPT ...)
+; compiling (DEFUN JSCL/COMMON-LISP::EXP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SQRT ...)
+; compiling (DEFUN GCD-2 ...)
+; compiling (DEFUN JSCL/COMMON-LISP::GCD ...)
+; compiling (DEFUN LCM-2 ...)
+; compiling (DEFUN JSCL/COMMON-LISP::LCM ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/numbers.fasl written
+; compilation finished in 0:00:00.083
+DEBUG: loading numbers.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/char.lisp" (written 14 DEC 2016 01:38:55 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading char.lisp!")
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR= ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR/= ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR< ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR> ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR<= ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR>= ...)
+; compiling (DEFUN EQUAL-CHAR-CODE ...)
+; compiling (DEFUN TWO-ARG-CHAR-EQUAL ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR-EQUAL ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR-NOT-EQUAL ...)
+; compiling (DEFUN TWO-ARG-CHAR-LESSP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR-LESSP ...)
+; compiling (DEFUN TWO-ARG-CHAR-GREATERP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR-GREATERP ...)
+; compiling (DEFUN TWO-ARG-CHAR-NOT-GREATERP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR-NOT-GREATERP ...)
+; compiling (DEFUN TWO-ARG-CHAR-NOT-LESSP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR-NOT-LESSP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHARACTER ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ALPHANUMERICP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::GRAPHIC-CHAR-P ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STANDARD-CHAR-P ...)
+; compiling (DEFUN JSCL/COMMON-LISP::UPPER-CASE-P ...)
+; compiling (DEFUN JSCL/COMMON-LISP::LOWER-CASE-P ...)
+; compiling (DEFUN JSCL/COMMON-LISP::BOTH-CASE-P ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR-INT ...)
+; compiling (DEFCONSTANT JSCL/COMMON-LISP::CHAR-CODE-LIMIT ...)
+; compiling (DEFVAR +ASCII-NAMES+ ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR-NAME ...)
+; compiling (DEFUN JSCL/COMMON-LISP::NAME-CHAR ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/char.fasl written
+; compilation finished in 0:00:02.477
+DEBUG: loading char.lisp!
+WARNING: redefining JSCL/COMMON-LISP::CHAR= in DEFUN
+WARNING: redefining JSCL/COMMON-LISP::CHAR< in DEFUN
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/list.lisp" (written 14 DEC 2016 01:38:54 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading list.lisp!")
+; compiling (DEFUN JSCL/COMMON-LISP::CONS ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CONSP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::LISTP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::NULL ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ENDP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CDR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::RPLACA ...)
+; compiling (DEFUN JSCL/COMMON-LISP::RPLACD ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FIRST ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SECOND ...)
+; compiling (DEFUN JSCL/COMMON-LISP::THIRD ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FOURTH ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FIFTH ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SIXTH ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SEVENTH ...)
+; compiling (DEFUN JSCL/COMMON-LISP::EIGHTH ...)
+; compiling (DEFUN JSCL/COMMON-LISP::NINTH ...)
+; compiling (DEFUN JSCL/COMMON-LISP::TENTH ...)
+; compiling (DEFUN JSCL/COMMON-LISP::REST ...)
+; compiling (DEFUN JSCL/COMMON-LISP::LIST-LENGTH ...)
+; compiling (DEFUN JSCL/COMMON-LISP::NTHCDR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::NTH ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CAAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CADR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CDAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CDDR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CAAAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CAADR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CADAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CADDR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CDAAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CDADR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CDDAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CDDDR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CAAAAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CAAADR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CAADAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CAADDR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CADAAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CADADR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CADDAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CADDDR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CDAAAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CDAADR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CDADAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CDADDR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CDDAAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CDDADR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CDDDAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CDDDDR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MAKE-LIST ...)
+; compiling (DEFUN JSCL/COMMON-LISP::LIST ...)
+; compiling (DEFUN JSCL/COMMON-LISP::LIST* ...)
+; compiling (DEFUN APPEND-TWO ...)
+; compiling (DEFUN JSCL/COMMON-LISP::APPEND ...)
+; compiling (DEFUN JSCL/COMMON-LISP::REVAPPEND ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SUBLIS ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SUBST ...)
+; compiling (DEFUN JSCL/COMMON-LISP::COPY-LIST ...)
+; compiling (DEFUN JSCL/COMMON-LISP::COPY-TREE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::TREE-EQUAL ...)
+; compiling (DEFUN JSCL/COMMON-LISP::TAILP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::LAST ...)
+; compiling (DEFUN JSCL/COMMON-LISP::BUTLAST ...)
+; compiling (DEFUN JSCL/COMMON-LISP::NBUTLAST ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MEMBER ...)
+; compiling (DEFUN JSCL/COMMON-LISP::INTERSCTION ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ASSOC ...)
+; compiling (DEFUN JSCL/COMMON-LISP::RASSOC ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ACONS ...)
+; compiling (DEFUN JSCL/COMMON-LISP::PAIRLIS ...)
+; compiling (DEFUN JSCL/COMMON-LISP::COPY-ALIST ...)
+; compiling (DEFUN (SETF JSCL/COMMON-LISP::CAR) ...)
+; compiling (DEFUN (SETF JSCL/COMMON-LISP::CDR) ...)
+; compiling (DEFUN (SETF JSCL/COMMON-LISP::NTH) ...)
+; compiling (DEFUN JSCL/COMMON-LISP::NCONC ...)
+; compiling (DEFUN JSCL/COMMON-LISP::NRECONC ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ADJOIN ...)
+; compiling (DEFUN JSCL/COMMON-LISP::GET-PROPERTIES ...)
+; compiling (DEFUN JSCL/COMMON-LISP::GETF ...)
+; compiling (DEFUN %PUTF ...)
+; compiling (DEFINE-SETF-EXPANDER JSCL/COMMON-LISP::GETF ...)
+; compiling (DEFUN MAP1 ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MAPC ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MAPCAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MAPCAN ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MAPLIST ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MAPCON ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/list.fasl written
+; compilation finished in 0:00:00.345
+DEBUG: loading list.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/array.lisp" (written 14 DEC 2016 01:38:56 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading array.lisp!")
+; compiling (DEFUN JSCL/COMMON-LISP::UPGRADED-ARRAY-ELEMENT-TYPE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ARRAY-DIMENSIONS ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ADJUSTABLE-ARRAY-P ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FILL-POINTER ...)
+; compiling (DEFUN (SETF JSCL/COMMON-LISP::FILL-POINTER) ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MAKE-ARRAY ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ARRAYP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ARRAY-ELEMENT-TYPE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ARRAY-DIMENSION ...)
+; compiling (DEFUN JSCL/COMMON-LISP::AREF ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ASET ...)
+; compiling (DEFUN (SETF JSCL/COMMON-LISP::AREF) ...)
+; compiling (DEFUN JSCL/COMMON-LISP::VECTORP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::VECTOR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::VECTOR-PUSH-EXTEND ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/array.fasl written
+; compilation finished in 0:00:00.052
+DEBUG: loading array.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/string.lisp" (written 14 DEC 2016 01:38:53 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading string.lisp!")
+; compiling (DEFUN JSCL/COMMON-LISP::STRINGP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING-LENGTH ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MAKE-STRING ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CHAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING= ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING/= ...)
+; compiling (DEFUN COMPARE-STRINGS ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING< ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING> ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING<= ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING>= ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING-LESSP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING-GREATERP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING-NOT-GREATERP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING-NOT-LESSP ...)
+; compiling (DEFUN (SETF JSCL/COMMON-LISP::CHAR) ...)
+; compiling (DEFUN CONCAT ...)
+; compiling (DEFUN JSCL/COMMON-LISP::CONCATENATE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING-UPCASE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::NSTRING-UPCASE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING-DOWNCASE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::NSTRING-DOWNCASE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING-CAPITALIZE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::NSTRING-CAPITALIZE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING-EQUAL ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING-NOT-EQUAL ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING-TRIM ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING-LEFT-TRIM ...)
+; compiling (DEFUN JSCL/COMMON-LISP::STRING-RIGHT-TRIM ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/string.fasl written
+; compilation finished in 0:00:00.155
+DEBUG: loading string.lisp!
+WARNING: redefining JSCL::CONCAT in DEFUN
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/sequence.lisp" (written 14 DEC 2016 10:05:31 PM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading sequence.lisp!")
+; compiling (DEFUN SEQUENCEP ...)
+; compiling (DEFUN NOT-SEQ-ERROR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::LENGTH ...)
+; compiling (DEFUN JSCL/COMMON-LISP::EMPTYP ...)
+; compiling (DEFUN VECTOR-REVERSE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::REVERSE ...)
+; compiling (DEFUN LIST-NREVERSE ...)
+; compiling (DEFUN VECTOR-NREVERSE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::NREVERSE ...)
+; compiling (DEFMACRO DO-SEQUENCE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::COUNT ...)
+; compiling (DEFUN JSCL/COMMON-LISP::COUNT-IF ...)
+; compiling (DEFUN JSCL/COMMON-LISP::COUNT-IF-NOT ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FIND ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FIND-IF ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FIND-IF-NOT ...)
+; compiling (DEFUN JSCL/COMMON-LISP::POSITION ...)
+; compiling (DEFUN JSCL/COMMON-LISP::POSITION-IF ...)
+; compiling (DEFUN JSCL/COMMON-LISP::POSITION-IF-NOT ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SUBSTITUTE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SUBSTITUTE-IF ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SUBSTITUTE-IF-NOT ...)
+; compiling (DEFUN JSCL/COMMON-LISP::REMOVE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SOME ...)
+; compiling (DEFUN JSCL/COMMON-LISP::EVERY ...)
+; compiling (DEFUN JSCL/COMMON-LISP::REMOVE-IF ...)
+; compiling (DEFUN JSCL/COMMON-LISP::REMOVE-IF-NOT ...)
+; compiling (DEFUN LIST-REMOVE-IF ...)
+; compiling (DEFUN VECTOR-REMOVE-IF ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SUBSEQ ...)
+; compiling (DEFUN JSCL/COMMON-LISP::COPY-SEQ ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ELT ...)
+; compiling (DEFUN (SETF JSCL/COMMON-LISP::ELT) ...)
+; compiling (DEFUN ZERO-ARGS-REDUCE ...)
+; compiling (DEFUN ONE-ARGS-REDUCE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::REDUCE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MISMATCH ...)
+; compiling (DEFUN LIST-SEARCH ...)
+; compiling (DEFUN VECTOR-SEARCH ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SEARCH ...)
+; compiling (DEFVAR *ITERATOR-DONE* ...)
+; compiling (DEFUN MAKE-LIST-ITERATOR ...)
+; compiling (DEFUN MAKE-VECTOR-ITERATOR ...)
+; compiling (DEFUN MAKE-ITERATOR ...)
+; compiling (DEFUN MAKE-LIST-COLLECTOR ...)
+; compiling (DEFUN MAKE-VECTOR-COLLECTOR ...)
+; compiling (DEFUN MAKE-COLLECTOR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MAP ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/sequence.fasl written
+; compilation finished in 0:00:00.436
+DEBUG: loading sequence.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/stream.lisp" (written 14 DEC 2016 01:38:53 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading stream.lisp!")
+; compiling (DEFVAR JSCL/COMMON-LISP::*STANDARD-OUTPUT*)
+; compiling (DEFUN JSCL/COMMON-LISP::STREAMP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::OUTPUT-STREAM-P ...)
+; compiling (DEFUN CONSOLE-LOG ...)
+; compiling (DEFVAR *STREAM-GENERIC-FUNCTIONS* ...)
+; compiling (DEFUN STREAM-GENERIC-METHOD ...)
+; compiling (DEFUN JSCL/COMMON-LISP::WRITE-CHAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FORCE-OUTPUT ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FINISH-OUTPUT ...)
+; compiling (DEFUN JSCL/COMMON-LISP::WRITE-STRING ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MAKE-STRING-OUTPUT-STREAM ...)
+; compiling (DEFUN MAKE-WEB-CONSOLE-OUTPUT-STREAM ...)
+; compiling (DEFUN JSCL/COMMON-LISP::GET-OUTPUT-STREAM-STRING ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::WITH-OUTPUT-TO-STRING ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/stream.fasl written
+; compilation finished in 0:00:00.042
+DEBUG: loading stream.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/hash-table.lisp" (written 14 DEC 2016 01:38:55 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (DEFVAR *EQ-HASH-COUNTER* ...)
+; compiling (DEFUN EQ-HASH ...)
+; compiling (DEFUN EQL-HASH ...)
+; compiling (DEFUN EQUAL-HASH ...)
+; compiling (DEFUN EQUALP-HASH ...)
+; compiling (DEFUN HASH-TABLE-FUNCTION ...)
+; compiling (DEFUN HASH-TABLE-FUNCTION/INVERT ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MAKE-HASH-TABLE ...)
+; compiling (DEFUN HASH-KEY-FOR-TABLE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::GETHASH ...)
+; compiling (DEFUN SETHASH ...)
+; compiling (DEFINE-SETF-EXPANDER JSCL/COMMON-LISP::GETHASH ...)
+; compiling (DEFUN JSCL/COMMON-LISP::REMHASH ...)
+; compiling (DEFUN JSCL/COMMON-LISP::HASH-TABLE-COUNT ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MAPHASH ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/hash-table.fasl written
+; compilation finished in 0:00:00.033
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/print.lisp" (written 15 DEC 2016 03:48:54 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading print.lisp!")
+; compiling (DEFVAR JSCL/COMMON-LISP::*STANDARD-OUTPUT* ...)
+; compiling (DEFUN LISP-ESCAPE-STRING ...)
+; compiling (DEFUN ESCAPE-SYMBOL-NAME-P ...)
+; compiling (DEFUN POTENTIAL-NUMBER-P ...)
+; compiling (DEFUN ESCAPE-TOKEN-P ...)
+; compiling (DEFUN ESCAPE-TOKEN ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*PRINT-ESCAPE* ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*PRINT-READABLY* ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*PRINT-CIRCLE* ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*PRINT-RADIX* ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*PRINT-BASE* ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*READ-BASE* ...)
+; compiling (DEFUN SCAN-MULTIPLE-REFERENCED-OBJECTS ...)
+; compiling (DEFUN WRITE-INTEGER ...)
+; compiling (DEFUN SIMPLE-FORMAT ...)
+; compiling (DEFUN WRITE-AUX ...)
+; compiling (DEFUN OUTPUT-STREAM-DESIGNATOR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::WRITE ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::WITH-INPUT-FROM-STRING ...)
+; compiling (DEFUN JSCL/COMMON-LISP::PRIN1 ...)
+; compiling (DEFUN JSCL/COMMON-LISP::PRIN1-TO-STRING ...)
+; compiling (DEFUN JSCL/COMMON-LISP::PRINC ...)
+; compiling (DEFUN JSCL/COMMON-LISP::PRINC-TO-STRING ...)
+; compiling (DEFUN JSCL/COMMON-LISP::TERPRI ...)
+; compiling (DEFUN JSCL/COMMON-LISP::WRITE-LINE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::PRINT ...)
+; compiling (DEFUN FORMAT-AESTHETIC ...)
+; compiling (DEFUN GROUP-DIGITS ...)
+; compiling (DEFUN FORMAT-PAD-TO-RIGHT ...)
+; compiling (DEFUN FORMAT-NUMERIC ...)
+; compiling (DEFUN FORMAT-HEX ...)
+; compiling (DEFUN FORMAT-ORDINAL-STRING ...)
+; compiling (DEFUN FORMAT-CARDINAL-STRING ...)
+; compiling (DEFUN FORMAT-ROMAN-NUMERAL ...)
+; compiling (DEFUN FORMAT-RADIX ...)
+; compiling (DEFUN FORMAT-BINARY ...)
+; compiling (DEFUN FORMAT-OCTAL ...)
+; compiling (DEFUN FORMAT-DECIMAL ...)
+; compiling (DEFUN FORMAT-TERPRI ...)
+; compiling (DEFUN FORMAT-FRESH-LINE ...)
+; compiling (DEFUN FORMAT-SYNTAX ...)
+; compiling (DEFUN FORMAT-WRITE ...)
+; compiling (DEFUN FORMAT-CHAR ...)
+; compiling (DEFUN FORMAT-FLOAT-E ...)
+; compiling (DEFUN FORMAT-FLOAT-F ...)
+; compiling (DEFUN FORMAT-FLOAT-G ...)
+; compiling (DEFUN FORMAT-FLOAT-$ ...)
+; compiling (DEFUN STRING-CAPITALIZE-FIRST ...)
+; compiling (DEFUN FORMAT-LETTER-CASE ...)
+; compiling (DEFUN FORMAT-JUSTIFY ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/print.lisp
+; in: DEFUN FORMAT-JUSTIFY
+;     'STRING
+; 
+; note: deleting unreachable code
+
+;     (DEFUN JSCL::FORMAT-JUSTIFY
+;            (JSCL::CAPTURED-SUBSTRINGS JSCL::ARGUMENTS
+;             &KEY JSCL::START-AT-P JSCL::START-COLON-P JSCL::END-AT-P
+;             JSCL::END-COLON-P)
+;       "FORMAT ~< ~> handler. (unimplemented)"
+;       (LET (JSCL::OUTPUT)
+;         (ERROR "~~< ~~> not implemented yet")
+;         (VALUES (CONCATENATE 'STRING (REVERSE JSCL::OUTPUT)) JSCL::ARGUMENTS)))
+; --> PROGN SB-IMPL::%DEFUN SB-IMPL::%DEFUN SB-INT:NAMED-LAMBDA 
+; ==>
+;   #'(SB-INT:NAMED-LAMBDA JSCL::FORMAT-JUSTIFY
+;         (JSCL::CAPTURED-SUBSTRINGS JSCL::ARGUMENTS &KEY JSCL::START-AT-P
+;          JSCL::START-COLON-P JSCL::END-AT-P JSCL::END-COLON-P)
+;       "FORMAT ~< ~> handler. (unimplemented)"
+;       (BLOCK JSCL::FORMAT-JUSTIFY
+;         (LET (JSCL::OUTPUT)
+;           (ERROR "~~< ~~> not implemented yet")
+;           (VALUES (CONCATENATE 'STRING #) JSCL::ARGUMENTS))))
+; 
+; caught STYLE-WARNING:
+;   The variable START-AT-P is defined but never used.
+; 
+; caught STYLE-WARNING:
+;   The variable START-COLON-P is defined but never used.
+; 
+; caught STYLE-WARNING:
+;   The variable END-AT-P is defined but never used.
+; 
+; caught STYLE-WARNING:
+;   The variable END-COLON-P is defined but never used.
+; 
+; caught STYLE-WARNING:
+;   The variable CAPTURED-SUBSTRINGS is defined but never used.
+
+; compiling (DEFUN FORMAT-CONDITIONAL-T-OR-NOTHING ...)
+; compiling (DEFUN FORMAT-CONDITIONAL-NIL-T ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/print.lisp
+; in: DEFUN FORMAT-CONDITIONAL-NIL-T
+;     (FIRST JSCL::ARGUMENTS)
+; --> CAR 
+; ==>
+;   JSCL::ARGUMENTS
+; 
+; note: deleting unreachable code
+
+;     (FIRST JSCL::CAPTURED-SUBSTRINGS)
+; --> CAR 
+; ==>
+;   JSCL::CAPTURED-SUBSTRINGS
+; 
+; note: deleting unreachable code
+
+;     (THIRD JSCL::CAPTURED-SUBSTRINGS)
+; --> CADDR CAR CDR CDR 
+; ==>
+;   JSCL::CAPTURED-SUBSTRINGS
+; 
+; note: deleting unreachable code
+
+;     (REST JSCL::ARGUMENTS)
+; --> CDR 
+; ==>
+;   JSCL::ARGUMENTS
+; 
+; note: deleting unreachable code
+
+; compiling (DEFUN FORMAT-CONDITIONAL-NTH ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/print.lisp
+; in: DEFUN FORMAT-CONDITIONAL-NTH
+;     (DEFUN JSCL::FORMAT-CONDITIONAL-NTH
+;            (JSCL::CAPTURED-SUBSTRINGS JSCL::ARGUMENTS)
+;       (ERROR "~~[ (nth) does not yet work in JSCL"))
+; --> PROGN SB-IMPL::%DEFUN SB-IMPL::%DEFUN SB-INT:NAMED-LAMBDA 
+; ==>
+;   #'(SB-INT:NAMED-LAMBDA JSCL::FORMAT-CONDITIONAL-NTH
+;         (JSCL::CAPTURED-SUBSTRINGS JSCL::ARGUMENTS)
+;       (BLOCK JSCL::FORMAT-CONDITIONAL-NTH
+;         (ERROR "~~[ (nth) does not yet work in JSCL")))
+; 
+; caught STYLE-WARNING:
+;   The variable CAPTURED-SUBSTRINGS is defined but never used.
+; 
+; caught STYLE-WARNING:
+;   The variable ARGUMENTS is defined but never used.
+
+; compiling (DEFUN FORMAT-CONDITIONAL ...)
+; compiling (DEFUN TILDE-SEMICOLON-P ...)
+; compiling (DEFUN FORMAT-REPEAT ...)
+; compiling (DEFVAR *FORMAT-NESTING* ...)
+; compiling (DEFVAR *NESTED-SUBSTRINGS* ...)
+; compiling (DEFUN PUSH-NESTED-SUBSTRING ...)
+; compiling (DEFUN FORMAT-SPECIAL ...)
+; compiling (DEFUN FORMAT-NESTED ...)
+; compiling (DEFUN FORMAT-TILDE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FORMAT ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/print.fasl written
+; compilation finished in 0:00:00.700
+DEBUG: loading print.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/symbol.lisp" (written 14 DEC 2016 01:38:53 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "Loading symbol.lisp")
+; compiling (DEFUN JSCL/COMMON-LISP::SYMBOL-PLIST ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SET-SYMBOL-PLIST ...)
+; compiling (DEFINE-SETF-EXPANDER JSCL/COMMON-LISP::SYMBOL-PLIST ...)
+; compiling (DEFUN JSCL/COMMON-LISP::GET ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/symbol.fasl written
+; compilation finished in 0:00:00.012
+DEBUG: Loading symbol.lisp
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/package.lisp" (written 14 DEC 2016 01:38:54 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading package.lisp!")
+; compiling (DEFVAR *PACKAGE-TABLE* ...)
+; compiling (DEFUN JSCL/COMMON-LISP::LIST-ALL-PACKAGES ...)
+; compiling (DEFUN JSCL/COMMON-LISP::PACKAGEP ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FIND-PACKAGE ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*PACKAGE* ...)
+; compiling (DEFUN JSCL/COMMON-LISP::DELETE-PACKAGE ...)
+; compiling (DEFUN %MAKE-PACKAGE ...)
+; compiling (DEFUN RESOLVE-PACKAGE-LIST ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MAKE-PACKAGE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::PACKAGE-NAME ...)
+; compiling (DEFUN %PACKAGE-SYMBOLS ...)
+; compiling (DEFUN JSCL/COMMON-LISP::PACKAGE-USE-LIST ...)
+; compiling (DEFUN %PACKAGE-EXTERNAL-SYMBOLS ...)
+; compiling (DEFVAR *USER-PACKAGE* ...)
+; compiling (DEFVAR *KEYWORD-PACKAGE* ...)
+; compiling (DEFUN JSCL/COMMON-LISP::KEYWORDP ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::IN-PACKAGE ...)
+; compiling (DEFUN DEFPACKAGE-REAL% ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DEFPACKAGE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::REDEFINE-PACKAGE ...)
+; compiling (DEFUN %DEFPACKAGE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FIND-SYMBOL ...)
+; compiling (DEFVAR *INTERN-HOOK* ...)
+; compiling (DEFUN JSCL/COMMON-LISP::INTERN ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SYMBOL-PACKAGE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::EXPORT ...)
+; compiling (DEFUN %MAP-EXTERNAL-SYMBOLS ...)
+; compiling (DEFUN %MAP-SYMBOLS ...)
+; compiling (DEFUN %MAP-ALL-SYMBOLS ...)
+; compiling (DEFUN %MAP-ALL-EXTERNAL-SYMBOLS ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DO-SYMBOLS ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DO-EXTERNAL-SYMBOLS ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DO-ALL-SYMBOLS ...)
+; compiling (DEFMACRO DO-ALL-EXTERNAL-SYMBOLS ...)
+; compiling (DEFUN JSCL/COMMON-LISP::FIND-ALL-SYMBOLS ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/package.fasl written
+; compilation finished in 0:00:00.088
+DEBUG: loading package.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/ansiloop/ansi-loop.lisp" (written 14 DEC 2016 10:05:31 PM):
+; compiling (DEFPACKAGE :JSCL/LOOP ...)
+; compiling (IN-PACKAGE :JSCL/LOOP)
+; compiling NIL
+; compiling NIL
+; compiling (DEFVAR *LOOP-GENTEMP* ...)
+; compiling (DEFUN LOOP-GENTEMP ...)
+; compiling (DEFVAR *LOOP-REAL-DATA-TYPE* ...)
+; compiling (DEFUN LOOP-OPTIMIZATION-QUANTITIES ...)
+; compiling (DEFUN HIDE-VARIABLE-REFERENCES ...)
+; compiling (DEFUN HIDE-VARIABLE-REFERENCE ...)
+; compiling (DEFMACRO WITH-LOOP-LIST-COLLECTION-HEAD ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/ansiloop/ansi-loop.lisp
+; in: DEFMACRO WITH-LOOP-LIST-COLLECTION-HEAD
+;     (DEFMACRO JSCL/LOOP::WITH-LOOP-LIST-COLLECTION-HEAD
+;               (
+;                (JSCL/LOOP::HEAD-VAR
+;                 JSCL/LOOP::TAIL-VAR
+;                 &OPTIONAL
+;                 JSCL/LOOP::USER-HEAD-VAR)
+;                &BODY JSCL/LOOP::BODY)
+;       (LET ((JSCL/LOOP::L (AND JSCL/LOOP::USER-HEAD-VAR #)))
+;         `(LET* ((,JSCL/LOOP::HEAD-VAR #)
+;                 (,JSCL/LOOP::TAIL-VAR ,JSCL/LOOP::HEAD-VAR)
+;                 ,@JSCL/LOOP::L)
+;            ,@JSCL/LOOP::BODY)))
+; --> PROGN EVAL-WHEN 
+; ==>
+;   (SB-C::%DEFMACRO 'JSCL/LOOP::WITH-LOOP-LIST-COLLECTION-HEAD
+;                    (SB-INT:NAMED-LAMBDA (MACRO-FUNCTION
+;                                          JSCL/LOOP::WITH-LOOP-LIST-COLLECTION-HEAD)
+;                        (#:EXPR #:ENV)
+;                      (DECLARE (SB-C::LAMBDA-LIST (# &BODY JSCL/LOOP::BODY)))
+;                      (DECLARE (IGNORE #:ENV))
+;                      (SB-INT:NAMED-DS-BIND (:MACRO
+;                                             JSCL/LOOP::WITH-LOOP-LIST-COLLECTION-HEAD
+;                                             . DEFMACRO)
+;                          ((JSCL/LOOP::HEAD-VAR JSCL/LOOP::TAIL-VAR &OPTIONAL
+;                            JSCL/LOOP::USER-HEAD-VAR)
+;                           &BODY JSCL/LOOP::BODY)
+;                          (CDR #:EXPR)
+;                        (BLOCK JSCL/LOOP::WITH-LOOP-LIST-COLLECTION-HEAD
+;                          (LET #
+;                            `#))))
+;                    (SB-C:SOURCE-LOCATION))
+; 
+; caught STYLE-WARNING:
+;   redefining JSCL/LOOP::WITH-LOOP-LIST-COLLECTION-HEAD in DEFMACRO
+
+; compiling (DEFMACRO LOOP-COLLECT-RPLACD ...)
+; compiling (DEFMACRO LOOP-COLLECT-ANSWER ...)
+; compiling (DEFSTRUCT (LOOP-MINIMAX # ...) ...)
+; compiling (DEFVAR *LOOP-MINIMAX-TYPE-INFINITIES-ALIST* ...)
+; compiling (DEFUN MAKE-LOOP-MINIMAX ...)
+; compiling (DEFUN LOOP-NOTE-MINIMAX-OPERATION ...)
+; compiling (DEFMACRO WITH-MINIMAX-VALUE ...)
+; compiling (DEFMACRO LOOP-ACCUMULATE-MINIMAX-VALUE ...)
+; compiling (DEFUN LOOP-TEQUAL ...)
+; compiling (DEFUN LOOP-TASSOC ...)
+; compiling (DEFUN LOOP-TMEMBER ...)
+; compiling (DEFUN LOOP-LOOKUP-KEYWORD ...)
+; compiling (DEFMACRO LOOP-STORE-TABLE-DATA ...)
+; compiling (DEFSTRUCT (LOOP-UNIVERSE # ...) ...)
+; compiling (DEFUN PRINT-LOOP-UNIVERSE ...)
+; compiling (DEFVAR *LOOP-UNIVERSE*)
+; compiling (DEFUN MAKE-STANDARD-LOOP-UNIVERSE ...)
+; compiling (DEFVAR *LOOP-DESTRUCTURING-HOOKS* ...)
+; compiling (DEFUN LOOP-MAKE-PSETQ ...)
+; compiling (DEFUN LOOP-MAKE-DESETQ ...)
+; compiling (DEFVAR *LOOP-DESETQ-TEMPORARY* ...)
+; compiling (DEFMACRO LOOP-REALLY-DESETQ ...)
+; compiling (DEFVAR *LOOP-SOURCE-CODE*)
+; compiling (DEFVAR *LOOP-ORIGINAL-SOURCE-CODE*)
+; compiling (DEFVAR *LOOP-SOURCE-CONTEXT*)
+; compiling (DEFVAR *LOOP-NAMES*)
+; compiling (DEFVAR *LOOP-MACRO-ENVIRONMENT*)
+; compiling (DEFVAR *LOOP-NAMED-VARIABLES*)
+; compiling (DEFVAR *LOOP-VARIABLES*)
+; compiling (DEFVAR *LOOP-DECLARATIONS*)
+; compiling (DEFVAR *LOOP-DESETQ-CROCKS*)
+; compiling (DEFVAR *LOOP-WRAPPERS*)
+; compiling (DEFVAR *LOOP-BIND-STACK*)
+; compiling (DEFVAR *LOOP-NODECLARE*)
+; compiling (DEFVAR *LOOP-ITERATION-VARIABLES*)
+; compiling (DEFVAR *LOOP-PROLOGUE*)
+; compiling (DEFVAR *LOOP-BEFORE-LOOP*)
+; compiling (DEFVAR *LOOP-BODY*)
+; compiling (DEFVAR *LOOP-AFTER-BODY*)
+; compiling (DEFVAR *LOOP-EMITTED-BODY*)
+; compiling (DEFVAR *LOOP-EPILOGUE*)
+; compiling (DEFVAR *LOOP-AFTER-EPILOGUE*)
+; compiling (DEFVAR *LOOP-FINAL-VALUE-CULPRIT*)
+; compiling (DEFVAR *LOOP-INSIDE-CONDITIONAL*)
+; compiling (DEFVAR *LOOP-WHEN-IT-VARIABLE*)
+; compiling (DEFVAR *LOOP-NEVER-STEPPED-VARIABLE*)
+; compiling (DEFVAR *LOOP-COLLECTION-CRUFT*)
+; compiling (DEFUN LOOP-CONSTANT-FOLD-IF-POSSIBLE ...)
+; compiling (DEFUN LOOP-CONSTANTP ...)
+; compiling (DEFVAR *LOOP-DUPLICATE-CODE* ...)
+; compiling (DEFVAR *LOOP-ITERATION-FLAG-VARIABLE* ...)
+; compiling (DEFUN LOOP-CODE-DUPLICATION-THRESHOLD ...)
+; compiling (DEFMACRO LOOP-BODY ...)
+; compiling (DEFUN DUPLICATABLE-CODE-P ...)
+; compiling (DEFVAR *SPECIAL-CODE-SIZES* ...)
+; compiling (DEFVAR *ESTIMATE-CODE-SIZE-PUNT* ...)
+; compiling (DEFUN DESTRUCTURING-SIZE ...)
+; compiling (DEFUN ESTIMATE-CODE-SIZE ...)
+; compiling (DEFUN ESTIMATE-CODE-SIZE-1 ...)
+; compiling (DEFUN LOOP-CONTEXT ...)
+; compiling (DEFUN LOOP-ERROR ...)
+; compiling (DEFUN LOOP-WARN ...)
+; compiling (DEFUN LOOP-CHECK-DATA-TYPE ...)
+; compiling (DEFMACRO !LOOP-FINISH ...)
+; compiling (DEFUN LOOP-TRANSLATE ...)
+; compiling (DEFUN LOOP-ITERATION-DRIVER ...)
+; compiling (DEFUN LOOP-POP-SOURCE ...)
+; compiling (DEFUN LOOP-GET-PROGN ...)
+; compiling (DEFUN LOOP-GET-FORM ...)
+; compiling (DEFUN LOOP-CONSTRUCT-RETURN ...)
+; compiling (DEFUN LOOP-PSEUDO-BODY ...)
+; compiling (DEFUN LOOP-EMIT-BODY ...)
+; compiling (DEFUN LOOP-EMIT-FINAL-VALUE ...)
+; compiling (DEFUN LOOP-DISALLOW-CONDITIONAL ...)
+; compiling (DEFUN LOOP-TYPED-INIT ...)
+; compiling (DEFUN LOOP-OPTIONAL-TYPE ...)
+; compiling (DEFUN LOOP-BIND-BLOCK ...)
+; compiling (DEFUN LOOP-MAKE-VARIABLE ...)
+; compiling (DEFUN LOOP-MAKE-ITERATION-VARIABLE ...)
+; compiling (DEFUN LOOP-DECLARE-VARIABLE ...)
+; compiling (DEFUN LOOP-MAYBE-BIND-FORM ...)
+; compiling (DEFUN LOOP-DO-IF ...)
+; compiling (DEFUN LOOP-DO-INITIALLY ...)
+; compiling (DEFUN LOOP-DO-FINALLY ...)
+; compiling (DEFUN LOOP-DO-DO ...)
+; compiling (DEFUN LOOP-DO-NAMED ...)
+; compiling (DEFUN LOOP-DO-RETURN ...)
+; compiling (DEFSTRUCT (LOOP-COLLECTOR # ...) ...)
+; compiling (DEFUN LOOP-GET-COLLECTION-INFO ...)
+; compiling (DEFUN LOOP-LIST-COLLECTION ...)
+; compiling (DEFUN LOOP-SUM-COLLECTION ...)
+; compiling (DEFUN LOOP-MAXMIN-COLLECTION ...)
+; compiling (DEFUN LOOP-DO-ALWAYS ...)
+; compiling (DEFUN LOOP-DO-THEREIS ...)
+; compiling (DEFUN LOOP-DO-WHILE ...)
+; compiling (DEFUN LOOP-DO-WITH ...)
+; compiling (DEFUN LOOP-HACK-ITERATION ...)
+; compiling (DEFUN LOOP-DO-FOR ...)
+; compiling (DEFUN LOOP-DO-REPEAT ...)
+; compiling (DEFUN LOOP-WHEN-IT-VARIABLE ...)
+; compiling (DEFUN LOOP-ANSI-FOR-EQUALS ...)
+; compiling (DEFUN LOOP-FOR-ACROSS ...)
+; compiling (DEFUN LOOP-LIST-STEP ...)
+; compiling (DEFUN LOOP-FOR-ON ...)
+; compiling (DEFUN LOOP-FOR-IN ...)
+; compiling (DEFSTRUCT (LOOP-PATH # ...) ...)
+; compiling (DEFUN ADD-LOOP-PATH ...)
+; compiling (DEFUN LOOP-FOR-BEING ...)
+; compiling (DEFUN NAMED-VARIABLE ...)
+; compiling (DEFUN LOOP-COLLECT-PREPOSITIONAL-PHRASES ...)
+; compiling (DEFUN LOOP-SEQUENCER ...)
+; compiling (DEFUN LOOP-FOR-ARITHMETIC ...)
+; compiling (DEFUN LOOP-SEQUENCE-ELEMENTS-PATH ...)
+; compiling (DEFUN LOOP-HASH-TABLE-ITERATION-PATH ...)
+; compiling (DEFUN LOOP-PACKAGE-SYMBOLS-ITERATION-PATH ...)
+; compiling (DEFUN MAKE-ANSI-LOOP-UNIVERSE ...)
+; compiling (DEFPARAMETER *LOOP-ANSI-UNIVERSE* ...)
+; compiling (DEFUN LOOP-STANDARD-EXPANSION ...)
+; compiling (DEFMACRO !LOOP ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/ansiloop/ansi-loop.fasl written
+; compilation finished in 0:00:03.004
+WARNING: redefining JSCL/LOOP::LOOP-GENTEMP in DEFUN
+WARNING: redefining JSCL/LOOP::LOOP-OPTIMIZATION-QUANTITIES in DEFUN
+WARNING: redefining JSCL/LOOP::HIDE-VARIABLE-REFERENCES in DEFUN
+WARNING: redefining JSCL/LOOP::HIDE-VARIABLE-REFERENCE in DEFUN
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/read.lisp" (written 14 DEC 2016 10:05:31 PM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading read.lisp!")
+; compiling (DEFVAR *READ-SKIP-P* ...)
+; compiling (DEFVAR *LABELLED-OBJECTS* ...)
+; compiling (DEFUN NEW-LABELLED-OBJECTS-TABLE ...)
+; compiling (DEFUN FIND-LABELLED-OBJECT ...)
+; compiling (DEFUN ADD-LABELLED-OBJECT ...)
+; compiling (DEFVAR *FUTURE-VALUE* ...)
+; compiling (DEFVAR *FIXUP-VALUE* ...)
+; compiling (DEFVAR *FIXUP-LOCATIONS* ...)
+; compiling (DEFUN FIXUP-BACKREFS ...)
+; compiling (DEFVAR *MAKE-FIXUP-FUNCTION* ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MAKE-STRING-INPUT-STREAM ...)
+; compiling (DEFUN JSCL/COMMON-LISP::PEEK-CHAR ...)
+; compiling (DEFUN JSCL/COMMON-LISP::READ-CHAR ...)
+; compiling (DEFUN WHITESPACEP ...)
+; compiling (DEFUN SKIP-WHITESPACES ...)
+; compiling (DEFUN TERMINALP ...)
+; compiling (DEFUN READ-UNTIL ...)
+; compiling (DEFUN READ-ESCAPED-UNTIL ...)
+; compiling (DEFUN SKIP-WHITESPACES-AND-COMMENTS ...)
+; compiling (DEFUN DISCARD-CHAR ...)
+; compiling (DEFUN %READ-LIST ...)
+; compiling (DEFUN READ-STRING ...)
+; compiling (DEFUN EVAL-FEATURE-EXPRESSION ...)
+; compiling (DEFUN READ-INTEGER-FROM-STREAM ...)
+; compiling (DEFUN COLON-OR-COMMA-P ...)
+; compiling (DEFUN J-READER ...)
+; compiling (DEFUN READ-SHARP ...)
+; compiling (DEFUN UNESCAPE-TOKEN ...)
+; compiling (DEFUN STRING-UPCASE-NOESCAPED ...)
+; compiling (DEFUN READ-SYMBOL ...)
+; compiling (DEFUN READ-INTEGER ...)
+; compiling (DEFUN READ-FLOAT ...)
+; compiling (DEFUN !PARSE-INTEGER ...)
+; compiling (DEFUN INTERPRET-TOKEN ...)
+; compiling (DEFUN JSCL/COMMON-LISP::READ ...)
+; compiling (DEFUN JSCL/COMMON-LISP::READ-FROM-STRING ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/read.fasl written
+; compilation finished in 0:00:00.558
+DEBUG: loading read.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/conditions.lisp" (written 14 DEC 2016 10:51:08 PM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (DEFVAR *HANDLER-BINDINGS* ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::HANDLER-BIND ...)
+; compiling (DEFMACRO %HANDLER-CASE-1 ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::HANDLER-CASE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MAKE-CONDITION ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::DEFINE-CONDITION ...)
+; compiling (DEFUN COERCE-TO-CONDITION ...)
+; compiling (DEFUN CONDITION-P ...)
+; compiling (DEFUN CONDITION-TYPE-P ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SIGNAL ...)
+; compiling (DEFUN JSCL/COMMON-LISP::WARN ...)
+; compiling (DEFUN JSCL/COMMON-LISP::ERROR ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/conditions.fasl written
+; compilation finished in 0:00:00.058
+WARNING: redefining JSCL/COMMON-LISP::ERROR in DEFUN
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/backquote.lisp" (written 14 DEC 2016 01:38:55 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading backquote.lisp!")
+; compiling (DEFVAR *COMMA* ...)
+; compiling (DEFVAR *COMMA-ATSIGN* ...)
+; compiling (DEFVAR *BQ-LIST* ...)
+; compiling (DEFVAR *BQ-APPEND* ...)
+; compiling (DEFVAR *BQ-LIST** ...)
+; compiling (DEFVAR *BQ-NCONC* ...)
+; compiling (DEFVAR *BQ-CLOBBERABLE* ...)
+; compiling (DEFVAR *BQ-QUOTE* ...)
+; compiling (DEFVAR *BQ-QUOTE-NIL* ...)
+; compiling (DEFPARAMETER *BQ-SIMPLIFY* ...)
+; compiling (DEFMACRO BACKQUOTE ...)
+; compiling (DEFMACRO UNQUOTE ...)
+; compiling (DEFMACRO UNQUOTE-SPLICING ...)
+; compiling (DEFUN BQ-COMPLETELY-PROCESS ...)
+; compiling (DEFUN BQ-PROCESS ...)
+; compiling (DEFUN BRACKET ...)
+; compiling (DEFUN MAPTREE ...)
+; compiling (DEFUN BQ-SPLICING-FROB ...)
+; compiling (DEFUN BQ-FROB ...)
+; compiling (DEFUN BQ-SIMPLIFY ...)
+; compiling (DEFUN BQ-SIMPLIFY-ARGS ...)
+; compiling (DEFUN NULL-OR-QUOTED ...)
+; compiling (DEFUN BQ-ATTACH-APPEND ...)
+; compiling (DEFUN BQ-ATTACH-CONSES ...)
+; compiling (DEFUN BQ-REMOVE-TOKENS ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/backquote.fasl written
+; compilation finished in 0:00:00.199
+DEBUG: loading backquote.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/compiler/codegen.lisp" (written 14 DEC 2016 10:05:31 PM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading compiler/codegen.lisp!")
+; compiling (DEFVAR *JS-MACROS* ...)
+; compiling (DEFMACRO DEFINE-JS-MACRO ...)
+; compiling (DEFUN JS-MACROEXPAND ...)
+; compiling (DEFCONSTANT NO-COMMA ...)
+; compiling (DEFVAR *JS-OUTPUT* ...)
+; compiling (DEFVAR *JS-PRETTY-PRINT* ...)
+; compiling (DEFUN JS-ESCAPE-STRING ...)
+; compiling (DEFUN JS-FORMAT ...)
+; compiling (DEFUN VALID-JS-IDENTIFIER ...)
+; compiling (DEFUN JS-IDENTIFIER ...)
+; compiling (DEFUN JS-PRIMARY-EXPR ...)
+; compiling (DEFUN JS-VECTOR-INITIALIZER ...)
+; compiling (DEFUN JS-OBJECT-INITIALIZER ...)
+; compiling (DEFUN JS-FUNCTION ...)
+; compiling (DEFUN CHECK-LVALUE ...)
+; compiling (DEFUN JS-EXPAND-EXPR ...)
+; compiling (DEFUN JS-OPERATOR-EXPRESSION ...)
+; compiling (DEFUN JS-EXPR ...)
+; compiling (DEFUN JS-EXPAND-STMT ...)
+; compiling (DEFUN JS-END-STMT ...)
+; compiling (DEFUN JS-STMT ...)
+; compiling (DEFUN JS ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/compiler/codegen.fasl written
+; compilation finished in 0:00:00.164
+DEBUG: loading compiler/codegen.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/compiler/compiler.lisp" (written 14 DEC 2016 10:05:31 PM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading compiler.lisp!")
+; compiling (DEFINE-JS-MACRO SELFCALL ...)
+; compiling (DEFINE-JS-MACRO METHOD-CALL ...)
+; compiling (DEFINE-JS-MACRO NARGS ...)
+; compiling (DEFINE-JS-MACRO ARG ...)
+; compiling (DEFINE-JS-MACRO INTERNAL ...)
+; compiling (DEFINE-JS-MACRO CALL-INTERNAL ...)
+; compiling (DEFUN CONVERT-TO-BOOL ...)
+; compiling (DEFVAR *MULTIPLE-VALUE-P* ...)
+; compiling (DEFVAR *CONVERT-LEVEL* ...)
+; compiling (DEFSTRUCT BINDING ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/compiler/compiler.lisp
+; in: DEFSTRUCT BINDING
+;     (DEFSTRUCT JSCL::BINDING JSCL::NAME TYPE JSCL::VALUE JSCL::DECLARATIONS)
+; --> PROGN EVAL-WHEN 
+; ==>
+;   (SB-KERNEL::%COMPILER-DEFSTRUCT
+;    '#<SB-KERNEL:DEFSTRUCT-DESCRIPTION JSCL::BINDING {102F80BCD3}>
+;    '#(#<SB-KERNEL:LAYOUT for T {1000095613}>
+;       #<SB-KERNEL:LAYOUT for STRUCTURE-OBJECT {1000095693}>))
+; 
+; caught STYLE-WARNING:
+;   The new FTYPE proclamation for MAKE-BINDING
+;     (FUNCTION (&KEY (:NAME T) (:TYPE T) (:VALUE T) (:DECLARATIONS T)) (VALUES BINDING &OPTIONAL))
+;   does not match the old FTYPE proclamation
+;     (FUNCTION (&KEY (:NAME T) (:TYPE T) (:VALUE T) (:DECLARATIONS T)) *)
+
+; compiling (DEFSTRUCT LEXENV ...)
+; compiling (DEFVAR *GLOBAL-ENVIRONMENT* ...)
+; compiling (DEFVAR *ENVIRONMENT* ...)
+; compiling (DEFUN LOOKUP-IN-LEXENV ...)
+; compiling (DEFUN PUSH-TO-LEXENV ...)
+; compiling (DEFUN EXTEND-LEXENV ...)
+; compiling (DEFVAR *GLOBAL-ENVIRONMENT* ...)
+; compiling (DEFVAR *ENVIRONMENT* ...)
+; compiling (DEFVAR *VARIABLE-COUNTER*)
+; compiling (DEFUN GVARNAME ...)
+; compiling (DEFUN TRANSLATE-VARIABLE ...)
+; compiling (DEFUN EXTEND-LOCAL-ENV ...)
+; compiling (DEFVAR *TOPLEVEL-COMPILATIONS*)
+; compiling (DEFUN TOPLEVEL-COMPILATION ...)
+; compiling (DEFUN GET-TOPLEVEL-COMPILATIONS ...)
+; compiling (DEFUN %COMPILE-DEFMACRO ...)
+; compiling (DEFUN GLOBAL-BINDING ...)
+; compiling (DEFUN CLAIMP ...)
+; compiling (DEFUN !PROCLAMATION ...)
+; compiling (DEFUN JSCL/COMMON-LISP::PROCLAIM ...)
+; compiling (DEFUN JSCL/CLTL2:DECLARATION-INFORMATION ...)
+; compiling (DEFUN JSCL/COMMON-LISP::DEFINE-SYMBOL-MACRO ...)
+; compiling (DEFVAR *FN-INFO* ...)
+; compiling (DEFSTRUCT FN-INFO ...)
+; compiling (DEFUN FUNCTION-NAME-P ...)
+; compiling (DEFUN FIND-FN-INFO ...)
+; compiling (DEFUN FN-INFO ...)
+; compiling (DEFUN REPORT-UNDEFINED-FUNCTIONS ...)
+; compiling (DEFVAR *COMPILATIONS* ...)
+; compiling (DEFMACRO DEFINE-COMPILATION ...)
+; compiling (DEFINE-COMPILATION IF ...)
+; compiling (DEFVAR *LL-KEYWORDS* ...)
+; compiling (DEFUN LIST-UNTIL-KEYWORD ...)
+; compiling (DEFUN LL-SECTION ...)
+; compiling (DEFUN LL-REQUIRED-ARGUMENTS ...)
+; compiling (DEFUN LL-OPTIONAL-ARGUMENTS-CANONICAL ...)
+; compiling (DEFUN LL-OPTIONAL-ARGUMENTS ...)
+; compiling (DEFUN LL-REST-ARGUMENT ...)
+; compiling (DEFUN LL-KEYWORD-ARGUMENTS-CANONICAL ...)
+; compiling (DEFUN LL-KEYWORD-ARGUMENTS ...)
+; compiling (DEFUN LL-SVARS ...)
+; compiling (DEFUN JS-IDENTIFIER-CHAR-P ...)
+; compiling (DEFUN JS-NAME-PART ...)
+; compiling (DEFUN SAFE-JS-NAME ...)
+; compiling (DEFUN SAFE-JS-FUN-NAME ...)
+; compiling (DEFUN SAFE-JS-VAR-NAME ...)
+; compiling (DEFUN SAFE-JS-LIT-NAME ...)
+; compiling (DEFUN LAMBDA-NAME/DOCSTRING-WRAPPER ...)
+; compiling (DEFUN LAMBDA-CHECK-ARGUMENT-COUNT ...)
+; compiling (DEFUN COMPILE-LAMBDA-OPTIONAL ...)
+; compiling (DEFUN COMPILE-LAMBDA-REST ...)
+; compiling (DEFUN COMPILE-LAMBDA-PARSE-KEYWORDS ...)
+; compiling (DEFUN PARSE-LAMBDA-LIST ...)
+; compiling (DEFUN PARSE-BODY ...)
+; compiling (DEFUN BIND-THIS ...)
+; compiling (DEFUN COMPILE-LAMBDA ...)
+; compiling (DEFUN SETQ-PAIR ...)
+; compiling (DEFINE-COMPILATION SETQ ...)
+; compiling (DEFVAR *MAGIC-UNQUOTE-MARKER* ...)
+; compiling (SETF (MACRO-FUNCTION *MAGIC-UNQUOTE-MARKER*) ...)
+; compiling (DEFVAR *LITERAL-TABLE*)
+; compiling (DEFVAR *LITERAL-COUNTER*)
+; compiling (DEFUN LIMIT-STRING-LENGTH ...)
+; compiling (DEFUN GENLIT ...)
+; compiling (DEFUN DUMP-SYMBOL ...)
+; compiling (DEFUN DUMP-CONS ...)
+; compiling (DEFUN DUMP-ARRAY ...)
+; compiling (DEFUN DUMP-STRING ...)
+; compiling (DECLAIM (INLINE SAFE-ENDP))
+; compiling (DEFUN SAFE-ENDP ...)
+; compiling (DEFUN ALIST-PLIST ...)
+; compiling (DEFUN CONSTRUCTOR<-STRUCTURE ...)
+; compiling (DEFUN DUMP-COMPLEX-LITERAL ...)
+; compiling (DEFUN LITERAL ...)
+; compiling (DEFINE-COMPILATION QUOTE ...)
+; compiling (DEFINE-COMPILATION %WHILE ...)
+; compiling (DEFUN FUNCTION-NAMESTRING ...)
+; compiling (DEFUN FUNCTION-BLOCK-NAME ...)
+; compiling (DEFINE-COMPILATION FUNCTION ...)
+; compiling (DEFUN MAKE-FUNCTION-BINDING ...)
+; compiling (DEFUN COMPILE-FUNCTION-DEFINITION ...)
+; compiling (DEFUN TRANSLATE-FUNCTION ...)
+; compiling (DEFUN COMPILED-FUNCTION-CODE ...)
+; compiling (DEFUN ENVIRONMENT+NEW-FUNCTIONS ...)
+; compiling (DEFINE-COMPILATION FLET ...)
+; compiling (DEFUN LABELS/COMPILED-LABEL-FUNCTION ...)
+; compiling (DEFINE-COMPILATION LABELS ...)
+; compiling (DEFVAR *COMPILING-FILE* ...)
+; compiling (DEFUN BANGERANG ...)
+; compiling (DEFINE-COMPILATION EVAL-WHEN ...)
+; compiling (DEFMACRO DEFINE-TRANSFORMATION ...)
+; compiling (DEFINE-COMPILATION PROGN ...)
+; compiling (DEFUN MACROLET-VALUE ...)
+; compiling (DEFINE-COMPILATION MACROLET ...)
+; compiling (DEFUN SPECIAL-VARIABLE-P ...)
+; compiling (DEFUN NORMALIZE-BINDINGS ...)
+; compiling (DEFUN PROCESS-BINDINGS ...)
+; compiling (DEFUN CONVERT-BLOCK-WITH-SPECIAL-BINDINGS ...)
+; compiling (DEFUN LET-BIND-DYNAMIC-VARS ...)
+; compiling (DEFINE-COMPILATION LET ...)
+; compiling (DEFINE-COMPILATION LAMBDA ...)
+; compiling (DEFUN ADD-LET*-VAR-TO-ENVIRONMENT ...)
+; compiling (DEFUN LET*-INITIALIZE-VALUE ...)
+; compiling (DEFUN LET*-WRAPPER-SET-VALUE ...)
+; compiling (DEFUN LET*-WRAPPER-RESET-VALUE ...)
+; compiling (DEFUN LET*-BINDING-WRAPPER ...)
+; compiling (DEFINE-COMPILATION LET* ...)
+; compiling (DEFUN BLOCK-RETURN-MULTIPLE-VALUES ...)
+; compiling (DEFUN BLOCK-RETURN-SINGLE-VALUE ...)
+; compiling (DEFUN BLOCK/BUILD-NLX-CATCHER ...)
+; compiling (DEFINE-COMPILATION BLOCK ...)
+; compiling (DEFINE-COMPILATION RETURN-FROM ...)
+; compiling (DEFINE-COMPILATION CATCH ...)
+; compiling (DEFINE-COMPILATION THROW ...)
+; compiling (DEFUN GO-TAG-P ...)
+; compiling (DEFUN DECLARE-TAGBODY-TAGS ...)
+; compiling (DEFINE-COMPILATION TAGBODY ...)
+; compiling (DEFINE-COMPILATION GO ...)
+; compiling (DEFINE-COMPILATION UNWIND-PROTECT ...)
+; compiling (DEFINE-COMPILATION MULTIPLE-VALUE-CALL ...)
+; compiling (DEFINE-COMPILATION MULTIPLE-VALUE-PROG1 ...)
+; compiling (DEFINE-COMPILATION THE ...)
+; compiling (DECLAIM (FTYPE # ...))
+; compiling (DEFINE-TRANSFORMATION BACKQUOTE ...)
+; compiling (DEFVAR *BUILTINS* ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SPECIAL-OPERATOR-P ...)
+; compiling (DEFMACRO DEFINE-RAW-BUILTIN ...)
+; compiling (DEFMACRO DEFINE-BUILTIN ...)
+; compiling (DEFUN VARIABLE-ARITY/CHECK-NUMERIC-ARG ...)
+; compiling (DEFUN VARIABLE-ARITY-CALL ...)
+; compiling (DEFMACRO VARIABLE-ARITY ...)
+; compiling (DEFINE-RAW-BUILTIN + ...)
+; compiling (DEFINE-RAW-BUILTIN - ...)
+; compiling (DEFINE-RAW-BUILTIN * ...)
+; compiling (DEFINE-BUILTIN LOGIOR ...)
+; compiling (DEFINE-BUILTIN LOGAND ...)
+; compiling (DEFINE-BUILTIN LOGXOR ...)
+; compiling (DEFINE-RAW-BUILTIN / ...)
+; compiling (DEFINE-BUILTIN MOD ...)
+; compiling (DEFUN COMPARISON-CONJUNTION ...)
+; compiling (DEFMACRO DEFINE-BUILTIN-COMPARISON ...)
+; compiling (DEFINE-BUILTIN-COMPARISON >)
+; compiling (DEFINE-BUILTIN-COMPARISON <)
+; compiling (DEFINE-BUILTIN-COMPARISON >=)
+; compiling (DEFINE-BUILTIN-COMPARISON <=)
+; compiling (DEFINE-BUILTIN-COMPARISON = ...)
+; compiling (DEFINE-BUILTIN-COMPARISON /= ...)
+; compiling (DEFINE-BUILTIN NUMBERP ...)
+; compiling (DEFINE-BUILTIN %FLOOR ...)
+; compiling (DEFINE-BUILTIN %CEILING ...)
+; compiling (DEFINE-BUILTIN EXPT ...)
+; compiling (DEFINE-BUILTIN SQRT ...)
+; compiling (DEFINE-BUILTIN FLOAT-TO-STRING ...)
+; compiling (DEFINE-BUILTIN CONS ...)
+; compiling (DEFINE-BUILTIN CONSP ...)
+; compiling (DEFINE-BUILTIN CAR ...)
+; compiling (DEFINE-BUILTIN CDR ...)
+; compiling (DEFINE-BUILTIN RPLACA ...)
+; compiling (DEFINE-BUILTIN RPLACD ...)
+; compiling (DEFINE-BUILTIN SYMBOLP ...)
+; compiling (DEFINE-BUILTIN MAKE-SYMBOL ...)
+; compiling (DEFINE-COMPILATION SYMBOL-NAME ...)
+; compiling (DEFINE-BUILTIN SET ...)
+; compiling (DEFINE-BUILTIN FSET ...)
+; compiling (DEFINE-BUILTIN FSET-SETF ...)
+; compiling (DEFMACRO FSET-MACRO ...)
+; compiling (DEFINE-BUILTIN BOUNDP ...)
+; compiling (DEFINE-BUILTIN FBOUNDP ...)
+; compiling (DEFINE-BUILTIN %FBOUNDP-SETF ...)
+; compiling (DEFINE-BUILTIN SYMBOL-VALUE ...)
+; compiling (DEFINE-BUILTIN %FDEFINITION-SETF ...)
+; compiling (DEFINE-BUILTIN %SETF-FDEFINITION-SETF ...)
+; compiling (DEFINE-BUILTIN %SETF-SYMBOL-FUNCTION ...)
+; compiling (DEFINE-BUILTIN SYMBOL-FUNCTION ...)
+; compiling (DEFINE-BUILTIN %FMAKUNBOUND ...)
+; compiling (DEFINE-BUILTIN %FMAKUNBOUND-SETF ...)
+; compiling (DEFINE-BUILTIN LAMBDA-CODE ...)
+; compiling (DEFINE-BUILTIN EQ ...)
+; compiling (DEFINE-BUILTIN CHAR-CODE ...)
+; compiling (DEFINE-BUILTIN CODE-CHAR ...)
+; compiling (DEFINE-BUILTIN CHARACTERP ...)
+; compiling (DEFINE-BUILTIN CHAR-UPCASE ...)
+; compiling (DEFINE-BUILTIN CHAR-DOWNCASE ...)
+; compiling (DEFINE-BUILTIN STRINGP ...)
+; compiling (DEFINE-BUILTIN ORNATE-OBJECT-CLASS% ...)
+; compiling (DEFINE-BUILTIN SET-ORNATE-OBJECT-CLASS% ...)
+; compiling (DEFINE-RAW-BUILTIN FUNCALL ...)
+; compiling (DEFINE-RAW-BUILTIN APPLY ...)
+; compiling (DEFINE-BUILTIN JS-EVAL ...)
+; compiling (DEFINE-BUILTIN %THROW ...)
+; compiling (DEFINE-BUILTIN FUNCTIONP ...)
+; compiling (DEFINE-BUILTIN /DEBUG ...)
+; compiling (DEFINE-BUILTIN /LOG ...)
+; compiling (DEFINE-BUILTIN STORAGE-VECTOR-P ...)
+; compiling (DEFINE-BUILTIN MAKE-STORAGE-VECTOR ...)
+; compiling (DEFINE-BUILTIN STORAGE-VECTOR-SIZE ...)
+; compiling (DEFINE-BUILTIN RESIZE-STORAGE-VECTOR ...)
+; compiling (DEFINE-BUILTIN STORAGE-VECTOR-REF ...)
+; compiling (DEFINE-BUILTIN STORAGE-VECTOR-SET ...)
+; compiling (DEFINE-BUILTIN CONCATENATE-STORAGE-VECTOR ...)
+; compiling (DEFINE-BUILTIN GET-INTERNAL-REAL-TIME ...)
+; compiling (DEFINE-BUILTIN VALUES-ARRAY ...)
+; compiling (DEFINE-RAW-BUILTIN VALUES ...)
+; compiling (DEFINE-BUILTIN NEW ...)
+; compiling (DEFINE-RAW-BUILTIN JSCL/FFI:OGET* ...)
+; compiling (DEFINE-RAW-BUILTIN JSCL/FFI:OSET* ...)
+; compiling (DEFINE-RAW-BUILTIN JSCL/FFI:OGET ...)
+; compiling (DEFINE-RAW-BUILTIN JSCL/FFI:OSET ...)
+; compiling (DEFINE-BUILTIN JS-NULL-P ...)
+; compiling (DEFINE-BUILTIN OBJECTP ...)
+; compiling (DEFINE-BUILTIN %%NLX-P ...)
+; compiling (DEFINE-BUILTIN %%THROW ...)
+; compiling (DEFINE-BUILTIN LISP-TO-JS ...)
+; compiling (DEFINE-BUILTIN JS-TO-LISP ...)
+; compiling (DEFINE-BUILTIN IN ...)
+; compiling (DEFINE-BUILTIN DELETE-PROPERTY ...)
+; compiling (DEFINE-BUILTIN MAP-FOR-IN ...)
+; compiling (DEFINE-COMPILATION %JS-VREF ...)
+; compiling (DEFINE-COMPILATION %JS-VSET ...)
+; compiling (DEFINE-SETF-EXPANDER %JS-VREF ...)
+; compiling (DEFINE-COMPILATION %JS-TYPEOF ...)
+; compiling (DEFINE-COMPILATION %JS-INTERNAL ...)
+; compiling (DEFINE-COMPILATION %JS-TRY ...)
+; compiling (DEFINE-COMPILATION SYMBOL-MACROLET ...)
+; compiling (DEFPARAMETER *MACROEXPANDER-CACHE* ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MACRO-FUNCTION ...)
+; compiling (DEFUN !MACROEXPAND-1/SYMBOL ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MACROEXPAND-1 ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MACROEXPAND ...)
+; compiling (DEFUN COMPILE-FUNCALL/FUNCTION ...)
+; compiling (DEFUN COMPILE-FUNCALL/TRANSLATE-FUNCTION ...)
+; compiling (DEFUN COMPILE-FUNCALL/LAMBDA ...)
+; compiling (DEFUN COMPILE-FUNCALL/OGET ...)
+; compiling (DEFUN COMPILE-FUNCALL/ERROR ...)
+; compiling (DEFUN COMPILE-FUNCALL/ARGS-LIST ...)
+; compiling (DEFUN COMPILE-FUNCALL/FUNCTION-SPECIAL ...)
+; compiling (DEFUN COMPILE-FUNCALL ...)
+; compiling (DEFUN CONVERT-BLOCK ...)
+; compiling (DEFUN INLINE-BUILTIN-P ...)
+; compiling (DEFUN SPECIAL-FORM-P ...)
+; compiling (DEFUN COMPILE-SPECIAL-FORM ...)
+; compiling (DEFUN COMPILE-BUILTIN-FUNCTION ...)
+; compiling (DEFUN COMPILE-SEXP ...)
+; compiling (DEFUN CONVERT-1/SYMBOL ...)
+; compiling (DEFUN EMIT-UNCOMPILABLE-FORM ...)
+; compiling (DEFUN SHOULD-BE-MACROEXPANDED-IN-CL-P ...)
+; compiling (DEFUN PREFIX-! ...)
+; compiling (DEFUN COMPLAIN-FAILED-MACROEXPANSION ...)
+; compiling (DEFUN CHECK-FOR-FAILED-MACROEXPANSION ...)
+; compiling (DEFUN OBJECT-EVALUATES-TO-ITSELF-P ...)
+; compiling (DEFUN CONVERT-1 ...)
+; compiling (DEFUN CONVERT ...)
+; compiling (DEFVAR *COMPILE-PRINT-TOPLEVELS* ...)
+; compiling (DEFUN TRUNCATE-STRING ...)
+; compiling (DEFUN CONVERT-TOPLEVEL-PROGN ...)
+; compiling (DEFUN CONVERT-TOPLEVEL-DEFPACKAGE ...)
+; compiling (DEFUN CONVERT-TOPLEVEL-IN-PACKAGE ...)
+; compiling (DEFUN CONVERT-TOPLEVEL-NORMAL ...)
+; compiling (DEFUN CONVERT-TOPLEVEL ...)
+; compiling (DEFUN PROCESS-TOPLEVEL ...)
+; compiling (DEFUN COMPILE-TOPLEVEL ...)
+; compiling (DEFMACRO WITH-COMPILATION-ENVIRONMENT ...)
+; compiling (DEFMACRO !WITH-COMPILATION-UNIT ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/compiler/compiler.fasl written
+; compilation finished in 0:00:01.405
+DEBUG: loading compiler.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/compiler/compile-file.lisp" (written 14 DEC 2016 01:39:20 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (DEFMACRO WITH-COMPILE-FILE-BINDINGS ...)
+; compiling (DEFUN POSSIBLY-VALID-JS-P ...)
+; compiling (DEFUN COMPLAIN-ABOUT-ILLEGAL-CHARS ...)
+; compiling (DEFMACRO WITH-COMPILATION-RESTARTS ...)
+; compiling (DEFUN !COMPILE-FILE/FORM ...)
+; compiling (DEFMACRO DOFORMS ...)
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/compiler/compile-file.lisp
+; in: DEFMACRO DOFORMS
+;     (DEFMACRO JSCL::DOFORMS ((JSCL::FORM STREAM) &BODY JSCL::BODY)
+;       "Read  forms  from   STREAM,  binding  each  in  turn   to  FORM,  and
+;   execute BODY. Also binds LAST-FORM and FORM-COUNT."
+;       (LET ((JSCL::EOF (GENSYM "EOF-")))
+;         `(LOOP JSCL::WITH ,JSCL::EOF = (GENSYM "EOF-")
+;                JSCL::FOR JSCL::FORM-COUNT JSCL::FROM 0
+;                JSCL::FOR ,JSCL::FORM = ...)))
+; --> PROGN EVAL-WHEN 
+; ==>
+;   (SB-C::%DEFMACRO 'JSCL::DOFORMS
+;                    (SB-INT:NAMED-LAMBDA (MACRO-FUNCTION JSCL::DOFORMS)
+;                        (#:EXPR #:ENV)
+;                      "Read  forms  from   STREAM,  binding  each  in  turn   to  FORM,  and
+; execute BODY. Also binds LAST-FORM and FORM-COUNT."
+;                      (DECLARE (SB-C::LAMBDA-LIST (# &BODY JSCL::BODY)))
+;                      (DECLARE (IGNORE #:ENV))
+;                      (SB-INT:NAMED-DS-BIND (:MACRO JSCL::DOFORMS . DEFMACRO)
+;                          ((JSCL::FORM STREAM) &BODY JSCL::BODY)
+;                          (CDR #:EXPR)
+;                        (BLOCK JSCL::DOFORMS
+;                          (LET #
+;                            `#))))
+;                    (SB-C:SOURCE-LOCATION))
+; 
+; caught STYLE-WARNING:
+;   redefining JSCL::DOFORMS in DEFMACRO
+
+; compiling (DEFUN !COMPILE-FILE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::COMPILE-FILE ...)
+; compiling (DEFUN MACRO-BINDINGS-ADD-MAGIC-UNQUOTES ...)
+; compiling (DEFUN DUMP-GENSYM-TYPE-COUNTERS ...)
+; compiling (DEFUN DUMP-GLOBAL-ENVIRONMENT ...)
+; compiling (DEFMACRO WITH-JSCL-SCOPING-FUNCTION ...)
+; compiling (DEFMACRO WITH-SELF-INVOKING-FUNCTION ...)
+; compiling (DEFUN WRITE-JAVASCRIPT-FOR-FILES ...)
+; compiling (DEFUN COMPILE-APPLICATION ...)
+; compiling (DEFUN TEST-FILES ...)
+; compiling (DEFUN COMPILE-TEST-SUITE ...)
+; compiling (DEFUN COMPILE-WEB-REPL ...)
+; compiling (DEFUN COMPILE-NODE-REPL ...)
+; compiling (DEFUN COMPILE-JSCL.JS ...)
+; compiling (DEFMACRO WITH-BOOTSTRAP ...)
+; compiling (DEFUN BOOTSTRAP ...)
+; compiling (DEFUN BOOTSTRAP-CORE ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/compiler/compile-file.fasl written
+; compilation finished in 0:00:00.244
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/documentation.lisp" (written 14 DEC 2016 01:38:55 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading documentation.lisp!")
+; compiling (DEFUN JSCL/COMMON-LISP::DOCUMENTATION ...)
+; compiling (DEFUN MAP-APROPOS-SYMBOLS ...)
+; compiling (DEFUN JSCL/COMMON-LISP::APROPOS-LIST ...)
+; compiling (DEFUN JSCL/COMMON-LISP::APROPOS ...)
+; compiling (DEFUN JSCL/COMMON-LISP::DESCRIBE ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/documentation.fasl written
+; compilation finished in 0:00:00.037
+DEBUG: loading documentation.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/misc.lisp" (written 15 DEC 2016 02:08:00 AM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading misc.lisp!")
+; compiling (DEFPARAMETER JSCL/COMMON-LISP::*FEATURES* ...)
+; compiling (DEFUN JSCL/COMMON-LISP::LISP-IMPLEMENTATION-TYPE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::LISP-IMPLEMENTATION-VERSION ...)
+; compiling T
+; compiling (DEFUN NULL-IF-EMPTY ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SHORT-SITE-NAME ...)
+; compiling (DEFUN JSCL/COMMON-LISP::LONG-SITE-NAME ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MACHINE-INSTANCE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MACHINE-VERSION ...)
+; compiling (DEFUN JSCL/COMMON-LISP::MACHINE-TYPE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SOFTWARE-TYPE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::SOFTWARE-VERSION ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::TIME ...)
+; compiling (DEFVAR *TRACED-FUNCTIONS* ...)
+; compiling (DEFVAR *TRACE-LEVEL* ...)
+; compiling (DEFUN TRACE-REPORT-CALL ...)
+; compiling (DEFUN TRACE-REPORT-RETURN ...)
+; compiling (DEFUN TRACE-FUNCTIONS ...)
+; compiling (DEFUN UNTRACE-FUNCTIONS ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::TRACE ...)
+; compiling (DEFMACRO JSCL/COMMON-LISP::UNTRACE ...)
+; compiling (DEFUN JSCL/COMMON-LISP::GET-INTERNAL-REAL-TIME ...)
+; compiling (DEFUN GET-UNIX-TIME ...)
+; compiling (DEFUN JSCL/COMMON-LISP::GET-UNIVERSAL-TIME ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/misc.fasl written
+; compilation finished in 0:00:00.068
+DEBUG: loading misc.lisp!
+; compiling file "/home/brpocock/Projects/violet-volts/src/lib/jscl/src/toplevel.lisp" (written 14 DEC 2016 10:05:31 PM):
+; compiling (IN-PACKAGE :JSCL)
+; compiling (/DEBUG "loading toplevel.lisp!")
+; compiling (DEFUN JSCL/COMMON-LISP::EVAL ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::* ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::** ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::*** ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::/ ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::// ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::/// ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::+ ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::++ ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::+++ ...)
+; compiling (DEFVAR JSCL/COMMON-LISP::- ...)
+; compiling (DEFUN EVAL-INTERACTIVE ...)
+; compiling (SETQ JSCL/COMMON-LISP::*PACKAGE* ...)
+; compiling (DEFUN COMPILATION-NOTICE ...)
+; compiling (WHEN (AND # ...) ...)
+; compiling (DEFUN :COPYING ...)
+; compiling (DEFUN :CREDITS ...)
+; compiling (DEFUN WELCOME-MESSAGE ...)
+; compiling (SETQ JSCL/COMMON-LISP::*STANDARD-OUTPUT* ...)
+; compiling (DEFUN NODE-REQUIRE ...)
+
+; /home/brpocock/Projects/violet-volts/src/lib/jscl/src/toplevel.fasl written
+; compilation finished in 0:00:02.312
+DEBUG: loading toplevel.lisp!
+ ⚠ Warning(s) from compiling src/compiler/compile-file.lisp
+ ⚠ Warning(s) from compiling src/compiler/compiler.lisp
+ ⚠ Warning(s) from compiling src/ansiloop/ansi-loop.lisp
+ ⚠ Warning(s) from compiling src/print.lisp
+ ⚠ Warning(s) from compiling src/types.lisp
+ ⚠ Warning(s) from compiling src/defstruct.lisp
+ ⚠ Warning(s) from compiling src/utils.lisp
+ ⚠ Warning(s) from compiling src/boot.lisp
+ ⚠ Warning(s) from compiling src/compat/compat-misc.lisp
+While evaluating the form starting at line 463, column 0
+  of #P"/home/brpocock/Projects/violet-volts/src/lib/jscl/jscl.lisp":
+DEBUG: loading toplevel.lisp!
+DEBUG: loading misc.lisp!
+DEBUG: loading documentation.lisp!
+DEBUG: loading compiler.lisp!
+DEBUG: loading compiler/codegen.lisp!
+DEBUG: loading backquote.lisp!
+DEBUG: loading read.lisp!
+DEBUG: loading package.lisp!
+DEBUG: Loading symbol.lisp
+DEBUG: loading print.lisp!
+DEBUG: loading stream.lisp!
+DEBUG: loading sequence.lisp!
+DEBUG: loading string.lisp!
+DEBUG: loading array.lisp!
+DEBUG: loading list.lisp!
+DEBUG: loading char.lisp!
+DEBUG: loading numbers.lisp!
+DEBUG: loading lambda-list.lisp!
+DEBUG: Loading types.lisp…
+WARNING:
+   The new FTYPE proclamation for MAKE-BINDING
+     (FUNCTION (&KEY (:NAME T) (:TYPE T) (:VALUE T) (:DECLARATIONS T)) T)
+   does not match the old FTYPE proclamation
+     (FUNCTION (&KEY (:NAME T) (:TYPE T) (:VALUE T) (:DECLARATIONS T)) (VALUES BINDING &OPTIONAL))
+DEBUG: loading defstruct.lisp!
+WARNING:
+   The new FTYPE proclamation for MAKE-SLOT-INFO
+     (FUNCTION
+      (&KEY (:CLASS T) (:NAME T) (:ACCESSORS T) (:READERS T) (:WRITERS T) (:TYPE T) (:INITFORM T)
+       (:INITARG T) (:ALLOCATION T))
+      (VALUES SLOT-INFO &OPTIONAL))
+   does not match the old FTYPE proclamation
+     (FUNCTION
+      (&KEY (:CLASS T) (:NAME T) (:ACCESSORS T) (:READERS T) (:WRITERS T) (:TYPE T) (:INITFORM T)
+       (:INITARGS T) (:ALLOCATION T))
+      (VALUES SLOT-INFO &OPTIONAL))
+DEBUG: loading utils.lisp!
+DEBUG: loading setf!
+DEBUG: loading early-char.lisp!
+DEBUG: loading boot.lisp!
+WARNING: redefining JSCL/COMMON-LISP::CHAR= in DEFUN
+WARNING: redefining JSCL/COMMON-LISP::CHAR< in DEFUN
+WARNING: redefining JSCL/COMMON-LISP::ERROR in DEFUN
+WARNING: redefining JSCL/COMMON-LISP::DEFSTRUCT in DEFMACRO
+WARNING: redefining JSCL/JAVASCRIPT-LOW-LEVEL::= in DEFUN
+WARNING: redefining JSCL::CONCAT in DEFUN
+WARNING: redefining JSCL::FDEFINITION-SOFT in DEFUN
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/array.lisp
+; in: DEFUN JSCL/COMMON-LISP::FILL-POINTER
+;     (CHECK-TYPE ARRAY JSCL/COMMON-LISP::ARRAY)
+; --> DO BLOCK LET TAGBODY UNLESS IF 
+; ==>
+;   (TYPEP ARRAY 'JSCL/COMMON-LISP::ARRAY)
+; 
+; caught STYLE-WARNING:
+;   undefined type: JSCL/COMMON-LISP::ARRAY
+
+; in: DEFUN JSCL/COMMON-LISP::ADJUSTABLE-ARRAY-P
+;     (CHECK-TYPE ARRAY JSCL/COMMON-LISP::ARRAY)
+; --> DO BLOCK LET TAGBODY UNLESS IF 
+; ==>
+;   (TYPEP ARRAY 'JSCL/COMMON-LISP::ARRAY)
+; 
+; caught STYLE-WARNING:
+;   undefined type: JSCL/COMMON-LISP::ARRAY
+
+; in: DEFUN JSCL/COMMON-LISP::ARRAY-DIMENSIONS
+;     (CHECK-TYPE ARRAY JSCL/COMMON-LISP::ARRAY)
+; --> DO BLOCK LET TAGBODY UNLESS IF 
+; ==>
+;   (TYPEP ARRAY 'JSCL/COMMON-LISP::ARRAY)
+; 
+; caught STYLE-WARNING:
+;   undefined type: JSCL/COMMON-LISP::ARRAY
+
+; 
+; caught STYLE-WARNING:
+;   17 more uses of undefined type JSCL/COMMON-LISP::ARRAY
+
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/types.lisp
+; in: DEFUN JSCL/COMMON-LISP::TYPEP
+;     (JSCL::EQL-SPECIALIZER-P TYPE)
+; 
+; caught STYLE-WARNING:
+;   undefined function: EQL-SPECIALIZER-P
+
+
+; file: /home/brpocock/Projects/violet-volts/src/lib/jscl/src/misc.lisp
+; in: DEFUN JSCL/COMMON-LISP::GET-INTERNAL-REAL-TIME
+;     (JSCL/JAVASCRIPT-LOW-LEVEL::GET-INTERNAL-REAL-TIME)
+; 
+; caught STYLE-WARNING:
+;   undefined function: JSCL/JAVASCRIPT-LOW-LEVEL::GET-INTERNAL-REAL-TIME
+; 
+; compilation unit finished
+;   Undefined type:
+;     JSCL/COMMON-LISP::ARRAY
+;   Undefined functions:
+;     EQL-SPECIALIZER-P JSCL/JAVASCRIPT-LOW-LEVEL::GET-INTERNAL-REAL-TIME
+;   caught 24 STYLE-WARNING conditions
+;   printed 13 notes
+While evaluating the form starting at line 463, column 0
+  of #P"/home/brpocock/Projects/violet-volts/src/lib/jscl/jscl.lisp":
+T
+CL-USER> 
