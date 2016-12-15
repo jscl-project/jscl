@@ -40,7 +40,7 @@
   (null-if-empty
    #+jscl (or (and #j:location #j:location:hostname)
               (and #j:os #j:os:hostname (#j:os:hostname)))
-   #+sbcl (run-program-compile-time "hostname -d")
+   #+sbcl (run-program-compile-time "hostname" '("-d"))
    #-(or jscl sbcl) "localdomain"))
 
 (defun jscl/cl::long-site-name ()
@@ -48,7 +48,7 @@
    #+jscl (or (and #j:location #j:location:origin)
               (and #j:os #j:os:hostname (#j:os:hostname)))
    #+sbcl (substitute #\Space #\. (string-capitalize
-                                   (run-program-compile-time "hostname -d")))
+                                   (run-program-compile-time "hostname" '("-d"))))
    #-(or jscl sbcl) "Local Domain"))
 
 (defun jscl/cl::machine-instance ()
