@@ -549,8 +549,23 @@ star)."
   (dolist (hierarchy +standard-class-subclasses+)
     (destructuring-bind (class &rest subclasses) hierarchy
       (dolist (subclass subclasses)
-        (let ((metaclass (find-built-in-class subclass)))
-          (push class (built-in-class-superclasses metaclass)))))))
+        (let ((metaclass (ignore-errors (find-built-in-class subclass))))
+          (cond (metaclass
+                 (push class (built-in-class-superclasses metaclass)))
+                (t
+                 (setq metaclass 
+                       (make-binding
+                        :name subclass
+                        :type 'type
+                        :value (make-type-definition
+                                :name subclass
+                                :supertypes (list class)
+                                :predicate
+                                (lambda (object)
+                                  (subtypep (car (storage-vector-kind object))
+                                            subclass))
+                                :class :FIXME)))
+                 (push-to-lexenv metaclass *global-environment* 'type))))))))
 
 (defun validate-standard-class-subclasses% ()
   (dolist (hierarchy +standard-class-subclasses+)
