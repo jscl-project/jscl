@@ -667,13 +667,50 @@ emits (1- COUNT)."
     (error "~~< ~~> not implemented yet")
     (values (concatenate 'string (reverse output)) arguments)))
 
+(defun format-conditional-t-or-nothing (captured-substrings arguments)
+  (assert (and (= 1 (length captured-substrings))
+               (stringp (first captured-substrings))) 
+          (captured-substrings)
+          "~~@[ does not have ~~; fields")
+  (values
+   (if (first arguments)
+       (first captured-substrings)      ; FIXME: format recursively
+       "")
+   arguments))
+
+(defun format-conditional-nil-t (captured-substrings arguments)
+  (assert (and (= 3 (length captured-substrings))
+               (stringp (first captured-substrings))
+               (stringp (third captured-substrings)))
+          (captured-substrings)
+          "~~:[ expects two fields divided by ~~;")
+  (assert ())
+  (values
+   (if (first arguments)
+       (first captured-substrings)      ; FIXME: format recursively
+       (third captured-substrings))
+   (rest arguments)))
+
+(defun format-conditional-nth (captured-substrings arguments)
+  (error "~~[ (nth) does not yet work in JSCL"))
+
 (defun format-conditional (captured-substrings arguments
                            &key start-at-p start-colon-p
                                 end-at-p end-colon-p)
   "FORMAT ~[ ~] handler. (unimplemented)"
-  (let (output)
-    (error "~~[ ~~] not implemented yet")
-    (values (concatenate 'string (reverse output)) arguments)))
+  (cond
+    ((or end-colon-p end-at-p)
+     (error "~~~@[:~]~@[@~]] is not a valid closing option ~
+ \(neither : nor @ are allowed here)"
+            end-colon-p end-at-p))
+    ((and start-colon-p start-at-p)
+     (error "~~:@[ is not a valid option. Use either : or @, but not both."))
+    (start-at-p
+     (format-conditional-t-or-nothing captured-substrings arguments))
+    (start-colon-p
+     (format-conditional-nil-t captured-substrings arguments))
+    (t
+     (format-conditional-nth captured-substrings arguments))))
 
 (defun tilde-semicolon-p (form)
   (and (consp form)
