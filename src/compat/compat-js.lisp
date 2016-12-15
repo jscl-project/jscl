@@ -253,3 +253,12 @@ captured vars and embedded forms as multiple values."
 
 (defun jscl/js::lisp-to-js (string)
   string)
+
+(defun jscl/js::fset (symbol function)
+  (push-to-lexenv (make-binding
+                   :name symbol
+                   :type 'function
+                   :value function)
+                  *environment*
+                  symbol))
+

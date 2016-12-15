@@ -680,7 +680,6 @@
          `(progn
             (eval-when (:compile-toplevel :load-toplevel)
               (fn-info ',name :defined t))
-            ;; FIXME global binding
             (jscl/js::fset ',name #'(named-lambda ,name ,args ,@body))
             ',name))
         ((not (listp name))
