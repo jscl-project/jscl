@@ -1,4 +1,4 @@
-;;; defstruct.lisp —
+;;; defstruct.lisp — Structures
 
 ;; JSCL is free software: you can redistribute it and/or modify it under
 ;; the terms of the GNU General  Public License as published by the Free
@@ -20,9 +20,14 @@
 
 ;;; Low-level structure implementation details
 
-;;; This  implements a  structure  as a  LIST with  a  CAR =  type-name.
-;;; This will probably be changed  out for an alternative low-level (ie.
-;;; Javascript level) implementation in the near future.
+;;; This implements a structure as a Storage-Vector. The “Kind” field is
+;;; a cons  pair of  'Structure-Object and  the precise  structure type.
+;;; The slots  are simply  stored in order  into the  object; redefining
+;;; structures  is dangerous,  but ANSI  doesn't really  allow that,  so
+;;; programmers must suffer  the undefined behaviour if  they change the
+;;; layout of the leading fields.
+
+;; TODO: Detect incompatible changes and signal a continuable error
 
 (defun make-structure% (type &rest fields)
   (let ((struct (make-storage-vector (length fields)
