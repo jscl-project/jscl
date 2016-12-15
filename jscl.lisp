@@ -30,7 +30,9 @@
   (:use) ; nothing
   (:nicknames :jscl/js)
   (:documentation
-   "The JSCL compiler generates forms that represent JavaScript in an abstract syntax tree, which are interned in this package. The code generator then operates on that tree to create JavaScript source code.
+   "The JSCL  compiler generates forms  that represent JavaScript  in an
+ abstract  syntax tree,  which are  interned in  this package.  The code
+ generator then operates on that tree to create JavaScript source code.
 
 During  bootstrap,  these  forms  are  evaluated  instead  as  calls  to
 “compatibility” functions loaded into the host compiler."))
