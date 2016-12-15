@@ -1034,10 +1034,17 @@ This is SETF'able."
   (values-list args))
 
 ;;; Early error definition.
-(defun jscl/cl::error (fmt &rest args)
-  (jscl/js::%throw
-   (jscl/ffi:make-new '|Error|
-                      (apply #'format nil fmt args))))
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (unless (fboundp 'jscl/cl::error)
+    ;; Don't redefine this, we may  have loaded the “real” definition in
+    ;; conditions.lisp and don't want to revert to the less-correct one
+    (defun jscl/cl::error (fmt &rest args)
+      #+jscl
+      (jscl/js::%throw
+       (jscl/ffi:make-new '|Error|
+                          (apply #'format nil fmt args)))
+      #-jscl
+      (apply #'cl:error fmt args))))
 
 (defmacro jscl/cl::nth-value (n form)
   `(multiple-value-call (lambda (&rest values)
