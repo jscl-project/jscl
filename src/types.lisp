@@ -119,13 +119,22 @@
 (defun jscl/cl::type-of (value)
   (if value
       (let* ((curry (curry-type-check value))
-             (type (type-definition-name
-                    (most-specific-type
-                     (remove-if-not curry
-                                    (lexenv-type *environment*))))))
+             (type (or
+                    (and (storage-vector-p value)
+                         (cons 'storage-vector (storage-vector-kind value)))
+                    (type-definition-name
+                     (most-specific-type
+                      (remove-if-not curry
+                                     (lexenv-type *environment*)))))))
         (cond
-          ((subtypep type 'string) (cons type (length value)))
-          ((subtypep type 'array) (cons type (array-dimensions value)))
+          ((eql (car type) 'storage-vector)
+           (case (second type)
+             (array (list 'array
+                          (array-element-type value)
+                          (array-dimensions value)))
+             (structure-object (cddr type))
+             (standard-object (cddr type))))
+          ((subtypep type 'string) (cons type (length value))) 
           ((subtypep type 'integer) (list type value value))
           ((null type) t)
           (t type)))
