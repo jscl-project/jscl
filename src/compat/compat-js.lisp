@@ -23,6 +23,12 @@
 
 (in-package :jscl)
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (unless (and (boundp 'jscl/ffi:*root*)
+               (hash-table-p jscl/ffi:*root*))
+    (warn "Lost *ROOT* somehow again…")
+    (setf jscl/ffi:*root* (make-hash-table :test 'equal))))
+
 (defparameter jscl/js::this jscl/ffi::*root*)
 
 (defmacro jscl/js::%js-vref (symbol-name &optional _)
@@ -241,10 +247,6 @@ captured vars and embedded forms as multiple values."
   (remhash key object))
 
 
-
-(unless (and (boundp 'jscl/ffi:*root*)
-             (hash-table-p jscl/ffi:*root*))
-  (setf jscl/ffi:*root* (make-hash-table :test 'equal)))
 
 (unless (jscl/ffi:oget jscl/ffi:*root* "packages")
   (setf (jscl/ffi:oget jscl/ffi:*root* "packages") (jscl/ffi:make-new '|Object|)))
