@@ -11,16 +11,21 @@
 
 
 ;; forward declarations to compiler.lisp
-(declaim (special *environment* *global-environment*)
-         (ftype (function (t) t) binding-value)
-         (ftype (function (t t t) t) lookup-in-lexenv)
-         (ftype (function (&key (:name t) (:type t)
-                                (:value t) (:declarations t))
-                          t)
-                make-binding)
-         (ftype (function (t t t) cons)
-                push-to-lexenv)
-         (ftype (function (t) t) lexenv-type))
+(unless (fboundp 'lexenv-type)
+  ;; Don't  re-DECLAIM   these;  in  particular,   Make-Binding  returns
+  ;; a Binding object  (not T), but since Binding can't  be defined yet,
+  ;; we  get a  mismatch if  we re-evaluate  this declaration  once that
+  ;; function is actually known.
+  (declaim (special *environment* *global-environment*)
+           (ftype (function (t) t) binding-value)
+           (ftype (function (t t t) t) lookup-in-lexenv)
+           (ftype (function (&key (:name t) (:type t)
+                                  (:value t) (:declarations t))
+                            t)
+                  make-binding)
+           (ftype (function (t t t) cons)
+                  push-to-lexenv)
+           (ftype (function (t) t) lexenv-type)))
 
 
 
@@ -171,7 +176,7 @@
 
 (defun jscl/cl::typep (object type &optional (environment *environment*))
   (cond
-    ((eql-specializer-p type)
+    ((jscl/mop:eql-specializer-p type)
      (eql object (eql-specializer-object type)))
     ((consp type)
      (let ((predicate (type-definition-predicate
