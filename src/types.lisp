@@ -82,7 +82,8 @@
       name))
 
 (defun find-type-definition (type &optional (environment *environment*))
-  (or (let ((b (lookup-in-lexenv type environment 'type)))
+  (or (let ((b (or (lookup-in-lexenv type environment 'type)
+                   (lookup-in-lexenv type *global-environment* 'type))))
         (when b
           (binding-value b)))
       (error "~s does not name a type" type)))
@@ -441,30 +442,6 @@ star)."
 
 (in-package :jscl/cl)
 
-(cl:defparameter jscl::+basic-types+
-  '((hash-table hash-table-p atom)
-    (number numberp atom)
-    (real realp number)
-    (integer integerp rational)
-    (fixnum fixnump integer)
-    (cons consp)
-    (list listp cons sequence)
-    (vector vectorp sequence)
-    (character characterp atom)
-    (symbol symbolp atom)
-    (keyword keywordp symbol)
-    (function functionp atom)
-    (float floatp real)
-    (single-float floatp real)
-    (double-float floatp real)
-    (long-float floatp real)
-    (rational rationalp real)
-    (array arrayp sequence)
-    (string stringp vector)
-    (atom atom)
-    (null null)
-    (package packagep atom)))
-
 (cl:defparameter jscl::+standard-class-subclasses+
   '((arithmetic-error division-by-zero floating-point-inexact
      floating-point-invalid-operation floating-point-overflow
@@ -573,6 +550,32 @@ star)."
           (binding-value b)))
       (error "~s does not name a built-in class" name)))
 
+
+
+(cl:defparameter jscl::+basic-types+
+  '((hash-table hash-table-p atom)
+    (number numberp atom)
+    (real realp number)
+    (integer integerp rational)
+    (fixnum fixnump integer)
+    (cons consp)
+    (list listp cons sequence)
+    (vector vectorp sequence)
+    (character characterp atom)
+    (symbol symbolp atom)
+    (keyword keywordp symbol)
+    (function functionp atom)
+    (float floatp real)
+    (single-float floatp real)
+    (double-float floatp real)
+    (long-float floatp real)
+    (rational rationalp real)
+    (array arrayp sequence)
+    (string stringp vector)
+    (atom atom)
+    (null null)
+    (package packagep atom)))
+
 (defun init-built-in-basic-types% ()
   (dolist (type-info +basic-types+)
     (destructuring-bind (name predicate &rest supertypes) type-info
@@ -585,6 +588,8 @@ star)."
                                            :predicate predicate))
        *global-environment*
        'type))))
+
+
 
 (defun init-numeric-compound-predicates% ()
   (dolist (type '(number integer real rational
