@@ -584,10 +584,10 @@
      ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
 
-(defconstant jscl/cl::t 't)
-(defconstant jscl/cl::nil 'nil)
-(jscl/js::%js-vset "nil" nil)
-(jscl/js::%js-vset "t" t)
+(defconstant jscl/cl::t t)
+(defconstant jscl/cl::nil nil)
+#+jscl (jscl/js::%js-vset "t" t)
+#+jscl (jscl/js::%js-vset "nil" nil)
 
 (defmacro jscl/cl::lambda (args &body body)
   `(function (lambda ,args ,@body)))
