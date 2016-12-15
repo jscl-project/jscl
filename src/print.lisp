@@ -17,6 +17,7 @@
 
 (/debug "loading print.lisp!")
 
+
 ;;; HACK HACK — if an error  occurs during startup before toplevel binds
 ;;; this correctly — TODO this may not work with the new stream handlers
 ;;; with the generic function emulation
@@ -306,7 +307,9 @@ format control string ~S." fmt))))
      (simple-format stream "#<PACKAGE ~a>" (package-name form)))
     ;; Others
     (otherwise
-     (simple-format stream "#<JS-OBJECT ~a>" (#j:String form)))))
+     (simple-format stream "#<JS-OBJECT ~a>" 
+                    (funcall (JSCL/FFI:OGET* JSCL/FFI:*ROOT* "String")
+                             form)))))
 
 (defun output-stream-designator (x)
   ;; TODO: signal error if X is not a stream designator
