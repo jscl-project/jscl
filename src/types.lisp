@@ -434,6 +434,12 @@ star)."
                          (eql my-dim '*)
                          (= dim my-dim))))))))
 
+(defun find-built-in-class (name)
+  (or (let ((b (lookup-in-lexenv name *environment* 'class)))
+        (when b
+          (binding-value b)))
+      (error "~s does not name a built-in class" name)))
+
 
 
 
@@ -539,11 +545,12 @@ star)."
      simple-bit-vector)
     (warning simple-warning style-warning)))
 
-(defun find-built-in-class (name)
-  (or (let ((b (lookup-in-lexenv name *environment* 'class)))
-        (when b
-          (binding-value b)))
-      (error "~s does not name a built-in class" name)))
+(defun init-standard-class-subclasses% ()
+  (dolist (hierarchy +standard-class-subclasses+)
+    (destructuring-bind (class &rest subclasses) hierarchy
+      (dolist (subclass subclasses)
+        (let ((metaclass (find-built-in-class subclass)))
+          (push class (built-in-class-superclasses metaclass)))))))
 
 
 
@@ -573,7 +580,7 @@ star)."
 
 (defun init-built-in-basic-types% ()
   (dolist (type-info +basic-types+)
-    (destructuring-bind (name predicate &rest supertypes) type-info
+    (destructuring-bind (name predicate &rest supertypes) type-info 
       (push-to-lexenv
        (make-binding :name name
                      :type 'type
@@ -611,13 +618,6 @@ star)."
      'class)
     (unless (subtypep type-name t)
       (warn "Standard type ~s is not properly defined" type-name))))
-
-(defun init-standard-class-subclasses% ()
-  (dolist (hierarchy +standard-class-subclasses+)
-    (destructuring-bind (class &rest subclasses) hierarchy
-      (dolist (subclass subclasses)
-        (let ((metaclass (find-built-in-class subclass)))
-          (push class (built-in-class-superclasses metaclass)))))))
 
 (defun validate-standard-class-subclasses% ()
   (dolist (hierarchy +standard-class-subclasses+)
