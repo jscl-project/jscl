@@ -100,15 +100,8 @@ You should  have received a  copy of  the GNU General  Public License
 along with JSCL. If not, see <http://www.gnu.org/licenses/>."
           *print-right-margin*)
   (when (y-or-n-p "Would you like to read the GNU GPL now?")
-    (princ #.(with-open-file (s (make-pathname
-                                 :name "COPYING.GPLv3"
-                                 :directory
-                                 (append
-                                  (pathname-directory
-                                   (or *load-pathname*
-                                       *compile-file-pathname*
-                                       #p"."))
-                                  '(:up)))
+    (princ #.(with-open-file (s (source-pathname "COPYING.GPLv3" 
+                                                 :directory '(:relative))
                                 :direction :input)
                (read-fully s))))
   (values))
