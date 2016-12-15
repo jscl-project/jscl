@@ -439,9 +439,7 @@ star)."
 
 ;;; Subclass hierarchy of the standard classes
 
-(in-package :jscl/cl)
-
-(cl:defparameter jscl::+standard-class-subclasses+
+(defparameter +standard-class-subclasses+
   '((arithmetic-error division-by-zero floating-point-inexact
      floating-point-invalid-operation floating-point-overflow
      floating-point-underflow)
@@ -541,8 +539,6 @@ star)."
      simple-bit-vector)
     (warning simple-warning style-warning)))
 
-(CL:in-package :jscl)
-
 (defun find-built-in-class (name)
   (or (let ((b (lookup-in-lexenv name *environment* 'class)))
         (when b
@@ -551,7 +547,7 @@ star)."
 
 
 
-(cl:defparameter jscl::+basic-types+
+(defparameter +basic-types+
   '((hash-table hash-table-p atom)
     (number numberp atom)
     (real realp number)
