@@ -66,22 +66,22 @@ clean:
 
 jscl.js:	$(ALL_LISP)
 	$(LISP) $(LISPFLAGS) $(LISPLOAD)jscl.lisp \
-		$(LISPEVAL)'(jscl:bootstrap-core t)'
+		$(LISPEVAL)'(jscl:bootstrap-core t)' 2>&1 |tee jscl.js.build.log
 
 tests.js:	$(ALL_LISP)
 	$(LISP) $(LISPFLAGS) $(LISPLOAD)jscl.lisp \
 		$(LISPEVAL)'(jscl:bootstrap-core)' \
-		$(LISPEVAL)'(jscl:compile-test-suite)'
+		$(LISPEVAL)'(jscl:compile-test-suite)' 2>&1 |tee tests.js.build.log
 
 jscl-repl:	$(ALL_LISP)
 	$(LISP) $(LISPFLAGS) $(LISPLOAD)jscl.lisp \
 		$(LISPEVAL)'(jscl:bootstrap)' \
-		$(LISPEVAL)'(jscl:compile-node-repl)'
+		$(LISPEVAL)'(jscl:compile-node-repl)' 2>&1 |tee jscl-repl.build.log
 
 repl-web.js:	$(ALL_LISP)
 	$(LISP) $(LISPFLAGS) $(LISPLOAD)jscl.lisp \
 		$(LISPEVAL)'(jscl:bootstrap)' \
-		$(LISPEVAL)'(jscl:compile-web-repl)'
+		$(LISPEVAL)'(jscl:compile-web-repl)' 2>&1 |tee repl-web.js.build.log
 
 test:	jscl.js tests.js
 		$(shell find tests ansi-test \
@@ -90,7 +90,7 @@ test:	jscl.js tests.js
 		.ansi-patched
 	$(LISP) $(LISPFLAGS) $(LISPLOAD)jscl.lisp \
 		$(LISPEVAL)'(jscl:bootstrap-core)' \
-		$(LISPEVAL)'(jscl:run-tests-in-host)'
+		$(LISPEVAL)'(jscl:run-tests-in-host)' 2>&1 |tee test.log
 	node tests.js
 
 doc:	doc/jscl.pdf doc/jscl.html.d/index.html
@@ -100,7 +100,7 @@ doc/jscl.texi:	$(ALL_LISP) doc-intro.texi doc-conclusion.texi
 		$(LISPEVAL)'(ql:quickload :net.didierverna.declt)' \
 		$(LISPEVAL)'(ql:quickload :alexandria)' \
 		$(LISPLOAD)'write-docs.lisp' \
-		$(LISPEVAL)'(jscl/doc:write-docs)'
+		$(LISPEVAL)'(jscl/doc:write-docs)' 2>&1 | tee doc.build.log
 
 doc/jscl.html.d/index.html:	doc/jscl.texi
 	cp doc.css doc/
