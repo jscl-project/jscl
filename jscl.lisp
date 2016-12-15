@@ -400,15 +400,21 @@ compiled in the host.")
           (t
            (format *error-output* "~& ⚠ Warning(s) from compiling ~a" file)
            (push (enough-namestring file) file-warnings)))))
-    (cerror "Try anyway"
-            "There were ~
+    (cond 
+      (file-failures
+       (cerror "Try anyway"
+               "There were ~
  ~[~:;~:*~r file~:p with warnings, and~] ~
  ~[no files~:;~:*~r file~:p~] which failed, ~
 which occurred within ~r file~:p: ~
 ~@[~%Warning on ~{~a~^, ~}~] ~
 ~@[~%Failed on ~{~a~^, ~}~]"
-            (length file-warnings) (length file-failures) files
-            file-warnings file-failures)))
+               (length file-warnings) (length file-failures) files
+               file-warnings file-failures))
+      (file-warnings
+       (warn "Despite warnings in ~r file~:p, there were no failures; continuing…"
+             (length file-warnings)))
+      (t (format *trace-output* "~&No warnings or failures from compilation.")))))
 
 (defun load-jscl ()
   (with-compilation-unit ()
