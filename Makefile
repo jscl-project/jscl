@@ -52,8 +52,11 @@ else
 ALT_BRANCH=
 endif
 
+
 ALL_LISP=$(shell find . -name \*.lisp -and -not -name .\*)
 
+# This relies  upon a rigid formatting  of the JSON file,  which is also
+# used when building JSCL.
 VERSION=$(shell grep "version" package.json|cut -d '"' -f4)$(ALT_BRANCH)
 
 clean:
