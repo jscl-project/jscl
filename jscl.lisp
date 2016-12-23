@@ -491,7 +491,10 @@ which occurred within ~r file~:p: ~
 (defmacro with-jscl-second-pass ((&optional) &body body)
   `(unwind-protect
         (progn
-          (use-package '(:jscl/cl :jscl/mop :jscl/cltl2 :jscl/gray) :jscl) 
+          (handler-case
+              (use-package '(:jscl/cl :jscl/mop :jscl/cltl2 :jscl/gray) :jscl)
+            #+sbcl (sb-ext:name-conflict (c)
+                     (when (find-restart 'take-new) (invoke-restart 'take-new)))) 
           ,@body)
      (unuse-package '(:jscl/cl :jscl/mop :jscl/cltl2 :jscl/gray) :jscl)
      (defpackage-jscl)))
