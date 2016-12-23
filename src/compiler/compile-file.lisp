@@ -12,7 +12,7 @@
           (*compile-file-truename* (truename *compile-file-pathname*))
           (*compile-print-toplevels* ,verbosep)
           (*package* *package*)
-          (source (read-whole-file ,filename))
+          (source (jscl/bootstrap::read-whole-file ,filename))
           (in (make-string-input-stream source)))
      ,@body))
 
@@ -82,8 +82,8 @@ forms if PRINT is set."
  *  ⸨☕λ⸩ Compiled by 𝓙𝓢ℂ𝕃
  * ~@[(Romance Ⅱ fork) ~]version ~a, Git commit ~a
  * Source file: ~a */"
-              #.(violet-volts-p) *version*
-              #.(git-commit) filename)
+              #.(jscl/bootstrap::violet-volts-p) jscl/bootstrap::*version*
+              #.(jscl/bootstrap::git-commit) filename)
       (when print
         (format *trace-output*
                 "~&;;;; Compiling file ~a... "
@@ -187,49 +187,50 @@ forms if PRINT is set."
       (dolist (file files)
         (!compile-file file out :print verbosep))))
   (when shebang
-    (file-set-execute-permission output)))
+    (jscl/bootstrap::file-set-execute-permission output)))
 
 (defun test-files ()
   (append
-   (directory (source-pathname "*"
-                               :directory '(:relative "tests")
-                               :type "lisp"))
-   (list (source-pathname "validate.lisp"
-                          :directory '(:relative "tests" "loop")
-                          :type "lisp")
-         (source-pathname "base-tests.lisp"
-                          :directory '(:relative "tests" "loop")
-                          :type "lisp"))))
+   (directory (jscl/bootstrap::source-pathname "*"
+                                               :directory '(:relative "tests")
+                                               :type "lisp"))
+   (list (jscl/bootstrap::source-pathname "validate.lisp"
+                                          :directory '(:relative "tests" "loop")
+                                          :type "lisp")
+         (jscl/bootstrap::source-pathname "base-tests.lisp"
+                                          :directory '(:relative "tests" "loop")
+                                          :type "lisp"))))
 
 (defun compile-test-suite ()
   (compile-application
-   `(,(source-pathname "tests.lisp" :directory nil)
+   `(,(jscl/bootstrap::source-pathname "tests.lisp" :directory nil)
       ,@(test-files)
-      ,(source-pathname "tests-report.lisp" :directory nil))
-   (merge-pathnames "tests.js" *base-directory*)))
+      ,(jscl/bootstrap::source-pathname "tests-report.lisp" :directory nil))
+   (merge-pathnames "tests.js" jscl/bootstrap::*base-directory*)))
 
 (defun compile-web-repl ()
   (compile-application
-   (list (source-pathname "repl.lisp"
-                          :directory '(:relative "repl-web")))
-   (merge-pathnames "repl-web.js" *base-directory*)))
+   (list (jscl/bootstrap::source-pathname "repl.lisp"
+                                          :directory '(:relative "repl-web")))
+   (merge-pathnames "repl-web.js" jscl/bootstrap::*base-directory*)))
 
 (defun compile-node-repl ()
   (compile-application
-   (list (source-pathname "repl.lisp"
-                          :directory '(:relative "repl-node")))
-   (merge-pathnames "jscl-repl" *base-directory*)
+   (list (jscl/bootstrap::source-pathname "repl.lisp"
+                                          :directory '(:relative "repl-node")))
+   (merge-pathnames "jscl-repl" jscl/bootstrap::*base-directory*)
    :shebang t))
 
 (defun compile-jscl.js (verbosep)
   (with-compilation-environment
-    (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
+    (with-open-file (out (merge-pathnames "jscl.js" jscl/bootstrap::*base-directory*)
                          :direction :output
                          :if-exists :supersede)
       (with-self-invoking-function (out)
-        (write-string (read-whole-file (source-pathname "prelude.js"))
+        (write-string (jscl/bootstrap::read-whole-file
+                       (jscl/bootstrap::source-pathname "prelude.js"))
                       out)
-        (do-source input :target
+        (jscl/bootstrap::do-source (input :target)
           (!compile-file input out :print verbosep))
         (dump-global-environment out)))))
 
@@ -239,11 +240,11 @@ forms if PRINT is set."
      (let ((*features* (cons :jscl-xc *features*))
            (*package* (find-package "JSCL"))
            (*toplevel-compilations* nil)
-           (*default-pathname-defaults* *base-directory*))
+           (*default-pathname-defaults* jscl/bootstrap::*base-directory*))
        (setq *environment* *global-environment*)
        (format *trace-output*
                "~&~|~2%;;;; — Bootstrapping core for JSCL, version ~a.~%"
-               *version*)
+               jscl/bootstrap::*version*)
        (compile-jscl.js ,verbosep)
        (report-undefined-functions)
        (when verbosep
