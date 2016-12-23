@@ -90,7 +90,8 @@ and MOP into JSCL USE list"))
 When  you  build JSCL,  you'll  invoke  JSCL:Boostrap-Core in  the  host
 compiler (probably SBCL) to build the  system. Once you're “in” the JSCL
 implementation, you may never need to access this package directly.")))
-(defpackage-jscl)
+(eval-when (:compile-toplevel :execute :load-toplevel)
+  (defpackage-jscl))
 
 (defpackage jscl/ffi
   (:use :cl :jscl)
