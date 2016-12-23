@@ -1,5 +1,5 @@
 ;;;; compat-misc.lisp — Create  some definitions to run  JSCL code under
-;;;; an ANSI CL. Misc. functions that aren't built into the
+;;;; an ANSI CL. Misc. functions that aren't built in.
 
 ;; Copyright © 2012, 2013 David Vazquez
 ;;; Copyright © 2012 Raimon Grau
