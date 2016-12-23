@@ -418,7 +418,7 @@ compiled in the host.")
 
 ;;; Compile and load jscl into the host
 
-(defun review-failures (failures)
+(defun review-failures (pass failures)
   (let ((file-warnings ())
         (file-failures ())
         (files 0))
@@ -436,20 +436,22 @@ compiled in the host.")
     (cond 
       (file-failures
        (cerror "Try anyway"
-               "There were ~
+               "In the ~:(~a~) pass, there were ~
  ~[~:;~:*~r file~:p with warnings, and~] ~
  ~[no files~:;~:*~r file~:p~] which failed, ~
 which occurred within ~r file~:p: ~
 ~@[~%Warning on ~{~a~^, ~}~] ~
 ~@[~%Failed on ~{~a~^, ~}~]"
+               pass
                (length file-warnings) (length file-failures) files
                file-warnings file-failures))
       (file-warnings
-       (warn "Despite warnings in ~r file~:p, there were no failures; continuing…"
-             (length file-warnings)))
-      (t (format *trace-output* "~&No warnings or failures from compilation.")))))
+       (warn "In the ~:(~a~) pass, despite warnings in ~r file~:p, there were no failures; continuing…"
+             pass (length file-warnings)))
+      (t (format *trace-output* "~&No warnings or failures from compilation in the ~(~a~) pass."
+                 pass)))))
 
-(defun compile-hosted-file (input)
+(defun compile-hosted-file (input) 
   (locally
       ;; I  make the  assumption that  re-loading the  files under
       ;; Swank, you don't care about  these redefinitions … but if
@@ -481,14 +483,19 @@ which occurred within ~r file~:p: ~
   (check-type mode (member :host :target))
   (let (fasls failures)
     (do-source (input mode)
-      (multiple-value-bind (fails fasl) (ecase mode
-                                          (:host (compile-hosted-file input))
-                                          (:target (compile-second-pass-file input)))
-        (when fails 
+      (multiple-value-bind (fails fasl)
+          (funcall (ecase mode
+                     (:host #'compile-hosted-file)
+                     (:target #'compile-second-pass-file))
+                   input)
+        (when fails
+          (check-type fails list "a list mentioning warnings or failures")
           (push fails failures)) 
         (when fasl
+          (check-type fasl (or string pathname) "a fast load pathname")
           (push fasl fasls))))
-    (review-failures failures)
+    (when failures
+      (review-failures mode failures))
     fasls))
 
 (defmacro with-jscl-second-pass ((&optional) &body body)
