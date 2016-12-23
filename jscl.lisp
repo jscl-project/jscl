@@ -21,7 +21,21 @@
                    (safety 3) (compilation-speed 1)))
 
 (defpackage jscl/bootstrap
-  (:use :cl))
+  (:use :cl)
+  #+sbcl (:use :sb-gray)
+  #+clisp (:use :gray) 
+  #+ecl (:shadowing-import-from :gray
+                                #:stream-element-type
+                                #:open-stream-p
+                                #:output-stream-p
+                                #:input-stream-p
+                                #:streamp
+                                #:close)
+  #+ecl (:use :gray)
+  #+lispworks (:use :gray)
+  #-(or sbcl clisp ecl lispworks)
+  (:use #.(warn "You will probably need to add your Gray Streams ~
+ into JSCL/Bootstrap USE list")))
 
 (in-package :jscl/bootstrap)
 
@@ -259,12 +273,9 @@ alphabetized more-or-less phonetically, in many cases."
                            (run-program-compile-time
                             "/usr/bin/git"
                             '("log" "--format=%aN")))
-    (sort (loop
-             with unique = nil
-             for someone = (read-line everyone nil nil)
-             while someone
-             do (pushnew (string someone) unique :test #'string-equal)
-             finally (return unique))
+    (sort (remove-duplicates (loop for name = (read-line everyone nil nil)
+                                while name collect name)
+                             :test #'string-equal)
           #'string-lessp
           :key (lambda (name)
                  (latinize
@@ -394,14 +405,15 @@ compiled in the host.")
       (t
        (get-files (cdr file-list) type dir)))))
 
-(defmacro do-source (name type &body body)
+(defmacro do-source ((name type) &body body)
   "Iterate over all the source files that need to be compiled in the host or
  the target, depending on the TYPE argument."
-  (setq type (eval type))
-  (unless (member type '(:host :target))
-    (error "TYPE must be one of :HOST or :TARGET, not ~S" type))
-  `(dolist (,name (get-files *source* ,type '(:relative "src")))
-     ,@body))
+  (let ((type$ (gensym "SOURCE-TYPE-")))
+    `(let ((,type$ ,type))
+       (unless (member ,type$ '(:host :target))
+         (error "TYPE must be one of :HOST or :TARGET, not ~S" ,type$))
+       (dolist (,name (get-files *source* ,type$ '(:relative "src")))
+         ,@body))))
 
 ;;; Compile and load jscl into the host
 
@@ -460,12 +472,12 @@ which occurred within ~r file~:p: ~
 (defun compile-pass (mode)
   (check-type mode (member :host :target))
   (let (fasls failures)
-    (do-source input mode
-      (multiple-value-bind (fails fasl) (compile-hosted-file input)
-        (when fails 
-          (push fails failures)) 
-        (when fasl
-          (push fasl fasls))))
+    (do-source (input mode)
+        (multiple-value-bind (fails fasl) (compile-hosted-file input)
+          (when fails 
+            (push fails failures)) 
+          (when fasl
+            (push fasl fasls))))
     (review-failures failures)
     (dolist (fasl fasls)
       (locally
