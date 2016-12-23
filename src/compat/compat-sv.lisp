@@ -3,8 +3,11 @@
 ;; Provide  a   ANSI  compatible  implementation  of   storage  vectors.
 ;; The runtime definitions come from compiler.lisp.
 
+(in-package :jscl)
+
 (defstruct (storage-vector
-             (:constructor make-storage-vector-1))
+             (:constructor make-storage-vector-1)
+             (:predicate storage-vector-p))
   kind
   underlying-vector)
 
