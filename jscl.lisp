@@ -503,6 +503,7 @@ which occurred within ~r file~:p: ~
           (handler-case
               (use-package '(:jscl/cl :jscl/mop :jscl/cltl2 :jscl/gray) :jscl)
             #+sbcl (sb-ext:name-conflict (c)
+                     (declare (ignore c))
                      (when (find-restart 'take-new) (invoke-restart 'take-new)))) 
           ,@body)
      (unuse-package '(:jscl/cl :jscl/mop :jscl/cltl2 :jscl/gray) :jscl)
