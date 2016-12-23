@@ -554,5 +554,5 @@ improve the level of trust of the tests."
     (load (source-pathname "tests.lisp" :directory nil))
     (let ((*use-html-output-p* nil))
       (declare (special *use-html-output-p*))
-      (mapc #'load (jscl::test-files)))
+      (mapc #'load (funcall (intern "TEST-FILES" :jscl))))
     (load "tests-report.lisp")))
