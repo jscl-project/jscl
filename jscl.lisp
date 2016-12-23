@@ -475,8 +475,8 @@ which occurred within ~r file~:p: ~
 (defun cross-compile-file (file)
   (format *trace-output* "~& → cross-compiling ~a" (enough-namestring file))
   (multiple-value-bind (js warn fail) 
-      (let ((*features* jscl/cl::*features*))
-        (jscl/cl::compile-file file))
+      (let ((*features* (symbol-value (intern "*FEATURES*" :jscl/cl))))
+        (funcall (intern "COMPILE-FILE" :jscl/cl) file))
     (values
      (when (or warn fail)
        (list (enough-namestring file) warn fail))
@@ -527,7 +527,7 @@ which occurred within ~r file~:p: ~
             (declare #+sbcl (sb-ext:muffle-conditions
                              sb-kernel::function-redefinition-warning))
           (load fasl))))
-    (jscl::init-built-in-types%)
+    (funcall (intern "INIT-BUILT-IN-TYPES%" :jscl))
     (with-jscl-second-pass () 
       (compile-pass :target))))
 
