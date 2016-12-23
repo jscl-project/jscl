@@ -129,8 +129,8 @@ Software: you can redistribute it and/or modify it, but it comes with NO
 warranty. For details, type (:COPYING)⮰.
 "
           *print-right-margin*
-          #.(violet-volts-p) (lisp-implementation-version)
-          #.(git-commit)
+          #.(jscl/bootstrap::violet-volts-p) (lisp-implementation-version)
+          #.(jscl/bootstrap::git-commit)
           (lisp-implementation-type)
           (compilation-notice))
   (if (find :node *features*)
