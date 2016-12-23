@@ -24,7 +24,7 @@
                       (cl:lisp-implementation-type)))
 
 (defun jscl/cl::lisp-implementation-version ()
-  #.*version*)
+  #.jscl/bootstrap::*version*)
 
 #.(read-#j)
 
@@ -40,7 +40,7 @@
   (null-if-empty
    #+jscl (or (and #j:location #j:location:hostname)
               (and #j:os #j:os:hostname (#j:os:hostname)))
-   #+sbcl (run-program-compile-time "hostname" '("-d"))
+   #+sbcl (jscl/bootstrap::run-program-compile-time "hostname" '("-d"))
    #-(or jscl sbcl) "localdomain"))
 
 (defun jscl/cl::long-site-name ()
@@ -48,14 +48,14 @@
    #+jscl (or (and #j:location #j:location:origin)
               (and #j:os #j:os:hostname (#j:os:hostname)))
    #+sbcl (substitute #\Space #\. (string-capitalize
-                                   (run-program-compile-time "hostname" '("-d"))))
+                                   (jscl/bootstrap::run-program-compile-time "hostname" '("-d"))))
    #-(or jscl sbcl) "Local Domain"))
 
 (defun jscl/cl::machine-instance ()
   (null-if-empty
    #+jscl (or (and #j:location #j:location:hostname)
               (and #j:os #j:os:hostname (#j:os:hostname)))
-   #+sbcl (run-program-compile-time "hostname" ())
+   #+sbcl (jscl/bootstrap::run-program-compile-time "hostname" ())
    #-(or jscl sbcl) "localhost"))
 
 (defun jscl/cl::machine-version ()
