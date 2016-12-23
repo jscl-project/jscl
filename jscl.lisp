@@ -470,15 +470,24 @@ which occurred within ~r file~:p: ~
          (ignore-errors (load fasl))
          fasl)))))
 
+(defun compile-second-pass-file (file)
+  (multiple-value-bind (js warn fail) (jscl/hosted::compile-file file)
+    (values
+     (when (or warn fail)
+       (list (enough-namestring file) warn fail))
+     js)))
+
 (defun compile-pass (mode)
   (check-type mode (member :host :target))
   (let (fasls failures)
     (do-source (input mode)
-        (multiple-value-bind (fails fasl) (compile-hosted-file input)
-          (when fails 
-            (push fails failures)) 
-          (when fasl
-            (push fasl fasls))))
+      (multiple-value-bind (fails fasl) (ecase mode
+                                          (:host (compile-hosted-file input))
+                                          (:target (compile-second-pass-file input)))
+        (when fails 
+          (push fails failures)) 
+        (when fasl
+          (push fasl fasls))))
     (review-failures failures)
     (dolist (fasl fasls)
       (locally

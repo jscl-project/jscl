@@ -112,9 +112,10 @@ forms if PRINT is set."
   (assert (eql external-format :utf-8)
           (external-format)
           "External format must be :UTF-8 for now.")
-  (with-open-file (out output-file :direction :output
-                       :if-exists :new-version)
-    (let ((*trace-output* *trace-output*))
+  (let ((*trace-output* *trace-output*)
+        (successp nil))
+    (with-open-file (out output-file :direction :output
+                         :if-exists :new-version)
       (unwind-protect
            (progn
              (when trace-file
@@ -122,9 +123,12 @@ forms if PRINT is set."
                                           :direction :output
                                           :if-exists :append)))
              (!compile-file input-file out :print (or *compile-verbose*
-                                                      *compile-print*)))
+                                                      *compile-print*))
+             (setf successp t))
         (when trace-file
-          (close *trace-output*))))))
+          (close *trace-output*))))
+    (values output-file nil            ; FIXME: Warnings?
+            (not successp))))
 
 (defun macro-bindings-add-magic-unquotes ()
   ;; We assume that environments have a friendly list representation for
