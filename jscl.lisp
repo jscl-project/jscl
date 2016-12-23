@@ -19,14 +19,20 @@
 (cl:in-package :common-lisp-user)
 (declaim (optimize (speed 1) (debug 3) (space 0)
                    (safety 3) (compilation-speed 1)))
-(defpackage :jscl/common-lisp
+
+(defpackage jscl/bootstrap
+  (:use :cl))
+
+(in-package :jscl/bootstrap)
+
+(defpackage jscl/common-lisp
   (:use) ; Nothing. (Clozure tries to stuff CCL in by default)
   (:nicknames :jscl/cl)
   (:documentation
    "The  COMMON-LISP  package  contains   the  symbols  defined  in  the
  ANSI standard."))
 
-(defpackage :jscl/javascript-low-level
+(defpackage jscl/javascript-low-level
   (:use) ; nothing
   (:nicknames :jscl/js)
   (:documentation
@@ -37,47 +43,49 @@
 During  bootstrap,  these  forms  are  evaluated  instead  as  calls  to
 “compatibility” functions loaded into the host compiler."))
 
-(defpackage :jscl/intermediate-cross-compilation
+(defpackage jscl/intermediate-cross-compilation
   (:use :jscl/cl)
   (:nicknames :jscl/xc))
 
-(defpackage :jscl
-  (:use :cl)
-  #+sbcl (:use :sb-gray :sb-mop)
-  #+clisp (:use :gray :mop)
-  #+ecl (:use :clos)
-  #+ecl (:shadowing-import-from :gray
-                                #:stream-element-type
-                                #:open-stream-p
-                                #:output-stream-p
-                                #:input-stream-p
-                                #:streamp
-                                #:close)
-  #+ecl (:use :gray)
-  #+lispworks (:use :gray :clos)
-  #-(or sbcl clisp ecl lispworks)
-  (:use #.(warn "You will probably need to add your Gray Streams ~
+(defun defpackage-jscl ()
+  (defpackage jscl
+    (:use :cl)
+    #+sbcl (:use :sb-gray :sb-mop :sb-cltl2)
+    #+clisp (:use :gray :mop)
+    #+ecl (:use :clos)
+    #+ecl (:shadowing-import-from :gray
+                                  #:stream-element-type
+                                  #:open-stream-p
+                                  #:output-stream-p
+                                  #:input-stream-p
+                                  #:streamp
+                                  #:close)
+    #+ecl (:use :gray)
+    #+lispworks (:use :gray :clos)
+    #-(or sbcl clisp ecl lispworks)
+    (:use #.(warn "You will probably need to add your Gray Streams ~
 and MOP into JSCL USE list"))
-  (:export #:bootstrap #:bootstrap-core
-           #:run-tests-in-host #:with-sharp-j #:read-#j
-           #:write-javascript-for-files #:compile-application)
-  (:nicknames :jscl/hosted)
-  (:documentation "JavaScript  from Common  Lisp. This  package contains
+    (:export #:bootstrap #:bootstrap-core
+             #:run-tests-in-host #:with-sharp-j #:read-#j
+             #:write-javascript-for-files #:compile-application)
+    (:nicknames :jscl/hosted)
+    (:documentation "JavaScript  from Common  Lisp. This  package contains
  the   internals   and   exports    some   utility   functions   needed
  for compilation.
 
 When  you  build JSCL,  you'll  invoke  JSCL:Boostrap-Core in  the  host
 compiler (probably SBCL) to build the  system. Once you're “in” the JSCL
-implementation, you may never need to access this package directly."))
+implementation, you may never need to access this package directly.")))
+(defpackage-jscl)
 
-(defpackage :jscl/ffi
+(defpackage jscl/ffi
   (:use :cl :jscl)
   (:export #:oget #:oget* #:make-new #:new #:*root*
            #:oset #:oset*)
   (:documentation
    "Foreign Function Interface to JavaScript functions."))
 
-(defpackage :jscl/cltl2
+(defpackage jscl/cltl2
   (:use :cl :jscl)
   #+jscl (:nicknames :cltl2)
   (:export #:declaration-information)
@@ -88,7 +96,17 @@ Common-Lisp package).
 Very little of this set is  implemented; but this package exists to make
 identifying them (and their provenance) easier."))
 
-(defpackage :jscl/mop
+(defpackage jscl/gray
+  (:use :cl :jscl)
+  #+jscl (:nicknames :gray)
+  (:export #:declaration-information)
+  (:documentation   "Functions   defined  as   a   part   of  the   Gray
+  Streams protocol.
+
+Very little of this set is  implemented; but this package exists to make
+identifying them (and their provenance) easier."))
+
+(defpackage jscl/mop
   (:use :cl :jscl)
   #+jscl (:nicknames :mop)
   (:export #:eql-specializer-object #:eql-specializer-p)
@@ -112,7 +130,6 @@ identifying them (and their provenance) easier."))
 
 #+sbcl (require 'bordeaux-threads)
 
-(in-package :jscl)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun not-tmp (pathname)
@@ -246,9 +263,9 @@ alphabetized more-or-less phonetically, in many cases."
              with unique = nil
              for someone = (read-line everyone nil nil)
              while someone
-             do (pushnew someone unique :test #'string-equal)
+             do (pushnew (string someone) unique :test #'string-equal)
              finally (return unique))
-          #'string<
+          #'string-lessp
           :key (lambda (name)
                  (latinize
                   (subseq name (or (position #\Space name)
@@ -380,6 +397,7 @@ compiled in the host.")
 (defmacro do-source (name type &body body)
   "Iterate over all the source files that need to be compiled in the host or
  the target, depending on the TYPE argument."
+  (setq type (eval type))
   (unless (member type '(:host :target))
     (error "TYPE must be one of :HOST or :TARGET, not ~S" type))
   `(dolist (,name (get-files *source* ,type '(:relative "src")))
@@ -418,42 +436,63 @@ which occurred within ~r file~:p: ~
              (length file-warnings)))
       (t (format *trace-output* "~&No warnings or failures from compilation.")))))
 
+(defun compile-hosted-file (input)
+  (locally
+      ;; I  make the  assumption that  re-loading the  files under
+      ;; Swank, you don't care about  these redefinitions … but if
+      ;; we  get  them running  top-level  (eg,  from a  Makefile)
+      ;; they're more interesting.
+      (declare #+(and swank sbcl) (sb-ext:muffle-conditions
+                                   sb-kernel::function-redefinition-warning))
+    (multiple-value-bind (fasl warn fail) (compile-file input)
+      ;; It's only  interesting to see  if there were  failures at
+      ;; the  end   of  the  compilation  unit,   since  undefined
+      ;; functions  in  one  file   may  be  defined  in  another.
+      ;; This gets particularly convoluted  due to the circularity
+      ;; of the type system and object systems.
+      (values 
+       (when (or warn fail)
+         (list (enough-namestring input) warn fail))
+       (when fasl
+         (ignore-errors (load fasl))
+         fasl)))))
+
+(defun compile-pass (mode)
+  (check-type mode (member :host :target))
+  (let (fasls failures)
+    (do-source input mode
+      (multiple-value-bind (fails fasl) (compile-hosted-file input)
+        (when fails 
+          (push fails failures)) 
+        (when fasl
+          (push fasl fasls))))
+    (review-failures failures)
+    (dolist (fasl fasls)
+      (locally
+          ;; These  occur because  we  reload from  FASL the  compiled
+          ;; versions
+          (declare #+sbcl (sb-ext:muffle-conditions
+                           sb-kernel::function-redefinition-warning))
+        (load fasl)))))
+
+(defmacro with-jscl-second-pass ((&optional) &body body)
+  `(unwind-protect
+        (progn
+          (use-package '(:jscl/cl :jscl/mop :jscl/cltl2 :jscl/gray) :jscl) 
+          ,@body)
+     (unuse-package '(:jscl/cl :jscl/mop :jscl/cltl2 :jscl/gray) :jscl)
+     (defpackage-jscl)))
+
 (defun load-jscl ()
   (with-compilation-unit ()
     (when *load-pathname*    ; Prevent this  file from becoming that one
                                         ; stale FASL …
       (compile-file *load-pathname*)))
   (with-compilation-unit ()
-    (let (fasls failures)
-      (do-source input :host
-        (locally
-            ;; I  make the  assumption that  re-loading the  files under
-            ;; Swank, you don't care about  these redefinitions … but if
-            ;; we  get  them running  top-level  (eg,  from a  Makefile)
-            ;; they're more interesting.
-            (declare #+(and swank sbcl) (sb-ext:muffle-conditions
-                                         sb-kernel::function-redefinition-warning))
-          (multiple-value-bind (fasl warn fail) (compile-file input)
-            ;; It's only  interesting to see  if there were  failures at
-            ;; the  end   of  the  compilation  unit,   since  undefined
-            ;; functions  in  one  file   may  be  defined  in  another.
-            ;; This gets particularly convoluted  due to the circularity
-            ;; of the type system and object systems.
-            (when (or warn fail)
-              (push (list (enough-namestring input) warn fail) failures))
-            (when fasl
-              (ignore-errors (load fasl))
-              (push fasl fasls)))))
-      (review-failures failures)
-      (dolist (fasl fasls)
-        (locally
-            ;; These  occur because  we  reload from  FASL the  compiled
-            ;; versions
-            (declare #+sbcl (sb-ext:muffle-conditions
-                             sb-kernel::function-redefinition-warning))
-          (load fasl)))))
-  (init-built-in-types%)             ; should be a duplicate call by now
-  )
+    (compile-pass :host)
+    (jscl::init-built-in-types%)
+    (with-jscl-second-pass () 
+      (compile-pass :target))))
 
 
 (defmacro doforms ((var stream) &body body)
@@ -467,10 +506,10 @@ which occurred within ~r file~:p: ~
 
 ;;;; Load JSCL into the host implementation.
 
-(load-jscl)
+#+no (load-jscl)
 
 
-(defun run-tests-in-host ()
+(defun jscl/test::run-tests-in-host ()
   "Run the tests in  the host Lisp implementation. It is  a quick way to
 improve the level of trust of the tests."
   (let ((*package* (find-package "JSCL"))
@@ -478,5 +517,5 @@ improve the level of trust of the tests."
     (load (source-pathname "tests.lisp" :directory nil))
     (let ((*use-html-output-p* nil))
       (declare (special *use-html-output-p*))
-      (mapc #'load (test-files)))
+      (mapc #'load (jscl::test-files)))
     (load "tests-report.lisp")))
