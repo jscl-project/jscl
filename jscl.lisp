@@ -472,8 +472,11 @@ which occurred within ~r file~:p: ~
          (ignore-errors (load fasl))
          fasl)))))
 
-(defun compile-second-pass-file (file)
-  (multiple-value-bind (js warn fail) (jscl/hosted::compile-file file)
+(defun cross-compile-file (file)
+  (format *trace-output* "~& → cross-compiling ~a" (enough-namestring file))
+  (multiple-value-bind (js warn fail) 
+      (let ((*features* jscl/cl::*features*))
+        (jscl/cl::compile-file file))
     (values
      (when (or warn fail)
        (list (enough-namestring file) warn fail))
@@ -486,7 +489,7 @@ which occurred within ~r file~:p: ~
       (multiple-value-bind (fails fasl)
           (funcall (ecase mode
                      (:host #'compile-hosted-file)
-                     (:target #'compile-second-pass-file))
+                     (:target #'cross-compile-file))
                    input)
         (when fails
           (check-type fails list "a list mentioning warnings or failures")
