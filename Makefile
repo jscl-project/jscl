@@ -127,3 +127,7 @@ doc/jscl.info:	doc/jscl.texi
 .ansi-patched:	ansi-test.patch
 	-patch --forward --backup -d ansi-test < ansi-test.patch
 	touch .ansi-patched
+
+TAGS:	$(shell find . -name \*.lisp)
+	ctags --languages=lisp -e -R -f TAGS
+
