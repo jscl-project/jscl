@@ -60,7 +60,7 @@ Compiling form #~:d:~%~S~%from ~s~%Generated:~%~s"
         (complain-about-illegal-chars
          form form-count filename compilation))))
 
-(defmacro  doforms ((form  stream)  &body body)        ;  FIXME: Not  to
+(defmacro doforms ((form  stream)  &body body)        ;  FIXME: Not  to
                                         ; use LOOP?
   "Read  forms  from   STREAM,  binding  each  in  turn   to  FORM,  and
 execute BODY. Also binds LAST-FORM and FORM-COUNT."
