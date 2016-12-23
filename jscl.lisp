@@ -489,13 +489,7 @@ which occurred within ~r file~:p: ~
         (when fasl
           (push fasl fasls))))
     (review-failures failures)
-    (dolist (fasl fasls)
-      (locally
-          ;; These  occur because  we  reload from  FASL the  compiled
-          ;; versions
-          (declare #+sbcl (sb-ext:muffle-conditions
-                           sb-kernel::function-redefinition-warning))
-        (load fasl)))))
+    fasls))
 
 (defmacro with-jscl-second-pass ((&optional) &body body)
   `(unwind-protect
@@ -515,7 +509,14 @@ which occurred within ~r file~:p: ~
                                         ; stale FASL …
       (compile-file *load-pathname*)))
   (with-compilation-unit ()
-    (compile-pass :host)
+    (let ((fasls (compile-pass :host)))
+      (dolist (fasl fasls)
+        (locally
+            ;; These  occur because  we  reload from  FASL the  compiled
+            ;; versions
+            (declare #+sbcl (sb-ext:muffle-conditions
+                             sb-kernel::function-redefinition-warning))
+          (load fasl))))
     (jscl::init-built-in-types%)
     (with-jscl-second-pass () 
       (compile-pass :target))))
