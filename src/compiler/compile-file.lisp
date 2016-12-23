@@ -114,19 +114,20 @@ forms if PRINT is set."
           "External format must be :UTF-8 for now.")
   (let ((*trace-output* *trace-output*)
         (successp nil))
-    (with-open-file (out output-file :direction :output
-                         :if-exists :new-version)
-      (unwind-protect
-           (progn
-             (when trace-file
-               (setf *trace-output* (open trace-file
-                                          :direction :output
-                                          :if-exists :append)))
-             (!compile-file input-file out :print (or *compile-verbose*
-                                                      *compile-print*))
-             (setf successp t))
-        (when trace-file
-          (close *trace-output*))))
+    (with-compilation-environment
+      (with-open-file (out output-file :direction :output
+                           :if-exists :new-version)
+        (unwind-protect
+             (progn
+               (when trace-file
+                 (setf *trace-output* (open trace-file
+                                            :direction :output
+                                            :if-exists :append)))
+               (!compile-file input-file out :print (or *compile-verbose*
+                                                        *compile-print*))
+               (setf successp t))
+          (when trace-file
+            (close *trace-output*)))))
     (values output-file nil            ; FIXME: Warnings?
             (not successp))))
 
