@@ -100,10 +100,10 @@ You should  have received a  copy of  the GNU General  Public License
 along with JSCL. If not, see <http://www.gnu.org/licenses/>."
           *print-right-margin*)
   (when (y-or-n-p "Would you like to read the GNU GPL now?")
-    (princ #.(with-open-file (s (source-pathname "COPYING.GPLv3" 
-                                                 :directory '(:relative))
+    (princ #.(with-open-file (s (jscl/bootstrap::source-pathname "COPYING.GPLv3" 
+                                                                 :directory '(:relative))
                                 :direction :input)
-               (read-fully s))))
+               (jscl/bootstrap::read-whole-file s))))
   (values))
 
 (defun :credits ()
@@ -112,7 +112,7 @@ JSCL contains contributions by~
 ~:[ many people. ~
 ~;:~
 :~:*~{~%~a~^~32t	~a~}~]"
-           (git-credits))
+           (jscl/bootstrap::git-credits))
   (values))
 
 (defun welcome-message ()
