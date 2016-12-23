@@ -255,11 +255,11 @@ forms if PRINT is set."
                  "~2&;;;; … Done, compiled jscl.js and test suite.~%~|~%"))
        ,@body)))
 
-(defun bootstrap (&optional verbosep)
+(defun jscl/bootstrap::bootstrap (&optional verbosep)
   (with-bootstrap (verbosep)
     (compile-web-repl)
     (compile-node-repl)))
 
-(defun bootstrap-core (&optional verbosep)
+(defun jscl/bootstrap::bootstrap-core (&optional verbosep)
   "Build the core JSCL jscl.js file and test suite."
   (with-bootstrap (verbosep)))

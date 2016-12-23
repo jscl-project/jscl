@@ -35,7 +35,8 @@
   #+lispworks (:use :gray)
   #-(or sbcl clisp ecl lispworks)
   (:use #.(warn "You will probably need to add your Gray Streams ~
- into JSCL/Bootstrap USE list")))
+ into JSCL/Bootstrap USE list"))
+  (:export #:bootstrap #:bootstrap-core))
 
 (in-package :jscl/bootstrap)
 
@@ -79,8 +80,7 @@ During  bootstrap,  these  forms  are  evaluated  instead  as  calls  to
     #-(or sbcl clisp ecl lispworks)
     (:use #.(warn "You will probably need to add your Gray Streams ~
 and MOP into JSCL USE list"))
-    (:export #:bootstrap #:bootstrap-core
-             #:run-tests-in-host #:with-sharp-j #:read-#j
+    (:export #:run-tests-in-host #:with-sharp-j #:read-#j
              #:write-javascript-for-files #:compile-application)
     (:nicknames :jscl/hosted)
     (:documentation "JavaScript  from Common  Lisp. This  package contains
