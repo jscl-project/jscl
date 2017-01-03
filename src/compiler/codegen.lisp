@@ -201,7 +201,7 @@
 JavaScript.  This  is  a  union  of  all  the  reserved  word  lists  in
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_grammar")
 
-(defun valid-js-identifier (string-designator)
+(defun valid-js-identifier-p (string-designator)
   "Check  if  STRING-DESIGNATOR is  valid  as  a Javascript  identifier.
  It returns  a couple of values:  the identifier itself as  a string (if
  valid), and a boolean value with the result of this check."
@@ -209,7 +209,7 @@ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_gramma
                   (symbol (symbol-name string-designator))
                   (string string-designator)
                   (t
-                   (return-from valid-js-identifier (values nil nil))))))
+                   (return-from valid-js-identifier-p (values nil nil))))))
     (flet ((constitutentp (ch)
              (or (alphanumericp ch) (member ch '(#\$ #\_)))))
       (if (and (every #'constitutentp string)
@@ -229,7 +229,7 @@ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_gramma
 
 (defun js-identifier (string-designator)
   (multiple-value-bind (string valid)
-      (valid-js-identifier string-designator)
+      (valid-js-identifier-p string-designator)
     (unless valid
       (error "~S is not a valid Javascript identifier." string-designator))
     (js-format "~a" string)))
@@ -274,7 +274,7 @@ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_gramma
        ((null tail))
     (let ((key (car tail))
           (value (cadr tail)))
-      (multiple-value-bind (identifier identifier-p) (valid-js-identifier key)
+      (multiple-value-bind (identifier identifier-p) (valid-js-identifier-p key)
         (declare (ignore identifier))
         (if identifier-p
             (js-identifier key)
@@ -303,7 +303,7 @@ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_gramma
 
 (defun check-lvalue (x)
   (unless (or (symbolp x)
-              (nth-value 1 (valid-js-identifier x))
+              (nth-value 1 (valid-js-identifier-p x))
               (and (consp x)
                    (member (car x) '(get = property))))
     (error "Bad Javascript lvalue ~S" x)))
@@ -355,7 +355,7 @@ unnecessary parentheses."
        (js-format "]"))
       (get
        (multiple-value-bind (accessor accessorp)
-           (valid-js-identifier (cadr args))
+           (valid-js-identifier-p (cadr args))
          (unless accessorp
            (error "Invalid accessor ~S" (cadr args)))
          (js-expr (car args) 0)
