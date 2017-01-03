@@ -132,13 +132,79 @@
   (apply #'format *js-output* fmt args))
 
 
+(defvar +javascript-reserved-keywords+
+  '(
+    "abstract"
+    "await"
+    "boolean"
+    "break"
+    "byte"
+    "case"
+    "catch"
+    "char"
+    "class"
+    "const"
+    "continue"
+    "debugger"
+    "default"
+    "delete"
+    "do"
+    "double"
+    "else"
+    "enum"
+    "export"
+    "extends"
+    "false"
+    "final"
+    "finally"
+    "float"
+    "for"
+    "function"
+    "goto"
+    "if"
+    "implements"
+    "import"
+    "in"
+    "instanceof"
+    "int"
+    "interface"
+    "let"
+    "long"
+    "native"
+    "new"
+    "new"
+    "null"
+    "package"
+    "private"
+    "protected"
+    "public"
+    "return"
+    "short"
+    "static"
+    "super"
+    "switch"
+    "synchronized"
+    "this"
+    "throw"
+    "throws"
+    "transient"
+    "true"
+    "try"
+    "typeof"
+    "var"
+    "void"
+    "volatile"
+    "while"
+    "with"
+    "yield")
+  "These  keywords  are not  permitted  to  be  used as  identifiers  in
+JavaScript.  This  is  a  union  of  all  the  reserved  word  lists  in
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_grammar")
+
 (defun valid-js-identifier (string-designator)
   "Check  if  STRING-DESIGNATOR is  valid  as  a Javascript  identifier.
- It returns  a couple of values.  The identifier itself as  a string and
- a boolean value with the result of this check.
-
-FIXME: This  does not check the  list of reserved words  which cannot be
-used as identifiers; for example, “package” and “if”"
+ It returns  a couple of values:  the identifier itself as  a string (if
+ valid), and a boolean value with the result of this check."
   (let ((string (typecase string-designator
                   (symbol (symbol-name string-designator))
                   (string string-designator)
@@ -149,7 +215,9 @@ used as identifiers; for example, “package” and “if”"
       (if (and (every #'constitutentp string)
                (if (plusp (length string))
                    (not (digit-char-p (char string 0)))
-                   t))
+                   t)
+               (not (member string +javascript-reserved-keywords+
+                            :test #'string=)))
           (values string t)
           (values nil nil)))))
 
