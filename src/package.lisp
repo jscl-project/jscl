@@ -45,7 +45,7 @@
   (jscl/js::delete-property (package-name (find-package-or-fail package-designator))
                             *package-table*))
 
-(defun %make-package 
+(defun %make-package
     (name use &optional nicknames)
   (when (find-package name)
     (error "A package named `~a' already exists." name))

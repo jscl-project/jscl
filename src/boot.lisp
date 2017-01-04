@@ -30,7 +30,7 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (if (not (find-package :keyword))
       (make-package "KEYWORD"))
-  
+
   (make-package "COMMON-LISP" :nicknames (list "CL"))
   (export
    '(#:&allow-other-keys               	#:&aux
@@ -523,11 +523,11 @@
      #:write-to-string                 	#:y-or-n-p
      #:yes-or-no-p                     	#:zerop)
    (find-package "COMMON-LISP"))
-  
+
   (make-package "COMMON-LISP-USER"
                 :use :common-lisp
                 :nicknames (list "CL-USER"))
-  
+
   (make-package "JSCL" :use :common-lisp))
 
 (in-package :jscl)

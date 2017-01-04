@@ -134,7 +134,7 @@
                           (array-dimensions value)))
              (structure-object (cddr type))
              (standard-object (cddr type))))
-          ((subtypep type 'string) (cons type (length value))) 
+          ((subtypep type 'string) (cons type (length value)))
           ((subtypep type 'integer) (list type value value))
           ((null type) t)
           (t type)))
@@ -562,7 +562,7 @@ star)."
           (cond (metaclass
                  (push class (built-in-class-superclasses metaclass)))
                 (t
-                 (setq metaclass 
+                 (setq metaclass
                        (make-binding
                         :name subclass
                         :type 'type
@@ -612,7 +612,7 @@ star)."
 
 (defun init-built-in-basic-types% ()
   (dolist (type-info +basic-types+)
-    (destructuring-bind (name predicate &rest supertypes) type-info 
+    (destructuring-bind (name predicate &rest supertypes) type-info
       (push-to-lexenv
        (make-binding :name name
                      :type 'type

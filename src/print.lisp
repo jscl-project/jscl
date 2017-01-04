@@ -307,7 +307,7 @@ format control string ~S." fmt))))
      (simple-format stream "#<PACKAGE ~a>" (package-name form)))
     ;; Others
     (otherwise
-     (simple-format stream "#<JS-OBJECT ~a>" 
+     (simple-format stream "#<JS-OBJECT ~a>"
                     (funcall (JSCL/FFI:OGET* JSCL/FFI:*ROOT* "String")
                              form)))))
 
@@ -672,7 +672,7 @@ emits (1- COUNT)."
 
 (defun format-conditional-t-or-nothing (captured-substrings arguments)
   (assert (and (= 1 (length captured-substrings))
-               (stringp (first captured-substrings))) 
+               (stringp (first captured-substrings)))
           (captured-substrings)
           "~~@[ does not have ~~; fields")
   (values

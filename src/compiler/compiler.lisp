@@ -452,7 +452,7 @@ specifier for the condition types that have been muffled.
              (jscl/js::if (jscl/js::== (jscl/js::% (jscl/js::- (nargs) start) 2) 1)
                           (jscl/js::throw "Odd number of keyword arguments."))
              (jscl/js::for ((jscl/js::= i start) (jscl/js::< i (nargs)) (jscl/js::+= i 2))
-               (jscl/js::if (jscl/js::and 
+               (jscl/js::if (jscl/js::and
                              ,@(mapcar (lambda (keyword-argument)
                                          (destructuring-bind ((keyword-name var) &optional initform svar)
                                              keyword-argument
@@ -1627,7 +1627,7 @@ generate the code which performs the transformation on these variables."
   `(jscl/js::selfcall
     (jscl/js::progn
       (jscl/js::var tmp (jscl/js::property ,(convert object)
-                                           (jscl/js::call-internal |xstring| 
+                                           (jscl/js::call-internal |xstring|
                                                                    ,(convert key))))
       ,@(mapcar (lambda (key)
                   `(jscl/js::progn
@@ -1648,14 +1648,14 @@ generate the code which performs the transformation on these variables."
         (jscl/js::var obj ,(convert object))
         ,@(mapcar (lambda (key)
                     `(jscl/js::progn
-                       (jscl/js::= obj (jscl/js::property obj 
+                       (jscl/js::= obj (jscl/js::property obj
                                                           (jscl/js::call-internal |xstring|
                                                                                   ,(convert key))))
                        (jscl/js::if (jscl/js::=== obj jscl/ffi::undefined)
                                     (jscl/js::throw "Impossible to set object property."))))
                   (butlast keys))
         (jscl/js::var tmp
-                      (jscl/js::= (jscl/js::property obj 
+                      (jscl/js::= (jscl/js::property obj
                                                      (jscl/js::call-internal |xstring|
                                                                              ,(convert (car (last keys)))))
                                   ,(convert value)))

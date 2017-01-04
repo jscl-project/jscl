@@ -192,8 +192,8 @@ captured vars and embedded forms as multiple values."
              (push name vars)
              (when initializerp
                (push `(setq ,name ,initializer) revised))))
-          ;; Any of these forms establishes  a new lexical scope. Don't
-          ;; expand it yet, wait for it to do its own expansion. Any of
+          ;; Any of these  forms establishes a new  lexical scope. Don't
+          ;; expand it yet, wait for it  to do its own expansion. Any of
           ;; these forms must be a macro for this to work.
           ((jscl/js::function jscl/js::progn)
            (push form revised))
