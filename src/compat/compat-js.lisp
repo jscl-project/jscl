@@ -31,6 +31,13 @@
 
 (defparameter jscl/js::this jscl/ffi::*root*)
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (let ((packages (make-hash-table :test 'equal))
+        (keyword-package (make-hash-table :test 'equal)))
+    (setf (gethash "symbols" keyword-package) (make-hash-table :test 'equal)
+          (gethash "KEYWORD" packages) keyword-package
+          (gethash "packages" jscl/ffi:*root*) packages)))
+
 (defmacro jscl/js::%js-vref (symbol-name &optional _)
   (declare (ignore _))
   `(jscl/ffi:oget jscl/ffi:*root* ,symbol-name))
