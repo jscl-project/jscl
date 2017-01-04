@@ -401,7 +401,7 @@ specifier for the condition types that have been muffled.
            (jscl/js::for ((jscl/js::= i (- (nargs) 1))
                           (jscl/js::>= i ,(+ n-required-arguments n-optional-arguments))
                           (jscl/js::post-- i))
-             (jscl/js::= ,js!rest (new (jscl/js::call-internal |Cons| (arg i) ,js!rest)))))))))
+                         (jscl/js::= ,js!rest (new (jscl/js::call-internal |Cons| (arg i) ,js!rest)))))))))
 
 (defun compile-lambda-parse-keywords (ll)
   (let ((n-required-arguments
@@ -431,13 +431,13 @@ specifier for the condition types that have been muffled.
                       (jscl/js::for ((jscl/js::= i ,(+ n-required-arguments n-optional-arguments))
                                      (jscl/js::< i (nargs))
                                      (jscl/js::+= i 2))
-                        ;; ....
-                        (jscl/js::if (jscl/js::=== (arg i) ,(convert keyword-name))
-                                     (jscl/js::progn
-                                       (jscl/js::= ,(translate-variable var) (arg (+ i 1)))
-                                       ,(when svar `(jscl/js::= ,(translate-variable svar)
-                                                                ,(convert t)))
-                                       (jscl/js::break))))
+                                    ;; ....
+                                    (jscl/js::if (jscl/js::=== (arg i) ,(convert keyword-name))
+                                                 (jscl/js::progn
+                                                   (jscl/js::= ,(translate-variable var) (arg (+ i 1)))
+                                                   ,(when svar `(jscl/js::= ,(translate-variable svar)
+                                                                            ,(convert t)))
+                                                   (jscl/js::break))))
                       (jscl/js::if (jscl/js::== i (nargs))
                                    (jscl/js::= ,(translate-variable var) ,(convert initform)))))))
           (when keyword-arguments
@@ -452,15 +452,15 @@ specifier for the condition types that have been muffled.
              (jscl/js::if (jscl/js::== (jscl/js::% (jscl/js::- (nargs) start) 2) 1)
                           (jscl/js::throw "Odd number of keyword arguments."))
              (jscl/js::for ((jscl/js::= i start) (jscl/js::< i (nargs)) (jscl/js::+= i 2))
-               (jscl/js::if (jscl/js::and
-                             ,@(mapcar (lambda (keyword-argument)
-                                         (destructuring-bind ((keyword-name var) &optional initform svar)
-                                             keyword-argument
-                                           (declare (ignore var initform svar))
-                                           `(jscl/js::!== (arg i) ,(convert keyword-name))))
-                                       keyword-arguments))
-                            (jscl/js::throw (jscl/js::+ "Unknown keyword argument "
-                                                        (jscl/js::property (arg i) "name"))))))))))
+                           (jscl/js::if (jscl/js::and
+                                         ,@(mapcar (lambda (keyword-argument)
+                                                     (destructuring-bind ((keyword-name var) &optional initform svar)
+                                                         keyword-argument
+                                                       (declare (ignore var initform svar))
+                                                       `(jscl/js::!== (arg i) ,(convert keyword-name))))
+                                                   keyword-arguments))
+                                        (jscl/js::throw (jscl/js::+ "Unknown keyword argument "
+                                                                    (jscl/js::property (arg i) "name"))))))))))
 
 (defun parse-lambda-list (ll)
   (values (ll-required-arguments ll)
@@ -2171,7 +2171,7 @@ the value."
 (defun compile-toplevel (sexp &optional multiple-value-p return-p)
   #-jscl
   (progn
-    (jscl/cl:eval (process-toplevel sexp multiple-value-p return-p))
+    (jscl/cl::eval (process-toplevel sexp multiple-value-p return-p))
     (format *js-output* "/* Toplevel form evaluated in ~a */" (lisp-implementation-type)))
   #+jscl
   (with-output-to-string (*js-output*)
@@ -2181,7 +2181,8 @@ the value."
   `(let ((*literal-table* nil)
          (*variable-counter* 0)
          (*gensym-counter* 0)
-         (*literal-counter* 0))
+         (*literal-counter* 0)
+         (*features* (list :jscl *features*)))
      (with-sharp-j
        ,@body)))
 
