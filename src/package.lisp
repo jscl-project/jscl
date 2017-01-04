@@ -45,16 +45,17 @@
   (jscl/js::delete-property (package-name (find-package-or-fail package-designator))
                             *package-table*))
 
-(defun %make-package (name use &optional nicknames)
+(defun %make-package 
+    (name use &optional nicknames)
   (when (find-package name)
-    (error "A package namded `~a' already exists." name))
+    (error "A package named `~a' already exists." name))
   (let ((package (jscl/js::new)))
-    (setf (jscl/ffi:oget package "packageName") name)
-    (setf (jscl/ffi:oget package "symbols") (jscl/js::new))
-    (setf (jscl/ffi:oget package "exports") (jscl/js::new))
-    (setf (jscl/ffi:oget package "use") use)
-    (setf (jscl/ffi:oget package "nicknames") nicknames)
-    (setf (jscl/ffi:oget *package-table* name) package)
+    (setf (jscl/ffi:oget package "packageName") name
+          (jscl/ffi:oget package "symbols") (jscl/js::new)
+          (jscl/ffi:oget package "exports") (jscl/js::new)
+          (jscl/ffi:oget package "use") use
+          (jscl/ffi:oget package "nicknames") nicknames
+          (jscl/ffi:oget *package-table* name) package)
     (dolist (nickname nicknames)
       (setf (jscl/ffi:oget *package-table* nickname) package))
     package))
