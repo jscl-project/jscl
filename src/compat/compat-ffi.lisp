@@ -34,8 +34,8 @@ a function named CLASS in package JSCL/JS."
   (let ((jscl/js::this (make-hash-table :test 'equal)))
     (setf (gethash "_prototype" jscl/js::this) class)
     (if (fboundp class)
-        (funcall class ctor-args)
-        (funcall (intern (symbol-name class) :jscl/js) ctor-args))))
+        (apply class ctor-args)
+        (apply (intern (symbol-name class) :jscl/js) ctor-args))))
 
 (defun (setf jscl/ffi:oget) (value object key)
   "Set the field named by KEY on the JavaScript object OBJECT to VALUE."
