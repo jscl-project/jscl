@@ -13,20 +13,20 @@
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
-(in-package :jscl)
+(in-package #-jscl :jscl #+jscl :jscl/impl)
 
 (/debug "loading numbers.lisp!")
 
 ;;;; Various numeric functions and constants
 
 (macrolet ((def (operator initial-value)
-               (let ((init-sym   (gensym "INIT-"))
-                     (dolist-sym (gensym "DOLIST-")))
-                 `(defun ,(intern (symbol-name operator) :jscl/cl) (&rest args)
-                    (let ((,init-sym ,initial-value))
-                      (dolist (,dolist-sym args)
-                        (setq ,init-sym (,operator ,init-sym ,dolist-sym)))
-                      ,init-sym)))))
+             (let ((init-sym   (gensym "INIT-"))
+                   (dolist-sym (gensym "DOLIST-")))
+               `(defun ,(intern (symbol-name operator) :jscl/cl) (&rest args)
+                  (let ((,init-sym ,initial-value))
+                    (dolist (,dolist-sym args)
+                      (setq ,init-sym (,operator ,init-sym ,dolist-sym)))
+                    ,init-sym)))))
   (def + 0)
   (def * 1))
 
@@ -34,12 +34,12 @@
 ;; given, it negates it or takes its reciprocal. Otherwise all the other
 ;; args are subtracted from or divided by it.
 (macrolet ((def (operator unary-form)
-               `(defun ,(intern (symbol-name operator) :jscl/cl) (x &rest args)
-                  (cond
-                    ((null args) ,unary-form)
-                    (t (dolist (y args)
-                         (setq x (,operator x y)))
-                       x)))))
+             `(defun ,(intern (symbol-name operator) :jscl/cl) (x &rest args)
+                (cond
+                  ((null args) ,unary-form)
+                  (t (dolist (y args)
+                       (setq x (,operator x y)))
+                     x)))))
   (def - (-   x))
   (def / (/ 1 x)))
 
@@ -94,12 +94,12 @@
   (if (zerop x) x (/ x (abs x))))
 
 (macrolet ((def (operator)
-               `(defun ,(intern (symbol-name operator) :jscl/cl) (x &rest args)
-                  (dolist (y args)
-                    (if (,operator x y)
-                        (setq x (car args))
-                        (return-from ,(intern (symbol-name operator) :jscl/cl) nil)))
-                  t)))
+             `(defun ,(intern (symbol-name operator) :jscl/cl) (x &rest args)
+                (dolist (y args)
+                  (if (,operator x y)
+                      (setq x (car args))
+                      (return-from ,(intern (symbol-name operator) :jscl/cl) nil)))
+                t)))
   (def >)
   (def >=)
   (def =)
@@ -113,11 +113,11 @@
 (defun jscl/cl::oddp  (x) (not (evenp x)))
 
 (macrolet ((def (name comparison)
-               `(defun ,(intern (string name) :jscl/cl) (x &rest xs)
-                  (dolist (y xs)
-                    (when (,comparison y x)
-                      (setq x y)))
-                  x)))
+             `(defun ,(intern (string name) :jscl/cl) (x &rest xs)
+                (dolist (y xs)
+                  (when (,comparison y x)
+                    (setq x y)))
+                x)))
   (def max >)
   (def min <))
 

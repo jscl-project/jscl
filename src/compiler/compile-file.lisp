@@ -2,7 +2,7 @@
 ;;;; bundles
 ;;; -*- lisp -*-
 
-(in-package :jscl)
+(in-package #-jscl :jscl #+jscl :jscl/impl)
 
 
 (defmacro with-compile-file-bindings ((filename &key verbosep)

@@ -530,7 +530,7 @@
 
   (make-package "JSCL" :use :common-lisp))
 
-(in-package :jscl)
+(in-package #-jscl :jscl #+jscl :jscl/impl)
 
 (/debug "loading boot.lisp!")
 

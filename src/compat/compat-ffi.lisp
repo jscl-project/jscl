@@ -16,7 +16,7 @@
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
-(in-package :jscl)
+(in-package #-jscl :jscl #+jscl :jscl/impl)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defvar jscl/ffi:*root* (make-hash-table :test 'equal)

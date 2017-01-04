@@ -3,7 +3,7 @@
 ;;; This implementation is  in no way optimal, nor  really too effective
 ;;; at covering the cases for CLOS. It's a start, though.
 
-(in-package :jscl)
+(in-package #-jscl :jscl #+jscl :jscl/impl)
 
 (defstruct generic-function
   name lambda-list required-count methods

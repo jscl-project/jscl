@@ -5,7 +5,7 @@
 ;; a reasonable implementation of DEFGENERIC and DEFMETHOD and the basic
 ;; type system — DEFTYPE, TYPEP, SUBTYPEP, E/TYPECASE, &c.
 
-(in-package :jscl)
+(in-package #-jscl :jscl #+jscl :jscl/impl)
 
 (/debug "Loading types.lisp…")
 

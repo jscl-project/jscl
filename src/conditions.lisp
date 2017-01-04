@@ -13,7 +13,7 @@
 ;; You should  have received a  copy of  the GNU General  Public License
 ;; along with JSCL. If not, see <http://www.gnu.org/licenses/>.
 
-(in-package :jscl)
+(in-package #-jscl :jscl #+jscl :jscl/impl)
 
 ;;; Follow here a straighforward  implementation of the condition system
 ;;; of Common  Lisp, except  that any  value will  work as  a condition.

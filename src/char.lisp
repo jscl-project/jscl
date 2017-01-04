@@ -1,6 +1,6 @@
 ;;;; char.lisp — Character objects
 
-(in-package :jscl)
+(in-package #-jscl :jscl #+jscl :jscl/impl)
 
 (/debug "loading char.lisp!")
 

@@ -1,5 +1,5 @@
 ;;; documentation.lisp — Accessing DOCUMENTATION
-(in-package :jscl)
+(in-package #-jscl :jscl #+jscl :jscl/impl)
 
 (/debug "loading documentation.lisp!")
 

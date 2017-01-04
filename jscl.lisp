@@ -62,36 +62,39 @@ During  bootstrap,  these  forms  are  evaluated  instead  as  calls  to
   (:use :jscl/cl)
   (:nicknames :jscl/xc))
 
-(defun defpackage-jscl () 
-  (defpackage jscl
-    (:use :cl)
-    #+sbcl (:use :sb-gray :sb-mop :sb-cltl2)
-    #+clisp (:use :gray :mop)
-    #+ecl (:use :clos)
-    #+ecl (:shadowing-import-from :gray
-                                  #:stream-element-type
-                                  #:open-stream-p
-                                  #:output-stream-p
-                                  #:input-stream-p
-                                  #:streamp
-                                  #:close)
-    #+ecl (:use :gray)
-    #+lispworks (:use :gray :clos)
-    #-(or sbcl clisp ecl lispworks)
-    (:use #.(warn "You will probably need to add your Gray Streams ~
+(defpackage jscl
+  (:use :cl)
+  #+sbcl (:use :sb-gray :sb-mop :sb-cltl2)
+  #+clisp (:use :gray :mop)
+  #+ecl (:use :clos)
+  #+ecl (:shadowing-import-from :gray
+                                #:stream-element-type
+                                #:open-stream-p
+                                #:output-stream-p
+                                #:input-stream-p
+                                #:streamp
+                                #:close)
+  #+ecl (:use :gray)
+  #+lispworks (:use :gray :clos)
+  #-(or sbcl clisp ecl lispworks)
+  (:use #.(warn "You will probably need to add your Gray Streams ~
 and MOP into JSCL USE list"))
-    (:export #:run-tests-in-host #:with-sharp-j #:read-#j
-             #:write-javascript-for-files #:compile-application)
-    (:nicknames :jscl/hosted)
-    (:documentation "JavaScript  from Common  Lisp. This  package contains
+  (:export #:run-tests-in-host #:with-sharp-j #:read-#j
+           #:write-javascript-for-files #:compile-application)
+  (:nicknames :jscl/hosted)
+  (:documentation "JavaScript  from Common  Lisp. This  package contains
  the   internals   and   exports    some   utility   functions   needed
  for compilation.
 
 When  you  build JSCL,  you'll  invoke  JSCL:Boostrap-Core in  the  host
 compiler (probably SBCL) to build the  system. Once you're “in” the JSCL
-implementation, you may never need to access this package directly.")))
-(eval-when (:compile-toplevel :execute :load-toplevel)
-  (defpackage-jscl))
+implementation, you may never need to access this package directly."))
+
+(defpackage jscl/implementation-details
+  (:use :jscl/cl :jscl/gray :jscl/mop :jscl/cltl2)
+  (:nicknames :jscl/impl)
+  (:documentation "JavaScript from  Common Lisp. Internal implementation
+ details (when self-hosting)."))
 
 (defpackage jscl/ffi
   (:use :cl :jscl)

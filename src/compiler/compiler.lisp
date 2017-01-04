@@ -15,7 +15,7 @@
 
 ;;;; Compiler
 
-(in-package :jscl)
+(in-package #-jscl :jscl #+jscl :jscl/impl)
 
 (/debug "loading compiler.lisp!")
 

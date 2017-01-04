@@ -25,7 +25,7 @@
 ;;; these structures. They are  implemented as storage-vector objects at
 ;;; the JavaScript level.
 
-(in-package :jscl)
+(in-package #-jscl :jscl #+jscl :jscl/impl)
 
 ;; A Class-Layout  structure contains the interesting  information about
 ;; the  current revision  of a  class.  An instance  object's slots  are
