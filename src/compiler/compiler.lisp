@@ -1083,7 +1083,7 @@ let-binding-wrapper."
                                    (jscl/js::== (jscl/js::get cf "id") id))
                      (jscl/js::return (jscl/js::method-call
                                        ,values "apply" this
-                                       (jscl/js::call-internal 
+                                       (jscl/js::call-internal
                                         |forcemv|
                                         (jscl/js::get cf "values"))))
                      (jscl/js::throw cf))))))
@@ -1091,8 +1091,8 @@ let-binding-wrapper."
 (define-compilation throw (id value)
   `(jscl/js::selfcall
     (jscl/js::var |values| (internal |mv|))
-    (jscl/js::throw (jscl/js::new (jscl/js::call-internal |CatchNLX| 
-                                                          ,(convert id) 
+    (jscl/js::throw (jscl/js::new (jscl/js::call-internal |CatchNLX|
+                                                          ,(convert id)
                                                           ,(convert value t))))))
 
 (defun go-tag-p (x)
@@ -1458,7 +1458,7 @@ generate the code which performs the transformation on these variables."
     (jscl/js::return ,(convert-to-bool
                        `
                        (jscl/js::and
-                        (jscl/js::and 
+                        (jscl/js::and
                          (jscl/js::=== (jscl/js::typeof x) "object")
                          (jscl/js::in "length" x))
                         (jscl/js::== (jscl/js::get x "stringp") 1))))))
@@ -1581,11 +1581,11 @@ generate the code which performs the transformation on these variables."
     (jscl/js::if (jscl/js::or (< i 0)
                               (>= i (jscl/js::get x "length")))
                  (jscl/js::throw
-                     (jscl/js::new 
+                     (jscl/js::new
                       (jscl/js::call |Error|
                                      ,(concatenate
                                        'string
-                                       "SETF AREF out of range for vector " 
+                                       "SETF AREF out of range for vector "
                                        (string vector))))))
     (jscl/js::return (jscl/js::= (jscl/js::property x i) ,value))))
 
@@ -2161,26 +2161,25 @@ the value."
     (js (process-toplevel sexp multiple-value-p return-p))))
 
 (defmacro with-compilation-environment (&body body)
-  (let ((renames (gensym "RENAMES-")))
-    `(let ((*literal-table* nil)
-           (*variable-counter* 0)
-           (*gensym-counter* 0)
-           (*literal-counter* 0))
-       (with-sharp-j
-         (unwind-protect
-              (progn
-                (rename-package (find-package "JSCL/HOSTED")
-                                "JSCL/HOSTED*")
-                (unwind-protect
-                     (progn
-                       (rename-package (find-package "JSCL/XC") "JSCL")
-                       ,@body)
-                  (ignore-errors
-                    (rename-package (find-package "JSCL")
-                                    "JSCL/INTERMEDIATE-CROSS-COMPILATION"))))
-           (ignore-errors
-             (rename-package (find-package "JSCL/HOSTED*")
-                             "JSCL/HOSTED")))))))
+  `(let ((*literal-table* nil)
+         (*variable-counter* 0)
+         (*gensym-counter* 0)
+         (*literal-counter* 0))
+     (with-sharp-j
+       (unwind-protect
+            (progn
+              (rename-package (find-package "JSCL/HOSTED")
+                              "JSCL/HOSTED*")
+              (unwind-protect
+                   (progn
+                     (rename-package (find-package "JSCL/XC") "JSCL")
+                     ,@body)
+                (ignore-errors
+                  (rename-package (find-package "JSCL")
+                                  "JSCL/INTERMEDIATE-CROSS-COMPILATION"))))
+         (ignore-errors
+           (rename-package (find-package "JSCL/HOSTED*")
+                           "JSCL/HOSTED"))))))
 
 
 (defmacro !with-compilation-unit (options &body body)
