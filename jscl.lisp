@@ -23,7 +23,7 @@
 (defpackage jscl/bootstrap
   (:use :cl)
   #+sbcl (:use :sb-gray)
-  #+clisp (:use :gray) 
+  #+clisp (:use :gray)
   #+ecl (:shadowing-import-from :gray
                                 #:stream-element-type
                                 #:open-stream-p
@@ -116,7 +116,7 @@ identifying them (and their provenance) easier."))
   #+jscl (:nicknames :gray)
   (:export #:declaration-information)
   (:documentation   "Functions   defined  as   a   part   of  the   Gray
-  Streams protocol.
+ Streams protocol.
 
 Very little of this set is  implemented; but this package exists to make
 identifying them (and their provenance) easier."))
@@ -160,7 +160,7 @@ using Slime."
                              (or (not-tmp *load-pathname*)
                                  (not-tmp *compile-file-pathname*)
                                  *default-pathname-defaults*))))
-  
+
   (defun extract-version-from-package.json ()
     (with-open-file (in (merge-pathnames "package.json" *base-directory*))
       (loop
@@ -433,7 +433,7 @@ compiled in the host.")
           (t
            (format *error-output* "~& ⚠ Warning(s) from compiling ~a" file)
            (push (enough-namestring file) file-warnings)))))
-    (cond 
+    (cond
       (file-failures
        (cerror "Try anyway"
                "In the ~:(~a~) pass, there were ~
@@ -451,7 +451,7 @@ which occurred within ~r file~:p: ~
       (t (format *trace-output* "~&No warnings or failures from compilation in the ~(~a~) pass."
                  pass)))))
 
-(defun compile-hosted-file (input) 
+(defun compile-hosted-file (input)
   (locally
       ;; I  make the  assumption that  re-loading the  files under
       ;; Swank, you don't care about  these redefinitions … but if
@@ -465,7 +465,7 @@ which occurred within ~r file~:p: ~
       ;; functions  in  one  file   may  be  defined  in  another.
       ;; This gets particularly convoluted  due to the circularity
       ;; of the type system and object systems.
-      (values 
+      (values
        (when (or warn fail)
          (list (enough-namestring input) warn fail))
        (when fasl
@@ -474,7 +474,7 @@ which occurred within ~r file~:p: ~
 
 (defun cross-compile-file (file)
   (format *trace-output* "~& → cross-compiling ~a" (enough-namestring file))
-  (multiple-value-bind (js warn fail) 
+  (multiple-value-bind (js warn fail)
       (let ((*features* (symbol-value (intern "*FEATURES*" :jscl/cl))))
         (funcall (intern "COMPILE-FILE" :jscl/cl) file))
     (values
@@ -493,7 +493,7 @@ which occurred within ~r file~:p: ~
                    input)
         (when fails
           (check-type fails list "a list mentioning warnings or failures")
-          (push fails failures)) 
+          (push fails failures))
         (when fasl
           (check-type fasl (or string pathname) "a fast load pathname")
           (push fasl fasls))))
@@ -508,7 +508,7 @@ which occurred within ~r file~:p: ~
               (use-package '(:jscl/cl :jscl/mop :jscl/cltl2 :jscl/gray) :jscl)
             #+sbcl (sb-ext:name-conflict (c)
                      (declare (ignore c))
-                     (when (find-restart 'take-new) (invoke-restart 'take-new)))) 
+                     (when (find-restart 'take-new) (invoke-restart 'take-new))))
           ,@body)
      (unuse-package '(:jscl/cl :jscl/mop :jscl/cltl2 :jscl/gray) :jscl)
      (defpackage-jscl)))
@@ -528,7 +528,7 @@ which occurred within ~r file~:p: ~
                              sb-kernel::function-redefinition-warning))
           (load fasl))))
     (funcall (intern "INIT-BUILT-IN-TYPES%" :jscl))
-    (with-jscl-second-pass () 
+    (with-jscl-second-pass ()
       (compile-pass :target))))
 
 
