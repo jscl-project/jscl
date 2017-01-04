@@ -116,7 +116,7 @@ forms if PRINT is set."
         (successp nil))
     (with-compilation-environment
       (with-open-file (out output-file :direction :output
-                           :if-exists :new-version)
+                           :if-exists #+jscl :new-version #+unix :supersede)
         (unwind-protect
              (progn
                (when trace-file
