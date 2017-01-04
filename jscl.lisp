@@ -90,12 +90,6 @@ When  you  build JSCL,  you'll  invoke  JSCL:Boostrap-Core in  the  host
 compiler (probably SBCL) to build the  system. Once you're “in” the JSCL
 implementation, you may never need to access this package directly."))
 
-(defpackage jscl/implementation-details
-  (:use :jscl/cl :jscl/gray :jscl/mop :jscl/cltl2)
-  (:nicknames :jscl/impl)
-  (:documentation "JavaScript from  Common Lisp. Internal implementation
- details (when self-hosting)."))
-
 (defpackage jscl/ffi
   (:use :cl :jscl)
   (:export #:oget #:oget* #:make-new #:new #:*root*
@@ -117,7 +111,7 @@ identifying them (and their provenance) easier."))
 (defpackage jscl/gray
   (:use :cl :jscl)
   #+jscl (:nicknames :gray)
-  (:export #:declaration-information)
+  (:export )
   (:documentation   "Functions   defined  as   a   part   of  the   Gray
  Streams protocol.
 
@@ -133,6 +127,12 @@ identifying them (and their provenance) easier."))
 
 Very  few of  these are  implemented, but  this package  exists to  make
 identifying them (and their provenance) easier."))
+
+(defpackage jscl/implementation
+  (:use :jscl/cl :jscl/gray :jscl/mop :jscl/cltl2)
+  (:nicknames :jscl/impl)
+  (:documentation "JavaScript from  Common Lisp. Internal implementation
+ details (when self-hosting)."))
 
 (defpackage jscl/test
   (:use :cl #+sbcl :bordeaux-threads)
@@ -504,18 +504,6 @@ which occurred within ~r file~:p: ~
       (review-failures mode failures))
     fasls))
 
-(defmacro with-jscl-second-pass ((&optional) &body body)
-  `(unwind-protect
-        (progn
-          (handler-case
-              (use-package '(:jscl/cl :jscl/mop :jscl/cltl2 :jscl/gray) :jscl)
-            #+sbcl (sb-ext:name-conflict (c)
-                     (declare (ignore c))
-                     (when (find-restart 'take-new) (invoke-restart 'take-new))))
-          ,@body)
-     (unuse-package '(:jscl/cl :jscl/mop :jscl/cltl2 :jscl/gray) :jscl)
-     (defpackage-jscl)))
-
 (defun load-jscl ()
   (with-compilation-unit ()
     (when *load-pathname*    ; Prevent this  file from becoming that one
@@ -531,8 +519,7 @@ which occurred within ~r file~:p: ~
                              sb-kernel::function-redefinition-warning))
           (load fasl))))
     (funcall (intern "INIT-BUILT-IN-TYPES%" :jscl))
-    (with-jscl-second-pass ()
-      (compile-pass :target))))
+    (compile-pass :target)))
 
 
 (defmacro doforms ((var stream) &body body)
