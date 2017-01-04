@@ -114,14 +114,20 @@
   (lambda (&rest _) (declare (ignore _))
           (error "Unbound SetF function")))
 
-(defun jscl/js::internals.symbol (name package-name)
-  (let ((this (jscl/ffi:make-new '|Symbol|)))
-    (setf (jscl/ffi:oget this "name") name
-          (jscl/ffi:oget this "package") package-name
-          (jscl/ffi:oget this "value") 'jscl/ffi::undefined
-          (jscl/ffi:oget this "fvalue") jscl/ffi::unbound-function
-          (jscl/ffi:oget this "setfValue") jscl/ffi::unbound-setf-function
-          (jscl/ffi:oget this "typeName") 'jscl/ffi::undefined)))
+(defun jscl/js::|Symbol| ()
+       (jscl/js::|Object|)
+       (setf (jscl/ffi:oget jscl/js::this "value") 'jscl/ffi::undefined
+             (jscl/ffi:oget jscl/js::this "fvalue") jscl/ffi::unbound-function
+             (jscl/ffi:oget jscl/js::this "setfValue") jscl/ffi::unbound-setf-function
+             (jscl/ffi:oget jscl/js::this "typeName") 'jscl/ffi::undefined))
+
+(defun jscl/js::internals.symbol (name package-or-package-name)
+  (let ((jscl/js::this (jscl/ffi:make-new '|Symbol|))
+        (package-name (etypecase package-or-package-name
+                        (string package-or-package-name)
+                        (package (package-name package-or-package-name)))))
+    (setf (jscl/ffi:oget jscl/js::this "name") name
+          (jscl/ffi:oget jscl/js::this "package") package-name)))
 
 (defun jscl/js::internals.intern (name &optional package-name)
   (let* ((package-name (or package-name "JSCL"))
@@ -129,15 +135,13 @@
                                            "packages"
                                            package-name)
                            (error "No package ~a" package-name)))
-         (symbol (or (jscl/ffi:oget* jscl/ffi:*root*
-                                     lisp-package
+         (symbol (or (jscl/ffi:oget* lisp-package
                                      "symbols"
                                      name)
-                     (setf (jscl/ffi:oget* jscl/ffi:*root*
-                                           lisp-package
+                     (setf (jscl/ffi:oget* lisp-package
                                            "symbols"
                                            name)
-                           (jscl/js::internals.symbol name lisp-package)))))
+                           (jscl/js::internals.symbol name package-name)))))
     (when (eq lisp-package (jscl/ffi:oget* jscl/ffi:*root*
                                            "packages"
                                            "KEYWORD"))
