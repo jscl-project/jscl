@@ -36,7 +36,7 @@
   #-(or sbcl clisp ecl lispworks)
   (:use #.(warn "You will probably need to add your Gray Streams ~
  into JSCL/Bootstrap USE list"))
-  (:export #:bootstrap #:bootstrap-core))
+  (:export #:bootstrap #:bootstrap-core #:load-jscl))
 
 (in-package :jscl/bootstrap)
 
