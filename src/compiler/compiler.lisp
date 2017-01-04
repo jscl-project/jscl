@@ -2137,23 +2137,26 @@ the value."
     (js (process-toplevel sexp multiple-value-p return-p))))
 
 (defmacro with-compilation-environment (&body body)
-  `(let ((*literal-table* nil)
-         (*variable-counter* 0)
-         (*gensym-counter* 0)
-         (*literal-counter* 0))
-     (with-sharp-j
-       (unwind-protect
-            (progn
-              (rename-package (find-package "JSCL/HOSTED")
-                              "JSCL/HOSTED*")
-              (rename-package (find-package "JSCL/XC") "JSCL")
-              ,@body)
-         (ignore-errors
-           (rename-package (find-package "JSCL/HOSTED")
-                           "JSCL"))
-         (ignore-errors
-           (rename-package (find-package "JSCL/XC")
-                           "JSCL/INTERMEDIATE-CROSS-COMPILATION"))))))
+  (let ((renames (gensym "RENAMES-")))
+    `(let ((*literal-table* nil)
+           (*variable-counter* 0)
+           (*gensym-counter* 0)
+           (*literal-counter* 0))
+       (with-sharp-j
+         (unwind-protect
+              (progn
+                (rename-package (find-package "JSCL/HOSTED")
+                                "JSCL/HOSTED*")
+                (unwind-protect
+                     (progn
+                       (rename-package (find-package "JSCL/XC") "JSCL")
+                       ,@body)
+                  (ignore-errors
+                    (rename-package (find-package "JSCL")
+                                    "JSCL/INTERMEDIATE-CROSS-COMPILATION"))))
+           (ignore-errors
+             (rename-package (find-package "JSCL/HOSTED*")
+                             "JSCL/HOSTED")))))))
 
 
 (defmacro !with-compilation-unit (options &body body)
