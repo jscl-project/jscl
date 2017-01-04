@@ -829,7 +829,7 @@ association list ALIST in the same order."
       ,(convert-block body t))))
 
 (defvar *compiling-file* nil
-  "Was the compiler invoked from `!compile-file'?")
+  "Was the compiler invoked from `compile-file'?")
 
 (defun bangerang (form)
   (cond ((consp form)
@@ -865,8 +865,12 @@ association list ALIST in the same order."
      ;; evaluated  in the  host compiler,  which  is maybe  not what  we
      ;; usually want.
      (when (find :compile-toplevel situations)
-       (warn "Compile-Toplevel: OK, evaluating in compiler ~s" body)
-       (eval (cons 'progn body)))
+       (warn "Compile-Toplevel: OK, evaluating in compiler (~a) ~a"
+             (lisp-implementation-type)
+             (truncate-string
+              (substitute #\space #\newline (princ-to-string body))
+              120))
+       (jscl/cl::eval (cons 'progn body)))
      ;; `load-toplevel'  is  given,  then   just  compile  the  subforms
      ;; as usual.
      (when (find :load-toplevel situations)
@@ -2048,7 +2052,7 @@ names throughout the tree. "
 
 (defun convert-1 (sexp &optional multiple-value-p)
   "Translate  SEXP  (which  can  be  a  single  symbol  or  value)  into
-JavaScript AST form for the  code generator. Remove all macroexpansions.
+JavaScript  AST  form  for  the   code  generator.  Expand  all  macros.
 If MULTIPLE-VALUE-P,  then it's possible  that SEXP may  return multiple
 values, and  the appropriate  JavaScript wrappers must  be in  place; if
 not, the simplified forms that accept  only a primary value returned can
@@ -2167,8 +2171,8 @@ the value."
 (defun compile-toplevel (sexp &optional multiple-value-p return-p)
   #-jscl
   (progn
-    (eval (process-toplevel sexp multiple-value-p return-p))
-    "/* Evaluated in host */")
+    (jscl/cl:eval (process-toplevel sexp multiple-value-p return-p))
+    (format *js-output* "/* Toplevel form evaluated in ~a */" (lisp-implementation-type)))
   #+jscl
   (with-output-to-string (*js-output*)
     (js (process-toplevel sexp multiple-value-p return-p))))
@@ -2179,20 +2183,25 @@ the value."
          (*gensym-counter* 0)
          (*literal-counter* 0))
      (with-sharp-j
+       ,@body)))
+
+
+#+ (or)
+(unwind-protect
+     (progn
+       (rename-package (find-package "JSCL/HOSTED")
+                       "JSCL/HOSTED*")
        (unwind-protect
             (progn
-              (rename-package (find-package "JSCL/HOSTED")
-                              "JSCL/HOSTED*")
-              (unwind-protect
-                   (progn
-                     (rename-package (find-package "JSCL/XC") "JSCL")
-                     ,@body)
-                (ignore-errors
-                  (rename-package (find-package "JSCL")
-                                  "JSCL/INTERMEDIATE-CROSS-COMPILATION"))))
+              (rename-package (find-package "JSCL/XC") "JSCL")
+              ,@body)
          (ignore-errors
-           (rename-package (find-package "JSCL/HOSTED*")
-                           "JSCL/HOSTED"))))))
+           (rename-package (find-package "JSCL")
+                           "JSCL/INTERMEDIATE-CROSS-COMPILATION"))))
+  (ignore-errors
+    (rename-package (find-package "JSCL/HOSTED*")
+                    "JSCL/HOSTED")))
+
 
 
 (defmacro !with-compilation-unit (options &body body)
