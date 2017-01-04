@@ -342,11 +342,11 @@ specifier for the condition types that have been muffled.
 (defun lambda-name/docstring-wrapper (name docstring code)
   (let ((func (safe-js-fun-name name)))
     (if (or name docstring)
-        `(selfcall
-          (jscl/js::var (,func ,code))
+        `(jscl/js::selfcall
+          (jscl/js::var ,func ,code)
           ,(when name `(jscl/js::= (jscl/js::get ,func "fname") ,name))
           ,(when docstring `(jscl/js::= (jscl/js::get ,func "docstring") ,docstring))
-          (return ,func))
+          (jscl/js::return ,func))
         code)))
 
 (defun lambda-check-argument-count
@@ -396,7 +396,7 @@ specifier for the condition types that have been muffled.
     (when rest-argument
       (let ((js!rest (translate-variable rest-argument)))
         `(progn
-           (jscl/js::var (,js!rest ,(convert nil)))
+           (jscl/js::var ,js!rest ,(convert nil))
            (jscl/js::var i)
            (for ((jscl/js::= i (- (nargs) 1))
                  (>= i ,(+ n-required-arguments n-optional-arguments))
@@ -420,8 +420,8 @@ specifier for the condition types that have been muffled.
                (collect `(jscl/js::var ,(translate-variable var)))
                (when svar
                  (collect
-                     `(jscl/js::var (,(translate-variable svar)
-                                      ,(convert nil))))))))
+                     `(jscl/js::var ,(translate-variable svar)
+                                    ,(convert nil)))))))
 
        ;; Parse keywords
        ,(flet ((parse-keyword (keyarg)
@@ -448,16 +448,16 @@ specifier for the condition types that have been muffled.
        ;; Check for unknown keywords
        ,(when keyword-arguments
           `(progn
-             (jscl/js::var (start ,(+ n-required-arguments n-optional-arguments)))
+             (jscl/js::var start ,(+ n-required-arguments n-optional-arguments))
              (if (jscl/js::== (% (- (nargs) start) 2) 1)
                  (throw "Odd number of keyword arguments."))
              (for ((jscl/js::= i start) (< i (nargs)) (+= i 2))
-               (if (and ,@(mapcar (lambda (keyword-argument)
-                                    (destructuring-bind ((keyword-name var) &optional initform svar)
-                                        keyword-argument
-                                      (declare (ignore var initform svar))
-                                      `(jscl/js::!== (arg i) ,(convert keyword-name))))
-                                  keyword-arguments))
+               (if (jscl/js::and ,@(mapcar (lambda (keyword-argument)
+                                             (destructuring-bind ((keyword-name var) &optional initform svar)
+                                                 keyword-argument
+                                               (declare (ignore var initform svar))
+                                               `(jscl/js::!== (arg i) ,(convert keyword-name))))
+                                           keyword-arguments))
                    (throw (+ "Unknown keyword argument " (jscl/js::property (arg i) "name"))))))))))
 
 (defun parse-lambda-list (ll)
@@ -491,7 +491,7 @@ specifier for the condition types that have been muffled.
   (let* ((gvar (gvarname 'this))
          (binding (make-binding :name 'this :type 'variable :value gvar)))
     (push-to-lexenv binding *environment* 'variable)
-    `(jscl/js::var (,gvar |this|))))
+    `(jscl/js::var ,gvar |this|)))
 
 (defun compile-lambda (ll body &key name block)
   "Compile a lambda function with lambda list LL and body BODY. If NAME
@@ -700,7 +700,7 @@ association list ALIST in the same order."
                                    (array "array")
                                    (t (string sexp))))))
               (push (cons sexp jsvar) *literal-table*)
-              (toplevel-compilation `(jscl/js::var (,jsvar ,dumped)))
+              (toplevel-compilation `(jscl/js::var ,jsvar ,dumped))
               (when (keywordp sexp)
                 (toplevel-compilation `(jscl/js::= (jscl/js::get ,jsvar "value") ,jsvar)))
               jsvar)))))
@@ -816,13 +816,13 @@ association list ALIST in the same order."
                    ,@flet-compiled-funs)))
 
 (defun labels/compiled-label-function (func)
-  `(jscl/js::var (,(translate-function (car func))
-                   ,(compiled-function-code func))))
+  `(jscl/js::var ,(translate-function (car func))
+                 ,(compiled-function-code func)))
 
 (define-compilation labels (definitions &rest body)
   (let* ((label-fun-names (mapcar #'car definitions))
          (*environment* (environment+new-functions label-fun-names)))
-    `(selfcall
+    `(jscl/js::selfcall
       ,@(mapcar #'labels/compiled-label-function definitions)
       ,(convert-block body t))))
 
@@ -944,11 +944,11 @@ association list ALIST in the same order."
 (defun convert-block-with-special-bindings (body special-bindings)
   (let ((special-variables (mapcar #'car special-bindings))
         (lexical-variables (mapcar #'cdr special-bindings)))
-    `(return (jscl/js::call-internal
-              |bindSpecialBindings|
-              ,(map 'vector #'literal special-variables)
-              ,(map 'vector #'translate-variable lexical-variables)
-              (function () ,(convert-block body t t))))))
+    `(jscl/js::return (jscl/js::call-internal
+                       |bindSpecialBindings|
+                       ,(map 'vector #'literal special-variables)
+                       ,(map 'vector #'translate-variable lexical-variables)
+                       (function () ,(convert-block body t t))))))
 
 (defun let-bind-dynamic-vars (special-bindings body)
   "Wrap  CODE to  restore the  symbol  values of  the dynamic  bindings.
@@ -974,7 +974,7 @@ stored the old value."
 (defun add-let*-var-to-environment (var value)
   (let* ((v (gvarname var))
          (b (make-binding :name var :type 'variable :value v)))
-    (prog1 `(jscl/js::var (,v ,(convert value)))
+    (prog1 `(jscl/js::var ,v ,(convert value))
       (push-to-lexenv b *environment* 'variable))))
 
 (defun let*-initialize-value (binding)
@@ -988,7 +988,7 @@ current lexical environment if the variable is not special."
 
 (defun let*-wrapper-set-value (b)
   (let ((s (convert `(quote ,(car b)))))
-    `(jscl/js::var (,(cdr b) (jscl/js::get ,s "value")))))
+    `(jscl/js::var ,(cdr b) (jscl/js::get ,s "value"))))
 
 (defun let*-wrapper-reset-value (b)
   (let ((s (convert `(quote ,(car b)))))
@@ -1019,23 +1019,24 @@ let-binding-wrapper."
       `(jscl/js::selfcall ,(let*-binding-wrapper specials body)))))
 
 (defun block-return-multiple-values ()
-  `(return (jscl/js::method-call |values| "apply" this
-                                 (jscl/js::call-internal |forcemv| (jscl/js::get cf "values")))))
+  `(jscl/js::return (jscl/js::method-call |values| "apply" this
+                                          (jscl/js::call-internal |forcemv| (jscl/js::get cf "values")))))
 
 (defun block-return-single-value ()
-  `(return (jscl/js::get cf "values")))
+  `(jscl/js::return `(jscl/js::return (jscl/js::get cf "values"))))
 
 (defun block/build-nlx-catcher (idvar cbody)
-  `(selfcall
-    (try
-     (jscl/js::var (,idvar #()))
+  `(jscl/js::selfcall
+    (jscl/js::try
+     (jscl/js::var ,idvar #())
      ,cbody)
-    (catch (cf)
-      (if (and (instanceof cf (internal |BlockNLX|)) (jscl/js::== (jscl/js::get cf "id") ,idvar))
-          ,(if *multiple-value-p*
-               (block-return-multiple-values)
-               (block-return-single-value))
-          (throw cf)))))
+    (jscl/js::catch (cf)
+      (jscl/js::if (jscl/js::and (jscl/js::instanceof cf (jscl/js::internal |BlockNLX|))
+                                 (jscl/js::== (jscl/js::get cf "id") ,idvar))
+                   ,(if *multiple-value-p*
+                        (block-return-multiple-values)
+                        (block-return-single-value))
+                   (jscl/js::throw cf)))))
 
 (define-compilation block (name &rest body)
   "  We  use  Javascript  exceptions  to  implement  non  local  control
@@ -1064,29 +1065,35 @@ let-binding-wrapper."
     ;; unique identifier  of the  block as exception.  We can't  use the
     ;; variable  name itself,  because it  might  not be  unique, so  we
     ;; capture it in a closure.
-    `(selfcall
-      ,(when multiple-value-p `(jscl/js::var (|values| (internal |mv|))))
-      (throw (new (jscl/js::call-internal |BlockNLX|
-                                          ,(binding-value binding)
-                                          ,(convert value multiple-value-p)
-                                          ,(symbol-name name)))))))
+    `(jscl/js::selfcall
+      ,(when multiple-value-p `(jscl/js::var |values| (internal |mv|)))
+      (jscl/js::throw (jscl/js::new (jscl/js::call-internal |BlockNLX|
+                                                            ,(binding-value binding)
+                                                            ,(convert value multiple-value-p)
+                                                            ,(symbol-name name)))))))
 
 (define-compilation catch (id &rest body)
   (let ((values (if *multiple-value-p* '|values| '(internal |pv|))))
-    `(selfcall
-      (jscl/js::var (id ,(convert id)))
-      (try
+    `(jscl/js::selfcall
+      (jscl/js::var id ,(convert id))
+      (jscl/js::try
        ,(convert-block body t))
-      (catch (cf)
-        (if (and (instanceof cf (internal |CatchNLX|)) (jscl/js::== (jscl/js::get cf "id") id))
-            (return (jscl/js::method-call ,values "apply" this
-                                          (jscl/js::call-internal |forcemv| (jscl/js::get cf "values"))))
-            (throw cf))))))
+      (jscl/js::catch (cf)
+        (jscl/js::if (jscl/js::and (jscl/js::instanceof cf (jscl/js::internal |CatchNLX|))
+                                   (jscl/js::== (jscl/js::get cf "id") id))
+                     (jscl/js::return (jscl/js::method-call
+                                       ,values "apply" this
+                                       (jscl/js::call-internal 
+                                        |forcemv|
+                                        (jscl/js::get cf "values"))))
+                     (jscl/js::throw cf))))))
 
 (define-compilation throw (id value)
-  `(selfcall
-    (jscl/js::var (|values| (internal |mv|)))
-    (throw (new (jscl/js::call-internal |CatchNLX| ,(convert id) ,(convert value t))))))
+  `(jscl/js::selfcall
+    (jscl/js::var |values| (internal |mv|))
+    (jscl/js::throw (jscl/js::new (jscl/js::call-internal |CatchNLX| 
+                                                          ,(convert id) 
+                                                          ,(convert value t))))))
 
 (defun go-tag-p (x)
   (or (integerp x) (symbolp x)))
@@ -1116,70 +1123,72 @@ let-binding-wrapper."
           initag)
       (let ((b (lookup-in-lexenv (first body) *environment* 'gotag)))
         (setq initag (second (binding-value b))))
-      `(selfcall
+      `(jscl/js::selfcall
         ;; TAGBODY branch to take
-        (jscl/js::var (,branch ,initag))
-        (jscl/js::var (,tbidx #()))
-        (label tbloop
-               (while true
-                 (try
-                  (switch ,branch
-                    ,@(with-collect
-                        (collect `(case ,initag))
-                        (dolist (form (cdr body))
-                          (if (go-tag-p form)
-                              (let ((b (lookup-in-lexenv form *environment* 'gotag)))
-                                (collect `(case ,(second (binding-value b)))))
-                              (collect (convert form)))))
-                    default
-                    (break tbloop)))
-                 (catch (jump)
-                   (if (and (instanceof jump (internal |TagNLX|)) (jscl/js::== (jscl/js::get jump "id") ,tbidx))
-                       (jscl/js::= ,branch (jscl/js::get jump "label"))
-                       (throw jump)))))
-        (return ,(convert nil))))))
+        (jscl/js::var ,branch ,initag)
+        (jscl/js::var ,tbidx #())
+        (jscl/js::label tbloop
+                        (jscl/js::while jscl/js::true
+                          (jscl/js::try
+                           (jscl/js::switch ,branch
+                             ,@(with-collect
+                                 (collect `(case ,initag))
+                                 (dolist (form (cdr body))
+                                   (if (go-tag-p form)
+                                       (let ((b (lookup-in-lexenv form *environment* 'gotag)))
+                                         (collect `(jscl/js::case ,(second (binding-value b)))))
+                                       (collect (convert form)))))
+                             default
+                             (jscl/js::break tbloop)))
+                          (jscl/js::catch (jump)
+                            (jscl/js::if (jscl/js::and (jscl/js::instanceof jump
+                                                                            (internal |TagNLX|))
+                                                       (jscl/js::== (jscl/js::get jump "id") ,tbidx))
+                                         (jscl/js::= ,branch (jscl/js::get jump "label"))
+                                         (jscl/js::throw jump)))))
+        (jscl/js::return ,(convert nil))))))
 
 (define-compilation go (label)
   (let ((b (lookup-in-lexenv label *environment* 'gotag)))
     (when (null b)
       (error "Unknown tag `~S'" label))
-    `(selfcall
-      (throw (new (jscl/js::call-internal |TagNLX|
-                                          ,(first (binding-value b))
-                                          ,(second (binding-value b))))))))
+    `(jscl/js::selfcall
+      (jscl/js::throw (jscl/js::new (jscl/js::call-internal |TagNLX|
+                                                            ,(first (binding-value b))
+                                                            ,(second (binding-value b))))))))
 
 (define-compilation unwind-protect (form &rest clean-up)
-  `(selfcall
-    (jscl/js::var (ret ,(convert nil)))
-    (try
+  `(jscl/js::selfcall
+    (jscl/js::var ret ,(convert nil))
+    (jscl/js::try
      (jscl/js::= ret ,(convert form)))
-    (finally
+    (jscl/js::finally
      ,(convert-block clean-up))
-    (return ret)))
+    (jscl/js::return ret)))
 
 (define-compilation multiple-value-call (func-form &rest forms)
-  `(selfcall
-    (jscl/js::var (func ,(convert func-form)))
-    (jscl/js::var (args ,(vector (if *multiple-value-p* '|values| '(internal |pv|)))))
-    (return
-      (selfcall
-       (jscl/js::var (|values| (internal |mv|)))
+  `(jscl/js::selfcall
+    (jscl/js::var func ,(convert func-form))
+    (jscl/js::var args ,(vector (if *multiple-value-p* '|values| '(internal |pv|))))
+    (jscl/js::return
+      (jscl/js::selfcall
+       (jscl/js::var |values| (internal |mv|))
        (jscl/js::var vs)
-       (progn
+       (jscl/js::progn
          ,@(with-collect
              (dolist (form forms)
                (collect `(jscl/js::= vs ,(convert form t)))
-               (collect `(if (and (jscl/js::=== (typeof vs) "object")
-                                  (in "multiple-value" vs))
+               (collect `(if (jscl/js::and (jscl/js::=== (jscl/js::typeof vs) "object")
+                                           (in "multiple-value" vs))
                              (jscl/js::= args (jscl/js::method-call args "concat" vs))
                              (jscl/js::method-call args "push" vs))))))
-       (return (jscl/js::method-call func "apply" null args))))))
+       (jscl/js::return (jscl/js::method-call func "apply" null args))))))
 
 (define-compilation multiple-value-prog1 (first-form &rest forms)
-  `(selfcall
-    (jscl/js::var (args ,(convert first-form *multiple-value-p*)))
-    (progn ,@(mapcar #'convert forms))
-    (return args)))
+  `(jscl/js::selfcall
+    (jscl/js::var args ,(convert first-form *multiple-value-p*))
+    (jscl/js::progn ,@(mapcar #'convert forms))
+    (jscl/js::return args)))
 
 (define-compilation the (value-type form)
   (warn "discarding THE ~a" value-type) ; XXX perhaps one day
@@ -1190,7 +1199,6 @@ let-binding-wrapper."
 
 (define-transformation backquote (form)
   (bq-completely-process form))
-
 
 ;;; Primitives
 
@@ -1244,19 +1252,19 @@ generate the code which performs the transformation on these variables."
           (if (numberp x)
               (collect-fargs x)
               (let ((v (make-symbol (concat "arg" (integer-to-string (incf counter))))))
-                (collect-prelude `(jscl/js::var (,v ,(convert x))))
+                (collect-prelude `(jscl/js::var ,v ,(convert x)))
                 (collect-prelude (variable-arity/check-numeric-arg v x
                                                                    function args))
                 (collect-fargs v))))
-        `(selfcall
-          (progn
+        `(jscl/js::selfcall
+          (jscl/js::progn
             ,@prelude)
           ,(funcall function fargs))))))
 
 (defmacro variable-arity (args &body body)
   (unless (symbolp args)
     (error "`~S' is not a symbol." args))
-  `(variable-arity-call ,args (lambda (,args) `(return  ,,@body))))
+  `(variable-arity-call ,args (lambda (,args) `(jscl/js::return  ,,@body))))
 
 (define-raw-builtin + (&rest numbers)
   (if (null numbers)
@@ -1288,20 +1296,20 @@ generate the code which performs the transformation on these variables."
 (define-builtin mod (x y)
   (when (constantp y)
     (assert (not (zerop y))))
-  `(selfcall
-    (if (jscl/js::== ,y 0)
-        (throw (new |Error| "Division by zero")))
-    (return (% ,x ,y))))
+  `(jscl/js::selfcall
+    (jscl/js::if (jscl/js::== ,y 0)
+                 (jscl/js::throw (jscl/js::new |Error| "Division by zero")))
+    (jscl/js::return (jscl/js::% ,x ,y))))
 
 (defun comparison-conjuntion (vars op)
   (cond
     ((null (cdr vars))
-     'true)
+     'jscl/js::true)
     ((null (cddr vars))
      `(,op ,(car vars) ,(cadr vars)))
     (t
-     `(and (,op ,(car vars) ,(cadr vars))
-           ,(comparison-conjuntion (cdr vars) op)))))
+     `(jscl/js::and (,op ,(car vars) ,(cadr vars))
+                    ,(comparison-conjuntion (cdr vars) op)))))
 
 (defmacro define-builtin-comparison (op &optional (sym op))
   `(define-raw-builtin ,op (x &rest args)
@@ -1317,7 +1325,7 @@ generate the code which performs the transformation on these variables."
 (define-builtin-comparison /= !=)
 
 (define-builtin numberp (x)
-  (convert-to-bool `(jscl/js::== (typeof ,x) "number")))
+  (convert-to-bool `(jscl/js::== (jscl/js::typeof ,x) "number")))
 
 (define-builtin %floor (x)
   `(jscl/js::method-call |Math| "floor" ,x))
@@ -1347,22 +1355,23 @@ generate the code which performs the transformation on these variables."
   `(jscl/js::call-internal |cdr| ,x))
 
 (define-builtin rplaca (x new)
-  `(selfcall
-    (jscl/js::var (tmp ,x))
+  `(jscl/js::selfcall
+    (jscl/js::var tmp ,x)
     (jscl/js::= (jscl/js::get tmp "car") ,new)
-    (return tmp)))
+    (jscl/js::return tmp)))
 
 (define-builtin rplacd (x new)
-  `(selfcall
-    (jscl/js::var (tmp ,x))
+  `(jscl/js::selfcall
+    (jscl/js::var tmp ,x)
     (jscl/js::= (jscl/js::get tmp "cdr") ,new)
-    (return tmp)))
+    (jscl/js::return tmp)))
 
 (define-builtin symbolp (x)
-  (convert-to-bool `(instanceof ,x (internal |Symbol|))))
+  (convert-to-bool `(jscl/js::instanceof ,x (internal |Symbol|))))
 
 (define-builtin make-symbol (name)
-  `(new (jscl/js::call-internal |Symbol| (jscl/js::call-internal |lisp_to_js| ,name))))
+  `(jscl/js::new (jscl/js::call-internal |Symbol|
+                                         (jscl/js::call-internal |lisp_to_js| ,name))))
 
 (define-compilation symbol-name (x)
   (convert `(jscl/ffi:oget ,x "name")))
@@ -1430,12 +1439,12 @@ generate the code which performs the transformation on these variables."
   `(jscl/js::call-internal |char_from_codepoint| ,x))
 
 (define-builtin characterp (x)
-  `(selfcall
-    (jscl/js::var (x ,x))
-    (return ,(convert-to-bool
-              `(and (jscl/js::== (typeof x) "string")
-                    (or (jscl/js::== (jscl/js::get x "length") 1)
-                        (jscl/js::== (jscl/js::get x "length") 2)))))))
+  `(jscl/js::selfcall
+    (jscl/js::var x ,x)
+    (jscl/js::return ,(convert-to-bool
+                       `(jscl/js::and (jscl/js::== (jscl/js::typeof x) "string")
+                                      (jscl/js::or (jscl/js::== (jscl/js::get x "length") 1)
+                                                   (jscl/js::== (jscl/js::get x "length") 2)))))))
 
 (define-builtin char-upcase (x)
   `(jscl/js::call-internal |safe_char_upcase| ,x))
@@ -1444,51 +1453,55 @@ generate the code which performs the transformation on these variables."
   `(jscl/js::call-internal |safe_char_downcase| ,x))
 
 (define-builtin stringp (x)
-  `(selfcall
-    (jscl/js::var (x ,x))
-    (return ,(convert-to-bool
-              `(and (and (jscl/js::===(typeof x) "object")
-                         (in "length" x))
-                    (jscl/js::== (jscl/js::get x "stringp") 1))))))
+  `(jscl/js::selfcall
+    (jscl/js::var x ,x)
+    (jscl/js::return ,(convert-to-bool
+                       `
+                       (jscl/js::and
+                        (jscl/js::and 
+                         (jscl/js::=== (jscl/js::typeof x) "object")
+                         (jscl/js::in "length" x))
+                        (jscl/js::== (jscl/js::get x "stringp") 1))))))
 
 (define-builtin ornate-object-class% (x)
-  `(selfcall
-    (jscl/js::var (x ,x))
-    (return (and (jscl/js::=== (typeof x) "object")
-                 (in "🏛" x)
-                 (jscl/js::get x "🏛")))))
+  `(jscl/js::selfcall
+    (jscl/js::var x ,x)
+    (jscl/js::return (jscl/js::and (jscl/js::=== (jscl/js::typeof x) "object")
+                                   (jscl/js::in "🏛" x)
+                                   (jscl/js::get x "🏛")))))
 
 (define-builtin set-ornate-object-class% (x class)
-  `(selfcall
-    (jscl/js::var (x ,x))
-    (return (and (jscl/js::=== (typeof x) "object")
-                 (in "🏛" x)
-                 (jscl/js::= (jscl/js::get x "🏛") ,(string class))))))
+  `(jscl/js::selfcall
+    (jscl/js::var x ,x)
+    (jscl/js::return (jscl/js::and (jscl/js::=== (jscl/js::typeof x) "object")
+                                   (jscl/js::in "🏛" x)
+                                   (jscl/js::= (jscl/js::get x "🏛") ,(string class))))))
 
 (define-raw-builtin funcall (func &rest args)
-  `(selfcall
-    (jscl/js::var (f ,(convert func)))
-    (return (jscl/js::call(if (jscl/js::=== (typeof f) "function")
-                              f
-                              (jscl/js::get f "fvalue"))
-                          ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
-                                  (mapcar #'convert args))))))
+  `(jscl/js::selfcall
+    (jscl/js::var f ,(convert func))
+    (jscl/js::return (jscl/js::call
+                      (jscl/js::if (jscl/js::=== (jscl/js::typeof f) "function")
+                                   f
+                                   (jscl/js::get f "fvalue"))
+                      ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
+                              (mapcar #'convert args))))))
 
 (define-raw-builtin apply (func &rest args)
   (if (null args)
       (convert func)
       (let ((args (butlast args))
             (last (car (last args))))
-        `(selfcall
-          (jscl/js::var (f ,(convert func)))
-          (jscl/js::var (args ,(list-to-vector
-                                (cons (if *multiple-value-p* '|values| '(internal |pv|))
-                                      (mapcar #'convert args)))))
-          (jscl/js::var (tail ,(convert last)))
+        `(jscl/js::selfcall
+          (jscl/js::var f ,(convert func))
+          (jscl/js::var args ,(list-to-vector
+                               (cons (if *multiple-value-p* '|values| '(internal |pv|))
+                                     (mapcar #'convert args))))
+          (jscl/js::var tail ,(convert last))
           (jscl/js::while (jscl/js::!= tail ,(convert nil))
             (jscl/js::method-call args "push" (jscl/js::get tail "car"))
             (jscl/js::= tail (jscl/js::get tail "cdr")))
-          (jscl/js::return (jscl/js::method-call (if (jscl/js::=== (typeof f) "function")
+          (jscl/js::return (jscl/js::method-call (if (jscl/js::=== (jscl/js::typeof f) "function")
                                                      f
                                                      (jscl/js::get f "fvalue"))
                                                  "apply"
@@ -1498,11 +1511,11 @@ generate the code which performs the transformation on these variables."
 (define-builtin js-eval (string)
   (if *multiple-value-p*
       `(selfcall
-        (jscl/js::var (v (jscl/js::call-internal |globalEval|
-                                                 (jscl/js::call-internal |xstring|
-                                                                         ,string))))
-        (return (jscl/js::method-call |values| "apply"
-                                      this (jscl/js::call-internal |forcemv| v))))
+        (jscl/js::var v (jscl/js::call-internal |globalEval|
+                                                (jscl/js::call-internal |xstring|
+                                                                        ,string)))
+        (jscl/js::return (jscl/js::method-call |values| "apply"
+                                               this (jscl/js::call-internal |forcemv| v))))
       `(jscl/js::call-internal |globalEval|
                                (jscl/js::call-internal |xstring| ,string))))
 
@@ -1510,7 +1523,7 @@ generate the code which performs the transformation on these variables."
   `(jscl/js::selfcall (throw ,string)))
 
 (define-builtin functionp (x)
-  (convert-to-bool `(jscl/js::=== (typeof ,x) "function")))
+  (convert-to-bool `(jscl/js::=== (jscl/js::typeof ,x) "function")))
 
 
 
@@ -1525,19 +1538,19 @@ generate the code which performs the transformation on these variables."
 ;;; future) structures. (work-in-progress, kinda.)
 
 (define-builtin storage-vector-p (x)
-  `(selfcall
-    (jscl/js::var (x ,x))
-    (return ,(convert-to-bool
-              `(and (jscl/js::=== (typeof x) "object")
-                    (in "length" x)
-                    (in "svKind" x))))))
+  `(jscl/js::selfcall
+    (jscl/js::var x ,x)
+    (jscl/js::return ,(convert-to-bool
+                       `(jscl/js::and (jscl/js::=== (jscl/js::typeof x) "object")
+                                      (in "length" x)
+                                      (in "svKind" x))))))
 
 (define-builtin make-storage-vector (size kind)
-  `(selfcall
-    (jscl/js::var (r #()))
+  `(jscl/js::selfcall
+    (jscl/js::var r #())
     (jscl/js::= (jscl/js::get r "length") ,size)
     (jscl/js::= (jscl/js::get r "svKind") ,kind)
-    (return r)))
+    (jscl/js::return r)))
 
 (define-builtin storage-vector-size (x)
   `(jscl/js::get ,x "length"))
@@ -1548,36 +1561,47 @@ generate the code which performs the transformation on these variables."
 (define-builtin storage-vector-ref (vector n)
   (when (constantp n)
     (check-type n (integer 0 *)))
-  `(selfcall
-    (jscl/js::var (x (jscl/js::property ,vector ,n)))
-    (if (jscl/js::=== x undefined)
-        (throw (new (jscl/js::call|Error| ,(concatenate 'string "AREF "
-                                                        (princ-to-string n)
-                                                        "out of range for vector "
-                                                        (string vector))))))
-    (return x)))
+  `(jscl/js::selfcall
+    (jscl/js::var x (jscl/js::property ,vector ,n))
+    (jscl/js::if (jscl/js::=== x jscl/js::undefined)
+                 (jscl/js::throw
+                     (jscl/js::new
+                      (jscl/js::call
+                       |Error|
+                       ,(concatenate 'string "AREF "
+                                     (princ-to-string n)
+                                     "out of range for vector "
+                                     (string vector))))))
+    (jscl/js::return x)))
 
 (define-builtin storage-vector-set (vector n value)
-  `(selfcall
-    (jscl/js::var (x ,vector))
-    (jscl/js::var (i ,n))
-    (if (or (< i 0) (>= i (jscl/js::get x "length")))
-        (throw (new (jscl/js::call|Error| ,(concatenate 'string "SETF AREF out of range for vector " (string vector))))))
-    (return (jscl/js::= (jscl/js::property x i) ,value))))
+  `(jscl/js::selfcall
+    (jscl/js::var x ,vector)
+    (jscl/js::var i ,n)
+    (jscl/js::if (jscl/js::or (< i 0)
+                              (>= i (jscl/js::get x "length")))
+                 (jscl/js::throw
+                     (jscl/js::new 
+                      (jscl/js::call |Error|
+                                     ,(concatenate
+                                       'string
+                                       "SETF AREF out of range for vector " 
+                                       (string vector))))))
+    (jscl/js::return (jscl/js::= (jscl/js::property x i) ,value))))
 
 (define-builtin concatenate-storage-vector (sv1 sv2)
   ;; TODO check kind?
-  `(selfcall
-    (jscl/js::var (sv1 ,sv1))
-    (jscl/js::var (r (jscl/js::method-call sv1 "concat" ,sv2)))
+  `(jscl/js::selfcall
+    (jscl/js::var sv1 ,sv1)
+    (jscl/js::var r (jscl/js::method-call sv1 "concat" ,sv2))
     (jscl/js::= (jscl/js::get r "svKind") (jscl/js::get sv1 "svKind"))
     (jscl/js::= (jscl/js::get r "stringp") (jscl/js::get sv1 "stringp"))
-    (return r)))
+    (jscl/js::return r)))
 
 
 
 (define-builtin get-internal-real-time ()
-  `(jscl/js::method-call (new (jscl/js::call|Date|)) "getTime"))
+  `(jscl/js::method-call (jscl/js::new (jscl/js::call |Date|)) "getTime"))
 
 
 
@@ -1588,7 +1612,7 @@ generate the code which performs the transformation on these variables."
 
 (define-raw-builtin values (&rest args)
   (if *multiple-value-p*
-      `(jscl/js::call|values| ,@(mapcar #'convert args))
+      `(jscl/js::call |values| ,@(mapcar #'convert args))
       `(jscl/js::call-internal |pv| ,@(mapcar #'convert args))))
 
 
@@ -1600,7 +1624,7 @@ generate the code which performs the transformation on these variables."
 (define-raw-builtin jscl/ffi::oget* (object key &rest keys)
   `(selfcall
     (progn
-      (jscl/js::var (tmp (jscl/js::property ,(convert object) (jscl/js::call-internal |xstring| ,(convert key)))))
+      (jscl/js::var tmp (jscl/js::property ,(convert object) (jscl/js::call-internal |xstring| ,(convert key))))
       ,@(mapcar (lambda (key)
                   `(progn
                      (if (jscl/js::=== tmp undefined) (return ,(convert nil)))
@@ -1612,16 +1636,16 @@ generate the code which performs the transformation on these variables."
   (let ((keys (cons key keys)))
     `(selfcall
       (progn
-        (jscl/js::var (obj ,(convert object)))
+        (jscl/js::var obj ,(convert object))
         ,@(mapcar (lambda (key)
                     `(progn
                        (jscl/js::= obj (jscl/js::property obj (jscl/js::call-internal |xstring| ,(convert key))))
                        (if (jscl/js::=== obj undefined)
                            (throw "Impossible to set object property."))))
                   (butlast keys))
-        (jscl/js::var (tmp
-                       (jscl/js::= (jscl/js::property obj (jscl/js::call-internal |xstring| ,(convert (car (last keys)))))
-                                   ,(convert value))))
+        (jscl/js::var tmp
+                      (jscl/js::= (jscl/js::property obj (jscl/js::call-internal |xstring| ,(convert (car (last keys)))))
+                                  ,(convert value)))
         (jscl/js::return (if (jscl/js::=== tmp undefined)
                              ,(convert nil)
                              tmp))))))
@@ -1636,7 +1660,7 @@ generate the code which performs the transformation on these variables."
   (convert-to-bool `(jscl/js::=== ,x null)))
 
 (define-builtin objectp (x)
-  (convert-to-bool `(jscl/js::=== (typeof ,x) "object")))
+  (convert-to-bool `(jscl/js::=== (jscl/js::typeof ,x) "object")))
 
 (define-builtin %%nlx-p (x)
   (convert-to-bool `(jscl/js::call-internal |isNLX| ,x)))
@@ -1656,8 +1680,8 @@ generate the code which performs the transformation on these variables."
 
 (define-builtin map-for-in (function object)
   `(selfcall
-    (jscl/js::var (f ,function)
-                  (g (if (jscl/js::=== (typeof f) "function") f (jscl/js::get f "fvalue")))
+    (jscl/js::var f ,function
+                  (g (if (jscl/js::=== (jscl/js::typeof f) "function") f (jscl/js::get f "fvalue")))
                   (o ,object)
                   key)
     (for-in (key o)
@@ -1684,7 +1708,7 @@ generate the code which performs the transformation on these variables."
             `(%js-vref ,var))))
 
 (define-compilation %js-typeof (x)
-  `(jscl/js::call-internal |js_to_lisp| (typeof ,x)))
+  `(jscl/js::call-internal |js_to_lisp| (jscl/js::typeof ,x)))
 
 ;;; Access a function defined in the internals runtime object.
 (define-compilation %js-internal (name)
