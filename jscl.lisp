@@ -62,25 +62,7 @@ During  bootstrap,  these  forms  are  evaluated  instead  as  calls  to
   (:use :jscl/cl)
   (:nicknames :jscl/xc))
 
-(defmacro continue-on-package-error (&body form)
-  `(handler-case
-       (progn ,@form)
-     (#+sbcl sb-kernel:simple-package-error
-       #-sbcl error
-       (c) (declare (ignore c))
-       (invoke-restart 'continue))))
-
-(defun defpackage-jscl ()
-  (when (and (find-package :jscl/hosted)
-             (not (equal (find-package :jscl/hosted)
-                         (find-package :jscl))))
-    (continue-on-package-error
-     (delete-package :jscl/hosted))
-    (continue-on-package-error
-     (delete-package :jscl)))
-  (when (find-package :jscl/hosted*)
-    (continue-on-package-error
-     (rename-package :jscl/hosted* "JSCL")))
+(defun defpackage-jscl () 
   (defpackage jscl
     (:use :cl)
     #+sbcl (:use :sb-gray :sb-mop :sb-cltl2)
