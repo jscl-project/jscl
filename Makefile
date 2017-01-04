@@ -69,22 +69,25 @@ clean:
 
 jscl.js:	$(ALL_LISP)
 	$(LISP) $(LISPFLAGS) $(LISPLOAD)jscl.lisp \
-		$(LISPEVAL)'(jscl:bootstrap-core t)' 2>&1 |tee jscl.js.build.log
+		$(LISPEVAL)'(jscl/bootstrap::load-jscl)' \
+		$(LISPEVAL)'(jscl/bootstrap::bootstrap-core t)' 2>&1 |tee jscl.js.build.log
 
 tests.js:	$(ALL_LISP)
 	$(LISP) $(LISPFLAGS) $(LISPLOAD)jscl.lisp \
-		$(LISPEVAL)'(jscl:bootstrap-core)' \
-		$(LISPEVAL)'(jscl:compile-test-suite)' 2>&1 |tee tests.js.build.log
+		$(LISPEVAL)'(jscl/bootstrap::load-jscl)' \
+		$(LISPEVAL)'(jscl/bootstrap::bootstrap-core)' \
+		$(LISPEVAL)'(jscl/bootstrap::compile-test-suite)' 2>&1 |tee tests.js.build.log
 
 jscl-repl:	$(ALL_LISP)
 	$(LISP) $(LISPFLAGS) $(LISPLOAD)jscl.lisp \
-		$(LISPEVAL)'(jscl:bootstrap)' \
-		$(LISPEVAL)'(jscl:compile-node-repl)' 2>&1 |tee jscl-repl.build.log
+		$(LISPEVAL)'(jscl/bootstrap::load-jscl)' \
+		$(LISPEVAL)'(jscl/bootstrap::bootstrap)' \
+		$(LISPEVAL)'(jscl/bootstrap::compile-node-repl)' 2>&1 |tee jscl-repl.build.log
 
 repl-web.js:	$(ALL_LISP)
 	$(LISP) $(LISPFLAGS) $(LISPLOAD)jscl.lisp \
-		$(LISPEVAL)'(jscl:bootstrap)' \
-		$(LISPEVAL)'(jscl:compile-web-repl)' 2>&1 |tee repl-web.js.build.log
+		$(LISPEVAL)'(jscl/bootstrap::bootstrap)' \
+		$(LISPEVAL)'(jscl/bootstrap::compile-web-repl)' 2>&1 |tee repl-web.js.build.log
 
 test:	jscl.js tests.js
 		$(shell find tests ansi-test \
@@ -92,8 +95,9 @@ test:	jscl.js tests.js
 			-and -not -name .\*) \
 		.ansi-patched
 	$(LISP) $(LISPFLAGS) $(LISPLOAD)jscl.lisp \
-		$(LISPEVAL)'(jscl:bootstrap-core)' \
-		$(LISPEVAL)'(jscl:run-tests-in-host)' 2>&1 |tee test.log
+		$(LISPEVAL)'(jscl/bootstrap::load-jscl)' \
+		$(LISPEVAL)'(jscl/bootstrap::bootstrap-core)' \
+		$(LISPEVAL)'(jscl/bootstrap::run-tests-in-host)' 2>&1 |tee test.log
 	node tests.js
 
 doc:	doc/jscl.pdf doc/jscl.html.d/index.html
