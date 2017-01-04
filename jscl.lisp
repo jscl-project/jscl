@@ -63,6 +63,24 @@ During  bootstrap,  these  forms  are  evaluated  instead  as  calls  to
   (:nicknames :jscl/xc))
 
 (defun defpackage-jscl ()
+  (when (not (equal (find-package :jscl/hosted)
+                    (find-package :jscl)))
+    (cerror "CONTINUE"
+            "Package JSCL/HOSTED exists; ~
+probably a crash was not cleaned up during cross-compilation. ~
+Delete hosted packages and continue?")
+    (handler-case
+        (delete-package :jscl)
+      (#+sbcl sb-kernel:simple-package-error
+        #-sbcl error
+        (c) (declare (ignore c))
+        (invoke-restart 'continue)))
+    (handler-case
+        (rename-package :jscl/hosted* "JSCL")
+      (#+sbcl sb-kernel:simple-package-error
+        #-sbcl error
+        (c) (declare (ignore c))
+        (invoke-restart 'continue))))
   (defpackage jscl
     (:use :cl)
     #+sbcl (:use :sb-gray :sb-mop :sb-cltl2)
