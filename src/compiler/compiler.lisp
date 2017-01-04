@@ -401,7 +401,7 @@ specifier for the condition types that have been muffled.
            (for ((jscl/js::= i (- (nargs) 1))
                  (>= i ,(+ n-required-arguments n-optional-arguments))
                  (post-- i))
-                (jscl/js::= ,js!rest (new (jscl/js::call-internal |Cons| (arg i) ,js!rest)))))))))
+             (jscl/js::= ,js!rest (new (jscl/js::call-internal |Cons| (arg i) ,js!rest)))))))))
 
 (defun compile-lambda-parse-keywords (ll)
   (let ((n-required-arguments
@@ -431,13 +431,13 @@ specifier for the condition types that have been muffled.
                       (for ((jscl/js::= i ,(+ n-required-arguments n-optional-arguments))
                             (< i (nargs))
                             (+= i 2))
-                           ;; ....
-                           (if (jscl/js::=== (arg i) ,(convert keyword-name))
-                               (progn
-                                 (jscl/js::= ,(translate-variable var) (arg (+ i 1)))
-                                 ,(when svar `(jscl/js::= ,(translate-variable svar)
-                                                          ,(convert t)))
-                                 (break))))
+                        ;; ....
+                        (if (jscl/js::=== (arg i) ,(convert keyword-name))
+                            (progn
+                              (jscl/js::= ,(translate-variable var) (arg (+ i 1)))
+                              ,(when svar `(jscl/js::= ,(translate-variable svar)
+                                                       ,(convert t)))
+                              (break))))
                       (if (jscl/js::== i (nargs))
                           (jscl/js::= ,(translate-variable var) ,(convert initform)))))))
           (when keyword-arguments
@@ -452,13 +452,13 @@ specifier for the condition types that have been muffled.
              (if (jscl/js::== (% (- (nargs) start) 2) 1)
                  (throw "Odd number of keyword arguments."))
              (for ((jscl/js::= i start) (< i (nargs)) (+= i 2))
-                  (if (and ,@(mapcar (lambda (keyword-argument)
-                                       (destructuring-bind ((keyword-name var) &optional initform svar)
-                                           keyword-argument
-                                         (declare (ignore var initform svar))
-                                         `(jscl/js::!== (arg i) ,(convert keyword-name))))
-                                     keyword-arguments))
-                      (throw (+ "Unknown keyword argument " (jscl/js::property (arg i) "name"))))))))))
+               (if (and ,@(mapcar (lambda (keyword-argument)
+                                    (destructuring-bind ((keyword-name var) &optional initform svar)
+                                        keyword-argument
+                                      (declare (ignore var initform svar))
+                                      `(jscl/js::!== (arg i) ,(convert keyword-name))))
+                                  keyword-arguments))
+                   (throw (+ "Unknown keyword argument " (jscl/js::property (arg i) "name"))))))))))
 
 (defun parse-lambda-list (ll)
   (values (ll-required-arguments ll)

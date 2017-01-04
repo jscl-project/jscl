@@ -181,7 +181,7 @@ captured vars and embedded forms as multiple values."
      for form in body
      if (consp form)
      do (case (car form)
-          ;; A var in the current  lexical scratchpad. Capture the var,
+          ;; A var in  the current lexical scratchpad.  Capture the var,
           ;; but only initialize it at this point in the program flow.
           (jscl/js::var
            (destructuring-bind (var name
