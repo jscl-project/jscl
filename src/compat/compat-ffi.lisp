@@ -31,11 +31,12 @@ bound to a freshly-constructed object, and pass it CTOR-ARGS.
 
 As  a convenience,  if  CLASS is  not FBOUNDP,  this  will instead  call
 a function named CLASS in package JSCL/JS."
-  (let ((jscl/js::this (make-hash-table :test 'equal)))
-    (setf (gethash "_prototype" jscl/js::this) class)
+  (let ((jscl/js::*this* (make-hash-table :test 'equal))) 
+    (setf (gethash "_prototype" jscl/js::*this*) class)
     (if (fboundp class)
         (apply class ctor-args)
-        (apply (intern (symbol-name class) :jscl/js) ctor-args))))
+        (apply (intern (symbol-name class) :jscl/js) ctor-args))
+    jscl/js::*this*))
 
 (defun (setf jscl/ffi:oget) (value object key)
   "Set the field named by KEY on the JavaScript object OBJECT to VALUE."

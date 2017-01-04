@@ -29,7 +29,7 @@
     (warn "Lost *ROOT* somehow again…")
     (setf jscl/ffi:*root* (make-hash-table :test 'equal))))
 
-(defparameter jscl/js::this jscl/ffi::*root*)
+(defparameter jscl/js::*this* jscl/ffi::*root*)
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (let ((packages (make-hash-table :test 'equal))
@@ -93,8 +93,8 @@
 
 (defun jscl/js::|Object| (&rest args-plist)
        (loop for (key value) on args-plist by #'cddr
-          do (setf (gethash key jscl/js::this) value))
-       jscl/js::this)
+          do (setf (gethash key jscl/js::*this*) value))
+       jscl/js::*this*)
 
 (defun jscl/js::|String| (&optional contents)
        (etypecase contents
@@ -116,18 +116,19 @@
 
 (defun jscl/js::|Symbol| ()
        (jscl/js::|Object|)
-       (setf (jscl/ffi:oget jscl/js::this "value") 'jscl/ffi::undefined
-             (jscl/ffi:oget jscl/js::this "fvalue") jscl/ffi::unbound-function
-             (jscl/ffi:oget jscl/js::this "setfValue") jscl/ffi::unbound-setf-function
-             (jscl/ffi:oget jscl/js::this "typeName") 'jscl/ffi::undefined))
+       (setf (jscl/ffi:oget jscl/js::*this* "value") 'jscl/ffi::undefined
+             (jscl/ffi:oget jscl/js::*this* "fvalue") jscl/ffi::unbound-function
+             (jscl/ffi:oget jscl/js::*this* "setfValue") jscl/ffi::unbound-setf-function
+             (jscl/ffi:oget jscl/js::*this* "typeName") 'jscl/ffi::undefined))
 
 (defun jscl/js::internals.symbol (name package-or-package-name)
-  (let ((jscl/js::this (jscl/ffi:make-new '|Symbol|))
+  (let ((jscl/js::*this* (jscl/ffi:make-new '|Symbol|))
         (package-name (etypecase package-or-package-name
                         (string package-or-package-name)
                         (package (package-name package-or-package-name)))))
-    (setf (jscl/ffi:oget jscl/js::this "name") name
-          (jscl/ffi:oget jscl/js::this "package") package-name)))
+    (break "This is ~a" jscl/js::*this*)
+    (setf (jscl/ffi:oget jscl/js::*this* "name") name
+          (jscl/ffi:oget jscl/js::*this* "package") package-name)))
 
 (defun jscl/js::internals.intern (name &optional package-name)
   (let* ((package-name (or package-name "JSCL"))
