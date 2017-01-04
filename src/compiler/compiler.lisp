@@ -360,7 +360,7 @@ specifier for the condition types that have been muffled.
       (when (and (< 0 min) (eql min max))
         (return `(jscl/js::call-internal |checkArgs| (nargs) ,min)))
       ;; General case:
-      `(progn
+      `(jscl/js::progn
          ,(when (< 0 min)     `(jscl/js::call-internal |checkArgsAtLeast| (nargs) ,min))
          ,(when (numberp max) `(jscl/js::call-internal |checkArgsAtMost|  (nargs) ,max))))))
 
@@ -370,13 +370,13 @@ specifier for the condition types that have been muffled.
          (n-optional-arguments (length optional-arguments))
          (svars (remove nil (mapcar #'third optional-arguments))))
     (when optional-arguments
-      `(progn
+      `(jscl/js::progn
          ,(when svars
             `(jscl/js::var ,@(mapcar (lambda (svar)
                                        (list (translate-variable svar)
                                              (convert t)))
                                      svars)))
-         (switch (nargs)
+         (jscl/js::switch (nargs)
            ,@(with-collect
                (dotimes (idx n-optional-arguments)
                  (let ((arg (nth idx optional-arguments)))
@@ -395,12 +395,12 @@ specifier for the condition types that have been muffled.
         (rest-argument (ll-rest-argument ll)))
     (when rest-argument
       (let ((js!rest (translate-variable rest-argument)))
-        `(progn
+        `(jscl/js::progn
            (jscl/js::var ,js!rest ,(convert nil))
            (jscl/js::var i)
-           (for ((jscl/js::= i (- (nargs) 1))
-                 (>= i ,(+ n-required-arguments n-optional-arguments))
-                 (post-- i))
+           (jscl/js::for ((jscl/js::= i (- (nargs) 1))
+                          (jscl/js::>= i ,(+ n-required-arguments n-optional-arguments))
+                          (jscl/js::post-- i))
              (jscl/js::= ,js!rest (new (jscl/js::call-internal |Cons| (arg i) ,js!rest)))))))))
 
 (defun compile-lambda-parse-keywords (ll)
@@ -410,7 +410,7 @@ specifier for the condition types that have been muffled.
          (length (ll-optional-arguments ll)))
         (keyword-arguments
          (ll-keyword-arguments-canonical ll)))
-    `(progn
+    `(jscl/js::progn
        ;; Declare variables
        ,@(with-collect
            (dolist (keyword-argument keyword-arguments)
@@ -427,38 +427,40 @@ specifier for the condition types that have been muffled.
        ,(flet ((parse-keyword (keyarg)
                  (destructuring-bind ((keyword-name var) &optional initform svar) keyarg
                    ;; ((keyword-name var) init-form svar)
-                   `(progn
-                      (for ((jscl/js::= i ,(+ n-required-arguments n-optional-arguments))
-                            (< i (nargs))
-                            (+= i 2))
+                   `(jscl/js::progn
+                      (jscl/js::for ((jscl/js::= i ,(+ n-required-arguments n-optional-arguments))
+                                     (jscl/js::< i (nargs))
+                                     (jscl/js::+= i 2))
                         ;; ....
-                        (if (jscl/js::=== (arg i) ,(convert keyword-name))
-                            (progn
-                              (jscl/js::= ,(translate-variable var) (arg (+ i 1)))
-                              ,(when svar `(jscl/js::= ,(translate-variable svar)
-                                                       ,(convert t)))
-                              (break))))
-                      (if (jscl/js::== i (nargs))
-                          (jscl/js::= ,(translate-variable var) ,(convert initform)))))))
+                        (jscl/js::if (jscl/js::=== (arg i) ,(convert keyword-name))
+                                     (jscl/js::progn
+                                       (jscl/js::= ,(translate-variable var) (arg (+ i 1)))
+                                       ,(when svar `(jscl/js::= ,(translate-variable svar)
+                                                                ,(convert t)))
+                                       (jscl/js::break))))
+                      (jscl/js::if (jscl/js::== i (nargs))
+                                   (jscl/js::= ,(translate-variable var) ,(convert initform)))))))
           (when keyword-arguments
-            `(progn
+            `(jscl/js::progn
                (jscl/js::var i)
                ,@(mapcar #'parse-keyword keyword-arguments))))
 
        ;; Check for unknown keywords
        ,(when keyword-arguments
-          `(progn
+          `(jscl/js::progn
              (jscl/js::var start ,(+ n-required-arguments n-optional-arguments))
-             (if (jscl/js::== (% (- (nargs) start) 2) 1)
-                 (throw "Odd number of keyword arguments."))
-             (for ((jscl/js::= i start) (< i (nargs)) (+= i 2))
-               (if (jscl/js::and ,@(mapcar (lambda (keyword-argument)
-                                             (destructuring-bind ((keyword-name var) &optional initform svar)
-                                                 keyword-argument
-                                               (declare (ignore var initform svar))
-                                               `(jscl/js::!== (arg i) ,(convert keyword-name))))
-                                           keyword-arguments))
-                   (throw (+ "Unknown keyword argument " (jscl/js::property (arg i) "name"))))))))))
+             (jscl/js::if (jscl/js::== (jscl/js::% (jscl/js::- (nargs) start) 2) 1)
+                          (jscl/js::throw "Odd number of keyword arguments."))
+             (jscl/js::for ((jscl/js::= i start) (jscl/js::< i (nargs)) (jscl/js::+= i 2))
+               (jscl/js::if (jscl/js::and 
+                             ,@(mapcar (lambda (keyword-argument)
+                                         (destructuring-bind ((keyword-name var) &optional initform svar)
+                                             keyword-argument
+                                           (declare (ignore var initform svar))
+                                           `(jscl/js::!== (arg i) ,(convert keyword-name))))
+                                       keyword-arguments))
+                            (jscl/js::throw (jscl/js::+ "Unknown keyword argument "
+                                                        (jscl/js::property (arg i) "name"))))))))))
 
 (defun parse-lambda-list (ll)
   (values (ll-required-arguments ll)
@@ -890,7 +892,7 @@ association list ALIST in the same order."
 (define-compilation progn (&rest body)
   (if (null (cdr body))
       (convert (car body) *multiple-value-p*)
-      `(progn
+      `(jscl/js::progn
          ,@(append (mapcar #'convert (butlast body))
                    (list (convert (car (last body)) t))))))
 
@@ -1002,18 +1004,18 @@ let-binding-wrapper."
     (return-from let*-binding-wrapper body))
   (let ((store (mapcar (lambda (s) (cons s (gvarname s)))
                        (remove-if-not #'special-variable-p symbols))))
-    `(progn
-       (try
+    `(jscl/js::progn
+       (jscl/js::try
         ,@(mapcar #'let*-wrapper-set-value store)
         ,body)
-       (finally
+       (jscl/js::finally
         ,@(mapcar #'let*-wrapper-reset-value store)))))
 
 (define-compilation let* (bindings &rest body)
   (let ((bindings (mapcar #'ensure-list bindings))
         (*environment* (copy-lexenv *environment*)))
     (let ((specials (remove-if-not #'special-variable-p (mapcar #'first bindings)))
-          (body `(progn
+          (body `(jscl/js::progn
                    ,@(mapcar #'let*-initialize-value bindings)
                    ,(convert-block body t t))))
       `(jscl/js::selfcall ,(let*-binding-wrapper specials body)))))
@@ -1622,42 +1624,53 @@ generate the code which performs the transformation on these variables."
   '(object))
 
 (define-raw-builtin jscl/ffi::oget* (object key &rest keys)
-  `(selfcall
-    (progn
-      (jscl/js::var tmp (jscl/js::property ,(convert object) (jscl/js::call-internal |xstring| ,(convert key))))
+  `(jscl/js::selfcall
+    (jscl/js::progn
+      (jscl/js::var tmp (jscl/js::property ,(convert object)
+                                           (jscl/js::call-internal |xstring| 
+                                                                   ,(convert key))))
       ,@(mapcar (lambda (key)
-                  `(progn
-                     (if (jscl/js::=== tmp undefined) (return ,(convert nil)))
-                     (jscl/js::= tmp (jscl/js::property tmp (jscl/js::call-internal |xstring| ,(convert key))))))
+                  `(jscl/js::progn
+                     (jscl/js::if (jscl/js::=== tmp jscl/ffi::undefined)
+                                  (jscl/js::return ,(convert nil)))
+                     (jscl/js::= tmp (jscl/js::property tmp
+                                                        (jscl/js::call-internal |xstring|
+                                                                                ,(convert key))))))
                 keys))
-    (return (if (jscl/js::=== tmp undefined) ,(convert nil) tmp))))
+    (jscl/js::return (jscl/js::if (jscl/js::=== tmp undefined)
+                                  ,(convert nil)
+                                  tmp))))
 
 (define-raw-builtin jscl/ffi::oset* (value object key &rest keys)
   (let ((keys (cons key keys)))
-    `(selfcall
-      (progn
+    `(jscl/js::selfcall
+      (jscl/js::progn
         (jscl/js::var obj ,(convert object))
         ,@(mapcar (lambda (key)
-                    `(progn
-                       (jscl/js::= obj (jscl/js::property obj (jscl/js::call-internal |xstring| ,(convert key))))
-                       (if (jscl/js::=== obj undefined)
-                           (throw "Impossible to set object property."))))
+                    `(jscl/js::progn
+                       (jscl/js::= obj (jscl/js::property obj 
+                                                          (jscl/js::call-internal |xstring|
+                                                                                  ,(convert key))))
+                       (jscl/js::if (jscl/js::=== obj jscl/ffi::undefined)
+                                    (jscl/js::throw "Impossible to set object property."))))
                   (butlast keys))
         (jscl/js::var tmp
-                      (jscl/js::= (jscl/js::property obj (jscl/js::call-internal |xstring| ,(convert (car (last keys)))))
+                      (jscl/js::= (jscl/js::property obj 
+                                                     (jscl/js::call-internal |xstring|
+                                                                             ,(convert (car (last keys)))))
                                   ,(convert value)))
-        (jscl/js::return (if (jscl/js::=== tmp undefined)
-                             ,(convert nil)
-                             tmp))))))
+        (jscl/js::return (jscl/js::if (jscl/js::=== tmp jscl/ffi::undefined)
+                                      ,(convert nil)
+                                      tmp))))))
 
 (define-raw-builtin jscl/ffi::oget (object key &rest keys)
   `(jscl/js::call-internal |js_to_lisp| ,(convert `(jscl/ffi:oget* ,object ,key ,@keys))))
 
 (define-raw-builtin jscl/ffi::oset (value object key &rest keys)
-  (convert `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
+  (convert `(jscl/ffi::oset* (lisp-to-js ,value) ,object ,key ,@keys)))
 
 (define-builtin js-null-p (x)
-  (convert-to-bool `(jscl/js::=== ,x null)))
+  (convert-to-bool `(jscl/js::=== ,x jscl/ffi::null)))
 
 (define-builtin objectp (x)
   (convert-to-bool `(jscl/js::=== (jscl/js::typeof ,x) "object")))
@@ -1666,7 +1679,7 @@ generate the code which performs the transformation on these variables."
   (convert-to-bool `(jscl/js::call-internal |isNLX| ,x)))
 
 (define-builtin %%throw (x)
-  `(jscl/js::selfcall (throw ,x)))
+  `(jscl/js::selfcall (jscl/js::throw ,x)))
 
 (define-builtin lisp-to-js (x) `(jscl/js::call-internal |lisp_to_js| ,x))
 (define-builtin js-to-lisp (x) `(jscl/js::call-internal |js_to_lisp| ,x))
@@ -1728,7 +1741,7 @@ generate the code which performs the transformation on these variables."
                   (error "Bad CATCH clausule `~S'." catch-form))
                 (let* ((*environment* (extend-local-env (list var)))
                        (tvar (translate-variable var)))
-                  `(catch (,tvar)
+                  `(jscl/js::catch (,tvar)
                      (jscl/js::= ,tvar (jscl/js::call-internal |js_to_lisp| ,tvar))
                      ,(convert-block body t))))))
 
@@ -1895,10 +1908,10 @@ generate the code which performs the transformation on these variables."
       (parse-body sexps :declarations decls-allowed-p)
     (declare (ignore decls))
     (if return-last-p
-        `(progn
+        `(jscl/js::progn
            ,@(mapcar #'convert (butlast sexps))
-           (return ,(convert (car (last sexps)) *multiple-value-p*)))
-        `(progn ,@(mapcar #'convert sexps)))))
+           (jscl/js::return ,(convert (car (last sexps)) *multiple-value-p*)))
+        `(jscl/js::progn ,@(mapcar #'convert sexps)))))
 
 (defun inline-builtin-p (name)
   (and (gethash name *builtins*)
@@ -2075,7 +2088,7 @@ remove newlines."
 (defun convert-toplevel-progn (sexp &optional multiple-value-p return-p)
   (warn "Top-level PROGN same as as ~r top-level form~:p"
         (length (cdr sexp)))
-  `(progn
+  `(jscl/js::progn
      ;; Discard all except the last value
      ,@(mapcar (lambda (form)
                  (convert-toplevel form nil nil))
@@ -2147,7 +2160,7 @@ the value."
 (defun process-toplevel (sexp &optional multiple-value-p return-p)
   (let ((*toplevel-compilations* nil))
     (let ((code (convert-toplevel sexp multiple-value-p return-p)))
-      `(progn
+      `(jscl/js::progn
          ,@(get-toplevel-compilations)
          ,code))))
 

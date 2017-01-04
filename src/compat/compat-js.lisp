@@ -162,7 +162,7 @@
 
 (defun jscl/js::new () (make-hash-table :test 'equal))
 
-(defun jscl/js::var (symbol value)
+(defmacro jscl/js::var (symbol &optional (value jscl/ffi::undefined))
   (error "Unprocessed VAR? ~s ← ~s" symbol value))
 
 (defun elevate-vars (body &key (lexicalp t))
@@ -186,7 +186,7 @@ captured vars and embedded forms as multiple values."
           ;; but only initialize it at this point in the program flow.
           (jscl/js::var
            (destructuring-bind (var name
-                                    &optional (initializer nil initializerp))
+                                    &optional (initializer jscl/ffi::undefined initializerp))
                form
              (declare (ignore var))
              (push name vars)
@@ -195,7 +195,7 @@ captured vars and embedded forms as multiple values."
           ;; Any of these forms establishes  a new lexical scope. Don't
           ;; expand it yet, wait for it to do its own expansion. Any of
           ;; these forms must be a macro for this to work.
-          ((jscl/js::function)
+          ((jscl/js::function jscl/js::progn)
            (push form revised))
           ;; All  other   CONS  forms   are  recursively   examined  for
           ;; a  Ruby::Var  form  to  appear  under  them.  Call  ourself
@@ -222,6 +222,9 @@ captured vars and embedded forms as multiple values."
       `(lambda (&rest |arguments|)
          (destructuring-bind (&optional ,@lambda-list) |arguments|
            ,@(elevate-vars body)))))
+
+(defmacro jscl/js::progn (&body body)
+  `(progn ,@ (elevate-vars body)))
 
 (defun jscl/js::= (var value) (setf var value))
 (defun jscl/js::== (a b) (equal a b))
