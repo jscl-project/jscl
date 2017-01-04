@@ -132,24 +132,92 @@
   (apply #'format *js-output* fmt args))
 
 
-(defun valid-js-identifier (string-designator)
-  "Check  if  STRING-DESIGNATOR is  valid  as  a Javascript  identifier.
- It returns  a couple of values.  The identifier itself as  a string and
- a boolean value with the result of this check.
+(defvar +javascript-reserved-keywords+
+  '(
+    "abstract"
+    "await"
+    "boolean"
+    "break"
+    "byte"
+    "case"
+    "catch"
+    "char"
+    "class"
+    "const"
+    "continue"
+    "debugger"
+    "default"
+    "delete"
+    "do"
+    "double"
+    "else"
+    "enum"
+    "export"
+    "extends"
+    "false"
+    "final"
+    "finally"
+    "float"
+    "for"
+    "function"
+    "goto"
+    "if"
+    "implements"
+    "import"
+    "in"
+    "instanceof"
+    "int"
+    "interface"
+    "let"
+    "long"
+    "native"
+    "new"
+    "new"
+    "null"
+    "package"
+    "private"
+    "protected"
+    "public"
+    "return"
+    "short"
+    "static"
+    "super"
+    "switch"
+    "synchronized"
+    "this"
+    "throw"
+    "throws"
+    "transient"
+    "true"
+    "try"
+    "typeof"
+    "var"
+    "void"
+    "volatile"
+    "while"
+    "with"
+    "yield")
+  "These  keywords  are not  permitted  to  be  used as  identifiers  in
+JavaScript.  This  is  a  union  of  all  the  reserved  word  lists  in
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Lexical_grammar")
 
-FIXME: This  does not check the  list of reserved words  which cannot be
-used as identifiers; for example, “package” and “if”"
+(defun valid-js-identifier-p (string-designator)
+  "Check  if  STRING-DESIGNATOR is  valid  as  a Javascript  identifier.
+ It returns  a couple of values:  the identifier itself as  a string (if
+ valid), and a boolean value with the result of this check."
   (let ((string (typecase string-designator
                   (symbol (symbol-name string-designator))
                   (string string-designator)
                   (t
-                   (return-from valid-js-identifier (values nil nil))))))
+                   (return-from valid-js-identifier-p (values nil nil))))))
     (flet ((constitutentp (ch)
              (or (alphanumericp ch) (member ch '(#\$ #\_)))))
       (if (and (every #'constitutentp string)
                (if (plusp (length string))
                    (not (digit-char-p (char string 0)))
-                   t))
+                   t)
+               (not (member string +javascript-reserved-keywords+
+                            :test #'string=)))
           (values string t)
           (values nil nil)))))
 
@@ -161,7 +229,7 @@ used as identifiers; for example, “package” and “if”"
 
 (defun js-identifier (string-designator)
   (multiple-value-bind (string valid)
-      (valid-js-identifier string-designator)
+      (valid-js-identifier-p string-designator)
     (unless valid
       (error "~S is not a valid Javascript identifier." string-designator))
     (js-format "~a" string)))
@@ -206,7 +274,7 @@ used as identifiers; for example, “package” and “if”"
        ((null tail))
     (let ((key (car tail))
           (value (cadr tail)))
-      (multiple-value-bind (identifier identifier-p) (valid-js-identifier key)
+      (multiple-value-bind (identifier identifier-p) (valid-js-identifier-p key)
         (declare (ignore identifier))
         (if identifier-p
             (js-identifier key)
@@ -235,7 +303,7 @@ used as identifiers; for example, “package” and “if”"
 
 (defun check-lvalue (x)
   (unless (or (symbolp x)
-              (nth-value 1 (valid-js-identifier x))
+              (nth-value 1 (valid-js-identifier-p x))
               (and (consp x)
                    (member (car x) '(get = property))))
     (error "Bad Javascript lvalue ~S" x)))
@@ -287,7 +355,7 @@ unnecessary parentheses."
        (js-format "]"))
       (get
        (multiple-value-bind (accessor accessorp)
-           (valid-js-identifier (cadr args))
+           (valid-js-identifier-p (cadr args))
          (unless accessorp
            (error "Invalid accessor ~S" (cadr args)))
          (js-expr (car args) 0)
