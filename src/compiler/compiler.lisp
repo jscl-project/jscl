@@ -261,8 +261,9 @@ specifier for the condition types that have been muffled.
   "Creates a new primitive named NAME with parameters ARGS and
  BODY. The body can access to the local environment through the
  variable *ENVIRONMENT*."
-  `(setf (gethash ',name *compilations*)
-         (lambda ,args (block ,name ,@body))))
+  `(let ((fn (lambda ,args (block ,name ,@body))))
+     (setf (gethash ',name *compilations*) fn)
+     (setf (gethash (intern (symbol-name ',name) :jscl/cl) *compilations*) fn)))
 
 (define-compilation if (condition true &optional false)
   `(jscl/js::if (jscl/js::!== ,(convert condition) ,(convert nil))
