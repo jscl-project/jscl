@@ -865,20 +865,20 @@ association list ALIST in the same order."
      ;; evaluated  in the  host compiler,  which  is maybe  not what  we
      ;; usually want.
      (when (find :compile-toplevel situations)
-       (warn "Compile-Toplevel: OK, evaluating in compiler (~a) ~a"
+       (warn "Eval-When Compile-Toplevel: OK, evaluating in compiler (~a) ~a…"
              (lisp-implementation-type)
              (truncate-string
               (substitute #\space #\newline (princ-to-string body))
               120))
-       (jscl/cl::eval (cons 'progn body)))
+       (map nil #'eval body))
      ;; `load-toplevel'  is  given,  then   just  compile  the  subforms
      ;; as usual.
      (when (find :load-toplevel situations)
-       (warn "Load-Toplevel: OK, pushing into code")
+       (warn "Eval-When Load-Toplevel: OK, pushing into code")
        (convert-toplevel (cons 'progn body) *multiple-value-p*))
      (unless (or (find :compile-toplevel situations)
                  (find :load-toplevel situations))
-       (warn "EVAL-WHEN: During compilation, ignoring ~s" situations)))
+       (warn "Eval-When: During compilation, ignoring ~s" situations)))
     ((find :execute situations)
      (convert `(progn ,@body) *multiple-value-p*))
     ((find :compile-toplevel situations)
