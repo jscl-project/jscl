@@ -254,7 +254,8 @@ specifier for the condition types that have been muffled.
 ;;; Special forms
 
 (defvar *compilations*
-  (make-hash-table))
+  (make-hash-table)
+  "Special forms that have direct compilations rather than typical macros")
 
 (defmacro define-compilation (name args &body body)
   "Creates a new primitive named NAME with parameters ARGS and
@@ -401,7 +402,7 @@ specifier for the condition types that have been muffled.
            (jscl/js::for ((jscl/js::= i (- (nargs) 1))
                           (jscl/js::>= i ,(+ n-required-arguments n-optional-arguments))
                           (jscl/js::post-- i))
-                         (jscl/js::= ,js!rest (new (jscl/js::call-internal |Cons| (arg i) ,js!rest)))))))))
+             (jscl/js::= ,js!rest (new (jscl/js::call-internal |Cons| (arg i) ,js!rest)))))))))
 
 (defun compile-lambda-parse-keywords (ll)
   (let ((n-required-arguments
@@ -431,13 +432,13 @@ specifier for the condition types that have been muffled.
                       (jscl/js::for ((jscl/js::= i ,(+ n-required-arguments n-optional-arguments))
                                      (jscl/js::< i (nargs))
                                      (jscl/js::+= i 2))
-                                    ;; ....
-                                    (jscl/js::if (jscl/js::=== (arg i) ,(convert keyword-name))
-                                                 (jscl/js::progn
-                                                   (jscl/js::= ,(translate-variable var) (arg (+ i 1)))
-                                                   ,(when svar `(jscl/js::= ,(translate-variable svar)
-                                                                            ,(convert t)))
-                                                   (jscl/js::break))))
+                        ;; ....
+                        (jscl/js::if (jscl/js::=== (arg i) ,(convert keyword-name))
+                                     (jscl/js::progn
+                                       (jscl/js::= ,(translate-variable var) (arg (+ i 1)))
+                                       ,(when svar `(jscl/js::= ,(translate-variable svar)
+                                                                ,(convert t)))
+                                       (jscl/js::break))))
                       (jscl/js::if (jscl/js::== i (nargs))
                                    (jscl/js::= ,(translate-variable var) ,(convert initform)))))))
           (when keyword-arguments
@@ -452,15 +453,15 @@ specifier for the condition types that have been muffled.
              (jscl/js::if (jscl/js::== (jscl/js::% (jscl/js::- (nargs) start) 2) 1)
                           (jscl/js::throw "Odd number of keyword arguments."))
              (jscl/js::for ((jscl/js::= i start) (jscl/js::< i (nargs)) (jscl/js::+= i 2))
-                           (jscl/js::if (jscl/js::and
-                                         ,@(mapcar (lambda (keyword-argument)
-                                                     (destructuring-bind ((keyword-name var) &optional initform svar)
-                                                         keyword-argument
-                                                       (declare (ignore var initform svar))
-                                                       `(jscl/js::!== (arg i) ,(convert keyword-name))))
-                                                   keyword-arguments))
-                                        (jscl/js::throw (jscl/js::+ "Unknown keyword argument "
-                                                                    (jscl/js::property (arg i) "name"))))))))))
+               (jscl/js::if (jscl/js::and
+                             ,@(mapcar (lambda (keyword-argument)
+                                         (destructuring-bind ((keyword-name var) &optional initform svar)
+                                             keyword-argument
+                                           (declare (ignore var initform svar))
+                                           `(jscl/js::!== (arg i) ,(convert keyword-name))))
+                                       keyword-arguments))
+                            (jscl/js::throw (jscl/js::+ "Unknown keyword argument "
+                                                        (jscl/js::property (arg i) "name"))))))))))
 
 (defun parse-lambda-list (ll)
   (values (ll-required-arguments ll)
@@ -1844,7 +1845,8 @@ generate the code which performs the transformation on these variables."
 
 (defun compile-funcall/function (function arglist)
   (when (and (symbolp function)
-             (jscl/cl::macro-function function))
+             (or (jscl/cl::macro-function function)
+                 (special-form-p function)))
     (error "Compiler error: Macro function was not expanded: ~s"
            function))
   (fn-info function :called t)
@@ -2111,10 +2113,33 @@ just fine."
   (apply #'defpackage-real% (rest sexp))
   (convert-toplevel `(apply #'defpackage-real% (rest sexp))))
 
+;; Based upon the one from Alexandria:
+(defun hash-table-values (table)
+  (let ((values nil))
+    (maphash (lambda (k v)
+               (declare (ignore k))
+               (push v values))
+             table)
+    values))
+
+(defun hosted-copy-package (name)
+  #-jscl
+  (let* ((package (jscl::find-package-or-fail name))
+         (used (gethash "use" package))
+         (nicknames (gethash "nicknames" package))
+         #+nil (exports (gethash "exports" package)))
+    (make-package (gethash "packageName" package)
+                  :use (and used (hash-table-values used))
+                  :nicknames (and nicknames (hash-table-values nicknames)))))
+
 (defun convert-toplevel-in-package (sexp)
-  (setf *package* (find-package-or-fail (second sexp)))
-  (convert-toplevel
-   `(setq *package* (find-package-or-fail ,(second sexp)))))
+  (assert (= 2 (length sexp)))
+  (let ((name (second sexp)))
+    (setf *package* (or (cl:find-package name)
+                        #-jscl (hosted-copy-package name)
+                        #+jscl (find-package-or-fail name)))
+    (convert-toplevel
+     `(setq *package* (find-package-or-fail ,name)))))
 
 (defun convert-toplevel-normal (sexp multiple-value-p return-p)
   (when *compile-print-toplevels*
