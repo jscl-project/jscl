@@ -69,14 +69,16 @@ or FUNCTION."
          (let ((value (symbol-value object)))
            (format stream "~&Its current value is ~A" value)
            (jscl/cl::describe value stream)))
+       (when (special-form-p object)
+         (format stream "~&~A names a special form" object))
        (when (macro-function object)
          (format stream "~&~A names a macro-function" object))
        (when (fboundp object)
          (format stream "~&~A names a function" object)
          (jscl/cl::describe (fdefinition object) stream))
-       (when (find-type-definition object)
+       (when (ignore-errors (find-type-definition object))
          (format stream "~&~A names a Type" object))
-       (when (find-class object)
+       (when (ignore-errors (find-class object))
          (format stream "~&~A names a Class" object)))
       (string
        (format stream "~%Length: ~:D"
