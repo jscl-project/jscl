@@ -48,7 +48,7 @@
 (defun %make-package
     (name use &optional nicknames)
   (when (find-package name)
-    (error "A package named `~a' already exists." name))
+    (cerror "IGNORE" "A package named `~a' already exists." name))
   (let ((package (jscl/js::new)))
     (setf (jscl/ffi:oget package "packageName") name
           (jscl/ffi:oget package "symbols") (jscl/js::new)

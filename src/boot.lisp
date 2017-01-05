@@ -28,11 +28,12 @@
 
 #+jscl
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (if (not (find-package :keyword))
-      (make-package "KEYWORD"))
+  (if (not (jscl/cl::find-package "KEYWORD"))
+      (jscl/cl::make-package "KEYWORD"))
 
-  (make-package "COMMON-LISP" :nicknames (list "CL"))
-  (export
+  (if (not (jscl/cl::find-package "COMMON-LISP"))
+      (jscl/cl::make-package "COMMON-LISP" :nicknames (list "CL")))
+  (jscl/cl::export
    '(#:&allow-other-keys               	#:&aux
      #:&body                           	#:&environment
      #:&key                            	#:&optional
@@ -522,13 +523,13 @@
      #:write-sequence                  	#:write-string
      #:write-to-string                 	#:y-or-n-p
      #:yes-or-no-p                     	#:zerop)
-   (find-package "COMMON-LISP"))
+   (jscl/cl::find-package "COMMON-LISP"))
 
-  (make-package "COMMON-LISP-USER"
-                :use :common-lisp
-                :nicknames (list "CL-USER"))
+  (jscl/cl::make-package "COMMON-LISP-USER"
+                         :use (list :common-lisp)
+                         :nicknames (list "CL-USER"))
 
-  (make-package "JSCL" :use :common-lisp))
+  (jscl/cl::make-package "JSCL/IMPL" :use (list :common-lisp)))
 
 (in-package #-jscl :jscl #+jscl :jscl/impl)
 
