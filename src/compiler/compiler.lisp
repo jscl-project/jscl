@@ -2171,7 +2171,7 @@ the value."
 (defun compile-toplevel (sexp &optional multiple-value-p return-p)
   #-jscl
   (progn
-    (jscl/cl::eval (process-toplevel sexp multiple-value-p return-p))
+    (eval (process-toplevel sexp multiple-value-p return-p))
     (format *js-output* "/* Toplevel form evaluated in ~a */" (lisp-implementation-type)))
   #+jscl
   (with-output-to-string (*js-output*)
