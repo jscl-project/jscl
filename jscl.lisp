@@ -311,10 +311,16 @@ permissions on FILENAME, if we  know how in the current implementation."
   #+sbcl
   (/= 0 (sb-unix:unix-isatty (sb-sys:fd-stream-fd stream)))
   #+ecl
-  (and (subtypep (type-of stream) 'file-stream)
-       (interactive-stream-p stream))
+  (interactive-stream-p stream)
   #- (or ecl sbcl)
   nil)
+
+#+ecl
+(defmethod stream-clear-output ((stream si:file-stream))
+  (if (teletype-p stream)
+      (dolist (char '(#\Esc #\[ #\H #\Esc #\[ #\2 #\J))
+        (write-char char stream))
+      (call-next-method)))
 
 #+sbcl
 (defmethod stream-clear-output ((stream sb-sys:fd-stream))
