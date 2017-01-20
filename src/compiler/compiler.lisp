@@ -262,8 +262,7 @@ specifier for the condition types that have been muffled.
  BODY. The body can access to the local environment through the
  variable *ENVIRONMENT*."
   `(let ((fn (lambda ,args (block ,name ,@body))))
-     (setf (gethash ',name *compilations*) fn)
-     (setf (gethash (intern (symbol-name ',name) :jscl/cl) *compilations*) fn)))
+     (setf (gethash ',(intern (string name) :jscl/js) *compilations*) fn)))
 
 (define-compilation if (condition true &optional false)
   `(jscl/js::if (jscl/js::!== ,(convert condition) ,(convert nil))
