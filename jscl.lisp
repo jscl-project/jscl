@@ -310,9 +310,13 @@ permissions on FILENAME, if we  know how in the current implementation."
 (defun teletype-p (stream)
   #+sbcl
   (/= 0 (sb-unix:unix-isatty (sb-sys:fd-stream-fd stream)))
-  #-sbcl
+  #+ecl
+  (and (subtypep (type-of stream) 'file-stream)
+       (interactive-stream-p stream))
+  #- (or ecl sbcl)
   nil)
 
+#+sbcl
 (defmethod stream-clear-output ((stream sb-sys:fd-stream))
   (if (teletype-p stream)
       (dolist (char '(#\Esc #\[ #\H #\Esc #\[ #\2 #\J))
