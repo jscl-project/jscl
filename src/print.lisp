@@ -684,10 +684,11 @@ emits (1- COUNT)."
 (defun format-conditional-nil-t (captured-substrings arguments)
   (assert (and (= 3 (length captured-substrings))
                (stringp (first captured-substrings))
-               (stringp (third captured-substrings)))
+               (stringp (third captured-substrings))
+               (consp (second captured-substrings))
+               (eql #\; (car (second captured-substrings))))
           (captured-substrings)
           "~~:[ expects two fields divided by ~~;")
-  (assert ())
   (values
    (if (first arguments)
        (first captured-substrings)      ; FIXME: format recursively
