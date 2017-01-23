@@ -254,7 +254,7 @@ specifier for the condition types that have been muffled.
 ;;; Special forms
 
 (defvar *compilations*
-  (make-hash-table)
+  (make-hash-table :test 'equal)
   "Special forms that have direct compilations rather than typical macros")
 
 (defmacro define-compilation (name args &body body)
@@ -262,7 +262,7 @@ specifier for the condition types that have been muffled.
  BODY. The body can access to the local environment through the
  variable *ENVIRONMENT*."
   `(let ((fn (lambda ,args (block ,name ,@body))))
-     (setf (gethash ',(intern (string name) :jscl/js) *compilations*) fn)))
+     (setf (gethash ,(string name) *compilations*) fn)))
 
 (define-compilation if (condition true &optional false)
   `(jscl/js::if (jscl/js::!== ,(convert condition) ,(convert nil))
@@ -1924,10 +1924,12 @@ generate the code which performs the transformation on these variables."
        (not (claimp name 'function 'notinline))))
 
 (defun special-form-p (name)
-  (gethash name *compilations*))
+  (and (eql (symbol-package name) (find-package "JSCL/CL"))
+       (gethash (string name) *compilations*)))
 
 (defun compile-special-form (name args)
-  (let ((comp (gethash name *compilations*)))
+  (let ((comp (gethash (string name) *compilations*)))
+    (assert comp () "~S must name a special form" comp)
     (apply comp args)))
 
 (defun compile-builtin-function (name args)
