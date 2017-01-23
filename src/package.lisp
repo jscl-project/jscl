@@ -46,9 +46,12 @@
                             *package-table*))
 
 (defun %make-package
-    (name use &optional nicknames)
-  (when (find-package name)
-    (cerror "IGNORE" "A package named `~a' already exists." name))
+    (name use &optional nicknames (if-exists :error))
+  (when (jscl/cl::find-package name)
+    (ecase if-exists
+      (:error (cerror "IGNORE" "A package named `~a' already exists." name))
+      (:ignore (warn "A package named `~a' already exists (ignoring MAKE-PACKAGE)" name)
+               (return-from %make-package (values nil (jscl/cl::find-package name))))))
   (let ((package (jscl/js::new)))
     (setf (jscl/ffi:oget package "packageName") name
           (jscl/ffi:oget package "symbols") (jscl/js::new)
@@ -66,10 +69,11 @@
       (pushnew package result :test #'eq))
     (reverse result)))
 
-(defun jscl/cl::make-package (name &key use nicknames)
+(defun jscl/cl::make-package (name &key use nicknames ((if-exists if-exists) :error))
   (%make-package (string name)
                  (resolve-package-list use)
-                 nicknames))
+                 nicknames
+                 if-exists))
 
 (defun jscl/cl::package-name (package-designator)
   (let ((package (find-package-or-fail package-designator)))

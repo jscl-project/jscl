@@ -28,16 +28,15 @@
 
 #+jscl
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (if (not (jscl/cl::find-package "KEYWORD"))
-      (jscl/cl::make-package "KEYWORD"))
-
-  (if (not (jscl/cl::find-package "COMMON-LISP"))
-      (jscl/cl::make-package "COMMON-LISP" :nicknames (list "CL"))) 
-
+  (jscl/cl::make-package "KEYWORD" 'jscl::if-exists :ignore)
+  
+  (jscl/cl::make-package "COMMON-LISP" :nicknames (list "CL") 'jscl::if-exists :ignore) 
+  
   (jscl/cl::make-package "COMMON-LISP-USER"
                          :use (list :common-lisp)
-                         :nicknames (list "CL-USER"))
-
+                         :nicknames (list "CL-USER")
+                         'jscl::if-exists :ignore)
+  
   (jscl/cl::make-package "JSCL/IMPL" :use (list :common-lisp)))
 
 (progn .
@@ -539,6 +538,17 @@
 (in-package #-jscl :jscl #+jscl :jscl/impl)
 
 (/debug "loading boot.lisp!")
+
+
+;;; Special forms treated as macros
+#-jscl
+(progn 
+  (defmacro jscl/cl::let (bindings &body body)
+    `(jscl/js::let ,bindings ,@body))
+  (defmacro jscl/cl::let* (bindings &body body)
+    `(jscl/js::let* ,bindings ,@body))
+  (defmacro jscl/cl::setq (&body assignment-pairs)
+    `(jscl/js::setq ,@assignment-pairs)))
 
 
 ;;; DEFMACRO

@@ -261,9 +261,10 @@ specifier for the condition types that have been muffled.
   "Creates a new primitive named NAME with parameters ARGS and
  BODY. The body can access to the local environment through the
  variable *ENVIRONMENT*."
-  `(let ((fn (lambda ,args (block ,name ,@body))))
-     (setf (gethash ',name *compilations*) fn)
-     (setf (gethash (intern (symbol-name ',name) :jscl/cl) *compilations*) fn)))
+  (let ((name (intern (symbol-name name) :jscl/js)))
+    `(let  ((fn (lambda ,args (block ,name ,@body))))
+       (setf (gethash ',name *compilations*) fn)
+       (setf (gethash (intern (symbol-name ',name) :jscl/cl) *compilations*) fn))))
 
 (define-compilation if (condition true &optional false)
   `(jscl/js::if (jscl/js::!== ,(convert condition) ,(convert nil))
@@ -559,7 +560,7 @@ is NIL."
 
 (define-compilation setq (&rest pairs)
   (when (null pairs)
-    (return-from setq (convert nil)))
+    (return-from jscl/js::setq (convert nil)))
   (with-collector (result)
     (loop
        (cond
@@ -663,6 +664,7 @@ association list ALIST in the same order."
 
                                         ; end ALEXANDRIA
 
+#+struct-ctor-FIXME-remove
 (defun constructor<-structure (object) ;; FIXME ☠☠☠
   (let* ((class (class-of object))
          (class-name (class-name class))
@@ -1120,7 +1122,7 @@ let-binding-wrapper."
   ;; because  1)  it is  easy  and  2)  many  built-in forms  expand  to
   ;; a implicit tagbody, so we save some space.
   (unless (some #'go-tag-p body)
-    (return-from tagbody (convert `(progn ,@body nil))))
+    (return-from jscl/js::tagbody (convert `(progn ,@body nil))))
   ;; The translation assumes the first form in BODY is a label
   (unless (go-tag-p (car body))
     (push (gensym "START") body))

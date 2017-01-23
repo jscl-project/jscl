@@ -665,9 +665,10 @@ emits (1- COUNT)."
 (defun format-justify (captured-substrings arguments
                        &key start-at-p start-colon-p
                             end-at-p end-colon-p)
-  "FORMAT ~< ~> handler. (unimplemented)"
+  (declare (ignore start-at-p start-colon-p end-at-p end-colon-p captured-substrings)) ; TODO
+  "FORMAT ~< ~> handler. (unimplemented; TODO)"
   (let (output)
-    (error "~~< ~~> not implemented yet")
+    (warn "~~< ~~> not implemented yet")
     (values (concatenate 'string (reverse output)) arguments)))
 
 (defun format-conditional-t-or-nothing (captured-substrings arguments)
@@ -686,16 +687,44 @@ emits (1- COUNT)."
                (stringp (first captured-substrings))
                (stringp (third captured-substrings)))
           (captured-substrings)
-          "~~:[ expects two fields divided by ~~;")
-  (assert ())
+          "~~:[ expects two fields divided by ~~;") 
   (values
    (if (first arguments)
        (first captured-substrings)      ; FIXME: format recursively
        (third captured-substrings))
    (rest arguments)))
 
+(defun divide-by (predicate sequence)
+  (let ((true ())
+        (false ()))
+    (dotimes (i (length sequence))
+      (if (funcall predicate i)
+          (push (elt sequence i) true)
+          (push (elt sequence i) false)))
+    (values (coerce (reverse true) (if (listp sequence) 
+                                       'list
+                                       'vector))
+            (coerce (reverse false) (if (listp sequence) 
+                                        'list
+                                        'vector)))))
+
 (defun format-conditional-nth (captured-substrings arguments)
-  (error "~~[ (nth) does not yet work in JSCL"))
+  (multiple-value-bind (alternatives semicolons) (divide-by #'oddp captured-substrings)
+    (assert (every #'tilde-semicolon-p semicolons) ()
+            "~~[ (Nth string) alternatives must be separated by ~~;") 
+    (let ((n (first arguments)))
+      (assert (and (numberp n)
+                   (not (minusp n))) ()
+                   "~~[ (Nth string) requires a non-negative, numeric argument; got ~a" n)
+      (values
+       (cond ((< n (length alternatives))
+              (nth n alternatives))
+             ((find #\: (last semicolons))
+              (car (last alternatives)))
+             (t
+              (error "~~[ (Nth string) argument ~a is greater than the number of alternatives available"
+                     n (length alternatives))))
+       (rest arguments)))))
 
 (defun format-conditional (captured-substrings arguments
                            &key start-at-p start-colon-p
