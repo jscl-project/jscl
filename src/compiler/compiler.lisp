@@ -262,8 +262,8 @@ specifier for the condition types that have been muffled.
  BODY. The body can access to the local environment through the
  variable *ENVIRONMENT*."
   (let ((name (intern (symbol-name name) :jscl/js)))
-  `(let ((fn (lambda ,args (block ,name ,@body))))
-     (setf (gethash ,(string name) *compilations*) fn)))
+    `(let ((fn (lambda ,args (block ,name ,@body))))
+       (setf (gethash ,(string name) *compilations*) fn))))
 
 (define-compilation if (condition true &optional false)
   `(jscl/js::if (jscl/js::!== ,(convert condition) ,(convert nil))
@@ -403,7 +403,7 @@ specifier for the condition types that have been muffled.
            (jscl/js::for ((jscl/js::= i (- (nargs) 1))
                           (jscl/js::>= i ,(+ n-required-arguments n-optional-arguments))
                           (jscl/js::post-- i))
-             (jscl/js::= ,js!rest (new (jscl/js::call-internal |Cons| (arg i) ,js!rest)))))))))
+                         (jscl/js::= ,js!rest (new (jscl/js::call-internal |Cons| (arg i) ,js!rest)))))))))
 
 (defun compile-lambda-parse-keywords (ll)
   (let ((n-required-arguments
@@ -433,13 +433,13 @@ specifier for the condition types that have been muffled.
                       (jscl/js::for ((jscl/js::= i ,(+ n-required-arguments n-optional-arguments))
                                      (jscl/js::< i (nargs))
                                      (jscl/js::+= i 2))
-                        ;; ....
-                        (jscl/js::if (jscl/js::=== (arg i) ,(convert keyword-name))
-                                     (jscl/js::progn
-                                       (jscl/js::= ,(translate-variable var) (arg (+ i 1)))
-                                       ,(when svar `(jscl/js::= ,(translate-variable svar)
-                                                                ,(convert t)))
-                                       (jscl/js::break))))
+                                    ;; ....
+                                    (jscl/js::if (jscl/js::=== (arg i) ,(convert keyword-name))
+                                                 (jscl/js::progn
+                                                   (jscl/js::= ,(translate-variable var) (arg (+ i 1)))
+                                                   ,(when svar `(jscl/js::= ,(translate-variable svar)
+                                                                            ,(convert t)))
+                                                   (jscl/js::break))))
                       (jscl/js::if (jscl/js::== i (nargs))
                                    (jscl/js::= ,(translate-variable var) ,(convert initform)))))))
           (when keyword-arguments
@@ -454,15 +454,15 @@ specifier for the condition types that have been muffled.
              (jscl/js::if (jscl/js::== (jscl/js::% (jscl/js::- (nargs) start) 2) 1)
                           (jscl/js::throw "Odd number of keyword arguments."))
              (jscl/js::for ((jscl/js::= i start) (jscl/js::< i (nargs)) (jscl/js::+= i 2))
-               (jscl/js::if (jscl/js::and
-                             ,@(mapcar (lambda (keyword-argument)
-                                         (destructuring-bind ((keyword-name var) &optional initform svar)
-                                             keyword-argument
-                                           (declare (ignore var initform svar))
-                                           `(jscl/js::!== (arg i) ,(convert keyword-name))))
-                                       keyword-arguments))
-                            (jscl/js::throw (jscl/js::+ "Unknown keyword argument "
-                                                        (jscl/js::property (arg i) "name"))))))))))
+                           (jscl/js::if (jscl/js::and
+                                         ,@(mapcar (lambda (keyword-argument)
+                                                     (destructuring-bind ((keyword-name var) &optional initform svar)
+                                                         keyword-argument
+                                                       (declare (ignore var initform svar))
+                                                       `(jscl/js::!== (arg i) ,(convert keyword-name))))
+                                                   keyword-arguments))
+                                        (jscl/js::throw (jscl/js::+ "Unknown keyword argument "
+                                                                    (jscl/js::property (arg i) "name"))))))))))
 
 (defun parse-lambda-list (ll)
   (values (ll-required-arguments ll)
@@ -710,6 +710,16 @@ association list ALIST in the same order."
                 (toplevel-compilation `(jscl/js::= (jscl/js::get ,jsvar "value") ,jsvar)))
               jsvar)))))
 
+(defun literal-sv (sv)
+  (let ((jsvar (genlit (string (storage-vector-kind sv)))))
+    (push (cons sv jsvar) *literal-table*)
+    (toplevel-compilation `(jscl/js::var ,jsvar
+                                         (let ((,jsvar (make-storage-vector ,(storage-vector-size sv)
+                                                                            ,(storage-vector-kind sv))))
+                                           (setf ,(loop for i below (storage-vector-length sv)
+                                                     collect `(aref ,jsvar ,i)
+                                                     collect (ared sv i))))))))
+
 (defun literal (sexp &optional recursivep)
   (cond
     ((typep sexp 'sb-impl::comma)
@@ -740,7 +750,7 @@ association list ALIST in the same order."
         (list 'function (list 'quote (nth-value 2 (function-lambda-expression sexp)))))
        (character (string sexp))  ; is this really the right thing?
        (pathname (namestring sexp))
-       (structure-object (constructor<-structure sexp))
+       (structure-object (literal-struct sexp))
        (t (dump-complex-literal sexp recursivep))))))
 
 (define-compilation quote (sexp)
@@ -1279,7 +1289,7 @@ generate the code which performs the transformation on these variables."
   (if (null numbers)
       0
       (variable-arity numbers
-        `(+ ,@numbers))))
+                      `(+ ,@numbers))))
 
 (define-raw-builtin - (x &rest others)
   (let ((args (cons x others)))
@@ -1297,10 +1307,10 @@ generate the code which performs the transformation on these variables."
 (define-raw-builtin / (x &rest others)
   (let ((args (cons x others)))
     (variable-arity args
-      (if (null others)
-          `(jscl/js::call-internal |handled_division| 1 ,(car args))
-          (reduce (lambda (x y) `(jscl/js::call-internal |handled_division| ,x ,y))
-                  args)))))
+                    (if (null others)
+                        `(jscl/js::call-internal |handled_division| 1 ,(car args))
+                        (reduce (lambda (x y) `(jscl/js::call-internal |handled_division| ,x ,y))
+                                args)))))
 
 (define-builtin mod (x y)
   (when (constantp y)
@@ -1324,7 +1334,7 @@ generate the code which performs the transformation on these variables."
   `(define-raw-builtin ,op (x &rest args)
      (let ((args (cons x args)))
        (variable-arity args
-         (convert-to-bool (comparison-conjuntion args ',sym))))))
+                       (convert-to-bool (comparison-conjuntion args ',sym))))))
 
 (define-builtin-comparison >)
 (define-builtin-comparison <)
