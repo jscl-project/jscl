@@ -253,7 +253,7 @@ specifier for the condition types that have been muffled.
 
 ;;; Special forms
 
-(defvar *compilations*
+(defvar *special-forms*
   (make-hash-table :test 'equal)
   "Special forms that have direct compilations rather than typical macros")
 
@@ -263,7 +263,7 @@ specifier for the condition types that have been muffled.
  variable *ENVIRONMENT*."
   (let ((name (intern (symbol-name name) :jscl/js)))
     `(let ((fn (lambda ,args (block ,name ,@body))))
-       (setf (gethash ,(string name) *compilations*) fn))))
+       (setf (gethash ,(string name) *special-forms*) fn))))
 
 (define-compilation if (condition true &optional false)
   `(jscl/js::if (jscl/js::!== ,(convert condition) ,(convert nil))
@@ -718,7 +718,7 @@ association list ALIST in the same order."
                                                                             ,(storage-vector-kind sv))))
                                            (setf ,(loop for i below (storage-vector-length sv)
                                                      collect `(aref ,jsvar ,i)
-                                                     collect (ared sv i))))))))
+                                                     collect (aref sv i))))))))
 
 (defun literal (sexp &optional recursivep)
   (cond
@@ -1937,10 +1937,10 @@ generate the code which performs the transformation on these variables."
 
 (defun special-form-p (name)
   (and (eql (symbol-package name) (find-package "JSCL/CL"))
-       (gethash (string name) *compilations*)))
+       (gethash (string name) *special-forms*)))
 
 (defun compile-special-form (name args)
-  (let ((comp (gethash (string name) *compilations*)))
+  (let ((comp (gethash (string name) *special-forms*)))
     (assert comp () "~S must name a special form" comp)
     (apply comp args)))
 
