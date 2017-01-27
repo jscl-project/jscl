@@ -711,14 +711,16 @@ association list ALIST in the same order."
               jsvar)))))
 
 (defun literal-sv (sv)
-  (let ((jsvar (genlit (string (storage-vector-kind sv)))))
+  (let* ((kind (storage-vector-kind sv))
+         (jsvar (genlit (string kind)))
+         (vec (storage-vector-underlying-vector sv)))
     (push (cons sv jsvar) *literal-table*)
-    (toplevel-compilation `(jscl/js::var ,jsvar
-                                         (let ((,jsvar (make-storage-vector ,(storage-vector-size sv)
-                                                                            ,(storage-vector-kind sv))))
-                                           (setf ,(loop for i below (storage-vector-length sv)
-                                                     collect `(aref ,jsvar ,i)
-                                                     collect (aref sv i))))))))
+    `(jscl/js::var ,jsvar 
+                   (jscl/js::selfcall
+                    (jscl/js::var r ,vec)
+                    (jscl/js::= (jscl/js::get r "length") ,(length vec))
+                    (jscl/js::= (jscl/js::get r "svKind") ,kind)
+                    (jscl/js::return r)))))
 
 (defun literal (sexp &optional recursivep)
   (cond
@@ -746,11 +748,13 @@ association list ALIST in the same order."
         (warn "Rounding ~a to float" sexp)
         (coerce sexp 'double-float))
        (number sexp)
+       (structure-object (literal-sv sexp))
+       (array (literal-sv sexp))
+       (standard-object (literal-sv sexp))
        (function  ;; FIXME?
         (list 'function (list 'quote (nth-value 2 (function-lambda-expression sexp)))))
        (character (string sexp))  ; is this really the right thing?
        (pathname (namestring sexp))
-       (structure-object (literal-struct sexp))
        (t (dump-complex-literal sexp recursivep))))))
 
 (define-compilation quote (sexp)
