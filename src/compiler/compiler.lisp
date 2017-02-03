@@ -1228,9 +1228,6 @@ let-binding-wrapper."
 (defvar *builtins*
   (make-hash-table))
 
-(defun jscl/cl::special-operator-p (name)
-  (nth-value 1 (gethash name *builtins*)))
-
 (defmacro define-raw-builtin (name args &body body)
   " Creates  a new  primitive function `name'  with parameters  args and
  @body.  The body  can access  to  the local  environment through  the
@@ -1862,7 +1859,7 @@ generate the code which performs the transformation on these variables."
 (defun compile-funcall/function (function arglist)
   (when (and (symbolp function)
              (or (jscl/cl::macro-function function)
-                 (special-form-p function)))
+                 (jscl/cl::special-operator-p function)))
     (error "Compiler error: Macro function was not expanded: ~s"
            function))
   (fn-info function :called t)
@@ -1939,9 +1936,10 @@ generate the code which performs the transformation on these variables."
   (and (gethash name *builtins*)
        (not (claimp name 'function 'notinline))))
 
-(defun special-form-p (name)
-  (and (eql (symbol-package name) (find-package "JSCL/CL"))
-       (gethash (string name) *special-forms*)))
+(defun jscl/cl::special-operator-p (name)
+  (or (and (eql (symbol-package name) (find-package "JSCL/CL"))
+           (gethash (string name) *special-forms*))
+      (nth-value 1 (gethash name *builtins*))))
 
 (defun compile-special-form (name args)
   (let ((comp (gethash (string name) *special-forms*)))
@@ -1970,7 +1968,7 @@ generate the code which performs the transformation on these variables."
       ((and (claimp name 'function 'jscl::pure)
             (every #'constantp args))
        (apply name args))
-      ((special-form-p name)
+      ((jscl/cl::special-operator-p name)
        (compile-special-form name args))
       ((inline-builtin-p name)
        (compile-builtin-function name args))
