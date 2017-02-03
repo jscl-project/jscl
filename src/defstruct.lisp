@@ -175,7 +175,7 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
 (declaim (ftype (function
                  (&key (:class t) (:name t) (:accessors t) (:readers t) (:writers t)
                        (:type t) (:initform t) (:initarg t) (:allocation t))
-                 (values slot-info &optional))
+                 (values jscl::slot-info &optional))
                 make-slot-info)
          (ftype (function (t) t) slot-info-p)
          (special *types*))
