@@ -365,7 +365,8 @@ for details.'"
            (check-type struct-type symbol "a structure type name (symbol)")
            (let* ((sv (make-storage-vector :kind (list 'structure-object struct-type))))
              (loop for (key value) on struct-data by #'cddr
-                do (setf (slot-value sv key) value))))))
+                do (setf (slot-value sv key) value))
+             sv))))
       ((#\X #\x)
        (let ((*read-base* 16))
          (read-integer-from-stream stream)))
