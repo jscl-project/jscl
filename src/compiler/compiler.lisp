@@ -716,9 +716,9 @@ association list ALIST in the same order."
     (toplevel-compilation `(jscl/js::var ,jsvar
                                          (let ((,jsvar (make-storage-vector ,(storage-vector-size sv)
                                                                             ,(storage-vector-kind sv))))
-                                           (setf ,(loop for i below (storage-vector-length sv)
-                                                     collect `(aref ,jsvar ,i)
-                                                     collect (aref sv i))))))))
+                                           (setf ,(loop for i below (length (storage-vector-underlying-vector sv))
+                                                     collect `(aref ,(storage-vector-underlying-vector jsvar) ,i)
+                                                     collect (aref (storage-vector-underlying-vector sv) i))))))))
 
 (defun literal (sexp &optional recursivep)
   (cond
@@ -750,7 +750,7 @@ association list ALIST in the same order."
         (list 'function (list 'quote (nth-value 2 (function-lambda-expression sexp)))))
        (character (string sexp))  ; is this really the right thing?
        (pathname (namestring sexp))
-       (structure-object (literal-struct sexp))
+       (structure-object (literal-sv sexp))
        (t (dump-complex-literal sexp recursivep))))))
 
 (define-compilation quote (sexp)
