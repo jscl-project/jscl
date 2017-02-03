@@ -22,7 +22,8 @@
   (defvar jscl/ffi:*root* (make-hash-table :test 'equal)
     "The *ROOT* object is “window” (in a browser) or the Node root object.
  This provides access to whichever root  object happens to exist in the
- active JavaScript Virtual Machine."))
+ active JavaScript Virtual Machine.")
+  (defvar jscl/js::*this*))
 
 (defun jscl/ffi:make-new (class &rest ctor-args)
   "Create a new  instance of CLASS with the  JavaScript special operator
