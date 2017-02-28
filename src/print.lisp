@@ -724,7 +724,7 @@ emits (1- COUNT)."
              ((find #\: (last semicolons))
               (car (last alternatives)))
              (t
-              (error "~~[ (Nth string) argument ~a is greater than the number of alternatives available"
+              (error "~~[ (Nth string) argument ~d is greater than the number of alternatives available (~d)"
                      n (length alternatives))))
        (rest arguments)))))
 

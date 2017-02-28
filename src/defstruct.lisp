@@ -174,8 +174,8 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
 ;; Forward declaration of Make-Slot-Info. This is a circular dependency…
 (declaim (ftype (function
                  (&key (:class t) (:name t) (:accessors t) (:readers t) (:writers t)
-                       (:type t) (:initform t) (:initarg t) (:allocation t))
-                 (values slot-info &optional))
+                       (:type t) (:initform t) (:initargs t) (:allocation t))
+                 (values jscl::slot-info &optional))
                 make-slot-info)
          (ftype (function (t) t) slot-info-p)
          (special *types*))
@@ -186,7 +186,7 @@ TYPE (and fulfills PREDICATE). Used in slot readers."
    :allocation :instance
    :name (car slot)
    :accessors (list (defstruct/make-accessor-name type slot))
-   :initarg (intern (car slot) :keyword)))
+   :initargs (list (intern (car slot) :keyword))))
 
 (defun defstruct/define-type (type slots &key
                                            predicate
