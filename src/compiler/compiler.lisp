@@ -1138,7 +1138,7 @@
   (convert-to-bool `(!== (get ,x "value") undefined)))
 
 (define-builtin fboundp (x)
-  (convert-to-bool `(!== (get ,x "fvalue") undefined)))
+  (convert-to-bool `(!== (get ,x "fvalue") (internal |unboundFunction|))))
 
 (define-builtin symbol-value (x)
   `(call-internal |symbolValue| ,x))

@@ -305,15 +305,15 @@ packages.KEYWORD = {
 
 jscl.CL = packages.CL.exports;
 
-function unboundFunction () {
+internals.unboundFunction = function () {
   throw new Error("Function '" + this.name + "' undefined");
-}
+};
 
 internals.Symbol = function(name, package_name){
   this.name = name;
   this.package = package_name;
   this.value = undefined;
-  this.fvalue = unboundFunction;
+  this.fvalue = internals.unboundFunction;
 };
 
 internals.symbolValue = function (symbol){
@@ -327,7 +327,7 @@ internals.symbolValue = function (symbol){
 
 internals.symbolFunction = function (symbol){
   var fn = symbol.fvalue;
-  if (fn === unboundFunction)
+  if (fn === internals.unboundFunction)
     symbol.fvalue();
   return fn;
 };
