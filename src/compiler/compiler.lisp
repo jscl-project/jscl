@@ -851,20 +851,7 @@ association list ALIST in the same order."
   "Was the compiler invoked from `compile-file'?")
 
 (defun bangerang (form)
-  (cond ((consp form)
-         (cons
-          (if (symbolp (car form))
-              (let ((name (car form)))
-                (if (and (fboundp name)
-                         (or (eql (find-package :jscl) (symbol-package name))
-                             (eql (find-package :cl) (symbol-package name))))
-                    (let ((bang (find-symbol (concatenate 'string "!"
-                                                          (symbol-name name)) :jscl)))
-                      (or (and bang (fboundp bang) bang)
-                          name))
-                    name)))
-          (mapcar #'bangerang (cdr form))))
-        (t form)))
+  (error "Deprecated function removed"))
 
 (define-compilation eval-when (situations &rest body)
   "NOTE: It  is probably wrong  in many cases but  we will not  use this
