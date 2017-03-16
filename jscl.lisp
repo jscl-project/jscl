@@ -459,7 +459,8 @@ which occurred within ~r file~:p: ~
                (length file-warnings) (length file-failures) files
                file-warnings file-failures))
       (file-warnings
-       (warn "In the ~:(~a~) pass, despite warnings in ~r file~:p, there were no failures; continuing…"
+       (warn "In the ~:(~a~) pass, despite warnings in ~r file~:p, ~
+   there were no failures; continuing…"
              pass (length file-warnings)))
       (t (format *trace-output* "~&No warnings or failures from compilation in the ~(~a~) pass."
                  pass)))))

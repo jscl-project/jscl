@@ -728,7 +728,9 @@ association list ALIST in the same order."
      (error "Quasi-quoted expression leakage: ~s" sexp))
     ((and (integerp sexp)
           (not (jscl/cl::fixnump sexp)))
-     (cerror "Use the biggest possible number instead"
+     (cerror (format nil 
+                     "Use the ~:[smallest~;biggest~] possible number instead"
+                     (plusp sexp))
              "Cannot pass BigNum ~:d yet" sexp)
      (if (plusp sexp)
          (literal +most-positive-fixnum+)
@@ -873,7 +875,7 @@ association list ALIST in the same order."
                  situations)
           (situations)
           "Eval-When  situations   must  be   (MEMBER  COMPILE-TOPLEVEL~
- LOAD-TOPLEVEL EXECUTE) only; not ~s" situations)
+  LOAD-TOPLEVEL EXECUTE) only; not ~s" situations)
   (cond
     ;; Toplevel form compiled by !compile-file.
     ((and *compiling-file* (zerop *convert-level*))
