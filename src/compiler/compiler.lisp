@@ -745,6 +745,7 @@ association list ALIST in the same order."
      (error "Cannot pass complex numberss like ~d" sexp))
     (t
      (typecase sexp
+       (pathname (namestring sexp))
        (fixnum sexp)
        (rational
         (warn "Rounding ~a to float" sexp)
@@ -756,7 +757,6 @@ association list ALIST in the same order."
        (function  ;; FIXME?
         (list 'function (list 'quote (nth-value 2 (function-lambda-expression sexp)))))
        (character (string sexp))  ; is this really the right thing?
-       (pathname (namestring sexp))
        (t (dump-complex-literal sexp recursivep))))))
 
 (define-compilation quote (sexp)
