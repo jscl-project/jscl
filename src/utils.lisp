@@ -63,8 +63,8 @@ accumulated, in the order."
 (defun join (list &optional (separator ""))
   (if (null list)
       ""
-      (jscl/cl::reduce (lambda (s o) (concat s separator o))
-                       list)))
+      (reduce (lambda (s o) (concat s separator o))
+              list)))
 
 (defun join-trailing (list &optional (separator ""))
   (if (null list)

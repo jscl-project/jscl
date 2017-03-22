@@ -722,6 +722,13 @@ association list ALIST in the same order."
                     (jscl/js::= (jscl/js::get r "svKind") ,kind)
                     (jscl/js::return r)))))
 
+(defun literal-symbol (sexp)
+  (let ((jsvar (genlit)))
+    (toplevel-compilation `(var (,jsvar ,(dump-symbol sexp)))) 
+    (when (keywordp sexp)
+      (toplevel-compilation `(= (get ,jsvar "value") ,jsvar)))
+    jsvar))
+
 (defun literal (sexp &optional recursivep)
   (cond
     ((typep sexp 'sb-impl::comma)
@@ -738,13 +745,14 @@ association list ALIST in the same order."
     ((and (rationalp sexp)
           (not (= 1 (denominator sexp)))
           (not (rational-float-p sexp)))
-     (cerror "Round it off"
-             "Cannot pass ~d exactly" sexp)
+     (cerror "Round it off as a Double-Float"
+             "Cannot pass BigNum ~:d exactly" sexp)
      (literal (coerce sexp 'double-float)))
     ((complexp sexp)
-     (error "Cannot pass complex numberss like ~d" sexp))
+     (error "Cannot pass complex numbers like ~d" sexp))
     (t
      (typecase sexp
+       (symbol (literal-symbol sexp))
        (pathname (namestring sexp))
        (fixnum sexp)
        (rational
@@ -754,9 +762,9 @@ association list ALIST in the same order."
        (structure-object (literal-sv sexp))
        (array (literal-sv sexp))
        (standard-object (literal-sv sexp))
-       (function  ;; FIXME?
+       (function ;; FIXME?
         (list 'function (list 'quote (nth-value 2 (function-lambda-expression sexp)))))
-       (character (string sexp))  ; is this really the right thing?
+       (character (string sexp))       ; is this really the right thing?
        (t (dump-complex-literal sexp recursivep))))))
 
 (define-compilation quote (sexp)
@@ -1894,6 +1902,10 @@ generate the code which performs the transformation on these variables."
       ((eql 'setf function)
        (compile-funcall (list 'setf (first args))
                         (rest args)))
+      ((and (symbolp function)
+            (special-operator-p function))
+       (error "Compiler error: Special operator ~s treated as function call"
+              function))
       ((translate-function function)
        (compile-funcall/translate-function function arglist))
       ((and (symbolp function) (jscl/cl::macro-function function))
@@ -1957,10 +1969,10 @@ generate the code which performs the transformation on these variables."
       ((and (claimp name 'function 'jscl::pure)
             (every #'constantp args))
        (apply name args))
-      ((jscl/cl::special-operator-p name)
-       (compile-special-form name args))
       ((inline-builtin-p name)
        (compile-builtin-function name args))
+      ((jscl/cl::special-operator-p name)
+       (compile-special-form name args))
       (t (compile-funcall name args)))))
 
 (defun convert-1/symbol (sexp)
@@ -2072,6 +2084,8 @@ be used."
       (let ((*multiple-value-p* multiple-value-p)
             (*convert-level* (1+ *convert-level*)))
         (cond
+          ((null sexp)
+           (literal nil))
           ((symbolp sexp)
            (convert-1/symbol sexp))
           ((rational-float-p sexp)
