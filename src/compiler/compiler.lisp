@@ -257,13 +257,21 @@ specifier for the condition types that have been muffled.
   (make-hash-table :test 'equal)
   "Special forms that have direct compilations rather than typical macros")
 
+(eval-when (:load-toplevel :execute :compile-toplevel)
+  (defun jscl/cl::special-operator-p (name)
+    (or (and (eql (symbol-package name) (find-package "JSCL/CL"))
+             (gethash (string name) *special-forms*))
+        (nth-value 1 (gethash name *builtins*)))))
+
 (defmacro define-compilation (name args &body body)
   "Creates a new primitive named NAME with parameters ARGS and
  BODY. The body can access to the local environment through the
  variable *ENVIRONMENT*."
   (let ((name (intern (symbol-name name) :jscl/js)))
     `(let ((fn (lambda ,args (block ,name ,@body))))
-       (setf (gethash ,(string name) *special-forms*) fn))))
+       (setf (gethash ,(string name) *special-forms*) fn)
+       (assert (jscl/cl::special-operator-p 
+                ',(intern (symbol-name name) :jscl/cl))))))
 
 (define-compilation if (condition true &optional false)
   `(jscl/js::if (jscl/js::!== ,(convert condition) ,(convert nil))
@@ -859,6 +867,7 @@ association list ALIST in the same order."
   "Was the compiler invoked from `compile-file'?")
 
 (defun bangerang (form)
+  (declare (ignore form))
   (error "Deprecated function removed"))
 
 (define-compilation eval-when (situations &rest body)
@@ -899,7 +908,7 @@ association list ALIST in the same order."
      (warn "Skipping EVAL-WHEN: ~@[not compiling~] ~@[not toplevel~] "
            (not *compiling-file*) (not (zerop *convert-level*))))
     (t
-     (warn "EVAL-WHEN has no valie situation ~s~%(unreachable code ~s)"
+     (warn "EVAL-WHEN has no valid situation ~s~%(unreachable code ~s)"
            situations body)
      (convert nil))))
 
@@ -1910,6 +1919,9 @@ generate the code which performs the transformation on these variables."
        (compile-funcall/translate-function function arglist))
       ((and (symbolp function) (jscl/cl::macro-function function))
        (error "Compiler error: Macro function was not expanded: ~s" function))
+      ((jscl/cl::special-operator-p function)
+       (error "Compiler error: Special operator ~s is not a function"
+              function))
       ((function-name-p function)
        (compile-funcall/function function arglist))
       ((not (consp function))
@@ -1937,11 +1949,6 @@ generate the code which performs the transformation on these variables."
   (and (gethash name *builtins*)
        (not (claimp name 'function 'notinline))))
 
-(defun jscl/cl::special-operator-p (name)
-  (or (and (eql (symbol-package name) (find-package "JSCL/CL"))
-           (gethash (string name) *special-forms*))
-      (nth-value 1 (gethash name *builtins*))))
-
 (defun compile-special-form (name args)
   (let ((comp (gethash (string name) *special-forms*)))
     (assert comp () "~S must name a special form" comp)
@@ -1966,23 +1973,24 @@ generate the code which performs the transformation on these variables."
   (let ((name (car sexp))
         (args (cdr sexp)))
     (cond
-      ((and (claimp name 'function 'jscl::pure)
-            (every #'constantp args))
-       (apply name args))
       ((inline-builtin-p name)
        (compile-builtin-function name args))
       ((jscl/cl::special-operator-p name)
        (compile-special-form name args))
+      ((and (claimp name 'function 'jscl::pure)
+            (every #'constantp args))
+       (apply name args))
       (t (compile-funcall name args)))))
 
 (defun convert-1/symbol (sexp)
   (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
     (cond
+      ((keywordp sexp)
+       (list 'quote sexp))
+      ((and b (member 'constant (binding-declarations b)))
+       `(jscl/js::get ,(convert `,'sexp) "value"))
       ((and b (not (member 'special (binding-declarations b))))
        (binding-value b))
-      ((or (keywordp sexp)
-           (and b (member 'constant (binding-declarations b))))
-       `(jscl/js::get ,(convert `',sexp) "value"))
       (t
        (convert `(symbol-value ',sexp))))))
 
@@ -2036,20 +2044,12 @@ generate the code which performs the transformation on these variables."
 (defun check-for-failed-macroexpansion (sexp)
   "When a symbol is defined as a  macro in the host compiler, and exists
 in the CL package,  it is usually a safe bet that  we should be treating
-it as a macro within JSCL  as well. The notable exception (inversion) is
-`DESTRUCTURING-BIND'.  This checks  for  missing  macros, which  usually
+it as a macro within JSCL/CL  as well. The notable exception (inversion)
+is `DESTRUCTURING-BIND'.  This checks for missing  macros, which usually
 means either that  we have a compile-time dependency  ordering issue, or
 just haven't gotten  around to defining that macro at  all, yet. It also
 jumps out and  shouts when macro-expansion is  broken completely, rather
-than baffling errors because of macro-forms being treated as functions.
-
-FIXME redocument with !
-
-Notably,  a  macro defined  as  !NAME  will be  used  for  NAME to  make
-cross-compilation less  sticky about symbol  names in the  JSCL package.
-If the  JSCL/CL package were separate  from the JSCL/INT package  or so,
-this might go  away, but that will  take a good bit  of rewriting symbol
-names throughout the tree. "
+than baffling errors because of macro-forms being treated as functions."
   (cond ((not (should-be-macroexpanded-in-cl-p sexp)) sexp)
         ((jscl/cl::macro-function (prefix-! (car sexp)))
          (warn "Substituting !~s for ~:*~s" (car sexp))
