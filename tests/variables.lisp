@@ -6,6 +6,6 @@
               (setq *x* 1)
               (test (= *x* 1))
               2)))
-  (expected-failure (= *x* 2)))
+  (test (= *x* 2)))
 
-(expected-failure (= *x* 1))
+(test (= *x* 1))
