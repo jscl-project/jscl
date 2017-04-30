@@ -1,5 +1,7 @@
 # JSCL [![Build Status](https://travis-ci.org/jscl-project/jscl.svg?branch=master)](https://travis-ci.org/jscl-project/jscl)
 
+![JSCL Logo](logo/logo-128.png)
+
 JSCL is a Common Lisp to Javascript compiler, which is bootstrapped
 from Common Lisp and executed from the browser.
 
