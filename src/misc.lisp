@@ -123,3 +123,13 @@
 (defun get-universal-time ()
   (+ (get-unix-time) 2208988800))
 
+
+;;;; STEP
+
+;; Adding STEP macro entry here with no useful code for now, only for ANSI compliance as
+;; in other Lisp platforms (like Clozure CL). The expansion of this macro will be only the code passed
+;; as the argument
+
+(defmacro step (form)
+  "Stepping is no currently available"
+  form)
