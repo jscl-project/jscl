@@ -163,7 +163,7 @@
 
 (defun export (symbols &optional (package *package*))
   (let ((exports (%package-external-symbols package)))
-    (dolist (symb symbols t)
+    (dolist (symb (ensure-list symbols) t)
       (setf (oget exports (symbol-name symb)) symb))))
 
 (defun %map-external-symbols (function package)
