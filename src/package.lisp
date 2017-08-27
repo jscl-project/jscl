@@ -131,7 +131,7 @@
        (dolist (used (package-use-list package) (values nil nil))
          (let ((exports (%package-external-symbols used)))
            (when (in name exports)
-             (return (values (oget exports name) :inherit)))))))))
+             (return (values (oget exports name) :inherited)))))))))
 
 
 ;;; It is a function to call when a symbol is interned. The function
