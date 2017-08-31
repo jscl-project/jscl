@@ -23,27 +23,26 @@
 
 (defvar *standard-output*)
 
+(defun make-stream-highter (write-fn &optional kind data)
+  (vector 'stream write-fn 'stream-highter kind data))
+
 (defun streamp (x)
   (and (vectorp x) (eq (aref x 0) 'stream)))
 
 (defun write-char (char &optional (stream *standard-output*))
-  (funcall (aref stream 1) char))
+  (funcall (aref stream 1) (string char)))
 
 (defun write-string (string &optional (stream *standard-output*))
-  (funcall (aref stream 2) string))
-
+  (funcall (aref stream 1) string))
 
 (defun make-string-output-stream ()
   (let ((buffer (make-string 0)))
-    (vector 'stream
-            ;; write-char
-            (lambda (ch)
-              (vector-push-extend ch buffer))
-            (lambda (string)
-              (dotimes (i (length string))
-                (vector-push-extend (aref string i) buffer)))
-            'string-stream
-            buffer)))
+    (make-stream-highter
+     (lambda (string)
+       (dotimes (i (length string))
+         (vector-push-extend (aref string i) buffer)))
+     'string-stream
+     buffer)))
 
 (defun get-output-stream-string (stream)
   (eq (aref stream 3) 'string-stream)

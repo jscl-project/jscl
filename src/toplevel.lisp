@@ -291,11 +291,9 @@
 ;;; console.log.
 ;;;
 (setq *standard-output*
-      (vector 'stream
-              (lambda (ch)
-                (#j:console:log (string ch)))
-              (lambda (string)
-                (#j:console:log string))))
+      (make-stream-highter
+       (lambda (string)
+         (#j:console:log string))))
 
 
 (if (find :node *features*)

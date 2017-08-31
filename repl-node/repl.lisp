@@ -17,11 +17,9 @@
 
 (defun node-init ()
   (setq *standard-output*
-        (vector 'stream
-                (lambda (ch)
-                  (#j:process:stdout:write (string ch)))
-                (lambda (string)
-                  (#j:process:stdout:write string))))
+        (make-stream-highter
+         (lambda (string)
+           (#j:process:stdout:write string))))
   (setq *rl* (#j:readline:createInterface #j:process:stdin #j:process:stdout))
   (welcome-message)
   (let ((*root* *rl*))
