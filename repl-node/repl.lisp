@@ -17,7 +17,7 @@
 
 (defun node-init ()
   (setq *standard-output*
-        (make-stream-highter
+        (%make-stream
          (lambda (string)
            (#j:process:stdout:write string))))
   (setq *rl* (#j:readline:createInterface #j:process:stdin #j:process:stdout))

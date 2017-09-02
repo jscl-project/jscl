@@ -291,7 +291,7 @@
 ;;; console.log.
 ;;;
 (setq *standard-output*
-      (make-stream-highter
+      (%make-stream
        (lambda (string)
          (#j:console:log string))))
 

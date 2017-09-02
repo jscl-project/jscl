@@ -23,7 +23,7 @@
 
 (defvar *standard-output*)
 
-(defun make-stream-highter (write-fn &optional kind data)
+(defun %make-stream (write-fn &optional kind data)
   (vector 'stream write-fn 'stream-highter kind data))
 
 (defun streamp (x)
@@ -37,7 +37,7 @@
 
 (defun make-string-output-stream ()
   (let ((buffer (make-string 0)))
-    (make-stream-highter
+    (%make-stream
      (lambda (string)
        (dotimes (i (length string))
          (vector-push-extend (aref string i) buffer)))
