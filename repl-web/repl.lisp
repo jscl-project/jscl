@@ -97,9 +97,8 @@
 (defun web-init ()
   (load-history)
   (setq *standard-output*
-        (vector 'stream
-                (lambda (ch) (%write-string (string ch)))
-                (lambda (string) (%write-string string))))
+        (%make-stream
+         (lambda (string) (%write-string string))))
   (welcome-message)
   (#j:window:addEventListener "load" (lambda (&rest args) (toplevel))))
 
