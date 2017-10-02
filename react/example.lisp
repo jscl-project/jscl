@@ -33,7 +33,7 @@
 
 (defun react/create-element (element children &rest plist)
   (cond
-    ((stringp children)
+    ((or (stringp children) (null children))
      (apply #j:React:createElement
             (list element (apply #'make-plist plist) children)))
     ((consp children)
@@ -56,7 +56,6 @@
   (react-dom/render
    (react/create-element "h1" "Hello, world!")
    (#j:document:getElementById location)))
-
 
 ;; ADDER
 
@@ -98,6 +97,7 @@
                             :class-name "bn"))
      :class-name "mv2 flex flex-column")))
 
+
 (defun editor (plist &rest whatever)
   "A simple editor"
   (let ((text (jscl::oget plist "text")))
@@ -111,7 +111,7 @@
                             nil
                             :value text
                             :id "editor"))
-     :class-name "mv2 flex flex-column"))))
+     :class-name "mv2 flex flex-column")))
 
 
 (defun word-counter (plist &rest whatever)
@@ -122,18 +122,16 @@
      (list
       (react/create-element #'editor nil :text text)
       (react/create-element #'counter nil :count 1)
-      (react/create-element #'progress nil :count 0.1))
+      (react/create-element #'progress-bar nil :count 0.1))
      :class-name "measure pa4 sans-serif")))
+
 
 
 (defun example-3 (location)
   (react-dom/render
-   (react/create-element #'progress-bar "Relax"
+   (react/create-element #'word-counter nil
                          :completion 0.4
                          :text "Type some text here")
    (#j:document:getElementById location)))
 
-(loop for x in)
-
-(#j:alert "HELLO")
-(example-1 "app")
+(example-3 "app")
