@@ -1,137 +1,202 @@
-;; EXTENDER
+;; References:
+;;
+;; CREATE-REACT-CLASS
+;;  https://reactjs.org/docs/react-without-es6.html
+;; EVENTS:
+;;  https://reactjs.org/docs/events.html
 
-(defun js-identifier-from-symbol-name (name)
-  "Convert a Lisp symbol name to a JavaScript camelCase identifier."
-  (let ((words
-          (loop for i = 0 then (+ 1 j)
-                as j = (position #\- name :start i)
-                collect (subseq name i j)
-                while j)))
-    (apply #'concat (string-downcase (car words))
-           (mapcar #'string-capitalize (cdr words)))))
+(/debug "loading example.lisp!")
 
-(defun make-plist-keyname (key)
-  "Make a keyname string from KEY."
-  (cond
-    ((stringp key) key)
-    ((symbolp key) (js-identifier-from-symbol-name (symbol-name key)))
-    (t (error "Cannot convert KEY to string."))))
+(defpackage :react-example
+  (:use :cl :cl-user :jscl :react))
 
-(defun make-plist (&rest init-plist)
-  "Make a JS-POD initialised with the given INIT-PLIST."
-  (let ((object (jscl::make-new #j:Object)))
-    (do ((tail init-plist (cddr tail)))
-        ((null tail) object)
-      (setf (jscl::oget object (make-plist-keyname (first tail)))
-            (second tail)))
-    object))
+(/debug "loading example.lisp!")
 
+(in-package :react-example)
 
+;;; Example, following Ludovico Fischer
 
-;; REACT
-;;  Bindings to React
+(define-react-component save-button
+  ((save :documentation "The callback triggered by the Save button."
+         :initform #'(lambda (&rest react-internal) (/debug "SAVE-BUTTON#SAVE"))))
+  nil
+  (render (&rest react-internal)
+    (create-element "button" :class-name "pb2 ph3" :on-click save "Save")))
 
-(defun react/create-element (element children &rest plist)
-  (cond
-    ((or (stringp children) (null children))
-     (apply #j:React:createElement
-            (list element (apply #'make-plist plist) children)))
-    ((consp children)
-     (apply #j:React:createElement
-            element (apply #'make-plist plist) children))
-    (t (error "Unsuppored polymorphic CHILDREN."))))
+(define-react-component alert-box
+  ((status :documentation "The status of the last save operaion."
+           :initform :idle))
+  nil
+  (render (&rest react-internal)
+    (unless (equal status :idle)
+      (create-element
+       "div"
+       :class-name "mv2"
+       (ecase status
+         (:failure "Save failed")
+         (:success "Save successful")
+         (:waiting "Saving!")
+         (:idle ""))))))
 
+(define-react-component counter
+  ((count :documentation "The number of words typed so far."
+          :initform 0))
+  nil
+  (render (&rest react-internal)
+    (create-element "p" :class-name "mb2" (format nil "Word count: ~D" count))))
 
-;; REACT-DOM
-;;  Bindings to ReactDOM
-
-(defun react-dom/render (&rest rest)
-  (apply #j:ReactDOM:render rest))
-
-
-;; CL-USER
-;;  Interface
-
-(defun example-1 (location)
-  (react-dom/render
-   (react/create-element "h1" "Hello, world!")
-   (#j:document:getElementById location)))
-
-;; ADDER
-
-(defun show-arguments (&rest plist)
-  (react/create-element "h1" (apply #'concat
-                                    (mapcar #j:JSON:stringify plist))
-                        :class-name "flex flex-column mv2"))
-
-(defun example-2 (location)
-  (react-dom/render
-   (react/create-element #'show-arguments "Relax"
-                         :n1 1 :n2 2
-                         :class-name "flex flex-column mv2")
-   (#j:document:getElementById location)))
-
-
-;; Example Ludovico Fischer
-
-(defun counter (plist &rest whatever)
-  "A simple component displaying a count."
-  (let ((count (jscl::oget plist "count")))
-    (react/create-element "p"
-                          (format nil "Word count: ~D" count)
-                          :class-name "mb2")))
-
-(defun progress-bar (plist &rest whatever)
-  "A simple component displaying a progress bar."
-  (let ((completion (jscl::oget plist "completion")))
-    (react/create-element
+(define-react-component
+  (progress-bar
+   :documentation "A simple component displaying a progress bar.")
+  ((completion :documentation "The completion rate for typing words."
+               :initform 0.0))
+  nil
+  (render (&rest react-internal)
+    (create-element
      "div"
-     (list
-      (react/create-element "label" "Progress"
-                            :html-for "progress"
-                            :class-name "mv-2")
-      (react/create-element "progress"
-                            (format nil "~D%" completion)
-                            :value completion
-                            :id "progress"
-                            :class-name "bn"))
-     :class-name "mv2 flex flex-column")))
+     :class-name "mv2 flex flex-column"
+     (create-element "label"
+                     :html-for "progress"
+                     :class-name "mv-2"
+                     "Progress")
+     (create-element "progress"
+                     :value completion
+                     :id "progress"
+                     :class-name "bn"
+                     (format nil "~D%" completion)))))
 
-
-(defun editor (plist &rest whatever)
-  "A simple editor"
-  (let ((text (jscl::oget plist "text")))
-    (react/create-element
+(define-react-component (editor :documentation "A simple editor")
+  ((text :documentation "The initial text in the editor."))
+  nil
+  (render (&rest react-internal)
+    (create-element
      "div"
-     (list
-      (react/create-element "label" "Enter your text:"
-                            :html-for "editor"
-                            :class-name "mv-2")
-      (react/create-element "textarea"
-                            nil
-                            :value text
-                            :id "editor"))
-     :class-name "mv2 flex flex-column")))
+     :class-name "mv2 flex flex-column"
+     (create-element "label"
+                     :html-for "editor"
+                     :class-name "mv-2"
+                     "Enter your text:")
+     (create-element "textarea"
+                     :value text
+                     :id "editor"))))
 
-
-(defun word-counter (plist &rest whatever)
-  "A simple word counter"
-  (let ((text (jscl::oget plist "text")))
-    (react/create-element
+(define-react-component
+  (word-counter
+   :documentation "A simple word counter")
+  ((text :documentation "The text typed so far."
+         :initform ""))
+  nil
+  (render (&rest react-internal)
+    (create-element
      "form"
-     (list
-      (react/create-element #'editor nil :text text)
-      (react/create-element #'counter nil :count 1)
-      (react/create-element #'progress-bar nil :count 0.1))
-     :class-name "measure pa4 sans-serif")))
+     :class-name "measure pa4 sans-serif"
+     (create-element #'editor :text text)
+     (create-element #'counter :count 1)
+     (create-element #'progress-bar :completion 0.1))))
+
+(define-react-component
+  (save-manager
+   :documentation "I am too lazy to write a meaningful documentation.")
+  ((save :documentation "The callback triggered by the save button."
+         :initform (lambda (data on-success on-failure)
+                    (funcall on-failure "Not implemented")))
+   (data :documentation "The data to save"
+         :initform "This is the data to save."))
+  ((save-status :documentation "The status of the save manager."
+                :initform :idle))
+  (render (&rest react-internal)
+    (flet ((on-save (state)
+             (funcall
+              save
+              data
+              #'(lambda (success) (set-save-status :success))
+              #'(lambda (failure)
+                  (/debug "SAVE-FAILURE")
+                  (/log jscl::this)
+                  (set-save-status :failure)))))
+      (create-element
+       "div"
+       :class-name "flex flex-column mv2"
+       (create-element #'save-button :save #'on-save)
+       (create-element #'alert-box :save-status (get-save-status))))))
+
+(defun lf-1 (location)
+  (dom-render
+   (create-element #'save-manager
+                   :save #'(lambda (data on-success on-failure)
+                             (funcall on-failure "Oups"))
+                   :data "This is the real data to save")
+   location))
 
 
+;;; Example, following ParenScript documentation
 
-(defun example-3 (location)
-  (react-dom/render
-   (react/create-element #'word-counter nil
-                         :completion 0.4
-                         :text "Type some text here")
-   (#j:document:getElementById location)))
+(defun test-1 (location)
+  (dom-render (create-element "h1" "Hello, world!") location))
 
-(example-3 "app")
+(setf todo-list-2
+      (react::ll-create-component
+       "TODO-LIST-2"
+       nil
+       (list :render #'(lambda (&rest react-internal)
+                         (/debug "todo-list#render")
+                         (/log jscl::this)
+                         (let ((items (jscl::oget jscl::this "props" "items")))
+                           (flet ((create-item (text) (create-element "li" text)))
+                             (create-element "ul" (mapcar #'create-item items))))))))
+
+(defun test-2 (location)
+  (dom-render (create-element todo-list-2 :items '("Apple" "Peach" "Pear"))
+              location))
+
+(define-react-component todo-list
+  ((items :documentation "The list of items displayed by the todo list."
+          :initform '("Initialise this todo list.")))
+  nil
+  (render (&rest react-internal)
+   (flet ((create-item (text) (create-element "li" text)))
+     (create-element "ul" (mapcar #'create-item items)))))
+
+(define-react-component todo-app
+  ((placeholder :documentation "Prompt for new items."
+                :initform "New item"))
+  ((items :documentation "The list of items gathered so far."
+          :initform '("Apple" "Peach" "Pear"))
+   (text :documentation "The working copy of the next item."
+         :initform ""))
+  (render (&rest react-internal)
+    (labels
+        ((input-on-change (event)
+           (set-text (dom-element-value (event-target event))))
+         (form-on-submit (event)
+           (event-prevent-default event)
+           (let ((next-items
+                   (cons (get-text) (get-items)))
+                 (next-text ""))
+             (set-items next-items)
+             (set-text next-text))))
+
+      (create-element
+       "div"
+       (create-element "h3" :style '(:background-color "lightgrey") "TODO")
+       (create-element #'todo-list :items (get-items))
+       (create-element
+        "form"
+        :on-submit #'form-on-submit
+        (if (string= (get-text) "")
+            (create-element "input"
+                            :placeholder placeholder
+                            :on-change #'input-on-change)
+            (create-element "input"
+                            :value (get-text)
+                            :on-change #'input-on-change))
+        (create-element "button" "Add"))))))
+
+
+(defun test-3 (location)
+  (dom-render (create-element #'todo-list :items '("Apple" "Peach" "Pear")) location))
+
+(defun test-4 (location)
+  (dom-render (create-element #'todo-app) location))
+
+(test-4 "app")

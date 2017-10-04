@@ -18,7 +18,7 @@
 
 (defpackage :jscl
   (:use :cl)
-  (:export #:bootstrap #:compile-example #:run-tests-in-host))
+  (:export #:bootstrap #:react #:run-tests-in-host))
 
 (in-package :jscl)
 
@@ -183,7 +183,31 @@
         (format out "})(jscl.internals.pv, jscl.internals);~%")
         (format out "})( typeof require !== 'undefined'? require('./jscl'): window.jscl )~%"))))
 
+(defun compile-project (&rest applications)
+  (let ((*features* (list* :jscl :jscl-xc *features*))
+        (*package* (find-package "JSCL"))
+        (*default-pathname-defaults* *base-directory*))
+    (setq *environment* (make-lexenv))
+    (with-compilation-environment
+      (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
+                           :direction :output
+                           :if-exists :supersede)
+        (format out "(function(){~%")
+        (format out "'use strict';~%")
+        (write-string (read-whole-file (source-pathname "prelude.js")) out)
+        (do-source input :target
+          (!compile-file input out :print nil))
+        (dump-global-environment out)
+        (format out "})();~%")))
 
+    (report-undefined-functions)
+
+    (dolist (application applications t)
+      (apply
+       (lambda (name files output &rest rest)
+         (declare (ignore name))
+         (apply #'compile-application files output rest))
+       application))))
 
 (defun bootstrap (&optional verbose)
   (let ((*features* (list* :jscl :jscl-xc *features*))
@@ -211,7 +235,7 @@
         ;; Loop tests
         ,(source-pathname "validate.lisp" :directory '(:relative "tests" "loop") :type "lisp")
         ,(source-pathname "base-tests.lisp" :directory '(:relative "tests" "loop") :type "lisp")
-        
+
         ,(source-pathname "tests-report.lisp" :directory nil))
      (merge-pathnames "tests.js" *base-directory*))
 
@@ -222,36 +246,29 @@
     ;; Node REPL
     (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "repl-node")))
                          (merge-pathnames "repl-node.js" *base-directory*)
-                         :shebang t)
+                         :shebang t)))
 
-    ;; Web React
-    (compile-application (list (source-pathname "example.lisp" :directory '(:relative "react")))
-                         (merge-pathnames "react-example.js" *base-directory*))))
+(defun react ()
+  (compile-project
+   (list "react"
+         (list
+          (source-pathname "react.lisp" :directory '(:relative "react"))
+          (source-pathname "example.lisp" :directory '(:relative "react")))
+         (merge-pathnames
+          (make-pathname
+           :defaults "example.js"
+           :directory '(:relative "react"))
+          *base-directory*))))
 
-
-
-(defun compile-example (&optional verbose)
-  (let ((*features* (list* :jscl :jscl-xc *features*))
-        (*package* (find-package "JSCL"))
-        (*default-pathname-defaults* *base-directory*))
-    (setq *environment* (make-lexenv))
-    (report-undefined-functions)
-    (with-compilation-environment
-      (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
-                           :direction :output
-                           :if-exists :supersede)
-        (format out "(function(){~%")
-        (format out "'use strict';~%")
-        (write-string (read-whole-file (source-pathname "prelude.js")) out)
-        (do-source input :target
-          (!compile-file input out :print verbose))
-        (dump-global-environment out)
-        (format out "})();~%")))
-    ;; Web React
-    (compile-application (list (source-pathname "example.lisp" :directory '(:relative "react")))
-                         (merge-pathnames "react-example.js" *base-directory*))))
-
-
+(defun display-package-error (&optional bootstrap)
+  (compile-project
+   (list "display-package-error"
+         (list
+          (source-pathname "display-package-error.lisp"
+                           :directory '(:relative "example")))
+         (merge-pathnames
+          "display-package-error.js"
+          *base-directory*))))
 
 ;;; Run the tests in the host Lisp implementation. It is a quick way
 ;;; to improve the level of trust of the tests.
