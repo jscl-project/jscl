@@ -568,6 +568,10 @@
                    (list 'unquote (ls-read stream eof-error-p eof-value t))))
               ((char= ch #\#)
                (read-sharp stream eof-error-p eof-value))
+              ((char= ch #\.)
+               (let ((descriptor (subseq (read-until stream #'terminalp) 1))
+                     (object (ls-read stream)))
+                 `(oget ,object ,descriptor)))
               (t
                (let ((string (read-escaped-until stream #'terminalp)))
                  (unless *read-skip-p*
