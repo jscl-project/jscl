@@ -218,12 +218,17 @@ internals.lisp_to_js = function (x) {
     return false;
   else if (typeof x == 'function'){
     // Trampoline calling the Lisp function
-    return (function(){
-      var args = Array.prototype.slice.call(arguments);
-      for (var i in args)
-        args[i] = internals.js_to_lisp(args[i]);
-      return internals.lisp_to_js(x.apply(this, [internals.pv].concat(args)));
-    });
+    if("jscl_original" in x) {
+        return x.jscl_original
+    } else {
+        return( function(){
+            var args = Array.prototype.slice.call(arguments);
+            for (var i in args)
+                args[i] = internals.js_to_lisp(args[i]);
+            return internals.lisp_to_js(x.apply(this, [internals.pv].concat(args)));
+        });
+    }
+    return answer;
   }
   else return x;
 };
