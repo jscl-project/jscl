@@ -368,17 +368,89 @@ internals.intern = function (name, package_name){
 
 /* execute all script tags with type of x-common-lisp */
 var eval_in_lisp;               // set in FFI.lisp
-if (typeof window !== "undefined"){
-  window.onload = (function () {
-	var scripts = document.scripts;
-	for (var i = 0; i < scripts.length; ++i) {
-	  var script = scripts[i];
-	  /* TODO: what about errors? */
-	  if (script.type == "text/x-common-lisp") {
-		eval_in_lisp(script.text);
-	  }
-	}
-  });
+const commonLispScriptType = "text/x-common-lisp";
+
+if (typeof window !== 'undefined' && window && window.addEventListener) {
+    window.addEventListener('DOMContentLoaded', function () {
+        return runCommonLispScripts();
+    }, false);
+}
+
+function runCommonLispScripts() {
+
+    var documentScripts = document.getElementsByTagName('script');
+    var scripts = [];
+    var script;
+
+    var progressivelyRunScripts = function(){
+        var script, i;
+
+        for (i = 0; i < scripts.length; i++) {
+            script = scripts[i];
+            if (script.loaded && !script.executed) {
+                script.executed = true;
+                eval_in_lisp('(progn ' + script.text + ')');
+            } else if (!script.loaded && !script.error) {
+                break;
+            }
+        }
+    }
+
+    var loadRemoteDocument = function (url, successCallback, errorCallback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        if ('overrideMimeType' in xhr) {
+            xhr.overrideMimeType('text/plain');
+        }
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 0 || xhr.status === 200) {
+                    successCallback(xhr.responseText);
+                } else {
+                    errorCallback();
+                    throw new Error('Could not load ' + url);
+                }
+            }
+        };
+        return xhr.send(null);
+    }
+
+    for(var i = 0; i < documentScripts.length; ++i) {
+
+        if(documentScripts[i].type != commonLispScriptType) {
+            continue;
+        }
+
+        if("src" in documentScripts[i]) {
+            script = {
+                executed: false,
+                error: false,
+                text: null,
+                loaded: false,
+                url: documentScripts[i].src
+            };
+            scripts.push(script);
+            loadRemoteDocument(
+                documentScripts[i].src,
+                function successCallback(content) {
+                    script.loaded = true;
+                    script.text = content;
+                    progressivelyRunScripts();
+                }, function errorCallback(error) {
+                    script.error = true;
+                    progressivelyRunScripts();
+                });
+        } else {
+            scripts.push({
+                executed: false,
+                error: false,
+                text: documentScripts[i].innerHTML,
+                loaded: true,
+                url: null
+            });
+        }
+    }
+    progressivelyRunScripts();
 }
 
 // Node Readline
