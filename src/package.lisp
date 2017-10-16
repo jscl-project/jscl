@@ -106,7 +106,7 @@
          (make-package ',(string package) :use ',use)))))
 
 
-(defun redefine-package (package use)
+(defun %redefine-package (package use)
   (setf (oget package "use") use)
   package)
 
@@ -114,7 +114,7 @@
   (let ((package (find-package name))
         (use (resolve-package-list use)))
     (if package
-        (redefine-package package use)
+        (%redefine-package package use)
         (make-package name :use use))))
 
 
