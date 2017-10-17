@@ -354,7 +354,7 @@
     result))
 
 ;;; Parse a string of the form NAME, PACKAGE:NAME or
-;;; PACKAGE::NAME and return the name. If the string is of the
+;;; PACKAGE::NAME and return the symbol. If the string is of the
 ;;; form 1) or 3), but the symbol does not exist, it will be created
 ;;; and interned in that package.
 (defun read-symbol (string)

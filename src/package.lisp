@@ -93,20 +93,33 @@
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (setq *package* (find-package-or-fail ',string-designator))))
 
-(defmacro defpackage (package &rest options)
-  (let (use)
+
+(defmacro defpackage (name &rest options)
+  (let (exports use)
     (dolist (option options)
       (ecase (car option)
+        (:export
+         (setf exports (append exports (cdr option))))
         (:use
          (setf use (append use (cdr option))))))
     `(progn
        (eval-when (:load-toplevel :execute)
-         (%defpackage ',(string package) ',use))
+         (let ((package (%defpackage ',(string name) ',use)))
+           (export
+            (mapcar (lambda (symbol)(intern (symbol-name symbol) package)) ',exports)
+            package)
+           package))
        (eval-when (:compile-toplevel)
-         (make-package ',(string package) :use ',use)))))
+         (let ((package
+                 (or (find-package ,name)
+                     (make-package ',(string name) :use ',use))))
+           (export
+            (mapcar (lambda (symbol)(intern (symbol-name symbol) package)) ',exports)
+            package)
+           package)))))
 
 
-(defun redefine-package (package use)
+(defun %redefine-package (package use)
   (setf (oget package "use") use)
   package)
 
@@ -114,7 +127,7 @@
   (let ((package (find-package name))
         (use (resolve-package-list use)))
     (if package
-        (redefine-package package use)
+        (%redefine-package package use)
         (make-package name :use use))))
 
 
