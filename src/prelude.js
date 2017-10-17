@@ -228,7 +228,6 @@ internals.lisp_to_js = function (x) {
             return internals.lisp_to_js(x.apply(this, [internals.pv].concat(args)));
         });
     }
-    return answer;
   }
   else return x;
 };

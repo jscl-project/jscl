@@ -123,7 +123,7 @@
    floating-point-inexact floating-point-invalid-operation
    floating-point-overflow floating-point-underflow floatp floor
    fmakunbound force-output format formatter fourth fresh-line fround
-   ftruncate ftype funcall function function-keywords
+   fset ftruncate ftype funcall function function-keywords
    function-lambda-expression functionp gcd generic-function gensym
    gentemp get get-decoded-time get-dispatch-macro-character
    get-internal-real-time get-internal-run-time get-macro-character
