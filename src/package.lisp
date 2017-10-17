@@ -106,7 +106,7 @@
        (eval-when (:load-toplevel :execute)
          (let ((package (%defpackage ',(string name) ',use)))
            (export
-            (mapcar (lambda (symbol)(intern (symbol-name symbol) package)) ',exports)
+            (mapcar (lambda (symbol) (intern (symbol-name symbol) package)) ',exports)
             package)
            package))
        (eval-when (:compile-toplevel)
@@ -114,7 +114,7 @@
                  (or (find-package ,name)
                      (make-package ',(string name) :use ',use))))
            (export
-            (mapcar (lambda (symbol)(intern (symbol-name symbol) package)) ',exports)
+            (mapcar (lambda (symbol) (intern (symbol-name symbol) package)) ',exports)
             package)
            package)))))
 
