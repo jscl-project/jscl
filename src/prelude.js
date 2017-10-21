@@ -29,7 +29,7 @@
 var t;
 var nil;
 
-var jscl = {};
+var jscl = Object.create(null);
 
 if (typeof module !== 'undefined')
   module.exports = jscl;
@@ -37,7 +37,7 @@ else
   window.jscl = jscl;
 
 
-var internals = jscl.internals = {};
+var internals = jscl.internals = Object.create(null);
 
 internals.globalEval = function(code){
   var geval = eval;             // Just an indirect eval
@@ -249,7 +249,7 @@ internals.js_to_lisp = function (x) {
     };
     trampoline.jscl_original = x;
     return trampoline;
-  } else 
+  } else
     return x;
 };
 
@@ -282,19 +282,19 @@ internals.isNLX = function(x){
 
 // Packages & Symbols
 
-var packages = jscl.packages = {};
+var packages = jscl.packages = Object.create(null);
 
 packages.JSCL = {
   packageName: 'JSCL',
-  symbols: {},
-  exports: {},
+  symbols: Object.create(null),
+  exports: Object.create(null),
   use: nil
 };
 
 packages.CL = {
   packageName: 'CL',
-  symbols: {},
-  exports: {},
+  symbols: Object.create(null),
+  exports: Object.create(null),
   use: nil
 };
 
@@ -302,8 +302,8 @@ packages['COMMON-LISP'] = packages.CL;
 
 packages.KEYWORD = {
   packageName: 'KEYWORD',
-  symbols: {},
-  exports: {},
+  symbols: Object.create(null),
+  exports: Object.create(null),
   use: nil
 };
 
