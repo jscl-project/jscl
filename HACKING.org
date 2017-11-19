@@ -81,7 +81,7 @@ JSCL> (js '(named-function "add2" (a b) (return (+ a b))))
 *JavaScript driver*
 The file =prelude.js= is a JavaScript driver defining various
 low-level functions, such as trampolines to call Common-Lisp functions
-from JavaScript or handling of Cons cells andw Symbol cells.
+from JavaScript or handling of Cons cells and Symbol cells.
 
 It defines a global object =JSCL= populated with a hand of
 substructures such as =packages= owning Lisp packages and =internal=
@@ -96,7 +96,7 @@ Compilations and Builtins are used to enrich the Common Lisp
 vocabulary understood by the =process-toplevel= function. Compilations
 and Builtins differ in how they handle their arguments, so that
 Compilations can defined special forms and Builtins can define
-primitive functions.  Compilations and Builtins can use Compler Macros
+primitive functions.  Compilations and Builtins can use Compiler Macros
 to factorise or in-line parts of the JavaScript AST they need to
 generate. Compiler macros should not be mistaken for host Common Lisp
 macros.
