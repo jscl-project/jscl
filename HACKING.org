@@ -13,3 +13,105 @@
 *** Tests should follow the same organization as definitions.
 *** CLHS examples can be used as tests.
 *** Documentation strings should not be taken from CLHS (due to license issues). It is recommended to take them from SBCL instead of reinventing them.
+** Hacking the compiler
+*** Interactive development
+    - Load slime and bootstrap JSCL as explained in the newbie guide.
+    - Work in package JSCL with =(in-package #:jscl)=.
+    - Use the =compile-toplevel= function to prepare the JavaSript code
+      associated to a S-expression SEXP, compiled as a toplevel form.
+    - Use the =process-toplevel= function to prepare the JavaScript
+      AST associated to a S-expression SEXP, compiled as a toplevel
+      form.
+
+
+#+BEGIN_EXAMPLE
+JSCL> (process-toplevel '(+ 1 2))
+(PROGN (SELFCALL (PROGN) (RETURN (+ 1 2))))
+
+JSCL> (compile-toplevel '(+ 1 2))
+"(function(){return 1+2;
+})();
+"
+#+END_EXAMPLE
+
+
+*** Compiler anatomy
+This paragraph outlines a few crude elements of the compiler. A
+compilation environment keeps track of macros, identifiers numbers,
+etc.
+
+*Code generation.*
+The =codegen.lisp= file implements details of JavaScript code
+generation. The file entrypoint is the =js= function which takes a as
+input a S-expression representing a JavaScript program as an AST in
+common Lisp notation and emits the corresponding JavaScript code to
+the =*js-output*= output channel, which can be set to =t= to target
+stdout. For instance
+
+#+BEGIN_EXAMPLE
+JSCL> (js '(+ 1 2))
+1+2;
+#+END_EXAMPLE
+
+The representation accepted by =js= uses =call= to denote function
+calls and =named-function= to distinguish function expressions
+featuring a function name.
+
+#+BEGIN_EXAMPLE
+JSCL> (js '(call (property |console| "log") "A message."))
+console['log']('A message.');
+
+JSCL> (js '(call (get |console| |log|) "A message."))
+console.log('A message.');
+
+JSCL> (js '(call (get |console| "log") "A message."))
+console.log('A message.');
+
+
+JSCL> (js '(function (a b) (return (+ a b))))
+(function(A,B){return A+B;
+});
+
+JSCL> (js '(named-function "add2" (a b) (return (+ a b))))
+(function add2(A,B){return A+B;
+});
+#+END_EXAMPLE
+
+
+*JavaScript driver*
+The file =prelude.js= is a JavaScript driver defining various
+low-level functions, such as trampolines to call Common-Lisp functions
+from JavaScript or handling of Cons cells andw Symbol cells.
+
+It defines a global object =JSCL= populated with a hand of
+substructures such as =packages= owning Lisp packages and =internal=
+where internal functions called by the emitted JavaScript are kept.
+
+It is worth to mention that these internal functions are not used, nor
+are they referred to, in the code generation.
+
+
+*Compiler Macros, Compilations and Builtins*
+Compilations and Builtins are used to enrich the Common Lisp
+vocabulary understood by the =process-toplevel= function. Compilations
+and Builtins differ in how they handle their arguments, so that
+Compilations can defined special forms and Builtins can define
+primitive functions.  Compilations and Builtins can use Compler Macros
+to factorise or in-line parts of the JavaScript AST they need to
+generate. Compiler macros should not be mistaken for host Common Lisp
+macros.
+
+#+BEGIN_EXAMPLE
+JSCL> (define-builtin mod (x y)
+  `(selfcall
+    (if (== ,y 0)
+        (throw "Division by zero in mod"))
+    (return (% ,x ,y))))
+
+JSCL> (with-compilation-environment (process-toplevel '(mod 7 2)))
+(PROGN
+ (SELFCALL
+  (IF (== 2 0)
+      (THROW "Division by zero in mod"))
+  (RETURN (% 7 2))))
+#+END_EXAMPLE
