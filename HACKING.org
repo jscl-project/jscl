@@ -115,3 +115,44 @@ JSCL> (with-compilation-environment (process-toplevel '(mod 7 2)))
       (THROW "Division by zero in mod"))
   (RETURN (% 7 2))))
 #+END_EXAMPLE
+
+
+*Multiple Values*
+
+Every Common Lisp function is represented as a Javascript function
+with an extra first argument called =values=.  Functions can return
+multiple values by returning the result of this function, e.g:
+
+#+BEGIN_SRC common-lisp
+(lambda () (values 1 2 3))
+#+END_SRC
+
+could be compiled to something like
+
+#+BEGIN_SRC javascript
+function (values) {
+  return values(1,2,3)
+}
+#+END_SRC
+
+There are two possible values for this argument, =pv= (primary value),
+which returns the first arg.  And =mv=, which return all of them as an
+tagged array.
+
+When compiler will automatically pass =pv= or =mv=, depending on the
+context where the function is used. For example in =(+ 1 (f x))=, =f=
+is called with =pv=.  However, if all multiple values are relevant,
+like in:
+
+#+BEGIN_SRC common-lisp
+(lambda ()
+  (f 0))
+#+END_SRC
+
+then f is called passing the values from the parent function. So this would compile to
+
+#+BEGIN_SRC javascript
+function (values) {
+  return f(values, 0);
+}
+#+END_SRC
