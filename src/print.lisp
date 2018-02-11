@@ -184,11 +184,11 @@
 
 (defun write-char-aux (c stream)
   (cond ((char= #\space c)
-         (write-string "#\\Space" stream))
+         (write-string "Space" stream))
         ((char= #\tab c)
-         (write-string "#\\Tab" stream))
+         (write-string "Tab" stream))
         ((char= #\newline c)
-         (write-string "#\\Newline" stream))
+         (write-string "Newline" stream))
         (t
          (write-char c stream))))
 
@@ -240,6 +240,7 @@
      (write-string (float-to-string form) stream))
     ;; Characters
     (character
+     (write-string "#\\" stream)
      (write-char-aux form stream))
     ;; Strings
     (string
