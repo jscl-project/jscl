@@ -90,15 +90,23 @@
 
 ;;; Floor, Ceil, Truncate and Round
 
-(test (= (floor 0) 0))
-(test (= (floor 1) 1))
-(test (= (floor -1) -1))
-(test (= (floor 1.2) 1))
-(test (= (floor -1.2) -2))
-(test (= (floor 4 3) 1))
-(test (= (floor -4 3) -2))
-(test (= (floor 4 -3) -2))
-(test (= (floor -4 -3) 1))
+(test (equal (multiple-value-list (floor 0))        '(0 0)))
+(test (equal (multiple-value-list (floor 1))        '(1 0)))
+(test (equal (multiple-value-list (floor -1))       '(-1 0)))
+(test (equal (multiple-value-list (floor 4 3))      '(1 1)))
+(test (equal (multiple-value-list (floor -4 3))     '(-2 2)))
+(test (equal (multiple-value-list (floor 4 -3))     '(-2 -2)))
+(test (equal (multiple-value-list (floor -4 -3))    '(1 -1)))
+
+(test (multiple-value-bind (quotient reminder)
+          (floor 1.2)
+        (and (= quotient 1)
+             (= (+ (* quotient 1) reminder) 1.2))))
+
+(test (multiple-value-bind (quotient reminder)
+          (floor -1.2)
+        (and (= quotient -2)
+             (= (+ (* quotient 1) reminder) -1.2))))
 
 (test (= (ceiling 0) 0))
 (test (= (ceiling 1) 1))

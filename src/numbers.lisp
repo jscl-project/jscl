@@ -54,7 +54,9 @@
 
 
 (defun floor (x &optional (y 1))
-  (%floor (/ x y)))
+  (let ((quotient (%floor (/ x y))))
+    (values quotient
+            (- x (* quotient y)))))
 
 (defun ceiling (x &optional (y 1))
   (%ceiling (/ x y)))
