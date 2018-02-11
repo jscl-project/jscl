@@ -183,14 +183,10 @@
           (write-char char stream)))))
 
 (defun write-char-aux (c stream)
-  (cond ((char= #\space c)
-         (write-string "Space" stream))
-        ((char= #\tab c)
-         (write-string "Tab" stream))
-        ((char= #\newline c)
-         (write-string "Newline" stream))
-        (t
-         (write-char c stream))))
+  (let ((name (char-name c)))
+    (if name
+        (write-string name stream)
+        (write-char c stream))))
 
 (defun write-aux (form stream known-objects object-ids)
   (when *print-circle*
