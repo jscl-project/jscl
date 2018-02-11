@@ -72,6 +72,7 @@
     ("stream"        :target)
     ("hash-table"    :target)
     ("print"         :target)
+    ("format"        :target)
     ("misc"          :target)
     ("ffi"           :target)
     ("symbol"        :target)

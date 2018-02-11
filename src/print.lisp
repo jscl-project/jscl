@@ -183,6 +183,12 @@
           (write-char char stream)))))
 
 
+(defun write-char-aux (char stream)
+  (if (and (not (eql char #\Space))
+           (graphic-char-p char))
+      (write-char char stream)
+      (write-string (string-capitalize (char-name char)) stream)))
+
 (defun write-aux (form stream known-objects object-ids)
   (when *print-circle*
     (let* ((ix (or (position form known-objects) 0))
@@ -232,10 +238,7 @@
     ;; Characters
     (character
      (write-string "#\\" stream)
-     (case form
-       (#\newline (write-string "newline" stream))
-       (#\space   (write-string "space"   stream))
-       (otherwise (write-char form stream))))
+     (write-char-aux form stream))
     ;; Strings
     (string
      (if *print-escape*
@@ -336,49 +339,3 @@
   (defun print (x)
     (prog1 (prin1 x)
       (terpri))))
-
-
-;;; Format
-
-(defun format-special (chr arg)
-  (case (char-upcase chr)
-    (#\S (prin1-to-string arg))
-    (#\A (princ-to-string arg))
-    (#\D (princ-to-string arg))
-    (t
-     (warn "~S is not implemented yet, using ~~S instead" chr)
-     (prin1-to-string arg))))
-
-(defun !format (destination fmt &rest args)
-  (let ((len (length fmt))
-        (i 0)
-        (res "")
-        (arguments args))
-    (while (< i len)
-      (let ((c (char fmt i)))
-        (if (char= c #\~)
-            (let ((next (char fmt (incf i))))
-              (cond
-                ((char= next #\~)
-                 (concatf res "~"))
-                ((or (char= next #\&) 
-                     (char= next #\%))
-                 (concatf res (string #\newline)))
-                ((char= next #\*)
-                 (pop arguments))
-                (t
-                 (concatf res (format-special next (car arguments)))
-                 (pop arguments))))
-            (setq res (concat res (string c))))
-        (incf i)))
-
-    (case destination
-      ((t)
-       (write-string res)
-       nil)
-      ((nil)
-       res)
-      (t
-       (write-string res destination)))))
-
-#+jscl (fset 'format (fdefinition '!format))
