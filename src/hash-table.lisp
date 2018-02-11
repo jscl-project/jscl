@@ -103,7 +103,7 @@
             `(progn
                (sethash ,g!new-value ,g!key ,g!hash-table)  ; storing form
                ,g!new-value)              
-            `(gethash ,g!new-value ,g!key ,g!hash-table)    ; accessing form
+            `(gethash ,g!key ,g!hash-table)    ; accessing form
             )))
 
 
