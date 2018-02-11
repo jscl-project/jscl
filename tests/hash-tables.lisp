@@ -19,6 +19,16 @@
   (test (eq (remhash "foo" ht) nil))
   (test (null (gethash "foo" ht))))
 
+(let ((ht (make-hash-table :test #'equal))
+      (result))
+    (push (cons 1 2) (gethash "key" ht))
+    (push (cons 3 4) (gethash "key" ht))
+    (test (equal (gethash "key" ht) '((3 . 4) (1 . 2))))
+    (setf (gethash "baz" ht) '(1 2 3))
+    (push '(5 6 7) (gethash "baz" ht))
+    (test (equal (gethash "baz" ht) '((5 6 7) 1 2 3)))
+    (maphash (lambda (k v) (push (list k v) result)) ht)
+    (test (equal result '(("baz" ((5 6 7) 1 2 3)) ("key" ((3 . 4) (1 . 2)))))))
 
 ;;; MAPHASH
 
