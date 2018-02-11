@@ -182,11 +182,12 @@
             (incf i))
           (write-char char stream)))))
 
-(defun write-char-aux (c stream)
-  (let ((name (char-name c)))
-    (if name
-        (write-string name stream)
-        (write-char c stream))))
+
+(defun write-char-aux (char stream)
+  (if (and (not (eql char #\Space))
+           (graphic-char-p char))
+      (write-char char stream)
+      (write-string (string-capitalize (char-name char)) stream)))
 
 (defun write-aux (form stream known-objects object-ids)
   (when *print-circle*
