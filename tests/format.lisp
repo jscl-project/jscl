@@ -22,6 +22,7 @@ a" (format nil "a~%a")))
 (test (string= "Newline" (format nil "~:C" #\newline)))
 
 ;;; Premature end of control string
+#+jscl
 (test 
  (string= "Premature end of control string \"result ~\"" 
           (let ((result))
