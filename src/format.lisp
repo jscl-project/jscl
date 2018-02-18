@@ -79,30 +79,33 @@
 
 
 (defun !format (destination fmt &rest args)
-  (let ((len (length fmt))
-        (i 0)
-        (arguments args))
+  (let* ((len (length fmt))
+         (i 0)
+         (end (1- len))
+         (arguments args))
     (let ((res
             (with-output-to-string (stream)
               (while (< i len)
                 (let ((c (char fmt i)))
                   (if (char= c #\~)
-                      (multiple-value-bind (parms modifiers pos next-arguments)
-                          (parse-format-directive fmt (incf i) arguments)
-                        (setq i pos
-                              arguments next-arguments)
-                        (let ((next (char fmt i)))
-                          (cond
-                            ((char= next #\~)
-                             (write-char #\~ stream))
-                            ((or (char= next #\&)
-                                 (char= next #\%))
-                             (write-char #\newline stream))
-                            ((char= next #\*)
-                             (pop arguments))
-                            (t
-                             (format-special next (car arguments) parms modifiers stream)
-                             (pop arguments)))))
+                      (progn
+                          (if (= i end) (error "Premature end of control string ~s" fmt))
+                          (multiple-value-bind (parms modifiers pos next-arguments)
+                              (parse-format-directive fmt (incf i) arguments)
+                              (setq i pos
+                                    arguments next-arguments)
+                              (let ((next (char fmt i)))
+                                  (cond
+                                    ((char= next #\~)
+                                     (write-char #\~ stream))
+                                    ((or (char= next #\&)
+                                         (char= next #\%))
+                                     (write-char #\newline stream))
+                                    ((char= next #\*)
+                                     (pop arguments))
+                                    (t
+                                     (format-special next (car arguments) parms modifiers stream)
+                                     (pop arguments))))))
                       (write-char c stream))
                   (incf i))))))
       (case destination
