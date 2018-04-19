@@ -74,17 +74,11 @@
   (lambda ()
     (error "Internal error in fixup creation during read")))
 
-(defun make-string-stream (string)
-  (cons string 0))
-
 (defun %peek-char (stream)
-  (and (< (cdr stream) (length (car stream)))
-       (char (car stream) (cdr stream))))
+  (peek-char nil stream nil))
 
 (defun %read-char (stream)
-  (and (< (cdr stream) (length (car stream)))
-       (prog1 (char (car stream) (cdr stream))
-         (rplacd stream (1+ (cdr stream))))))
+  (read-char stream nil))
 
 (defun whitespacep (ch)
   (or (char= ch #\space) (char= ch #\newline) (char= ch #\tab) (char= ch (char "" 0))))
@@ -578,7 +572,7 @@
         (setf *fixup-locations* save-fixup-locations)))))
 
 (defun ls-read-from-string (string &optional (eof-error-p t) eof-value)
-  (ls-read (make-string-stream string) eof-error-p eof-value))
+  (ls-read (make-string-input-stream string) eof-error-p eof-value))
 
 #+jscl
 (defun read-from-string (string &optional (eof-errorp t) eof-value)

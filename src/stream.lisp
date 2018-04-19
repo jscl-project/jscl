@@ -22,11 +22,47 @@
 (/debug "loading stream.lisp!")
 
 (defvar *standard-output*)
+(defvar *standard-input*)
 
 (def!struct (stream (:predicate streamp))
   write-fn
+  read-char-fn
+  peek-char-fn
   kind
   data)
+
+
+;;; Input streams
+
+(defun make-string-input-stream (string)
+  (let ((index 0))
+    (flet ((peek (eof-error-p)
+             (cond
+               ((< index (length string))
+                (char string index))
+               (eof-error-p
+                (error "End of file"))
+               (t
+                nil))))
+
+      (make-stream
+       :read-char-fn (lambda (eof-error-p)
+                       (prog1 (peek eof-error-p)
+                         (incf index)))
+
+       :peek-char-fn (lambda (eof-error-p)
+                       (peek eof-error-p))))))
+
+(defun peek-char (&optional type (stream *standard-input*) (eof-error-p t))
+  (unless (null type)
+    (error "peek-char with non-null TYPE is not implemented."))
+  (funcall (stream-peek-char-fn stream) eof-error-p))
+
+(defun read-char (&optional (stream *standard-input*) (eof-error-p t))
+  (funcall (stream-read-char-fn stream) eof-error-p))
+
+
+;;; Ouptut streams
 
 (defun write-char (char &optional (stream *standard-output*))
   (funcall (stream-write-fn stream) (string char)))
