@@ -527,7 +527,7 @@
       (read-float string)
       (read-symbol string)))
 
-(defun ls-read (stream &optional (eof-error-p t) eof-value recursive-p)
+(defun ls-read (&optional (stream *standard-input*) (eof-error-p t) eof-value recursive-p)
   (let ((save-labelled-objects *labelled-objects*)
         (save-fixup-locations *fixup-locations*))
     (unless recursive-p
@@ -571,9 +571,11 @@
         (setf *labelled-objects* save-labelled-objects)
         (setf *fixup-locations* save-fixup-locations)))))
 
+#+jscl
+(fset 'read #'ls-read)
+
 (defun ls-read-from-string (string &optional (eof-error-p t) eof-value)
   (ls-read (make-string-input-stream string) eof-error-p eof-value))
 
 #+jscl
-(defun read-from-string (string &optional (eof-errorp t) eof-value)
-  (ls-read-from-string string eof-errorp eof-value))
+(fset 'read-from-string #'ls-read-from-string)
