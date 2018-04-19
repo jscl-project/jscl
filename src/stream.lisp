@@ -23,31 +23,29 @@
 
 (defvar *standard-output*)
 
-(defun %make-stream (write-fn &optional kind data)
-  (vector 'stream write-fn 'stream-highter kind data))
-
-(defun streamp (x)
-  (and (vectorp x) (eq (aref x 0) 'stream)))
+(def!struct (stream (:predicate streamp))
+  write-fn
+  kind
+  data)
 
 (defun write-char (char &optional (stream *standard-output*))
-  (funcall (aref stream 1) (string char)))
+  (funcall (stream-write-fn stream) (string char)))
 
 (defun write-string (string &optional (stream *standard-output*))
-  (funcall (aref stream 1) string))
+  (funcall (stream-write-fn stream) string))
 
 (defun make-string-output-stream ()
   (let ((buffer (make-string 0)))
-    (%make-stream
-     (lambda (string)
+    (make-stream
+     :write-fn (lambda (string)
        (dotimes (i (length string))
          (vector-push-extend (aref string i) buffer)))
-     'string-stream
-     buffer)))
+     :kind 'string-stream
+     :data buffer)))
 
 (defun get-output-stream-string (stream)
-  (eq (aref stream 3) 'string-stream)
-  (prog1 (aref stream 4)
-    (aset stream 4 (make-string 0))))
+  (prog1 (stream-data stream)
+    (setf (stream-data stream) (make-string 0))))
 
 (defmacro with-output-to-string ((var) &body body)
   `(let ((,var (make-string-output-stream)))

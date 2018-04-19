@@ -291,9 +291,9 @@
 ;;; console.log.
 ;;;
 (setq *standard-output*
-      (%make-stream
-       (lambda (string)
-         (#j:console:log string))))
+      (make-stream
+       :write-fn (lambda (string)
+                   (#j:console:log string))))
 
 (cond
   ((find :node *features*)
