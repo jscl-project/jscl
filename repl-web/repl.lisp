@@ -99,7 +99,7 @@
   (setq *standard-output*
         (%make-stream
          (lambda (string) (%write-string string))))
-  (welcome-message)
+  (welcome-message :html t)
   (#j:window:addEventListener "load" (lambda (&rest args) (toplevel))))
 
 (web-init)

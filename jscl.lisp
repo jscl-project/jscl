@@ -86,6 +86,7 @@
      ("codegen"      :both)
      ("compiler"     :both))
     ("documentation" :target)
+    ("worker"        :target)
     ("toplevel"      :target)))
 
 

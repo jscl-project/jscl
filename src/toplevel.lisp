@@ -271,17 +271,17 @@
   (push :node *features*))
 
 
-(defun welcome-message ()
+(defun welcome-message (&key (html nil))
   (format t "Welcome to ~a ~a (~a)~%~%"
           (lisp-implementation-type)
           (lisp-implementation-version)
           (compilation-notice))
   (format t "JSCL is a Common Lisp implementation on Javascript.~%")
-  (if (find :node *features*)
-      (format t "For more information, visit the project page at https://github.com/jscl-project/jscl.~%~%")
+  (if html
       (%write-string
        (format nil "For more information, visit the project page at <a href=\"https://github.com/jscl-project/jscl\">GitHub</a>.~%~%")
-       nil)))
+       nil)
+      (format t "For more information, visit the project page at https://github.com/jscl-project/jscl.~%~%")))
 
 
 ;;; Basic *standard-output* stream. This will usually be overriden by
@@ -295,13 +295,18 @@
        (lambda (string)
          (#j:console:log string))))
 
-
-(if (find :node *features*)
-    (setq *root* (%js-vref "global"))
-    (setq *root* (%js-vref "window")))
-
-
+(cond
+  ((find :node *features*)
+   (setq *root* (%js-vref "global")))
+  ((string/= (%js-typeof |window|) "undefined")
+   (setq *root* (%js-vref "window")))
+  (t
+   (setq *root* (%js-vref "self"))))
 
 (defun require (name)
   (if (find :node *features*)
       (funcall (%js-vref "require") name)))
+
+
+(when (jscl::web-worker-p)
+  (jscl::initialize-web-worker))

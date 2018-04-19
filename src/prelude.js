@@ -33,7 +33,7 @@ var jscl = Object.create(null);
 
 if (typeof module !== 'undefined')
   module.exports = jscl;
-else
+else if (typeof window !== 'undefined')
   window.jscl = jscl;
 
 
