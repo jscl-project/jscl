@@ -7,7 +7,7 @@ if (
   typeof Worker !== "undefined"
 ) {
   navigator.serviceWorker
-    .register("repl-web-worker/service-worker.js")
+    .register("service-worker.js")
     .then(() => {
       loadJSCLWorker();
     })
