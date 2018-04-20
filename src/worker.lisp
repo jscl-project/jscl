@@ -32,12 +32,66 @@
 
 
 (defun web-worker-repl ()
-  (let ((*web-worker-output-class* "jqconsole-prompt"))
-    (format t "~a> " (package-name *package*))))
+  (loop
+     (let ((*web-worker-output-class* "jqconsole-prompt"))
+       (format t "~a> " (package-name *package*)))
+     (%js-try
+      (progn
+        (handler-case
+            (let ((results (multiple-value-list
+                            (eval-interactive (read)))))
+              (dolist (result results)
+                (print result)))
+          (error (err)
+            (let ((*web-worker-output-class* "jqconsole-error"))
+              (format t "ERROR: ")
+              (apply #'format t (!condition-args err))
+              (terpri)))))
+      (catch (err)
+        (let (((*web-worker-output-class* "jqconsole-error"))
+              (message (or (oget err "message") err)))
+          (format t "ERROR[!]: ~a~%" message))))))
+
+
+(defun sw-request-sync (command &optional (options (new)))
+  (let ((xhr (make-new #j:XMLHttpRequest))
+        (payload (new)))
+
+    (setf (oget payload "command") command)
+    (setf (oget payload "options") options)
+
+    ((oget xhr "open") "POST" "__jscl" nil)
+    ((oget xhr "setRequestHeader") "ContentType" "application/json")
+    ((oget xhr "send") (#j:JSON:stringify payload))
+
+    (if (eql (oget xhr "status") 200)
+        (let* ((text (oget xhr "responseText"))
+               (json (#j:JSON:parse text)))
+          (oget json "value")) 
+        (error "Could not contact with the service worker."))))
+
+
+(defun sleep (seconds)
+  (let ((options (new)))
+    (setf (oget options "seconds") seconds)
+    (sw-request-sync "sleep" options)))
 
 
 (defun initialize-web-worker ()
   (setq *standard-output*
         (make-stream :write-fn #'%web-worker-write-string))
+
+  (setq *standard-input*
+        (make-stream
+         :read-char-fn
+         (lambda (&rest args)
+           (declare (ignorable args))
+           (char (sw-request-sync "read-char") 0))
+         :peek-char-fn
+         (lambda (&rest args)
+           (declare (ignorable args))
+           (char (sw-request-sync "peek-char") 0))))
+
   (welcome-message)
   (web-worker-repl))
+

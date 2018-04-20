@@ -86,8 +86,7 @@
      ("codegen"      :both)
      ("compiler"     :both))
     ("documentation" :target)
-    ("worker"        :target)
-    ("toplevel"      :target)))
+    ("worker"        :target)))
 
 
 (defun source-pathname (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
@@ -202,6 +201,14 @@
         (do-source input :target
           (!compile-file input out :print verbose))
         (dump-global-environment out)
+
+        ;; NOTE: Thie file must be compiled after the global
+        ;; environment. Because some web worker code may do some
+        ;; blocking, like starting a REPL, we need to ensure that
+        ;; *environment* and other critical special variables are
+        ;; initialized before we do this.
+        (!compile-file "src/toplevel.lisp" out :print verbose)
+        
         (format out "})();~%")))
 
     (report-undefined-functions)
