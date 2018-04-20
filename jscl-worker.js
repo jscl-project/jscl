@@ -34,7 +34,17 @@ if (
   navigator.serviceWorker
     .register("service-worker.js")
     .then(() => {
-      loadJSCLWorker();
+      // KLUDGE: When a full-page reload happens (shift-reload),
+      // navigator.serviceWorker.controller will be null and the
+      // browser will completely bypass the service-worker, making
+      // impossible to provide synchronous input for the web
+      // worker. As a work around, we'll reload the page again to
+      // ensure the service worker is activated properly.
+      if (navigator.serviceWorker.controller) {
+        loadJSCLWorker();
+      } else {
+        window.location.reload(false);
+      }
     })
     .catch(() => {
       jqconsole.Write("Could not connect to JSCL worker", "jqconsole-error");
