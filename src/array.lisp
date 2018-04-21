@@ -32,14 +32,19 @@
           (setf element-type 'character
                 initial-element (or initial-element #\space)))
         (setf element-type t))
-    ;; Initialize array
-    (dotimes (i size)
-      (storage-vector-set array i initial-element))
-    ;; Record and return the object
-    (oset element-type array "type")
-    (oset dimensions array "dimensions")
-    array))
 
+    (when (and (listp dimensions)
+               (not (null (cdr dimensions)))
+               fill-pointer)
+      (error "FILL-POINTER cannot be specified on multidimensional arrays."))
+
+    ;; Initialize array
+    (storage-vector-fill array initial-element)
+    ;; Record and return the object
+    (setf (oget array "type") element-type)
+    (setf (oget array "dimensions") dimensions)
+    (setf (oget array "fillpointer") fill-pointer)
+    array))
 
 (defun arrayp (x)
   (storage-vector-p x))
@@ -86,6 +91,26 @@
             `(aref ,g!array ,g!index))))
 
 
+(defun array-has-fill-pointer-p (array)
+  (and (oget array "fillpointer") t))
+
+(defun fill-pointer (array)
+  (unless (arrayp array)
+    (error "~S is not an array" array))
+  (unless (array-has-fill-pointer-p array)
+    (error "~S does not have a fill pointer" array))
+  (oget array "fillpointer"))
+
+(defun set-fill-pointer (array new-value)
+  (unless (arrayp array)
+    (error "~S is not an array" array))
+  (unless (array-has-fill-pointer-p array)
+    (error "~S does not have a fill pointer" array))
+  (setf (oget array "fillpointer") new-value))
+
+(defsetf fill-pointer set-fill-pointer)
+
+
 ;;; Vectors
 
 (defun vectorp (x)
@@ -94,12 +119,10 @@
 (defun vector (&rest objects)
   (list-to-vector objects))
 
-;;; FIXME: should take optional min-extension.
-;;; FIXME: should use fill-pointer instead of the absolute end of array
-(defun vector-push-extend (new vector)
+(defun vector-push-extend (new-element vector)
   (unless (vectorp vector)
-    (error "~S is not a vector." vector))  
-  (let ((size (storage-vector-size vector)))
-    (resize-storage-vector vector (1+ size))
-    (aset vector size new)
-    size))
+    (error "~S is not a vector." vector))
+  ;; Note that JS will automatically grow the array as new elements
+  ;; are assigned, so no need to do `adjust-array` here.
+  (storage-vector-set! vector (fill-pointer vector) new-element)
+  (incf (fill-pointer vector)))

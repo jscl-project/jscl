@@ -1314,6 +1314,12 @@
         (throw "Out of range."))
     (return (= (property x i) ,value))))
 
+(define-builtin storage-vector-set! (vector n value)
+  `(= (property ,vector ,n) ,value))
+
+(define-builtin storage-vector-fill (vector value)
+  `(method-call ,vector "fill" ,value))
+
 (define-builtin concatenate-storage-vector (sv1 sv2)
   `(selfcall
      (var (sv1 ,sv1))

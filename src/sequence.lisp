@@ -26,7 +26,9 @@
     ((stringp seq)
      (string-length seq))
     ((arrayp seq)
-     (oget seq "length"))
+     (if (array-has-fill-pointer-p seq)
+         (fill-pointer seq)
+         (oget seq "length")))
     ((listp seq)
      (list-length seq))
     (t
@@ -216,7 +218,7 @@
              ;; Copy the beginning of the vector only when we find an element
              ;; that does not match.
              (unless vector
-               (setq vector (make-array 0))
+               (setq vector (make-array 0 :fill-pointer 0))
                (dotimes (i index)
                  (vector-push-extend (aref seq i) vector)))
              (when vector
@@ -256,7 +258,7 @@
         (cons (car list) (list-remove-if func (cdr list) negate))))))
 
 (defun vector-remove-if (func vector negate)
-  (let ((out-vector (make-array 0)))
+  (let ((out-vector (make-array 0 :fill-pointer 0)))
     (do-sequence (element vector i)
       (let ((test (funcall func element)))
         (when (if negate test (not test))

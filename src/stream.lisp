@@ -71,7 +71,7 @@
   (funcall (stream-write-fn stream) string))
 
 (defun make-string-output-stream ()
-  (let ((buffer (make-string 0)))
+  (let ((buffer (make-array 0 :element-type 'character :fill-pointer 0)))
     (make-stream
      :write-fn (lambda (string)
        (dotimes (i (length string))
