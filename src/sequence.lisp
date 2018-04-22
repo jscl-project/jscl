@@ -23,8 +23,6 @@
 
 (defun length (seq)
   (cond
-    ((stringp seq)
-     (string-length seq))
     ((arrayp seq)
      (if (array-has-fill-pointer-p seq)
          (fill-pointer seq)
