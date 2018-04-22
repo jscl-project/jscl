@@ -669,12 +669,15 @@
     ((and *compiling-file* (zerop *convert-level*))
      ;; If the situation `compile-toplevel' is given. The form is
      ;; evaluated at compilation-time.
-     (when (find :compile-toplevel situations)
+     (when (or (find :compile-toplevel situations)
+               (find 'compile situations))
        (eval (cons 'progn body)))
      ;; `load-toplevel' is given, then just compile the subforms as usual.
-     (when (find :load-toplevel situations)
+     (when (or (find :load-toplevel situations)
+               (find 'load situations))
        (convert-toplevel `(progn ,@body) *multiple-value-p*)))
-    ((find :execute situations)
+    ((or (find :execute situations)
+         (find 'eval situations))
      (convert `(progn ,@body) *multiple-value-p*))
     (t
      (convert nil))))
