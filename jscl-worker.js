@@ -31,40 +31,112 @@ if (
   typeof navigator.serviceWorker !== "undefined" &&
   typeof Worker !== "undefined"
 ) {
-  navigator.serviceWorker
-    .register("service-worker.js")
-    .then(() => {
-      // KLUDGE: When a full-page reload happens (shift-reload),
-      // navigator.serviceWorker.controller will be null and the
-      // browser will completely bypass the service-worker, making
-      // impossible to provide synchronous input for the web
-      // worker. As a work around, we'll reload the page again to
-      // ensure the service worker is activated properly.
-      if (navigator.serviceWorker.controller) {
-        loadJSCLWorker();
-      } else {
-        window.location.reload(false);
-      }
-    })
-    .catch(() => {
-      jqconsole.Write("Could not connect to JSCL worker", "jqconsole-error");
-    });
+  initialize().catch(() => {
+    jqconsole.Write("Could not connect to JSCL worker", "jqconsole-error");
+  });
 } else {
   jqconsole.Write("JSCL does not support this browser.", "jqconsole-error");
 }
 
-function loadJSCLWorker() {
+async function initialize() {
+  await navigator.serviceWorker.register("service-worker.js");
+
+  // KLUDGE: When a full-page reload happens (shift-reload),
+  // navigator.serviceWorker.controller will be null and the
+  // browser will completely bypass the service-worker, making
+  // impossible to provide synchronous input for the web
+  // worker. As a work around, we'll reload the page again to
+  // ensure the service worker is activated properly.
+  if (!navigator.serviceWorker.controller) {
+    window.location.reload(false);
+    return;
+  }
+
+  const response = await fetch("/__jscl", {
+    method: "post",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      command: "init"
+    })
+  });
+
+  const body = await response.json();
+  const sessionId = body.value;
+
+  navigator.serviceWorker.onmessage = event => {
+    handleServiceWorkerMessage(sessionId, event);
+  };
+
+  loadJSCLWorker(sessionId);
+}
+
+function loadJSCLWorker(sessionId) {
   const jsclWorker = new Worker("jscl.js");
   jsclWorker.onmessage = event => {
     const { string, stringclass } = event.data;
     jqconsole.Write(string, stringclass);
   };
+  jsclWorker.postMessage({
+    command: "init",
+    sessionId
+  });
   prompt();
+}
+
+class StreamBuffer {
+  constructor() {
+    this.buffer = "";
+    this.resolve = undefined;
+  }
+
+  push(input) {
+    this.buffer = this.buffer + input;
+    if (this.resolve) {
+      this.resolve();
+      this.resolve = undefined;
+    }
+  }
+
+  async read() {
+    if (this.buffer.length > 0) {
+      const value = this.buffer;
+      this.buffer = "";
+      return value;
+    } else {
+      await new Promise(resolve => {
+        if (this.resolve) {
+          throw new Error(`Concurrent reads on StreamBuffer are not supported`);
+        }
+        this.resolve = resolve;
+      });
+      return this.read();
+    }
+  }
+}
+
+const stdin = new StreamBuffer();
+
+function handleServiceWorkerMessage(sessionId, event) {
+  const { command } = event.data;
+  switch (command) {
+    case "prompt":
+      {
+        return stdin.read().then(value => {
+          navigator.serviceWorker.controller.postMessage({
+            sessionId,
+            input: value
+          });
+        });
+      }
+      break;
+  }
 }
 
 function prompt() {
   jqconsole.Prompt(true, input => {
-    navigator.serviceWorker.controller.postMessage(input + "\n");
+    stdin.push(input + "\n");
     prompt();
   });
 }

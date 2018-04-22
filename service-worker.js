@@ -37,44 +37,58 @@
 
 "use strict";
 
-//
-// Standard Input
-//
+const contexts = {};
 
-let stdinBuffer = "";
+// A context represents a client of the service-worker. We want to
+// keep separate buffers for different clients for example, as it
+// should be possible to use multiple REPLs in multiple tabs.
+class Context {
+  constructor(sessionId) {
+    this.sessionId = sessionId;
+    this.resolvePendingRequest = undefined;
+  }
 
-let pendingReaders = [];
+  readStdin() {
+    return new Promise(async resolve => {
+      if (this.resolvePendingRequest) {
+        throw new Error(
+          `Concurrent requests from the same client are not allowed.`
+        );
+      }
 
-self.addEventListener("message", function(event) {
-  stdinBuffer += event.data;
-  const pending = pendingReaders;
-  pendingReaders = [];
-  pending.forEach(resolve => resolve());
-});
+      const client = await self.clients.get(this.sessionId);
 
-async function readStdin() {
-  if (stdinBuffer.length > 0) {
-    const value = stdinBuffer;
-    stdinBuffer = "";
-    return value;
-  } else {
-    await new Promise(resolve => {
-      pendingReaders.push(resolve);
+      client.postMessage({
+        command: "prompt"
+      });
+      this.resolvePendingRequest = resolve;
     });
-    return readStdin();
+  }
+
+  sleep({ seconds }) {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(true), seconds * 1000);
+    });
+  }
+
+  static findOrCreate(clientId) {
+    if (contexts[clientId]) {
+      return contexts[clientId];
+    } else {
+      contexts[clientId] = new Context(clientId);
+      return contexts[clientId];
+    }
   }
 }
 
-function sleep({ options: { seconds } }) {
-  return new Promise(resolve => {
-    setTimeout(() => resolve(true), seconds * 1000);
-  });
-}
+// Message handler
 
-const commandHandlers = {
-  readStdin,
-  sleep
-};
+self.addEventListener("message", function(event) {
+  const { sessionId, input } = event.data;
+  const context = Context.findOrCreate(sessionId);
+  context.resolvePendingRequest(input);
+  context.resolvePendingRequest = undefined;
+});
 
 self.addEventListener("fetch", event => {
   const { request } = event;
@@ -82,8 +96,29 @@ self.addEventListener("fetch", event => {
     event.respondWith(
       (async function() {
         const cmd = await request.json();
-        const { command } = cmd;
-        const value = await commandHandlers[command](cmd);
+        const { command, sessionId, options } = cmd;
+        let value;
+
+        switch (command) {
+          case "init": {
+            // Note that the client INIT request is made from the main
+            // thread.
+            const context = Context.findOrCreate(event.clientId);
+            value = context.sessionId;
+            break;
+          }
+          case "readStdin": {
+            const context = Context.findOrCreate(sessionId);
+            value = await context.readStdin();
+            break;
+          }
+          case "sleep": {
+            const context = Context.findOrCreate(sessionId);
+            value = await context.sleep(options);
+            break;
+          }
+        }
+
         const response = new Response(JSON.stringify({ value: value }), {
           headers: { "Content-Type": "application/json" }
         });

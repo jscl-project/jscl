@@ -21,7 +21,10 @@
   (and (string= (%js-typeof |document|) "undefined")
        (string= (%js-typeof |module|) "undefined")))
 
+(defvar *web-worker-session-id*)
+
 (defvar *web-worker-output-class* "jqconsole-output")
+
 
 (defun %web-worker-write-string (string)
   (let ((obj (new)))
@@ -58,6 +61,7 @@
         (payload (new)))
 
     (setf (oget payload "command") command)
+    (setf (oget payload "sessionId") *web-worker-session-id*)
     (setf (oget payload "options") options)
 
     ((oget xhr "open") "POST" "__jscl" nil)
@@ -105,5 +109,12 @@
          :peek-char-fn #'%peek-char-stdin))
 
   (welcome-message)
-  (web-worker-repl))
 
+  (setf #j:onmessage
+        (lambda (event)
+          (let* ((data (oget event "data"))
+                 (command (oget data "command"))
+                 (sessionId (oget data "sessionId")))
+            (when (string= command "init")
+              (setf *web-worker-session-id* sessionId)
+              (web-worker-repl))))))
