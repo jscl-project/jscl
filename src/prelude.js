@@ -205,7 +205,9 @@ internals.safe_char_downcase = function(x) {
 };
 
 internals.xstring = function(x){
-  return x.join('');
+  const hasFillPointer = typeof x.fillpointer === 'number'
+  const activechars = hasFillPointer? x.slice(0, x.fillpointer): x
+  return activechars.join('');
 };
 
 

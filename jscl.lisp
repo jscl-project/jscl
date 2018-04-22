@@ -18,7 +18,7 @@
 
 (defpackage :jscl
   (:use :cl)
-  (:export #:bootstrap #:run-tests-in-host))
+  (:export #:bootstrap #:compile-application #:run-tests-in-host))
 
 (in-package :jscl)
 
@@ -63,6 +63,7 @@
     ("utils"         :both)
     ("defstruct"     :both)
     ("lambda-list"   :both)
+    ("ffi"           :target)
     ("numbers"       :target)
     ("char"          :target)
     ("list"          :target)
@@ -74,7 +75,6 @@
     ("print"         :target)
     ("format"        :target)
     ("misc"          :target)
-    ("ffi"           :target)
     ("symbol"        :target)
     ("package"       :target)
     ("ansiloop"

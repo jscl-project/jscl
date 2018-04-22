@@ -38,3 +38,8 @@
 
 (defun get (symbol indicator &optional default)
   (getf (symbol-plist symbol) indicator default))
+
+(defun symbol-function (symbol)
+  (symbol-function symbol))
+
+(defsetf symbol-function fset)
