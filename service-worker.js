@@ -52,35 +52,32 @@ self.addEventListener("message", function(event) {
   pending.forEach(resolve => resolve());
 });
 
-async function getChar(consume) {
+async function readStdin() {
   if (stdinBuffer.length > 0) {
-    const value = stdinBuffer[0];
-    if (consume) {
-      stdinBuffer = stdinBuffer.slice(1);
-    }
+    const value = stdinBuffer;
+    stdinBuffer = "";
     return value;
   } else {
     await new Promise(resolve => {
       pendingReaders.push(resolve);
     });
-    return getChar(consume);
+    return readStdin();
   }
 }
 
+function sleep({ options: { seconds } }) {
+  return new Promise(resolve => {
+    setTimeout(() => resolve(true), seconds * 1000);
+  });
+}
+
 const commandHandlers = {
-  "read-char": () => getChar(true),
-  "peek-char": () => getChar(),
-  sleep: ({ options: { seconds } }) => {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(true), seconds * 1000);
-    });
-  }
+  readStdin,
+  sleep
 };
 
 self.addEventListener("fetch", event => {
   const { request } = event;
-
-  // works
   if (request.url.endsWith("/__jscl")) {
     event.respondWith(
       (async function() {

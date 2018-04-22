@@ -77,20 +77,32 @@
     (sw-request-sync "sleep" options)))
 
 
+(defvar *stdin-buffer* "")
+
+(defun read-stdin ()
+  (let ((input (sw-request-sync "readStdin")))
+    (setf *stdin-buffer* (concat *stdin-buffer* input))
+    *stdin-buffer*))
+
+(defun %peek-char-stdin (&rest args)
+  (if (< 0 (length *stdin-buffer*))
+      (char *stdin-buffer* 0)
+      (progn
+        (read-stdin)
+        (apply #'%peek-char-stdin args))))
+
+(defun %read-char-stdin (&rest args)
+  (prog1 (apply #'%peek-char-stdin args)
+    (setf *stdin-buffer* (subseq *stdin-buffer* 1))))
+
 (defun initialize-web-worker ()
   (setq *standard-output*
         (make-stream :write-fn #'%web-worker-write-string))
 
   (setq *standard-input*
         (make-stream
-         :read-char-fn
-         (lambda (&rest args)
-           (declare (ignorable args))
-           (char (sw-request-sync "read-char") 0))
-         :peek-char-fn
-         (lambda (&rest args)
-           (declare (ignorable args))
-           (char (sw-request-sync "peek-char") 0))))
+         :read-char-fn #'%read-char-stdin
+         :peek-char-fn #'%peek-char-stdin))
 
   (welcome-message)
   (web-worker-repl))
