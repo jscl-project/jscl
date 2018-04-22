@@ -27,12 +27,22 @@
                   `(,value)
                   `(setq ,place ,value)
                   place))
-        (let ((place (!macroexpand-1 place)))
-          (let* ((access-fn (car place))
-                 (expander (cdr (assoc access-fn *setf-expanders*))))
-            (when (null expander)
-              (error "Unknown generalized reference."))
-            (apply expander (cdr place)))))))
+        (let* ((access-fn (car place))
+               (expander (cdr (assoc access-fn *setf-expanders*))))
+          (if expander
+              (apply expander (cdr place))
+              ;; Only after the setf expansion is unkonwn, we should
+              ;; try to macroexpand the form. See:
+              ;;
+              ;;   5.1.2.7 Macro Forms as Places:
+              ;;
+              ;;   http://clhs.lisp.se/Body/05_abg.htm
+              ;;
+              (multiple-value-bind (macroexpansion macroexpanded)
+                  (!macroexpand-1 place)
+                (if macroexpanded
+                    (!get-setf-expansion macroexpansion)
+                    (error "Unknown generalized reference."))))))))
 (fset 'get-setf-expansion (fdefinition '!get-setf-expansion))
 
 (defmacro define-setf-expander (access-fn lambda-list &body body)
