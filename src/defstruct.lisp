@@ -98,3 +98,6 @@
                                     `(,',accessor-name ,object)))))
                    (incf index)))))
          ',name))))
+#+jscl
+(defmacro defstruct (name-and-options &rest slots)
+  `(def!struct ,name-and-options ,@slots))
