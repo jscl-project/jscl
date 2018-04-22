@@ -39,6 +39,10 @@
 (defun get (symbol indicator &optional default)
   (getf (symbol-plist symbol) indicator default))
 
+(defmacro get (symbol indicator &optional default)
+  `(getf (symbol-plist ,symbol) ,indicator ,default))
+
+
 (defun symbol-function (symbol)
   (symbol-function symbol))
 
