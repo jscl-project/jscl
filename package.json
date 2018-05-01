@@ -1,6 +1,6 @@
 {
   "name": "jscl",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "A Common Lisp implementation for Javascript",
   "main": "jscl.js",
   "files": [
