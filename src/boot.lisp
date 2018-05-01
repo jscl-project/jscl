@@ -29,24 +29,28 @@
          '#'(lambda (form)
               (destructuring-bind (name args &body body)
                   form
-                (let* ((whole (gensym))
-                       (expander `(function
-                                   (lambda (,whole)
-                                    (block ,name
-                                      (destructuring-bind ,args ,whole
-                                        ,@body))))))
+                (multiple-value-bind (body decls docstring)
+                    (parse-body body :declarations t :docstring t)
+                  (let* ((whole (gensym))
+                         (expander `(function
+                                     (lambda (,whole)
+                                      ,docstring
+                                      (block ,name
+                                        (destructuring-bind ,args ,whole
+                                          ,@decls
+                                          ,@body))))))
 
-                  ;; If we are boostrapping JSCL, we need to quote the
-                  ;; macroexpander, because the macroexpander will
-                  ;; need to be dumped in the final environment
-                  ;; somehow.
-                  (when (find :jscl-xc *features*)
-                    (setq expander `(quote ,expander)))
-                  
-                  `(eval-when (:compile-toplevel :execute)
-                     (%compile-defmacro ',name ,expander))
+                    ;; If we are boostrapping JSCL, we need to quote the
+                    ;; macroexpander, because the macroexpander will
+                    ;; need to be dumped in the final environment
+                    ;; somehow.
+                    (when (find :jscl-xc *features*)
+                      (setq expander `(quote ,expander)))
 
-                  )))))
+                    `(eval-when (:compile-toplevel :execute)
+                       (%compile-defmacro ',name ,expander))
+
+                    ))))))
     
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
