@@ -397,20 +397,30 @@
 ;;; list of declaration forms and the docstring.
 (defun parse-body (body &key declarations docstring)
   (let ((value-declarations)
-        (value-docstring))
-    ;; Parse declarations
-    (when declarations
-      (do* ((rest body (cdr rest))
-            (form (car rest) (car rest)))
-           ((or (atom form) (not (eq (car form) 'declare)))
-            (setf body rest))
-        (push form value-declarations)))
-    ;; Parse docstring
-    (when (and docstring
-               (stringp (car body))
-               (not (null (cdr body))))
-      (setq value-docstring (car body))
-      (setq body (cdr body)))
+        (value-docstring)
+        (end nil))
+
+    (while (not end)
+      (cond
+        ;; Docstring
+        ((and docstring
+              (stringp (car body))
+              (not (null (cdr body))))
+         (when value-docstring
+           (error "Duplicated docstring ~S" (car body)))
+         (setq value-docstring (car body))
+         (setq body (cdr body)))
+
+        ;; Declaration
+        ((and declarations
+              (consp (car body))
+              (eq (caar body) 'declare))
+         (push (car body) value-declarations)
+         (setq body (cdr body)))
+
+        (t
+         (setq end t))))
+
     (values body value-declarations value-docstring)))
 
 
