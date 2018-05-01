@@ -90,8 +90,17 @@
       (%read-char stream)
       (setq ch (%peek-char stream)))))
 
+(defun terminating-char-p (ch)
+  (or (char= #\" ch)
+      (char= #\) ch)
+      (char= #\( ch)
+      (char= #\` ch)
+      (char= #\, ch)
+      (char= #\' ch)
+      (char= #\; ch)))
+
 (defun terminalp (ch)
-  (or (null ch) (whitespacep ch) (char= #\" ch) (char= #\) ch) (char= #\( ch)))
+  (or (null ch) (whitespacep ch) (terminating-char-p ch)))
 
 (defun read-until (stream func)
   (let ((string "")
