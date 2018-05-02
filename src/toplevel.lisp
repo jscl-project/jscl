@@ -255,16 +255,27 @@
 
 
 (defun compilation-notice ()
-  #.(multiple-value-bind (second minute hour date month year)
-        (get-decoded-time)
-      (declare (ignore second minute hour))
-      (format nil "built on ~d ~a ~d"
-              date
-              (elt #("" "January" "February" "March" "April" "May" "June"
-                     "July" "August" "September" "October" "November"
-                     "December")
-                   month)
-              year)))
+  #.(let ((build-time
+           ;; The variable SOURCE_DATE_EPOCH specifies the point in
+           ;; time of the project. It is usually set to the unix
+           ;; timestamp of the GIT commit being built, to make the
+           ;; build artifact reproducible. Variable is specified at
+           ;; 
+           ;;   https://reproducible-builds.org/specs/source-date-epoch/
+           ;;
+           (if (sb-posix:getenv "SOURCE_DATE_EPOCH")
+               (+ (parse-integer (sb-posix:getenv "SOURCE_DATE_EPOCH")) 2208988800)
+               (get-universal-time))))
+      (multiple-value-bind (second minute hour date month year)
+          (decode-universal-time build-time)
+        (declare (ignore second minute hour))
+        (format nil "built on ~d ~a ~d"
+                date
+                (elt #("" "January" "February" "March" "April" "May" "June"
+                       "July" "August" "September" "October" "November"
+                       "December")
+                     month)
+                year))))
 
 (when (and (string/= (%js-typeof |module|) "undefined")
            (string= (%js-typeof |phantom|) "undefined"))
