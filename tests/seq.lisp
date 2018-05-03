@@ -137,6 +137,8 @@
 (test (equal 3 (reduce #'(lambda () (error "When reducing a sequence with one element the function should not be called"))
                        #(1 2 3 4) :start 2 :end 3)))
 
+(test (equal (reduce #'cons '(1) :initial-value 0) '(0 . 1)))
+
 ;; The following tests reduced reduce were copied from ANSI CL TESTS.
 (test (equal (reduce #'cons '(a b c d e f) :start 1 :end 4 :from-end t)
              '(b c . d)))
