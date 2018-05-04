@@ -372,6 +372,10 @@ internals.intern = function (name, package_name){
   return symbol;
 };
 
+jscl.evaluateString = function(str) {
+    return eval_in_lisp(str);
+}
+
 /* execute all script tags with type of x-common-lisp */
 var eval_in_lisp;               // set in FFI.lisp
 const commonLispScriptType = "text/x-common-lisp";
