@@ -547,9 +547,15 @@
           (skip-whitespaces-and-comments stream)
           (let ((ch (%peek-char stream)))
             (cond
-              ((or (null ch) (char= ch #\)))
+              ((null ch)
                (if eof-error-p
                    (error "End of file")
+                   eof-value))
+              ((char= ch #\))
+               (if eof-error-p
+                   (progn 
+                     (%read-char stream)
+                     (error "End of file"))
                    eof-value))
               ((char= ch #\()
                (%read-char stream)
