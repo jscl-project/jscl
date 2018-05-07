@@ -1,6 +1,6 @@
 {
   "name": "jscl",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "A Common Lisp implementation for Javascript",
   "main": "jscl.js",
   "files": [
@@ -9,7 +9,7 @@
     "repl-web.js"
   ],
   "bin": {
-    "jscl-repl" : "./repl-node.js"
+    "jscl-repl": "./repl-node.js"
   },
   "directories": {
     "test": "tests"
