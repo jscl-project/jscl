@@ -29,42 +29,40 @@
 
 ;;; Decides wheater the input the user has entered is completed or we
 ;;; should accept one more line.
-(defun indent-level (string)
-  (let ((i 0)
-        (stringp nil)
-        (s (length string))
-        (depth 0))
-
-    (while (< i s)
-      (cond
-        (stringp
-         (case (char string i)
-           (#\\
+(defun %sexpr-complete (string)
+    (let ((i 0)
+          (stringp nil)
+          (comments nil)
+          (s (length string))
+          (depth 0))
+        (while (< i s)
+            (cond
+              (comments 
+               (case (char string i)
+                 (#\newline 
+                  (setq comments nil))))
+              (stringp
+               (case (char string i)
+                 (#\\
+                  (incf i))
+                 (#\"
+                  (setq stringp nil)
+                  (decf depth))))
+              (t
+               (case (char string i)
+                 (#\; 
+                  (setq comments t))
+                 (#\( (unless comments (incf depth)))
+                 (#\) (unless comments (decf depth)))
+                 (#\"
+                  (incf depth)
+                  (setq stringp t)))))
             (incf i))
-           (#\"
-            (setq stringp nil)
-            (decf depth))))
-        (t
-         (case (char string i)
-           (#\( (incf depth))
-           (#\) (decf depth))
-           (#\"
-            (incf depth)
-            (setq stringp t)))))
-      (incf i))
-
-    (if (and (zerop depth))
-        nil
-        ;; We should use something based on DEPTH in order to make
-        ;; edition nice, but the behaviour is a bit weird with
-        ;; jqconsole.
-        0)))
-
-
+        (if (<= depth 0)
+            nil
+            0)))
 
 (defun toplevel ()
-  (#j:jqconsole:RegisterMatching "(" ")" "parents")
-
   (let ((prompt (format nil "~a> " (package-name *package*))))
     (#j:jqconsole:Write prompt "jqconsole-prompt"))
   (flet ((process-input (input)
@@ -75,10 +73,11 @@
 
             ;; Capture unhandled Lisp conditeions.
             (handler-case
-                (let* ((form (read-from-string input))
-                       (results (multiple-value-list (eval-interactive form))))
-                  (dolist (x results)
-                    (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return")))
+                (when (> (length input) 0)
+                  (let* ((form (read-from-string input))
+                         (results (multiple-value-list (eval-interactive form))))
+                    (dolist (x results)
+                      (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return"))))
               (error (err)
                 (#j:jqconsole:Write "ERROR: " "jqconsole-error")
                 (#j:jqconsole:Write (apply #'format nil (!condition-args err)) "jqconsole-error")
@@ -91,7 +90,7 @@
            
            (save-history)
            (toplevel)))
-    (#j:jqconsole:Prompt t #'process-input #'indent-level)))
+    (#j:jqconsole:Prompt t #'process-input #'%sexpr-complete)))
 
 
 (defun web-init ()
