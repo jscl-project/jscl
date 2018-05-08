@@ -555,8 +555,8 @@
                (if eof-error-p
                    (progn 
                      (%read-char stream)
-                     (error "End of file"))
-                   eof-value))
+                     (error "unmatched close parenthesis"))
+                     eof-value))
               ((char= ch #\()
                (%read-char stream)
                (%read-list stream eof-error-p eof-value))
