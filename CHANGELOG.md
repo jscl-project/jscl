@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - We have a logo!
 - Run `text/x-common-lisp` scripts [#289](https://github.com/jscl-project/jscl/pull/289)
 - Experimental service worker-based synchronicity
-- Fix SYMBOL-FUNCTION and (SETF SYMBOL-FUNCTION) [98e2f0d](https://github.com/jscl-project/jscl/commit/4f44bd131fc1bf7f32ce47578b336f6349d0bc5f)
+- Fix `SYMBOL-FUNCTION` and `(SETF SYMBOL-FUNCTION)` [98e2f0d](https://github.com/jscl-project/jscl/commit/4f44bd131fc1bf7f32ce47578b336f6349d0bc5f)
 - Basic support for arrays with fill-pointers [c8af504](https://github.com/jscl-project/jscl/commit/c8af5049194550624202b58374ed0c3c907ce2a7)
 - `defpackage` supports `:export` [#288](https://github.com/jscl-project/jscl/issues/288)
 - `format` directive `~C` [#303](https://github.com/jscl-project/jscl/issues/303)
