@@ -553,10 +553,8 @@
                    eof-value))
               ((char= ch #\))
                (if eof-error-p
-                   (progn 
-                     (%read-char stream)
-                     (error "unmatched close parenthesis"))
-                     eof-value))
+                   (error "unmatched close parenthesis")
+                   eof-value))
               ((char= ch #\()
                (%read-char stream)
                (%read-list stream eof-error-p eof-value))

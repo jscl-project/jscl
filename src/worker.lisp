@@ -47,12 +47,14 @@
                 (print result)))
           (error (err)
             (let ((*web-worker-output-class* "jqconsole-error"))
+              (clear-buffer)
               (format t "ERROR: ")
               (apply #'format t (!condition-args err))
               (terpri)))))
       (catch (err)
         (let (((*web-worker-output-class* "jqconsole-error"))
               (message (or (oget err "message") err)))
+          (clear-buffer)
           (format t "ERROR[!]: ~a~%" message))))))
 
 
@@ -87,6 +89,9 @@
   (let ((input (sw-request-sync "readStdin")))
     (setf *stdin-buffer* (concat *stdin-buffer* input))
     *stdin-buffer*))
+
+(defun clear-buffer ()
+  (setf *stdin-buffer* ""))
 
 (defun %peek-char-stdin (&rest args)
   (if (< 0 (length *stdin-buffer*))
