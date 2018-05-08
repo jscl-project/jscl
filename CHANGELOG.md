@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 ### Fixed
+- Infinite loop in the exprimental service-worker REPL on EOF [#318](https://github.com/jscl-project/jscl/issues/318)
+
 
 ## [0.6.1] - 2018-05-07
 
@@ -32,6 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `reduce` for sequences of length 1 [#261](https://github.com/jscl-project/jscl/issues/261)
 - `(SETF GETHASH)` [#307](https://github.com/jscl-project/jscl/issues/307)
 - Many minor fixes
+
 
 ## [0.5.1] - 2016-11-06
 ### Added
