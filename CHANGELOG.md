@@ -16,5 +16,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Implement the [LOOP](https://github.com/jscl-project/jscl/pull/253) macro
 
-[Unreleased]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/jscl-project/jscl/compare/v0.5.1...HEAD
 [0.5.1]: https://github.com/jscl-project/jscl/compare/v0.4.0...v0.5.1
