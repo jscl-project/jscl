@@ -63,6 +63,7 @@
             0)))
 
 (defun toplevel ()
+  (#j:jqconsole:RegisterMatching "(" ")" "parents")
   (let ((prompt (format nil "~a> " (package-name *package*))))
     (#j:jqconsole:Write prompt "jqconsole-prompt"))
   (flet ((process-input (input)
