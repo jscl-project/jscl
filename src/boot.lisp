@@ -451,7 +451,7 @@
   (cond
     ((symbolp x)
      (cond
-       ((eq x t) t)
+       ((or (eq x t) (eq x nil)) t)
        ((setq x nil) t)))
     ((atom x)
      t)
