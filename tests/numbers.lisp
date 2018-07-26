@@ -28,30 +28,6 @@
        (not (oddp  2))
        (not (oddp  0))
 
-;;; +, -, *, /
-;;; The builtin definition of these is variadic, but the function definition
-;;; should be as well. So, test it using MAPCAR
-       (let* ((a '(1 2))
-	      (b a)
-	      (c a))
-	 (equal (mapcar #'+ a b c) '( 3  6))
-	 (equal (mapcar #'- a b c) '(-1 -2))
-	 (equal (mapcar #'* a b c) '( 1  8))
-	 ;; This test will need to be changed when rationals are introduced
-	 (equal (mapcar #'/ a b c) '( 1  0.5)))
-
-;;; >, >=, =, <, <=, /=
-;;; As above, we need to make sure the function is called, not the builtin
-       (let ((a '(1 3 1 2 1))
-	     (b '(2 2 2 2 1))
-	     (c '(3 1 2 1 1)))
-	 (equal (mapcar #'>  a b c) '(nil   t nil nil nil))
-	 (equal (mapcar #'>= a b c) '(nil   t nil   t   t))
-	 (equal (mapcar #'=  a b c) '(nil nil nil nil   t))
-	 (equal (mapcar #'<  a b c) '(  t nil nil nil nil))
-	 (equal (mapcar #'<= a b c) '(  t nil   t nil   t))
-	 (equal (mapcar #'/= a b c) '(  t   t nil nil nil)))
-
 ;;; INTEGERP
        (integerp  1)
        (integerp -1)
@@ -127,3 +103,27 @@
        (= (truncate -4 3) -1)
        (= (truncate 4 -3) -1)
        (= (truncate -4 -3) 1))
+
+;;; +, -, *, /
+;;; The builtin definition of these is variadic, but the function definition
+;;; should be as well. So, test it using MAPCAR
+(let* ((a '(1 2))
+       (b a)
+       (c a))
+  (tests (equal (mapcar #'+ a b c) '( 3  6))
+	 (equal (mapcar #'- a b c) '(-1 -2))
+	 (equal (mapcar #'* a b c) '( 1  8))
+	 ;; This test will need to be changed when rationals are introduced
+	 (equal (mapcar #'/ a b c) '( 1  0.5))))
+
+;;; >, >=, =, <, <=, /=
+;;; As above, we need to make sure the function is called, not the builtin
+(let ((a '(1 3 1 2 1))
+      (b '(2 2 2 2 1))
+      (c '(3 1 2 1 1)))
+  (tests (equal (mapcar #'>  a b c) '(nil   t nil nil nil))
+	 (equal (mapcar #'>= a b c) '(nil   t nil   t   t))
+	 (equal (mapcar #'=  a b c) '(nil nil nil nil   t))
+	 (equal (mapcar #'<  a b c) '(  t nil nil nil nil))
+	 (equal (mapcar #'<= a b c) '(  t nil   t nil   t))
+	 (equal (mapcar #'/= a b c) '(  t   t nil nil nil))))
