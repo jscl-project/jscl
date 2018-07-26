@@ -30,4 +30,3 @@
                     :docstring t))))
 
   (test (equal actual '((3) nil "foo"))))
-

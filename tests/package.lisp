@@ -1,23 +1,23 @@
-(test (listp (list-all-packages)))
+(tests (listp (list-all-packages))
 
-(test (not (eq (list-all-packages) (list-all-packages))))
+       (not (eq (list-all-packages) (list-all-packages)))
 
-(test (equal (multiple-value-list (do-symbols (symbol *package* (values 1 2)))) '(1 2)))
+       (equal (multiple-value-list (do-symbols (symbol *package* (values 1 2)))) '(1 2)))
 
 (make-package 'fubar)
-(test (find-package 'fubar))
+(tests (find-package 'fubar))
 (delete-package "FUBAR")
-(test (null (find-package 'fubar)))
+(tests (null (find-package 'fubar)))
 (make-package 'fubar)
 (delete-package 'fubar)
-(test (null (find-package 'fubar)))
+(tests (null (find-package 'fubar)))
 (make-package 'fubar)
 (delete-package (find-package 'fubar))
-(test (null (find-package 'fubar)))
+(tests (null (find-package 'fubar)))
 
 (when (find-package 'foo)
      (delete-package (find-package 'foo)))
-(test
+(tests
  (let ((package (make-package 'foo :use '(cl)))
        foo-symbols
        cl-symbols)
@@ -30,7 +30,7 @@
 
 (when (find-package 'bar)
    (delete-package (find-package 'bar)))
-(test
+(tests
  (let* ((package (make-package 'bar))
         (baz (intern (string 'baz) package)))
    (let (symbols)
@@ -39,9 +39,7 @@
      (and (member 'car symbols)
           (member baz symbols)))))
 
-(test (member 'car (find-all-symbols (string 'car))))
+(tests (member 'car (find-all-symbols (string 'car))))
 
 ;; This test is failing. I have disabled temporarily.
-;; (test (eq (eval '(in-package #:cl-user)) (find-package '#:cl-user)))
-
-
+;; (tests (eq (eval '(in-package #:cl-user)) (find-package '#:cl-user)))
