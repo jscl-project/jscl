@@ -566,16 +566,19 @@
        (eql (string-not-lessp "pppTTTxTTTqqq" "pTTTaTTT"
 			      :start1 6 :end1 7
 			      :start2 4 :end2 5) 6)
-
+       (string= (make-string 1 :initial-element #\Space) " ")
        (and (eql (string-not-lessp "abc" "ABC") 3)
 	    (eql (string-not-lessp "ABC" "abc") 3))
        (= (string-not-lessp 'love 'hate) 0)
        (not (string-not-lessp 'peace 'war))       
        (not (string-not-lessp #\a #\b))
        (= (string-not-lessp #\z #\a) 0)
-       
-       
-       
+       (eql (string-not-greaterp (make-array 0 :element-type 'character)
+				 (make-array 0 :element-type 'base-char)) 0)
+       (not (string> (make-array 0 :element-type 'character)
+		     (make-array 0 :element-type 'base-char)))
+       (eql (string<= (make-array 0 :element-type 'character)
+		(make-array 0 :element-type 'base-char)) 0)
        (stringp "aaaaaa")
        (stringp (make-array 0 :element-type 'character))
        (not (stringp #\a))

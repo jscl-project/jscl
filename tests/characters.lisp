@@ -1,5 +1,13 @@
 ;; CHAR=, CHAR/=, etc.
 (tests (char= (code-char 127744) (code-char 127744))
+       (mapcar #'(lambda (radix)
+		   (map 'list #'(lambda (x) (digit-char-p x radix))
+			"059AaFGZ"))
+               '(2 8 10 16 36))
+       (graphic-char-p #\Space)
+       (not (graphic-char-p #\Newline))
+       (string= "Space" (char-name #\Space)))
+       (not (alphanumericp #\Newline))
        (char= #\d #\d)
        (not (char= #\A #\a))
        (not (char= #\d #\x))

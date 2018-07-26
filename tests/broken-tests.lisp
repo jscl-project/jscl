@@ -8,16 +8,10 @@
  (expected-failure (character 65.))
  (expected-failure (character 'apple))
  (alpha-char-p #\Newline)
- (not (alphanumericp #\Newline))
- (mapcar #'(lambda (radix)
-             (map 'list #'(lambda (x) (digit-char-p x radix))
-                  "059AaFGZ"))
-         '(2 8 10 16 36))
- (graphic-char-p #\Space)
- (not (graphic-char-p #\Newline))
- (string= "Space" (char-name #\Space)))
+
 (list.lisp
- (SETF (CAR (CAR FOO)) 0) working fine in the REPL)
+ (SETF (CAR (CAR FOO)) 0);;working fine in the REPL
+)
  (package.lisp
  (tests (eq (eval '(in-package #:cl-user)) (find-package '#:cl-user))))
 (read.lisp
@@ -26,8 +20,7 @@
  (tests (equal (read-from-string " 1 3 5" t nil :start 2) (values 3 5))))
 (seq.lisp
  ;;This  fails expectely as you can't compare vectors with equal.
- #+nil
- (equal (substitute 99 3 #(1 2 3 4) :test #'<=) #(1 2 99 99)))
+(equal (substitute 99 3 #(1 2 3 4) :test #'<=) #(1 2 99 99)))
 (strings.lisp
  ;; BUG: The compiler will macroexpand the forms below (char str N)
  ;; will expand to internal SBCL code instead of our (setf char). It
@@ -67,20 +60,14 @@
 		      (make-array 0 :element-type 'base-char))))
  (test (not (string< (make-array 0 :element-type 'character)
 		     (make-array 0 :element-type 'base-char))))
- (test (not (string> (make-array 0 :element-type 'character)
-		     (make-array 0 :element-type 'base-char))))
- (test (eql (string<= (make-array 0 :element-type 'character)
-		      (make-array 0 :element-type 'base-char)) 0))
  (test (string-equal (make-array 0 :element-type 'character)
 		     (make-array 0 :element-type 'base-char)))
  (test (not (string-not-equal (make-array 0 :element-type 'character)
 			      (make-array 0 :element-type 'base-char))))
- (test (eql (string-not-greaterp (make-array 0 :element-type 'character)
-				 (make-array 0 :element-type 'base-char)) 0))
  (test (eql (string-not-lessp (make-array 0 :element-type 'character)
 			      (make-array 0 :element-type 'base-char)) 0))
  ;; JSCL: no SCHAR, so disabled
- ( (let ((str (make-string 3)))
+ (test (let ((str (make-string 3)))
      (and (simple-string-p str)
           (setf (schar str 0) #\x)
           (setf (schar str 1) #\y)
@@ -88,9 +75,9 @@
           (string= str "xyz"))))
  ;; JSCL: #\Space isn't read correctly yet
  (test (string= (make-string 1 :initial-element #\Space) " "))
- ( (stringp (make-array 0 :element-type 'base-char)))
+ (test (stringp (make-array 0 :element-type 'base-char)))
  ;; JSCL: an array of STANDARD-CHAR isn't a STRINGP yet, either
- ( (stringp (make-array 0 :element-type 'standard-char)))
+ (test (stringp (make-array 0 :element-type 'standard-char)))
  ;; JSCL: BUG?: this barfs inside the JS function xstring(), and i don't know why.
  (test (subtypep (upgraded-array-element-type
 		  (array-element-type (make-string 3 :element-type 'standard-char)))
