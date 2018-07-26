@@ -1,4 +1,3 @@
-
 (let ((ht (make-hash-table))
       (key "foo"))
   (setf (gethash key ht) 10)

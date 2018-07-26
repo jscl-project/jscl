@@ -60,3 +60,7 @@
 (setq *timestamp* (get-internal-real-time))
 
 (terpri)
+
+(defmacro tests (&rest conditions)
+  `(progn ,@(loop for condition in conditions
+	       collect `(test-fn (lambda () ,condition) ',condition t))))
