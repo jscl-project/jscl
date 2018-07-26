@@ -31,19 +31,11 @@
        (char>= #\d #\d #\c #\a)
        (not (char> #\e #\d #\b #\c #\a))
        (not (char>= #\e #\d #\b #\c #\a))
-       ;; (char> #\z #\A) =>  implementation-dependent
-       ;; (char> #\Z #\a) =>  implementation-dependent
        (char-equal #\A #\a)
-       ;; (stable-sort (list #\b #\A #\B #\a #\c #\C) #'char-lessp) =>  (#\A #\a #\b #\B #\c #\C)
-       ;; (stable-sort (list #\b #\A #\B #\a #\c #\C) #'char<) => implementation-dependent
        
        ;; CHARACTER
        (equal #\a (character #\a))
        (equal #\a (character "a"))
-       ;;  (equal #\A (character 'a))
-       ;; (equal #\a (character '\a))
-       ;; (expected-failure (character 65.))
-       ;; (expected-failure (character 'apple))
        
        ;; CHARACTERP
        (characterp #\a)
@@ -63,12 +55,10 @@
        ;; ALPHA-CHAR-P
        (alpha-char-p #\a)
        (not (alpha-char-p #\5))
-       ;;  (alpha-char-p #\Newline)
        
        ;; ALPHANUMERICP
        (alphanumericp #\Z)
-       (alphanumericp #\9)
-       ;; (not (alphanumericp #\Newline))
+       (alphanumericp #\9)       
        (not (alphanumericp #\#))
        
        ;; DIGIT-CHAR
@@ -88,16 +78,10 @@
        (null (digit-char-p #\a))
        (= 10 (digit-char-p #\A 11))
        (= 10 (digit-char-p #\a 11))
-       ;; (mapcar #'(lambda (radix)
-       ;;              (map 'list #'(lambda (x) (digit-char-p x radix))
-       ;;                   "059AaFGZ"))
-       ;;          '(2 8 10 16 36))
        
        ;; GRAPHIC-CHAR-P
        (graphic-char-p #\G)
        (graphic-char-p #\#)
-       ;; (graphic-char-p #\Space)
-       ;; (not (graphic-char-p #\Newline))
        
        ;; STANDARD-CHAR-P
        ;; (standard-char-p #\Space)
@@ -139,7 +123,6 @@
        
        ;; CHAR-NAME
        (string= "Space" (char-name #\ ))
-       ;;  (string= "Space" (char-name #\Space))
        (string= "Page" (char-name (code-char 12)))  ;; #\Page
        (string= "LATIN_SMALL_LETTER_A" (char-name #\a))
        (string= "LATIN_CAPITAL_LETTER_A" (char-name #\A))

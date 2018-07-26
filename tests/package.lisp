@@ -41,5 +41,3 @@
 
 (tests (member 'car (find-all-symbols (string 'car))))
 
-;; This test is failing. I have disabled temporarily.
-;; (tests (eq (eval '(in-package #:cl-user)) (find-package '#:cl-user)))

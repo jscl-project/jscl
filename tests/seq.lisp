@@ -1,7 +1,7 @@
 ; Functions used as :KEY argument in tests
 (defvar halve  (lambda (x) (/ x 2)))
 (defvar double (lambda (x) (* x 2)))
-; COUNT
+;; COUNT
 (tests (= (count #\a "how many A's are there in here?") 2)
        (= (count #\a "how many A's are there in here?" :start 10) 1)
        (= (count 'a '(a b c d e a e f)) 2)
@@ -19,7 +19,7 @@
        (= (count-if-not #'not '(a b nil c d nil e)) 5)
        (= (count-if-not #'oddp '(1 2 3 4 4 1 8 10 1) :key #'1+) 4)
 
-					; FIND
+       ;; FIND
        (find 1 #(2 1 3))
        (find 1 '(2 1 3))
        (not (find 1 #(2 2 2)))
@@ -28,8 +28,7 @@
        (not (find 1 '(1 1 1) :test-not #'=))
        (not (find 1 #(1 2 3) :key double))
        (not (find 1 '(1 2 3) :key double))
-
-					; REMOVE
+       ;; REMOVE
        (not (find 1 (remove 1 #(1 2 3 1))))
        (not (find 1 (remove 1 '(1 2 3 1))))
        (not (find 2 (remove 1 #(1 2 3 1) :key halve)))
@@ -46,11 +45,8 @@
        (equal (substitute 99 3 '(1 2 3 4)) '(1 2 99 4))
        (equal (substitute 99 3 '(1 2 3 4) :test #'<=) '(1 2 99 99))
 
-;;; This  fails expectely as you can't compare vectors with equal.
-       #+nil
-       (equal (substitute 99 3 #(1 2 3 4) :test #'<=) #(1 2 99 99))
 
-					; POSITION
+       ;; POSITION
        (= (position 1 #(1 2 3))  0)
        (= (position 1 '(1 2 3))  0)
        (= (position 1 #(1 2 3 1)) 0)
@@ -187,7 +183,7 @@
  (map 'list #'list "123")
  '((#\1) (#\2) (#\3)))
 
-; CHAR-UPCASE cannot be sharp-quoted currently
+;; CHAR-UPCASE cannot be sharp-quoted currently
 (test-equal
  (map 'string (lambda (c) (char-upcase c)) '(#\a #\b #\c))
  "ABC")

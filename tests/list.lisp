@@ -117,8 +117,6 @@
 					; COPY-TREE
        (let* ((foo (list '(1 2) '(3 4)))
               (bar (copy-tree foo)))
-	 ;; (SETF (CAR (CAR FOO)) 0) doesn't work in the test for some reason,
-	 ;; despite working fine in the REPL
 	 (rplaca (car foo) 0)
 	 (not (= (car (car foo))
 		 (car (car bar)))))
