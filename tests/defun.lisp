@@ -31,3 +31,12 @@
 
   (test (equal actual '((3) nil "foo"))))
 
+
+;;; (defun (setf ))
+(let ((obj #(1 2 3)))
+    (defun something (idx) 
+        (aref obj idx))
+    (defun (setf something) (idx value)
+        (setf (aref obj idx) value))
+    (setf (something 1) 4)
+    (test (= (something 1) 4)))
