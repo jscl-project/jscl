@@ -93,12 +93,49 @@
      ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
 
+#|
 (defmacro defun (name args &rest body)
   `(progn
      (eval-when (:compile-toplevel)
        (fn-info ',name :defined t))
      (fset ',name #'(named-lambda ,name ,args ,@body))
      ',name))
+|#
+
+;;; 
+(defmacro %defun (name args &rest body)
+  `(progn
+     (eval-when (:compile-toplevel)
+       (fn-info ',name :defined t))
+     (fset ',name #'(named-lambda ,name ,args ,@body))
+     ',name))
+
+
+(defun %setf-function-symbol (name)
+    (if (consp name)
+        (let ((pname (write-to-string name)))
+            (intern pname
+                    (symbol-package (cadr name))))
+        name))
+
+
+;;; (defun somefn (arg) ...)
+;;; (somefn 11)
+;;;
+;;; (defun (setf somefn) (arg newvalue) ...)
+;;; (setf (somefn 11) 22)
+;;;
+(defmacro defun (name args &rest body)
+    (cond ((symbolp name)
+           `(%defun ,name ,args ,@body))
+          ((and (consp name) (eq (car name) 'setf))
+           (let ((sfn (%setf-function-symbol name)))
+               `(progn
+                    (%defun ,sfn ,args ,@body)
+                    (defsetf ,(cadr name) ,sfn))))
+          (t (error "defun* ~a unknow function specifier" name))))
+;;;
+
 
 (defmacro return (&optional value)
   `(return-from nil ,value))
