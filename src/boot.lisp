@@ -93,12 +93,47 @@
      ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
 
-(defmacro defun (name args &rest body)
+;;; Basic DEFUN for regular function names (not SETF)
+(defmacro %defun (name args &rest body)
   `(progn
      (eval-when (:compile-toplevel)
        (fn-info ',name :defined t))
      (fset ',name #'(named-lambda ,name ,args ,@body))
      ',name))
+
+(defmacro defun (name args &rest body)
+  (cond ((symbolp name)
+         `(%defun ,name ,args ,@body))
+        ((and (consp name) (eq (car name) 'setf))
+         ;; HACK: This stores SETF functions within regular symbols,
+         ;; built from using (SETF name) as a string. This of course
+         ;; is incorrect, and (SETF name) functions should be stored
+         ;; in a different place.
+         ;;
+         ;; Also, the SETF expansion could be defined on demand in
+         ;; get-setf-expansion by consulting this register of SETF
+         ;; definitions.
+         (let ((sfn 
+                (let ((pname (write-to-string name)))
+                  (intern pname
+                          (symbol-package (cadr name))))))
+           `(progn
+              (%defun ,sfn ,args ,@body)
+              (define-setf-expander ,(cadr name) (&rest arguments)
+                (let ((g!args (mapcar (lambda (it)
+                                        (declare (ignore it))
+                                        (gensym))
+                                      arguments))
+                      (g!newvalue (gensym))
+                      (g!setter ',sfn))
+                  (values 
+                   (list g!args)
+                   arguments
+                   (list g!newvalue)
+                   `(,g!setter ,g!newvalue ,@arguments)
+                   nil))))))
+        (t (error "defun ~a unknow function specifier" name))))
+;;;
 
 (defmacro return (&optional value)
   `(return-from nil ,value))
