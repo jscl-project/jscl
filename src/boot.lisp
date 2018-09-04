@@ -93,7 +93,7 @@
      ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
 
-;;; (defun (setf))
+;;; Basic DEFUN for regular function names (not SETF)
 (defmacro %defun (name args &rest body)
   `(progn
      (eval-when (:compile-toplevel)
@@ -105,6 +105,14 @@
   (cond ((symbolp name)
          `(%defun ,name ,args ,@body))
         ((and (consp name) (eq (car name) 'setf))
+         ;; HACK: This stores SETF functions within regular symbols,
+         ;; built from using (SETF name) as a string. This of course
+         ;; is incorrect, and (SETF name) functions should be stored
+         ;; in a different place.
+         ;;
+         ;; Also, the SETF expansion could be defined on demand in
+         ;; get-setf-expansion by consulting this register of SETF
+         ;; definitions.
          (let ((sfn 
                 (let ((pname (write-to-string name)))
                   (intern pname
