@@ -79,6 +79,11 @@
      :kind 'string-stream
      :data buffer)))
 
+(defmacro with-input-from-string ((var string) &body body)
+  ;; TODO: &key start end index
+  `(let ((,var (make-string-input-stream ,string)))
+     ,@body))
+
 (defun get-output-stream-string (stream)
   (prog1 (stream-data stream)
     (setf (stream-data stream) (make-string 0))))
