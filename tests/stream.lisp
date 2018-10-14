@@ -1,4 +1,4 @@
-(with-input-from-string (in (make-string-input-stream "foo bar baz"))
-  (test (equal (read in) "foo"))
-  (test (equal (read in) "bar"))
-  (test (equal (read in) "baz")))
+(with-input-from-string (in "jscl::foo jscl::bar jscl::baz")
+  (test (eq (read in) 'jscl::foo))
+  (test (eq (read in) 'jscl::bar))
+  (test (eq (read in) 'jscl::baz)))
