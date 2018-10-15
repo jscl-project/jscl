@@ -229,11 +229,21 @@
     (when (funcall function elt)
       (return-from some t))))
 
+#+nil
 (defun every (function seq)
   (do-sequence (elt seq)
     (unless (funcall function elt)
       (return-from every nil)))
   t)
+
+;;; more sequences version
+(defun every (predicate first-seq &rest more-sequences)
+    (apply #'map nil (lambda (&rest seqs)
+                         (when (not (apply predicate seqs))
+                             (return-from every nil)))
+           first-seq more-sequences)
+    t)
+
 
 (defun remove-if (func seq)
   (cond
@@ -454,4 +464,32 @@
       (if result-type
 	  (funcall result-collector (apply function args))
 	  (apply function args)))))
+
+
+;;; remove duplicates
+(defun %remove-duplicates (seq from-end test test-not key start end)
+    (let ((result)
+          (test-fn test)
+          (sequence (if from-end seq (reverse seq))))
+        (when test-not 
+            (setq test-fn (complement test-not)))
+        (when (or (not (eql start 0))
+                  end)
+            (setq sequence (subseq sequence start end)))
+        (dolist (it sequence)
+            (unless (find (funcall key it) result :key key :test test-fn)
+                (push it result)))
+        (if from-end
+            (reverse result)
+            result)))
+
+(defun remove-duplicates (seq &key from-end (test 'eq) test-not (key 'identity) (start 0) end)
+    (cond ((listp seq)
+           (%remove-duplicates seq from-end test test-not key start end))
+          ((stringp seq)
+           (apply #'concat (%remove-duplicates (vector-to-list seq) from-end test test-not key start end)))
+          ((vectorp seq)
+           (list-to-vector (%remove-duplicates (vector-to-list seq) from-end test test-not key start end)))
+          (t (error "Its not sequence ~a" seq))))
+
 
