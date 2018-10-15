@@ -253,3 +253,54 @@
 ;; MAKE-LIST
 (test (equal (make-list 5) '(nil nil nil nil nil)))
 (test (equal (make-list 3 :initial-element 'rah) '(rah rah rah)))
+
+
+;;; set-difference test
+(let ((lst1 (list "A" "b" "C" "d"))
+      (lst2 (list "a" "B" "C" "d")))
+    (test (equal 
+           (list
+            (equal (set-difference lst1 lst2) (list "d" "C" "b" "A"))
+            (equal (set-difference lst1 lst2 :test 'equal) (list "b" "A"))
+            (equal (set-difference lst1 lst2 :test #'string=)  (list "b" "A")))
+           (list t t t)))) 
+
+
+;; SORT
+#+jscl
+(test 
+ (equal (apply 'jscl::concat
+               (sort (jscl::vector-to-list "cdbaxaybzcd") #'char-lessp))
+        "aabbccddxyz"))
+
+#+jscl
+(test 
+ (let ((sorted (apply 'jscl::concat
+                      (sort (jscl::vector-to-list "cdbaxaybzcd") #'char-lessp))))
+     (equal (remove-duplicates sorted :test #'char-equal :from-end t) "abcdxyz")))
+
+
+(test 
+ (equal (sort '((1 2 3) (4 5 6) (7 8 9))  #'> :key #'car)
+        '((7 8 9) (4 5 6) (1 2 3))))
+
+
+;;; union
+
+(test
+ (equal (union '(a b c) '(f a d))
+        '(C B F A D)))
+
+
+(test 
+ (equal (union '((x 5) (y 6)) '((z 2) (x 4) (z 2)) 
+               :key #'car 
+               :test (lambda (x y) (equal (car x) y)))
+        '((Y 6) (Z 2) (X 4))))
+
+
+(test
+ (let ((lst1 (list 1 2 '(1 2) "a" "b"))
+       (lst2 (list 2 3 '(2 3) "B" "C")))
+     (equal (union lst1 lst2) 
+            '("b" "a" (1 2) 1 2 3 (2 3) "B" "C"))))
