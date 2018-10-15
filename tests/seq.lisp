@@ -273,3 +273,20 @@
    (list acc result))
  '((3 2 1) t))
  
+
+
+;;; REMOVE-DUPLICATES
+(test 
+ (equal
+  (list
+   (equal (remove-duplicates "aBcDAbCd" :test #'char-equal :from-end t) "aBcD")
+   (equal (remove-duplicates '(a b c b d d e)) '(A C B D E))
+   (equal (remove-duplicates '(a b c b d d e) :from-end t) '(A B C D E))
+   (equal (remove-duplicates '((foo #\a) (bar #\%) (baz #\A))
+                             :test #'char-equal :key #'cadr) '((BAR #\%) (BAZ #\A)))
+   (equal (remove-duplicates '((foo #\a) (bar #\%) (baz #\A)) 
+                             :test #'char-equal :key #'cadr :from-end t) '((FOO #\a) (BAR #\%))))
+  (list t t t t t)))
+
+
+
