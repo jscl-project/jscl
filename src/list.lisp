@@ -475,3 +475,63 @@
 (defun mapcon (function list &rest more-lists)
   "Apply FUNCTION to successive CDRs of lists. Return NCONC of results."
   (map1 function (cons list more-lists) :nconc nil))
+
+
+;;; set-difference
+(defun set-difference (list1 list2 &key key (test #'eq))
+    (cond (list2
+           (let ((result '()))
+               (dolist (it list1)
+                   (when (not (member it list2 :key key :test test))
+                       (push it result)))
+               result))
+          (t list1)))
+
+;;; makeset
+(defun makeset (lst &key (test #'eq))
+    (prog ((result)
+           (seq lst))
+     feed
+       (when (null seq) (return (reverse result)))
+       (if (not (member (car seq) result :test test))
+           (setq result (cons (car seq) result)))
+       (setq seq (cdr seq))
+       (go feed)))
+
+;;; union
+(defun union (list1 list2 &key key (test #'eq))
+    (cond ((and list1 list2)
+           (let ((result (makeset list2 :test #'equal)))
+               (dolist (it (makeset list1 :test #'equal))
+                   (when (not (member it list2 :key key :test test))
+                       (push it result)))
+               result))
+          (list1)
+          (list2)))
+
+
+;;; sort
+;;; https://en.wikipedia.org/wiki/Selection_sort
+(defun sort (lst fn &key (key 'identity))
+    (if (endp lst) '()
+        (block selection-sort
+            (let* ((j lst)
+                   (imin j))
+                (while t
+                    (when (null j)
+                        (return lst))
+                    (tagbody
+                       (let ((i (cdr j)))
+                           (while t
+                               (if (null i) (return nil))
+                               (if (funcall fn
+                                            (funcall key (car i))
+                                            (funcall key (car imin)))
+                                   (setq imin i))
+                               (setq i (cdr i))))
+                       (when (not (eq imin j))
+                           (let ((swap-j (car j))
+                                 (swap-imin (car imin)))
+                               (setf (car j) swap-imin (car imin) swap-j))))
+                    (setq j (cdr j) imin j)))) ))
+
