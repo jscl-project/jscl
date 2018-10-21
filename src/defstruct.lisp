@@ -79,10 +79,13 @@
               `(defun ,predicate (x)
                  (and (consp x) (eq (car x) ',name)))))
 
+      ;; mark copy as :structure
       (when copier
         (setq copier-expansion
               `(defun ,copier (x)
-                 (copy-list x))))
+                 (let ((obj (copy-list x)))
+                   #+jscl (oset :structure obj "tagName")
+                   obj))))
 
       `(progn
          ,constructor-expansion
