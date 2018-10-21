@@ -489,14 +489,14 @@
 
 ;;; makeset
 (defun makeset (lst &key (test #'eq))
-    (prog ((result)
-           (seq lst))
-     feed
-       (when (null seq) (return (reverse result)))
-       (if (not (member (car seq) result :test test))
-           (setq result (cons (car seq) result)))
-       (setq seq (cdr seq))
-       (go feed)))
+  (prog ((result)
+         (seq lst))
+   feed
+     (when (null seq) (return (reverse result)))
+     (if (not (member (car seq) result :test test))
+         (setq result (cons (car seq) result)))
+     (setq seq (cdr seq))
+     (go feed)))
 
 ;;; union
 (defun union (list1 list2 &key key (test #'eq))
