@@ -135,3 +135,13 @@
        (eq (oget obj "tagName") :hash-table)
        (= (length obj) 3)
        (eq (car obj) 'hash-table)))
+
+;;; hash-table printer
+(defun hash-table-object-printer (form stream)
+  (let* ((hashfn (cadr form))
+         (fname (oget hashfn "fname"))
+         (tail-pos (position #\- fname))
+         (testfn (subseq fname 0 tail-pos))
+         (res))
+    (setq res (concat "#<hash-table :test " (string-downcase testfn) ">"))
+    (simple-format stream res)))
