@@ -128,3 +128,10 @@
 		(funcall function (car x) (cdr x)))
 	      (caddr hash-table))
   nil)
+
+;;; hash-table object predicate
+(defun hash-table-p (obj)
+  (and (consp obj)
+       (eq (oget obj "tagName") :hash-table)
+       (= (length obj) 3)
+       (eq (car obj) 'hash-table)))
