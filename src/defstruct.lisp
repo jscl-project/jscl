@@ -71,7 +71,7 @@
         (setq constructor-expansion
               `(defun ,constructor (&key ,@slot-descriptions)
                  (let ((obj (list ',name ,@(mapcar #'car slot-descriptions))))
-                   #+jscl (jscl::oset :structure obj "tagName")
+                   #+jscl (oset :structure obj "tagName")
                    obj))))
 
       (when predicate
