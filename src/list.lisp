@@ -500,14 +500,14 @@
 
 ;;; union
 (defun union (list1 list2 &key key (test #'eq))
-    (cond ((and list1 list2)
-           (let ((result (makeset list2 :test #'equal)))
-               (dolist (it (makeset list1 :test #'equal))
-                   (when (not (member it list2 :key key :test test))
-                       (push it result)))
-               result))
-          (list1)
-          (list2)))
+  (cond ((and list1 list2)
+         (let ((result (makeset list2 :test #'equal)))
+           (dolist (it list1)
+             (when (not (member it list2 :key key :test test))
+               (push it result)))
+           result))
+        (list1)
+        (list2)))
 
 
 ;;; sort
