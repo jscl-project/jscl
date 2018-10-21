@@ -114,9 +114,9 @@
          ;; get-setf-expansion by consulting this register of SETF
          ;; definitions.
          (let ((sfn 
-                (let ((pname (write-to-string name)))
-                  (intern pname
-                          (symbol-package (cadr name))))))
+                 (let ((pname (write-to-string name)))
+                   (intern pname
+                           (symbol-package (cadr name))))))
            `(progn
               (%defun ,sfn ,args ,@body)
               (define-setf-expander ,(cadr name) (&rest arguments)
@@ -125,15 +125,15 @@
                                         (gensym))
                                       arguments))
                       (g!newvalue (gensym))
-                      (g!setter ',sfn))
+                      (g!setter ',sfn)
+                      (g!getter ',(cadr name)))
                   (values 
                    (list g!args)
                    arguments
                    (list g!newvalue)
                    `(,g!setter ,g!newvalue ,@arguments)
-                   nil))))))
+                   `(,g!getter ,@arguments)))))))
         (t (error "defun ~a unknow function specifier" name))))
-;;;
 
 (defmacro return (&optional value)
   `(return-from nil ,value))
