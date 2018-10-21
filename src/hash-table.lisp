@@ -38,7 +38,7 @@
      x)
     (t
      (unless (in "$$jscl_id" x)
-       (oset (format nil "$~d" *eq-hash-counter*) x "$$jscl_id")
+       (oset (concat "$" *eq-hash-counter*) x "$$jscl_id")
        (incf *eq-hash-counter*))
      (oget x "$$jscl_id"))))
 
