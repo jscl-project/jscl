@@ -229,20 +229,13 @@
     (when (funcall function elt)
       (return-from some t))))
 
-#+nil
-(defun every (function seq)
-  (do-sequence (elt seq)
-    (unless (funcall function elt)
-      (return-from every nil)))
-  t)
-
 ;;; more sequences version
 (defun every (predicate first-seq &rest more-sequences)
-    (apply #'map nil (lambda (&rest seqs)
-                         (when (not (apply predicate seqs))
-                             (return-from every nil)))
-           first-seq more-sequences)
-    t)
+  (apply #'map nil (lambda (&rest seqs)
+                     (when (not (apply predicate seqs))
+                       (return-from every nil)))
+         first-seq more-sequences)
+  t)
 
 
 (defun remove-if (func seq)
