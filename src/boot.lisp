@@ -407,6 +407,13 @@
     `(multiple-value-call (lambda ,gvars ,@setqs)
        ,@form)))
 
+;;; mop (closette) object predicate
+(defun mop-object-p (obj)
+  (and (consp obj)
+       (eq (oget obj "tagName") :mop-object)
+       (= (length obj) 5)
+       (eq (car obj) 'std-instance)) )
+
 
 ;; Incorrect typecase, but used in NCONC.
 (defmacro typecase (x &rest clausules)
