@@ -15,7 +15,9 @@
 
 (defun %write-string (string &optional (escape t))
   (if #j:jqconsole
-      (#j:jqconsole:Write string "jqconsole-output" "" escape)
+      (if escape
+          (#j:jqconsole:Write string "jqconsole-output")
+          (#j:jqconsole:Write string "jqconsole-output" ""))
       (#j:console:log string)))
 
 (defun load-history ()
