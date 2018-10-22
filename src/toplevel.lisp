@@ -168,6 +168,7 @@
    maphash mapl maplist mask-field max member member-if member-if-not
    merge merge-pathnames method method-combination
    method-combination-error method-qualifiers min minusp mismatch mod
+   mop-object mop-object-p
    most-negative-double-float most-negative-fixnum
    most-negative-long-float most-negative-short-float
    most-negative-single-float most-positive-double-float
