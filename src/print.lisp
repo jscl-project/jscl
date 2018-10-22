@@ -306,6 +306,12 @@
     (t x)))
 
 #+jscl
+(defun invoke-object-printer (fn form &optional (stream *standard-output*))
+  (let ((stream (output-stream-designator stream)))
+    (funcall fn form stream)))
+
+
+#+jscl
 (defun write (form &key (stream *standard-output*))
   (let ((stream (output-stream-designator stream)))
     (multiple-value-bind (objs ids)
