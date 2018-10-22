@@ -310,14 +310,19 @@
   (let ((stream (output-stream-designator stream)))
     (funcall fn form stream)))
 
-
 #+jscl
 (defun write (form &key (stream *standard-output*))
-  (let ((stream (output-stream-designator stream)))
-    (multiple-value-bind (objs ids)
-        (scan-multiple-referenced-objects form)
-      (write-aux form stream objs ids)
-      form)))
+    (cond ((mop-object-p form)
+           (invoke-object-printer #'mop-object-printer form stream))
+          ((hash-table-p form)
+           (invoke-object-printer #'hash-table-object-printer form stream))
+          ((structure-p form)
+           (invoke-object-printer #'structure-object-printer form stream))
+          (t  (let ((stream (output-stream-designator stream)))
+                  (multiple-value-bind (objs ids)
+                      (scan-multiple-referenced-objects form)
+                      (write-aux form stream objs ids)
+                      form)))))
 
 #+jscl
 (defun write-to-string (form)
