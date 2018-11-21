@@ -15,6 +15,13 @@
 
 (/debug "loading defstruct.lisp!")
 
+;;; object 'structure'  predicate
+(defun structure-p (obj)
+    (and (consp obj)
+         (symbolp (car obj))
+         (eq (oget obj "tagName") :structure)))
+
+
 ;; A very simple defstruct built on lists. It supports just slot with
 ;; an optional default initform, and it will create a constructor,
 ;; predicate and accessors for you.
