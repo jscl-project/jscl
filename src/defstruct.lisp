@@ -66,10 +66,13 @@
            copier-expansion)
       
 
+      ;; mark object as :structure 
       (when constructor
         (setq constructor-expansion
               `(defun ,constructor (&key ,@slot-descriptions)
-                 (list ',name ,@(mapcar #'car slot-descriptions)))))
+                 (let ((obj (list ',name ,@(mapcar #'car slot-descriptions)))) 
+                   #+jscl (oset :structure obj "tagName")
+                   obj))))
 
       (when predicate
         (setq predicate-expansion
