@@ -21,6 +21,12 @@
          (symbolp (car obj))
          (eq (oget obj "tagName") :structure)))
 
+;;; structure object printer
+;;; invoke from print.lisp
+(defun structure-object-printer (form stream)
+  (let ((res))
+    (setq res (concat "#<structure " (string-downcase (string (car form))) ">"))
+    (simple-format stream res)))
 
 ;; A very simple defstruct built on lists. It supports just slot with
 ;; an optional default initform, and it will create a constructor,
