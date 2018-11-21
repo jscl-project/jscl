@@ -70,6 +70,18 @@
        (= (length obj) 3)
        (eq (car obj) 'hash-table)))
 
+;;; hash-table printer
+;;; invoke from print.lisp
+(defun hash-table-object-printer (form stream)
+  (let* ((hashfn (cadr form))
+         (fname (oget hashfn "fname"))
+         (tail-pos (position #\- fname))
+         (testfn (subseq fname 0 tail-pos))
+         (res))
+    (setq res (concat "#<hash-table :test " (string-downcase testfn) ">"))
+    (simple-format stream res)))
+
+
 
 (defun make-hash-table (&key (test #'eql) size)
   (let* ((test-fn (fdefinition test))
