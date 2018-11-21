@@ -492,3 +492,27 @@
      t)
     (t
      nil)))
+
+
+;;; print-unreadable-object
+(defmacro !print-unreadable-object ((object stream &key type identity) &body body)
+  (let ((g!stream (gensym))
+        (g!object (gensym)))
+    `(let ((,g!stream ,stream)
+           (,g!object ,object))
+       (simple-format ,g!stream "#<")
+       ,(when type
+          (error "type-of yet not implemented")
+       ,(when (and type (or body identity))
+          `(simple-format ,g!stream " "))
+       ,@body
+       ,(when (and identity body)
+          `(simple-format ,g!stream " "))
+       (simple-format ,g!stream ">")
+       nil)))
+
+
+#+jscl
+(defmacro print-unreadable-object ((object stream &key type identity) &body body) 
+    `(!print-unreadable-object (,object ,stream :type ,type :identity ,identity) ,@body))
+
