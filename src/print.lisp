@@ -146,6 +146,9 @@
                       nil))))
                (visit (x)
                  (cond
+                   ;; prevent scan infinity mop pbjects
+                   ((mop-object-p x) 
+                    (mark x))
                    ((and x (symbolp x) (null (symbol-package x)))
                     (mark x))
                    ((consp x)
