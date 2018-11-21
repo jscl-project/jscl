@@ -503,6 +503,7 @@
        (simple-format ,g!stream "#<")
        ,(when type
           (error "type-of yet not implemented")
+          `(simple-format ,g!stream "~S" (type-of g!object)))
        ,(when (and type (or body identity))
           `(simple-format ,g!stream " "))
        ,@body
