@@ -17,9 +17,9 @@
 
 ;;; object 'structure'  predicate
 (defun structure-p (obj)
-    (and (consp obj)
-         (symbolp (car obj))
-         (eq (oget obj "tagName") :structure)))
+  (and (consp obj)
+       (symbolp (car obj))
+       (eq (oget obj "tagName") :structure)))
 
 ;;; structure object printer
 ;;; invoke from print.lisp
