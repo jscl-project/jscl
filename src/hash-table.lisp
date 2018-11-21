@@ -63,6 +63,13 @@
   ;; by now.
   )
 
+;;; hash-table predicate
+(defun hash-table-p (obj)
+  (and (consp obj)
+       (eq (oget obj "tagName") :hash-table)
+       (= (length obj) 3)
+       (eq (car obj) 'hash-table)))
+
 
 (defun make-hash-table (&key (test #'eql) size)
   (let* ((test-fn (fdefinition test))
