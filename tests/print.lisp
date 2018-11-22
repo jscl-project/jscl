@@ -51,3 +51,13 @@
                    (write-to-string list)))))
 
 
+;;; lisp structured objects pretty printed
+(progn
+  (defstruct struct name slots)
+  (test (string= "#<structure struct>"  (write-to-string (make-struct))))
+  (test (string= "#<structure struct>"  (write-to-string (make-struct :name 'definition :slots #(a b c))))))
+
+(let ((ht (make-hash-table :test #'equal)))
+  (test (string= "#<hash-table :test equal>"  (write-to-string ht)))
+  (map nil (lambda (k v) (setf (gethash k ht) v)) '(a b c "aaa") '(1 2 3 c))
+  (test (string= "#<hash-table :test equal>"  (write-to-string ht))))
