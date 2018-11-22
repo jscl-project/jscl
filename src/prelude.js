@@ -77,6 +77,11 @@ internals.newInstance = function(values, ct){
   return new newCt();
 };
 
+// Workaround the problem with send NULL for async XHR 
+var reqXHRsendNull = function(req){
+  req.send(null);
+};
+
 
 // NOTE: Define VALUES to be MV for toplevel forms. It is because
 // `eval' compiles the forms and execute the Javascript code at
