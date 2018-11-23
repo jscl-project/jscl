@@ -14,9 +14,11 @@
 (/debug "loading repl-web/repl.lisp!")
 
 (defun %write-string (string &optional (escape t))
-  (if #j:jqconsole
-      (#j:jqconsole:Write string "jqconsole-output" "" escape)
-      (#j:console:log string)))
+    (if #j:jqconsole
+        (if escape
+            (#j:jqconsole:Write string "jqconsole-output")
+            (#j:jqconsole:Write string "jqconsole-output" ""))
+        (#j:console:log string)))
 
 (defun load-history ()
   (let ((raw (#j:localStorage:getItem "jqhist")))

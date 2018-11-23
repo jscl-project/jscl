@@ -146,6 +146,9 @@
                       nil))))
                (visit (x)
                  (cond
+                   ;; prevent scan infinity mop pbjects
+                   ((mop-object-p x) 
+                    (mark x))
                    ((and x (symbolp x) (null (symbol-package x)))
                     (mark x))
                    ((consp x)
@@ -251,6 +254,12 @@
        (if name
            (simple-format stream "#<FUNCTION ~a>" name)
            (write-string "#<FUNCTION>" stream))))
+    ;; mop object
+    (mop-object (mop-object-printer form stream))
+    ;; structure object
+    (structure (structure-object-printer form stream))
+    ;; hash-table object
+    (hash-table (hash-table-object-printer form stream))
     ;; Lists
     (list
      (write-char #\( stream)
@@ -297,12 +306,39 @@
     (t x)))
 
 #+jscl
-(defun write (form &key (stream *standard-output*))
+(defun invoke-object-printer (fn form &optional (stream *standard-output*))
   (let ((stream (output-stream-designator stream)))
-    (multiple-value-bind (objs ids)
-        (scan-multiple-referenced-objects form)
-      (write-aux form stream objs ids)
-      form)))
+    (funcall fn form stream)))
+
+;;; structure object printer
+(defun structure-object-printer (form stream)
+  (let ((res))
+    (setq res (concat "#<structure " (string-downcase (string (car form))) ">"))
+    (simple-format stream res)))
+
+;;; hash-table printer
+(defun hash-table-object-printer (form stream)
+  (let* ((hashfn (cadr form))
+         (fname (oget hashfn "fname"))
+         (tail-pos (position #\- fname))
+         (testfn (subseq fname 0 tail-pos))
+         (res))
+    (setq res (concat "#<hash-table :test " (string-downcase testfn) ">"))
+    (simple-format stream res)))
+
+#+jscl
+(defun write (form &key (stream *standard-output*))
+  (cond ((mop-object-p form)
+         (invoke-object-printer #'mop-object-printer form stream))
+        ((hash-table-p form)
+         (invoke-object-printer #'hash-table-object-printer form stream))
+        ((structure-p form)
+         (invoke-object-printer #'structure-object-printer form stream))
+        (t  (let ((stream (output-stream-designator stream)))
+              (multiple-value-bind (objs ids)
+                  (scan-multiple-referenced-objects form)
+                (write-aux form stream objs ids)
+                form)))))
 
 #+jscl
 (defun write-to-string (form)

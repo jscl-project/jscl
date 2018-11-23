@@ -38,7 +38,7 @@
      x)
     (t
      (unless (in "$$jscl_id" x)
-       (oset (format nil "$~d" *eq-hash-counter*) x "$$jscl_id")
+       (oset (concat "$" *eq-hash-counter*) x "$$jscl_id")
        (incf *eq-hash-counter*))
      (oget x "$$jscl_id"))))
 
@@ -63,18 +63,25 @@
   ;; by now.
   )
 
+;;; hash-table predicate
+(defun hash-table-p (obj)
+  (and (consp obj)
+       (eq (oget obj "tagName") :hash-table)
+       (= (length obj) 3)
+       (eq (car obj) 'hash-table)))
+
 
 (defun make-hash-table (&key (test #'eql) size)
-  (let* ((test-fn (fdefinition test))
-         (hash-fn
-          (cond
-            ((eq test-fn #'eq)    #'eq-hash)
-            ((eq test-fn #'eql)   #'eql-hash)
-            ((eq test-fn #'equal) #'equal-hash)
-            ((eq test-fn #'equalp) #'equalp-hash))))
-    ;; TODO: Replace list with a storage-vector and tag
-    ;; conveniently to implemnet `hash-table-p'.
-    `(hash-table ,hash-fn ,(new))))
+    (let* ((test-fn (fdefinition test))
+           (hash-fn
+             (cond
+               ((eq test-fn #'eq)    #'eq-hash)
+               ((eq test-fn #'eql)   #'eql-hash)
+               ((eq test-fn #'equal) #'equal-hash)
+               ((eq test-fn #'equalp) #'equalp-hash)))
+           (obj `(hash-table ,hash-fn ,(new))))
+        (oset :hash-table obj "tagName") 
+        obj))
 
 (defun gethash (key hash-table &optional default)
   (let* ((obj (caddr hash-table))

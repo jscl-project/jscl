@@ -15,6 +15,12 @@
 
 (/debug "loading defstruct.lisp!")
 
+;;; object 'structure'  predicate
+(defun structure-p (obj)
+  (and (consp obj)
+       (symbolp (car obj))
+       (eq (oget obj "tagName") :structure)))
+
 ;; A very simple defstruct built on lists. It supports just slot with
 ;; an optional default initform, and it will create a constructor,
 ;; predicate and accessors for you.
@@ -53,20 +59,26 @@
            copier-expansion)
       
 
+      ;; mark object as :structure 
       (when constructor
         (setq constructor-expansion
               `(defun ,constructor (&key ,@slot-descriptions)
-                 (list ',name ,@(mapcar #'car slot-descriptions)))))
+                 (let ((obj (list ',name ,@(mapcar #'car slot-descriptions)))) 
+                   #+jscl (oset :structure obj "tagName")
+                   obj))))
 
       (when predicate
         (setq predicate-expansion
               `(defun ,predicate (x)
                  (and (consp x) (eq (car x) ',name)))))
 
+      ;; mark copy as :structure
       (when copier
         (setq copier-expansion
               `(defun ,copier (x)
-                 (copy-list x))))
+                 (let ((obj (copy-list x)))
+                   #+jscl (oset :structure obj "tagName")
+                   obj))))
 
       `(progn
          ,constructor-expansion
