@@ -33,7 +33,7 @@ CLOSETTE original code:
 
 ## Modification original
 
-Source code is in `./closette` subdirectory.
+Source code is in `./closette` directory.
 
 Original file `./closette/closette.lisp` has been divided into parts:
 - `kludges.lisp` (from closette.lisp lines 116-154)
