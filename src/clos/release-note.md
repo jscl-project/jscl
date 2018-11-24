@@ -47,7 +47,7 @@ Original file `./closette/closette.lisp` has been divided into parts:
 
 All source code modifications (marked with tag `@vlad-km`) are associated with:
 - features of JSCL compilation
-- performance generic functions and some standard functions
+- performance generic functions and some CLOS standard functions
 
 2019, Vladimir Mezentsev, @vlad-km
  
