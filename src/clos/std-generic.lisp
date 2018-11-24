@@ -6,6 +6,8 @@
 ;;; Original code closette.lisp, lines 729-918
 ;;; Modification for JSCL  @vlad-km, 2019
 ;;;
+;;; JSCL compilation mode - :both
+;;;
 ;;; Release note
 ;;; - The names of some functions have been changed from !name to !name, to prevent naming conflicts
 ;;;   when host compiling. See FSET section from macros.lisp for full list.
