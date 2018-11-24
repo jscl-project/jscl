@@ -45,7 +45,7 @@ Original file `./closette/closette.lisp` has been divided into parts:
 - `tools.lisp` (see notes inside. Source code is in ./closette/closette-test.lisp)
 - `methods.lisp` (from closette.lisp lines 919-1316)
 
-All source code modifications (marked with tag `mvk`) are associated with:
+All source code modifications (marked with tag `@vlad-km`) are associated with:
 - features of JSCL compilation
 - performance generic functions and some standard functions
 
