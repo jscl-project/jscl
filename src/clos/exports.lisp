@@ -2,11 +2,11 @@
 
 ;;;
 ;;; Export CLOS symbols
-;;; Original code closette.lisp, lines 1317-1403
+;;; Original code closette.lisp, lines 69-111
 ;;;
 ;;; JSCL compilation mode - :target
 ;;;
-;;; todo: compare with var exports from original closette.lisp (line 69)
+;;; todo: compare with var exports from original closette.lisp
 ;;;       the export list uncomplite
 
 (export
