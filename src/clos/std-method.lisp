@@ -4,6 +4,8 @@
 ;;; Original code closette.lisp, lines 919-1316
 ;;; Modification for JSCL  @vlad-km, 2019
 ;;;
+;;; JSCL compilation mode - :both
+;;;
 ;;; Release note
 ;;; - The names of some functions have been changed from !name to !name, to prevent naming conflicts
 ;;;   when host compiling. See FSET section from macros.lisp for full list.
@@ -144,6 +146,7 @@
              :allow-other-keys allow-other-keys))))
 
 ;;; ensure method
+;;; @vlad-km
 (defun ensure-method (gf &rest all-keys)
   (let ((new-method
           (apply
