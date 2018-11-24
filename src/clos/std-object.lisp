@@ -7,6 +7,8 @@
 ;;; Modification  @vlad-km, 2019
 ;;; version for JSCL
 ;;;
+;;; JSCL compilation mode - :both
+;;;
 ;;; Release note
 ;;; - The names of some functions have been changed from !name to !name, to prevent naming conflicts
 ;;;   when host compiling. See FSET section from macros.lisp
