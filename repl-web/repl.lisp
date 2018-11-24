@@ -74,7 +74,7 @@
            ;; happens, we cancel it, so it is not propagated more.
            (%js-try
 
-            ;; Capture unhandled Lisp conditeions.
+            ;; Capture unhandled Lisp conditions.
             (handler-case
                 (when (> (length input) 0)
                   (let* ((form (read-from-string input))
