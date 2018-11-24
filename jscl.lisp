@@ -86,7 +86,18 @@
      ("codegen"      :both)
      ("compiler"     :both))
     ("documentation" :target)
-    ("worker"        :target)))
+    ("worker"        :target)
+    ("clos"
+       ("kludges"       :both)
+       ("std-object"    :both)
+       ("mop-utils"     :both)
+       ("std-generic"   :both)
+       ("std-method"    :both)
+       ("bootstrap"     :target)
+       ("tools"         :target)
+       ("macros"        :target)
+       ("exports"       :target)
+       ("methods"       :target)) ))
 
 
 (defun source-pathname (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
