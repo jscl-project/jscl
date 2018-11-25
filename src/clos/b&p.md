@@ -58,8 +58,5 @@ ELF
   (something-name ip))
 ```
 
-## Problem with `slot-value`
-
-The form `(setf (slot-value instance slot-name) value)` does not return value.
 
 
