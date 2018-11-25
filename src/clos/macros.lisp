@@ -3,6 +3,7 @@
 ;;;
 ;;; CLOS macros
 ;;; Modification for JSCL  @vlad-km, 2019
+;;;
 ;;; JSCL compilation mode :target
 ;;;
 
@@ -70,14 +71,15 @@
 
 ;;; psetf
 ;;: todo: remove to ?
+#+nil
 (defmacro psetf (&rest pairs)
   `(!psetf ,@pairs))
 
 ;;; rotatef
 ;;: todo: remove to ?
+#+nil
 (defmacro rotatef (&rest assigments)
   `(!rotatef ,@assigments))
-
 
 
 
