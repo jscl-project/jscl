@@ -1,8 +1,8 @@
-# JSCL CLOS release v1.0 (13-OCT-2018)
+# JSCL CLOS  
 
 The implementation is based on a subset of CLOS known as CLOSETTE. 
 
-Closette is an implementation of a subset of CLOS with a metaobject protocol as described in the book
+CLOSETTE is an implementation of a subset of CLOS with a metaobject protocol as described in the book
 - **Gregor Kiczales, Jim des Rivieres, and Daniel G. Bobrow, "The
    Art of the Metaobject Protocol", MIT Press, 1991. 335 pages.
    ISBN 0-262-61074-4**
@@ -42,12 +42,19 @@ Original file `./closette/closette.lisp` has been divided into parts:
 - `std-method.lisp` (from closette.lisp lines 919-1316)
 - `bootstrap.lisp` (from closette.lisp lines 1317-1403)
 - `macros.lisp` (see notes inside)
-- `tools.lisp` (see notes inside. Source code is in ./closette/closette-test.lisp)
+- `exports.lisp` (from closette.lisp lines 69-111)
 - `methods.lisp` (from closette.lisp lines 919-1316)
 
 All source code modifications (marked with tag `@vlad-km`) are associated with:
 - features of JSCL compilation
 - performance generic functions and some CLOS standard functions
+
+## Know bugs and problems
+
+See `./b&p.md`
+
+
+
 
 2019, Vladimir Mezentsev, @vlad-km
  
