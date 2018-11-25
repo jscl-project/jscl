@@ -21,6 +21,11 @@
       (setf-slot-value-using-class new-value (!class-of object) object slot-name)))
 
 
+;;; @vlad-km
+;;; moved from std-object.lisp
+(defun (setf find-class) (new-value symbol)
+  (setf (gethash symbol *class-table*) new-value))
+
 ;;; print-object
 (defgeneric print-object (instance &optional stream))
 

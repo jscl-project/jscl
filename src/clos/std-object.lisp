@@ -438,7 +438,10 @@
 (defun setf-find-class (symbol new-value)
   (setf (gethash symbol *class-table*) new-value))
 
-#+jscl
+;;; @vlad-km
+;;; remove to methods.lisp
+;;;
+#+nil
 (defun (setf find-class) (new-value symbol)
   (setf (gethash symbol *class-table*) new-value))
 
