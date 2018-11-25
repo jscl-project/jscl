@@ -13,6 +13,13 @@
 (defvar *mop-awake-time* (get-internal-real-time))
 
 
+;;; @vlad-km.
+;;; moved from std-object.
+(defun (setf slot-value) (new-value object slot-name)
+  (if (eq (!class-of (!class-of object)) *the-class-standard-class*)
+      (setf-std-slot-value object slot-name new-value)
+      (setf-slot-value-using-class new-value (!class-of object) object slot-name)))
+
 
 ;;; print-object
 (defgeneric print-object (instance &optional stream))
@@ -145,10 +152,10 @@
                  (slot-boundp old-instance slot-name))
         (setf (slot-value new-instance slot-name)
               (slot-value old-instance slot-name))))
-    (rotatef (std-instance-slots new-instance)
-             (std-instance-slots old-instance))
-    (rotatef (std-instance-class new-instance)
-             (std-instance-class old-instance))
+    (!rotatef (std-instance-slots new-instance)
+              (std-instance-slots old-instance))
+    (!rotatef (std-instance-class new-instance)
+              (std-instance-class old-instance))
     (apply #'update-instance-for-different-class
            new-instance old-instance initargs)
     old-instance))
