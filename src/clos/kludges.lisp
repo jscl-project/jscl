@@ -84,14 +84,13 @@
 ;;;
 ;;; Warning! Not use with (incf/decf) !
 ;;;
-;;; rotatef
 (defmacro !psetf (&rest pairs)
   (when pairs
     (when (null (cdr pairs))
       (error "PSETF odd arguments"))
     (let ((g!val (gensym)))
       `(let ((,g!val ,(cadr pairs)))
-         (psetf ,@(cddr pairs))
+         (!psetf ,@(cddr pairs))
          (setf ,(car pairs) ,g!val)
          nil))))
 
@@ -104,7 +103,7 @@
         (push it res))
       (push (car args) res)
       (setq res (reverse res))
-      (setf (car res) 'psetf))
+      (setf (car res) '!psetf))
     res ))
 
 
