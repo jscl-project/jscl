@@ -124,6 +124,27 @@
 
 
 ;;; test change-class rotatef psetf
+
+;;; rotatef test
+#+jscl
+(let ((a 1)
+      (b 2)
+      (c 3)
+      (d #(1 2 3)))
+    (!rotatef a b c)
+    (test (equal '(2 3 1) (list a b c)))
+    (!rotatef a b c)
+    (test (equal '(3 1 2) (list a b c)))
+    (!rotatef (aref d 0) (aref d 2))
+    (test (equal '(3 2 1) (jscl::vector-to-list d))))
+
+(let* ((a '(1 2))
+       (b '(3 4))
+       (c '(a b))
+       (d (list a b c)))
+   (!rotatef (nth 0 d) (nth 2 d))
+   (test (equal '((a b) (3 4) (1 2)) d)))
+
 (defclass rectangle ()
   ((height :initform 0.0 :initarg :height)
    (width  :initform 0.0 :initarg :width)))
