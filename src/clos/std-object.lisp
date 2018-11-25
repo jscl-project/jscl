@@ -152,8 +152,8 @@
 
 ;;; @vlad-km
 (defun setf-slot-contents (slots location new-value)
-  (setf (aref slots location) new-value)
-  (values))
+  (setf (aref slots location) new-value))
+
 
 ;;; std-slot-value
 
@@ -184,7 +184,9 @@
       (setf-std-slot-value object slot-name new-value)
       (setf-slot-value-using-class new-value (!class-of object) object slot-name)))
 
-;;; @vlad-km. replaced (setf ..) forms on (setf-...)
+;;; @vlad-km.
+;;; Moved to methods.lisp
+#+nil
 (defun (setf slot-value) (new-value object slot-name)
   (if (eq (!class-of (!class-of object)) *the-class-standard-class*)
       (setf-std-slot-value object slot-name new-value)
