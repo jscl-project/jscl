@@ -15,11 +15,13 @@
 
 ;;; @vlad-km.
 ;;; moved from std-object.
+#+nil
 (defun (setf slot-value) (new-value object slot-name)
   (if (eq (!class-of (!class-of object)) *the-class-standard-class*)
       (setf-std-slot-value object slot-name new-value)
       (setf-slot-value-using-class new-value (!class-of object) object slot-name)))
 
+(defsetf slot-value setf-slot-value)
 
 ;;; @vlad-km
 ;;; moved from std-object.lisp
