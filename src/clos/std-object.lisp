@@ -244,9 +244,9 @@
 
 (defun built-in-class-of (x)
   (typecase x
-    (null                         (find-class 'null))
-    (hash-table                   (find-class 'hash-table))
-    (structure                    (find-class 'structure))
+    (null                         (!find-class 'null))
+    (hash-table                   (!find-class 'hash-table))
+    (structure                    (!find-class 'structure))
     (symbol                       (!find-class 'symbol))
     (integer                      (!find-class 'integer))
     (float                        (!find-class 'float))
