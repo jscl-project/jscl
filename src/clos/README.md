@@ -1,6 +1,6 @@
-# JSCL CLOS  
+# JSCL CLOS
 
-The implementation is based on a subset of CLOS known as CLOSETTE. 
+The implementation is based on a subset of CLOS known as CLOSETTE.
 
 CLOSETTE is an implementation of a subset of CLOS with a metaobject protocol as described in the book
 - **Gregor Kiczales, Jim des Rivieres, and Daniel G. Bobrow, "The
@@ -53,8 +53,4 @@ All source code modifications (marked with tag `@vlad-km`) are associated with:
 
 See `./b&p.md`
 
-
-
-
 2019, Vladimir Mezentsev, @vlad-km
- 
