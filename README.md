@@ -65,6 +65,8 @@ functions and macros. In particular:
 
 - The `LOOP` macro
 
+- CLOS
+
 - Others
 
 The compiler is very verbose, some simple optimizations or
@@ -73,9 +75,5 @@ The compiler is very verbose, some simple optimizations or
 Most of the above features are incomplete. The major features that are still missing are:
 
 - The `format` function
-
-- CLOS 
-  (http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/lang/lisp/oop/0.html)
-
 
 *Feel free to hack it yourself*
