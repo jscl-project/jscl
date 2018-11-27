@@ -6,7 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.0] - 2018-11-27
+
 ### Added
+
+- CLOS support and improved compliance (by @vlad-km)
+  [#338](https://github.com/jscl-project/jscl/pull/338)
+  [#337](https://github.com/jscl-project/jscl/pull/337)
+  [#334](https://github.com/jscl-project/jscl/pull/334)
 
 ### Fixed
 - Infinite loop in the exprimental service-worker REPL on EOF [#318](https://github.com/jscl-project/jscl/issues/318)
@@ -40,6 +47,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Implement the [LOOP](https://github.com/jscl-project/jscl/pull/253) macro
 
-[Unreleased]: https://github.com/jscl-project/jscl/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/jscl-project/jscl/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/jscl-project/jscl/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/jscl-project/jscl/compare/v0.5.1...v0.6.1
 [0.5.1]: https://github.com/jscl-project/jscl/compare/v0.4.0...v0.5.1
