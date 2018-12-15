@@ -697,11 +697,9 @@
      (convert ,form)))
 
 (define-compilation progn (&rest body)
-  (if (null (cdr body))
-      (convert (car body) *multiple-value-p*)
-      `(progn
-         ,@(append (mapcar #'convert (butlast body))
-                   (list (convert (car (last body)) t))))))
+  `(progn
+     ,@(append (mapcar #'convert (butlast body))
+               (list (convert (car (last body)) *multiple-value-p*)))))
 
 (define-compilation macrolet (definitions &rest body)
   (let ((*environment* (copy-lexenv *environment*)))
