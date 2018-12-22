@@ -29,6 +29,9 @@
             (do-all-external-symbols (symbol) (handle-symbol symbol))
             (do-all-symbols (symbol) (handle-symbol symbol))))))
 
+(defun apropos/regexp-test (pattern str)
+  ((oget pattern "test")  str))
+
 (defun apropos-list (string &optional package external-only)
   (let (symbols)
     (map-apropos-symbols
