@@ -279,9 +279,9 @@
         (doc (oget obj "docstring")))
     (with-pp-buffer (buf)
       (pp/presentation obj 'function stream)
-      (format stream "Name:~a~%" (if name name "anonimous"))
+      (format buf "Name:~a~%" (if name name "anonimous"))
       (when doc
-        (format stream "Documentation: ~a~%" doc))
+        (format buf "Documentation: ~a~%" doc))
       (flush-pp-buffer buf stream))
     (values)))
 
