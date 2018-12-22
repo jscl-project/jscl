@@ -97,7 +97,9 @@
        ("tools"         :target)
        ("macros"        :target)
        ("exports"       :target)
-       ("methods"       :target)) ))
+       ("methods"       :target)
+       ("describe"      :target))
+    ("load"          :target)))
 
 
 (defun source-pathname (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
