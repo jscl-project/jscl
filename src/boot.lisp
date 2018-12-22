@@ -415,6 +415,16 @@
          (= (length obj) 5)   ;; 3
          (eq (car obj) 'std-instance)) )
 
+;;; js-object predicate
+(defun js-object-p (obj)
+  (if (or (sequencep obj)
+          (numberp obj)
+          (symbolp obj)
+          (functionp obj)
+          (packagep obj))
+      nil
+      t))
+
 ;; Incorrect typecase, but used in NCONC.
 (defmacro typecase (x &rest clausules)
   (let ((value (gensym)))
