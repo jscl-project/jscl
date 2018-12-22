@@ -265,9 +265,7 @@
            ;; 
            ;;   https://reproducible-builds.org/specs/source-date-epoch/
            ;;
-           (if (sb-posix:getenv "SOURCE_DATE_EPOCH")
-               (+ (parse-integer (sb-posix:getenv "SOURCE_DATE_EPOCH")) 2208988800)
-               (get-universal-time))))
+           (get-source-data-epoch) ))
       (multiple-value-bind (second minute hour date month year)
           (decode-universal-time build-time)
         (declare (ignore second minute hour))
