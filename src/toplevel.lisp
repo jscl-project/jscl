@@ -310,7 +310,9 @@
 
 (cond
   ((find :node *features*)
-   (setq *root* (%js-vref "global")))
+   (setq *root* (%js-vref "global"))
+   (setf #j:Fs (funcall (%js-vref "require") "fs")) 
+   (setf #j:FsPath (funcall (%js-vref "require") "path")))
   ((string/= (%js-typeof |window|) "undefined")
    (setq *root* (%js-vref "window")))
   (t
