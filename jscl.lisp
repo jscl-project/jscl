@@ -139,7 +139,7 @@
   (do-source input :host
     (multiple-value-bind (fasl warn fail) (compile-file input)
       (declare (ignore warn))
-      (when fail
+      #-ccl (when fail
         (error "Compilation of ~A failed." input))
       (load fasl))))
 
