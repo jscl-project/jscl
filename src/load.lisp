@@ -125,11 +125,16 @@
 ;;;
 ;;; have a fun
 ;;;
-(defun load (name &key verbose (sync t) output place hook)
+
+(defun node-environment-p ()
+  (if (find :node *features*) t))
+
+
+(defun load (name &key verbose (sync (node-environment-p)) output place hook)
   (terpri)
   (cond
     ;; node.js/electron platform
-    ((find :node *features*)
+    ((node-environment-p)
      (if place
          (setq place (concat place "./"))
          (setq place "./"))
