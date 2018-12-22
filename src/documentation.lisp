@@ -32,13 +32,21 @@
 (defun apropos/regexp-test (pattern str)
   ((oget pattern "test")  str))
 
-(defun apropos-list (string &optional package external-only)
-  (let (symbols)
-    (map-apropos-symbols
-     (lambda (symbol)
-       (pushnew symbol symbols :test #'eq))
-     string package external-only)
-    symbols))
+(defun apropos-list (string &optional package externals-only)
+  (let* ((result '())
+         (pattern (#j:RegExp string))
+         (comparator (lambda (x)
+                       (let ((name (symbol-name x)))
+                         (when (apropos/regexp-test pattern name)
+                           (pushnew  x result :test 'eq)))))
+         (single-package (lambda (pkg)
+                           (map-for-in comparator (if externals-only
+                                                      (%package-external-symbols pkg)
+                                                      (%package-symbols pkg))))))
+    (if package
+        (funcall single-package package)
+        (map-for-in single-package *package-table*))
+    result))
 
 (defun apropos (string &optional package external-only)
   (map-apropos-symbols
