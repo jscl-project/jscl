@@ -439,6 +439,7 @@
                                     (structure 'structure-p)       
                                     (hash-table 'hash-table-p)     
                                     (mop-object 'mop-object-p) 
+                                    (js-object  'js-object-p)
                                     (cons 'consp)
                                     (list 'listp)
                                     (vector 'vectorp)
