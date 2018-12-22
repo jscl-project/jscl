@@ -41,3 +41,11 @@
         :until (terminalp ch)))
 
 (set-dispatch-macro-character #\# #\J #'j-reader)
+
+(defun get-source-data-epoch ()
+  (let (sde)
+    #+ccl (setq sde (ccl::getenv "SOURCE_DATE_EPOCH"))
+    #+sbcl (setq sde (sb-posix:getenv "SOURCE_DATE_EPOCH"))
+    (if sde
+        (+ (parse-integer sde) 2208988800)
+      (get-universal-time))))
