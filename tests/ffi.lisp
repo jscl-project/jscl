@@ -55,7 +55,7 @@
   (test (js-object-signature obj)))
 
 ;;; test html-object
-#+jscl
+#+nil
 (let ((obj (#j:window:document:createElement "div")))
   (test (and
          (js-object-p obj)
