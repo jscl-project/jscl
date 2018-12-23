@@ -137,7 +137,6 @@
    integer-length integerp interactive-stream-p intern
    internal-time-units-per-second intersection invalid-method-error
    invoke-debugger invoke-restart invoke-restart-interactively isqrt
-   js-object js-object-p js-object-signature
    keyword keywordp labels lambda lambda-list-keywords
    lambda-parameters-limit last lcm ldb ldb-test ldiff
    least-negative-double-float least-negative-long-float
