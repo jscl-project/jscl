@@ -278,15 +278,6 @@
 ;;; Warning:
 ;;;        The both functions only for rapidly development
 ;;;        Not for production
-;;;
-;;;
-;;; Restricted license
-;;;   These two functions will be delivered as is:
-;;;     - without any guarantees
-;;;     - without obligations of support
-;;;     - without obligations of responsibility for the result of use in any form and for any purposes
-;;; Copyleft (C) Vladimir Mezentsev, 2018
-;;;
 
 ;;;
 ;;; load-js - load javascript code from local file system (by FILE:),
