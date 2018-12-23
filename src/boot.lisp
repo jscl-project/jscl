@@ -412,8 +412,7 @@
 (defun mop-object-p (obj)
     (and (consp obj)
          (eq (oget obj "tagName") :mop-object)
-         (= (length obj) 5)   ;; 3
-         (eq (car obj) 'std-instance)) )
+         (= (length obj) 5)))
 
 ;;; js-object predicate
 (defun js-object-p (obj)
