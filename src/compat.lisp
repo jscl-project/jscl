@@ -46,6 +46,6 @@
   (let (sde)
     #+ccl (setq sde (ccl::getenv "SOURCE_DATE_EPOCH"))
     #+sbcl (setq sde (sb-posix:getenv "SOURCE_DATE_EPOCH"))
+    ;; other compiler - will be nil
     (if sde
-        (+ (parse-integer sde) 2208988800)
-      (get-universal-time))))
+        (+ (parse-integer sde) 2208988800))))
