@@ -144,10 +144,10 @@
       (load fasl))))
 
 (defun read-whole-file (filename)
-    (with-open-file (in filename)
-        (let ((seq (make-array (file-length in) :element-type 'character)))
-            (read-sequence seq in)
-            (substitute-if #\Space #'(lambda (char) (eql char #\Return)) seq))))
+  (with-open-file (in filename)
+    (let ((seq (make-array (file-length in) :element-type 'character)))
+      (read-sequence seq in)
+      (substitute-if #\Space #'(lambda (char) (eql char #\Return)) seq))))
 
 (defun !compile-file (filename out &key print)
   (let ((*compiling-file* t)
