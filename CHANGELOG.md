@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `describe` is implemented on top of CLOS now. [#343](https://github.com/jscl-project/jscl/pull/343)
+- `apropos` and `apropos-list` support regular expressions. [#343](https://github.com/jscl-project/jscl/pull/343)
+- Basic `load` is supported in browser and node environments [#343](https://github.com/jscl-project/jscl/pull/343)
+
 ## [0.7.0] - 2018-11-27
 
 ### Added
