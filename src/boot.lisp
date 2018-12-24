@@ -412,8 +412,17 @@
 (defun mop-object-p (obj)
     (and (consp obj)
          (eq (oget obj "tagName") :mop-object)
-         (= (length obj) 5)   ;; 3
-         (eq (car obj) 'std-instance)) )
+         (= (length obj) 5)))
+
+;;; js-object predicate
+(defun js-object-p (obj)
+  (if (or (sequencep obj)
+          (numberp obj)
+          (symbolp obj)
+          (functionp obj)
+          (packagep obj))
+      nil
+      t))
 
 ;; Incorrect typecase, but used in NCONC.
 (defmacro typecase (x &rest clausules)
@@ -429,6 +438,7 @@
                                     (structure 'structure-p)       
                                     (hash-table 'hash-table-p)     
                                     (mop-object 'mop-object-p) 
+                                    (js-object  'js-object-p)
                                     (cons 'consp)
                                     (list 'listp)
                                     (vector 'vectorp)

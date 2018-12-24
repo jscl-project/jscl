@@ -38,3 +38,25 @@
     (test (string= "123.01" (number-to-fixed 123.012345 2)))
     (test (string= "a" (number-by-radix 10 16))) 
     (test (string= "1100100" (number-by-radix 100 2)))))
+
+;;; test what simple-object (Object.create(null)) 
+(test (string= "#<JS-OBJECT [object Simple-object]>" (write-to-string *package-table*)))
+(test (equal t (js-object-p *package-table*)))
+
+;;; test what new Array isnt js-object
+(let ((obj (make-new #j:Array)))
+  (setf (oget obj "name") 'one)
+  (test (and (objectp obj)
+             (not (js-object-p obj)))))
+
+;;; test what new Date is js-object & have a signature 
+(let ((obj (make-new #j:Date)))
+  (test (js-object-p obj))
+  (test (js-object-signature obj)))
+
+;;; test html-object
+#+nil
+(let ((obj (#j:window:document:createElement "div")))
+  (test (and
+         (js-object-p obj)
+         (string= "[object HTMLDivElement]" (js-object-signature obj)))))

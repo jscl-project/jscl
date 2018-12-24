@@ -135,3 +135,11 @@
 		(funcall function (car x) (cdr x)))
 	      (caddr hash-table))
   nil)
+
+(defun hash-table-test (obj)
+  (cond ((hash-table-p obj)
+         (let ((test (cadr obj)))
+           (cond ((eq test #'eq-hash) 'eq)
+                 ((eq test #'eql-hash) 'eql)
+                 (t 'equal))))
+        (t (error "~a is not hash-table" obj))))

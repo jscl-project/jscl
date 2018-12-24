@@ -295,30 +295,6 @@
   (std-compute-method-function method))
 
 
-;;;
-(defgeneric describe-object (object &optional stream))
-
-(defmethod describe-object ((object standard-object) &optional (stream *standard-output*))
-  (format stream "A CLOS object
-             Printed representation: ~S
-             Class: ~S
-             Structure "
-          object
-          (class-of object))
-  (dolist (sn (mapcar #'slot-definition-name (class-slots (class-of object))))
-    (format stream "~%             ~S <- [~S]"
-            sn
-            (if (slot-boundp object sn)
-                (slot-value object sn)
-                "slot unbound")))
-  (format stream "~%")
-  (values))
-
-(defmethod describe-object ((object t) &optional (stream *standard-output*))
-  (describe object)
-  (values))
-
-
 ;;; timestamp. todo: remove it
 (/debug (concat "             elapsed time:" (/ (- (get-internal-real-time) *mop-awake-time*) internal-time-units-per-second 1.0) " sec."))
 

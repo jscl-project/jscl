@@ -258,6 +258,7 @@
     (array                        (!find-class 'array))
     (sequence                     (!find-class 'sequence))
     (function                     (!find-class 'function))
+    (js-object                    (!find-class 'js-object))
     (t                            (!find-class 't))))
 
 

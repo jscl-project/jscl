@@ -88,16 +88,18 @@
     ("documentation" :target)
     ("worker"        :target)
     ("clos"
-       ("kludges"       :both)
-       ("std-object"    :both)
-       ("mop-utils"     :both)
-       ("std-generic"   :both)
-       ("std-method"    :both)
-       ("bootstrap"     :target)
-       ("tools"         :target)
-       ("macros"        :target)
-       ("exports"       :target)
-       ("methods"       :target)) ))
+     ("kludges"       :both)
+     ("std-object"    :both)
+     ("mop-utils"     :both)
+     ("std-generic"   :both)
+     ("std-method"    :both)
+     ("bootstrap"     :target)
+     ("tools"         :target)
+     ("macros"        :target)
+     ("exports"       :target)
+     ("methods"       :target)
+     ("describe"      :target))
+    ("load"          :target)))
 
 
 (defun source-pathname (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
@@ -137,7 +139,7 @@
   (do-source input :host
     (multiple-value-bind (fasl warn fail) (compile-file input)
       (declare (ignore warn))
-      (when fail
+      #-ccl (when fail
         (error "Compilation of ~A failed." input))
       (load fasl))))
 
@@ -145,7 +147,7 @@
   (with-open-file (in filename)
     (let ((seq (make-array (file-length in) :element-type 'character)))
       (read-sequence seq in)
-      seq)))
+      (substitute-if #\Space #'(lambda (char) (eql char #\Return)) seq))))
 
 (defun !compile-file (filename out &key print)
   (let ((*compiling-file* t)

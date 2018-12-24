@@ -264,9 +264,8 @@
            ;; 
            ;;   https://reproducible-builds.org/specs/source-date-epoch/
            ;;
-           (if (sb-posix:getenv "SOURCE_DATE_EPOCH")
-               (+ (parse-integer (sb-posix:getenv "SOURCE_DATE_EPOCH")) 2208988800)
-               (get-universal-time))))
+           (or (get-source-data-epoch)
+               (get-universal-time)) ))
       (multiple-value-bind (second minute hour date month year)
           (decode-universal-time build-time)
         (declare (ignore second minute hour))
@@ -309,7 +308,9 @@
 
 (cond
   ((find :node *features*)
-   (setq *root* (%js-vref "global")))
+   (setq *root* (%js-vref "global"))
+   (setf #j:Fs (funcall (%js-vref "require") "fs")) 
+   (setf #j:FsPath (funcall (%js-vref "require") "path")))
   ((string/= (%js-typeof |window|) "undefined")
    (setq *root* (%js-vref "window")))
   (t
@@ -323,72 +324,3 @@
 (when (jscl::web-worker-p)
   (jscl::initialize-web-worker))
 
-;;;
-;;; LOAD - load file
-;;;
-(defun _xhr_receiver_ (uri fn-ok &optional fn-err)
-  (let ((req (make-new #j:XMLHttpRequest)))
-    ((oget req "open" ) "GET" uri t)
-    ((oget req "setRequestHeader") "Cache-Control" "no-cache")
-    ((oget req "setRequestHeader") "Cache-Control" "no-store")
-    (setf (oget req "onreadystatechange")
-          (lambda (evt)
-            (if (= (oget req "readyState") 4)
-                (if (= (oget req "status") 200)
-                    (funcall fn-ok (oget req "responseText"))
-                    (if fn-err
-                        (funcall fn-err uri (oget req "status") )
-                        (format t "xhr: ~a~%    ~a~%" (oget req "statusText") uri )) ))))
-    (funcall (%js-vref "reqXHRsendNull") req) ))
-
-
-(defun _ldr_eval_ (sexpr verbose)
-  (if verbose
-      (format t "~a ~a~%" (car sexpr) (cadr sexpr)))
-  (%js-try
-   (handler-case
-       (progn
-         (dolist (x (multiple-value-list (eval sexpr)))
-           (format t  "~a~%"  x))
-         t)
-     (error (msg)
-       (format t "Error: ~a~%" (!condition-args msg))
-       nil))
-   (catch (err)
-     (format t "Error: ~a~%" (or (oget err "message") err))
-     nil)))
-
-
-(defun _load_form_eval_ (input verbose)
-  (let ((stream)
-        (expr)
-        (eof (gensym "LOADER" )))
-    (setq stream (make-string-input-stream input))
-    (terpri)
-    (tagbody
-     rdr-feeder
-       (setq expr (ls-read stream nil eof))
-       (if (eql expr eof)
-           (go rdr-eof))
-       (_ldr_eval_ expr verbose)
-       (go rdr-feeder)
-     rdr-eof)
-    (values)))
-
-
-
-;;; replace cntrl-r from input
-(defun _ldr_ctrl-r_replace_ (src)
-  (let ((reg (#j:RegExp (code-char 13) "g")))
-    ((oget (lisp-to-js src) "replace") reg " ")))
-
-
-;;; (load "./app.lisp" :verbose t)
-(defun load (name &key verbose)
-  (_xhr_receiver_ name
-                  (lambda (input)
-                    (_load_form_eval_ (_ldr_ctrl-r_replace_ input) verbose))
-                  (lambda (url status)
-                    (format t "~%Load: Can't load ~a~%     Status ~%" url status)))
-  (terpri)
-  (values))
