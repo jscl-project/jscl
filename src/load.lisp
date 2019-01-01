@@ -145,7 +145,7 @@
     (t
      (when sync
        (warn "sync mode only for node/electron platform~%will be used async mode"))
-     (when (or output bin)
+     (when (or output hook)
        (warn "output/hook options only for node/electron platform"))
      (loader-browser-mode name verbose)))
   (values))
