@@ -145,9 +145,10 @@
 
 (defun read-whole-file (filename)
   (with-open-file (in filename)
-    (let ((seq (make-array (file-length in) :element-type 'character)))
-      (read-sequence seq in)
-      (substitute-if #\Space #'(lambda (char) (eql char #\Return)) seq))))
+    (let* ((seq (make-array (file-length in) :element-type 'character))
+           (char-count (read-sequence seq in))
+           (seq1 (substitute-if #\Space #'(lambda (char) (eql char #\Return)) seq)))
+      (subseq seq1 0 char-count))))
 
 (defun !compile-file (filename out &key print)
   (let ((*compiling-file* t)
