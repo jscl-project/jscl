@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `apropos` and `apropos-list` support regular expressions. [#343](https://github.com/jscl-project/jscl/pull/343)
 - Basic `load` is supported in browser and node environments [#343](https://github.com/jscl-project/jscl/pull/343)
 
+### Fixed
+
+- Handle files with multi-byte character encodings [#348](https://github.com/jscl-project/jscl/pull/348)
+
 ## [0.7.0] - 2018-11-27
 
 ### Added
