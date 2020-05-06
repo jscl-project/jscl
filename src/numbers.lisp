@@ -53,6 +53,9 @@
 (defun 1- (x) (- x 1))
 
 
+(defun rem (number divisor)
+ (rem0 number divisor))
+
 (defun floor (x &optional (y 1))
   (let ((quotient (%floor (/ x y))))
     (values quotient
