@@ -1106,7 +1106,7 @@
           (reduce (lambda (x y) `(call-internal |handled_division| ,x ,y))
                   args)))))
 
-(define-builtin mod (x y)
+(define-builtin rem0 (x y)
   `(selfcall
     (if (== ,y 0)
         (throw "Division by zero"))
