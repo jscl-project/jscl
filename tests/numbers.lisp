@@ -146,3 +146,29 @@
  (test (equal s1 s2)))
 
 
+(defmacro g!tl (fn number divisor result) `(list ',fn ,number ,divisor ,result))
+
+(let* ((test-tuples
+         (list
+          (g!tl rem -1 5  -1)
+          (g!tl mod -1 5  4)
+          (g!tl mod 13 4 1)
+          (g!tl rem 13 4 1)
+          (g!tl mod -13 4 3)
+          (g!tl rem -13 4 -1)
+          (g!tl mod 13 -4 -3)
+          (g!tl rem 13 -4 1)
+          (g!tl mod -13 -4 -1)
+          (g!tl rem -13 -4 -1)))
+       (pattern  (mapcar (lambda (tuple)
+                          (let ((fn (car tuple))
+                                (number (cadr tuple))
+                                (divisor (caddr tuple))
+                                (mr (cadddr tuple)))
+                           (eql mr (truncate (funcall fn number divisor)))))
+                         test-tuples))
+       (match (list T T T T T T T T T T)))
+ (teql (equal  pattern match)))
+
+
+;;; end
