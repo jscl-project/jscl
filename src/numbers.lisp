@@ -56,6 +56,11 @@
 (defun rem (number divisor)
  (rem0 number divisor))
 
+(defun mod (number divisor)
+  (multiple-value-bind (quotient reminder)
+      (floor number divisor)
+    reminder))
+
 (defun floor (x &optional (y 1))
   (let ((quotient (%floor (/ x y))))
     (values quotient
