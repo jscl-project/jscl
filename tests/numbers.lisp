@@ -127,3 +127,22 @@
 (test (= (truncate -4 3) -1))
 (test (= (truncate 4 -3) -1))
 (test (= (truncate -4 -3) 1))
+
+(let* ((term-width 80)
+       (char-positions '(10 100 250 795))
+       (find-row (lambda (chpos columns) (ceiling chpos columns)))
+       (find-col (lambda (chpos columns) (rem chpos columns)))
+       (cursor-position (lambda (chpos width)
+                         (values (ceiling chpos width) (rem chpos width))))
+       (s1 (mapcar (lambda (x)
+                    (multiple-value-bind (row col)
+                      (funcall cursor-position x term-width)
+                     (list row col))) char-positions))
+
+       (s2 (mapcar (lambda (x)
+                    (list (funcall find-row x term-width)
+                          (funcall find-col x term-width))) char-positions)))
+ ;; ((1 10) (2 20) (4 10) (10 75))
+ (test (equal s1 s2)))
+
+
