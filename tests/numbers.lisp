@@ -168,7 +168,7 @@
                            (eql mr (truncate (funcall fn number divisor)))))
                          test-tuples))
        (match (list T T T T T T T T T T)))
- (teql (equal  pattern match)))
+ (test (equal  pattern match)))
 
 
 ;;; end
