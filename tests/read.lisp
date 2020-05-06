@@ -51,3 +51,7 @@
 
 ;; character literals
 (test (char= #\SPACE #\Space #\space))
+
+
+(let ((*features* '(foo)))
+  (test (= (read-from-string "#+foo 1 2)") 1)))

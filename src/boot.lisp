@@ -89,6 +89,7 @@
 
 (defmacro defparameter (name value &optional docstring)
   `(progn
+     (declaim (special ,name))
      (setq ,name ,value)
      ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
