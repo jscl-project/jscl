@@ -533,42 +533,6 @@
       ;; XXX: Use FLOAT when implemented.
       (/ (* sign (expt 10.0 (* exponent-sign exponent)) number) divisor 1.0))))
 
-#+nil(defun !parse-integer (string junk-allow)
-  (block nil
-    (let ((value 0)
-          (index 0)
-          (size (length string))
-          (sign 1))
-      ;; Leading whitespace
-      (while (and (< index size)
-                  (whitespacep (char string index)))
-        (incf index))
-      (unless (< index size) (return (values nil 0)))
-      ;; Optional sign
-      (case (char string 0)
-        (#\+ (incf index))
-        (#\- (setq sign -1)
-             (incf index)))
-      ;; First digit
-      (unless (and (< index size)
-                   (setq value (digit-char-p (char string index))))
-        (return (values nil index)))
-      (incf index)
-      ;; Other digits
-      (while (< index size)
-        (let ((digit (digit-char-p (char string index))))
-          (unless digit (return))
-          (setq value (+ (* value 10) digit))
-          (incf index)))
-      ;; Trailing whitespace
-      (do ((i index (1+ i)))
-          ((or (= i size) (not (whitespacep (char string i))))
-           (and (= i size) (setq index i))))
-      (if (or junk-allow
-              (= index size))
-          (values (* sign value) index)
-          (values nil index)))))
-
 
 (defun !parse-integer (string start end radix junk-allow)
   (block nil
