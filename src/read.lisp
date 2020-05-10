@@ -20,6 +20,12 @@
 
 ;;;; Reader
 
+#+jscl(defvar *read-base* 10)
+
+;;; Reader radix bases
+(defvar *fixed-radix-bases* '((#\B . 2) (#\b . 2) (#\o . 8) (#\O . 8) (#\x . 16) (#\X . 16)))
+
+
 ;;; If it is not NIL, we do not want to read the expression but just
 ;;; ignore it. For example, it is used in conditional reads #+.
 (defvar *read-skip-p* nil)
