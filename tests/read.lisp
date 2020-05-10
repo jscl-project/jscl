@@ -69,3 +69,44 @@
            (funcall fn0 1 2)
            (funcall fn1 1)
            (funcall fn1 1 :y 2)))))
+
+;;; radix sharp at sequence's
+
+#+jscl
+(test
+ (equal
+  '(t t t t t)
+  (let ((bfv #(#b1 #b10 #b11 #b100 #b101 #b110 #b111 #b1000 #b1001 #b1010))
+        (bfv1 #(#b1 #b10 #b11 'sharp #\# #b100 #b101 #b110 #b111 #b1000 #b1001 #b1010))
+        (bfv2 #(1 2 3 (QUOTE SHARP) #\# 4 5 6 7 8 9 10))
+        (xfv #(#xa001 #xb001 #xc001 #xd001 #xe001 #xf001)))
+    (list (equal
+           ;; correct b->d conversion
+           (jscl::vector-to-list bfv)
+           '(1 2 3 4 5 6 7 8 9 10))
+          (equal
+           ;; correct x->d conversion
+           (jscl::vector-to-list xfv)
+           '(40961 45057 49153 53249 57345 61441))
+          ;; list & sharp tokens -> with sharp reader
+          (equal
+           (jscl::vector-to-list bfv1)
+           '(1 2 3 (QUOTE SHARP) #\# 4 5 6 7 8 9 10))
+          (equal
+           (aref bfv1 3)
+           '(quote sharp))
+          (equal
+           (aref bfv1 4) #\#)  ))))
+
+;;; sharp radix reader from string
+;;; higly likely it redundant but let stay
+#+jscl
+(test
+ (equal
+  '(t)
+  (let* 
+      ((s1 (read-from-string "#(#b1 #b10 #b11 #b100 #b101 #b110 #b111 #b1000 #b1001 #b1010)")))
+    (list
+     (equal
+      (jscl::vector-to-list s1)
+      '(1 2 3 4 5 6 7 8 9 10))))))
