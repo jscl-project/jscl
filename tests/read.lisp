@@ -55,3 +55,17 @@
 
 (let ((*features* '(foo)))
   (test (= (read-from-string "#+foo 1 2)") 1)))
+
+;;; sharp radix reader
+
+(test (string= "this is 1985" (format nil "this is ~a" #o3701)))
+
+(test
+ (equal '((1 2573) (1 2) (1 2573) (1 2))
+        (let ((fn0 (lambda (x &optional (y #x0a0d)) (list x y) ))
+              (fn1 (lambda (x &key (y #x0a0d)) (list x y))))
+          (list
+           (funcall fn0 1)
+           (funcall fn0 1 2)
+           (funcall fn1 1)
+           (funcall fn1 1 :y 2)))))
