@@ -110,3 +110,23 @@
      (equal
       (jscl::vector-to-list s1)
       '(1 2 3 4 5 6 7 8 9 10))))))
+
+;;;
+;;; parse-integer
+;;;
+(test
+ (equal '(t t t t t t)
+        (list
+         (multiple-value-bind (num pos) (parse-integer " 11111000001 " :radix 2 )
+           (equal (list num pos) '(1985 13)))
+         (multiple-value-bind (num pos) (parse-integer " 7C1 " :radix 16 )
+           (equal (list num pos) '(1985 5)))
+         (multiple-value-bind (num pos) (parse-integer " 3701 " :radix 8 )
+           (equal (list num pos) '(1985 6)))
+         ;;clhs examples
+         (multiple-value-bind (num pos) (parse-integer "123")
+           (equal (list num pos) '(123 3)))
+         (multiple-value-bind (num pos) (parse-integer "123"  :start 1 :radix 5)
+           (equal (list num pos) '(13 3)))
+         (multiple-value-bind (num pos) (parse-integer "no-integer" :junk-allowed t)
+           (equal (list num pos) '(nil 0))))))
