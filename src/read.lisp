@@ -20,6 +20,12 @@
 
 ;;;; Reader
 
+#+jscl(defvar *read-base* 10)
+
+;;; Reader radix bases
+(defvar *fixed-radix-bases* '((#\B . 2) (#\b . 2) (#\o . 8) (#\O . 8) (#\x . 16) (#\X . 16)))
+
+
 ;;; If it is not NIL, we do not want to read the expression but just
 ;;; ignore it. For example, it is used in conditional reads #+.
 (defvar *read-skip-p* nil)
@@ -290,6 +296,9 @@
                (push (subseq descriptor start) subdescriptors)
                `(oget *root* ,@(reverse subdescriptors)))
            (push (subseq descriptor start end) subdescriptors))))
+      ;; Sharp radix 
+      ((#\B #\b #\O #\o #\X #\x)
+       (sharp-radix-reader ch stream))
       (#\|
        (labels ((read-til-bar-sharpsign ()
                   (do ((ch (%read-char stream) (%read-char stream)))
@@ -334,6 +343,22 @@
                      (error "Invalid labelled object #~S#" id)))))))
          (t
           (error "Invalid dispatch character after #")))))))
+
+(defun sharp-radix-reader (ch stream)
+  ;; Sharp radix base #\B #\O #\X
+  (let* ((fixed-base (assoc ch jscl::*fixed-radix-bases*))
+	       (base (cond (fixed-base (cdr fixed-base))
+		                 (t (error "No radix base in #~A" ch))))
+         (*read-base* base)
+         (number nil)
+         (string (read-until stream #'terminalp)))
+    (setq number (read-integer string))
+    (unless number
+      (error "#~c: bad base(~d) digit at ~s~%"
+             ch
+             base
+             string))
+    number))
 
 (defun unescape-token (x)
   (let ((result ""))
@@ -400,23 +425,28 @@
               symbol
               (error "The symbol `~S' is not external in the package ~S." name package))))))
 
+
 (defun read-integer (string)
-  (let ((sign 1)
-        (number nil)
-        (size (length string)))
-    (dotimes (i size)
-      (let ((elt (char string i)))
-        (cond
-          ((digit-char-p elt)
-           (setq number (+ (* (or number 0) 10) (digit-char-p elt))))
-          ((zerop i)
-           (case elt
-             (#\+ nil)
-             (#\- (setq sign -1))
-             (t (return-from read-integer))))
-          ((and (= i (1- size)) (char= elt #\.)) nil)
-          (t (return-from read-integer)))))
-    (and number (* sign number))))
+  (let ((base *read-base*)
+	      (negative nil)
+	      (number 0)
+	      (start 0)
+	      (end (length string)))
+    (when (eql #\. (char string (1- (length string))))
+      (setf base 10  end (1- end)))
+    (when (or (eql #\+ (char string 0))
+	            (eql #\- (char string 0)))
+      (setq negative (eql #\- (char string 0))
+	          start (1+ start)))
+    (when (not (= (- end start) 0))
+      (do ((idx start (1+ idx)))
+          ((>= idx end)
+           (if negative
+               (- number)
+               number))
+        (let ((weight (digit-char-p (char string idx) base)))
+          (unless weight (return))
+          (setq number (+ (* number base) weight)))))))
 
 (defun read-float (string)
   (block nil
@@ -486,33 +516,34 @@
       ;; XXX: Use FLOAT when implemented.
       (/ (* sign (expt 10.0 (* exponent-sign exponent)) number) divisor 1.0))))
 
-(defun !parse-integer (string junk-allow)
+
+(defun !parse-integer (string start end radix junk-allow)
   (block nil
     (let ((value 0)
-          (index 0)
-          (size (length string))
+          (index start)
+          (size (or end (length string)))
           (sign 1))
       ;; Leading whitespace
       (while (and (< index size)
                   (whitespacep (char string index)))
-        (incf index))
+             (incf index))
       (unless (< index size) (return (values nil 0)))
       ;; Optional sign
       (case (char string 0)
         (#\+ (incf index))
         (#\- (setq sign -1)
-             (incf index)))
+         (incf index)))
       ;; First digit
       (unless (and (< index size)
-                   (setq value (digit-char-p (char string index))))
+                   (setq value (digit-char-p (char string index) radix)))
         (return (values nil index)))
       (incf index)
       ;; Other digits
       (while (< index size)
-        (let ((digit (digit-char-p (char string index))))
-          (unless digit (return))
-          (setq value (+ (* value 10) digit))
-          (incf index)))
+             (let ((digit (digit-char-p (char string index) radix)))
+               (unless digit (return))
+               (setq value (+ (* value radix) digit))
+               (incf index)))
       ;; Trailing whitespace
       (do ((i index (1+ i)))
           ((or (= i size) (not (whitespacep (char string i))))
@@ -522,11 +553,12 @@
           (values (* sign value) index)
           (values nil index)))))
 
+
 #+jscl
-(defun parse-integer (string &key junk-allowed)
+(defun parse-integer (string &key (start 0) end (radix 10) junk-allowed)
   (multiple-value-bind (num index)
-      (!parse-integer string junk-allowed)
-    (if num
+      (jscl::!parse-integer string start end radix junk-allowed)
+    (if (or num junk-allowed)
         (values num index)
         (error "Junk detected."))))
 
