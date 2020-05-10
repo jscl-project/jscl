@@ -130,3 +130,26 @@
            (equal (list num pos) '(13 3)))
          (multiple-value-bind (num pos) (parse-integer "no-integer" :junk-allowed t)
            (equal (list num pos) '(nil 0))))))
+
+;;;
+;;; other fun glitch's
+;;;
+
+#|
+If you remove comments from the following expression there will be a compilation error.
+actually any errors in the types are caught at the compilation stage.
+The correct value can be used in any expressions, as is, at your discretion
+|#
+
+#|
+(let ((fn 
+        (lambda (#xag #xaf) (list #xaa #xaf))))
+  (funcall fn 1 2))
+|#
+
+;;; the correct value can be used in any expressions, as is, at your discretion
+(let ((fn (lambda (#xaa #xaf) (list #xaa #xaf))))
+  (funcall fn 1 2))
+;;; => (170 175)
+
+;;; end
