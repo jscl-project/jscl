@@ -341,6 +341,22 @@
          (t
           (error "Invalid dispatch character after #")))))))
 
+(defun sharp-radix-reader (ch stream)
+  ;; Sharp radix base #\B #\O #\X
+  (let* ((fixed-base (assoc ch jscl::*fixed-radix-bases*))
+	       (base (cond (fixed-base (cdr fixed-base))
+		                 (t (error "No radix base in #~A" ch))))
+         (*read-base* base)
+         (number nil)
+         (string (read-until stream #'terminalp)))
+    (setq number (read-integer string))
+    (unless number
+      (error "#~c: bad base(~d) digit at ~s~%"
+             ch
+             base
+             string))
+    number))
+
 (defun unescape-token (x)
   (let ((result ""))
     (dotimes (i (length x))
