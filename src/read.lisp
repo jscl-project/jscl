@@ -422,7 +422,7 @@
               symbol
               (error "The symbol `~S' is not external in the package ~S." name package))))))
 
-(defun read-integer (string)
+#+nil(defun read-integer (string)
   (let ((sign 1)
         (number nil)
         (size (length string)))
@@ -439,6 +439,28 @@
           ((and (= i (1- size)) (char= elt #\.)) nil)
           (t (return-from read-integer)))))
     (and number (* sign number))))
+
+(defun read-integer (string)
+  (let ((base *read-base*)
+	      (negative nil)
+	      (number 0)
+	      (start 0)
+	      (end (length string)))
+    (when (eql #\. (char string (1- (length string))))
+      (setf base 10  end (1- end)))
+    (when (or (eql #\+ (char string 0))
+	            (eql #\- (char string 0)))
+      (setq negative (eql #\- (char string 0))
+	          start (1+ start)))
+    (when (not (= (- end start) 0))
+      (do ((idx start (1+ idx)))
+          ((>= idx end)
+           (if negative
+               (- number)
+               number))
+        (let ((weight (digit-char-p (char string idx) base)))
+          (unless weight (return))
+          (setq number (+ (* number base) weight)))))))
 
 (defun read-float (string)
   (block nil
