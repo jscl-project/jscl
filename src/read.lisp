@@ -425,23 +425,6 @@
               symbol
               (error "The symbol `~S' is not external in the package ~S." name package))))))
 
-#+nil(defun read-integer (string)
-  (let ((sign 1)
-        (number nil)
-        (size (length string)))
-    (dotimes (i size)
-      (let ((elt (char string i)))
-        (cond
-          ((digit-char-p elt)
-           (setq number (+ (* (or number 0) 10) (digit-char-p elt))))
-          ((zerop i)
-           (case elt
-             (#\+ nil)
-             (#\- (setq sign -1))
-             (t (return-from read-integer))))
-          ((and (= i (1- size)) (char= elt #\.)) nil)
-          (t (return-from read-integer)))))
-    (and number (* sign number))))
 
 (defun read-integer (string)
   (let ((base *read-base*)
