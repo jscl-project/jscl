@@ -608,10 +608,10 @@
 
 
 #+jscl
-(defun parse-integer (string &key junk-allowed)
+(defun parse-integer (string &key (start 0) end (radix 10) junk-allowed)
   (multiple-value-bind (num index)
-      (!parse-integer string junk-allowed)
-    (if num
+      (jscl::!parse-integer string start end radix junk-allowed)
+    (if (or num junk-allowed)
         (values num index)
         (error "Junk detected."))))
 
