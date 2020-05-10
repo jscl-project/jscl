@@ -533,7 +533,7 @@
       ;; XXX: Use FLOAT when implemented.
       (/ (* sign (expt 10.0 (* exponent-sign exponent)) number) divisor 1.0))))
 
-(defun !parse-integer (string junk-allow)
+#+nil(defun !parse-integer (string junk-allow)
   (block nil
     (let ((value 0)
           (index 0)
