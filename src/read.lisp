@@ -296,6 +296,9 @@
                (push (subseq descriptor start) subdescriptors)
                `(oget *root* ,@(reverse subdescriptors)))
            (push (subseq descriptor start end) subdescriptors))))
+      ;; Sharp radix 
+      ((#\B #\b #\O #\o #\X #\x)
+       (sharp-radix-reader ch stream))
       (#\|
        (labels ((read-til-bar-sharpsign ()
                   (do ((ch (%read-char stream) (%read-char stream)))
