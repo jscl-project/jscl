@@ -205,4 +205,11 @@
 (test (equal t (= 16 (logand 16 31))))
 
 
+;;; clhs (logxor 1 3 7 15) => 10
+(test
+ (equal t
+        (= 10
+           (logxor (logxor (logxor 1 3) 7) 15))))
+
+
 ;;; end
