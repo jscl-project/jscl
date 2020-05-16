@@ -170,5 +170,14 @@
        (match (list T T T T T T T T T T)))
  (test (equal  pattern match)))
 
+;;; test what (expt 10 65) corrected parsed from string
+;;; Important note:
+;;;     sbcl: (expt 10 65) => 100000000000000000000000000000000000000000000000000000000000000000
+;;;     jscl: (expt 10 65) => 100000000000000000000008244226848602684002400884060400424240244468
+;;;
+(test
+ (equal t
+        (numberp (parse-integer (format nil "~d" (expt 10 65))))))
+
 
 ;;; end
