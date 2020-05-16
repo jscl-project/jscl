@@ -179,5 +179,20 @@
  (equal t
         (numberp (parse-integer (format nil "~d" (expt 10 65))))))
 
+;;; test ASH 
+;;; important note:
+;;; at clhs example (ash  -100000000000000000000000000000000 -100) => -79
+;;; but js op: -100000000000000000000000000000000 >> -100 => 0
+;;;
+(test
+ (equal '(32 16 8 0)
+        (mapcar (lambda (x y) (ash x y))
+                '(16 16 16 -100000000000000000000000000000000)
+                '(1 0 -1 -100))))
+
+(test
+ (equal t
+        (= #x3FFFC
+           (ash #xFFFF 2))))
 
 ;;; end
