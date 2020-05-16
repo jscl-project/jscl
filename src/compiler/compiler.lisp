@@ -1119,6 +1119,10 @@
         (return (<< ,x ,y))
         (return (>> ,x (- ,y))))))
 
+(define-builtin lognot (x)
+  `(selfcall
+    (return (~ ,x))))
+
 
 (defun comparison-conjuntion (vars op)
   (cond
