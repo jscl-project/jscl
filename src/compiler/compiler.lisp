@@ -1113,6 +1113,13 @@
     (return (% ,x ,y))))
 
 
+(define-builtin ash (x y)
+  `(selfcall
+    (if (>= ,y 0)
+        (return (<< ,x ,y))
+        (return (>> ,x (- ,y))))))
+
+
 (defun comparison-conjuntion (vars op)
   (cond
     ((null (cdr vars))
