@@ -170,5 +170,46 @@
        (match (list T T T T T T T T T T)))
  (test (equal  pattern match)))
 
+;;; test what (expt 10 65) corrected parsed from string
+;;; Important note:
+;;;     sbcl: (expt 10 65) => 100000000000000000000000000000000000000000000000000000000000000000
+;;;     jscl: (expt 10 65) => 100000000000000000000008244226848602684002400884060400424240244468
+;;;
+(test
+ (equal t
+        (numberp (parse-integer (format nil "~d" (expt 10 65))))))
+
+;;; test ASH 
+;;; important note:
+;;; at clhs example (ash  -100000000000000000000000000000000 -100) => -79
+;;; but js op: -100000000000000000000000000000000 >> -100 => 0
+;;;
+(test
+ (equal '(32 16 8 0)
+        (mapcar (lambda (x y) (ash x y))
+                '(16 16 16 -100000000000000000000000000000000)
+                '(1 0 -1 -100))))
+
+(test
+ (equal t
+        (= #x3FFFC
+           (ash #xFFFF 2))))
+
+;;; test LOGNOT
+(test
+ (equal '(-1 -2 0 999)
+        (mapcar (lambda (x) (lognot x))
+                (list 0 1 -1 (1+ (lognot 1000))))))
+
+;;; test LOGAND
+(test (equal t (= 16 (logand 16 31))))
+
+
+;;; clhs (logxor 1 3 7 15) => 10
+(test
+ (equal t
+        (= 10
+           (logxor (logxor (logxor 1 3) 7) 15))))
+
 
 ;;; end

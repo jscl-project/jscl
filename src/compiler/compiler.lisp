@@ -1113,6 +1113,27 @@
     (return (% ,x ,y))))
 
 
+(define-builtin ash (x y)
+  `(selfcall
+    (if (>= ,y 0)
+        (return (<< ,x ,y))
+        (return (>> ,x (- ,y))))))
+
+(define-builtin lognot (x)
+  `(selfcall
+    (return (~ ,x))))
+
+(define-builtin logand (x y)
+  `(selfcall
+    (return (& ,x ,y))))
+
+;;; not canonical
+;;; binary-op restricted implementation
+(define-builtin logxor (x y)
+  `(selfcall
+    (return (^ ,x ,y))))
+
+
 (defun comparison-conjuntion (vars op)
   (cond
     ((null (cdr vars))

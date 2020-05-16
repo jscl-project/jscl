@@ -88,7 +88,7 @@ accumulated, in the order."
 
 (defun list-to-vector (list)
   (let ((v (make-array (length list)))
-	(i 0))
+	      (i 0))
     (dolist (x list v)
       (aset v i x)
       (incf i))))
@@ -106,10 +106,10 @@ accumulated, in the order."
     (t
      (let ((digits nil))
        (while (not (zerop x))
-         (push (mod x 10) digits)
+         (push (rem x 10) digits)
          (setq x (truncate x 10)))
        (mapconcat (lambda (x) (string (digit-char x)))
-		  digits)))))
+		              digits)))))
 
 (defun float-to-string (x)
   #+jscl (float-to-string x)
