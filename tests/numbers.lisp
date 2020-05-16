@@ -201,7 +201,8 @@
         (mapcar (lambda (x) (lognot x))
                 (list 0 1 -1 (1+ (lognot 1000))))))
 
-
+;;; test LOGAND
+(test (equal t (= 16 (logand 16 31))))
 
 
 ;;; end
