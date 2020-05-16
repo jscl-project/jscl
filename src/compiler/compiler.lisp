@@ -1127,6 +1127,13 @@
   `(selfcall
     (return (& ,x ,y))))
 
+;;; not canonical
+;;; binary-op restricted implementation
+(define-builtin logxor (x y)
+  `(selfcall
+    (return (^ ,x ,y))))
+
+
 (defun comparison-conjuntion (vars op)
   (cond
     ((null (cdr vars))
