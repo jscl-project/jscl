@@ -340,7 +340,7 @@
            (binary-op +          "+"             4    left)
            (binary-op -          "-"             5    left)
            (binary-op <<         "<<"            5    left)
-           (binary-op >>         "<<"            5    left)
+           (binary-op >>         ">>"            5    left)
            (binary-op >>>        ">>>"           5    left)
            (binary-op <=         "<="            6    left)
            (binary-op <          "<"             6    left)
