@@ -195,4 +195,13 @@
         (= #x3FFFC
            (ash #xFFFF 2))))
 
+;;; test LOGNOT
+(test
+ (equal '(-1 -2 0 999)
+        (mapcar (lambda (x) (lognot x))
+                (list 0 1 -1 (1+ (lognot 1000))))))
+
+
+
+
 ;;; end
