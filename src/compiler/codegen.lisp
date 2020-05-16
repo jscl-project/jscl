@@ -323,6 +323,7 @@
            (unary-op post--      "--"            2    right :lvalue t :post t)
            (unary-op not         "!"             2    right)
            (unary-op bit-not     "~"             2    right)
+           (unary-op ~           "~"             2    right)
            ;; Note that the leading space is necessary because it
            ;; could break with post++, for example. TODO: Avoid
            ;; leading space when it's possible.
@@ -354,6 +355,8 @@
            (binary-op !==        "!=="           7    left)
            (binary-op bit-and    "&"             8    left)
            (binary-op bit-xor    "^"             9    left)
+           (binary-op &          "&"             8    left)
+           (binary-op ^          "^"             9    left)
            (binary-op bit-or     "|"            10    left)
            (binary-op and        "&&"           11    left)
            (binary-op or         "||"           12    left)
