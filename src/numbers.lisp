@@ -126,7 +126,7 @@
 (defun gcd-2 (a b)
   (if (zerop b)
       (abs a)
-    (gcd-2 b (mod a b))))
+    (gcd-2 b (rem a b))))
 
 (defun gcd (&rest integers)
   (cond ((null integers)
