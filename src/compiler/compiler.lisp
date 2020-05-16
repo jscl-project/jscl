@@ -1123,6 +1123,9 @@
   `(selfcall
     (return (~ ,x))))
 
+(define-builtin logand (x y)
+  `(selfcall
+    (return (& ,x ,y))))
 
 (defun comparison-conjuntion (vars op)
   (cond
