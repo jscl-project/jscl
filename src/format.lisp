@@ -31,7 +31,7 @@
                 (write-char arg stream))))
     (t
      (warn "~S is not implemented yet, using ~~S instead" chr)
-     (prin1-to-string arg))))
+     (prin1 arg stream))))
 
 
 (defun get-format-parameter (fmt i args)
