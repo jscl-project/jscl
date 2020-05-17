@@ -42,6 +42,10 @@
 
 (set-dispatch-macro-character #\# #\J #'j-reader)
 
+#+sbcl
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require :sb-posix))
+
 (defun get-source-data-epoch ()
   (let (sde)
     #+ccl (setq sde (ccl::getenv "SOURCE_DATE_EPOCH"))
