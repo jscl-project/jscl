@@ -73,12 +73,12 @@
     ("stream"        :target)
     ("hash-table"    :target)
     ("print"         :target)
-    ("format"        :target)
     ("misc"          :target)
     ("symbol"        :target)
     ("package"       :target)
     ("ansiloop"
      ("ansi-loop"    :both))
+    ("format"        :target)
     ("read"          :both)
     ("conditions"    :both)
     ("backquote"     :both)
