@@ -54,6 +54,9 @@
                (case (char string i)
                  (#\; 
                   (setq comments t))
+                 ;; skip character literals
+                 (#\\
+                  (incf i))
                  (#\( (unless comments (incf depth)))
                  (#\) (unless comments (decf depth)))
                  (#\"
