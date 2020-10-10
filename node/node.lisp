@@ -15,13 +15,9 @@
 
 (defvar *rl*)
 
-(defun node-init ()
-  (setq *standard-output*
-        (make-stream
-         :write-fn (lambda (string)
-                     (#j:process:stdout:write string))))
-  (setq *rl* (#j:readline:createInterface #j:process:stdin #j:process:stdout))
+(defun start-repl ()
   (welcome-message)
+  (setq *rl* (#j:readline:createInterface #j:process:stdin #j:process:stdout))
   (let ((*root* *rl*))
     (#j:setPrompt "CL-USER> ")
     (#j:prompt)
@@ -43,6 +39,19 @@
                   (format t "ERROR[!]: ~a~%" message))))
              ;; Continue
              ((oget *rl* "prompt"))))))
+
+(defun node-init ()
+  (setq *standard-output*
+        (make-stream
+         :write-fn (lambda (string)
+                     (#j:process:stdout:write string))))
+  (let ((args (mapcar #'js-to-lisp (vector-to-list (subseq #j:process:argv 2)))))
+    (cond
+      ((null args)
+       (start-repl))
+      (t
+       (dolist (file args)
+         (load file))))))
 
 
 (node-init)

@@ -238,12 +238,12 @@
      (merge-pathnames "tests.js" *base-directory*))
 
     ;; Web REPL
-    (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "repl-web")))
-                         (merge-pathnames "repl-web.js" *base-directory*))
+    (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "web")))
+                         (merge-pathnames "jscl-web.js" *base-directory*))
 
     ;; Node REPL
-    (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "repl-node")))
-                         (merge-pathnames "repl-node.js" *base-directory*)
+    (compile-application (list (source-pathname "node.lisp" :directory '(:relative "node")))
+                         (merge-pathnames "jscl-node.js" *base-directory*)
                          :shebang t)))
 
 

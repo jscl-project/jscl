@@ -5,11 +5,11 @@
   "main": "jscl.js",
   "files": [
     "jscl.js",
-    "repl-node.js",
-    "repl-web.js"
+    "jscl-node.js",
+    "jscl-web.js"
   ],
   "bin": {
-    "jscl-repl": "./repl-node.js"
+    "jscl": "./jscl-node-wrapper.js"
   },
   "directories": {
     "test": "tests"

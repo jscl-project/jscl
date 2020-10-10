@@ -49,6 +49,13 @@
 (defun make-new (constructor &rest args)
   (apply (%js-internal "newInstance") constructor args))
 
+
+(defun lisp-to-js (x)
+  (lisp-to-js x))
+
+(defun js-to-lisp (x)
+  (js-to-lisp x))
+
 (%js-vset "eval_in_lisp"
           (lambda (form)
             (eval (read-from-string form))))
