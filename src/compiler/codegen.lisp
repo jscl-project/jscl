@@ -374,8 +374,8 @@
            (binary-op >>=        ">>="          13    right :lvalue t)
            (binary-op >>>=       ">>>="         13    right :lvalue t)
 
-           (binary-op comma      ","            13    right)
-           (binary-op progn      ","            13    right)
+           (binary-op comma      ","            14    right)
+           (binary-op progn      ","            14    right)
 
            (when (member op '(? if))
              (when (low-precedence-p 12) (js-format "("))
