@@ -304,3 +304,12 @@
        (lst2 (list 2 3 '(2 3) "B" "C")))
      (equal (union lst1 lst2) 
             '("b" "a" (1 2) 1 2 3 (2 3) "B" "C"))))
+
+
+;; See https://github.com/jscl-project/jscl/issues/369
+(test
+ (equal
+  (let ((x (cons 'a 'b))
+        b)
+    (rplacd x (progn (setq b 0) 'c)))
+  '(a . c )))
