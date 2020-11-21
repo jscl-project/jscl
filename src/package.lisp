@@ -60,7 +60,7 @@
    (resolve-package-list use)))
 
 (defun packagep (x)
-  (and (objectp x) (in "symbols" x)))
+  (and (objectp x) (not (js-null-p x)) (in "symbols" x)))
 
 (defun package-name (package-designator)
   (let ((package (find-package-or-fail package-designator)))

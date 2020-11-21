@@ -56,7 +56,7 @@ internals.mv = function(){
 };
 
 internals.forcemv = function(x) {
-  return typeof x == 'object' && 'multiple-value' in x? x: internals.mv(x);
+  return typeof x == 'object' && x !== null && 'multiple-value' in x? x: internals.mv(x);
 };
 
 
@@ -217,7 +217,7 @@ internals.xstring = function(x){
 
 
 internals.lisp_to_js = function (x) {
-  if (typeof x == 'object' && 'length' in x && x.stringp == 1)
+  if (typeof x == 'object' && x !== null && 'length' in x && x.stringp == 1)
     return internals.xstring(x);
   else if (x === t)
     return true;

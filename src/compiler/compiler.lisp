@@ -1010,6 +1010,7 @@
             (dolist (form forms)
               (collect `(= vs ,(convert form t)))
               (collect `(if (and (=== (typeof vs) "object")
+                                 vs
                                  (in "multiple-value" vs))
                             (= args (method-call args "concat" vs))
                             (method-call args "push" vs))))))
@@ -1256,7 +1257,8 @@
   `(selfcall
     (var (x ,x))
     (return ,(convert-to-bool
-              `(and (and (===(typeof x) "object")
+              `(and (and (=== (typeof x) "object")
+                         (!== x null)
                          (in "length" x))
                     (== (get x "stringp") 1))))))
 
@@ -1318,6 +1320,7 @@
     (var (x ,x))
     (return ,(convert-to-bool
               `(and (=== (typeof x) "object")
+                    (!== x null)
                     (in "length" x))))))
 
 (define-builtin make-storage-vector (n)
