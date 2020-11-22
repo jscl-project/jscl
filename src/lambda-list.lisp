@@ -206,9 +206,14 @@
 (defun validate-reqvars (list n)
   (unless (listp list)
     (error "`~S' is not a list." list))
-  (unless (<= n (length list))
-    (error "Invalid number of elements in `~S'" list))
-  list)
+  (if (zerop n)
+      list
+      ;; Note that we don't mind if the list is an improper list.
+      (let ((tail (nthcdr (1- n) list)))
+        (unless (consp tail)
+          (error "Too few list elements in `~S'. Expected at least ~a elements." list n))
+        list)))
+
 
 (defun validate-max-args (list)
   (unless (null list)
