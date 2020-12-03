@@ -77,7 +77,8 @@ internals.newInstance = function(values, ct){
   return new newCt();
 };
 
-// Workaround the problem with send NULL for async XHR 
+// Workaround the problem with send NULL for async XHR
+// BUG: future todo
 var reqXHRsendNull = function(req){
   req.send(null);
 };
