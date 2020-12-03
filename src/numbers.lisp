@@ -198,4 +198,11 @@
       ((endp integers)  result)
    0))
 
+;;; logand
+(defun logand (integer &rest others)
+  (do ((integers others (cdr integers))
+       (result integer (%Logand result (car integers))))
+      ((endp integers)  result)
+   -1))
+
 ;;; EOF
