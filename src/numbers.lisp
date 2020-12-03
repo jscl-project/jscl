@@ -253,4 +253,17 @@
       (not (zerop (%logand integer (ash 1 index))))
       (minusp integer)))
 
+;;; LOGCOUNT
+;;; Count the number of 1 bits if INTEGER is non-negative,
+;;; and the number of 0 bits if INTEGER is negative
+(defun %logcount (integer)
+  (let ((length (integer-length integer))
+        (result 0))
+    (dotimes (bit length)
+      (if (logbitp bit integer) (incf result)))
+    result))
+
+(defun logcount (integer)
+  (%logcount (if (minusp integer) (%lognot integer) integer)))
+
 ;;; EOF
