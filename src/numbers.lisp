@@ -348,5 +348,14 @@
 (defun mask-field (byte integer)
   (%logand integer (ash (1- (ash 1 (car byte))) (cdr byte))))
 
+;;; LDB
+;;; extract the specified byte from integer
+;;; result right justify
+(defun %ldb (size pos integer)
+  (%logand (ash integer (- pos))
+          (1- (ash 1 size))))
+
+(defun ldb (byte integer)
+  (%ldb (car byte) (cdr byte) integer))
 
 ;;; EOF
