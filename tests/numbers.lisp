@@ -185,10 +185,16 @@
 ;;; but js op: -100000000000000000000000000000000 >> -100 => 0
 ;;;
 (test
- (equal '(32 16 8 0)
-        (mapcar (lambda (x y) (ash x y))
-                '(16 16 16 -100000000000000000000000000000000)
-                '(1 0 -1 -100))))
+ (let ((pattern '(32 16 8 0))
+       (result  (mapcar (lambda (x y) (ash x y))
+                        '(16 16 16 -100000000000000000000000000000000)
+                        '(1 0 -1 -100))))
+   (equal pattern result)))
+
+;;;(equal '(32 16 8 0)
+;;;        (mapcar (lambda (x y) (ash x y))
+;;;                '(16 16 16 -100000000000000000000000000000000)
+;;;                '(1 0 -1 -100))))
 
 (test
  (equal t
@@ -211,5 +217,112 @@
         (= 10
            (logxor (logxor (logxor 1 3) 7) 15))))
 
+(test
+ (eq 10 (logxor 1 3 7 15)))
+
+(test
+(let ((result))
+   (dolist (symbol '(boole-1     boole-2    boole-and  boole-andc1
+                     boole-andc2 boole-c1   boole-c2   boole-clr
+                     boole-eqv   boole-ior  boole-nand boole-nor
+                     boole-orc1  boole-orc2 boole-set  boole-xor))
+     (push (boole (symbol-value symbol) #b0011 #b0101) result))
+     (equal '(3 5 1 4 2 -4 -6 0 -7 7 -2 -8 -3 -5 -1 6)
+            (reverse result)))
+)
+
+(defconstant boole-n-vector
+  (vector boole-clr   boole-and  boole-andc1 boole-2
+          boole-andc2 boole-1    boole-xor   boole-ior
+          boole-nor   boole-eqv  boole-c1    boole-orc1
+          boole-c2    boole-orc2 boole-nand  boole-set))
+
+(defun boole-n (n integer &rest more-integers)
+  (apply #'boole (elt boole-n-vector n) integer more-integers))
+
+(test
+ (let ((pattern '(0 1 2 3 4 5 6 7 -8 -7 -6 -5 -4 -3 -2 -1))
+       (result (loop for n from #b0000 to #b1111 collect (boole-n n 5 3))))
+   (equal pattern result)))
+
+;;; 
+(test (let ((n1 1) (n2 2)) (eq (lognand n1 n2) (lognot (logand n1 n2)))))
+(test (let ((n1 1) (n2 2)) (eq (lognor n1 n2) (lognot (logior n1 n2)))))
+(test (let ((n1 1) (n2 2)) (eq (logandc1 n1 n2) (logand (lognot n1)  n2))))
+(test (let ((n1 1) (n2 2)) (eq (logandc2 n1 n2) (logand n1 (lognot n2)))))
+(test (let ((n1 1) (n2 2)) (eq (logiorc1 n1 n2) (logior (lognot n1) n2))))
+(test (let ((n1 1) (n2 2)) (eq (logiorc2 n1 n2) (logior n1 (lognot n2)))))
+(test (let ((j 1) (x 2))   (eq (logbitp j (lognot x)) (not (logbitp j x)))))
+
+(test
+ (let ((pattern '(nil t t t t nil))
+       (result (list (logbitp 1 1) (logbitp 0 1) (logbitp 3 10)
+                     (logbitp 1000000 -1) (logbitp 2 6) (logbitp 0 6))))
+   (equal pattern result)))
+
+(test
+ (let ((k 2) (n 6))
+  (eql (logbitp k n) (ldb-test (byte 1 k) n))))
+
+;;; LOGCOUNT
+(test
+ (let* ((x 123)
+        (r (logcount x)))
+   (eql (eql r (logcount (- (+ x 1))))
+        (eql r (logcount (lognot x))))))
+
+(defun identity-logcount (n)
+  (let* ((x n)
+         (r (logcount x)))
+    (eql (eql r (logcount (- (+ x 1))))
+         (eql r (logcount (lognot x))))))
+
+(test
+ (equal '(t)
+        (remove-duplicates
+         (jscl::with-collect
+           (dotimes (i 100)
+             (jscl::collect (identity-logcount (random 100))))))))
+
+;;; BYTE
+(test
+ (let ((j 1) (k 2))
+   (and
+    (eq (byte-size (byte j k)) j)
+    (eq (byte-position (byte j k)) k))))
+
+;;; LOGTEST
+(test
+  (let ((pattern '(t nil t nil))
+      (result (list  (logtest 1 7) (logtest 1 2)
+                     (logtest -2 -1) (logtest 0 -1))))
+  (equal pattern result)))
+
+;;; test identity
+(test
+ (let ((x 1) (y 7))
+  (eq (logtest x y) (not (zerop (logand x y))))))
+
+;;; DEPOSIT-FIELD
+(test
+ (let ((pattern '(6 15 -7))
+       (result
+         (list
+          (deposit-field 7 (byte 2 1) 0)
+          (deposit-field -1 (byte 4 0) 0)
+          (deposit-field 0 (byte 2 1) -3))))
+   (equal pattern result)))
+
+;;; DPB
+(test
+ (let ((pattern '(1024 2048 1024))
+       (result
+         (list (dpb 1 (byte 1 10) 0)
+               (dpb -2 (byte 2 10) 0)
+               (dpb 1 (byte 2 10) 2048))))
+   (equal pattern result)))
+
+;;; LDB
+(test (eq 1 (ldb (byte 2 1) 10) ))
 
 ;;; end
