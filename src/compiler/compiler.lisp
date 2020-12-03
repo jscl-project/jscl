@@ -1114,25 +1114,44 @@
     (return (% ,x ,y))))
 
 
+#+nil
 (define-builtin ash (x y)
   `(selfcall
     (if (>= ,y 0)
         (return (<< ,x ,y))
         (return (>> ,x (- ,y))))))
 
+(define-builtin %ash-left (x y)
+  `(call-internal |Bitwise_ash_L| ,x ,y))
+
+(define-builtin %ash-right (x y)
+  `(call-internal |Bitwise_ash_R| ,x ,y))
+
+#+nil
 (define-builtin lognot (x)
   `(selfcall
     (return (~ ,x))))
 
+(define-builtin %lognot (x)
+  `(call-internal |Bitwise_not| ,x ))
+
+#+nil
 (define-builtin logand (x y)
   `(selfcall
     (return (& ,x ,y))))
 
+(define-builtin %logand (x y)
+  `(call-internal |Bitwise_and| ,x ,y))
+
 ;;; not canonical
 ;;; binary-op restricted implementation
+#+nil
 (define-builtin logxor (x y)
   `(selfcall
     (return (^ ,x ,y))))
+
+(define-builtin %logxor (x y)
+  `(call-internal |Bitwise_xor| ,x ,y))
 
 
 (defun comparison-conjuntion (vars op)
