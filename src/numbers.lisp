@@ -266,4 +266,21 @@
 (defun logcount (integer)
   (%logcount (if (minusp integer) (%lognot integer) integer)))
 
+(defconstant boole-1     0)    ;; integer-1                                   
+(defconstant boole-2     1)    ;; integer-2                                   
+(defconstant boole-andc1 2)    ;; and complement of integer-1 with integer-2  
+(defconstant boole-andc2 3)    ;; and integer-1 with complement of integer-2  
+(defconstant boole-and   4)    ;; and                                         
+(defconstant boole-c1    5)    ;; complement of integer-1                     
+(defconstant boole-c2    6)    ;; complement of integer-2                     
+(defconstant boole-clr   7)    ;; always 0 (all zero bits)                    
+(defconstant boole-eqv   8)    ;; equivalence (exclusive nor)                 
+(defconstant boole-ior   9)    ;; inclusive or                                
+(defconstant boole-nand  10)   ;; not-and                                     
+(defconstant boole-nor   11)   ;; not-or                                      
+(defconstant boole-orc1  12)   ;; or complement of integer-1 with integer-2   
+(defconstant boole-orc2  13)   ;; or integer-1 with complement of integer-2   
+(defconstant boole-set   14)   ;; always -1 (all one bits)                    
+(defconstant boole-xor   15)   ;; exclusive or                                
+
 ;;; EOF
