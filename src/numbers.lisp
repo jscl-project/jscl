@@ -363,4 +363,15 @@
 (defun ldb-test (byte number)
   (not (zerop (ldb byte number))))
 
+;;; DPB
+;;; return new integer with newbyte in specified position
+;;; newbyte is right justify
+(defun %dpb (newbyte size posn integer)
+  (let ((mask (1- (ash 1 size))))
+    (%logior (%logand integer (%lognot (ash mask posn)))
+            (ash (%logand newbyte mask) posn))))
+
+(defun dpb (newbyte byte integer)
+  (%dpb newbyte (car byte) (cdr byte) integer))
+
 ;;; EOF
