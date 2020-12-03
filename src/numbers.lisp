@@ -338,5 +338,15 @@
 (defun clz32 (number)
   (#j:Math:clz32 number))
 
+;;; MASK-FIELD
+;;; extract the specified byte from integer
+;;; result not right justify
+(defun %mask-field (size posn integer)
+  (%logand integer (ash (1- (ash 1 size)) posn)))
+
+;;; todo: (setf)
+(defun mask-field (byte integer)
+  (%logand integer (ash (1- (ash 1 (car byte))) (cdr byte))))
+
 
 ;;; EOF
