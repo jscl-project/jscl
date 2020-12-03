@@ -374,4 +374,15 @@
 (defun dpb (newbyte byte integer)
   (%dpb newbyte (car byte) (cdr byte) integer))
 
+;;; DEPOSIT-FIELD
+;;; return new integer with newbyte in specified position
+;;; newbyte isnt right justify
+(defun %deposit-field (newbyte size posn integer)
+  (let ((mask (ash (%ldb size 0 -1) posn)))
+    (%logior (%logand newbyte mask)
+            (%logand integer (%lognot mask)))))
+
+(defun deposit-field (newbyte byte integer)
+  (%deposit-field newbyte (car byte) (cdr byte) integer))
+
 ;;; EOF
