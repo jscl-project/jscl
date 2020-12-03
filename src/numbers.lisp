@@ -317,4 +317,19 @@
   (let ((rn (#j:Math:random n)))
     (#j:Math:floor (* rn n))))
 
+;;; BYTE
+;;; return  byte specifier
+(defun byte (size position)
+  (cons size position))
+
+;;; BYTE-SIZE
+;;; return the size part of the byte specifier
+(defun byte-size (spec)
+  (car spec))
+
+;;; BYTE-POSITION
+;;; return thhe position part of the byte specifier
+(defun byte-position (spec)
+  (cdr spec))
+
 ;;; EOF
