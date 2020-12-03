@@ -247,4 +247,10 @@
 (defun logtest (integer1 integer2)
   (not (zerop (%logand integer1 integer2))))
 
+;;; logbitp
+(defun logbitp (index integer)
+  (if (< index most-positive-fixnum)
+      (not (zerop (%logand integer (ash 1 index))))
+      (minusp integer)))
+
 ;;; EOF
