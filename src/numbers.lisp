@@ -78,6 +78,7 @@
 (defun truncate (number &optional (divisor 1))
   (let ((res (%truncate (/ number divisor))))
     (values res (- number (* res divisor)))))
+;;; @vkm 30.11 end
 
 (defun integerp (x)
   (and (numberp x) (= (floor x) x)))
@@ -384,5 +385,7 @@
 
 (defun deposit-field (newbyte byte integer)
   (%deposit-field newbyte (car byte) (cdr byte) integer))
+
+;;; @vkm 30.11 end
 
 ;;; EOF
