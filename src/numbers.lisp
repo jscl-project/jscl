@@ -205,4 +205,14 @@
       ((endp integers)  result)
    -1))
 
+;;; logeqv
+(defun %logeqv (x y) (%lognot (%logxor x y)))
+
+(defun logeqv (&rest others)
+  (if (null others) (return-from logeqv -1)
+      (let ((integer (car others)))
+        (do ((integers (cdr others) (cdr integers))
+             (result integer (%logeqv result (car integers))))
+            ((endp integers)  result)))))
+
 ;;; EOF
