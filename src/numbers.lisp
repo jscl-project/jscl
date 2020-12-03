@@ -291,4 +291,27 @@
 (defun logiorc1  (x y)  (%logior  (%lognot x) y))
 (defun logiorc2  (x y)  (%logior x (%lognot y)))
 
+;;; BOOLE
+(defun boole (op i1 i2)
+    (cond
+      ((eq op boole-clr)      0)
+      ((eq op boole-set)     -1)
+      ((eq op boole-1)              i1)
+      ((eq op boole-2)          i2)
+      ((eq op boole-c1)    (%lognot i1))
+      ((eq op boole-c2)    (%lognot i2))
+      ((eq op boole-and)   (%logand i1 i2))
+      ((eq op boole-ior)   (%logior i1 i2))
+      ((eq op boole-xor)   (%logxor i1 i2))
+      ((eq op boole-eqv)   (%logeqv i1 i2))
+      ((eq op boole-nand)  (%lognot (%logand i1 i2)))
+      ((eq op boole-nor)   (%lognot (%logior i1 i2)))
+      ((eq op boole-andc1) (%logand (%lognot i1) i2))
+      ((eq op boole-andc2) (%logand i1 (%lognot i2)))
+      ((eq op boole-orc1)  (%logior (%lognot i1) i2))
+      ((eq op boole-orc2)  (%logior i1 (%lognot i2)))
+      (t (error "~S is an illegal control code to BOOLE." op))))
+
+
+
 ;;; EOF
