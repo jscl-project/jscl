@@ -223,5 +223,23 @@
       ((endp integers)  result)
    0))
 
+;;; integer-length
+;;; ONLY 32 bits
+(defun integer-length (integer)
+  (let ((negative (minusp integer)))
+    (if negative
+      (setq integer (- integer)))
+    (if (> integer most-integer-length)
+        (error "integer-length: bad numeric limit ~" integer)) 
+    (do ((len 0 (1+ len))
+         (original integer))
+        ((zerop integer)
+         ;; Negative powers of two require one less bit.
+         (if (and negative
+                  ;; Test if original is power-of-two.
+                  (zerop (%logand original (1- original))))
+             (1- len)
+             len))
+      (setq integer (ash integer -1)))))
 
 ;;; EOF
