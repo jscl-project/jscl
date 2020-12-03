@@ -157,6 +157,8 @@
 	(t
 	 (apply #'lcm (lcm (first integers) (second integers)) (nthcdr 2 integers)))))
 
+;;; @VKM path 30.11
+
 ;;; round number/division to nearest integer
 ;;; second value is remainder
 (defun round (number &optional (divisor 1))
@@ -177,7 +179,6 @@
                      (values (- integer 1) (+ remainder divisor))))
                 (t (values integer remainder)))))))
 
-;;; @VKM path 30.11
 (defconstant most-integer-length (expt 2 30))
 
 ;;; ash
@@ -214,5 +215,13 @@
         (do ((integers (cdr others) (cdr integers))
              (result integer (%logeqv result (car integers))))
             ((endp integers)  result)))))
+
+;;; logior
+(defun logior (integer &rest others)
+  (do ((integers others (cdr integers))
+       (result integer (%logior result (car integers))))
+      ((endp integers)  result)
+   0))
+
 
 ;;; EOF
