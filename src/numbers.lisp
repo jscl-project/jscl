@@ -332,4 +332,11 @@
 (defun byte-position (spec)
   (cdr spec))
 
+;;; CLZ32
+;;; count leading zero
+;;; ONLY 32 bits
+(defun clz32 (number)
+  (#j:Math:clz32 number))
+
+
 ;;; EOF
