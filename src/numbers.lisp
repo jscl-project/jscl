@@ -242,4 +242,9 @@
              len))
       (setq integer (ash integer -1)))))
 
+;;; logtest
+;;; Return T if logand of integer1 and integer2 is not zero
+(defun logtest (integer1 integer2)
+  (not (zerop (%logand integer1 integer2))))
+
 ;;; EOF
