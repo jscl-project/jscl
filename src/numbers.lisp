@@ -358,4 +358,9 @@
 (defun ldb (byte integer)
   (%ldb (car byte) (cdr byte) integer))
 
+;;; LDB-TEST
+;;; todo: (setf)
+(defun ldb-test (byte number)
+  (not (zerop (ldb byte number))))
+
 ;;; EOF
