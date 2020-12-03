@@ -283,4 +283,12 @@
 (defconstant boole-set   14)   ;; always -1 (all one bits)                    
 (defconstant boole-xor   15)   ;; exclusive or                                
 
+;;; fns definition: lognand, lognor, logandc*, logorc*
+(defun lognand  (x y)  (%lognot (%logand x y)))
+(defun lognor   (x y)  (%lognot (%logior x y)))
+(defun logandc1 (x y)  (%logand (%lognot x) y))
+(defun logandc2 (x y)  (%logand x (%lognot y)))
+(defun logiorc1  (x y)  (%logior  (%lognot x) y))
+(defun logiorc2  (x y)  (%logior x (%lognot y)))
+
 ;;; EOF
