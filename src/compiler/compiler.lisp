@@ -1162,6 +1162,10 @@
 (define-builtin numberp (x)
   (convert-to-bool `(== (typeof ,x) "number")))
 
+;;; @VKM PATH 30.11
+(define-builtin %truncate (x)
+`(method-call |Math| "trunc" ,x))
+
 (define-builtin %floor (x)
   `(method-call |Math| "floor" ,x))
 
