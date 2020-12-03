@@ -312,6 +312,9 @@
       ((eq op boole-orc2)  (%logior i1 (%lognot i2)))
       (t (error "~S is an illegal control code to BOOLE." op))))
 
-
+;;; RANDOM
+(defun random (n)
+  (let ((rn (#j:Math:random n)))
+    (#j:Math:floor (* rn n))))
 
 ;;; EOF
