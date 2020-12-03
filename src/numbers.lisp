@@ -69,11 +69,15 @@
 (defun ceiling (x &optional (y 1))
   (%ceiling (/ x y)))
 
-(defun truncate (x &optional (y 1))
-  (let ((z (/ x y)))
-    (if (> z 0)
-        (%floor z)
-        (%ceiling z))))
+;;; @vkm 30.11
+;;; test case
+;;; (floor number divisor) second value is (mod number divisor)
+;;; celing second value is remainder
+;;; (rem number divisor) return second result of truncate
+;;; (mod number divisor) return second result of floor
+(defun truncate (number &optional (divisor 1))
+  (let ((res (%truncate (/ number divisor))))
+    (values res (- number (* res divisor)))))
 
 (defun integerp (x)
   (and (numberp x) (= (floor x) x)))
@@ -152,3 +156,37 @@
 	 (lcm-2 (first integers) (second integers)))
 	(t
 	 (apply #'lcm (lcm (first integers) (second integers)) (nthcdr 2 integers)))))
+
+;;; round number/division to nearest integer
+;;; second value is remainder
+(defun round (number &optional (divisor 1))
+  (multiple-value-bind (integer remainder) (truncate number divisor)
+    (if (zerop remainder)
+        (values integer remainder)
+        (let ((thresh (/ (abs divisor) 2)))
+          (cond ((or (> remainder thresh)
+                     (and (= remainder thresh) (oddp integer)))
+                 (if (minusp divisor)
+                     (values (- integer 1) (+ remainder divisor))
+                     (values (+ integer 1) (- remainder divisor))))
+                ((let ((negative (- thresh)))
+                   (or (< remainder negative)
+                       (and (= remainder negative) (oddp integer))))
+                 (if (minusp divisor)
+                     (values (+ integer 1) (- remainder divisor))
+                     (values (- integer 1) (+ remainder divisor))))
+                (t (values integer remainder)))))))
+
+;;; @VKM path 30.11
+(defconstant most-integer-length (expt 2 30))
+
+;;; ash
+(defun ash (x y)
+  (let* ((minus-p (minusp y))
+        (y (if minus-p (- y) y)))
+    (if minus-p
+        (%ash-right x y)
+        (%ash-left x  y))))
+
+
+;;; EOF
