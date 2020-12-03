@@ -188,5 +188,7 @@
         (%ash-right x y)
         (%ash-left x  y))))
 
+;;; lognot
+(defun lognot (x) (%lognot x))
 
 ;;; EOF
