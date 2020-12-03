@@ -191,4 +191,11 @@
 ;;; lognot
 (defun lognot (x) (%lognot x))
 
+;;; logxor
+(defun logxor (integer &rest others)
+  (do ((integers others (cdr integers))
+       (result integer (%logxor result (car integers))))
+      ((endp integers)  result)
+   0))
+
 ;;; EOF
