@@ -1153,6 +1153,10 @@
 (define-builtin %logxor (x y)
   `(call-internal |Bitwise_xor| ,x ,y))
 
+;;; logior
+(define-builtin %logior (x y)
+  `(call-internal |Bitwise_ior| ,x ,y))
+
 
 (defun comparison-conjuntion (vars op)
   (cond
