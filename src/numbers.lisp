@@ -228,9 +228,8 @@
             ((endp integers)  result)))))
 
 ;;; integer-length
-;;; ONLY 32 bits
-;;; note: its very simple and incorrect function compiled from
-;;; originaled sbcl.
+;;; note: ONLY 32 bits
+;;; note: its very simple and incorrect function
 ;;; todo: We need version with corrected doing fixnum & bignum numbers
 (defun integer-length (integer)
   (let ((negative (minusp integer)))
@@ -238,7 +237,7 @@
       (setq integer (- integer)))
     (if (> integer most-integer-length)
         ;; prevent infinity loop with (integer-length (expt 2 31))
-        (error "integer-length: bad numeric limit ~" integer)) 
+        (error "integer-length: bad numeric limit ~a" integer)) 
     (do ((len 0 (1+ len))
          (original integer))
         ((zerop integer)
@@ -262,6 +261,9 @@
       (minusp integer)))
 
 ;;; LOGCOUNT
+;;; note: ONLY 32 bits
+;;; note: its very simple and incorrect function
+;;; todo: We need version with corrected doing fixnum & bignum numbers
 ;;; Count the number of 1 bits if INTEGER is non-negative,
 ;;; and the number of 0 bits if INTEGER is negative
 (defun %logcount (integer)
