@@ -195,17 +195,19 @@
 
 ;;; logxor
 (defun logxor (integer &rest others)
-  (do ((integers others (cdr integers))
-       (result integer (%logxor result (car integers))))
-      ((endp integers)  result)
-   0))
+  (if (null others) (return-from logxor 0)
+      (let ((integer (car others)))
+        (do ((integers others (cdr integers))
+             (result integer (%logxor result (car integers))))
+            ((endp integers)  result)))))
 
 ;;; logand
-(defun logand (integer &rest others)
-  (do ((integers others (cdr integers))
-       (result integer (%Logand result (car integers))))
-      ((endp integers)  result)
-   -1))
+(defun logand (&rest others)
+  (if (null others) (return-from logand -1)
+      (let ((integer (car others)))
+        (do ((integers others (cdr integers))
+             (result integer (%Logand result (car integers))))
+            ((endp integers)  result)))))
 
 ;;; logeqv
 (defun %logeqv (x y) (%lognot (%logxor x y)))
@@ -218,19 +220,24 @@
             ((endp integers)  result)))))
 
 ;;; logior
-(defun logior (integer &rest others)
-  (do ((integers others (cdr integers))
-       (result integer (%logior result (car integers))))
-      ((endp integers)  result)
-   0))
+(defun logior (&rest others)
+  (if (null others) (return-from logior 0)
+      (let ((integer (car others)))
+        (do ((integers others (cdr integers))
+             (result integer (%logior result (car integers))))
+            ((endp integers)  result)))))
 
 ;;; integer-length
 ;;; ONLY 32 bits
+;;; note: its very simple and incorrect function compiled from
+;;; originaled sbcl.
+;;; todo: We need version with corrected doing fixnum & bignum numbers
 (defun integer-length (integer)
   (let ((negative (minusp integer)))
     (if negative
       (setq integer (- integer)))
     (if (> integer most-integer-length)
+        ;; prevent infinity loop with (integer-length (expt 2 31))
         (error "integer-length: bad numeric limit ~" integer)) 
     (do ((len 0 (1+ len))
          (original integer))
