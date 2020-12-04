@@ -170,6 +170,12 @@
        (match (list T T T T T T T T T T)))
  (test (equal  pattern match)))
 
+;;; test correctness coerce float - integer
+(test
+ (multiple-value-bind (integer rest) (truncate 123.123)
+   (and (integerp integer) (eq integer 123))))
+
+
 ;;; test what (expt 10 65) corrected parsed from string
 ;;; Important note:
 ;;;     sbcl: (expt 10 65) => 100000000000000000000000000000000000000000000000000000000000000000
@@ -275,6 +281,42 @@
  (let ((k 2) (n 6))
   (eql (logbitp k n) (ldb-test (byte 1 k) n))))
 
+(test
+ (let ((option-name #(:include :initial-offset :type :conc-name :copier :predicate))
+       (f1 (list :initial-offset :copier))
+       (f2 (list :include :type :predicate))
+       (f3 (list :include :initial-offset :type :conc-name :copier :predicate))
+       (s1 0) (s2 0) (s3 0) (r)
+       (pattern '(t nil t nil t t)))
+   (flet ((%p (seq seen)
+            (let ((bit 0))
+              (dolist (it seq)
+                (setq bit (position it option-name))
+                (setq seen (logior seen (ash 1 bit))))
+              seen))
+          (%l (seen keyword)
+            (logbitp (position keyword option-name) seen)))
+     (setq s1 (%p f1 s1) ;; must be #b10010 or 18
+           s2 (%p f2 s2) ;; must be #b100101 or 37
+           s3 (%p f3 s3)) ;; must be #b111111 or 63
+     (setq r (list (%l s1 :copier) (%l s1 :type)
+                   (%l s2 :type) (%l s2 :conc-name)
+                   (%l s3 :include) (%l s3 :predicate)))
+     (equal pattern r))))
+
+;;; CLZ32
+(test
+ (let ((nums (list 0 1 10 100 200 (expt 2 10) (expt 2 20) (expt 2 30)))
+       (r (list))
+       ;; pattern ::= (number (leading-zero-bits . integer-length))
+       (pattern '((0 (32 . 0)) (1 (31 . 1)) (10 (28 . 4)) (100 (25 . 7))
+                  (200 (24 . 8)) (1024 (21 . 11)) (1048576 (11 . 21))
+                  (1073741824 (1 . 31)))))
+   (equal pattern
+          (dolist (it nums (return (reverse r)))
+            (push (list it (cons (jscl::clz32 it) (integer-length it))) r)))))
+
+    
 ;;; LOGCOUNT
 (test
  (let* ((x 123)
