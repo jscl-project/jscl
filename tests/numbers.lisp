@@ -221,15 +221,26 @@
  (eq 10 (logxor 1 3 7 15)))
 
 (test
-(let ((result))
+ (let ((pattern '(list -1 -1 0  0 -1 -2 0 999)))
+   (equal pattern
+          (list (logand) ;; must be -1
+                (logeqv) ;; must be -1
+                (logior) ;; must be 0
+                (logxor) ;; must be 0
+                (lognot 0)
+                (lognot 1)
+                (lognot -1)
+                (lognot (1+ (lognot 1000)))))))
+
+(test
+ (let ((result))
    (dolist (symbol '(boole-1     boole-2    boole-and  boole-andc1
                      boole-andc2 boole-c1   boole-c2   boole-clr
                      boole-eqv   boole-ior  boole-nand boole-nor
                      boole-orc1  boole-orc2 boole-set  boole-xor))
      (push (boole (symbol-value symbol) #b0011 #b0101) result))
-     (equal '(3 5 1 4 2 -4 -6 0 -7 7 -2 -8 -3 -5 -1 6)
-            (reverse result)))
-)
+   (equal '(3 5 1 4 2 -4 -6 0 -7 7 -2 -8 -3 -5 -1 6)
+          (reverse result))))
 
 (defconstant boole-n-vector
   (vector boole-clr   boole-and  boole-andc1 boole-2
