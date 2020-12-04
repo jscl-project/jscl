@@ -194,7 +194,7 @@
 (defun lognot (x) (%lognot x))
 
 ;;; logxor
-(defun logxor (integer &rest others)
+(defun logxor (&rest others)
   (if (null others) (return-from logxor 0)
       (let ((integer (car others)))
         (do ((integers others (cdr integers))
