@@ -227,7 +227,7 @@
  (eq 10 (logxor 1 3 7 15)))
 
 (test
- (let ((pattern '(list -1 -1 0  0 -1 -2 0 999)))
+ (let ((pattern '(-1 -1 0 0 -1 -2 0 999)))
    (equal pattern
           (list (logand) ;; must be -1
                 (logeqv) ;; must be -1
