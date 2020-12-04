@@ -196,9 +196,9 @@
 ;;; logxor
 (defun logxor (&rest others)
   (if (null others) (return-from logxor 0)
-      (let ((integer (car others)))
+      (let ((result (car others)))
         (do ((integers others (cdr integers))
-             (result integer (%logxor result (car integers))))
+             (result 0 (%logxor result (car integers))))
             ((endp integers)  result)))))
 
 ;;; logand
