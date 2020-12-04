@@ -77,10 +77,24 @@ internals.newInstance = function(values, ct){
   return new newCt();
 };
 
-// Workaround the problem with send NULL for async XHR 
+// Workaround the problem with send NULL for async XHR
+// BUG: future todo
 var reqXHRsendNull = function(req){
   req.send(null);
 };
+
+// Workaround the problem with operator precedence
+// ash
+internals.Bitwise_ash_R = function (x, y) { return x >> y;};
+internals.Bitwise_ash_L = function (x, y) { return x << y;};
+// lognot
+internals.Bitwise_not = function (x) {return ~x;};
+// logior
+internals.Bitwise_ior = function (x, y) {return x | y;};
+// logxor
+internals.Bitwise_xor = function (x, y) {return x ^ y;};
+// logand
+internals.Bitwise_and = function (x, y) { return x & y;};
 
 
 // NOTE: Define VALUES to be MV for toplevel forms. It is because

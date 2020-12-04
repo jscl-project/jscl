@@ -69,11 +69,16 @@
 (defun ceiling (x &optional (y 1))
   (%ceiling (/ x y)))
 
-(defun truncate (x &optional (y 1))
-  (let ((z (/ x y)))
-    (if (> z 0)
-        (%floor z)
-        (%ceiling z))))
+;;; @vkm 30.11
+;;; test case
+;;; (floor number divisor) second value is (mod number divisor)
+;;; celing second value is remainder
+;;; (rem number divisor) return second result of truncate
+;;; (mod number divisor) return second result of floor
+(defun truncate (number &optional (divisor 1))
+  (let ((res (%truncate (/ number divisor))))
+    (values res (- number (* res divisor)))))
+;;; @vkm 30.11 end
 
 (defun integerp (x)
   (and (numberp x) (= (floor x) x)))
@@ -152,3 +157,244 @@
 	 (lcm-2 (first integers) (second integers)))
 	(t
 	 (apply #'lcm (lcm (first integers) (second integers)) (nthcdr 2 integers)))))
+
+;;; @VKM path 30.11
+
+;;; round number/division to nearest integer
+;;; second value is remainder
+(defun round (number &optional (divisor 1))
+  (multiple-value-bind (integer remainder) (truncate number divisor)
+    (if (zerop remainder)
+        (values integer remainder)
+        (let ((thresh (/ (abs divisor) 2)))
+          (cond ((or (> remainder thresh)
+                     (and (= remainder thresh) (oddp integer)))
+                 (if (minusp divisor)
+                     (values (- integer 1) (+ remainder divisor))
+                     (values (+ integer 1) (- remainder divisor))))
+                ((let ((negative (- thresh)))
+                   (or (< remainder negative)
+                       (and (= remainder negative) (oddp integer))))
+                 (if (minusp divisor)
+                     (values (+ integer 1) (- remainder divisor))
+                     (values (- integer 1) (+ remainder divisor))))
+                (t (values integer remainder)))))))
+
+(defconstant most-integer-length (expt 2 30))
+
+;;; ash
+(defun ash (x y)
+  (let* ((minus-p (minusp y))
+        (y (if minus-p (- y) y)))
+    (if minus-p
+        (%ash-right x y)
+        (%ash-left x  y))))
+
+;;; lognot
+(defun lognot (x) (%lognot x))
+
+;;; logxor
+(defun logxor (&rest others)
+  (if (null others) (return-from logxor 0)
+      (let ((result (car others)))
+        (do ((integers others (cdr integers))
+             (result 0 (%logxor result (car integers))))
+            ((endp integers)  result)))))
+
+;;; logand
+(defun logand (&rest others)
+  (if (null others) (return-from logand -1)
+      (let ((integer (car others)))
+        (do ((integers others (cdr integers))
+             (result integer (%Logand result (car integers))))
+            ((endp integers)  result)))))
+
+;;; logeqv
+(defun %logeqv (x y) (%lognot (%logxor x y)))
+
+(defun logeqv (&rest others)
+  (if (null others) (return-from logeqv -1)
+      (let ((integer (car others)))
+        (do ((integers (cdr others) (cdr integers))
+             (result integer (%logeqv result (car integers))))
+            ((endp integers)  result)))))
+
+;;; logior
+(defun logior (&rest others)
+  (if (null others) (return-from logior 0)
+      (let ((integer (car others)))
+        (do ((integers others (cdr integers))
+             (result integer (%logior result (car integers))))
+            ((endp integers)  result)))))
+
+;;; integer-length
+;;; note: ONLY 32 bits
+;;; note: its very simple and incorrect function
+;;; todo: We need version with corrected doing fixnum & bignum numbers
+(defun integer-length (integer)
+  (let ((negative (minusp integer)))
+    (if negative
+      (setq integer (- integer)))
+    (if (> integer most-integer-length)
+        ;; prevent infinity loop with (integer-length (expt 2 31))
+        (error "integer-length: bad numeric limit ~a" integer)) 
+    (do ((len 0 (1+ len))
+         (original integer))
+        ((zerop integer)
+         ;; Negative powers of two require one less bit.
+         (if (and negative
+                  ;; Test if original is power-of-two.
+                  (zerop (%logand original (1- original))))
+             (1- len)
+             len))
+      (setq integer (ash integer -1)))))
+
+;;; logtest
+;;; Return T if logand of integer1 and integer2 is not zero
+(defun logtest (integer1 integer2)
+  (not (zerop (%logand integer1 integer2))))
+
+;;; logbitp
+(defun logbitp (index integer)
+  (if (< index most-positive-fixnum)
+      (not (zerop (%logand integer (ash 1 index))))
+      (minusp integer)))
+
+;;; LOGCOUNT
+;;; note: ONLY 32 bits
+;;; note: its very simple and incorrect function
+;;; todo: We need version with corrected doing fixnum & bignum numbers
+;;; Count the number of 1 bits if INTEGER is non-negative,
+;;; and the number of 0 bits if INTEGER is negative
+(defun %logcount (integer)
+  (let ((length (integer-length integer))
+        (result 0))
+    (dotimes (bit length)
+      (if (logbitp bit integer) (incf result)))
+    result))
+
+(defun logcount (integer)
+  (%logcount (if (minusp integer) (%lognot integer) integer)))
+
+(defconstant boole-1     0)    ;; integer-1                                   
+(defconstant boole-2     1)    ;; integer-2                                   
+(defconstant boole-andc1 2)    ;; and complement of integer-1 with integer-2  
+(defconstant boole-andc2 3)    ;; and integer-1 with complement of integer-2  
+(defconstant boole-and   4)    ;; and                                         
+(defconstant boole-c1    5)    ;; complement of integer-1                     
+(defconstant boole-c2    6)    ;; complement of integer-2                     
+(defconstant boole-clr   7)    ;; always 0 (all zero bits)                    
+(defconstant boole-eqv   8)    ;; equivalence (exclusive nor)                 
+(defconstant boole-ior   9)    ;; inclusive or                                
+(defconstant boole-nand  10)   ;; not-and                                     
+(defconstant boole-nor   11)   ;; not-or                                      
+(defconstant boole-orc1  12)   ;; or complement of integer-1 with integer-2   
+(defconstant boole-orc2  13)   ;; or integer-1 with complement of integer-2   
+(defconstant boole-set   14)   ;; always -1 (all one bits)                    
+(defconstant boole-xor   15)   ;; exclusive or                                
+
+;;; fns definition: lognand, lognor, logandc*, logorc*
+(defun lognand  (x y)  (%lognot (%logand x y)))
+(defun lognor   (x y)  (%lognot (%logior x y)))
+(defun logandc1 (x y)  (%logand (%lognot x) y))
+(defun logandc2 (x y)  (%logand x (%lognot y)))
+(defun logiorc1  (x y)  (%logior  (%lognot x) y))
+(defun logiorc2  (x y)  (%logior x (%lognot y)))
+
+;;; BOOLE
+(defun boole (op i1 i2)
+    (cond
+      ((eq op boole-clr)      0)
+      ((eq op boole-set)     -1)
+      ((eq op boole-1)              i1)
+      ((eq op boole-2)          i2)
+      ((eq op boole-c1)    (%lognot i1))
+      ((eq op boole-c2)    (%lognot i2))
+      ((eq op boole-and)   (%logand i1 i2))
+      ((eq op boole-ior)   (%logior i1 i2))
+      ((eq op boole-xor)   (%logxor i1 i2))
+      ((eq op boole-eqv)   (%logeqv i1 i2))
+      ((eq op boole-nand)  (%lognot (%logand i1 i2)))
+      ((eq op boole-nor)   (%lognot (%logior i1 i2)))
+      ((eq op boole-andc1) (%logand (%lognot i1) i2))
+      ((eq op boole-andc2) (%logand i1 (%lognot i2)))
+      ((eq op boole-orc1)  (%logior (%lognot i1) i2))
+      ((eq op boole-orc2)  (%logior i1 (%lognot i2)))
+      (t (error "~S is an illegal control code to BOOLE." op))))
+
+;;; RANDOM
+(defun random (n)
+  (let ((rn (#j:Math:random n)))
+    (#j:Math:floor (* rn n))))
+
+;;; BYTE
+;;; return  byte specifier
+(defun byte (size position)
+  (cons size position))
+
+;;; BYTE-SIZE
+;;; return the size part of the byte specifier
+(defun byte-size (spec)
+  (car spec))
+
+;;; BYTE-POSITION
+;;; return thhe position part of the byte specifier
+(defun byte-position (spec)
+  (cdr spec))
+
+;;; CLZ32
+;;; count leading zero
+;;; ONLY 32 bits
+(defun clz32 (number)
+  (#j:Math:clz32 number))
+
+;;; MASK-FIELD
+;;; extract the specified byte from integer
+;;; result not right justify
+(defun %mask-field (size posn integer)
+  (%logand integer (ash (1- (ash 1 size)) posn)))
+
+;;; todo: (setf)
+(defun mask-field (byte integer)
+  (%logand integer (ash (1- (ash 1 (car byte))) (cdr byte))))
+
+;;; LDB
+;;; extract the specified byte from integer
+;;; result right justify
+(defun %ldb (size pos integer)
+  (%logand (ash integer (- pos))
+          (1- (ash 1 size))))
+
+(defun ldb (byte integer)
+  (%ldb (car byte) (cdr byte) integer))
+
+;;; LDB-TEST
+;;; todo: (setf)
+(defun ldb-test (byte number)
+  (not (zerop (ldb byte number))))
+
+;;; DPB
+;;; return new integer with newbyte in specified position
+;;; newbyte is right justify
+(defun %dpb (newbyte size posn integer)
+  (let ((mask (1- (ash 1 size))))
+    (%logior (%logand integer (%lognot (ash mask posn)))
+            (ash (%logand newbyte mask) posn))))
+
+(defun dpb (newbyte byte integer)
+  (%dpb newbyte (car byte) (cdr byte) integer))
+
+;;; DEPOSIT-FIELD
+;;; return new integer with newbyte in specified position
+;;; newbyte isnt right justify
+(defun %deposit-field (newbyte size posn integer)
+  (let ((mask (ash (%ldb size 0 -1) posn)))
+    (%logior (%logand newbyte mask)
+            (%logand integer (%lognot mask)))))
+
+(defun deposit-field (newbyte byte integer)
+  (%deposit-field newbyte (car byte) (cdr byte) integer))
+
+;;; @vkm 30.11 end
+
+;;; EOF
