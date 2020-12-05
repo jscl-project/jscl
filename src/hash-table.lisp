@@ -149,11 +149,13 @@
       (oget (#j:Object:entries (cdr obj)) "length")
       0))
 
-
-(defun maphash (function hash-table)
-  (map-for-in (lambda (x)
-		(funcall function (car x) (cdr x)))
-	      (caddr hash-table))
+;;; maphash
+(defun maphash (function table)
+  (unless (hash-table-p table)
+    (error "The value ~s is not of type HASH-TABLE" table))
+  (map-for-in
+   (lambda (x) (funcall function (car x) (cdr x)))
+	 (cdr table))
   nil)
 
 (defun hash-table-test (obj)
