@@ -80,18 +80,18 @@
       nil
       (eq (oget obj "td_Name") :hash-table)))
 
+;;; make-hash-table
+(defun %select-hash-fn (fn)
+  (cond
+    ((eql fn #'eq)     'eq-hash )
+    ((eql fn #'eql)    'eql-hash )
+    ((eql fn #'equal)  'equal-hash )
+    (t (error "Incorrect hash function: ~s." test))))
 
 (defun make-hash-table (&key (test #'eql) size)
-    (let* ((test-fn (fdefinition test))
-           (hash-fn
-             (cond
-               ((eq test-fn #'eq)    #'eq-hash)
-               ((eq test-fn #'eql)   #'eql-hash)
-               ((eq test-fn #'equal) #'equal-hash)
-               ((eq test-fn #'equalp) #'equalp-hash)))
-           (obj `(hash-table ,hash-fn ,(new))))
-        (oset :hash-table obj "tagName") 
-        obj))
+  (let ((cell (cons (%select-hash-fn test) (new))))
+    (oset :hash-table cell "td_Name")
+    cell))
 
 (defun gethash (key hash-table &optional default)
   (let* ((obj (caddr hash-table))
