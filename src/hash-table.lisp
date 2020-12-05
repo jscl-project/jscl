@@ -167,6 +167,7 @@
   (unless (hash-table-p origin)
     (error "The value ~s is not of type HASH-TABLE" origin))
   (let ((cell (cons (car origin)
+                    ;; todo: Object.assign as builtin method-call?
                     (#j:Object:assign (new) (cdr origin)))))
     (oset :hash-table cell "td_Name")
     cell))
