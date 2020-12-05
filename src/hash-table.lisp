@@ -167,3 +167,14 @@
     (cond ((eq test 'eq-hash) 'eq)
           ((eq test 'eql-hash) 'eql)
           (t 'equal))))
+
+;;; copy-hash-table
+;;; not in standard
+(defun copy-hash-table (origin)
+  (unless (hash-table-p origin)
+    (error "The value ~s is not of type HASH-TABLE" origin))
+  (let ((cell (cons (car origin)
+                    (#j:Object:assign (new) (cdr origin)))))
+    (oset :hash-table cell "td_Name")
+    cell))
+
