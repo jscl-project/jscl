@@ -62,9 +62,7 @@
          (%concat "(" (equal-hash (car x)) (equal-hash (cdr x)) ")"))
         ((stringp x)
          ;; at this place x always string, so used (oget length)
-         ;; we used (string) because concat has the unpleasant feature
-         ;; of substituting a number instead of a character literal.
-         (%concat "s" (string (oget x "length")) ":" (lisp-to-js x)))
+         (%concat "s" (storage-vector-size x) ":" (lisp-to-js x)))
         (t (eql-hash x))))
 
 (defun equalp-hash (x)
