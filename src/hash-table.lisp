@@ -134,6 +134,15 @@
         (in hash obj)
       (delete-property hash obj))))
 
+;;; clrhash
+;;; clear hash-table
+(defun clrhash (obj)
+  (if (hash-table-p obj)
+      (progn
+        (rplacd obj (new))
+        obj)
+      (error "The value ~s is not of type HASH-TABLE" obj)))
+
 
 (defun hash-table-count (hash-table)
   (let ((count 0))
