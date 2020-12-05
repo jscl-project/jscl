@@ -121,7 +121,7 @@
 ;;; remhash
 (defun remhash (key table)
   (unless (hash-table-p table)
-    (error "The value ~s is not of type HASH-TABLE" tale))
+    (error "The value ~s is not of type HASH-TABLE." table))
   (let ((obj (cdr table))
         (hash (funcall (car table) key)))
     (prog1
@@ -134,7 +134,7 @@
       (progn
         (rplacd obj (new))
         obj)
-      (error "The value ~s is not of type HASH-TABLE" obj)))
+      (error "The value ~s is not of type HASH-TABLE." obj)))
 
 ;;; hash-table-count
 (defun hash-table-count (obj)
@@ -145,7 +145,7 @@
 ;;; maphash
 (defun maphash (function table)
   (unless (hash-table-p table)
-    (error "The value ~s is not of type HASH-TABLE" table))
+    (error "The value ~s is not of type HASH-TABLE." table))
   (map-for-in
    (lambda (x) (funcall function (car x) (cdr x)))
 	 (cdr table))
@@ -155,7 +155,7 @@
 ;;; the test value returned is always a symbol
 (defun hash-table-test (obj)
   (unless (hash-table-p obj)
-    (error "The value ~s is not of type HASH-TABLE" obj))
+    (error "The value ~s is not of type HASH-TABLE." obj))
   (let ((test (car obj)))
     (cond ((eq test 'eq-hash) 'eq)
           ((eq test 'eql-hash) 'eql)
@@ -164,7 +164,7 @@
 ;;; copy-hash-table, not in standard
 (defun copy-hash-table (origin)
   (unless (hash-table-p origin)
-    (error "The value ~s is not of type HASH-TABLE" origin))
+    (error "The value ~s is not of type HASH-TABLE." origin))
   (let ((cell (cons (car origin)
                     ;; todo: Object.assign as builtin method-call?
                     (#j:Object:assign (new) (cdr origin)))))
