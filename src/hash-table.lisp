@@ -178,3 +178,19 @@
     (oset :hash-table cell "td_Name")
     cell))
 
+;;; all keys containing
+(defun hash-table-keys (table)
+  (let ((keys nil))
+    (maphash-keys (lambda (k)
+                    (push k keys))
+                  table)
+    keys))
+
+;;; all values containing
+(defun hash-table-values (table)
+  (let ((values nil))
+    (maphash-values (lambda (v)
+                      (push v values))
+                    table)
+    values))
+
