@@ -124,11 +124,14 @@
             `(gethash ,g!key ,g!hash-table)    ; accessing form
             )))
 
-
-(defun remhash (key hash-table)
-  (let ((obj (caddr hash-table))
-        (hash (funcall (cadr hash-table) key)))
-    (prog1 (in hash obj)
+;;; remhash
+(defun remhash (key table)
+  (unless (hash-table-p table)
+    (error "The value ~s is not of type HASH-TABLE" tale))
+  (let ((obj (cdr table))
+        (hash (funcall (car table) key)))
+    (prog1
+        (in hash obj)
       (delete-property hash obj))))
 
 
