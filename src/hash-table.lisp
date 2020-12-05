@@ -104,8 +104,6 @@
     (oset (cons key new-value) table hash)
     new-value))
 
-
-;;; TODO: Please, implement (DEFUN (SETF foo) ...) syntax!
 (define-setf-expander gethash (key hash-table &optional defaults)
   (let ((g!key (gensym))
         (g!hash-table (gensym))
@@ -131,7 +129,6 @@
       (delete-property hash obj))))
 
 ;;; clrhash
-;;; clear hash-table
 (defun clrhash (obj)
   (if (hash-table-p obj)
       (progn
@@ -164,8 +161,7 @@
           ((eq test 'eql-hash) 'eql)
           (t 'equal))))
 
-;;; copy-hash-table
-;;; not in standard
+;;; copy-hash-table, not in standard
 (defun copy-hash-table (origin)
   (unless (hash-table-p origin)
     (error "The value ~s is not of type HASH-TABLE" origin))
