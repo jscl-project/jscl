@@ -42,14 +42,11 @@
         (setq string (concat-two string it))))))
 
 (defun eq-hash (x)
-  (cond
-    ((numberp x)
-     x)
-    (t
-     (unless (in "$$jscl_id" x)
-       (oset (%concat "$" *eq-hash-counter*) x "$$jscl_id")
-       (incf *eq-hash-counter*))
-     (oget x "$$jscl_id"))))
+  (cond ((numberp x) x)
+        (t (unless (in "$$jscl_id" x)
+             (oset (%concat "$" *eq-hash-counter*) x "$$jscl_id")
+             (incf *eq-hash-counter*))
+           (oget x "$$jscl_id"))))
 
 ;;; We do not have bignums, so eql is equivalent to eq.
 (defun eql-hash (x)
@@ -58,16 +55,12 @@
 
 ;;; In the case of equal-based hash tables, we do not store the hash
 ;;; in the objects, but compute a hash from the elements it contains.
-;;; note: do not use equal-hash until numbers are defined in the bundle
-;;;       integer-to-string use truncate from numbers
 (defun equal-hash (x)
-  (cond
-    ((consp x)
-     (%concat "(" (equal-hash (car x)) (equal-hash (cdr x)) ")"))
-    ((stringp x)
-     (%concat "s" (integer-to-string (length x)) ":" (lisp-to-js x)))
-    (t
-     (eql-hash x))))
+  (cond ((consp x)
+         (%concat "(" (equal-hash (car x)) (equal-hash (cdr x)) ")"))
+        ((stringp x)
+         (%concat "s" (string (list-length x)) ":" (lisp-to-js x)))
+        (t (eql-hash x))))
 
 (defun equalp-hash (x)
   ;; equalp is not implemented as predicate. So I am skipping this one
