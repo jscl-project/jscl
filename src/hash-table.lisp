@@ -101,10 +101,11 @@
         (values (cdr (oget table hash)) t)
         (values default nil))))
 
+;;; sethash
 (defun sethash (new-value key hash-table)
-  (let ((obj (caddr hash-table))
-        (hash (funcall (cadr hash-table) key)))
-    (oset (cons key new-value) obj hash)
+  (let ((table (cdr hash-table))
+        (hash (funcall (car hash-table) key)))
+    (oset (cons key new-value) table hash)
     new-value))
 
 
