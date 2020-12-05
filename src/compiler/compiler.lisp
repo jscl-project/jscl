@@ -1427,6 +1427,11 @@
 (define-builtin objectp (x)
   (convert-to-bool `(=== (typeof ,x) "object")))
 
+;;; @VKM 30.10
+;;; @vkm 30.10
+(define-builtin js-undefined-p (x)
+  (convert-to-bool `(=== ,x undefined)))
+
 (define-builtin %%nlx-p (x)
   (convert-to-bool `(call-internal |isNLX| ,x)))
 
