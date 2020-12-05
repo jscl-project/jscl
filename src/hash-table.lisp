@@ -32,6 +32,8 @@
 ;;; a `$$jscl_id' property. As a special case, numbers do not need to
 ;;; be tagged, as they can be used to index Javascript objects.
 
+(/debug "loading hash-table.lisp!")
+
 (defvar *eq-hash-counter* 0)
 
 (defun %concat (&rest elements)
@@ -59,7 +61,7 @@
   (cond ((consp x)
          (%concat "(" (equal-hash (car x)) (equal-hash (cdr x)) ")"))
         ((stringp x)
-         (%concat "s" (string (list-length x)) ":" (lisp-to-js x)))
+         (%concat "s" (string (oget x "length")) ":" (lisp-to-js x)))
         (t (eql-hash x))))
 
 (defun equalp-hash (x)
