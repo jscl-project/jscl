@@ -158,10 +158,12 @@
 	 (cdr table))
   nil)
 
+;;; hash-table-test
+;;; the test value returned is always a symbol
 (defun hash-table-test (obj)
-  (cond ((hash-table-p obj)
-         (let ((test (cadr obj)))
-           (cond ((eq test #'eq-hash) 'eq)
-                 ((eq test #'eql-hash) 'eql)
-                 (t 'equal))))
-        (t (error "~a is not hash-table" obj))))
+  (unless (hash-table-p obj)
+    (error "The value ~s is not of type HASH-TABLE" obj))
+  (let ((test (car obj)))
+    (cond ((eq test 'eq-hash) 'eq)
+          ((eq test 'eql-hash) 'eql)
+          (t 'equal))))
