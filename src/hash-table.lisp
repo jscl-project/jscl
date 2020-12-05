@@ -194,14 +194,13 @@
                     table)
     values))
 
-;;; hash-table printer
+;;; hash-table printer for lisp print
 (defun %hash-fn-print-name (form)
   (let ((name (oget (car form) "name")))
     (string-downcase (subseq name 0 (position #\- name)))))
 
 (defun %hash-table-count (obj)
   (oget (#j:Object:entries (cdr obj)) "length"))
-
 
 (defun hash-table-object-printer (form stream)
   ;; object printer called under typecase. so, check-type not do
