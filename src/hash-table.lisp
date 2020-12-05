@@ -143,14 +143,11 @@
         obj)
       (error "The value ~s is not of type HASH-TABLE" obj)))
 
-
-(defun hash-table-count (hash-table)
-  (let ((count 0))
-    (map-for-in (lambda (x)
-                  (declare (ignore x))
-                  (incf count))
-                (caddr hash-table))
-    count))
+;;; hash-table-count
+(defun hash-table-count (obj)
+  (if (and (consp obj) (eql (oget obj "td_Name") :hash-table))
+      (oget (#j:Object:entries (cdr obj)) "length")
+      0))
 
 
 (defun maphash (function hash-table)
