@@ -93,12 +93,12 @@
     (oset :hash-table cell "td_Name")
     cell))
 
+;;; gethash
 (defun gethash (key hash-table &optional default)
-  (let* ((obj (caddr hash-table))
-         (hash (funcall (cadr hash-table) key))
-         (exists (in hash obj)))
-    (if exists
-        (values (cdr (oget obj hash)) t)
+  (let ((table (cdr hash-table))
+        (hash (funcall (car hash-table) key)))
+    (if (in hash table)
+        (values (cdr (oget table hash)) t)
         (values default nil))))
 
 (defun sethash (new-value key hash-table)
