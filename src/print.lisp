@@ -319,14 +319,21 @@
     (simple-format stream res)))
 
 ;;; hash-table printer
+(defun %hash-fn-print-name (form)
+  (let ((name (oget (car form) "name")))
+    (string-downcase (subseq name 0 (position #\- name)))))
+
+(defun %hash-table-count (obj)
+  ;; todo: #j:Object:entries as builtin (method-call |Object| "entries" ,object)
+  (oget (#j:Object:entries (cdr obj)) "length"))
+
 (defun hash-table-object-printer (form stream)
-  (let* ((hashfn (cadr form))
-         (fname (oget hashfn "fname"))
-         (tail-pos (position #\- fname))
-         (testfn (subseq fname 0 tail-pos))
-         (res))
-    (setq res (concat "#<hash-table :test " (string-downcase testfn) ">"))
-    (simple-format stream res)))
+  ;; object printer called under typecase. so, check-type not do
+  (simple-format
+   stream
+   (concat "#<hash-table :test " (%hash-fn-print-name form)
+           " :count ~d>")
+   (%hash-table-count form)))
 
 #+jscl
 (defun write (form &key (stream *standard-output*))
