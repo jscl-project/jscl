@@ -323,17 +323,13 @@
   (let ((name (oget (car form) "name")))
     (string-downcase (subseq name 0 (position #\- name)))))
 
-(defun %hash-table-count (obj)
-  ;; todo: #j:Object:entries as builtin (method-call |Object| "entries" ,object)
-  (oget (#j:Object:entries (cdr obj)) "length"))
-
 (defun hash-table-object-printer (form stream)
   ;; object printer called under typecase. so, check-type not do
   (simple-format
    stream
    (concat "#<hash-table :test " (%hash-fn-print-name form)
            " :count ~d>")
-   (%hash-table-count form)))
+   (hash-table-count form)))
 
 #+jscl
 (defun write (form &key (stream *standard-output*))
