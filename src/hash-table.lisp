@@ -36,17 +36,10 @@
 
 (defvar *eq-hash-counter* 0)
 
-(defun %concat (&rest elements)
-  (let ((string ""))
-    (flet ((concat-two (str1 str2)
-             (concatenate-storage-vector str1 str2)))
-      (dolist (it elements string)
-        (setq string (concat-two string it))))))
-
 (defun eq-hash (x)
   (cond ((numberp x) x)
         (t (unless (in "$$jscl_id" x)
-             (oset (%concat "$" *eq-hash-counter*) x "$$jscl_id")
+             (oset (concat "$" *eq-hash-counter*) x "$$jscl_id")
              (incf *eq-hash-counter*))
            (oget x "$$jscl_id"))))
 
@@ -54,15 +47,14 @@
 (defun eql-hash (x)
   (eq-hash x))
 
-
 ;;; In the case of equal-based hash tables, we do not store the hash
 ;;; in the objects, but compute a hash from the elements it contains.
 (defun equal-hash (x)
   (cond ((consp x)
-         (%concat "(" (equal-hash (car x)) (equal-hash (cdr x)) ")"))
+         (concat "(" (equal-hash (car x)) (equal-hash (cdr x)) ")"))
         ((stringp x)
          ;; at this place x always string, so used (oget length)
-         (%concat "s" (storage-vector-size x) ":" (lisp-to-js x)))
+         (concat "s" (storage-vector-size x) ":" (lisp-to-js x)))
         (t (eql-hash x))))
 
 (defun equalp-hash (x)
