@@ -31,74 +31,67 @@
 ;;; strings for each Lisp object. To do this, we tag the objects with
 ;;; a `$$jscl_id' property. As a special case, numbers do not need to
 ;;; be tagged, as they can be used to index Javascript objects.
+
+(/debug "loading hash-table.lisp!")
+
 (defvar *eq-hash-counter* 0)
+
 (defun eq-hash (x)
-  (cond
-    ((numberp x)
-     x)
-    (t
-     (unless (in "$$jscl_id" x)
-       (oset (concat "$" *eq-hash-counter*) x "$$jscl_id")
-       (incf *eq-hash-counter*))
-     (oget x "$$jscl_id"))))
+  (cond ((numberp x) x)
+        (t (unless (in "$$jscl_id" x)
+             (oset (concat "$" *eq-hash-counter*) x "$$jscl_id")
+             (incf *eq-hash-counter*))
+           (oget x "$$jscl_id"))))
 
 ;;; We do not have bignums, so eql is equivalent to eq.
 (defun eql-hash (x)
   (eq-hash x))
 
-
 ;;; In the case of equal-based hash tables, we do not store the hash
 ;;; in the objects, but compute a hash from the elements it contains.
 (defun equal-hash (x)
-  (typecase x
-    (cons
-     (concat "(" (equal-hash (car x)) (equal-hash (cdr x)) ")"))
-    (string
-     (concat "s" (integer-to-string (length x)) ":" (lisp-to-js x)))
-    (t
-     (eql-hash x))))
+  (cond ((consp x)
+         (concat "(" (equal-hash (car x)) (equal-hash (cdr x)) ")"))
+        ((stringp x)
+         ;; at this place x always string, so used (oget length)
+         (concat "s" (storage-vector-size x) ":" (lisp-to-js x)))
+        (t (eql-hash x))))
 
 (defun equalp-hash (x)
   ;; equalp is not implemented as predicate. So I am skipping this one
   ;; by now.
   )
 
-;;; hash-table predicate
 (defun hash-table-p (obj)
-  (and (consp obj)
-       (eq (oget obj "tagName") :hash-table)
-       (= (length obj) 3)
-       (eq (car obj) 'hash-table)))
+  (if (js-undefined-p obj)
+      nil
+      (eq (oget obj "td_Name") :hash-table)))
 
+(defun %select-hash-fn (fn)
+  (cond
+    ((eql fn #'eq)     'eq-hash )
+    ((eql fn #'eql)    'eql-hash )
+    ((eql fn #'equal)  'equal-hash )
+    (t (error "Incorrect hash function: ~s." test))))
 
 (defun make-hash-table (&key (test #'eql) size)
-    (let* ((test-fn (fdefinition test))
-           (hash-fn
-             (cond
-               ((eq test-fn #'eq)    #'eq-hash)
-               ((eq test-fn #'eql)   #'eql-hash)
-               ((eq test-fn #'equal) #'equal-hash)
-               ((eq test-fn #'equalp) #'equalp-hash)))
-           (obj `(hash-table ,hash-fn ,(new))))
-        (oset :hash-table obj "tagName") 
-        obj))
+  (let ((cell (cons (%select-hash-fn test) (new))))
+    (oset :hash-table cell "td_Name")
+    cell))
 
 (defun gethash (key hash-table &optional default)
-  (let* ((obj (caddr hash-table))
-         (hash (funcall (cadr hash-table) key))
-         (exists (in hash obj)))
-    (if exists
-        (values (cdr (oget obj hash)) t)
+  (let ((table (cdr hash-table))
+        (hash (funcall (car hash-table) key)))
+    (if (in hash table)
+        (values (cdr (oget table hash)) t)
         (values default nil))))
 
 (defun sethash (new-value key hash-table)
-  (let ((obj (caddr hash-table))
-        (hash (funcall (cadr hash-table) key)))
-    (oset (cons key new-value) obj hash)
+  (let ((table (cdr hash-table))
+        (hash (funcall (car hash-table) key)))
+    (oset (cons key new-value) table hash)
     new-value))
 
-
-;;; TODO: Please, implement (DEFUN (SETF foo) ...) syntax!
 (define-setf-expander gethash (key hash-table &optional defaults)
   (let ((g!key (gensym))
         (g!hash-table (gensym))
@@ -113,33 +106,70 @@
             `(gethash ,g!key ,g!hash-table)    ; accessing form
             )))
 
-
-(defun remhash (key hash-table)
-  (let ((obj (caddr hash-table))
-        (hash (funcall (cadr hash-table) key)))
-    (prog1 (in hash obj)
+(defun remhash (key table)
+  (unless (hash-table-p table)
+    (error "The value ~s is not of type HASH-TABLE." table))
+  (let ((obj (cdr table))
+        (hash (funcall (car table) key)))
+    (prog1
+        (in hash obj)
       (delete-property hash obj))))
 
+(defun clrhash (obj)
+  (if (hash-table-p obj)
+      (progn
+        (rplacd obj (new))
+        obj)
+      (error "The value ~s is not of type HASH-TABLE." obj)))
 
-(defun hash-table-count (hash-table)
-  (let ((count 0))
-    (map-for-in (lambda (x)
-                  (declare (ignore x))
-                  (incf count))
-                (caddr hash-table))
-    count))
+(defun hash-table-count (obj)
+  (if (and (consp obj) (eql (oget obj "td_Name") :hash-table))
+      (oget (#j:Object:entries (cdr obj)) "length")
+      0))
 
-
-(defun maphash (function hash-table)
-  (map-for-in (lambda (x)
-		(funcall function (car x) (cdr x)))
-	      (caddr hash-table))
+(defun maphash (function table)
+  (unless (hash-table-p table)
+    (error "The value ~s is not of type HASH-TABLE." table))
+  (map-for-in
+   (lambda (x) (funcall function (car x) (cdr x)))
+	 (cdr table))
   nil)
 
+;;; the test value returned is always a symbol
 (defun hash-table-test (obj)
-  (cond ((hash-table-p obj)
-         (let ((test (cadr obj)))
-           (cond ((eq test #'eq-hash) 'eq)
-                 ((eq test #'eql-hash) 'eql)
-                 (t 'equal))))
-        (t (error "~a is not hash-table" obj))))
+  (unless (hash-table-p obj)
+    (error "The value ~s is not of type HASH-TABLE." obj))
+  (let ((test (car obj)))
+    (cond ((eq test 'eq-hash) 'eq)
+          ((eq test 'eql-hash) 'eql)
+          (t 'equal))))
+
+;;; copy-hash-table - not in standard
+(defun copy-hash-table (origin)
+  (unless (hash-table-p origin)
+    (error "The value ~s is not of type HASH-TABLE." origin))
+  (let ((cell (cons (car origin)
+                    ;; todo: Object.assign as builtin method-call?
+                    (#j:Object:assign (new) (cdr origin)))))
+    (oset :hash-table cell "td_Name")
+    cell))
+
+;;; all keys containing
+(defun hash-table-keys (table)
+  (let ((keys nil))
+    (maphash (lambda (k v)
+               (declare (ignore v))
+               (push k keys))
+             table)
+    keys))
+
+;;; all values containing
+(defun hash-table-values (table)
+  (let ((values nil))
+    (maphash (lambda (k v)
+               (declare (ignore k))
+               (push v values))
+             table)
+    values))
+
+;;; EOF
