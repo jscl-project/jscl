@@ -1113,7 +1113,6 @@
         (throw "Division by zero"))
     (return (% ,x ,y))))
 
-;;; @VKM path 30.11
 (define-builtin %ash-left (x y)
   `(call-internal |Bitwise_ash_L| ,x ,y))
 
@@ -1126,15 +1125,11 @@
 (define-builtin %logand (x y)
   `(call-internal |Bitwise_and| ,x ,y))
 
-;;; not canonical
-;;; binary-op restricted implementation
 (define-builtin %logxor (x y)
   `(call-internal |Bitwise_xor| ,x ,y))
 
-;;; logior
 (define-builtin %logior (x y)
   `(call-internal |Bitwise_ior| ,x ,y))
-;;; @vkm path 30.11 end
 
 (defun comparison-conjuntion (vars op)
   (cond
@@ -1162,7 +1157,6 @@
 (define-builtin numberp (x)
   (convert-to-bool `(== (typeof ,x) "number")))
 
-;;; @VKM PATH 30.11
 (define-builtin %truncate (x)
 `(method-call |Math| "trunc" ,x))
 
@@ -1427,8 +1421,6 @@
 (define-builtin objectp (x)
   (convert-to-bool `(=== (typeof ,x) "object")))
 
-;;; @VKM 30.10
-;;; @vkm 30.10
 (define-builtin js-undefined-p (x)
   (convert-to-bool `(=== ,x undefined)))
 
