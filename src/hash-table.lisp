@@ -70,13 +70,11 @@
   ;; by now.
   )
 
-;;; hash-table predicate
 (defun hash-table-p (obj)
   (if (js-undefined-p obj)
       nil
       (eq (oget obj "td_Name") :hash-table)))
 
-;;; make-hash-table
 (defun %select-hash-fn (fn)
   (cond
     ((eql fn #'eq)     'eq-hash )
@@ -89,7 +87,6 @@
     (oset :hash-table cell "td_Name")
     cell))
 
-;;; gethash
 (defun gethash (key hash-table &optional default)
   (let ((table (cdr hash-table))
         (hash (funcall (car hash-table) key)))
@@ -97,7 +94,6 @@
         (values (cdr (oget table hash)) t)
         (values default nil))))
 
-;;; sethash
 (defun sethash (new-value key hash-table)
   (let ((table (cdr hash-table))
         (hash (funcall (car hash-table) key)))
@@ -118,7 +114,6 @@
             `(gethash ,g!key ,g!hash-table)    ; accessing form
             )))
 
-;;; remhash
 (defun remhash (key table)
   (unless (hash-table-p table)
     (error "The value ~s is not of type HASH-TABLE." table))
@@ -128,7 +123,6 @@
         (in hash obj)
       (delete-property hash obj))))
 
-;;; clrhash
 (defun clrhash (obj)
   (if (hash-table-p obj)
       (progn
@@ -136,13 +130,11 @@
         obj)
       (error "The value ~s is not of type HASH-TABLE." obj)))
 
-;;; hash-table-count
 (defun hash-table-count (obj)
   (if (and (consp obj) (eql (oget obj "td_Name") :hash-table))
       (oget (#j:Object:entries (cdr obj)) "length")
       0))
 
-;;; maphash
 (defun maphash (function table)
   (unless (hash-table-p table)
     (error "The value ~s is not of type HASH-TABLE." table))
@@ -151,7 +143,6 @@
 	 (cdr table))
   nil)
 
-;;; hash-table-test
 ;;; the test value returned is always a symbol
 (defun hash-table-test (obj)
   (unless (hash-table-p obj)
@@ -161,7 +152,7 @@
           ((eq test 'eql-hash) 'eql)
           (t 'equal))))
 
-;;; copy-hash-table, not in standard
+;;; copy-hash-table - not in standard
 (defun copy-hash-table (origin)
   (unless (hash-table-p origin)
     (error "The value ~s is not of type HASH-TABLE." origin))
