@@ -298,6 +298,9 @@
 (defun copy-seq (sequence)
   (subseq sequence 0))
 
+(defun elt-index-err (index object length)
+  (error "The index ~D is too large for ~A of length ~D." index object length))
+
 (defun elt (sequence index)
   (when (< index 0)
     (error "The index ~D is below zero." index))
@@ -308,11 +311,11 @@
          (when (eql index i)
            (return-from elt elt))
          (incf i))
-       (error "The index ~D is too large for ~A of length ~D." index 'list i)))
+       (elt-index-err index 'list i)))
     ((arrayp sequence)
      (let ((length (length sequence)))
        (when (>= index length)
-         (error "The index ~D is too large for ~A of length ~D." index 'vector length))
+         (elt-index-err index 'vector length))
        (aref sequence index)))
     (t (not-seq-error sequence))))
 
