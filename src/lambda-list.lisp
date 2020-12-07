@@ -94,6 +94,40 @@
                     :initform initform
                     :supplied-p-parameter supplied-p-parameter)))))
 
+(defun parse-keyvar (desc)
+  (cond
+    ((symbolp desc)
+     (make-keyvar :variable desc :keyword-name (intern (string desc) "KEYWORD")))
+    ((consp desc)
+     (let (variable
+           keyword-name
+           (initform (second desc))
+           (supplied-p-parameter (third desc)))
+       (unless (null (cdddr desc))
+         (error "Bad keyword parameter specification `~S'" desc))
+       (unless (symbolp supplied-p-parameter)
+         (error "`~S' is not a valid supplied optional parameter." supplied-p-parameter))
+       (let ((name (first desc)))
+         (cond
+           ((symbolp name)
+            (setq keyword-name (intern (string name) "KEYWORD"))
+            (setq variable name))
+           ((consp name)
+            (unless (null (cddr name))
+              (error "Bad keyword argument name description `~S'" name))
+            (setq keyword-name (first name))
+            (setq variable (second name)))
+           (t (error "~S Bad keyword argument name description." name))))
+       (unless (symbolp keyword-name)
+         (error "~S is not a valid keyword-name." keyword-name))
+       (make-keyvar :variable (var-or-pattern variable)
+                    :keyword-name keyword-name
+                    :initform initform
+                    :supplied-p-parameter supplied-p-parameter)))
+    (t (error "~S Bad keyword parameter specification." desc))))
+
+
+
 (defun parse-auxvar (desc)
   (etypecase desc
     (symbol
