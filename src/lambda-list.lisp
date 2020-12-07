@@ -95,18 +95,18 @@
                    :supplied-p-parameter supplied-p-parameter)))
    (t (error "Bad keyword parameter specification `~S'" desc))))
 
-
 (defun parse-auxvar (desc)
-  (etypecase desc
-    (symbol
-     (make-auxvar :variable desc))
-    (cons
-     (let ((variable (first desc))
-           (initform (second desc)))
-       (unless (null (cdddr desc))
-         (error "Bad aux variable specification `~S'" desc))
-       (make-auxvar :variable (var-or-pattern variable)
-                    :initform initform)))))
+  (cond
+   ((symbolp desc)
+    (make-auxvar :variable desc))
+   ((consp desc)
+    (let ((variable (first desc))
+          (initform (second desc)))
+      (unless (null (cdddr desc))
+        (error "Bad aux variable specification `~S'" desc))
+      (make-auxvar :variable (var-or-pattern variable)
+                   :initform initform)))
+   (t (error "Bad aux variable specification `~S'" desc))))
 
 (defun parse-destructuring-lambda-list (lambda-list)
   (let (;; Destructure lambda list structure where we accumulate the
