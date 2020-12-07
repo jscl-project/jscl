@@ -301,19 +301,20 @@
 (defun elt (sequence index)
   (when (< index 0)
     (error "The index ~D is below zero." index))
-  (etypecase sequence
-    (list
+  (cond
+    ((listp sequence)
      (let ((i 0))
        (dolist (elt sequence)
          (when (eql index i)
            (return-from elt elt))
          (incf i))
        (error "The index ~D is too large for ~A of length ~D." index 'list i)))
-    (array
+    ((arrayp sequence)
      (let ((length (length sequence)))
        (when (>= index length)
          (error "The index ~D is too large for ~A of length ~D." index 'vector length))
-       (aref sequence index)))))
+       (aref sequence index)))
+    (t (not-seq-error seq))))
 
 (defun zero-args-reduce (function initial-value initial-value-p)
   (if initial-value-p
