@@ -40,10 +40,9 @@
 
 (defun reverse (sequence)
   "Return a new sequence containing the same elements but in reverse order."
-  (etypecase sequence
-    (list (revappend sequence '()))
-    (vector (vector-reverse sequence))))
-
+  (cond ((listp sequence) (revappend sequence '()))
+        ((vectorp sequence) (vector-reverse sequence))
+        (t (not-seq-error sequence))))
 
 (defun list-nreverse (list)
   (do ((1st (cdr list) (if (endp 1st) 1st (cdr 1st)))
