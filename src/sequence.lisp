@@ -52,13 +52,14 @@
     (rplacd 2nd 3rd)))
 
 (defun nreverse (sequence)
-  (etypecase sequence
-    (list (list-nreverse sequence))
-    (vector
+  (cond
+    ((listp sequence) (list-nreverse sequence))
+    ((vectorp sequence)
      (let ((size (length sequence)))
        (do ((i 0 (1+ i)))
            ((< i (/ size 2)) sequence)
-         (set (elt sequence i) (elt sequence (- size i 1))))))))
+         (set (elt sequence i) (elt sequence (- size i 1))))))
+    (t (not-seq-error sequence))))
 
 
 (defmacro do-sequence ((elt seq &optional (index (gensym "i") index-p)) &body body)
