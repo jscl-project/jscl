@@ -314,7 +314,7 @@
        (when (>= index length)
          (error "The index ~D is too large for ~A of length ~D." index 'vector length))
        (aref sequence index)))
-    (t (not-seq-error seq))))
+    (t (not-seq-error sequence))))
 
 (defun zero-args-reduce (function initial-value initial-value-p)
   (if initial-value-p
