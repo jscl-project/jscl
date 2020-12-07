@@ -44,7 +44,8 @@
 (defun var-or-pattern (x)
   (cond
     ((symbolp x) x)
-    ((consp x) (parse-destructuring-lambda-list x))))
+    ((consp x) (parse-destructuring-lambda-list x))
+    (t (error "Bad parameter specification `~S'." x))))
 
 (defun parse-optvar (desc)
   (cond
