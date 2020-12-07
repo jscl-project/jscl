@@ -391,12 +391,11 @@
   (when (or (and (listp sequence1) (null sequence1))
             (and (vectorp sequence1) (zerop (length sequence1))))
     (return-from search 0))
-  (funcall
-   (typecase sequence2
-     (list #'list-search)
-     (array #'vector-search)
-     (t (not-seq-error sequence2)))
-   sequence1 sequence2 args))
+  (funcall (cond ((listp sequence2) #'list-search)
+                 ((arrayp sequence2) #'vector-search)
+                 (t (not-seq-error sequence2)))
+           sequence1 sequence2 args))
+
 
 (defparameter *iterator-done* (gensym))
 
