@@ -61,7 +61,7 @@
        (make-optvar :variable (var-or-pattern variable)
                     :initform initform
                     :supplied-p-parameter supplied-p-parameter)))
-    (t (error "~S fell through etypecase expression." desc))))
+    (t (error "~S Bad optional parameter specification." desc))))
 
 (defun parse-keyvar (desc)
   (cond
