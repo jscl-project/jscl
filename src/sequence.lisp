@@ -337,19 +337,21 @@
       (0 (zero-args-reduce function initial-value initial-value-p))
       (1 (one-args-reduce function (funcall key (elt sequence 0)) from-end initial-value initial-value-p))
       (t (let* ((function (if from-end
-                             #'(lambda (x y) (funcall function y x))
-                             function))
+                              #'(lambda (x y) (funcall function y x))
+                              function))
                 (sequence (if from-end
                               (reverse sequence)
                               sequence))
                 (value (elt sequence 0)))
            (when initial-value-p
              (setf value (funcall function initial-value (funcall key value))))
-           (etypecase sequence
-             (list (dolist (elt (cdr sequence) value)
-                     (setf value (funcall function value (funcall key elt)))))
-             (vector (dotimes (index (1- sequence-length) value)
-                       (setf value (funcall function value (funcall key (elt sequence (1+ index)))))))))))))
+           (cond
+             ((listp sequence) (dolist (elt (cdr sequence) value)
+                                 (setf value (funcall function value (funcall key elt)))))
+             ((vectorp sequence) (dotimes (index (1- sequence-length) value)
+                                   (setf value (funcall function value (funcall key (elt sequence (1+ index)))))))
+             (t (not-seq-error sequence))))))))
+
 
 (defun mismatch (sequence1 sequence2 &key key (test #'eql testp) (test-not nil test-not-p)
                                        (start1 0) (end1 (length sequence1))
