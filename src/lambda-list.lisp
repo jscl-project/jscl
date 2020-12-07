@@ -42,15 +42,15 @@
   auxvars)
 
 (defun var-or-pattern (x)
-  (etypecase x
-    (symbol x)
-    (cons (parse-destructuring-lambda-list x))))
+  (cond
+    ((symbolp x) x)
+    ((consp x) (parse-destructuring-lambda-list x))))
 
 (defun parse-optvar (desc)
-  (etypecase desc
-    (symbol
+  (cond
+    ((symbolp desc)
      (make-optvar :variable desc))
-    (cons
+    ((consp desc)
      (let ((variable (first desc))
            (initform (second desc))
            (supplied-p-parameter (third desc)))
@@ -60,7 +60,9 @@
          (error "`~S' is not a valid supplied optional parameter." supplied-p-parameter))
        (make-optvar :variable (var-or-pattern variable)
                     :initform initform
-                    :supplied-p-parameter supplied-p-parameter)))))
+                    :supplied-p-parameter supplied-p-parameter)))
+    (t (error "~S fell through etypecase expression." desc))))
+
 
 (defun parse-keyvar (desc)
   (etypecase desc
