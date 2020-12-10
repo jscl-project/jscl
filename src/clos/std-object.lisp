@@ -421,15 +421,16 @@
        ())))
 
 
-(defun canonicalize-defclass-option (option)
-  (case (car option)
-    (:metaclass (list ':metaclass `(!find-class ',(cadr option))))
-    (:default-initargs
-     (list ':direct-default-initargs
-           `(list ,@(mapappend #'(lambda (x) x)
-                               (mapplist #'(lambda (key value) `(',key ,value))
-                                         (cdr option))))))
-    (t (list `',(car option) `',(cadr option)))))
+(eval-always
+ (defun canonicalize-defclass-option (option)
+   (case (car option)
+     (:metaclass (list ':metaclass `(!find-class ',(cadr option))))
+     (:default-initargs
+      (list ':direct-default-initargs
+            `(list ,@(mapappend #'(lambda (x) x)
+                                (mapplist #'(lambda (key value) `(',key ,value))
+                                          (cdr option))))))
+     (t (list `',(car option) `',(cadr option))))))
 
 ;;; find-class
 (defparameter *class-table* (make-hash-table :test #'eq))
