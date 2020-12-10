@@ -21,38 +21,39 @@
 (/debug "loading std-method")
 
 
-(defun canonicalize-specializers (specializers)
-  (if specializers
-      `(list ,@(mapcar #'canonicalize-specializer specializers))
-      '()))
+(eval-always
+ (defun canonicalize-specializer (specializer)
+   `(!find-class ',specializer))
 
+ (defun canonicalize-specializers (specializers)
+   (if specializers
+       `(list ,@(mapcar #'canonicalize-specializer specializers))
+       '())))
 
-(defun canonicalize-specializer (specializer)
-  `(!find-class ',specializer))
-
-(defun parse-defmethod (args)
-  (let ((fn-spec (car args))
-        (qualifiers ())
-        (specialized-lambda-list nil)
-        (body ())
-        (parse-state :qualifiers))
-    (dolist (arg (cdr args))
-      (ecase parse-state
-        (:qualifiers
-         (if (and (atom arg) (not (null arg)))
-             (push-on-end arg qualifiers)
-             (progn (setq specialized-lambda-list arg)
-                    (setq parse-state :body))))
-        (:body (push-on-end arg body))))
-    (values fn-spec
-            qualifiers
-            (extract-lambda-list specialized-lambda-list)
-            (extract-specializers specialized-lambda-list)
-            (list* 'block
-                   (if (consp fn-spec)
-                       (cadr fn-spec)
-                       fn-spec)
-                   body))))
+(eval-always
+ (defun parse-defmethod (args)
+   (let ((fn-spec (car args))
+         (qualifiers ())
+         (specialized-lambda-list nil)
+         (body ())
+         (parse-state :qualifiers))
+     (dolist (arg (cdr args))
+       (ecase parse-state
+         (:qualifiers
+          (if (and (atom arg) (not (null arg)))
+              (push-on-end arg qualifiers)
+              (progn (setq specialized-lambda-list arg)
+                     (setq parse-state :body))))
+         (:body (push-on-end arg body))))
+     (values fn-spec
+             qualifiers
+             (extract-lambda-list specialized-lambda-list)
+             (extract-specializers specialized-lambda-list)
+             (list* 'block
+                    (if (consp fn-spec)
+                        (cadr fn-spec)
+                        fn-spec)
+                    body)))))
 
 ;;; Several tedious functions for analyzing lambda lists
 (defun required-portion (gf args)
