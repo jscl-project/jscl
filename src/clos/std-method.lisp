@@ -84,11 +84,13 @@
        ,@(if opts `(&optional ,@opts) ())
        ,@(if auxs `(&aux ,@auxs) ())))))
 
-(defun extract-specializers (specialized-lambda-list)
-  (let ((plist (analyze-lambda-list specialized-lambda-list)))
-    (getf plist ':specializers)))
+(eval-always
+ (defun extract-specializers (specialized-lambda-list)
+   (let ((plist (analyze-lambda-list specialized-lambda-list)))
+     (getf plist ':specializers))))
 
-(defvar *lambda-list-keywords* '(&optional &rest &key &aux &allow-other-keys))
+(eval-always
+ (defvar *lambda-list-keywords* '(&optional &rest &key &aux &allow-other-keys)))
 
 (defun analyze-lambda-list (lambda-list)
   (labels ((make-keyword (symbol)
