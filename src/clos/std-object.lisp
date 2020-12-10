@@ -374,49 +374,52 @@
 (defun canonicalize-defclass-options (options)
   (mapappend #'canonicalize-defclass-option options))
 
-(defun canonicalize-direct-slots (direct-slots)
-  (if direct-slots
-      `(list ,@(mapcar #'canonicalize-direct-slot direct-slots))
-      ()))
+(eval-always
+ (defun canonicalize-direct-slot (spec)
+   (if (symbolp spec)
+       `(list :name ',spec)
+       (let ((name (car spec))
+             (initfunction nil)
+             (initform nil)
+             (initargs ())
+             (readers ())
+             (writers ())
+             (other-options ()))
+         (do ((olist (cdr spec) (cddr olist)))
+             ((null olist))
+           (case (car olist)
+             (:initform
+              (setq initfunction
+                    `(function (lambda () ,(cadr olist))))
+              (setq initform `',(cadr olist)))
+             (:initarg (push-on-end (cadr olist) initargs))
+             (:reader  (push-on-end (cadr olist) readers))
+             (:writer  (push-on-end (cadr olist) writers))
+             (:accessor
+              ;; accessor reader fn
+              (push-on-end (cadr olist) readers)
+              ;; accessor writer fn
+              ;; make (setf name) symbolic name
+              (push-on-end `(setf ,(cadr olist)) writers))
+             (otherwise
+              (push-on-end `',(car olist) other-options)
+              (push-on-end `',(cadr olist) other-options))))
+         `(list
+           :name ',name
+           ,@(when initfunction
+               `(:initform ,initform
+                 :initfunction ,initfunction))
+           ,@(when initargs `(:initargs ',initargs))
+           ,@(when readers `(:readers ',readers))
+           ,@(when writers `(:writers ',writers))
+           ,@other-options)))))
 
-(defun canonicalize-direct-slot (spec)
-  (if (symbolp spec)
-      `(list :name ',spec)
-      (let ((name (car spec))
-            (initfunction nil)
-            (initform nil)
-            (initargs ())
-            (readers ())
-            (writers ())
-            (other-options ()))
-        (do ((olist (cdr spec) (cddr olist)))
-            ((null olist))
-          (case (car olist)
-            (:initform
-             (setq initfunction
-                   `(function (lambda () ,(cadr olist))))
-             (setq initform `',(cadr olist)))
-            (:initarg (push-on-end (cadr olist) initargs))
-            (:reader  (push-on-end (cadr olist) readers))
-            (:writer  (push-on-end (cadr olist) writers))
-            (:accessor
-             ;; accessor reader fn
-             (push-on-end (cadr olist) readers)
-             ;; accessor writer fn
-             ;; make (setf name) symbolic name
-             (push-on-end `(setf ,(cadr olist)) writers))
-            (otherwise
-             (push-on-end `',(car olist) other-options)
-             (push-on-end `',(cadr olist) other-options))))
-        `(list
-          :name ',name
-          ,@(when initfunction
-              `(:initform ,initform
-                :initfunction ,initfunction))
-          ,@(when initargs `(:initargs ',initargs))
-          ,@(when readers `(:readers ',readers))
-          ,@(when writers `(:writers ',writers))
-          ,@other-options))))
+(eval-always
+ (defun canonicalize-direct-slots (direct-slots)
+   (if direct-slots
+       `(list ,@(mapcar #'canonicalize-direct-slot direct-slots))
+       ())))
+
 
 (defun canonicalize-defclass-option (option)
   (case (car option)
