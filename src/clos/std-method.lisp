@@ -92,62 +92,63 @@
 (eval-always
  (defvar *lambda-list-keywords* '(&optional &rest &key &aux &allow-other-keys)))
 
-(defun analyze-lambda-list (lambda-list)
-  (labels ((make-keyword (symbol)
-             (intern (symbol-name symbol)
-                     (find-package 'keyword)))
-           (get-keyword-from-arg (arg)
-             (if (listp arg)
-                 (if (listp (car arg))
-                     (caar arg)
-                     (make-keyword (car arg)))
-                 (make-keyword arg))))
-    (let ((keys ())           ; Just the keywords
-          (key-args ())       ; Keywords argument specs
-          (required-names ()) ; Just the variable names
-          (required-args ())  ; Variable names & specializers
-          (specializers ())   ; Just the specializers
-          (rest-var nil)
-          (optionals ())
-          (auxs ())
-          (allow-other-keys nil)
-          (state :parsing-required))
-      (dolist (arg lambda-list)
-        (if (member arg *lambda-list-keywords*)
-            (ecase arg
-              (&optional
-               (setq state :parsing-optional))
-              (&rest
-               (setq state :parsing-rest))
-              (&key
-               (setq state :parsing-key))
-              (&allow-other-keys
-               (setq allow-other-keys 't))
-              (&aux
-               (setq state :parsing-aux)))
-            (case state
-              (:parsing-required
-               (push-on-end arg required-args)
-               (if (listp arg)
-                   (progn (push-on-end (car arg) required-names)
-                          (push-on-end (cadr arg) specializers))
-                   (progn (push-on-end arg required-names)
-                          (push-on-end 't specializers))))
-              (:parsing-optional (push-on-end arg optionals))
-              (:parsing-rest (setq rest-var arg))
-              (:parsing-key
-               (push-on-end (get-keyword-from-arg arg) keys)
-               (push-on-end arg key-args))
-              (:parsing-aux (push-on-end arg auxs)))))
-      (list  :required-names required-names
-             :required-args required-args
-             :specializers specializers
-             :rest-var rest-var
-             :keywords keys
-             :key-args key-args
-             :auxiliary-args auxs
-             :optional-args optionals
-             :allow-other-keys allow-other-keys))))
+(eval-always
+ (defun analyze-lambda-list (lambda-list)
+   (labels ((make-keyword (symbol)
+              (intern (symbol-name symbol)
+                      (find-package 'keyword)))
+            (get-keyword-from-arg (arg)
+              (if (listp arg)
+                  (if (listp (car arg))
+                      (caar arg)
+                      (make-keyword (car arg)))
+                  (make-keyword arg))))
+     (let ((keys ())                    ; Just the keywords
+           (key-args ())                ; Keywords argument specs
+           (required-names ())          ; Just the variable names
+           (required-args ())           ; Variable names & specializers
+           (specializers ())            ; Just the specializers
+           (rest-var nil)
+           (optionals ())
+           (auxs ())
+           (allow-other-keys nil)
+           (state :parsing-required))
+       (dolist (arg lambda-list)
+         (if (member arg *lambda-list-keywords*)
+             (ecase arg
+               (&optional
+                (setq state :parsing-optional))
+               (&rest
+                (setq state :parsing-rest))
+               (&key
+                (setq state :parsing-key))
+               (&allow-other-keys
+                (setq allow-other-keys 't))
+               (&aux
+                (setq state :parsing-aux)))
+             (case state
+               (:parsing-required
+                (push-on-end arg required-args)
+                (if (listp arg)
+                    (progn (push-on-end (car arg) required-names)
+                           (push-on-end (cadr arg) specializers))
+                    (progn (push-on-end arg required-names)
+                           (push-on-end 't specializers))))
+               (:parsing-optional (push-on-end arg optionals))
+               (:parsing-rest (setq rest-var arg))
+               (:parsing-key
+                (push-on-end (get-keyword-from-arg arg) keys)
+                (push-on-end arg key-args))
+               (:parsing-aux (push-on-end arg auxs)))))
+       (list  :required-names required-names
+              :required-args required-args
+              :specializers specializers
+              :rest-var rest-var
+              :keywords keys
+              :key-args key-args
+              :auxiliary-args auxs
+              :optional-args optionals
+              :allow-other-keys allow-other-keys)))))
 
 ;;; ensure method
 ;;; @vlad-km
