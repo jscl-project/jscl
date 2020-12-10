@@ -362,13 +362,14 @@
 
 
 ;;; defclass
-(defun canonicalize-direct-superclasses (direct-superclasses)
-  (if direct-superclasses
-      `(list ,@(mapcar 'canonicalize-direct-superclass direct-superclasses))
-      ()))
+(eval-always
+ (defun canonicalize-direct-superclasses (direct-superclasses)
+   (if direct-superclasses
+       `(list ,@(mapcar 'canonicalize-direct-superclass direct-superclasses))
+       ()))
 
-(defun canonicalize-direct-superclass (class-name)
-  `(!find-class ',class-name))
+ (defun canonicalize-direct-superclass (class-name)
+   `(!find-class ',class-name)))
 
 (defun canonicalize-defclass-options (options)
   (mapappend #'canonicalize-defclass-option options))
