@@ -363,16 +363,12 @@
 
 ;;; defclass
 (eval-always
+ (defun canonicalize-direct-superclass (class-name)
+   `(!find-class ',class-name))
  (defun canonicalize-direct-superclasses (direct-superclasses)
    (if direct-superclasses
        `(list ,@(mapcar 'canonicalize-direct-superclass direct-superclasses))
-       ()))
-
- (defun canonicalize-direct-superclass (class-name)
-   `(!find-class ',class-name)))
-
-(defun canonicalize-defclass-options (options)
-  (mapappend #'canonicalize-defclass-option options))
+       ())))
 
 (eval-always
  (defun canonicalize-direct-slot (spec)
@@ -420,7 +416,6 @@
        `(list ,@(mapcar #'canonicalize-direct-slot direct-slots))
        ())))
 
-
 (eval-always
  (defun canonicalize-defclass-option (option)
    (case (car option)
@@ -431,6 +426,10 @@
                                 (mapplist #'(lambda (key value) `(',key ,value))
                                           (cdr option))))))
      (t (list `',(car option) `',(cadr option))))))
+
+(eval-always
+ (defun canonicalize-defclass-options (options)
+  (mapappend #'canonicalize-defclass-option options)))
 
 ;;; find-class
 (defparameter *class-table* (make-hash-table :test #'eq))
