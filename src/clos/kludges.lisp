@@ -8,8 +8,8 @@
 ;;; kludge for (defun (setf name) ...) syntax
 (defun setf-function-symbol (spec)
   (if (consp spec)
-      (let ((print-name (write-to-string spec)))
-        (intern print-name
+      (let ((fname (concat "(" (symbol-name (car spec)) "_" (symbol-name (cadr spec)) ")")))
+        (intern fname
                 (symbol-package (cadr spec))))
       spec))
 
