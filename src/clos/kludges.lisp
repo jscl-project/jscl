@@ -1,7 +1,9 @@
-;;;
-;;; MOP Utilities & kludges
-;;;
+;;; -*- mode:lisp; coding:utf-8 -*-
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defmacro eval-always (&rest body)
+    `(eval-when (:compile-toplevel :load-toplevel :execute)
+       ,@body)))
 
 ;;; kludge for (defun (setf name) ...) syntax
 (defun setf-function-symbol (spec)
