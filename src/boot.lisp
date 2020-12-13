@@ -115,7 +115,8 @@
          ;; get-setf-expansion by consulting this register of SETF
          ;; definitions.
          (let ((sfn 
-                 (let ((pname (write-to-string name)))
+                 (let ((pname
+                         (concat "(" (symbol-name (car name)) "_" (symbol-name (cadr name)) ")")))
                    (intern pname
                            (symbol-package (cadr name))))))
            `(progn
