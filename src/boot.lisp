@@ -492,15 +492,10 @@
 (defun values (&rest args)
   (values-list args))
 
-;;; Early error definition.
-(defun error (fmt &rest args)
-  (%throw (apply #'format nil fmt args)))
-
 (defmacro nth-value (n form)
   `(multiple-value-call (lambda (&rest values)
                           (nth ,n values))
      ,form))
-
 
 (defun constantp (x)
   ;; TODO: Consider quoted forms, &environment and many other
@@ -515,6 +510,17 @@
     (t
      nil)))
 
+(defparameter *features* '(:jscl :common-lisp))
+
+;;; Early error definition.
+(defun error (fmt &rest args)
+  (let ((msg fmt))
+    (if (fboundp 'format)
+        (progn
+          (setq msg (apply #'format nil fmt args))
+          (/debug msg))
+        (%console msg args)))
+  (%throw "ERROR!"))
 
 ;;; print-unreadable-object
 (defmacro !print-unreadable-object ((object stream &key type identity) &body body)
