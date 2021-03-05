@@ -83,6 +83,7 @@
      ("bootstrap"     :target)
      ("macros"        :target)
      ("methods"       :target))
+    ("conditions"    :target)
     ("stream"        :target)
     ("print"         :target)
     ("misc"          :target)
@@ -90,7 +91,6 @@
      ("ansi-loop"    :both))
     ("format"        :target)
     ("read"          :both)
-    ("conditions"    :target)
     ("backquote"     :both)
     ("compiler"
      ("codegen"      :both)
