@@ -432,8 +432,6 @@
   (mapappend #'canonicalize-defclass-option options)))
 
 ;;; find-class
-(defparameter *class-table* (make-hash-table :test #'eq))
-
 (defun !find-class (symbol &optional (errorp t))
   (let ((class (gethash symbol *class-table* nil)))
     (if (and (null class) errorp)
