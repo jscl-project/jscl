@@ -115,7 +115,8 @@
          ;; get-setf-expansion by consulting this register of SETF
          ;; definitions.
          (let ((sfn 
-                 (let ((pname (write-to-string name)))
+                 (let ((pname
+                         (concat "(" (symbol-name (car name)) "_" (symbol-name (cadr name)) ")")))
                    (intern pname
                            (symbol-package (cadr name))))))
            `(progn
@@ -491,15 +492,10 @@
 (defun values (&rest args)
   (values-list args))
 
-;;; Early error definition.
-(defun error (fmt &rest args)
-  (%throw (apply #'format nil fmt args)))
-
 (defmacro nth-value (n form)
   `(multiple-value-call (lambda (&rest values)
                           (nth ,n values))
      ,form))
-
 
 (defun constantp (x)
   ;; TODO: Consider quoted forms, &environment and many other
@@ -514,6 +510,13 @@
     (t
      nil)))
 
+(defparameter *features* '(:jscl :common-lisp))
+
+;;; Early error definition.
+(defun error (fmt &rest args)
+  (if (fboundp 'format)
+      (%throw (apply #'format nil fmt args))
+      (%throw (lisp-to-js (concat "BOOT PANIC! " (string fmt))))))
 
 ;;; print-unreadable-object
 (defmacro !print-unreadable-object ((object stream &key type identity) &body body)

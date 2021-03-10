@@ -1307,9 +1307,12 @@
 (define-builtin /debug (x)
   `(method-call |console| "log" (call-internal |xstring| ,x)))
 
-(define-builtin /log (x)
-  `(method-call |console| "log" ,x))
-
+(define-raw-builtin /log (x &rest y)
+  `(selfcall
+    (call (get |console| "log")
+          ,x
+          ,@(mapcar #'convert y))
+    (return ,(convert nil))))
 
 ;;; Storage vectors. They are used to implement arrays and (in the
 ;;; future) structures.

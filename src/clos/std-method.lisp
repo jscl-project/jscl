@@ -21,38 +21,39 @@
 (/debug "loading std-method")
 
 
-(defun canonicalize-specializers (specializers)
-  (if specializers
-      `(list ,@(mapcar #'canonicalize-specializer specializers))
-      '()))
+(eval-always
+ (defun canonicalize-specializer (specializer)
+   `(!find-class ',specializer))
 
+ (defun canonicalize-specializers (specializers)
+   (if specializers
+       `(list ,@(mapcar #'canonicalize-specializer specializers))
+       '())))
 
-(defun canonicalize-specializer (specializer)
-  `(!find-class ',specializer))
-
-(defun parse-defmethod (args)
-  (let ((fn-spec (car args))
-        (qualifiers ())
-        (specialized-lambda-list nil)
-        (body ())
-        (parse-state :qualifiers))
-    (dolist (arg (cdr args))
-      (ecase parse-state
-        (:qualifiers
-         (if (and (atom arg) (not (null arg)))
-             (push-on-end arg qualifiers)
-             (progn (setq specialized-lambda-list arg)
-                    (setq parse-state :body))))
-        (:body (push-on-end arg body))))
-    (values fn-spec
-            qualifiers
-            (extract-lambda-list specialized-lambda-list)
-            (extract-specializers specialized-lambda-list)
-            (list* 'block
-                   (if (consp fn-spec)
-                       (cadr fn-spec)
-                       fn-spec)
-                   body))))
+(eval-always
+ (defun parse-defmethod (args)
+   (let ((fn-spec (car args))
+         (qualifiers ())
+         (specialized-lambda-list nil)
+         (body ())
+         (parse-state :qualifiers))
+     (dolist (arg (cdr args))
+       (ecase parse-state
+         (:qualifiers
+          (if (and (atom arg) (not (null arg)))
+              (push-on-end arg qualifiers)
+              (progn (setq specialized-lambda-list arg)
+                     (setq parse-state :body))))
+         (:body (push-on-end arg body))))
+     (values fn-spec
+             qualifiers
+             (extract-lambda-list specialized-lambda-list)
+             (extract-specializers specialized-lambda-list)
+             (list* 'block
+                    (if (consp fn-spec)
+                        (cadr fn-spec)
+                        fn-spec)
+                    body)))))
 
 ;;; Several tedious functions for analyzing lambda lists
 (defun required-portion (gf args)
@@ -67,83 +68,87 @@
            (generic-function-lambda-list gf))))
     (getf plist ':required-args)))
 
-(defun extract-lambda-list (specialized-lambda-list)
-  (let* ((plist (analyze-lambda-list specialized-lambda-list))
-         (requireds (getf plist ':required-names))
-         (rv (getf plist ':rest-var))
-         (ks (getf plist ':key-args))
-         (aok (getf plist ':allow-other-keys))
-         (opts (getf plist ':optional-args))
-         (auxs (getf plist ':auxiliary-args)))
-    `(,@requireds
-      ,@(if rv `(&rest ,rv) ())
-      ,@(if (or ks aok) `(&key ,@ks) ())
-      ,@(if aok '(&allow-other-keys) ())
-      ,@(if opts `(&optional ,@opts) ())
-      ,@(if auxs `(&aux ,@auxs) ()))))
+(eval-always
+ (defun extract-lambda-list (specialized-lambda-list)
+   (let* ((plist (analyze-lambda-list specialized-lambda-list))
+          (requireds (getf plist ':required-names))
+          (rv (getf plist ':rest-var))
+          (ks (getf plist ':key-args))
+          (aok (getf plist ':allow-other-keys))
+          (opts (getf plist ':optional-args))
+          (auxs (getf plist ':auxiliary-args)))
+     `(,@requireds
+       ,@(if rv `(&rest ,rv) ())
+       ,@(if (or ks aok) `(&key ,@ks) ())
+       ,@(if aok '(&allow-other-keys) ())
+       ,@(if opts `(&optional ,@opts) ())
+       ,@(if auxs `(&aux ,@auxs) ())))))
 
-(defun extract-specializers (specialized-lambda-list)
-  (let ((plist (analyze-lambda-list specialized-lambda-list)))
-    (getf plist ':specializers)))
+(eval-always
+ (defun extract-specializers (specialized-lambda-list)
+   (let ((plist (analyze-lambda-list specialized-lambda-list)))
+     (getf plist ':specializers))))
 
-(defvar *lambda-list-keywords* '(&optional &rest &key &aux &allow-other-keys))
+(eval-always
+ (defvar *lambda-list-keywords* '(&optional &rest &key &aux &allow-other-keys)))
 
-(defun analyze-lambda-list (lambda-list)
-  (labels ((make-keyword (symbol)
-             (intern (symbol-name symbol)
-                     (find-package 'keyword)))
-           (get-keyword-from-arg (arg)
-             (if (listp arg)
-                 (if (listp (car arg))
-                     (caar arg)
-                     (make-keyword (car arg)))
-                 (make-keyword arg))))
-    (let ((keys ())           ; Just the keywords
-          (key-args ())       ; Keywords argument specs
-          (required-names ()) ; Just the variable names
-          (required-args ())  ; Variable names & specializers
-          (specializers ())   ; Just the specializers
-          (rest-var nil)
-          (optionals ())
-          (auxs ())
-          (allow-other-keys nil)
-          (state :parsing-required))
-      (dolist (arg lambda-list)
-        (if (member arg *lambda-list-keywords*)
-            (ecase arg
-              (&optional
-               (setq state :parsing-optional))
-              (&rest
-               (setq state :parsing-rest))
-              (&key
-               (setq state :parsing-key))
-              (&allow-other-keys
-               (setq allow-other-keys 't))
-              (&aux
-               (setq state :parsing-aux)))
-            (case state
-              (:parsing-required
-               (push-on-end arg required-args)
-               (if (listp arg)
-                   (progn (push-on-end (car arg) required-names)
-                          (push-on-end (cadr arg) specializers))
-                   (progn (push-on-end arg required-names)
-                          (push-on-end 't specializers))))
-              (:parsing-optional (push-on-end arg optionals))
-              (:parsing-rest (setq rest-var arg))
-              (:parsing-key
-               (push-on-end (get-keyword-from-arg arg) keys)
-               (push-on-end arg key-args))
-              (:parsing-aux (push-on-end arg auxs)))))
-      (list  :required-names required-names
-             :required-args required-args
-             :specializers specializers
-             :rest-var rest-var
-             :keywords keys
-             :key-args key-args
-             :auxiliary-args auxs
-             :optional-args optionals
-             :allow-other-keys allow-other-keys))))
+(eval-always
+ (defun analyze-lambda-list (lambda-list)
+   (labels ((make-keyword (symbol)
+              (intern (symbol-name symbol)
+                      (find-package 'keyword)))
+            (get-keyword-from-arg (arg)
+              (if (listp arg)
+                  (if (listp (car arg))
+                      (caar arg)
+                      (make-keyword (car arg)))
+                  (make-keyword arg))))
+     (let ((keys ())                    ; Just the keywords
+           (key-args ())                ; Keywords argument specs
+           (required-names ())          ; Just the variable names
+           (required-args ())           ; Variable names & specializers
+           (specializers ())            ; Just the specializers
+           (rest-var nil)
+           (optionals ())
+           (auxs ())
+           (allow-other-keys nil)
+           (state :parsing-required))
+       (dolist (arg lambda-list)
+         (if (member arg *lambda-list-keywords*)
+             (ecase arg
+               (&optional
+                (setq state :parsing-optional))
+               (&rest
+                (setq state :parsing-rest))
+               (&key
+                (setq state :parsing-key))
+               (&allow-other-keys
+                (setq allow-other-keys 't))
+               (&aux
+                (setq state :parsing-aux)))
+             (case state
+               (:parsing-required
+                (push-on-end arg required-args)
+                (if (listp arg)
+                    (progn (push-on-end (car arg) required-names)
+                           (push-on-end (cadr arg) specializers))
+                    (progn (push-on-end arg required-names)
+                           (push-on-end 't specializers))))
+               (:parsing-optional (push-on-end arg optionals))
+               (:parsing-rest (setq rest-var arg))
+               (:parsing-key
+                (push-on-end (get-keyword-from-arg arg) keys)
+                (push-on-end arg key-args))
+               (:parsing-aux (push-on-end arg auxs)))))
+       (list  :required-names required-names
+              :required-args required-args
+              :specializers specializers
+              :rest-var rest-var
+              :keywords keys
+              :key-args key-args
+              :auxiliary-args auxs
+              :optional-args optionals
+              :allow-other-keys allow-other-keys)))))
 
 ;;; ensure method
 ;;; @vlad-km
@@ -405,14 +410,15 @@
 ;;; N.B. The function kludge-arglist is used to pave over the differences
 ;;; between argument keyword compatibility for regular functions versus
 ;;; generic functions.
-(defun kludge-arglist (lambda-list)
-  (if (and (member '&key lambda-list)
-           (not (member '&allow-other-keys lambda-list)))
-      (append lambda-list '(&allow-other-keys))
-      (if (and (not (member '&rest lambda-list))
-               (not (member '&key lambda-list)))
-          (append lambda-list '(&key &allow-other-keys))
-          lambda-list)))
+(eval-always
+ (defun kludge-arglist (lambda-list)
+   (if (and (member '&key lambda-list)
+            (not (member '&allow-other-keys lambda-list)))
+       (append lambda-list '(&allow-other-keys))
+       (if (and (not (member '&rest lambda-list))
+                (not (member '&key lambda-list)))
+           (append lambda-list '(&key &allow-other-keys))
+           lambda-list))))
 
 ;;; @vlad-km
 ;;; Bye, artefact

@@ -12,6 +12,7 @@
 ;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
+(/debug "loading symbol.lisp!")
 
 (defun symbol-plist (x)
   (cond

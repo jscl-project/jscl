@@ -18,6 +18,8 @@
 ;;; system of Common Lisp, except that any value will work as a
 ;;; condition. Because, well, we do not have conditions at this point.
 
+(/debug "loading conditions.lisp!")
+
 
 (defvar *handler-bindings* nil)
 

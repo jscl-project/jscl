@@ -15,8 +15,6 @@
 
 (/debug "loading misc.lisp!")
 
-(defparameter *features* '(:jscl :common-lisp))
-
 (defun lisp-implementation-type ()
   "JSCL")
 

@@ -181,23 +181,26 @@
 
 
 
-(defun canonicalize-defgeneric-ll (lst)
+(eval-always
+ (defun canonicalize-defgeneric-ll (lst)
   (if lst
       `',lst
-      '()))
+      '())))
 
-(defun canonicalize-defgeneric-options (options)
-  (mapappend #'canonicalize-defgeneric-option options))
+(eval-always
+ (defun canonicalize-defgeneric-option (option)
+   (case (car option)
+     (:generic-function-class
+      (list ':generic-function-class
+            `(!find-class ',(cadr option))))
+     (:method-class
+      (list ':method-class
+            `(!find-class ',(cadr option))))
+     (t (list `',(car option) `',(cadr option)))))
 
-(defun canonicalize-defgeneric-option (option)
-  (case (car option)
-    (:generic-function-class
-     (list ':generic-function-class
-           `(!find-class ',(cadr option))))
-    (:method-class
-     (list ':method-class
-           `(!find-class ',(cadr option))))
-    (t (list `',(car option) `',(cadr option)))))
+ (defun canonicalize-defgeneric-options (options)
+   (mapappend #'canonicalize-defgeneric-option options)))
+
 
 ;;; find-generic-function looks up a generic function by name.  It's an
 ;;; artifact of the fact that our generic function metaobjects can't legally
