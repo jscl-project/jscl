@@ -514,13 +514,9 @@
 
 ;;; Early error definition.
 (defun error (fmt &rest args)
-  (let ((msg fmt))
-    (if (fboundp 'format)
-        (progn
-          (setq msg (apply #'format nil fmt args))
-          (/debug msg))
-        (%console msg args)))
-  (%throw "ERROR!"))
+  (if (fboundp 'format)
+      (%throw (apply #'format nil fmt args))
+      (%throw (lisp-to-js (concat "BOOT PANIC! " (string fmt))))))
 
 ;;; print-unreadable-object
 (defmacro !print-unreadable-object ((object stream &key type identity) &body body)
