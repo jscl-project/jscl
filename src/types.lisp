@@ -155,5 +155,32 @@
       (setf (gethash name *builtin-types*) tip)
       (%deftype name :predicate predicate))))
 
+(defun builtin-type-p (name &optional (content-p nil))
+  (let (type-info)
+    (setq type-info
+          (gethash (if (consp name) (car name) name) *builtin-types*))
+    (if (null type-info)
+        (values nil nil)
+        (if content-p
+            (values type-info t)
+            (values (if type-info t nil) t)))))
+
+;;; for clos unify
+(defun %build-inherit-types (for)
+  (%lmapcar #'class-name (class-precedence-list (find-class for))))
+
+;;; => class-cpl-list::= (name ... name)
+;;;   name::= symbol
+(defun %class-cpl(class-name)
+  (%lmapcar #'class-name (class-precedence-list (find-class class-name nil))))
+
+;;; c1-cpl::= symbol | cpl
+;;; c2-name::= symbol | (find-class c2)
+(defun %subclass (c1-cpl c2-name)
+  (if (memq (if (symbolp c2-name) c2-name (class-name c2-name))
+            (if (symbolp c1-cpl) (%class-cpl c1-cpl) c1-cpl))
+      t
+      nil))
+
 ;;; EOF
 
