@@ -83,5 +83,27 @@
              (setf (gethash name *types*) exists))
             (t exists)))))
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun %deftype (name &key expander compound predicate)
+    (let ((type (%deftype-info name)))
+      (when expander
+        (setf (type-info-expand type) expander) )
+      (when compound
+        (setf (type-info-compound type) compound))
+      (when predicate
+        (setf (type-info-predicate type) predicate)))))
+
+(defun get-expander-for (type)
+  (let ((exists (%deftype-info (if (symbolp type) type (car type)) nil)))
+    (if exists (type-info-expand exists))))
+
+(defun get-compound-for (type)
+  (let ((exists (%deftype-info (if (symbolp type) type (car type)) nil)))
+    (if exists (type-info-compound exists))))
+
+(defun get-predicate-for (type)
+  (let ((exists (%deftype-info (if (symbolp type) type (car type)) nil)))
+    (if exists (type-info-predicate exists))))
+
 ;;; EOF
 
