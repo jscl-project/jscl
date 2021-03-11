@@ -1,6 +1,7 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-;;; DEFTYPE
+;;; Tiny type system for JSCL
+;;; @vkm
 (/debug "loading types.lisp!")
 
 
