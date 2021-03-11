@@ -105,5 +105,55 @@
   (let ((exists (%deftype-info (if (symbolp type) type (car type)) nil)))
     (if exists (type-info-predicate exists))))
 
+(defparameter *types-basic-types*
+  ;; name              predicate     class super-class rest
+  '((hash-table        hash-table-p   t    t )
+    (package           packagep       t    t )
+    (stream            streamp        t    t )
+    (atom              atom           t    t )
+    (structure         structure-p    t    t )
+    (js-object         js-object-p    t    t )
+    (js-null           js-null-p      t    t )
+    (mop-object        mop-object-p   nil  t)
+    (character         characterp     t    t )
+    ;; symbol relations
+    (symbol            symbolp        t    t )
+    (keyword           keywordp       t    symbol t)
+    ;; callable relations
+    (function          functionp     t    t )
+    ;; numeric relations
+    (number            numberp       t    t)
+    (real              realp         t    number t)
+    ;;(rational          rationalp     t    real   number t)
+    (float             floatp        t    real number t)
+    (integer           integerp      t    real number t)
+    ;; sequnce relations  
+    (sequence          sequencep      t    t)
+    (list              listp          t    sequence t)
+    (cons              consp          t    list sequence t)
+    (array             arrayp         t    sequence t)
+    (vector            vectorp        t    array sequence t)
+    (string            stringp        t    vector array sequence t)
+    (null              null           t    list sequence t)
+    (nil               null           nil  list sequence t)
+    (t                 true           nil  t)))
+
+(%i-struct (basic-type (:form &key))  name predicate class-of supertype tpl)
+
+(defvar *builtin-types* (make-hash-table :test #'eql)  "hand off")
+
+(let ((tip))
+  (/debug "            compile basic types")
+  (dolist (it *types-basic-types*)
+    (destructuring-bind (name predicate class-of supertype &rest tpl) it
+      (setq tip (%make-basic-type
+                 :name name
+                 :predicate predicate
+                 :supertype supertype
+                 :class-of class-of
+                 :tpl tpl))
+      (setf (gethash name *builtin-types*) tip)
+      (%deftype name :predicate predicate))))
+
 ;;; EOF
 
