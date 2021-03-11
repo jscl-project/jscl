@@ -37,5 +37,40 @@
       (cdr ret-list)))
   )
 
+;;; defstruct - internal, shortly version
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun %struct-generator (kind options slots)
+    (let* ((constructor (cadr (assoc :constructor options)))
+           (keys (cadr (assoc :form options)))
+           (names (mapcar (lambda (x) (if (consp x) (car x) x)) slots))
+           (option (if keys keys '&optional))
+           (maker)
+           (makname (if constructor
+                        (intern (symbol-name constructor))
+                        (intern (concat "%MAKE-" (symbol-name `,kind)))))
+           (getter)
+           (position 0)
+           (q))
+      (unless (memq option '(&key &optional)) (error "Something went wrong: ~a." options))
+      (setq maker
+            `(defun ,makname (,option ,@slots)  (list ,@names)))
+      (dolist (it names)
+        (setq getter (intern (concat (symbol-name kind) "-" (symbol-name it))))
+        (push `(defun ,getter (storage)(nth ,position storage)) q)
+        (push `(defun (setf ,getter) (value storage)
+                       (rplaca (nthcdr ,position storage) value) value)
+                    q)
+        (incf position))
+      (values maker (reverse q)))))
+
+(defmacro %i-struct (name-options &rest slots)
+  (let* ((name-options (ensure-list name-options))
+         (name (car name-options))
+         (options (rest name-options)))
+    (multiple-value-bind (maker accessors) (%struct-generator name options slots)
+      `(progn
+         ,maker
+         ,@accessors))))
+
 ;;; EOF
 
