@@ -72,5 +72,16 @@
          ,maker
          ,@accessors))))
 
+(%i-struct (type-info (:form &key)) name expand compound predicate)
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun %deftype-info (name &optional (create t))
+    (unless (symbolp name) (error "Not a symbol ~a." name))
+    (let ((exists (gethash name *types*)))
+      (cond ((and (not exists) create)
+             (setq exists (%make-type-info :name name))
+             (setf (gethash name *types*) exists))
+            (t exists)))))
+
 ;;; EOF
 
