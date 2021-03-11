@@ -182,6 +182,28 @@
       t
       nil))
 
+;;; from CLOS std-object.lisp
+(defun built-in-class-of (x)
+  (typecase x
+    (null                         (!find-class 'null))
+    (hash-table                   (!find-class 'hash-table))
+    (structure                    (!find-class 'structure))
+    (symbol                       (!find-class 'symbol))
+    (keyword                      (!find-class 'keyword))
+    (integer                      (!find-class 'integer))
+    (float                        (!find-class 'float))
+    (cons                         (!find-class 'cons))
+    (character                    (!find-class 'character))
+    (package                      (!find-class 'package))
+    (string                       (!find-class 'string))
+    (vector                       (!find-class 'vector))
+    (array                        (!find-class 'array))
+    (sequence                     (!find-class 'sequence))
+    (function                     (!find-class 'function))
+    (js-object                    (!find-class 'js-object))
+    ;;; and Root of the Evil
+    (t                            (!find-class 't))))
+
 ;;; type expander
 (defun type-expand-1 (type)
   (unless (symbolp type)
@@ -246,6 +268,7 @@
       (if expanded-p
           (!typep object expansion)
           (error "Unknown type-specifier ~a."  type-specifier)))))
+
 
 ;;; EOF
 
