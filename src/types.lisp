@@ -182,5 +182,70 @@
       t
       nil))
 
+;;; type expander
+(defun type-expand-1 (type)
+  (unless (symbolp type)
+    (unless (listp type)
+      (return-from type-expand-1 (values type nil))))
+  (let ((expander (get-expander-for type)))
+    (cond (expander
+           (if (symbolp type)
+               (setq type (list type)))
+           (values (funcall expander type) t))
+          ((and (consp type)
+                (cadr type))
+           (multiple-value-bind (expansion expanded-p)
+               (type-expand (cadr type))
+             (if expanded-p
+                 (values (list* (first type) expansion (cddr type)) t)
+                 (values type nil))))
+          (t (values type nil)))))
+
+(defun type-expand (form)
+  (let ((expanded-p nil))
+    (while t
+      (multiple-value-bind (expander continue)
+          (type-expand-1 form)
+        (unless continue
+          (return-from type-expand
+            (values expander expanded-p)))
+        (setq expanded-p t
+              form expander)))))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun !typep (object type-specifier)
+    (if (eql type-specifier 'nil)
+        (return-from !typep nil))
+    (if (std-instance-p type-specifier)
+        (return-from !typep (!typep object (class-name type-specifier))))
+    (let ((may-be-predicate
+            (cond ((symbolp type-specifier) type-specifier)
+                  ((and (consp type-specifier)(null (rest type-specifier)))
+                   (car type-specifier))
+                  (t nil))))
+      (if may-be-predicate
+          (let ((test  (get-predicate-for may-be-predicate)))
+            (if test
+                (return-from !typep (funcall test object))))))
+    (let ((test (get-compound-for type-specifier)))
+      (if test
+          (return-from !typep (funcall test object type-specifier))))
+    (if (symbolp type-specifier)
+        (let ((class-object nil))
+          (if (find-class type-specifier nil)
+              (setq class-object
+                    (cond ((std-instance-p object)
+                           (class-name (class-of object)))
+                          ((std-instance-class object)
+                           (class-name object)))))
+          (if class-object
+              (return-from !typep
+                (%subclass (%class-cpl class-object) type-specifier)))))
+    (multiple-value-bind (expansion expanded-p)
+        (type-expand type-specifier)
+      (if expanded-p
+          (!typep object expansion)
+          (error "Unknown type-specifier ~a."  type-specifier)))))
+
 ;;; EOF
 
