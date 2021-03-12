@@ -80,8 +80,10 @@
     (values res (- number (* res divisor)))))
 ;;; @vkm 30.11 end
 
-(defun integerp (x)
-  (and (numberp x) (= (floor x) x)))
+(defun numberp (x) (numberp x))
+(defun integerp (x) (%integer-p))
+(defun realp (x) (numberp x))
+(defun rationalp (x) (%integer-p x))
 
 (defun floatp (x)
   (and (numberp x) (not (integerp x))))
