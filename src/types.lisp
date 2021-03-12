@@ -358,5 +358,16 @@
              (or (eql t2 't)
                  (!typep (cdr object) t2))))))
 
+;;; (list *) | (list) | (list length)
+;;; non canonical type spec
+(deftype-compound  list (object type)
+  (when (consp object)
+    (if (not (%type-cons-p object))
+        (destructuring-bind (&optional (size '*)) (cdr type)
+          (cond ((eq size '*) t)
+                ((integerp size)
+                 (eq size (list-length object)))
+                (t (error "Bad list size specificator ~a." type)))))))
+
 ;;; EOF
 
