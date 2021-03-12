@@ -302,5 +302,19 @@
         `(eval-when (:load-toplevel :execute)
            (%deftype ',name :compound ,compound))))))
 
+(macrolet ((dc (type-name predicate-name limit-type)
+               `(deftype-compound ,type-name (object type)
+                  (if (,predicate-name object)
+                      (multiple-value-bind (min max)
+                          (canonicalize-numeric-limits type ',limit-type)
+                        (and (or (eql min '*)
+                                 (>= object min))
+                             (or (eql max '*)
+                                 (<= object max))))))))
+  (dc integer  integerp integer)
+  (dc number   numberp  number)
+  (dc real     numberp  real)
+  (dc float    floatp  float))
+
 ;;; EOF
 
