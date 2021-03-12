@@ -336,5 +336,27 @@
                (equal al (array-dimensions object)))               
               (t (false))))))
 
+;;; (cons * *) (cons thing thing)
+
+;;; dirty hack for to accurately definition  LIST and CONS forms
+(defun %type-cons-p (obj)
+  (handler-case
+      (progn (length obj) nil)
+    (error (ignore) t)))
+
+;;; pure list predicate: (%type-list-p (cons 1 2)) => nil
+;;;                      (listp (cons 1 2)) => t
+(defun %type-list-p (obj) (and (consp obj) (not (%type-cons-p obj))))
+
+(deftype-compound cons (object type)
+  (if (consp object)
+      (destructuring-bind (&optional (t1 '*) (t2 '*)) (cdr type)
+        (if (eq t1 '*) (setq t1 't))
+        (if (eq t2 '*) (setq t2 't))
+        (and (or (eql t1 't)
+                 (!typep (car object) t1))
+             (or (eql t2 't)
+                 (!typep (cdr object) t2))))))
+
 ;;; EOF
 
