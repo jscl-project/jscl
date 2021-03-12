@@ -409,6 +409,9 @@
     `(multiple-value-call (lambda ,gvars ,@setqs)
        ,@form)))
 
+;;; types utils
+(defun object-type-code (object) (oget object "dt_Name"))
+(defun set-object-type-code (object tag) (oset tag object "dt_Name"))
 
 ;;; mop predicate
 (defun mop-object-p (obj)
