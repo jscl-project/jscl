@@ -384,30 +384,26 @@
 
 ;;; predefenition types
 (deftype mod (n)
-  (unless (and (integerp n) (plusp n))
-    (error "Type (mod ~a)." n))
+  (unless (and (integerp n) (plusp n)) (error "Type (mod ~a)." n))
   `(integer 0 (,n)))
 
 (deftype fixnum ()
   `(integer ,most-negative-fixnum ,most-positive-fixnum))
 
 (deftype bignum ()
-  `(and integer (not fixnum)))
+  ;; and integer not fixnum
+  `(and integer (not (integer ,most-negative-fixnum ,most-positive-fixnum))))
 
 (deftype signed-byte (&optional (s '*))
   (cond ((eq s '*) 'integer)
         ((and (integerp s) (> s 0))
-         (let ((bound (ash 1 (1- s))))
-           `(integer ,(- bound) ,(1- bound))))
-        (t
-         (error "Bad size specified for SIGNED-BYTE type specifier: ~a."  s))))
+         (let ((bound (ash 1 (1- s)))) `(integer ,(- bound) ,(1- bound))))
+        (t (error "Bad size specified for SIGNED-BYTE type specifier: ~a."  s))))
 
 (deftype unsigned-byte (&optional (s '*))
-  (cond ((eq s '*) '(integer 0))
-        ((and (integerp s) (> s 0))
-         `(integer 0 ,(1- (ash 1 s))))
-        (t
-         (error "Bad size specified for UNSIGNED-BYTE type specifier: ~a."  s))))
+  (cond ((eq s '*) '(integer 0 *))
+        ((and (integerp s) (> s 0)) `(integer 0 ,(1- (ash 1 s))))
+        (t (error "Bad size specified for UNSIGNED-BYTE type specifier: ~a."  s))))
 
 (deftype type-specifier ()  '(or list symbol ))
 (deftype string-designator () '(or string symbol character))
