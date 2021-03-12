@@ -216,7 +216,7 @@
   (typecase x
     (null                         (!find-class 'null))
     (hash-table                   (!find-class 'hash-table))
-    (structure                    (!find-class 'structure))
+    ;;(structure                    (!find-class 'structure))
     (symbol                       (!find-class 'symbol))
     (keyword                      (!find-class 'keyword))
     (integer                      (!find-class 'integer))
