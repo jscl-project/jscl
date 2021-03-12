@@ -369,5 +369,22 @@
                  (eq size (list-length object)))
                 (t (error "Bad list size specificator ~a." type)))))))
 
+;;; todo: canonical deftype lambda-list
+(defmacro deftype (&whole whole name lambda-list &body body)
+  (destructuring-bind (name args &body body) whole
+    (if (null args)
+        (setq args '(&optional ignore)))
+    (multiple-value-bind (body decls docstring)
+        (parse-body body :declarations t :docstring t)
+      (let* ((expr (gensym (symbol-name name)))
+             (expander
+               `(function
+                 (lambda (,expr)
+                  (destructuring-bind ,args (cdr ,expr)
+                    ,@body)))))
+        `(progn
+           (%deftype ',name :expander ,expander)
+           ',name)))))
+
 ;;; EOF
 
