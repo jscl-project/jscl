@@ -242,27 +242,6 @@
       (std-instance-class x)
       (built-in-class-of x)))
 
-(defun built-in-class-of (x)
-  (typecase x
-    (null                         (!find-class 'null))
-    (hash-table                   (!find-class 'hash-table))
-    (structure                    (!find-class 'structure))
-    (symbol                       (!find-class 'symbol))
-    (integer                      (!find-class 'integer))
-    (float                        (!find-class 'float))
-    (cons                         (!find-class 'cons))
-    (character                    (!find-class 'character))
-    (package                      (!find-class 'package))
-    (string                       (!find-class 'string))
-    (vector                       (!find-class 'vector))
-    (array                        (!find-class 'array))
-    (sequence                     (!find-class 'sequence))
-    (function                     (!find-class 'function))
-    (js-object                    (!find-class 'js-object))
-    (t                            (!find-class 't))))
-
-
-
 ;;; subclassp and sub-specializer-p
 (defun subclassp (c1 c2)
   (not (null (find c2 (class-precedence-list c1)))))
