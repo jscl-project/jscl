@@ -394,11 +394,33 @@
   ;; and integer not fixnum
   `(and integer (not (integer ,most-negative-fixnum ,most-positive-fixnum))))
 
+(defun signed-byte-8-p (n)
+  (and (fixnump n)
+       (and (>= n -128)(<= n 127)))))
+(defun signed-byte-16-p (n)
+  (and (fixnump n)
+       (and (>= n -32768)(<= n 32767))))
+(defun signed-byte-32-p (n)
+  (and (integerp n)
+       (>= n  -2147483648)
+       (<= n 2147483647)))
+
 (deftype signed-byte (&optional (s '*))
   (cond ((eq s '*) 'integer)
         ((and (integerp s) (> s 0))
          (let ((bound (ash 1 (1- s)))) `(integer ,(- bound) ,(1- bound))))
         (t (error "Bad size specified for SIGNED-BYTE type specifier: ~a."  s))))
+
+(defun unsigned-byte-8-p (n)
+  (and (fixnump n)
+       (and (>= n 0) (< n #x100))))
+(defun unsigned-byte-16-p (n)
+  (and (fixnump n)
+       (and (>= n 0)(< n #x10000))))
+(defun unsigned-byte-32-p (n)
+  (and (integerp n)
+       (>= n 0)
+       (<= n #xffffffff)))
 
 (deftype unsigned-byte (&optional (s '*))
   (cond ((eq s '*) '(integer 0 *))
