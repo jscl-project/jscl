@@ -19,11 +19,7 @@
       (setq list (cdr list))))
 
 
-;;; lighweight mapcar
-;;; CL-USER> (time (dotimes (i 1000) (mapcar (lambda (x) (list x)) '(1 2 3 4))))
-;;; Execution took 0.032 seconds.
-;;; CL-USER> (time (dotimes (i 1000) (%lmapcar (lambda (x) (list x)) '(1 2 3 4))))
-;;; Execution took 0.008 seconds.
+;;; lightweight mapcar
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun %lmapcar (fn list)
     (let* ((ret-list (list nil))
