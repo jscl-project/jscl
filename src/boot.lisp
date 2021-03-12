@@ -413,22 +413,6 @@
 (defun object-type-code (object) (oget object "dt_Name"))
 (defun set-object-type-code (object tag) (oset tag object "dt_Name"))
 
-;;; mop predicate
-(defun mop-object-p (obj)
-    (and (consp obj)
-         (eq (oget obj "tagName") :mop-object)
-         (= (length obj) 5)))
-
-;;; js-object predicate
-(defun js-object-p (obj)
-  (if (or (sequencep obj)
-          (numberp obj)
-          (symbolp obj)
-          (functionp obj)
-          (packagep obj))
-      nil
-      t))
-
 ;; Incorrect typecase, but used in NCONC.
 (defmacro typecase (x &rest clausules)
   (let ((value (gensym)))

@@ -101,16 +101,49 @@
   (let ((exists (%deftype-info (if (symbolp type) type (car type)) nil)))
     (if exists (type-info-predicate exists))))
 
+;;; mop predicate
+(defun mop-object-p (obj)
+    (and (consp obj)
+         (eq (oget obj "tagName") :mop-object)
+         (= (length obj) 5)))
+
+;;; js-object predicate
+(defun js-object-p (obj)
+  (if (or (sequencep obj)
+          (numberp obj)
+          (symbolp obj)
+          (functionp obj)
+          (characterp obj)
+          (packagep obj))
+      nil
+      t))
+
+;;; js-null predicate
+(defun js-null-p (obj) (js-null-p obj))
+
+;;; other's
+(defun true (&optional (always t)) t)
+(defun false (&optional (always nil)) nil)
+(defun void () (values))
+
+(defun functionp (f) (functionp f))
+
+;;; future upgrade
+(defun stream-p (object) (eql (object-type-code object) :stream))
+(defun condition-p (object) (eql (object-type-code object) :condition))
+(defun clos-object-p (object) (eql (object-type-code object) :clos_object))
+
+
 (defparameter *types-basic-types*
   ;; name              predicate     class super-class rest
   '((hash-table        hash-table-p   t    t )
     (package           packagep       t    t )
-    (stream            streamp        t    t )
+    ;;(stream            streamp        t    t )
     (atom              atom           t    t )
-    (structure         structure-p    t    t )
+    ;;(structure         structure-p    t    t )
     (js-object         js-object-p    t    t )
     (js-null           js-null-p      t    t )
-    (mop-object        mop-object-p   nil  t)
+    (clos-object       mop-object-p   nil  t)
     (character         characterp     t    t )
     ;; symbol relations
     (symbol            symbolp        t    t )
