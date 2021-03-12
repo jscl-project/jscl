@@ -390,6 +390,7 @@
 (deftype fixnum ()
   `(integer ,most-negative-fixnum ,most-positive-fixnum))
 
+;;; Yeat another Root of the Evil
 (deftype bignum ()
   ;; and integer not fixnum
   `(and integer (not (integer ,most-negative-fixnum ,most-positive-fixnum))))
@@ -421,6 +422,8 @@
   (and (integerp n)
        (>= n 0)
        (<= n #xffffffff)))
+
+(deftype bit () `(integer 0 1))
 
 (deftype unsigned-byte (&optional (s '*))
   (cond ((eq s '*) '(integer 0 *))
