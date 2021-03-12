@@ -273,6 +273,34 @@
    (error "Type error. ~%The value of ~s is ~s, is not ~a ~a."
           place value typespec (if (null string) "" string)))
 
+;;; numeric [lower-limit [upper-limit]]
+(defun check-numeric-limit (limit his-type)
+  (when (consp limit)
+    (if (rest limit)(error "Bad numeric limit ~a." limit))
+    (setq limit (1- (car limit))))
+  (unless (or (eql limit '*) (!typep limit his-type))
+    (error "Bad numeric limit ~a." limit))
+  limit)
+
+(defun canonicalize-numeric-limits (type-specifier limit-type)
+  (if (consp type-specifier)
+      (let* ((req (validate-reqvars (cdr type-specifier) 0))
+             (low (if (null req) '* (car req)))
+             (high (if (null (cdr req)) '* (cadr req))))
+        (values (check-numeric-limit low limit-type)
+                (check-numeric-limit high limit-type) ))
+      (values '* '*)))
+
+(defmacro deftype-compound (&whole whole name args &body body)
+  (destructuring-bind (name lambda-list &body body) whole
+    (multiple-value-bind (body decls docstring)
+        (parse-body body :declarations t :docstring t)
+      (let* ((compound
+               `(function
+                 (lambda ,lambda-list
+                  ,@body))))
+        `(eval-when (:load-toplevel :execute)
+           (%deftype ',name :compound ,compound))))))
 
 ;;; EOF
 
