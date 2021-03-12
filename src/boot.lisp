@@ -473,7 +473,7 @@
          (t (error "~S fell through etypecase expression." ,x))))
 
 
-;;; No type system is implemented yet.
+;;; it remains so. not all at once
 (defun subtypep (type1 type2)
   (cond
     ((null type1)
