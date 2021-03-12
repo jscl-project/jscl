@@ -254,6 +254,7 @@
               (setq class-object
                     (cond ((std-instance-p object)
                            (class-name (class-of object)))
+                          ;; todo: 
                           ((std-instance-class object)
                            (class-name object)))))
           (if class-object
