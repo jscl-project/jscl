@@ -321,15 +321,37 @@
                (eql vector-length (oget object "length")))
               (t (false))))))
 
-;;; (array dimensions) | dimensions::=(n...*)
+;;; (array type dimensions)  dimensions::=(n...*)
+(defun %compare-array-type (object type-spec)
+  (destructuring-bind (type-base &optional (type-element-type '*) (type-dimensions '*))
+      type-spec
+    (when (integerp type-dimensions)(setq type-dimensions (list type-dimensions)))
+    (let ((object-element-type (array-element-type object))
+          (object-dimensions (array-dimensions object)))
+      (cond ((not (eql (list-length type-dimensions) (list-length object-dimensions))) nil)
+            ((equal '(t t)
+                    (mapcar
+                     (lambda (axis-object axis-type)
+                       (cond ((eql axis-type '*) t)
+                             ((eql axis-object '*) nil)
+                             (t (<= axis-object axis-type))))
+                     object-dimensions
+                     type-dimensions)))))))
+
 (deftype-compound array (object type)
   (if (arrayp object)
-      (let ((al (cadr type)))
-        (cond ((eql al '*) t)
-              ((integerp al)
-               (eql al (oget object "length")))
-              ((consp al)
-               (equal al (array-dimensions object)))               
+      (let ((element-type (cadr type))
+            (dimensions (caddr type)))
+        (if (null element-type)
+            (setq element-type 'T dimensions '*)
+            (if (null dimension) (setq dimensions '*)))
+        ;; array element type doesn't compare
+        ;; only dimensions 
+        (cond ((eql dimensions '*) t)
+              ((integerp dimensions)
+               (%compare-array-type object (list dimensions)))
+              ((consp dimensions)
+               (%compare-array-type object dimensions))               
               (t (false))))))
 
 ;;; (cons * *) (cons thing thing)
