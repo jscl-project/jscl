@@ -316,5 +316,25 @@
   (dc real     numberp  real)
   (dc float    floatp  float))
 
+;;; (vector dimension) ::= (vector *) | (vector 35) 
+(deftype-compound vector (object type)
+  (if (vectorp object)
+      (let ((vector-length (cadr type)))
+        (cond ((eql vector-length '*) t)
+              ((integerp vector-length)
+               (eql vector-length (oget object "length")))
+              (t (false))))))
+
+;;; (array dimensions) | dimensions::=(n...*)
+(deftype-compound array (object type)
+  (if (arrayp object)
+      (let ((al (cadr type)))
+        (cond ((eql al '*) t)
+              ((integerp al)
+               (eql al (oget object "length")))
+              ((consp al)
+               (equal al (array-dimensions object)))               
+              (t (false))))))
+
 ;;; EOF
 
