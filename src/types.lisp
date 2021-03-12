@@ -234,7 +234,7 @@
   (defun !typep (object type-specifier)
     (if (eql type-specifier 'nil)
         (return-from !typep nil))
-    (if (std-instance-p type-specifier)
+    (if (mop-object-p type-specifier)
         (return-from !typep (!typep object (class-name type-specifier))))
     (let ((may-be-predicate
             (cond ((symbolp type-specifier) type-specifier)
