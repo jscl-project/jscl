@@ -413,6 +413,22 @@
 (defun object-type-code (object) (oget object "dt_Name"))
 (defun set-object-type-code (object tag) (oset tag object "dt_Name"))
 
+
+(defun %check-type-error (place value typespec string)
+   (error "Type error. ~%The value of ~s is ~s, is not ~a ~a."
+          place value typespec (if (null string) "" string)))
+
+(defmacro check-type (place typespec &optional string)
+  (let ((value (gensym)))
+    (if (symbolp place)
+        `(do ((,value ,place ,place))
+             ((!typep ,value ',typespec))
+           (setf ,place (%check-type-error ',place ,value ',typespec ,string)))
+        (if (!typep place typespec)
+            t
+            (%check-type-error place place typespec string)))))
+
+
 ;; Incorrect typecase, but used in NCONC.
 (defmacro typecase (x &rest clausules)
   (let ((value (gensym)))

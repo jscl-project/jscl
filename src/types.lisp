@@ -299,9 +299,6 @@
           (!typep object expansion)
           (error "Unknown type-specifier ~a."  type-specifier)))))
 
-(defun %check-type-error (place value typespec string)
-   (error "Type error. ~%The value of ~s is ~s, is not ~a ~a."
-          place value typespec (if (null string) "" string)))
 
 ;;; numeric [lower-limit [upper-limit]]
 (defun check-numeric-limit (limit his-type)
