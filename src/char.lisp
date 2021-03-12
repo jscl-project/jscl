@@ -1,5 +1,7 @@
 (/debug "loading char.lisp!")
 
+(defun characterp (ch) (characterp ch))
+
 ;; These comparison functions heavily borrowed from SBCL/CMUCL (public domain).
 
 (defun char= (character &rest more-characters)
