@@ -428,47 +428,49 @@
             t
             (%check-type-error place place typespec string)))))
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defparameter *basic-type-predicates*
+    '((hash-table . hash-table-p) (package . packagep) (stream . streamp)
+      (atom . atom) (structure . structure-p) (js-object . js-object-p)
+      (clos-object . mop-object-p) (character . characterp)
+      (symbol . symbolp)  (keyword . keywordp)
+      (function . functionp) 
+      (number . numberp) (real . realp) (rational . rationalp) (float . floatp)
+      (integer . integerp)
+      (sequence .  sequencep) (list . listp) (cons . consp) (array . arrayp)
+      (vector . vectorp) (string . stringp) (null . null)))
 
-;; Incorrect typecase, but used in NCONC.
-(defmacro typecase (x &rest clausules)
-  (let ((value (gensym)))
-    `(let ((,value ,x))
-       (cond
-         ,@(mapcar (lambda (c)
-                     (if (find (car c) '(t otherwise))
-                         `(t ,@(rest c))
-                         `((,(ecase (car c)
-                                    (fixnum 'integerp)
-                                    (integer 'integerp)
-                                    (structure 'structure-p)       
-                                    (hash-table 'hash-table-p)     
-                                    (mop-object 'mop-object-p) 
-                                    (js-object  'js-object-p)
-                                    (cons 'consp)
-                                    (list 'listp)
-                                    (vector 'vectorp)
-                                    (character 'characterp)
-                                    (sequence 'sequencep)
-                                    (symbol 'symbolp)
-                                    (keyword 'keywordp)
-                                    (function 'functionp)
-                                    (float 'floatp)
-                                    (array 'arrayp)
-                                    (string 'stringp)
-                                    (atom 'atom)
-                                    (null 'null)
-                                    (package 'packagep))
-                             ,value)
-                           ,@(or (rest c)
-                                 (list nil)))))
-                   clausules)))))
+  (defun simple-base-predicate-p (expr)
+    (if (symbolp expr)
+        (let ((pair (assoc expr *basic-type-predicates*)))
+          (if pair (cdr pair)))))
+
+  (defun typecase-expander (object clausules)
+    (let ((key)
+          (body)
+          (std-p)
+          (g!x (gensym "TYPECASE"))
+          (result '()))
+      (setq result
+            (dolist (it clausules (reverse result))
+                     (setq key (car it)
+                           body (cdr it)
+                           std-p (simple-base-predicate-p key))
+                     (cond (std-p (push `((,std-p ,g!x) ,@body) result))
+                           ((or (eq key 't) (eq key 'otherwise))
+                            (push `(t ,@body) result))
+                           (t (push `((!typep ,g!x ',key) ,@body) result)))))
+      `(let ((,g!x ,object))
+         (cond ,@result))))
+  )
+
+(defmacro typecase (form &rest clausules)
+        (typecase-expander `,form `,clausules))
 
 (defmacro etypecase (x &rest clausules)
-  (let ((g!x (gensym)))
-    `(let ((,g!x ,x))
-       (typecase ,g!x
+       `(typecase ,x
          ,@clausules
-         (t (error "~S fell through etypecase expression." ,g!x))))))
+         (t (error "~S fell through etypecase expression." ,x))))
 
 
 ;;; No type system is implemented yet.
