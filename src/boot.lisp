@@ -415,6 +415,36 @@
 (defun object-type-code (object) (oget object "dt_Name"))
 (defun set-object-type-code (object tag) (oset tag object "dt_Name"))
 
+;;; types predicate's
+;;; mop predicate
+(defun mop-object-p (obj)
+    (and (consp obj)
+         (eq (oget obj "tagName") :mop-object)
+         (= (length obj) 5)))
+;;; future upgrade
+(defun clos-object-p (object) (eql (object-type-code object) :clos_object))
+
+(defun js-object-p (obj)
+  (if (or (sequencep obj)
+          (numberp obj)
+          (symbolp obj)
+          (functionp obj)
+          (characterp obj)
+          (packagep obj))
+      nil
+      t))
+
+;;; symbol-function from compiler macro
+(defun functionp (f) (functionp f))
+(defun js-null-p (obj) (js-null-p obj))
+(defun js-undefined-p (obj) (js-undefined-p obj))
+
+(defun true () t)
+(defun false () nil)
+(defun void () (values))
+
+
+;;; types family
 (defun %check-type-error (place value typespec string)
    (error "Type error. ~%The value of ~s is ~s, is not ~a ~a."
           place value typespec (if (null string) "" string)))
@@ -423,9 +453,9 @@
   (let ((value (gensym)))
     (if (symbolp place)
         `(do ((,value ,place ,place))
-             ((!typep ,value ',typespec))
+             ((typep ,value ',typespec))
            (setf ,place (%check-type-error ',place ,value ',typespec ,string)))
-        (if (!typep place typespec)
+        (if (typep place typespec)
             t
             (%check-type-error place place typespec string)))))
 
@@ -433,6 +463,7 @@
   (defparameter *basic-type-predicates*
     '((hash-table . hash-table-p) (package . packagep) (stream . streamp)
       (atom . atom) (structure . structure-p) (js-object . js-object-p)
+      ;; todo: subtypep - remove mop-object from tables
       (clos-object . mop-object-p) (mop-object . mop-object-p) (character . characterp)
       (symbol . symbolp)  (keyword . keywordp)
       (function . functionp) 
@@ -444,7 +475,7 @@
   (defun simple-base-predicate-p (expr)
     (if (symbolp expr)
         (let ((pair (assoc expr *basic-type-predicates*)))
-          (if pair (cdr pair)))))
+          (if pair (cdr pair) nil))))
 
   (defun typecase-expander (object clausules)
     (let ((key)
@@ -457,10 +488,14 @@
               (setq key (car it)
                     body (cdr it)
                     std-p (simple-base-predicate-p key))
+              ;; (typecase keyform (type-spec form*))
+              ;; when: type-spec is symbol in *basic-type-predicates*, its predicate
+              ;;       -> (cond ((predicate keyform) form*))
+              ;; otherwise: (cond ((typep keyform (type-spec form*))))
               (cond (std-p (push `((,std-p ,g!x) ,@body) result))
                     ((or (eq key 't) (eq key 'otherwise))
                      (push `(t ,@body) result))
-                    (t (push `((!typep ,g!x ',key) ,@body) result)))))
+                    (t (push `((typep ,g!x ',key) ,@body) result)))))
       `(let ((,g!x ,object))
          (cond ,@result))))
   )
@@ -474,7 +509,7 @@
          (t (error "~S fell through etypecase expression." ,x))))
 
 
-;;; it remains so. not all at once
+;;; it remains so. not all at once. with these - live...
 (defun subtypep (type1 type2)
   (cond
     ((null type1)

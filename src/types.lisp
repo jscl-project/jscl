@@ -4,19 +4,19 @@
 ;;; @vkm
 (/debug "loading types.lisp!")
 
-
+;;; DEFTYPE
 (defvar *types* (make-hash-table :test #'eq))
-
+;;; DEFSTRUCT
 (defvar *structures* (make-hash-table :test #'eq))
-
+;;; DEFCLASS
 (defvar *class-table* (make-hash-table :test #'eq))
 
 ;;; another member from ccl
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun memq (item list)
     (while list
-      (if (eq item (car list)) (return list))
-      (setq list (cdr list))))
+           (if (eq item (car list)) (return list))
+           (setq list (cdr list)))))
 
 
 ;;; lightweight mapcar
@@ -33,7 +33,7 @@
       (cdr ret-list)))
   )
 
-;;; defstruct - internal, shortly version
+;;; internal unsafe defstruct version
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun %struct-generator (kind options slots)
     (let* ((constructor (cadr (assoc :constructor options)))
@@ -54,8 +54,8 @@
         (setq getter (intern (concat (symbol-name kind) "-" (symbol-name it))))
         (push `(defun ,getter (storage)(nth ,position storage)) q)
         (push `(defun (setf ,getter) (value storage)
-                       (rplaca (nthcdr ,position storage) value) value)
-                    q)
+                 (rplaca (nthcdr ,position storage) value) value)
+              q)
         (incf position))
       (values maker (reverse q)))))
 
@@ -100,39 +100,6 @@
 (defun get-predicate-for (type)
   (let ((exists (%deftype-info (if (symbolp type) type (car type)) nil)))
     (if exists (type-info-predicate exists))))
-
-;;; mop predicate
-(defun mop-object-p (obj)
-    (and (consp obj)
-         (eq (oget obj "tagName") :mop-object)
-         (= (length obj) 5)))
-
-;;; js-object predicate
-(defun js-object-p (obj)
-  (if (or (sequencep obj)
-          (numberp obj)
-          (symbolp obj)
-          (functionp obj)
-          (characterp obj)
-          (packagep obj))
-      nil
-      t))
-
-;;; js-null predicate
-(defun js-null-p (obj) (js-null-p obj))
-
-;;; other's
-(defun true (&optional (always t)) t)
-(defun false (&optional (always nil)) nil)
-(defun void () (values))
-
-(defun functionp (f) (functionp f))
-
-;;; future upgrade
-(defun stream-p (object) (eql (object-type-code object) :stream))
-(defun condition-p (object) (eql (object-type-code object) :condition))
-(defun clos-object-p (object) (eql (object-type-code object) :clos_object))
-
 
 (defparameter *types-basic-types*
   ;; name              predicate     class super-class rest
@@ -194,10 +161,6 @@
             (values type-info t)
             (values (if type-info t nil) t)))))
 
-;;; for clos unify
-(defun %build-inherit-types (for)
-  (%lmapcar #'class-name (class-precedence-list (find-class for))))
-
 ;;; => class-cpl-list::= (name ... name)
 ;;;   name::= symbol
 (defun %class-cpl(class-name)
@@ -216,9 +179,13 @@
   (typecase x
     (null                         (!find-class 'null))
     (hash-table                   (!find-class 'hash-table))
-    ;;(structure                    (!find-class 'structure))
+    (structure                    (!find-class 'structure))
+    (stream                       (!find-class 'stream))
     (symbol                       (!find-class 'symbol))
     (keyword                      (!find-class 'keyword))
+    (number                       (!find-class 'number))
+    (real                         (!find-class 'real))
+    (rational                     (!find-class 'rational))
     (integer                      (!find-class 'integer))
     (float                        (!find-class 'float))
     (cons                         (!find-class 'cons))
@@ -234,10 +201,10 @@
     (t                            (!find-class 't))))
 
 ;;; type expander
-(defun type-expand-1 (type)
+(defun %type-expand-1 (type)
   (unless (symbolp type)
-    (unless (listp type)
-      (return-from type-expand-1 (values type nil))))
+    (unless (consp type)
+      (return-from %type-expand-1 (values type nil))))
   (let ((expander (get-expander-for type)))
     (cond (expander
            (if (symbolp type)
@@ -246,29 +213,29 @@
           ((and (consp type)
                 (cadr type))
            (multiple-value-bind (expansion expanded-p)
-               (type-expand (cadr type))
+               (%type-expand (cadr type))
              (if expanded-p
-                 (values (list* (first type) expansion (cddr type)) t)
+                 (values (list* (car type) expansion (cddr type)) t)
                  (values type nil))))
           (t (values type nil)))))
 
-(defun type-expand (form)
+(defun %type-expand (form)
   (let ((expanded-p nil))
     (while t
       (multiple-value-bind (expander continue)
-          (type-expand-1 form)
+          (%type-expand-1 form)
         (unless continue
-          (return-from type-expand
+          (return-from %type-expand
             (values expander expanded-p)))
         (setq expanded-p t
               form expander)))))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun !typep (object type-specifier)
+  (defun typep (object type-specifier)
     (if (eql type-specifier 'nil)
-        (return-from !typep nil))
+        (return-from typep nil))
     (if (mop-object-p type-specifier)
-        (return-from !typep (!typep object (class-name type-specifier))))
+        (return-from typep (typep object (class-name type-specifier))))
     (let ((may-be-predicate
             (cond ((symbolp type-specifier) type-specifier)
                   ((and (consp type-specifier)(null (rest type-specifier)))
@@ -277,26 +244,26 @@
       (if may-be-predicate
           (let ((test  (get-predicate-for may-be-predicate)))
             (if test
-                (return-from !typep (funcall test object))))))
+                (return-from typep (funcall test object))))))
     (let ((test (get-compound-for type-specifier)))
       (if test
-          (return-from !typep (funcall test object type-specifier))))
+          (return-from typep (funcall test object type-specifier))))
     (if (symbolp type-specifier)
         (let ((class-object nil))
           (if (find-class type-specifier nil)
               (setq class-object
                     (cond ((std-instance-p object)
                            (class-name (class-of object)))
-                          ;; todo: 
+                          ;; fixme: 
                           ((std-instance-class object)
                            (class-name object)))))
           (if class-object
-              (return-from !typep
+              (return-from typep
                 (%subclass (%class-cpl class-object) type-specifier)))))
     (multiple-value-bind (expansion expanded-p)
-        (type-expand type-specifier)
+        (%type-expand type-specifier)
       (if expanded-p
-          (!typep object expansion)
+          (typep object expansion)
           (error "Unknown type-specifier ~a."  type-specifier)))))
 
 
@@ -305,7 +272,7 @@
   (when (consp limit)
     (if (rest limit)(error "Bad numeric limit ~a." limit))
     (setq limit (1- (car limit))))
-  (unless (or (eql limit '*) (!typep limit his-type))
+  (unless (or (eql limit '*) (typep limit his-type))
     (error "Bad numeric limit ~a." limit))
   limit)
 
@@ -339,6 +306,7 @@
                              (or (eql max '*)
                                  (<= object max))))))))
   (dc integer  integerp integer)
+  (dc rational integerp integer)
   (dc number   numberp  number)
   (dc real     numberp  real)
   (dc float    floatp  float))
@@ -352,7 +320,7 @@
                (eql vector-length (oget object "length")))
               (t (false))))))
 
-;;; (array type dimensions)  dimensions::=(n...*)
+;;; (array type dimensions)  type::= t | * | any  dimensions::=(n...*)
 (defun %compare-array-type (object type-spec)
   (destructuring-bind (type-base &optional (type-element-type '*) (type-dimensions '*))
       type-spec
@@ -369,6 +337,7 @@
                      object-dimensions
                      type-dimensions)))))))
 
+;;; without upgraded-array-element-type
 (deftype-compound array (object type)
   (if (arrayp object)
       (let ((element-type (cadr type))
@@ -403,9 +372,9 @@
         (if (eq t1 '*) (setq t1 't))
         (if (eq t2 '*) (setq t2 't))
         (and (or (eql t1 't)
-                 (!typep (car object) t1))
+                 (typep (car object) t1))
              (or (eql t2 't)
-                 (!typep (cdr object) t2))))))
+                 (typep (cdr object) t2))))))
 
 ;;; (list *) | (list) | (list length)
 ;;; non canonical type spec
@@ -440,10 +409,16 @@
   (unless (and (integerp n) (plusp n)) (error "Type (mod ~a)." n))
   `(integer 0 (,n)))
 
+(defun fixnump (n)
+  (and (integerp n)(>= most-negative-fixnum) (<= most-positive-fixnum)))
+
 (deftype fixnum ()
   `(integer ,most-negative-fixnum ,most-positive-fixnum))
 
 ;;; Yeat another Root of the Evil
+(defun bignump (n)
+  (and (integerp n)(or (< most-negative-fixnum) (> most-positive-fixnum))))
+
 (deftype bignum ()
   ;; and integer not fixnum
   `(and integer (not (integer ,most-negative-fixnum ,most-positive-fixnum))))
@@ -476,18 +451,12 @@
        (>= n 0)
        (<= n #xffffffff)))
 
-(deftype bit () `(integer 0 1))
-
 (deftype unsigned-byte (&optional (s '*))
   (cond ((eq s '*) '(integer 0 *))
         ((and (integerp s) (> s 0)) `(integer 0 ,(1- (ash 1 s))))
         (t (error "Bad size specified for UNSIGNED-BYTE type specifier: ~a."  s))))
 
-(deftype type-specifier ()  '(or list symbol ))
-(deftype string-designator () '(or string symbol character))
-(deftype package-designator () '(or string-designator package))
-(deftype symbols-designator () '(or list symbol))
-
+(deftype bit () `(integer 0 1))
 
 ;;; EOF
 
