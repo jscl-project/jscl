@@ -1,3 +1,7 @@
+;;; -*- mode:lisp; coding:utf-8 -*-
+
+(/debug "perform test/defun.lisp!")
+
 ;;;; Tests for DEFUN
 
 ;;; Regression test for #111
@@ -79,3 +83,4 @@
       (incf (getr r 0)))
     (equal '(11 (3 2 1 :tail) nil) 
            (vector-to-list r))))
+;;; EOF
