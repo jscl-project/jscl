@@ -15,11 +15,9 @@
 
 (/debug "loading defstruct.lisp!")
 
-;;; object 'structure'  predicate
 (defun structure-p (obj)
   (and (consp obj)
-       (symbolp (car obj))
-       (eq (oget obj "tagName") :structure)))
+       (eql (object-type-code obj) :structure)))
 
 ;; A very simple defstruct built on lists. It supports just slot with
 ;; an optional default initform, and it will create a constructor,
@@ -64,7 +62,7 @@
         (setq constructor-expansion
               `(defun ,constructor (&key ,@slot-descriptions)
                  (let ((obj (list ',name ,@(mapcar #'car slot-descriptions)))) 
-                   #+jscl (oset :structure obj "tagName")
+                   #+jscl (set-object-type-code obj  :structure)
                    obj))))
 
       (when predicate
