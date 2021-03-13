@@ -58,7 +58,7 @@
                                          *secret-unbound-value*)
            :hash nil
            :cn nil )))
-    (setf (oget instance "tagName") :mop-object)
+    (set-object-type-code  instance :mop-object)
     instance ))
 
 
