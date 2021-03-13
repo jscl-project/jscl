@@ -1,5 +1,7 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
+(/debug "perform test/types.lisp!")
+
 (test
  (equal '(t (nil t t nil nil) (nil t t nil nil))
         (let* ((sym (INTERN (symbol-name (gensym))))
@@ -95,12 +97,15 @@
            x))))
 
 (test (eql 'a (typecase 1 (otherwise 'a))))
+
 ;;; bug:
-;;(test (null (typecase 1 (integer) (t 'a))))
+;;;(test (null (typecase 1 (integer) (t 'a))))
+
 (test (null (typecase 1 (symbol 'a) (t))))
 (test (null (typecase 1 (symbol 'a) (otherwise))))
 
-;;; bug:
+;;; bug: Sharp-reader is buggy
+;;; fixme:
 ;;;(typecase 'a
 ;;;    (number 'bad)
 ;;;    (#.(find-class 'symbol nil) 'good))
