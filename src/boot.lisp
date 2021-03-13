@@ -1,3 +1,5 @@
+;;; -*- mode:lisp; coding:utf-8 -*-
+
 ;;; boot.lisp --- First forms to be cross compiled
 
 ;; Copyright (C) 2012, 2013 David Vazquez
@@ -413,7 +415,6 @@
 (defun object-type-code (object) (oget object "dt_Name"))
 (defun set-object-type-code (object tag) (oset tag object "dt_Name"))
 
-
 (defun %check-type-error (place value typespec string)
    (error "Type error. ~%The value of ~s is ~s, is not ~a ~a."
           place value typespec (if (null string) "" string)))
@@ -432,7 +433,7 @@
   (defparameter *basic-type-predicates*
     '((hash-table . hash-table-p) (package . packagep) (stream . streamp)
       (atom . atom) (structure . structure-p) (js-object . js-object-p)
-      (clos-object . mop-object-p) (character . characterp)
+      (clos-object . mop-object-p) (mop-object . mop-object-p) (character . characterp)
       (symbol . symbolp)  (keyword . keywordp)
       (function . functionp) 
       (number . numberp) (real . realp) (rational . rationalp) (float . floatp)
@@ -453,13 +454,13 @@
           (result '()))
       (setq result
             (dolist (it clausules (reverse result))
-                     (setq key (car it)
-                           body (cdr it)
-                           std-p (simple-base-predicate-p key))
-                     (cond (std-p (push `((,std-p ,g!x) ,@body) result))
-                           ((or (eq key 't) (eq key 'otherwise))
-                            (push `(t ,@body) result))
-                           (t (push `((!typep ,g!x ',key) ,@body) result)))))
+              (setq key (car it)
+                    body (cdr it)
+                    std-p (simple-base-predicate-p key))
+              (cond (std-p (push `((,std-p ,g!x) ,@body) result))
+                    ((or (eq key 't) (eq key 'otherwise))
+                     (push `(t ,@body) result))
+                    (t (push `((!typep ,g!x ',key) ,@body) result)))))
       `(let ((,g!x ,object))
          (cond ,@result))))
   )
@@ -546,3 +547,4 @@
 (defmacro print-unreadable-object ((object stream &key type identity) &body body) 
     `(!print-unreadable-object (,object ,stream :type ,type :identity ,identity) ,@body))
 
+;;; EOF
