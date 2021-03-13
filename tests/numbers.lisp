@@ -1,4 +1,8 @@
-;;;; Tests for numeric functions
+;;; -*- mode:lisp; coding:utf-8 -*-
+
+(/debug "perform test/numbers.lisp!")
+
+;;; Tests for numeric functions
 
 ;;; ABS
 (test (= (abs  3) 3))
@@ -378,4 +382,4 @@
 ;;; LDB
 (test (eq 1 (ldb (byte 2 1) 10) ))
 
-;;; end
+;;; EOF
