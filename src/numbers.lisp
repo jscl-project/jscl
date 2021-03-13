@@ -81,7 +81,7 @@
 ;;; @vkm 30.11 end
 
 (defun numberp (x) (numberp x))
-(defun integerp (x) (%integer-p))
+(defun integerp (x) (%integer-p x))
 (defun realp (x) (numberp x))
 (defun rationalp (x) (%integer-p x))
 
