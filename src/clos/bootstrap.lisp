@@ -108,6 +108,14 @@
                 :direct-superclasses '()
                 :direct-slots   '())
 
+  (ensure-class 'stream
+                :direct-superclasses '()
+                :direct-slots   '())
+
+  (ensure-class 'structure
+                :direct-superclasses '()
+                :direct-slots   '())
+
   (ensure-class 'package
                 :direct-superclasses '()
                 :direct-slots   '())
