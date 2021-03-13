@@ -1,8 +1,12 @@
-; Functions used as :KEY argument in tests
+;;; -*- mode:lisp; coding:utf-8 -*-
+
+(/debug "perform test/seq.lisp!")
+
+;;; Functions used as :KEY argument in tests
 (defvar halve  (lambda (x) (/ x 2)))
 (defvar double (lambda (x) (* x 2)))
 
-; COUNT
+;;; COUNT
 (test (= (count #\a "how many A's are there in here?") 2))
 (test (= (count #\a "how many A's are there in here?" :start 10) 1))
 (test (= (count 'a '(a b c d e a e f)) 2))
@@ -10,7 +14,7 @@
 (test (= (count #\1 "11111011" :start 2 :end 7) 4))
 (test (= (count #\1 "11111011" :start 2 :end 7 :from-end t) 4))
 
-;; COUNT-IF, COUNT-IF-NOT
+;;; COUNT-IF, COUNT-IF-NOT
 (test (= (count-if #'upper-case-p "The Crying of Lot 49" :start 4) 2))
 (test (= (count-if #'not '(a b nil c d nil e)) 2))
 (test (= (count-if #'evenp '(1 2 3 4 4 1 8 10 1) :key #'1+) 4))
@@ -20,7 +24,7 @@
 (test (= (count-if-not #'not '(a b nil c d nil e)) 5))
 (test (= (count-if-not #'oddp '(1 2 3 4 4 1 8 10 1) :key #'1+) 4))
 
-; FIND
+;;; FIND
 (test (find 1 #(2 1 3)))
 (test (find 1 '(2 1 3)))
 (test (not (find 1 #(2 2 2))))
@@ -30,18 +34,18 @@
 (test (not (find 1 #(1 2 3) :key double)))
 (test (not (find 1 '(1 2 3) :key double)))
 
-; REMOVE
+;;; REMOVE
 (test (not (find 1 (remove 1 #(1 2 3 1)))))
 (test (not (find 1 (remove 1 '(1 2 3 1)))))
 (test (not (find 2 (remove 1 #(1 2 3 1) :key halve))))
 (test (not (find 2 (remove 1 '(1 2 3 1) :key halve))))
-;; TODO: Rewrite this test when EQUALP exists and works on vectors
+;;; TODO: Rewrite this test when EQUALP exists and works on vectors
 (test (equal (length (remove '(1 2) #((1 2) (1 2)) :test #'equal)) 0))
 (test (null          (remove '(1 2) '((1 2) (1 2)) :test #'equal)))
 (test (find 2 (remove 2 #(1 2 3) :test-not #'=)))
 (test (find 2 (remove 2 '(1 2 3) :test-not #'=)))
 
-;; SUBSTITUTE
+;;; SUBSTITUTE
 (test (equal (substitute #\_ #\- "Hello-World") "Hello_World"))
 (test (equal (substitute 4 5 '(1 2 3 4)) '(1 2 3 4)))
 (test (equal (substitute 99 3 '(1 2 3 4)) '(1 2 99 4)))
@@ -51,7 +55,7 @@
 #+nil
 (test (equal (substitute 99 3 #(1 2 3 4) :test #'<=) #(1 2 99 99)))
 
-; POSITION
+;;; POSITION
 (test (= (position 1 #(1 2 3))  0))
 (test (= (position 1 '(1 2 3))  0))
 (test (= (position 1 #(1 2 3 1)) 0))
@@ -68,34 +72,34 @@
 (test (= (position 1 '(1 1 3) :from-end t) 1))
 (test (= (position #\a "baobab" :from-end t) 4))
 
-;; POSITION-IF, POSITION-IF-NOT
+;;; POSITION-IF, POSITION-IF-NOT
 (test (= 2 (position-if #'oddp '((1) (2) (3) (4)) :start 1 :key #'car)))
 (test (= 4 (position-if-not #'integerp '(1 2 3 4 X))))  ;; (hyperspec example used "5.0", but we don't have a full numeric tower yet!)
 (test (= 4 (position-if #'oddp '((1) (2) (3) (4) (5)) :start 1 :key #'car :from-end t)))
 (test (= 4 (position-if-not #'integerp '(1 2 3 4 X Y))))  ;; (hyperspec example used "5.0", but we don't have a full numeric tower yet!)
 (test (= 5 (position-if-not #'integerp '(1 2 3 4 X Y) :from-end t)))
 
-; REMOVE-IF
+;;; REMOVE-IF
 (test (equal (remove-if     #'zerop '(1 0 2 0 3)) '(1 2 3)))
 (test (equal (remove-if-not #'zerop '(1 0 2 0 3)) '(0 0)))
-;; TODO: Rewrite these tests when EQUALP exists and works on vectors
+;;; TODO: Rewrite these tests when EQUALP exists and works on vectors
 (let ((v1 (remove-if #'zerop #(1 0 2 0 3))))
   (test (and (= (aref v1 0) 1) (= (aref v1 1) 2) (= (aref v1 2) 3)))) 
 (test (every #'zerop (remove-if-not #'zerop #(1 0 2 0 3))))
 
-; SUBSEQ
+;;; SUBSEQ
 (let ((nums '(1 2 3 4 5)))
   (test (equal (subseq nums 3) '(4 5)))
   (test (equal (subseq nums 2 4) '(3 4)))
-  ; Test that nums hasn't been altered: SUBSEQ should construct fresh lists
+  ;; Test that nums hasn't been altered: SUBSEQ should construct fresh lists
   (test (equal nums '(1 2 3 4 5))))
 
-;; REVERSE
+;;; REVERSE
 (test (eq (reverse nil) nil))
 (test (equal (reverse '(a b c)) '(c b a)))
-;; FIXME: When replace the following two cases when implemented.
+;;; FIXME: When replace the following two cases when implemented.
 (test (zerop (length (reverse #()))))
-;; (test (equalp (reverse #(a b c)) #(c b a)))
+;;; (test (equalp (reverse #(a b c)) #(c b a)))
 (let ((xs (reverse #(a b c)))
       (pattern #(c b a)))
   (test (equal (aref xs 0) (aref pattern 0)))
@@ -139,20 +143,20 @@
 
 (test (equal (reduce #'cons '(1) :initial-value 0) '(0 . 1)))
 
-;; The following tests reduced reduce were copied from ANSI CL TESTS.
+;;; The following tests reduced reduce were copied from ANSI CL TESTS.
 (test (equal (reduce #'cons '(a b c d e f) :start 1 :end 4 :from-end t)
              '(b c . d)))
 (test (equal (reduce #'cons '(a b c d e f) :start 1 :end 4 :from-end t
                                            :initial-value nil)
              '(b c d)))
 
-; MISMATCH
+;;; MISMATCH
 (test (= (mismatch '(1 2 3) '(1 2 3 4 5 6)) 3))
 (test (= (mismatch '(1 2 3) #(1 2 3 4 5 6)) 3))
 (test (= (mismatch #(1 2 3) '(1 2 3 4 5 6)) 3))
 (test (= (mismatch #(1 2 3) #(1 2 3 4 5 6)) 3))
 
-; SEARCH
+;;; SEARCH
 (test (= (search '(1 2 3) '(4 5 6 1 2 3)) 3))
 (test (= (search '(1 2 3) #(4 5 6 1 2 3)) 3))
 (test (= (search #(1 2 3) '(4 5 6 1 2 3)) 3))
@@ -189,7 +193,7 @@
  (map 'list #'list "123")
  '((#\1) (#\2) (#\3)))
 
-; CHAR-UPCASE cannot be sharp-quoted currently
+;;; CHAR-UPCASE cannot be sharp-quoted currently
 (test-equal
  (map 'string (lambda (c) (char-upcase c)) '(#\a #\b #\c))
  "ABC")
@@ -290,3 +294,4 @@
 
 
 
+;;; EOF
