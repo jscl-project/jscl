@@ -1,3 +1,7 @@
+;;; -*- mode:lisp; coding:utf-8 -*-
+
+(/debug "perform test/ffi.lisp!")
+
 ;;; Tests for Javascript FFI routines.
 
 ;;; TODO: Once these are exported under JSCL/FFI, just  :USE that into the testing package. For now,
@@ -55,8 +59,9 @@
   (test (js-object-signature obj)))
 
 ;;; test html-object
-#+nil
+;;; NOTE: Fixed js-object-p. @vkm
 (let ((obj (#j:window:document:createElement "div")))
   (test (and
          (js-object-p obj)
          (string= "[object HTMLDivElement]" (js-object-signature obj)))))
+;;; EOF
