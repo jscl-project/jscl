@@ -1,3 +1,7 @@
+;;; -*- mode:lisp; coding:utf-8 -*-
+
+(/debug "perform test/strings.lisp!")
+
 (defvar *str* "hello world")
 (defvar *str2* "h")
 
@@ -30,6 +34,7 @@
 ;;; in the host's environment. It should, but we have to think how to
 ;;; avoid conflicts (package renaming??)
 
+;;; note: Fixed ?. @vkm
 ;; (let ((str "hello"))
 ;;   (setf (char str 0) #\X)
 ;;   (setf (char str 4) #\X)
@@ -655,3 +660,5 @@
 ;; (test (subtypep (upgraded-array-element-type
 ;;         (array-element-type (make-string 3 :element-type 'standard-char)))
 ;;        'character))
+
+;;; EOF
