@@ -235,7 +235,7 @@
     (if (eql type-specifier 'nil)
         (return-from !typep nil))
     (if (mop-object-p type-specifier)
-        (return-from !typep (typep object (class-name type-specifier))))
+        (return-from !typep (!typep object (class-name type-specifier))))
     (let ((may-be-predicate
             (cond ((symbolp type-specifier) type-specifier)
                   ((and (consp type-specifier)(null (rest type-specifier)))
@@ -272,7 +272,7 @@
   (when (consp limit)
     (if (rest limit)(error "Bad numeric limit ~a." limit))
     (setq limit (1- (car limit))))
-  (unless (or (eql limit '*) (typep limit his-type))
+  (unless (or (eql limit '*) (!typep limit his-type))
     (error "Bad numeric limit ~a." limit))
   limit)
 
@@ -446,6 +446,7 @@
 (deftype vector (&optional element-type size)
   `(array ,element-type (,size)))
 
+#+jscl (fset 'typep (fdefinition '!typep))
 
 ;;; EOF
 

@@ -472,9 +472,9 @@
   (let ((value (gensym)))
     (if (symbolp place)
         `(do ((,value ,place ,place))
-             ((typep ,value ',typespec))
+             ((!typep ,value ',typespec))
            (setf ,place (%check-type-error ',place ,value ',typespec ,string)))
-        (if (typep place typespec)
+        (if (!typep place typespec)
             t
             (%check-type-error place place typespec string)))))
 
@@ -513,10 +513,10 @@
               ;; when: type-spec is symbol in *basic-type-predicates*, its predicate
               ;;       -> (cond ((predicate keyform) form*))
               ;; otherwise: (cond ((typep keyform (type-spec form*))))
-              (cond (std-p (push `((,std-p ,g!x) ,@body) result))
+              (cond (std-p (%push-end `((,std-p ,g!x) ,@body) result))
                     ((or (eq key 't) (eq key 'otherwise))
-                     (push `(t ,@body) result))
-                    (t (push `((typep ,g!x ',key) ,@body) result)))))
+                     (%push-end `(t ,@body) result))
+                    (t (%push-end `((!typep ,g!x ',key) ,@body) result)))))
       `(let ((,g!x ,object))
          (cond ,@result))))
   )
