@@ -415,6 +415,25 @@
 (defun object-type-code (object) (oget object "dt_Name"))
 (defun set-object-type-code (object tag) (oset tag object "dt_Name"))
 
+;;; for to accurately definition  LIST and CONS forms
+;;; used:
+;;; (typep form
+;;;    (cons
+;;;      (cond ((true-cons-p form) .... code sensetive for cons)
+;;;            (t  ...))))
+;;;
+(defun true-cons-p (form)
+  (%js-try
+   (progn
+     (list-length form)
+     nil)
+   (catch (err)
+     t)))
+
+;;; pure list predicate: (true-list-p (cons 1 2)) => nil
+;;;                      (listp (cons 1 2)) => t
+(defun true-list-p (obj) (and (consp obj) (not (true-cons-p obj))))
+
 ;;; types predicate's
 ;;; mop predicate
 (defun mop-object-p (obj)
@@ -460,6 +479,8 @@
             (%check-type-error place place typespec string)))))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
+  (defmacro %push-end (thing place) `(setq ,place (append ,place (list ,thing))))
+
   (defparameter *basic-type-predicates*
     '((hash-table . hash-table-p) (package . packagep) (stream . streamp)
       (atom . atom) (structure . structure-p) (js-object . js-object-p)
