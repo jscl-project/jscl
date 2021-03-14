@@ -331,25 +331,16 @@
 ;;; with dirty hack for recognize list or cons
 (defmethod describe ((obj list) &optional (stream *standard-output*))
   (with-pp-buffer (buf)
-    (cond ((its-cons-p obj)
+    (cond ((true-cons-p obj)
            (pp/presentation obj 'cons buf)
            (format buf "Car: ~s~%Cdr: ~s~%" (car obj) (cdr obj)))
           (t
-           (let ((len (length obj)))
+           (let ((len (list-length obj)))
              (pp/presentation obj 'list buf)
              (format buf "Length: ~a~%" len)
              (dotimes (idx len)
                (format buf  "~d: ~s~%" idx (nth idx obj))))))
     (flush-pp-buffer buf stream))
   (values))
-
-;;; dirty hack
-(defun its-cons-p (obj)
-  (handler-case
-      (progn
-        (length obj)
-        nil)
-    (error (msg)
-      t)))
 
 ;;; EOF
