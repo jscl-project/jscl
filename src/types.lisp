@@ -231,11 +231,11 @@
               form expander)))))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defun typep (object type-specifier)
+  (defun !typep (object type-specifier)
     (if (eql type-specifier 'nil)
-        (return-from typep nil))
+        (return-from !typep nil))
     (if (mop-object-p type-specifier)
-        (return-from typep (typep object (class-name type-specifier))))
+        (return-from !typep (typep object (class-name type-specifier))))
     (let ((may-be-predicate
             (cond ((symbolp type-specifier) type-specifier)
                   ((and (consp type-specifier)(null (rest type-specifier)))
@@ -244,10 +244,10 @@
       (if may-be-predicate
           (let ((test  (get-predicate-for may-be-predicate)))
             (if test
-                (return-from typep (funcall test object))))))
+                (return-from !typep (funcall test object))))))
     (let ((test (get-compound-for type-specifier)))
       (if test
-          (return-from typep (funcall test object type-specifier))))
+          (return-from !typep (funcall test object type-specifier))))
     (if (symbolp type-specifier)
         (let ((class-object nil))
           (if (find-class type-specifier nil)
@@ -258,12 +258,12 @@
                           ((std-instance-class object)
                            (class-name object)))))
           (if class-object
-              (return-from typep
+              (return-from !typep
                 (%subclass (%class-cpl class-object) type-specifier)))))
     (multiple-value-bind (expansion expanded-p)
         (%type-expand type-specifier)
       (if expanded-p
-          (typep object expansion)
+          (!typep object expansion)
           (error "Unknown type-specifier ~a."  type-specifier)))))
 
 
@@ -311,15 +311,6 @@
   (dc real     numberp  real)
   (dc float    floatp  float))
 
-;;; (vector dimension) ::= (vector *) | (vector 35) 
-(deftype-compound vector (object type)
-  (if (vectorp object)
-      (let ((vector-length (cadr type)))
-        (cond ((eql vector-length '*) t)
-              ((integerp vector-length)
-               (eql vector-length (oget object "length")))
-              (t (false))))))
-
 ;;; (array type dimensions)  type::= t | * | any  dimensions::=(n...*)
 (defun %compare-array-type (object type-spec)
   (destructuring-bind (type-base &optional (type-element-type '*) (type-dimensions '*))
@@ -355,37 +346,57 @@
               (t (false))))))
 
 ;;; (cons * *) (cons thing thing)
-
-;;; dirty hack for to accurately definition  LIST and CONS forms
-(defun %type-cons-p (obj)
-  (handler-case
-      (progn (length obj) nil)
-    (error (ignore) t)))
-
-;;; pure list predicate: (%type-list-p (cons 1 2)) => nil
-;;;                      (listp (cons 1 2)) => t
-(defun %type-list-p (obj) (and (consp obj) (not (%type-cons-p obj))))
-
 (deftype-compound cons (object type)
   (if (consp object)
       (destructuring-bind (&optional (t1 '*) (t2 '*)) (cdr type)
         (if (eq t1 '*) (setq t1 't))
         (if (eq t2 '*) (setq t2 't))
         (and (or (eql t1 't)
-                 (typep (car object) t1))
+                 (!typep (car object) t1))
              (or (eql t2 't)
-                 (typep (cdr object) t2))))))
+                 (!typep (cdr object) t2))))))
 
 ;;; (list *) | (list) | (list length)
 ;;; non canonical type spec
 (deftype-compound  list (object type)
   (when (consp object)
-    (if (not (%type-cons-p object))
+    (if (not (true-cons-p object))
         (destructuring-bind (&optional (size '*)) (cdr type)
           (cond ((eq size '*) t)
                 ((integerp size)
                  (eq size (list-length object)))
                 (t (error "Bad list size specificator ~a." type)))))))
+
+;;; (satisfies predicate)
+(deftype-compound  satisfies (object type)
+  (let ((fn (cadr type)))
+    (unless (or (symbolp fn) (functionp fn))
+      (error "Not satisfies function ~a." fn))
+    (funcall fn object)))
+
+;;; (or expr .... expr*)
+(deftype-compound  or (object type)
+  (dolist (it (cdr type))
+    (if (!typep object it) (return t))))
+
+;;; (and expr ... expr*)
+(deftype-compound  and (object type)
+  (dolist (it (cdr type) t)
+    (if (not (!typep object it)) (return nil))))
+
+;;; (not type-specifier)
+(deftype-compound  not (object type)
+  (not (!typep object (cadr type))))
+
+;;; (member object ... object*)
+(deftype-compound member (object type)
+  (dolist (o (cdr type))
+    (if (eql object o) (return t))))
+
+;;; (eql value)
+(deftype-compound eql (object type)
+  (eql object (cadr type)))
+
 
 ;;; todo: canonical deftype lambda-list
 (defmacro deftype (&whole whole name lambda-list &body body)
@@ -409,30 +420,14 @@
   (unless (and (integerp n) (plusp n)) (error "Type (mod ~a)." n))
   `(integer 0 (,n)))
 
-(defun fixnump (n)
-  (and (integerp n)(>= most-negative-fixnum) (<= most-positive-fixnum)))
+(deftype bit () `(integer 0 1))
 
 (deftype fixnum ()
   `(integer ,most-negative-fixnum ,most-positive-fixnum))
 
-;;; Yeat another Root of the Evil
-(defun bignump (n)
-  (and (integerp n)(or (< most-negative-fixnum) (> most-positive-fixnum))))
-
 (deftype bignum ()
   ;; and integer not fixnum
   `(and integer (not (integer ,most-negative-fixnum ,most-positive-fixnum))))
-
-(defun signed-byte-8-p (n)
-  (and (fixnump n)
-       (and (>= n -128)(<= n 127)))))
-(defun signed-byte-16-p (n)
-  (and (fixnump n)
-       (and (>= n -32768)(<= n 32767))))
-(defun signed-byte-32-p (n)
-  (and (integerp n)
-       (>= n  -2147483648)
-       (<= n 2147483647)))
 
 (deftype signed-byte (&optional (s '*))
   (cond ((eq s '*) 'integer)
@@ -440,23 +435,17 @@
          (let ((bound (ash 1 (1- s)))) `(integer ,(- bound) ,(1- bound))))
         (t (error "Bad size specified for SIGNED-BYTE type specifier: ~a."  s))))
 
-(defun unsigned-byte-8-p (n)
-  (and (fixnump n)
-       (and (>= n 0) (< n #x100))))
-(defun unsigned-byte-16-p (n)
-  (and (fixnump n)
-       (and (>= n 0)(< n #x10000))))
-(defun unsigned-byte-32-p (n)
-  (and (integerp n)
-       (>= n 0)
-       (<= n #xffffffff)))
-
 (deftype unsigned-byte (&optional (s '*))
   (cond ((eq s '*) '(integer 0 *))
         ((and (integerp s) (> s 0)) `(integer 0 ,(1- (ash 1 s))))
         (t (error "Bad size specified for UNSIGNED-BYTE type specifier: ~a."  s))))
 
-(deftype bit () `(integer 0 1))
+(deftype string (&optional size)
+  `(array character (,size)))
+
+(deftype vector (&optional element-type size)
+  `(array ,element-type (,size)))
+
 
 ;;; EOF
 
