@@ -120,7 +120,7 @@
     ;; numeric relations
     (number            numberp       t    t)
     (real              realp         t    number t)
-    ;;(rational          rationalp     t    real   number t)
+    (rational          rationalp     t    rational  real   number t)
     (float             floatp        t    real number t)
     (integer           integerp      t    real number t)
     ;; sequnce relations  
