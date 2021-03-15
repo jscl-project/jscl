@@ -2,6 +2,20 @@
 
 (/debug "perform test/types.lisp!")
 
+(defun *gensym* ()
+  (intern (symbol-name (gensym  "DEFTYPEP"))))
+
+(defun not* (f) (not (not f)))
+(defun eqlt (f s) (equal f s))
+
+(defmacro mv-eql (form &rest result)
+  `(equal
+    (multiple-value-list
+     ,form)
+    ',result))
+
+
+
 (test
  (equal '(t (nil t t nil nil) (nil t t nil nil))
         (let* ((sym (INTERN (symbol-name (gensym))))
@@ -73,6 +87,23 @@
  (let ((c1 (find-class 'number))
 	     (c2 (find-class 'symbol)))
    (typep 'a `(or ,c2 ,c1))))
+
+(test
+ (mv-eql
+ (let* ((sym (*gensym*))
+	      (form `(deftype ,sym (&rest args) (if args `(member ,@args) nil))))
+   (values
+    (eqlt (eval form) sym)
+    (not* (typep 'a `(,sym a)))
+    (not* (typep 'b `(,sym a)))
+    (not* (typep '* `(,sym a)))
+    (not* (typep 'a `(,sym a b)))
+    (not* (typep 'b `(,sym a b)))
+    (not* (typep 'c `(,sym a b)))))
+ T  T  NIL  NIL  T  T  NIL)
+)
+
+
 
 
 ;;; typecase test cases
@@ -159,5 +190,8 @@
 	        ((integer 0 1) (%m :bad1))
 	        ((integer 2 10) (%m :good))
 	        (t (%m :bad2))))))
+
+;;; type-of
+
 
 ;;; EOF
