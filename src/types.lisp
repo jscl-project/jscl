@@ -358,7 +358,7 @@
             (dimensions (caddr type)))
         (if (null element-type)
             (setq element-type 'T dimensions '*)
-            (if (null dimension) (setq dimensions '*)))
+            (if (null dimensions) (setq dimensions '*)))
         ;; array element type doesn't compare
         ;; only dimensions 
         (cond ((eql dimensions '*) t)
@@ -458,15 +458,33 @@
          (let ((bound (ash 1 (1- s)))) `(integer ,(- bound) ,(1- bound))))
         (t (error "Bad size specified for SIGNED-BYTE type specifier: ~a."  s))))
 
+(deftype signed-byte-8 ()
+  `(and (satisfies fixnump) (integer -128  #x100)))
+
+(deftype signed-byte-16 ()
+  `(and (satisfies fixnump) (integer -32768 32767)))
+
+(deftype signed-byte-32 ()
+  `(and (satisfies bignump) (integer  -2147483648 2147483647)))
+
 (deftype unsigned-byte (&optional (s '*))
   (cond ((eq s '*) '(integer 0 *))
         ((and (integerp s) (> s 0)) `(integer 0 ,(1- (ash 1 s))))
         (t (error "Bad size specified for UNSIGNED-BYTE type specifier: ~a."  s))))
 
-(deftype string (&optional size)
+(deftype unsigned-byte-8 ()
+  `(and (satisfies fixnump) (integer 0 #x100)))
+
+(deftype unsigned-byte-16 ()
+  `(and (satisfies fixnump) (integer 0 (#x10000))))
+
+(deftype unsigned-byte-32 ()
+  `(and (satisfies fixnump) (integer 0 #xffffffff)))
+
+(deftype string (&optional (size '*))
   `(array character (,size)))
 
-(deftype vector (&optional element-type size)
+(deftype vector (&optional (element-type '*) (size '*))
   `(array ,element-type (,size)))
 
 #+jscl (fset 'typep (fdefinition '!typep))
