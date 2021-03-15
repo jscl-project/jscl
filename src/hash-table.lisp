@@ -65,7 +65,7 @@
 (defun hash-table-p (obj)
   (if (js-undefined-p obj)
       nil
-      (eq (oget obj "td_Name") :hash-table)))
+      (eql (object-type-code obj) :hash-table)))
 
 (defun %select-hash-fn (fn)
   (cond
@@ -76,7 +76,7 @@
 
 (defun make-hash-table (&key (test #'eql) size)
   (let ((cell (cons (%select-hash-fn test) (new))))
-    (oset :hash-table cell "td_Name")
+    (set-object-type-code cell :hash-table)
     cell))
 
 (defun gethash (key hash-table &optional default)
@@ -123,7 +123,7 @@
       (error "The value ~s is not of type HASH-TABLE." obj)))
 
 (defun hash-table-count (obj)
-  (if (and (consp obj) (eql (oget obj "td_Name") :hash-table))
+  (if (and (consp obj) (eql (object-type-code obj) :hash-table))
       (oget (#j:Object:entries (cdr obj)) "length")
       0))
 

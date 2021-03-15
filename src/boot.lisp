@@ -438,8 +438,9 @@
 ;;; mop predicate
 (defun mop-object-p (obj)
     (and (consp obj)
-         (eq (oget obj "tagName") :mop-object)
+         (eql (object-type-code obj) :mop-object)
          (= (length obj) 5)))
+
 ;;; future upgrade
 (defun clos-object-p (object) (eql (object-type-code object) :clos_object))
 
@@ -522,12 +523,12 @@
   )
 
 (defmacro typecase (form &rest clausules)
-        (typecase-expander `,form `,clausules))
+  (typecase-expander `,form `,clausules))
 
 (defmacro etypecase (x &rest clausules)
-       `(typecase ,x
-         ,@clausules
-         (t (error "~S fell through etypecase expression." ,x))))
+  `(typecase ,x
+     ,@clausules
+     (t (error "~S fell through etypecase expression." ,x))))
 
 
 ;;; it remains so. not all at once. with these - live...
