@@ -329,9 +329,9 @@
                              (or (eql max '*)
                                  (<= object max))))))))
   (dc integer  integerp integer)
-  (dc rational integerp integer)
+  ;;(dc rational integerp integer)
   (dc number   numberp  number)
-  (dc real     numberp  real)
+  ;;(dc real     numberp  real)
   (dc float    floatp  float))
 
 ;;; (array type dimensions)  type::= t | * | any  dimensions::=(n...*)
@@ -488,6 +488,8 @@
   `(array ,element-type (,size)))
 
 #+jscl (fset 'typep (fdefinition '!typep))
+
+(push :types *features*)
 
 ;;; EOF
 
