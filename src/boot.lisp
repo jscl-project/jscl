@@ -505,19 +505,18 @@
           (std-p)
           (g!x (gensym "TYPECASE"))
           (result '()))
-      (setq result
-            (dolist (it clausules (reverse result))
-              (setq key (car it)
-                    body (cdr it)
-                    std-p (simple-base-predicate-p key))
-              ;; (typecase keyform (type-spec form*))
-              ;; when: type-spec is symbol in *basic-type-predicates*, its predicate
-              ;;       -> (cond ((predicate keyform) form*))
-              ;; otherwise: (cond ((typep keyform (type-spec form*))))
-              (cond (std-p (%push-end `((,std-p ,g!x) ,@body) result))
-                    ((or (eq key 't) (eq key 'otherwise))
-                     (%push-end `(t ,@body) result))
-                    (t (%push-end `((!typep ,g!x ',key) ,@body) result)))))
+      (dolist (it clausules (reverse result))
+        (setq key (car it)
+              body (cdr it)
+              std-p (simple-base-predicate-p key))
+        ;; (typecase keyform (type-spec form*))
+        ;; when: type-spec is symbol in *basic-type-predicates*, its predicate
+        ;;       -> (cond ((predicate keyform) form*))
+        ;; otherwise: (cond ((typep keyform (type-spec form*))))
+        (cond (std-p (%push-end `((,std-p ,g!x) ,@body) result))
+              ((or (eq key 't) (eq key 'otherwise))
+               (%push-end `(t ,@body) result))
+              (t (%push-end `((!typep ,g!x ',key) ,@body) result))))
       `(let ((,g!x ,object))
          (cond ,@result))))
   )
@@ -576,10 +575,19 @@
 (defparameter *features* '(:jscl :common-lisp))
 
 ;;; Early error definition.
+(defun %coerce-panic-arg (arg)
+  (cond ((symbolp arg) (concat "symbol: " (symbol-name arg)))
+        ((consp arg ) (concat "cons: " (car arg)))
+        ((numberp arg) (concat "number:" arg))
+        (t " @ ")))
+
 (defun error (fmt &rest args)
   (if (fboundp 'format)
       (%throw (apply #'format nil fmt args))
-      (%throw (lisp-to-js (concat "BOOT PANIC! " (string fmt))))))
+    (%throw (lisp-to-js (concat "BOOT PANIC! "
+                                (string fmt)
+                                " "
+                                (%coerce-panic-arg (car args)))))))
 
 ;;; print-unreadable-object
 (defmacro !print-unreadable-object ((object stream &key type identity) &body body)
@@ -589,7 +597,6 @@
            (,g!object ,object))
        (simple-format ,g!stream "#<")
        ,(when type
-          (error "type-of yet not implemented")
           `(simple-format ,g!stream "~S" (type-of g!object)))
        ,(when (and type (or body identity))
           `(simple-format ,g!stream " "))
