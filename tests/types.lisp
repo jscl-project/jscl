@@ -90,20 +90,63 @@
 
 (test
  (mv-eql
- (let* ((sym (*gensym*))
-	      (form `(deftype ,sym (&rest args) (if args `(member ,@args) nil))))
-   (values
-    (eqlt (eval form) sym)
-    (not* (typep 'a `(,sym a)))
-    (not* (typep 'b `(,sym a)))
-    (not* (typep '* `(,sym a)))
-    (not* (typep 'a `(,sym a b)))
-    (not* (typep 'b `(,sym a b)))
-    (not* (typep 'c `(,sym a b)))))
- T  T  NIL  NIL  T  T  NIL)
-)
+  (let* ((sym (*gensym*))
+	       (form `(deftype ,sym (&rest args) (if args `(member ,@args) nil))))
+    (values
+     (eqlt (eval form) sym)
+     (not* (typep 'a `(,sym a)))
+     (not* (typep 'b `(,sym a)))
+     (not* (typep '* `(,sym a)))
+     (not* (typep 'a `(,sym a b)))
+     (not* (typep 'b `(,sym a b)))
+     (not* (typep 'c `(,sym a b)))))
+  T  T  NIL  NIL  T  T  NIL)
+ )
 
+(test
+ (mv-eql
+  (let* ((sym (*gensym*))
+	       (form `(let ((a 1))
+		              (deftype ,sym (&optional (x a))
+		                `(integer 0 ,x)))))
+    (values
+     (eqlt (eval form) sym)
+     (let ((a 2))
+       (loop for i from -1 to 3 collect (typep i `(,sym 1))))
+     (let ((a 2))
+       (loop for i from -1 to 3 collect (typep i sym)))))
+  T
+  (NIL T T NIL NIL)
+  (NIL T T NIL NIL))
+ )
 
+(test
+ (mv-eql
+  (let* ((sym (*gensym*))
+	       (form `(let ((a 1))
+		              (deftype ,sym (&optional (x a))
+		                `(integer 0 ,x)))))
+    (values
+     (eqlt (eval form) sym)
+     (let ((a 2))
+       (loop for i from -1 to 3 collect (typep i `(,sym 1))))
+     (let ((a 2))
+       (loop for i from -1 to 3 collect (typep i sym)))))
+  t
+  (nil t t nil nil)
+  (nil t t nil nil))
+ )
+
+(test
+ (mv-eql
+  (let* ((sym (*gensym*))
+	       (form `(deftype ,sym () (block ,sym (return-from ,sym 'integer)))))
+    (values
+     (eqlt (eval form) sym)
+     (typep 123 sym)
+     (typep 'symbol sym)))
+  t t nil)
+ )
 
 
 ;;; typecase test cases
