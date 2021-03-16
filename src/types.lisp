@@ -390,9 +390,10 @@
              (or (eql t2 't)
                  (!typep (cdr object) t2))))))
 
-;;; (list *) | (list) | (list length)
-;;; non canonical type spec
-(deftype-compound  list-size (object type)
+;;; (list-length *) | (list-length 0) | (list-length n)
+;;;      (typep (list) '(list-length 0))
+;;;      (typesace x ((list-length 1) :ok) ((list-length 0) :bad))
+(deftype-compound  list-length (object type)
   (when (listp object)
     (if (not (true-cons-p object))
         (destructuring-bind (&optional (size '*))
