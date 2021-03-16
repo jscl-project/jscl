@@ -196,6 +196,14 @@
    (typep (make-bus :type 'alarm :signal 'trap-21) 'bus-alarm))
   t t nil))
 
+(test
+ (mv-eql
+  (values
+   (typep (make-array '(1 2)) '(and (array t 2) (array t (2))))
+   (typep (make-array '(10)) '(and (array t 1) (array t (10))))
+   (typep (make-array '(1 2)) '(and (array t 2) (array t (1 *))))
+   )
+  nil t t))
 
 ;;; typecase test cases
 (test (eql 'a (typecase 1 (integer 'a) (t 'b))))
