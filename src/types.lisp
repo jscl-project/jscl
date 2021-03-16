@@ -342,7 +342,7 @@
           (object-dimensions (array-dimensions object)))
       (when (eq type-element 'character)
         (if (not (eq object-type 'character))
-            (return-from '%compare-array-type nil)))
+            (return-from %compare-array-type nil)))
       (when (null object-dimensions)
         (setq object-dimensions (list (oget object "length"))))
       (cond ((numberp type-dimensions)
