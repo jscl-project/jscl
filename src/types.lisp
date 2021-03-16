@@ -452,10 +452,12 @@
            ',name)))))
 
 ;;; predefenition types
+;;; (mod n) -> (1- n)
 (deftype mod (n)
   (unless (and (integerp n) (plusp n)) (error "Type (mod ~a)." n))
   `(integer 0 (,n)))
 
+;;; (typep 1|0 '(bit)) -> t
 (deftype bit () `(integer 0 1))
 
 (deftype fixnum ()
@@ -465,6 +467,7 @@
   ;; and integer not fixnum
   `(and integer (not (integer ,most-negative-fixnum ,most-positive-fixnum))))
 
+;;; (signed-byte) |(signed-byte *)!(signed-byte n)
 (deftype signed-byte (&optional (s '*))
   (cond ((eq s '*) 'integer)
         ((and (integerp s) (> s 0))
