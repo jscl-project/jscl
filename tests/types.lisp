@@ -11,7 +11,13 @@
 (defmacro mv-eql (form &rest result)
   `(equal
     (multiple-value-list
-     ,form)
+     (handler-case
+         (progn
+           ,form)
+       (error (msg)
+         (format t "         ERROR: ~a ~%"
+                 (format nil (car (!condition-args msg)) (cadr (!condition-args msg))))
+         (values nil))))
     ',result))
 
 
