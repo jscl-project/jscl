@@ -148,6 +148,43 @@
   t t nil)
  )
 
+;;; compound tests
+
+(test
+ (mv-eql
+  (let* ((sym (*gensym*))
+	       (form `(deftype ,sym ()
+                  `(or (cons) (integer -1 1) (float -1.1 1.9)))))
+    (values
+     (eqlt (eval form) sym)
+     (typep 1 sym)
+     (typep 0 sym)
+     (typep -1 sym)
+     (typep (cons 1 2) sym)
+     (typep -1.00000001 sym)
+     (typep 0.99 sym)
+     (typep -2.99 sym)))
+  T T T T T T T NIL))
+
+(defstruct struct-bus type signal r1 r2 r3)
+
+(deftype bus-alarm ()
+  `(cons (eql bus)
+         (cons (eql alarm)
+               (cons (or (integer 0 22)
+                         (member sigint trap segmentation))  *) )))
+
+(test
+ (mv-eql
+  (values
+   (typep (make-bus :type 'alarm :signal 12) 'bus-alarm)
+   (typep (make-bus :type 'alarm :signal 'trap) '(bus-alarm))
+   (typep (make-bus :type 'alarm :signal 'trap-21) 'bus-alarm))
+  t t nil))
+
+
+
+
 
 ;;; typecase test cases
 (test (eql 'a (typecase 1 (integer 'a) (t 'b))))
