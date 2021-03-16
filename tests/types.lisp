@@ -205,6 +205,28 @@
    )
   nil t t))
 
+(test
+ (mv-eql
+  (values
+   (typep #(1 2 3) '(vector t 3))
+   (typep #(1 2 3) '(array t 1))
+   (typep #(1 2 3) '(array t (3))))
+  t t t))
+
+(test
+ (mv-eql
+  (let* ((sym (*gensym*))
+	       (form `(deftype ,sym ()
+                  `(or (list-size 0) (list-size 1)))))
+    (values
+     (eqlt (eval form) sym)
+     (typep (list) `(,sym))
+     (typep (list 1) `(,sym))
+     (typep (list 1 2 3) `(,sym))))
+  t t t nil))
+
+
+
 ;;; typecase test cases
 (test (eql 'a (typecase 1 (integer 'a) (t 'b))))
 (test  (not (typecase 1 (symbol 'a))))
