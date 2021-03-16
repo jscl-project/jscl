@@ -166,14 +166,28 @@
      (typep -2.99 sym)))
   T T T T T T T NIL))
 
-(defstruct struct-bus type signal r1 r2 r3)
+(test
+ (mv-eql
+  (values
+   (typep #(1 2 3) '(array t 1))
+   (typep #(1 2 3) '(array t 2))
+   (typep #(1 2 3) '(array t (3)))
+   (typep #(1 2 3) '(array t (4)))
+   (typep "123" '(array character 1))
+   (typep "123" '(array character 2))
+   (typep "123" '(array character (3)))
+   (typep "123" '(or (array character (2)) (array character (4))))
+   (typep "123" '(string 3))
+   (typep "123" '(or (string 1) (string 2) (string 4)))
+   (typep "123" '(string *)))
+  T NIL T NIL T NIL T NIL T NIL T))
 
+(defstruct struct-bus type signal r1 r2 r3)
 (deftype bus-alarm ()
   `(cons (eql bus)
          (cons (eql alarm)
                (cons (or (integer 0 22)
                          (member sigint trap segmentation))  *) )))
-
 (test
  (mv-eql
   (values
@@ -181,9 +195,6 @@
    (typep (make-bus :type 'alarm :signal 'trap) '(bus-alarm))
    (typep (make-bus :type 'alarm :signal 'trap-21) 'bus-alarm))
   t t nil))
-
-
-
 
 
 ;;; typecase test cases
