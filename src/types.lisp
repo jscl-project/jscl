@@ -393,9 +393,10 @@
 ;;; (list *) | (list) | (list length)
 ;;; non canonical type spec
 (deftype-compound  list-size (object type)
-  (when (consp object)
+  (when (listp object)
     (if (not (true-cons-p object))
-        (destructuring-bind (&optional (size '*)) (cdr type)
+        (destructuring-bind (&optional (size '*))
+            (cdr type)
           (cond ((eq size '*) t)
                 ((non-negative-fixnump size)
                  (eq size (list-length object)))
