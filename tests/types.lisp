@@ -120,6 +120,7 @@
   (NIL T T NIL NIL))
  )
 
+
 (test
  (mv-eql
   (let* ((sym (*gensym*))
@@ -137,6 +138,7 @@
   (nil t t nil nil))
  )
 
+;;; how use return-form for deftype
 (test
  (mv-eql
   (let* ((sym (*gensym*))
@@ -150,6 +152,7 @@
 
 ;;; compound tests
 
+;;; compound numeric
 (test
  (mv-eql
   (let* ((sym (*gensym*))
@@ -166,6 +169,7 @@
      (typep -2.99 sym)))
   T T T T T T T NIL))
 
+;;; string
 (test
  (mv-eql
   (values
@@ -188,6 +192,8 @@
          (cons (eql alarm)
                (cons (or (integer 0 22)
                          (member sigint trap segmentation))  *) )))
+
+;;; list
 (test
  (mv-eql
   (values
@@ -196,6 +202,7 @@
    (typep (make-bus :type 'alarm :signal 'trap-21) 'bus-alarm))
   t t nil))
 
+;;; array
 (test
  (mv-eql
   (values
@@ -205,6 +212,7 @@
    )
   nil t t))
 
+;;; vector
 (test
  (mv-eql
   (values
@@ -213,6 +221,7 @@
    (typep #(1 2 3) '(array t (3))))
   t t t))
 
+;;; list-size
 (test
  (mv-eql
   (let* ((sym (*gensym*))
@@ -237,6 +246,7 @@
     #\? #\+ #\< #\= #\> #\# #\% #\& #\* #\@ #\[ #\\ #\]
     #\{ #\| #\} #\` #\^ #\~))
 
+;;; typep member
 (test
  (mv-eql
   (values
@@ -245,6 +255,25 @@
    (typep #\space 'standard-char))
   t t t))
 
+;;; type-of
+(test
+ (let* ((universum (list 1 'symbol 1.2 #() (make-array '(1 1)) "string" (list) (list 0) t nil)))
+  (every #'identity
+         (mapcar (lambda (x y) (equal x y))
+                 '(BIT SYMBOL FLOAT (VECTOR 0) (ARRAY (1 1)) (STRING 6) NULL CONS BOOLEAN NULL)
+                 (loop for i in universum collect (type-of i))))))
+  
+(test
+ (mv-eql
+  (let* ((sym (*gensym*))
+         (class (eval `(defclass ,sym nil nil)))
+         (standard-class (type-of class)))
+    (values
+     (typep (make-instance class) (type-of (make-instance class)))
+     (typep (make-instance sym) sym)
+     (typep class standard-class)))
+  t t t))
+      
 ;;; typecase test cases
 (test (eql 'a (typecase 1 (integer 'a) (t 'b))))
 (test  (not (typecase 1 (symbol 'a))))
