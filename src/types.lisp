@@ -334,19 +334,25 @@
   ;;(dc real     numberp  real)
   (dc float    floatp  float))
 
+;;; (array type dimensions)
 (defun %compare-array-type (object type-spec)
   (destructuring-bind (type-base &optional (type-element '*) (type-dimensions '*))
       type-spec
     (let ((object-type (array-element-type object))
           (object-dimensions (array-dimensions object)))
       (when (eq type-element 'character)
-        (if (not (eq object-type 'character)) (return-from '%compare-array-type nil)))
-      (when (null object-dimensions) (setq object-dimensions (list (oget object "length"))))
+        (if (not (eq object-type 'character))
+            (return-from '%compare-array-type nil)))
+      (when (null object-dimensions)
+        (setq object-dimensions (list (oget object "length"))))
       (cond ((numberp type-dimensions)
              (setq type-dimensions (make-list type-dimensions :initial-element '*)))
             (t (if (eql '* type-dimensions)
-                   (setq type-dimensions (make-list (list-length object-dimensions) :initial-element '*)))))
-      (cond ((not (eql (list-length type-dimensions) (list-length object-dimensions))) nil)
+                   (setq type-dimensions
+                         (make-list (list-length object-dimensions) :initial-element '*)))))
+      (cond ((not (eql (list-length type-dimensions)
+                       (list-length object-dimensions)))
+             nil)
             ((equal (make-list (list-length type-dimensions) :initial-element 't)
                     (mapcar
                      (lambda (axis-object axis-type)
@@ -356,7 +362,7 @@
                      object-dimensions
                      type-dimensions)))))))
 
-(defun canonical-array-dimensions (dims)
+(defun %canonical-array-dimensions (dims)
   (cond ((consp dims)
          (dolist (it dims t)
            (cond ((eq it '*))
@@ -368,10 +374,10 @@
         (t (error "Bad dimensions form in array type ~a." dims))))
 
 
-(jscl::deftype-compound array (object type-spec)
-                        (and (arrayp object)
-                             (canonical-array-dimensions (caddr type-spec))
-                             (%compare-array-type object type-spec)))
+(deftype-compound array (object type-spec)
+  (and (arrayp object)
+       (%canonical-array-dimensions (caddr type-spec))
+       (%compare-array-type object type-spec)))
 
 ;;; (cons * *) (cons thing thing)
 (deftype-compound cons (object type)
@@ -391,7 +397,7 @@
     (if (not (true-cons-p object))
         (destructuring-bind (&optional (size '*)) (cdr type)
           (cond ((eq size '*) t)
-                ((integerp size)
+                ((non-negative-fixnump size)
                  (eq size (list-length object)))
                 (t (error "Bad list size specificator ~a." type)))))))
 
