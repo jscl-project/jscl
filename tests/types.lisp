@@ -225,7 +225,25 @@
      (typep (list 1 2 3) `(,sym))))
   t t t nil))
 
+(deftype standard-char ()
+  '(member
+    #\Space #\Newline
+    #\a #\b #\c #\d #\e #\f #\g #\h #\i #\j #\k #\l #\m
+    #\n #\o #\p #\q #\r #\s #\t #\u #\v #\w #\x #\y #\z
+    #\A #\B #\C #\D #\E #\F #\G #\H #\I #\J #\K #\L #\M
+    #\N #\O #\P #\Q #\R #\S #\T #\U #\V #\W #\X #\Y #\Z
+    #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9 #\0
+    #\! #\$ #\" #\' #\( #\) #\, #\_ #\- #\. #\/ #\: #\;
+    #\? #\+ #\< #\= #\> #\# #\% #\& #\* #\@ #\[ #\\ #\]
+    #\{ #\| #\} #\` #\^ #\~))
 
+(test
+ (mv-eql
+  (values
+   (typep #\newline '(standard-char))
+   (typep #\1 '(standard-char))
+   (typep #\space 'standard-char))
+  t t t))
 
 ;;; typecase test cases
 (test (eql 'a (typecase 1 (integer 'a) (t 'b))))
