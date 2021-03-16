@@ -392,14 +392,14 @@
 
 ;;; (list *) | (list) | (list length)
 ;;; non canonical type spec
-(deftype-compound  list (object type)
+(deftype-compound  list-size (object type)
   (when (consp object)
     (if (not (true-cons-p object))
         (destructuring-bind (&optional (size '*)) (cdr type)
           (cond ((eq size '*) t)
                 ((non-negative-fixnump size)
                  (eq size (list-length object)))
-                (t (error "Bad list size specificator ~a." type)))))))
+                (t (error "Bad type list size specificator ~a." type)))))))
 
 ;;; (satisfies predicate)
 (deftype-compound  satisfies (object type)
