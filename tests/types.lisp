@@ -342,7 +342,4 @@
 	        ((integer 2 10) (%m :good))
 	        (t (%m :bad2))))))
 
-;;; type-of
-
-
 ;;; EOF
