@@ -334,7 +334,7 @@
   ;;(dc real     numberp  real)
   (dc float    floatp  float))
 
-;;; (array type dimensions)
+;;; type compound: (array type dimensions)
 (defun %compare-array-type (object type-spec)
   (destructuring-bind (type-base &optional (type-element '*) (type-dimensions '*))
       type-spec
@@ -379,7 +379,7 @@
        (%canonical-array-dimensions (caddr type-spec))
        (%compare-array-type object type-spec)))
 
-;;; (cons * *) (cons thing thing)
+;;; (cons * *) (cons thing aught)
 (deftype-compound cons (object type)
   (if (consp object)
       (destructuring-bind (&optional (t1 '*) (t2 '*)) (cdr type)
@@ -471,34 +471,42 @@
          (let ((bound (ash 1 (1- s)))) `(integer ,(- bound) ,(1- bound))))
         (t (error "Bad size specified for SIGNED-BYTE type specifier: ~a."  s))))
 
+;;; (typep x 'jscl::signed-byte-8)
 (deftype signed-byte-8 ()
   `(and (satisfies fixnump) (integer -128  #x100)))
 
+;;; (typep x 'jscl::signed-byte-16)
 (deftype signed-byte-16 ()
   `(and (satisfies fixnump) (integer -32768 32767)))
 
+;;; (typep x 'jscl::signed-byte-16)
 (deftype signed-byte-32 ()
   `(and (satisfies bignump) (integer  -2147483648 2147483647)))
 
+;;; (typep x '(usigned-byte 8!16|32|4|number|*))
+;;;          | '(usigned-byte)
 (deftype unsigned-byte (&optional (s '*))
   (cond ((eq s '*) '(integer 0 *))
         ((and (integerp s) (> s 0)) `(integer 0 ,(1- (ash 1 s))))
         (t (error "Bad size specified for UNSIGNED-BYTE type specifier: ~a."  s))))
 
+;;; jscl::unsigned-byte-8
 (deftype unsigned-byte-8 ()
   `(and (satisfies fixnump) (integer 0 #x100)))
 
+;;; jscl::unsigned-byte-16
 (deftype unsigned-byte-16 ()
   `(and (satisfies fixnump) (integer 0 (#x10000))))
 
+;;; jscl::unsigned-byte-32
 (deftype unsigned-byte-32 ()
   `(and (satisfies fixnump) (integer 0 #xffffffff)))
 
 (deftype string (&optional (size '*))
   `(array character (,size)))
 
-(deftype vector (&optional (element-type '*) (size '*))
-  `(array ,element-type (,size)))
+(deftype vector (&optional (type 't) (size '*))
+  `(array t (,size)))
 
 #+jscl (fset 'typep (fdefinition '!typep))
 
