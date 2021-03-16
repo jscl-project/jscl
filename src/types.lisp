@@ -449,12 +449,6 @@
            (%deftype ',name :expander ,expander)
            ',name)))))
 
-;;;
-(defun non-negative-fixnump (n)
-  (if (fixnump n)
-      (and (>= n 0)
-           (<= n most-positive-fixnum))))
-
 ;;; predefenition types
 (deftype mod (n)
   (unless (and (integerp n) (plusp n)) (error "Type (mod ~a)." n))
