@@ -204,12 +204,12 @@
    (typep #(1 2 3) '(array t (3))))
   t t t))
 
-;;; list-size
+;;; list-length
 (test
  (mv-eql
   (let* ((sym (*gensym*))
 	       (form `(deftype ,sym ()
-                  `(or (list-size 0) (list-size 1)))))
+                  `(or (list-length 0) (list-length 1)))))
     (values
      (eqlt (eval form) sym)
      (typep (list) `(,sym))
