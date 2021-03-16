@@ -130,13 +130,13 @@
     ;; callable relations
     (function          functionp     t    t )
     ;; numeric relations
-    (number            numberp       t    t)
-    (real              realp         t    number t)
-    (rational          rationalp     t    rational  real   number t)
+    (number            numberp       nil    t)
+    (real              realp         nil   number t)
+    (rational          rationalp     nil    rational  real   number t)
     (float             floatp        t    real number t)
     (integer           integerp      t    real number t)
     ;; sequnce relations  
-    (sequence          sequencep      t    t)
+    (sequence          sequencep      nil    t)
     (list              listp          t    sequence t)
     (cons              consp          t    list sequence t)
     (array             arrayp         t    sequence t)
@@ -206,7 +206,7 @@
     (string                       (!find-class 'string))
     (vector                       (!find-class 'vector))
     (array                        (!find-class 'array))
-    (sequence                     (!find-class 'sequence))
+    ;;(sequence                     (!find-class 'sequence))
     (function                     (!find-class 'function))
     (js-object                    (!find-class 'js-object))
     ;;; and Root of the Evil
