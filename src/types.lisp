@@ -334,39 +334,44 @@
   ;;(dc real     numberp  real)
   (dc float    floatp  float))
 
-;;; (array type dimensions)  type::= t | * | any  dimensions::=(n...*)
 (defun %compare-array-type (object type-spec)
-  (destructuring-bind (type-base &optional (type-element-type '*) (type-dimensions '*))
+  (destructuring-bind (type-base &optional (type-element '*) (type-dimensions '*))
       type-spec
-    (when (integerp type-dimensions)(setq type-dimensions (list type-dimensions)))
-    (let ((object-element-type (array-element-type object))
+    (let ((object-type (array-element-type object))
           (object-dimensions (array-dimensions object)))
+      (when (eq type-element 'character)
+        (if (not (eq object-type 'character)) (return-from '%compare-array-type nil)))
+      (when (null object-dimensions) (setq object-dimensions (list (oget object "length"))))
+      (cond ((numberp type-dimensions)
+             (setq type-dimensions (make-list type-dimensions :initial-element '*)))
+            (t (if (eql '* type-dimensions)
+                   (setq type-dimensions (make-list (list-length object-dimensions) :initial-element '*)))))
       (cond ((not (eql (list-length type-dimensions) (list-length object-dimensions))) nil)
-            ((equal '(t t)
+            ((equal (make-list (list-length type-dimensions) :initial-element 't)
                     (mapcar
                      (lambda (axis-object axis-type)
                        (cond ((eql axis-type '*) t)
                              ((eql axis-object '*) nil)
-                             (t (<= axis-object axis-type))))
+                             (t (= axis-object axis-type))))
                      object-dimensions
                      type-dimensions)))))))
 
-;;; without upgraded-array-element-type
-(deftype-compound array (object type)
-  (if (arrayp object)
-      (let ((element-type (cadr type))
-            (dimensions (caddr type)))
-        (if (null element-type)
-            (setq element-type 'T dimensions '*)
-            (if (null dimensions) (setq dimensions '*)))
-        ;; array element type doesn't compare
-        ;; only dimensions 
-        (cond ((eql dimensions '*) t)
-              ((integerp dimensions)
-               (%compare-array-type object (list dimensions)))
-              ((consp dimensions)
-               (%compare-array-type object dimensions))               
-              (t (false))))))
+(defun canonical-array-dimensions (dims)
+  (cond ((consp dims)
+         (dolist (it dims t)
+           (cond ((eq it '*))
+                 ((non-negative-fixnump it))
+                 (t (error "Bad dimension in array type ~a." it)))))
+        ((non-negative-fixnump dims) t)
+        ((eq dims '*) t)
+        ((null dims) t)
+        (t (error "Bad dimensions form in array type ~a." dims))))
+
+
+(jscl::deftype-compound array (object type-spec)
+                        (and (arrayp object)
+                             (canonical-array-dimensions (caddr type-spec))
+                             (%compare-array-type object type-spec)))
 
 ;;; (cons * *) (cons thing thing)
 (deftype-compound cons (object type)
@@ -437,6 +442,12 @@
         `(progn
            (%deftype ',name :expander ,expander)
            ',name)))))
+
+;;;
+(defun non-negative-fixnump (n)
+  (if (fixnump n)
+      (and (>= n 0)
+           (<= n most-positive-fixnum))))
 
 ;;; predefenition types
 (deftype mod (n)
