@@ -103,23 +103,6 @@
   T  T  NIL  NIL  T  T  NIL)
  )
 
-(test
- (mv-eql
-  (let* ((sym (*gensym*))
-	       (form `(let ((a 1))
-		              (deftype ,sym (&optional (x a))
-		                `(integer 0 ,x)))))
-    (values
-     (eqlt (eval form) sym)
-     (let ((a 2))
-       (loop for i from -1 to 3 collect (typep i `(,sym 1))))
-     (let ((a 2))
-       (loop for i from -1 to 3 collect (typep i sym)))))
-  T
-  (NIL T T NIL NIL)
-  (NIL T T NIL NIL))
- )
-
 
 (test
  (mv-eql
