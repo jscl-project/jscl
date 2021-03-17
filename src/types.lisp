@@ -244,36 +244,47 @@
         (setq expanded-p t
               form expander)))))
 
+;;; very simple logic
+;;; complicate logic - increase execution time
+(defun %unwanted-types (thing)
+  (if (or (arrayp thing)
+          (numberp thing)
+          (functionp thing)
+          (packagep thing))
+      (error "Bad thing to be a type specifier ~a." thing)))
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun !typep (object type-specifier)
-    (if (eql type-specifier 'nil)
-        (return-from !typep nil))
+    ;; (%unwanted-types type-specifier)
+    (if (or (eql type-specifier 't)
+            (eql type-specifier 'nil))
+        (return-from !typep type-specifier))
+    ;; may be any clos form
     (if (mop-object-p type-specifier)
         (return-from !typep (!typep object (class-name type-specifier))))
-    (let ((may-be-predicate
-            (cond ((symbolp type-specifier) type-specifier)
-                  ((and (consp type-specifier)(null (rest type-specifier)))
-                   (car type-specifier))
-                  (t nil))))
-      (if may-be-predicate
-          (let ((test  (get-predicate-for may-be-predicate)))
-            (if test
-                (return-from !typep (funcall test object))))))
+    ;; may be predicate or class name
+    (if (symbolp type-specifier)
+        (let ((test (get-predicate-for type-specifier)))
+          (if test (return-from !typep (funcall test object)))
+          ;; try class name
+          (if (gethash type-specifier *class-table*)
+              (let ((class-object
+                      (cond ((std-instance-p object) (class-name (class-of object)))
+                            ;; fixme: 
+                            ((std-instance-class object) (class-name object))
+                            (t nil))))
+                (if class-object
+                    (return-from !typep
+                      (%subclass (%class-cpl class-object) type-specifier)))))))
+    ;; may be compound type specifier
     (let ((test (get-compound-for type-specifier)))
       (if test
           (return-from !typep (funcall test object type-specifier))))
-    (if (symbolp type-specifier)
-        (let ((class-object nil))
-          (if (find-class type-specifier nil)
-              (setq class-object
-                    (cond ((std-instance-p object)
-                           (class-name (class-of object)))
-                          ;; fixme: 
-                          ((std-instance-class object)
-                           (class-name object)))))
-          (if class-object
-              (return-from !typep
-                (%subclass (%class-cpl class-object) type-specifier)))))
+    ;; may be predicate cons form without arguments
+    (if (and (consp type-specifier) (null (rest type-specifier)))
+        (let ((test (get-predicate-for (car type-specifier))))
+          (if test (return-from !typep (funcall test object)))))
+    ;; can be a form with any typep specific syntax 
     (multiple-value-bind (expansion expanded-p)
         (%type-expand type-specifier)
       (if expanded-p
