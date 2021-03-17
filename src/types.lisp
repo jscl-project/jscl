@@ -132,9 +132,11 @@
     ;; numeric relations
     (number            numberp       nil    t)
     (real              realp         nil   number t)
-    (rational          rationalp     nil    rational  real   number t)
-    (float             floatp        t    real number t)
-    (integer           integerp      t    real number t)
+    (rational          rationalp     nil   rational  real   number t)
+    ;;(float             floatp        t    real   number t)
+    ;;(integer           integerp      t    rational  real   number t)
+    (float             floatp        t    number t)
+    (integer           integerp      t    number t)
     ;; sequnce relations  
     (sequence          sequencep      nil    t)
     (list              listp          t    sequence t)
@@ -153,11 +155,11 @@
 (let ((tip))
   (/debug "            compile basic types")
   (dolist (it *types-basic-types*)
-    (destructuring-bind (name predicate class-of supertype &rest tpl) it
+    (destructuring-bind (name predicate class-of &rest  tpl) it
       (setq tip (%make-basic-type
                  :name name
                  :predicate predicate
-                 :supertype supertype
+                 :supertype (car tpl)
                  :class-of class-of
                  :tpl tpl))
       (setf (gethash name *builtin-types*) tip)
