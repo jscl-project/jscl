@@ -15,12 +15,10 @@
          (progn
            ,form)
        (error (msg)
-         (format t "         ERROR: ~a ~%"
+         (format t " ERROR: ~a"
                  (format nil (car (!condition-args msg)) (cadr (!condition-args msg))))
          (values nil))))
     ',result))
-
-
 
 (test
  (equal '(t (nil t t nil nil) (nil t t nil nil))
@@ -108,7 +106,6 @@
      (not* (typep 'c `(,sym a b)))))
   T  T  NIL  NIL  T  T  NIL)
  )
-
 
 (test
  (mv-eql
@@ -269,8 +266,18 @@
 (test (eql 'b (typecase 1 (symbol 'a) (t 'b))))
 (test (null (typecase 1 (t (values)))))
 (test (null (typecase 1 (integer (values)) (t 'a))))
-(deftype bit ()  '(integer 0 1))
+;;; predefined type bit
 (test (eql 'a (typecase 1 (bit 'a) (integer 'b))))
+;;; test (boolean)
+(deftype boolean () `(member t nil))
+(test
+ (mv-eql
+  (values
+   (typecase t ((member t nil) :boolean) (t :bad))
+   (typecase nil ((member t nil) :boolean) (t :bad))
+   (typecase t (boolean :boolean) (otherwise :bad))
+   (typecase nil ((boolean) :boolean) (otherwise :bad)))
+  :boolean :boolean :boolean :boolean))
 (test (eql 'a (typecase 1 (otherwise 'a))))
 (test (equal '(a b c) (typecase 1 (t (list 'a 'b 'c)))))
 (test (equal '(a b c) (typecase 1 (integer (list 'a 'b 'c)) (t nil))))
@@ -283,8 +290,6 @@
              (integer (incf x 2) 'b)
              (t       (incf x 4) 'c))
            x))))
-
-(test (eql 'a (typecase 1 (otherwise 'a))))
 
 ;;; bug:
 ;;;(test (null (typecase 1 (integer) (t 'a))))
