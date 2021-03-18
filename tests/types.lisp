@@ -167,6 +167,25 @@
 (test (typep 'a '(or integer symbol)))
 
 (test
+ (mv-eql
+  (let* ((sym (*gensym*))
+         (pkg (make-package sym)))
+    (values
+     (type-of pkg)
+     (typep pkg 'package)
+     (typecase pkg (package :good))))
+  package t :good))
+
+(test
+ (mv-eql
+  (let ((ht (make-hash-table)))
+    (values
+     (type-of ht)
+     (typep ht 'hash-table)
+     (typecase ht (hash-table :good))))
+  ht t :good))
+
+(test
  (typep (cons #(1) 0.1)
         '(or (cons (or fixnum vector (member a "b")))
           (cons (or (and (not vector) array) (and (not integer) number))
