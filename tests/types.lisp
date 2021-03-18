@@ -20,6 +20,50 @@
          (values nil))))
     ',result))
 
+(defparameter +atomic-test-objects+
+  (list 1
+        1.2
+        's
+        #\c
+        :k
+        (gensym)
+        (make-symbol "lower")
+        (lambda nil nil)
+        (values)
+        (values-list nil)
+        nil
+        t
+        (make-package 'fake-pack)
+        (make-hash-table)
+        (defstruct atomic-test-struct)
+        (make-atomic-test-struct)
+        (defclass atomic-test-class nil nil)
+        (make-instance 'atomic-test-class)
+        (make-list 1)
+        (make-array '(1))
+        (vector)
+        "sss"
+        (make-string 2)
+        (jscl::new)
+        (find-class 'atomic-test-class)
+        (let nil (lambda nil nil))))
+
+
+(test
+ (mv-eql
+  (let ((typeof '(BIT FLOAT SYMBOL CHARACTER KEYWORD SYMBOL SYMBOL
+                  FUNCTION NULL NULL NULL BOOLEAN package CONS
+                  SYMBOL CONS STANDARD-CLASS ATOMIC-TEST CONS
+                  (VECTOR 1) (VECTOR 0) (STRING 3) (STRING 2)
+                  JSCL::JS-OBJECT STANDARD-CLASS FUNCTION)))
+    (values
+     (loop for x in +atomic-test-objects+
+           for y in typeof
+           collect (equal y (type-of x)))
+     (loop for x in +atomic-test-objects+ collect (typep x 'atom))))
+  (T T T T T T T T T T T T NIL T T T T NIL T T T T T T T T)
+  (T T T T T T T T T T T T T NIL T NIL NIL NIL NIL T T T T T NIL T)))
+
 (test
  (mv-eql
   (let ((universum (list 0 1  1.1  1. 0.0  1.
