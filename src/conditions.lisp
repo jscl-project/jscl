@@ -93,8 +93,10 @@
 
 (defun %coerce-condition (default datum arguments)
   (cond ((symbolp datum)
-         (unless (and (find-class datum nil) (subtypep datum 'condition))
-           (%%error 'type-error :datum datum :expected-type 'condition-class))
+         (let ((c0 (find-class datum nil))
+               (c1 (find-class 'condition nil)))
+           (unless (and c0 (subclassp c0 c1))
+             (%%error 'type-error :datum datum :expected-type 'condition-class)))
          (apply #'%%make-condition datum arguments))
         ((or (stringp datum)
              (functionp datum))
