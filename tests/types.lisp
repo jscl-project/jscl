@@ -42,6 +42,55 @@
 
 
 (test
+ (mv-eql
+  (let ((universum (list "string"
+                         (make-string 10) (concat (make-string 10) "aaaa" 1 "")
+                         (string 1) (string 'symbol)
+                         (symbol-name 'jjjj)))
+        (type-spec '(string
+                     string string
+                     string string
+                     string))
+        (deftype-spec '((STRING 6) (STRING 10) (STRING 15) (STRING 1)
+                        (STRING 6) (STRING 4)))
+        (fail-deftype-spec '((STRING 5) (STRING 11) (STRING 16) (STRING 2)
+                             (STRING 5) (STRING 3)))
+        (type-as-vector '((vector t 5) (vector t 11) (vector t 16) (vector t 2)
+                          (vector t 5) (vector t 3)))
+        (type-as-array  '((array character 5) (array character 11) (array character 16)
+                          (array character 2) (array character 5) (array character 3))))
+
+    (values 
+     (every #'identity (loop for x in universum collect (typep x 'atom)))
+     (loop for x in universum collect (type-of x))
+     (loop for x in universum
+           for type in type-spec collect (typep x type))
+     (loop for x in universum
+           for type in deftype-spec collect (typep x type))
+     (loop for x in universum collect (typep x '(string *)))
+     (loop for x in universum
+           for type in fail-deftype-spec collect (not (typep x type)))
+     (loop for x in universum
+           for type in type-as-vector collect (typep x type))
+     (loop for x in universum
+           for type in type-as-array collect (typep x type))
+     (list (typep "abc" '(or (vector) (array)))
+           (typep "abc" '(and (vector) (array) (string)))
+           (typep "abc" '(and (vector *) (array *) (string *)))
+           (typep "abc" '(and (vector t *) (array t *)))
+           (typep "abc" '(and (vector) (array character *) )))))
+  T
+  ((STRING 6) (STRING 10) (STRING 15) (STRING 1) (STRING 6) (STRING 4))
+  (T T T T T T)
+  (T T T T T T)
+  (T T T T T T)
+  (T T T T T T)
+  (NIL NIL NIL NIL NIL NIL)
+  (NIL NIL NIL NIL NIL NIL)
+  (T T T T T) ))
+
+
+(test
  (equal '(t (nil t t nil nil) (nil t t nil nil))
         (let* ((sym (INTERN (symbol-name (gensym))))
 	             (form `(let ((a 1))
