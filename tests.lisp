@@ -57,6 +57,26 @@
 (defmacro test-equal (form value)
   `(test (equal ,form ,value)))
 
+(defun *gensym* ()
+  (intern (symbol-name (gensym))))
+
+(defun not* (f) (not (not f)))
+
+(defun eqlt (f s) (equal f s))
+
+(defmacro mv-eql (form &rest result)
+  `(equal
+    (multiple-value-list
+     (handler-case
+         (progn
+           ,form)
+       (error (msg)
+         (format t " ERROR: ~a"
+                 (format nil (car (!condition-args msg)) (cadr (!condition-args msg))))
+         (values nil))))
+    ',result))
+
+
 (setq *timestamp* (get-internal-real-time))
 
 (terpri)
