@@ -172,6 +172,7 @@
    (typep "123" '(string *)))
   T NIL T NIL T NIL T NIL T NIL T))
 
+;;; defstruct with (:type list)
 (defstruct struct-bus type signal r1 r2 r3)
 (deftype bus-alarm ()
   `(cons (eql struct-bus)
@@ -179,14 +180,16 @@
                (cons (or (integer 0 22)
                          (member sigint trap segmentation))  *) )))
 
-;;; list
+;;; structure as cons
 (test
  (mv-eql
   (values
    (typep (make-struct-bus :type 'alarm :signal 12) 'bus-alarm)
    (typep (make-struct-bus :type 'alarm :signal 'trap) '(bus-alarm))
-   (typep (make-struct-bus :type 'alarm :signal 'trap-21) 'bus-alarm))
-  t t nil))
+   (typep (make-struct-bus :type 'alarm :signal 'trap-21) 'bus-alarm)
+   (typecase (make-struct-bus :type 'alarm :signal 12) (bus-alarm :good) (t :bad))
+   (typecase (make-struct-bus :type 'alarm :signal 32) ((bus-alarm) :good) (t :bad)))  
+  t t nil :good :bad))
 
 ;;; array
 (test
