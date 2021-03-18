@@ -61,7 +61,7 @@
            for y in typeof
            collect (equal y (type-of x)))
      (loop for x in +atomic-test-objects+ collect (typep x 'atom))))
-  (T T T T T T T T T T T T NIL T T T T NIL T T T T T T T T)
+  (T T T T T T T T T T T T T T T T T NIL T T T T T T T T)
   (T T T T T T T T T T T T T NIL T NIL NIL NIL NIL T T T T T NIL T)))
 
 (test
