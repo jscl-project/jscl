@@ -111,16 +111,6 @@
                      :datum datum
                      :expected-type 'condition-designator))))
 
-#+nil
-(defun %%signal (datum &rest args)
-  (let ((condition (%coerce-condition 'condition datum args)))
-    (dolist (binding *handler-bindings*)
-      (let ((binding-type (car binding))
-            (handler (cdr binding)))
-        (when (!typep condition binding-type)
-          (funcall handler condition))))
-    nil))
-
 (defun %%signal (datum &rest args)
   (let ((condition (%%coerce-condition 'condition datum args)))
     (dolist (binding *handler-bindings*)
@@ -147,7 +137,6 @@
     (check-type condition error)
     (%%signal condition)
     (format stream "~&ERROR: ~a~%" (type-of condition))
-    ;;(print (type-of condition))
     (typecase condition
       (simple-error
        (apply #'format
@@ -157,7 +146,6 @@
        (write-char #\newline))
       (t (print-object condition stream)))
     nil))
-
 
 ;;; handlers
 (defvar *handler-bindings* nil)
