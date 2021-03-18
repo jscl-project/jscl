@@ -300,6 +300,7 @@
         ((characterp object) 'character)
         ((floatp object) 'float)
         ((mop-object-p object) (class-name (class-of object)))
+        ((hash-table-p object) 'hash-table)
         ((consp object) 'cons)
         ((stringp object)`(string ,(oget object "length")))
         ((arrayp object)
