@@ -91,7 +91,7 @@
 (defun %%make-condition (type &rest slot-initializations)
     (apply #'make-instance type slot-initializations))
 
-(defun %coerce-condition (default datum arguments)
+(defun %%coerce-condition (default datum arguments)
   (cond ((symbolp datum)
          (let ((c0 (find-class datum nil))
                (c1 (find-class 'condition nil)))
@@ -111,6 +111,7 @@
                      :datum datum
                      :expected-type 'condition-designator))))
 
+#+nil
 (defun %%signal (datum &rest args)
   (let ((condition (%coerce-condition 'condition datum args)))
     (dolist (binding *handler-bindings*)
@@ -120,8 +121,15 @@
           (funcall handler condition))))
     nil))
 
+(defun %%signal (datum &rest args)
+  (let ((condition (%%coerce-condition 'condition datum args)))
+    (dolist (binding *handler-bindings*)
+      (when (!typep condition (car binding))
+        (funcall (cdr binding) condition)))
+    nil))
+
 (defun %%warn (datum &rest arguments)
-  (let ((condition (%coerce-condition 'simple-warning datum arguments)))
+  (let ((condition (%%coerce-condition 'simple-warning datum arguments)))
     (check-type condition warning)
     (%%signal condition)
     (format *standard-output* "~&WARNING: ")
@@ -135,11 +143,11 @@
 
 (defun %%error (datum &rest args)
   (let ((stream *standard-output*)
-        (condition (%coerce-condition 'simple-error datum args)))
+        (condition (%%coerce-condition 'simple-error datum args)))
     (check-type condition error)
     (%%signal condition)
-    (format stream "~&ERROR: ")
-    (print (type-of condition))
+    (format stream "~&ERROR: ~a~%" (type-of condition))
+    ;;(print (type-of condition))
     (typecase condition
       (simple-error
        (apply #'format
