@@ -21,6 +21,27 @@
     ',result))
 
 (test
+ (mv-eql
+  (let ((universum (list 0 1  1.1  1. 0.0  1.
+                         0.01
+                         #xabcd  #x123  #o123  #b00101
+                         (expt 2 32) (expt 2 32) (expt 2 15) (expt 2 52)))
+        (type-spec '(bit bit float integer integer integer
+                     float
+                     integer integer integer integer
+                     bignum fixnum fixnum bignum)))
+
+    (values 
+     (every #'identity (loop for x in universum collect (typep x 'atom)))
+     (loop for x in universum collect (type-of x))
+     (loop for x in universum
+           for type in type-spec collect (typep x type))))
+  T
+  (BIT BIT FLOAT BIT BIT BIT FLOAT INTEGER INTEGER INTEGER INTEGER INTEGER INTEGER INTEGER INTEGER)
+  (T T T T T T T T T T T NIL T T NIL) ))
+
+
+(test
  (equal '(t (nil t t nil nil) (nil t t nil nil))
         (let* ((sym (INTERN (symbol-name (gensym))))
 	             (form `(let ((a 1))
