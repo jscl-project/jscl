@@ -313,6 +313,7 @@
                (t 'symbol)))
         ((functionp object) 'function)
         ((js-object-p object) 'js-object)
+        ((packagep object) 'package)
         (t 'unreadable-object)))
 
 ;;; numeric [lower-limit [upper-limit]]
