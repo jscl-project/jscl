@@ -91,26 +91,6 @@
 (defun %%make-condition (type &rest slot-initializations)
     (apply #'make-instance type slot-initializations))
 
-#+nil
-(defun %%coerce-condition (default datum arguments)
-  (cond ((symbolp datum)
-         (let ((c0 (find-class default nil))
-               (c1 (find-class datum nil)))
-           (unless (and c0 (subclassp c0 c1))
-             (%%error 'type-error :datum datum :expected-type default)))
-         (apply #'%%make-condition datum arguments))
-        ((or (stringp datum)(functionp datum))
-         (%%make-condition default
-                           ;; todo: formater function
-                           :format-control datum
-                           :format-arguments arguments))
-        ((!typep datum 'condition)
-         (check-type arguments null)
-         datum)
-        (t  (%%error 'type-error
-                     :datum datum
-                     :expected-type 'condition-designator))))
-
 (defun %%coerce-condition (default datum arguments)
   (cond ((symbolp datum)
          (apply #'%%make-condition datum arguments))
@@ -128,7 +108,7 @@
 
 ;;; raise CONDITION with any type
 (defun %%signal (datum &rest args)
-  (let ((condition (coerce-to-condition 'condition datum args)))
+  (let ((condition (%%coerce-to-condition 'condition datum args)))
     (dolist (binding *handler-bindings*)
       (let ((type (car binding))
             (handler (cdr binding)))
@@ -150,7 +130,6 @@
     (write-char #\newline)
     nil))
 
-
 (defun %%error (datum &rest args)
   (let ((stream *standard-output*)
         (condition (%%coerce-condition 'simple-error datum args)))
@@ -167,7 +146,6 @@
        (write-char #\newline))
       (t (print-object condition stream)))
     nil))
-
 
 ;;; handlers
 (defvar *handler-bindings* nil)
@@ -188,7 +166,7 @@
               (%error (or (oget err "message") err))))))))
 
 
-(defmacro @handler-bind (bindings &body body)
+(defmacro %%handler-bind (bindings &body body)
   (let ((install-handlers nil))
     (dolist (binding bindings)
       (destructuring-bind (type handler) binding
@@ -205,7 +183,6 @@
           (if (%%nlx-p err)
               (%%throw err)
               (%%error (or (oget err "message") err))))))))
-
 
 ;; Implementation if :NO-ERROR case is missing.
 (defmacro %handler-case-1 (form &body cases)
@@ -236,6 +213,37 @@
          (let (,datum)
            (tagbody
               (%handler-bind ,(mapcar #'translate-case cases)
+                (return-from ,nlx ,form))
+              ,@(reverse tagbody-content)))))))
+
+(defmacro %%handler-case-1 (form &body cases)
+  (let ((datum (gensym))
+        (nlx (gensym))
+        (tagbody-content nil))
+
+    (flet (
+           ;; Given a case, return a condition handler for it. It will
+           ;; also update the TAGBODY-CONTENT variable. This variable
+           ;; contains the body of a tagbody form.  The condition
+           ;; handlers will GO to labels there in order to perform non
+           ;; local exit and handle the condition.
+           (translate-case (case)
+             (destructuring-bind (type (&optional (var (gensym))) &body body)
+                 case
+               (let ((label (gensym)))
+                 (push label tagbody-content)
+                 (push `(return-from ,nlx
+                          (let ((,var ,datum))
+                            ,@body))
+                       tagbody-content)
+
+                 `(,type (lambda (temp)
+                           (setq ,datum temp)
+                           (go ,label)))))))
+      `(block ,nlx
+         (let (,datum)
+           (tagbody
+              (%%handler-bind ,(mapcar #'translate-case cases)
                 (return-from ,nlx ,form))
               ,@(reverse tagbody-content)))))))
 
