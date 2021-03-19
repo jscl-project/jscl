@@ -91,6 +91,7 @@
 (defun %%make-condition (type &rest slot-initializations)
     (apply #'make-instance type slot-initializations))
 
+#+nil
 (defun %%coerce-condition (default datum arguments)
   (cond ((symbolp datum)
          (let ((c0 (find-class default nil))
@@ -125,25 +126,25 @@
                      :datum datum
                      :expected-type 'condition-designator))))
 
-
-
-
-
+;;; raise CONDITION with any type
 (defun %%signal (datum &rest args)
-  (let ((condition (%%coerce-condition 'simple-condition datum args)))
+  (let ((condition (coerce-to-condition 'condition datum args)))
     (dolist (binding *handler-bindings*)
-      (when (!typep condition (car binding))
-        (funcall (cdr binding) condition)))
-    nil))
+      (let ((type (car binding))
+            (handler (cdr binding)))
+        ;; Here  TYPE is one of: SYMBOL or (OR symbol ... symbol)
+        (when (typep condition type)
+          (funcall handler condition))))))
 
 (defun %%warn (datum &rest arguments)
-  (let ((condition (%%coerce-condition 'simple-warning datum arguments)))
-    ;; prevent all conditions with error
+  (let ((stream *standard-output*)
+        (condition (%%coerce-condition 'simple-warning datum arguments)))
+    ;; prevent all conditions ERROR class
     (check-type condition warning)
     (%%signal condition)
     (format *standard-output* "~&WARNING: ")
     (apply #'format
-           *standard-output*
+           stream
            (simple-condition-format-control condition)
            (simple-condition-format-arguments condition))
     (write-char #\newline)
@@ -153,6 +154,8 @@
 (defun %%error (datum &rest args)
   (let ((stream *standard-output*)
         (condition (%%coerce-condition 'simple-error datum args)))
+    ;; prevent all condition WARNING class
+    (check-type condition error)
     (%%signal condition)
     (format stream "~&ERROR: ~a~%" (type-of condition))
     (typecase condition
@@ -164,28 +167,6 @@
        (write-char #\newline))
       (t (print-object condition stream)))
     nil))
-
-(defun %%error (datum &rest args)
-  (let ((stream *standard-output*)
-        (condition (%%coerce-condition 'simple-error datum args))
-        (active-handlers *handler-bindings*))
-
-    ;;(%%signal condition)
-    
-(dolist (binding *handler-bindings*)
-      (when (!typep condition (car binding))
-        (funcall (cdr binding) condition)))
-    (format stream "~&ERROR: ~a~%" (type-of condition))
-    (typecase condition
-      (simple-error
-       (apply #'format
-              stream
-              (simple-condition-format-control condition)
-              (simple-condition-format-arguments condition))
-       (write-char #\newline))
-      (t (print-object condition stream)))
-    nil))
-
 
 
 ;;; handlers
@@ -212,8 +193,7 @@
     (dolist (binding bindings)
       (destructuring-bind (type handler) binding
         (if (consp type)
-            ;; (error warning) -> typep or form
-            ;; (or error warning)
+            ;; (error warning) -> (or error warning)
             (setq type (push 'or type)))
         (push `(push (cons ',type #',handler) *handler-bindings*)
               install-handlers)))
@@ -224,7 +204,7 @@
         (catch (err)
           (if (%%nlx-p err)
               (%%throw err)
-              (%error (or (oget err "message") err))))))))
+              (%%error (or (oget err "message") err))))))))
 
 
 ;; Implementation if :NO-ERROR case is missing.
