@@ -93,13 +93,12 @@
 
 (defun %%coerce-condition (default datum arguments)
   (cond ((symbolp datum)
-         (let ((c0 (find-class datum nil))
-               (c1 (find-class 'condition nil)))
+         (let ((c0 (find-class default nil))
+               (c1 (find-class datum nil)))
            (unless (and c0 (subclassp c0 c1))
-             (%%error 'type-error :datum datum :expected-type 'condition-class)))
+             (%%error 'type-error :datum datum :expected-type default)))
          (apply #'%%make-condition datum arguments))
-        ((or (stringp datum)
-             (functionp datum))
+        ((or (stringp datum)(functionp datum))
          (%%make-condition default
                            ;; todo: formater function
                            :format-control datum
@@ -111,8 +110,27 @@
                      :datum datum
                      :expected-type 'condition-designator))))
 
+(defun %%coerce-condition (default datum arguments)
+  (cond ((symbolp datum)
+         (apply #'%%make-condition datum arguments))
+        ((or (stringp datum)(functionp datum))
+         (%%make-condition default
+                           ;; todo: formater function
+                           :format-control datum
+                           :format-arguments arguments))
+        ((!typep datum 'condition)
+         (check-type arguments null)
+         datum)
+        (t  (%%error 'type-error
+                     :datum datum
+                     :expected-type 'condition-designator))))
+
+
+
+
+
 (defun %%signal (datum &rest args)
-  (let ((condition (%%coerce-condition 'condition datum args)))
+  (let ((condition (%%coerce-condition 'simple-condition datum args)))
     (dolist (binding *handler-bindings*)
       (when (!typep condition (car binding))
         (funcall (cdr binding) condition)))
@@ -120,6 +138,7 @@
 
 (defun %%warn (datum &rest arguments)
   (let ((condition (%%coerce-condition 'simple-warning datum arguments)))
+    ;; prevent all conditions with error
     (check-type condition warning)
     (%%signal condition)
     (format *standard-output* "~&WARNING: ")
@@ -134,7 +153,6 @@
 (defun %%error (datum &rest args)
   (let ((stream *standard-output*)
         (condition (%%coerce-condition 'simple-error datum args)))
-    (check-type condition error)
     (%%signal condition)
     (format stream "~&ERROR: ~a~%" (type-of condition))
     (typecase condition
@@ -146,6 +164,29 @@
        (write-char #\newline))
       (t (print-object condition stream)))
     nil))
+
+(defun %%error (datum &rest args)
+  (let ((stream *standard-output*)
+        (condition (%%coerce-condition 'simple-error datum args))
+        (active-handlers *handler-bindings*))
+
+    ;;(%%signal condition)
+    
+(dolist (binding *handler-bindings*)
+      (when (!typep condition (car binding))
+        (funcall (cdr binding) condition)))
+    (format stream "~&ERROR: ~a~%" (type-of condition))
+    (typecase condition
+      (simple-error
+       (apply #'format
+              stream
+              (simple-condition-format-control condition)
+              (simple-condition-format-arguments condition))
+       (write-char #\newline))
+      (t (print-object condition stream)))
+    nil))
+
+
 
 ;;; handlers
 (defvar *handler-bindings* nil)
@@ -164,6 +205,27 @@
           (if (%%nlx-p err)
               (%%throw err)
               (%error (or (oget err "message") err))))))))
+
+
+(defmacro @handler-bind (bindings &body body)
+  (let ((install-handlers nil))
+    (dolist (binding bindings)
+      (destructuring-bind (type handler) binding
+        (if (consp type)
+            ;; (error warning) -> typep or form
+            ;; (or error warning)
+            (setq type (push 'or type)))
+        (push `(push (cons ',type #',handler) *handler-bindings*)
+              install-handlers)))
+    `(let ((*handler-bindings* *handler-bindings*))
+       ,@install-handlers
+       (%js-try
+        (progn ,@body)
+        (catch (err)
+          (if (%%nlx-p err)
+              (%%throw err)
+              (%error (or (oget err "message") err))))))))
+
 
 ;; Implementation if :NO-ERROR case is missing.
 (defmacro %handler-case-1 (form &body cases)
