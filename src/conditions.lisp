@@ -165,14 +165,15 @@
               (%%throw err)
               (%error (or (oget err "message") err))))))))
 
-
 (defmacro %%handler-bind (bindings &body body)
   (let ((install-handlers nil))
     (dolist (binding bindings)
       (destructuring-bind (type handler) binding
         (if (consp type)
+            ;; TYPEP OR form
             ;; (error warning) -> (or error warning)
-            (setq type (push 'or type)))
+            ;; unless form - if someone smart has already used OR
+            (unless (eq (car type) 'or) (setq type (push 'or type))))
         (push `(push (cons ',type #',handler) *handler-bindings*)
               install-handlers)))
     `(let ((*handler-bindings* *handler-bindings*))
