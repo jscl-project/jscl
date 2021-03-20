@@ -106,8 +106,8 @@
                  (#j:jqconsole:Write (format nil
                                              (simple-condition-format-control condition)
                                              (simple-condition-format-arguments condition))
-                                     "jqconsole-error")
-                 (%console-terpri))))
+                                     "jqconsole-error")))
+              (%console-terpri) )
             (catch (js-err)
               (#j:console:log js-err)
               (let ((message (or (oget js-err "message") (%map-js-object js-err) js-err)))
