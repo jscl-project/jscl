@@ -213,58 +213,6 @@
                        ,@(butlast cases))))))))
         `(%%handler-case-1 ,form ,@cases))))
 
-
-
-;;; Fake condition objects until we have at least type system, but
-;;; final implementation would require CLOS.
-
-(def!struct !condition
-  type
-  args)
-
-(defun condition-type-p (x type)
-  (and (!condition-p x)
-       (equal (!condition-type x) type)))
-
-(defun coerce-to-condition (default datum args)
-  (cond
-    ((!condition-p datum)
-     datum)
-    ((stringp datum)
-     (make-!condition
-      :type default
-      :args (cons datum args)))
-    (t
-     (make-!condition
-      :type datum
-      :args args))))
-
-(defun %signal (datum &rest args)
-  (let ((condition (coerce-to-condition 'condition datum args)))
-    (dolist (binding *handler-bindings*)
-      (let ((type (car binding))
-            (handler (cdr binding)))
-        (when (condition-type-p condition type)
-          (funcall handler condition))))))
-
-(defun %warn (datum &rest args)
-  (let ((condition (coerce-to-condition 'warning datum args)))
-    (%signal condition)
-    ;; TODO: It should be *ERROR-OUTPUT*
-    (write-string "WARNING: ")
-    (apply #'format t datum args)
-    (write-char #\newline)
-    nil))
-
-(defun %error (datum &rest args)
-  (let ((condition (coerce-to-condition 'error datum args)))
-    (%signal condition)
-    ;; TODO: It should be *ERROR-OUTPUT*
-    (write-string "ERROR: ")
-    (apply #'format t datum args)
-    (write-char #\newline)
-    nil))
-
 #+jscl
 (progn
 
