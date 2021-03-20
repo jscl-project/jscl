@@ -1,3 +1,5 @@
+;;; -*- mode:lisp; coding:utf-8 -*-
+
 ;;; conditions.lisp ---
 
 ;; JSCL is free software: you can redistribute it and/or
@@ -217,12 +219,15 @@
 (progn
 
   (defmacro handler-bind (&rest body)
-    `(%handler-bind ,@body))
+    `(%%handler-bind ,@body))
 
   (defmacro handler-case (&rest body)
-    `(%handler-case ,@body))
+    `(%%handler-case ,@body))
 
-  (fset 'signal #'%signal)
-  (fset 'warn #'%warn)
-  (fset 'error #'%error))
+  (fset 'make-condition #'%%make-condition)
+  (fset 'signal #'%%signal)
+  (fset 'warn #'%%warn)
+  (fset 'error #'%%error))
 
+
+;;; EOF
