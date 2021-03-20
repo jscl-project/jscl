@@ -110,7 +110,7 @@
 
 ;;; raise CONDITION with any type
 (defun %%signal (datum &rest args)
-  (let ((condition (%%coerce-to-condition 'condition datum args)))
+  (let ((condition (%%coerce-condition 'simple-condition datum args)))
     (dolist (binding *handler-bindings*)
       (let ((type (car binding))
             (handler (cdr binding)))
