@@ -1,3 +1,5 @@
+;;; -*- mode:lisp; coding:utf-8 -*-
+
 ;; JSCL is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation, either version 3 of the
@@ -67,6 +69,15 @@
             nil
             0)))
 
+;;; decode error.msg object from (js-try)
+(defun %map-js-object (job)
+  (mapcar (lambda (k) (list k (oget job k)))
+          (mapcar (lambda (x) (js-to-lisp x))
+                  (vector-to-list (#j:Object:keys job)))))
+
+(defun %console-terpri()
+  (#j:jqconsole:Write (string #\newline) "jqconsole-error"))
+
 (defun toplevel ()
   (#j:jqconsole:RegisterMatching "(" ")" "parents")
   (let ((prompt (format nil "~a> " (package-name *package*))))
@@ -76,7 +87,6 @@
            ;; form and set successp to T. However, if a non-local exit
            ;; happens, we cancel it, so it is not propagated more.
            (%js-try
-
             ;; Capture unhandled Lisp conditions.
             (handler-case
                 (when (> (length input) 0)
@@ -84,16 +94,24 @@
                          (results (multiple-value-list (eval-interactive form))))
                     (dolist (x results)
                       (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return"))))
-              (error (err)
+              (error (condition)
                 (#j:jqconsole:Write "ERROR: " "jqconsole-error")
-                (#j:jqconsole:Write (apply #'format nil (!condition-args err)) "jqconsole-error")
-                (#j:jqconsole:Write (string #\newline) "jqconsole-error")))
-            
-            (catch (err)
-              (#j:console:log err)
-              (let ((message (or (oget err "message") err)))
+                (typecase condition
+                  (type-error
+                   (#j:jqconsole:Write
+                    (format nil "Type error. ~a does not designate a ~a~%"type-error-datum condition)
+                    (type-error-expected-type condition))
+                   "jqconsole-error"))
+                (simple-error
+                 (#j:jqconsole:Write (format nil
+                                             (simple-condition-format-control condition)
+                                             (simple-condition-format-arguments condition))
+                                     "jqconsole-error")
+                 (%console-terpri))))
+            (catch (js-err)
+              (#j:console:log js-err)
+              (let ((message (or (oget js-err "message") (%map-js-object js-err) js-err)))
                 (#j:jqconsole:Write (format nil "ERROR[!]: ~a~%" message) "jqconsole-error"))))
-           
            (save-history)
            (toplevel)))
     (#j:jqconsole:Prompt t #'process-input #'%sexpr-complete)))
@@ -108,3 +126,5 @@
   (#j:window:addEventListener "load" (lambda (&rest args) (toplevel))))
 
 (web-init)
+
+;;; EOF
