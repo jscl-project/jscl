@@ -122,11 +122,9 @@
     ;; prevent all conditions ERROR class
     (check-type condition warning)
     (%%signal condition)
-    (format *standard-output* "~&WARNING: ")
-    (apply #'format
-           stream
-           (simple-condition-format-control condition)
-           (simple-condition-format-arguments condition))
+    (format stream "WARNING: ")
+    (format stream (simple-condition-format-control condition)
+            (simple-condition-format-arguments condition))
     (write-char #\newline)
     nil))
 
@@ -136,34 +134,18 @@
     ;; prevent all condition WARNING class
     (check-type condition error)
     (%%signal condition)
-    (format stream "~&ERROR: ~a~%" (type-of condition))
+    ;;(format stream "~&ERROR: ~a~%" (type-of condition))
     (typecase condition
       (simple-error
-       (apply #'format
-              stream
-              (simple-condition-format-control condition)
-              (simple-condition-format-arguments condition))
-       (write-char #\newline))
-      (t (print-object condition stream)))
+       (format stream (simple-condition-format-control condition)
+               (simple-condition-format-arguments condition)))
+      (type-error
+       (format stream "Type error. ~a does not designate a ~a" (type-error-datum condition)
+               (type-error-expected-type condition))))
     nil))
 
 ;;; handlers
 (defvar *handler-bindings* nil)
-
-(defmacro %handler-bind (bindings &body body)
-  (let ((install-handlers nil))
-    (dolist (binding bindings)
-      (destructuring-bind (type handler) binding
-        (push `(push (cons ',type #',handler) *handler-bindings*)
-              install-handlers)))
-    `(let ((*handler-bindings* *handler-bindings*))
-       ,@install-handlers
-       (%js-try
-        (progn ,@body)
-        (catch (err)
-          (if (%%nlx-p err)
-              (%%throw err)
-              (%error (or (oget err "message") err))))))))
 
 (defmacro %%handler-bind (bindings &body body)
   (let ((install-handlers nil))
@@ -184,38 +166,6 @@
           (if (%%nlx-p err)
               (%%throw err)
               (%%error (or (oget err "message") err))))))))
-
-;; Implementation if :NO-ERROR case is missing.
-(defmacro %handler-case-1 (form &body cases)
-  (let ((datum (gensym))
-        (nlx (gensym))
-        (tagbody-content nil))
-
-    (flet (
-           ;; Given a case, return a condition handler for it. It will
-           ;; also update the TAGBODY-CONTENT variable. This variable
-           ;; contains the body of a tagbody form.  The condition
-           ;; handlers will GO to labels there in order to perform non
-           ;; local exit and handle the condition.
-           (translate-case (case)
-             (destructuring-bind (type (&optional (var (gensym))) &body body)
-                 case
-               (let ((label (gensym)))
-                 (push label tagbody-content)
-                 (push `(return-from ,nlx
-                          (let ((,var ,datum))
-                            ,@body))
-                       tagbody-content)
-
-                 `(,type (lambda (temp)
-                           (setq ,datum temp)
-                           (go ,label)))))))
-      `(block ,nlx
-         (let (,datum)
-           (tagbody
-              (%handler-bind ,(mapcar #'translate-case cases)
-                (return-from ,nlx ,form))
-              ,@(reverse tagbody-content)))))))
 
 (defmacro %%handler-case-1 (form &body cases)
   (let ((datum (gensym))
@@ -249,8 +199,7 @@
               ,@(reverse tagbody-content)))))))
 
 
-;;; General case
-(defmacro %handler-case (form &body cases)
+(defmacro %%handler-case (form &body cases)
   (let ((last-case (car (last cases))))
     (if (and last-case (eq (car last-case) :no-error))
         (destructuring-bind (lambda-list &body body) (cdr last-case)
@@ -260,9 +209,9 @@
                (multiple-value-call (lambda ,lambda-list ,@body)
                  (block ,normal-return
                    (return-from ,error-return
-                     (%handler-case-1 (return-from ,normal-return ,form)
+                     (%%handler-case-1 (return-from ,normal-return ,form)
                        ,@(butlast cases))))))))
-        `(%handler-case-1 ,form ,@cases))))
+        `(%%handler-case-1 ,form ,@cases))))
 
 
 
