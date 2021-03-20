@@ -97,17 +97,17 @@
               (error (condition)
                 (#j:jqconsole:Write "ERROR: " "jqconsole-error")
                 (typecase condition
-                  (type-error
-                   (#j:jqconsole:Write
-                    (format nil "Type error. ~a does not designate a ~a~%"type-error-datum condition)
-                    (type-error-expected-type condition))
-                   "jqconsole-error"))
-                (simple-error
-                 (#j:jqconsole:Write (format nil
-                                             (simple-condition-format-control condition)
-                                             (simple-condition-format-arguments condition))
-                                     "jqconsole-error")))
-              (%console-terpri) )
+                  (type-error (#j:jqconsole:Write
+                               (format nil "Type error. ~a does not designate a ~a~%"
+                                       (type-error-datum condition)
+                                       (type-error-expected-type condition))
+                               "jqconsole-error"))
+                  (simple-error (#j:jqconsole:Write
+                                 (format nil
+                                         (simple-condition-format-control condition)
+                                         (simple-condition-format-arguments condition))
+                                 "jqconsole-error")
+                   (%console-terpri)))))
             (catch (js-err)
               (#j:console:log js-err)
               (let ((message (or (oget js-err "message") (%map-js-object js-err) js-err)))
@@ -115,7 +115,6 @@
            (save-history)
            (toplevel)))
     (#j:jqconsole:Prompt t #'process-input #'%sexpr-complete)))
-
 
 (defun web-init ()
   (load-history)
