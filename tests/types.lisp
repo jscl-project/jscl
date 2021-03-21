@@ -563,6 +563,11 @@
                                                (cons array (cons vector))
                                          ))))))) )
 
+(test
+ (typep (cons 1 (list 1))
+        '(cons (or (eql 1) (eql 2))
+               (or (list-length 0) (list-length 1)))))
+
 
 
 ;;; EOF
