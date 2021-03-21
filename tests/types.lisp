@@ -546,4 +546,14 @@
 	        ((integer 2 10) (%m :good))
 	        (t (%m :bad2))))))
 
+(test
+ (let ((cells (list 1 2021 3.33  t #\c "abc" #(1)))) 
+   (typep cells '(cons (eql 1) 
+                       (cons (integer 2019 2022) 
+                            (cons (float -1.00000000001 3.4) 
+                                   (cons (member t nil) *))))))) 
+
+
+
+
 ;;; EOF
