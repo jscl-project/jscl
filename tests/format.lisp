@@ -36,6 +36,7 @@ a" (format nil "a~%a")))
                   (format nil "result ~"))
               (error (msg)
                 (setq result
-                      (format nil (car (jscl::!condition-args msg)) (cadr (jscl::!condition-args msg))))))
+                      (format nil (simple-condition-format-control msg)
+                              (car (simple-condition-format-arguments msg))))))
             result)))
 ;;; EOF
