@@ -3,48 +3,75 @@
 (/debug "perform test/types.lisp!")
 
 (defparameter +atomic-test-objects+
-  (list 1
-        1.2
-        's
-        #\c
-        :k
-        (gensym)
-        (make-symbol "lower")
-        (lambda nil nil)
-        (values)
-        (values-list nil)
-        nil
-        t
-        (make-package 'fake-pack)
-        (make-hash-table)
-        (defstruct atomic-test-struct)
-        (make-atomic-test-struct)
-        (defclass atomic-test-class nil nil)
-        (make-instance 'atomic-test-class)
-        (make-list 1)
-        (make-array '(1))
-        (vector)
-        "sss"
-        (make-string 2)
-        (jscl::new)
-        (find-class 'atomic-test-class)
-        (let nil (lambda nil nil))))
-
+  (list (cons 1     'bit)
+        (cons 1.2   'float)
+        (cons 's                    'symbol)
+        (cons #\c                   'character)
+        (cons :k                    'keyword)
+        (cons (gensym)              'symbol)
+        (cons (make-symbol "lower") 'symbol)
+        (cons (lambda nil nil)      'function)
+        (cons (values)              'null)
+        (cons (values-list nil)     'null)
+        (cons nil                   'null)
+        (cons t                     'boolean)
+        (cons (make-package 'fake-pack)            'package)
+        (cons (make-hash-table)                    'hash-table)
+        (cons (defstruct atomic-test-struct)       'symbol)
+        (cons (make-atomic-test-struct)            'cons)
+        (cons (defclass atomic-test-class nil nil) 'standard-class)
+        (cons (make-instance 'atomic-test-class)   'atomic-test-class)
+        (cons (make-list 1)     'cons)
+        (cons (make-array '(1)) '(vector 1))
+        (cons (vector)          '(vector 0))
+        (cons "sss"             '(string 3))
+        (cons (make-string 2)   '(string 2))
+        (cons (jscl::new)       'jscl::js-object)
+        (cons (find-class 'atomic-test-class) 'standard-class)
+        (cons (let nil (lambda nil nil))      'function)))
 
 (test
  (mv-eql
-  (let ((typeof '(BIT FLOAT SYMBOL CHARACTER KEYWORD SYMBOL SYMBOL
-                  FUNCTION NULL NULL NULL BOOLEAN package CONS
-                  SYMBOL CONS STANDARD-CLASS ATOMIC-TEST CONS
-                  (VECTOR 1) (VECTOR 0) (STRING 3) (STRING 2)
-                  JSCL::JS-OBJECT STANDARD-CLASS FUNCTION)))
+  (let ((real-type-of)
+        (idx 0)
+        (diff1)
+        (diff2)
+        (expected-type-of
+          '(BIT            FLOAT       SYMBOL     CHARACTER
+            KEYWORD        SYMBOL      SYMBOL     FUNCTION
+            NULL           NULL        NULL       BOOLEAN
+            package        hash-table  SYMBOL     CONS
+            STANDARD-CLASS ATOMIC-TEST-class  CONS       (VECTOR 1)
+            (VECTOR 0)     (STRING 3)  (STRING 2) JSCL::JS-OBJECT
+            STANDARD-CLASS  FUNCTION)))
+    (setq real-type-of (loop for x in +atomic-test-objects+ collect (type-of (car x))))
+    (setq diff0
+          (loop for x in +atomic-test-objects+
+                do (incf idx)
+                collect (unless (equal (type-of (car x)) (cdr x)))))
+    (setq idx 0
+          diff1
+          (loop for x in real-type-of
+                for y in expected-type-of
+                do (incf idx)
+                collect (unless (equal x y) (list idx x y)) ))
+    (setq idx 0
+          diff2
+          (loop for x in +atomic-test-objects+ 
+                do (incf idx)
+                collect (unless (typep (car x) 'atom) (list idx (cdr x)))))
+
     (values
-     (loop for x in +atomic-test-objects+
-           for y in typeof
-           collect (equal y (type-of x)))
-     (loop for x in +atomic-test-objects+ collect (typep x 'atom))))
-  (T T T T T T T T T T T T T T T T T NIL T T T T T T T T)
-  (T T T T T T T T T T T T T NIL T NIL NIL NIL NIL T T T T T NIL T)))
+     (list (list-length +atomic-test-objects+)
+           (list-length real-type-of)
+           (list-length expected-type-of))
+     (remove nil diff0)
+     (remove nil diff1)
+     (remove nil diff2)))
+  (26 26 26)
+  NIL
+  NIL
+  ((14 HASH-TABLE) (16 CONS) (17 STANDARD-CLASS) (18 ATOMIC-TEST-CLASS) (19 CONS) (25 STANDARD-CLASS))))
 
 (test
  (mv-eql
@@ -165,7 +192,7 @@
      (type-of ht)
      (typep ht 'hash-table)
      (typecase ht (hash-table :good))))
-  ht t :good))
+  hash-table  t :good))
 
 (test
  (typep (cons #(1) 0.1)
