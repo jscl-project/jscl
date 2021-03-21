@@ -363,13 +363,12 @@
 
 ;;; type compound: (array type dimensions)
 (defun %compare-array-type (object type-spec)
-  (destructuring-bind (type-base &optional (type-element '*) (type-dimensions '*))
+  (destructuring-bind (type-base &optional (type-element '* te-p) (type-dimensions '*))
       type-spec
     (let ((object-type (array-element-type object))
           (object-dimensions (array-dimensions object)))
-      (when (eq type-element 'character)
-        (if (not (eq object-type 'character))
-            (return-from %compare-array-type nil)))
+      (when (and (eq object-type 'character) (not (eq type-element 'character)))
+             (if  te-p (return-from %compare-array-type nil)))
       (when (null object-dimensions)
         (setq object-dimensions (list (oget object "length"))))
       (cond ((numberp type-dimensions)
@@ -536,7 +535,7 @@
   `(array character (,size)))
 
 (deftype vector (&optional (type 't) (size '*))
-  `(array t (,size)))
+  `(array ,type (,size)))
 
 #+jscl (fset 'typep (fdefinition '!typep))
 
