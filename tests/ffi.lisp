@@ -60,6 +60,7 @@
 
 ;;; test html-object
 ;;; NOTE: Fixed js-object-p. @vkm
+#+jscl
 (let ((obj (#j:window:document:createElement "div")))
   (test (and
          (js-object-p obj)
