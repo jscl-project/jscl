@@ -546,6 +546,7 @@
 	        ((integer 2 10) (%m :good))
 	        (t (%m :bad2))))))
 
+#+nil
 (test
  (let ((cells (list 1 2021 3.33  t #\c "abc" #(1)))) 
    (typep cells '(cons (eql 1) 
@@ -563,7 +564,7 @@
                                          (cons character
                                                (cons array (cons vector))
                                          ))))))) )
-#+nil
+
 (test
  (typep (cons 1 (list 1))
         '(cons (or (eql 1) (eql 2))
