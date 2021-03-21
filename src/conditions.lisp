@@ -216,17 +216,22 @@
         `(%%handler-case-1 ,form ,@cases))))
 
 (defmacro %%ignore-errors (&body forms)
-  `(handler-case (progn ,@forms)
-     (error (condition) (values nil condition)))
+  `(%%handler-case
+    (progn ,@forms)
+    (error (condition) (values nil condition))))
 
 #+jscl
 (progn
+
   (defmacro handler-bind (&rest body)
     `(%%handler-bind ,@body))
+
   (defmacro handler-case (&rest body)
     `(%%handler-case ,@body))
+
   (defmacro ignore-errors (&rest forms)
     `(%%ignore-errors ,@forms))
+
   (fset 'make-condition #'%%make-condition)
   (fset 'signal #'%%signal)
   (fset 'warn #'%%warn)
