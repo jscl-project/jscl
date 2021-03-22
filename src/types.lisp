@@ -24,6 +24,11 @@
 ;;; DEFCLASS
 (defvar *class-table* (make-hash-table :test #'eq))
 
+;;; for internal used only
+(defun true () t)
+(defun false () nil)
+(defun void () (values))
+
 ;;; another member from ccl
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun memq (item list)
