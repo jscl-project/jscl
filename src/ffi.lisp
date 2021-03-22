@@ -59,3 +59,18 @@
 (%js-vset "eval_in_lisp"
           (lambda (form)
             (eval (read-from-string form))))
+
+(defun js-object-p (obj)
+  (if (or (sequencep obj)
+          (numberp obj)
+          (symbolp obj)
+          (functionp obj)
+          (characterp obj)
+          (packagep obj))
+      nil
+      t))
+
+(defun js-null-p (obj) (js-null-p obj))
+(defun js-undefined-p (obj) (js-undefined-p obj))
+
+;;; EOF
