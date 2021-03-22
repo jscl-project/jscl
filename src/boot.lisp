@@ -444,32 +444,15 @@
 ;;; future upgrade
 (defun clos-object-p (object) (eql (object-type-code object) :clos_object))
 
-(defun js-object-p (obj)
-  (if (or (sequencep obj)
-          (numberp obj)
-          (symbolp obj)
-          (functionp obj)
-          (characterp obj)
-          (packagep obj))
-      nil
-      t))
-
 ;;; symbol-function from compiler macro
 (defun functionp (f) (functionp f))
-(defun js-null-p (obj) (js-null-p obj))
-(defun js-undefined-p (obj) (js-undefined-p obj))
-
-(defun true () t)
-(defun false () nil)
-(defun void () (values))
-
 
 ;;; types family
 (defun %check-type-error (place value typespec string)
-   (error "Type error. ~%The value of ~s is ~s, is not ~a ~a."
+   (error "Check type error.~%The value of ~s is ~s, is not ~a ~a."
           place value typespec (if (null string) "" string)))
 
-(defmacro check-type (place typespec &optional string)
+(defmacro %check-type (place typespec &optional (string ""))
   (let ((value (gensym)))
     (if (symbolp place)
         `(do ((,value ,place ,place))
@@ -478,6 +461,10 @@
         (if (!typep place typespec)
             t
             (%check-type-error place place typespec string)))))
+
+#+jscl
+(defmacro check-type (place typespec &optional (string ""))
+  `(%check-type ,place ,typespec ,string))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defmacro %push-end (thing place) `(setq ,place (append ,place (list ,thing))))
