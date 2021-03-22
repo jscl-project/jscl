@@ -98,12 +98,12 @@
                 (#j:jqconsole:Write "ERROR: " "jqconsole-error")
                 (typecase condition
                   (type-error (#j:jqconsole:Write
-                               (format nil "Type error. ~a does not designate a ~a~%"
+                               (apply #'format nil "Type error. ~a does not designate a ~a~%"
                                        (type-error-datum condition)
                                        (type-error-expected-type condition))
                                "jqconsole-error"))
                   (simple-error (#j:jqconsole:Write
-                                 (format nil
+                                 (apply #'format nil
                                          (simple-condition-format-control condition)
                                          (simple-condition-format-arguments condition))
                                  "jqconsole-error")
