@@ -442,32 +442,6 @@
 
 (defparameter *features* '(:jscl :common-lisp))
 
-;;; For to accurately definition  LIST and CONS forms.
-;;; Now inferno gate is opened. Welcome to DOOM
-;;;
-;;; (typep form
-;;;    (cons
-;;;      (cond ((true-cons-p form) .... code sensetive for cons)
-;;;            (t  ...))))
-;;; (true-list-p '(1 2 3 . t)) => nil
-;;; (true-consp-p '(1 2 3 . t)) => t
-;;;
-;;; todo: rename true-cons-p -> dotted-pair-p
-;;;       move to list.lisp
-(defun true-cons-p (form)
-  (%js-try
-   (progn
-     (list-length form)
-     nil)
-   (catch (err)
-     t)))
-
-;;; pure list predicate: (true-list-p (cons 1 2)) => nil
-;;;                      (listp (cons 1 2)) => t
-;;; todo: rename true-list-p -> proper-list-p
-;;;       move to list.lisp
-(defun true-list-p (obj) (and (consp obj) (not (true-cons-p obj))))
-
 ;;; symbol-function from compiler macro
 (defun functionp (f) (functionp f))
 
