@@ -78,6 +78,39 @@
 (defun %console-terpri()
   (#j:jqconsole:Write (string #\newline) "jqconsole-error"))
 
+(defun errmsg-prefix ()
+  (#j:jqconsole:Write "ERROR: " "jqconsole-error"))
+
+(defparameter +err-css+ "jqconsole-error")
+
+(defgeneric display-condition (c &optional style newline))
+
+(defmethod display-condition (c &optional (style +err-css+) ignore)
+  (errmsg-prefix)
+  (#j:jqconsole:Write
+   (format nil
+           "Unhandled error condition ~a~%" (class-name (class-of c)))
+   style))
+
+(defmethod display-condition ((c type-error) &optional (style +err-css+) ignore)
+  (errmsg-prefix)
+  (#j:jqconsole:Write
+   (format nil
+           "Type error.~% ~a does not designate a ~a~%"
+           (type-error-datum c)
+           (type-error-expected-type c))
+   style))
+
+(defmethod display-condition ((c simple-error) &optional (style +err-css+) (nl t))
+  (errmsg-prefix)
+  (#j:jqconsole:Write
+   (apply #'format nil
+          (simple-condition-format-control c)
+          (simple-condition-format-arguments c))
+   style)
+  (when nl (%console-terpri)))
+
+
 (defun toplevel ()
   (#j:jqconsole:RegisterMatching "(" ")" "parents")
   (let ((prompt (format nil "~a> " (package-name *package*))))
@@ -94,20 +127,8 @@
                          (results (multiple-value-list (eval-interactive form))))
                     (dolist (x results)
                       (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return"))))
-              (error (condition)
-                (#j:jqconsole:Write "ERROR: " "jqconsole-error")
-                (typecase condition
-                  (type-error (#j:jqconsole:Write
-                               (apply #'format nil "Type error. ~a does not designate a ~a~%"
-                                       (type-error-datum condition)
-                                       (type-error-expected-type condition))
-                               "jqconsole-error"))
-                  (simple-error (#j:jqconsole:Write
-                                 (apply #'format nil
-                                         (simple-condition-format-control condition)
-                                         (simple-condition-format-arguments condition))
-                                 "jqconsole-error")
-                   (%console-terpri)))))
+              ;; only error condition's
+              (error (condition) (display-condition condition)))
             (catch (js-err)
               (#j:console:log js-err)
               (let ((message (or (oget js-err "message") (%map-js-object js-err) js-err)))
