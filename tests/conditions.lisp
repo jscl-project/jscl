@@ -43,38 +43,33 @@
  (mv-eql
   (values
    (let ((fmt "Error"))
-     (handler-case
-         (jscl::%%error fmt)
-       (simple-error (c)
-         (frob-simple-error c fmt))))
+     (handler-case  (error fmt)
+       (simple-error (c) (frob-simple-error c fmt))))
    (let* ((fmt "Error")
-	        (cnd (jscl::%%make-condition 'simple-error :format-control fmt)))
+	        (cnd (make-condition 'simple-error :format-control fmt)))
      (handler-case
-         (jscl::%%error cnd)
+         (error cnd)
        (simple-error (c) (frob-simple-error c fmt))))
    (let ((fmt "Error"))
      (handler-case
-         (jscl::%%error 'simple-error :format-control fmt)
+         (error 'simple-error :format-control fmt)
        (simple-error (c) (frob-simple-error c fmt))))
    (let ((fmt "Error: ~A"))
      (handler-case
-         (jscl::%%error fmt 10)
+         (error fmt 10)
        (simple-error (c) (frob-simple-error c fmt 10))))
    (handler-case
-       (jscl::%%signal 'simple-condition)
-     (simple-condition (c)
-       :right)
-     (error (c)
-       :wrong))
+       (signal 'simple-condition)
+     (simple-condition (c)  :right)
+     (error (c)             :wrong))
    (handler-case
-       (jscl::%%signal 'simple-warning)
-     (error (c)
-       :wrong)
+       (signal 'simple-warning)
+     (error (c)           :wrong)
      (simple-warning (c)  :right)
-     (condition (c)  :wrong2))
+     (condition (c)       :wrong2))
    (let ((fmt "Booms!"))
      (handler-case
-         (jscl::%%signal 'simple-warning :format-control fmt)
+         (signal 'simple-warning :format-control fmt)
        (simple-warning (c) (frob-simple-warning c fmt)))) )
   T T T T :RIGHT :RIGHT T ))
 
