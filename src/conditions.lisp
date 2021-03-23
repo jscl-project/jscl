@@ -56,7 +56,7 @@
                  nil)))
       (values name class method))))
 
-(defmacro define-condition (name (&rest parents) (&rest slot-spec) &rest options)
+(defmacro %define-condition (name (&rest parents) (&rest slot-spec) &rest options)
   (multiple-value-bind (name class method)
       (%def-condition name parents slot-spec options)
     `(progn
@@ -66,19 +66,19 @@
 
 ;;; condition hierarhy
 (defclass condition ()())
-(define-condition simple-condition (condition)
+(%define-condition simple-condition (condition)
   ((format-control :initarg :format-control
                    :initform nil
                    :reader simple-condition-format-control)
    (format-arguments :initarg :format-arguments
                      :initform nil
                      :reader simple-condition-format-arguments)))
-(define-condition serious-condition (condition) ())
-(define-condition warning (condition) ())
-(define-condition simple-warning (simple-condition warning) ())
-(define-condition error (serious-condition) ())
-(define-condition simple-error (simple-condition error) ())
-(define-condition type-error (error)
+(%define-condition serious-condition (condition) ())
+(%define-condition warning (condition) ())
+(%define-condition simple-warning (simple-condition warning) ())
+(%define-condition error (serious-condition) ())
+(%define-condition simple-error (simple-condition error) ())
+(%define-condition type-error (error)
   ((datum :initform nil
           :initarg :datum
           :reader type-error-datum)
@@ -222,6 +222,9 @@
 
 #+jscl
 (progn
+  (defmacro define-condition (name (&rest parents) (&rest slot-spec) &rest options)
+    `(%define-condition ,name (,@parents)
+                        (,@slot-spec) ,@options))
 
   (defmacro handler-bind (&rest body)
     `(%%handler-bind ,@body))
