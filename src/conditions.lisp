@@ -95,6 +95,7 @@
 
 (defun %%coerce-condition (default datum arguments)
   (cond ((symbolp datum)
+         (check-type datum condition)
          (apply #'%%make-condition datum arguments))
         ((or (stringp datum)(functionp datum))
          (%%make-condition default
