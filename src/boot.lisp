@@ -411,17 +411,49 @@
     `(multiple-value-call (lambda ,gvars ,@setqs)
        ,@form)))
 
-;;; types utils
-(defun object-type-code (object) (oget object "dt_Name"))
-(defun set-object-type-code (object tag) (oset tag object "dt_Name"))
+(defun notany (fn seq)
+  (not (some fn seq)))
 
-;;; for to accurately definition  LIST and CONS forms
-;;; used:
+(defconstant internal-time-units-per-second 1000)
+
+(defun values-list (list)
+  (values-array (list-to-vector list)))
+
+(defun values (&rest args)
+  (values-list args))
+
+(defmacro nth-value (n form)
+  `(multiple-value-call (lambda (&rest values)
+                          (nth ,n values))
+     ,form))
+
+(defun constantp (x)
+  ;; TODO: Consider quoted forms, &environment and many other
+  ;; semantics of this function.
+  (cond
+    ((symbolp x)
+     (cond
+       ((eq x t) t)
+       ((eq x nil) t)))
+    ((atom x)
+     t)
+    (t
+     nil)))
+
+(defparameter *features* '(:jscl :common-lisp))
+
+;;; For to accurately definition  LIST and CONS forms.
+;;; Now inferno gate is opened. Welcome to DOOM
+;;;
 ;;; (typep form
 ;;;    (cons
 ;;;      (cond ((true-cons-p form) .... code sensetive for cons)
 ;;;            (t  ...))))
+;;; (true-list-p '(1 2 3 . t)) => nil
+;;; (true-consp-p '(1 2 3 . t)) => t
 ;;;
+;;; todo: rename true-cons-p -> dotted-pair-p
+;;;       move to list.lisp
 (defun true-cons-p (form)
   (%js-try
    (progn
@@ -432,22 +464,28 @@
 
 ;;; pure list predicate: (true-list-p (cons 1 2)) => nil
 ;;;                      (listp (cons 1 2)) => t
+;;; todo: rename true-list-p -> proper-list-p
+;;;       move to list.lisp
 (defun true-list-p (obj) (and (consp obj) (not (true-cons-p obj))))
 
+;;; symbol-function from compiler macro
+(defun functionp (f) (functionp f))
+
+;;; types family section
+
+;;; tag's utils
+(defun object-type-code (object) (oget object "dt_Name"))
+(defun set-object-type-code (object tag) (oset tag object "dt_Name"))
+
 ;;; types predicate's
-;;; mop predicate
 (defun mop-object-p (obj)
     (and (consp obj)
          (eql (object-type-code obj) :mop-object)
          (= (length obj) 5)))
 
-;;; future upgrade
 (defun clos-object-p (object) (eql (object-type-code object) :clos_object))
 
-;;; symbol-function from compiler macro
-(defun functionp (f) (functionp f))
-
-;;; types family
+;;; macro's
 (defun %check-type-error (place value typespec string)
    (error "Check type error.~%The value of ~s is ~s, is not ~a ~a."
           place value typespec (if (null string) "" string)))
@@ -529,37 +567,6 @@
              t))
     (t
      (values nil nil))))
-
-(defun notany (fn seq)
-  (not (some fn seq)))
-
-(defconstant internal-time-units-per-second 1000)
-
-(defun values-list (list)
-  (values-array (list-to-vector list)))
-
-(defun values (&rest args)
-  (values-list args))
-
-(defmacro nth-value (n form)
-  `(multiple-value-call (lambda (&rest values)
-                          (nth ,n values))
-     ,form))
-
-(defun constantp (x)
-  ;; TODO: Consider quoted forms, &environment and many other
-  ;; semantics of this function.
-  (cond
-    ((symbolp x)
-     (cond
-       ((eq x t) t)
-       ((eq x nil) t)))
-    ((atom x)
-     t)
-    (t
-     nil)))
-
-(defparameter *features* '(:jscl :common-lisp))
 
 ;;; Early error definition.
 (defun %coerce-panic-arg (arg)
