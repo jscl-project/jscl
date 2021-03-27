@@ -48,6 +48,17 @@
 (defconstant most-negative-fixnum
   (oget (%js-vref "Number" t) "MIN_SAFE_INTEGER"))
 
+(defun fixnump (n)
+  (and (integerp n)(>= most-negative-fixnum) (<= most-positive-fixnum)))
+
+(defun non-negative-fixnump (n)
+  (if (fixnump n)
+      (and (>= n 0)
+           (<= n most-positive-fixnum))))
+
+;;; Yeat another Root of the Evil
+(defun bignump (n)
+  (and (integerp n)(or (< most-negative-fixnum) (> most-positive-fixnum))))
 
 (defun 1+ (x) (+ x 1))
 (defun 1- (x) (- x 1))
@@ -80,8 +91,10 @@
     (values res (- number (* res divisor)))))
 ;;; @vkm 30.11 end
 
-(defun integerp (x)
-  (and (numberp x) (= (floor x) x)))
+(defun numberp (x) (numberp x))
+(defun integerp (x) (%integer-p x))
+(defun realp (x) (numberp x))
+(defun rationalp (x) (%integer-p x))
 
 (defun floatp (x)
   (and (numberp x) (not (integerp x))))

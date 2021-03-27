@@ -1,17 +1,22 @@
-; Tests for macros implementing iteration constructs
-; DOTIMES
+;;; -*- mode:lisp; coding:utf-8 -*-
+
+(/debug "perform test/iter-macros.lisp!")
+
+;;; Tests for macros implementing iteration constructs
+
+;;; DOTIMES
 (test (let ((total 0))
         (dotimes (n 6)
           (incf total n))
         (= total 15)))
 
-; DOLIST
+;;; DOLIST
 (test (let ((total 0))
         (dolist (n '(1 2 3 4 5))
           (incf total n))
         (= total 15)))
 
-; DO
+;;; DO
 (test (do ((a 0 b)
            (b 1 (+ a b))
            (n 0 (1+ n)))
@@ -26,7 +31,7 @@
 (test (= 5
          (do ((x nil nil)) (t 5))))
 
-; DO*
+;;; DO*
 (test (do* ((a 0 b)
             (b 1 (+ a b))
             (n 0 (1+ n)))
@@ -40,3 +45,4 @@
          (do* ((x nil)) (t 5))))
 (test (= 5
          (do* ((x nil nil)) (t 5))))
+;;; EOF

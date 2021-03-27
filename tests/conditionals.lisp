@@ -1,4 +1,8 @@
-; Tests for conditional forms
+;;; -*- mode:lisp; coding:utf-8 -*-
+
+(/debug "perform test/conditionals.lisp!")
+
+;;;; Tests for conditional forms
 ; Boolean operators
 (test (eql (and nil 1) nil))
 (test (=   (and 1   2)   2))
@@ -22,3 +26,5 @@
 (test (= (case 1 (2 3) (t 42)) 42))
 (test (= (case 1 (2 3) (1 42)) 42))
 (test (null (case 1 (2 3))))
+
+;;; EOF

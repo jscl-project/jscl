@@ -1,3 +1,7 @@
+;;; -*- mode:lisp; coding:utf-8 -*-
+
+(/debug "perform test/package.lisp!")
+
 (test (listp (list-all-packages)))
 
 (test (not (eq (list-all-packages) (list-all-packages))))
@@ -41,7 +45,9 @@
 
 (test (member 'car (find-all-symbols (string 'car))))
 
-;; This test is failing. I have disabled temporarily.
-;; (test (eq (eval '(in-package #:cl-user)) (find-package '#:cl-user)))
+;;; This test is failing. I have disabled temporarily.
+;;; note: Fixed ? @vkm
+(test (eq (eval '(in-package #:cl-user)) (find-package '#:cl-user)))
 
 
+;;; EOF

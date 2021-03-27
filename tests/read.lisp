@@ -1,6 +1,13 @@
-;; TODO: Uncomment when either read-from-string supports all these parameters
-;; or when test macro supports error handling, whichever comes first
-;; (test (equal (read-from-string " 1 3 5" t nil :start 2) (values 3 5)))
+;;; -*- mode:lisp; coding:utf-8 -*-
+
+(/debug "perform test/read.lisp!")
+
+
+;;; TODO: Uncomment when either read-from-string supports all these parameters
+;;; fixme:
+;;; or when test macro supports error handling, whichever comes first
+;;; (test (equal (read-from-string " 1 3 5" t nil :start 2) (values 3 5)))
+
 (expected-failure
  (equal (multiple-value-list (read-from-string "(a b c)"))
         '((A B C) 7)))
@@ -152,4 +159,4 @@ The correct value can be used in any expressions, as is, at your discretion
   (funcall fn 1 2))
 ;;; => (170 175)
 
-;;; end
+;;; EOF

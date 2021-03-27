@@ -1,4 +1,7 @@
-;;;   -*- Mode: LISP; Syntax: Common-lisp; Package: ANSI-LOOP; Base: 10; Lowercase:T -*-
+;;; -*- mode:lisp; coding:utf-8 -*-
+
+(/debug "perform test/loop/base-tests.lisp!")
+
 ;;;>
 ;;;> Portions of LOOP are Copyright (c) 1986 by the Massachusetts Institute of Technology.
 ;;;> All Rights Reserved.
@@ -654,3 +657,5 @@
 
 
 (in-package :cl)
+
+;;; EOF

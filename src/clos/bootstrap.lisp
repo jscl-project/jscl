@@ -100,13 +100,15 @@
                 :direct-superclasses '()
                 :direct-slots   '())
 
-
   (ensure-class 'function
                 :direct-superclasses '()
                 :direct-slots   '())
 
-
   (ensure-class 'hash-table
+                :direct-superclasses '()
+                :direct-slots   '())
+
+  (ensure-class 'stream
                 :direct-superclasses '()
                 :direct-slots   '())
 
@@ -118,8 +120,8 @@
                 :direct-superclasses '()
                 :direct-slots   '())
 
-  (ensure-class 'stream
-                :direct-superclasses '()
+  (ensure-class 'keyword
+                :direct-superclasses (LIST (!FIND-CLASS (QUOTE symbol)))
                 :direct-slots   '())
 
   (ensure-class 'list
@@ -142,12 +144,20 @@
                 :direct-superclasses (LIST (!FIND-CLASS (QUOTE vector)))
                 :direct-slots   '())
 
-  (ensure-class 'integer
+  (ensure-class 'real
                 :direct-superclasses (LIST (!FIND-CLASS (QUOTE number)))
                 :direct-slots   '())
 
+  (ensure-class 'rational
+                :direct-superclasses (LIST (!FIND-CLASS (QUOTE real)))
+                :direct-slots   '())
+
+  (ensure-class 'integer
+                :direct-superclasses (LIST (!FIND-CLASS (QUOTE rational)))
+                :direct-slots   '())
+
   (ensure-class 'float
-                :direct-superclasses (LIST (!FIND-CLASS (QUOTE number)))
+                :direct-superclasses (LIST (!FIND-CLASS (QUOTE real)))
                 :direct-slots   '())
 
   ;; 10. Define the other standard metaobject classes.

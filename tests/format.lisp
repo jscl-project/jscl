@@ -1,3 +1,7 @@
+;;; -*- mode:lisp; coding:utf-8 -*-
+
+(/debug "perform test/format.lisp!")
+
 (test (string= "a" (format nil "a")))
 
 (test (string= "~" (format nil "~~")))
@@ -26,10 +30,13 @@ a" (format nil "a~%a")))
 (test 
  (string= "Premature end of control string \"result ~\"" 
           (let ((result))
-              (handler-case 
-                  (progn 
-                      (format nil "its ok ~~")
-                      (format nil "result ~"))
-                (error (msg)
-                    (setq result (format nil (car (jscl::!condition-args msg)) (cadr (jscl::!condition-args msg))))))
-              result)))
+            (handler-case 
+                (progn 
+                  (format nil "its ok ~~")
+                  (format nil "result ~"))
+              (error (msg)
+                (setq result
+                      (format nil (simple-condition-format-control msg)
+                              (car (simple-condition-format-arguments msg))))))
+            result)))
+;;; EOF

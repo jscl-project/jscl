@@ -1,3 +1,6 @@
+;;; -*- mode:lisp; coding:utf-8 -*-
+
+(/debug "perform test/hash-tables.lisp!")
 
 (let ((ht (make-hash-table))
       (key "foo"))
@@ -130,3 +133,4 @@
                 (let ((h (temp-hash-table :fill t)))
                   (remhash 'one h)
                   h))))
+;;; EOF

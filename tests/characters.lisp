@@ -1,3 +1,8 @@
+;;; -*- mode:lisp; coding:utf-8 -*-
+
+(/debug "perform test/characters.lisp!")
+
+
 ;; CHAR=, CHAR/=, etc.
 (test (char= (code-char 127744) (code-char 127744)))
 (test (char= #\d #\d))
@@ -151,3 +156,5 @@
 (test
  (let ((x (char-name #\a)))
   (or (not x) (eql (name-char x) #\a))))
+
+;;; EOF

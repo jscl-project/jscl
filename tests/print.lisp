@@ -1,3 +1,7 @@
+;;; -*- mode:lisp; coding:utf-8 -*-
+
+(/debug "perform test/print.lisp!")
+
 (test (let ((x (read-from-string (prin1-to-string 'foo))))
         (and (symbolp x) (equal (symbol-name x) "FOO"))))
 (test (let ((x (read-from-string (prin1-to-string 'fo\o))))
@@ -57,3 +61,4 @@
   (test (string= "#<structure struct>"  (write-to-string (make-struct))))
   (test (string= "#<structure struct>"  (write-to-string (make-struct :name 'definition :slots #(a b c))))))
 
+;;; EOF

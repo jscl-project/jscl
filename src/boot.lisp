@@ -1,3 +1,5 @@
+;;; -*- mode:lisp; coding:utf-8 -*-
+
 ;;; boot.lisp --- First forms to be cross compiled
 
 ;; Copyright (C) 2012, 2013 David Vazquez
@@ -409,78 +411,6 @@
     `(multiple-value-call (lambda ,gvars ,@setqs)
        ,@form)))
 
-
-;;; mop predicate
-(defun mop-object-p (obj)
-    (and (consp obj)
-         (eq (oget obj "tagName") :mop-object)
-         (= (length obj) 5)))
-
-;;; js-object predicate
-(defun js-object-p (obj)
-  (if (or (sequencep obj)
-          (numberp obj)
-          (symbolp obj)
-          (functionp obj)
-          (packagep obj))
-      nil
-      t))
-
-;; Incorrect typecase, but used in NCONC.
-(defmacro typecase (x &rest clausules)
-  (let ((value (gensym)))
-    `(let ((,value ,x))
-       (cond
-         ,@(mapcar (lambda (c)
-                     (if (find (car c) '(t otherwise))
-                         `(t ,@(rest c))
-                         `((,(ecase (car c)
-                                    (fixnum 'integerp)
-                                    (integer 'integerp)
-                                    (structure 'structure-p)       
-                                    (hash-table 'hash-table-p)     
-                                    (mop-object 'mop-object-p) 
-                                    (js-object  'js-object-p)
-                                    (cons 'consp)
-                                    (list 'listp)
-                                    (vector 'vectorp)
-                                    (character 'characterp)
-                                    (sequence 'sequencep)
-                                    (symbol 'symbolp)
-                                    (keyword 'keywordp)
-                                    (function 'functionp)
-                                    (float 'floatp)
-                                    (array 'arrayp)
-                                    (string 'stringp)
-                                    (atom 'atom)
-                                    (null 'null)
-                                    (package 'packagep))
-                             ,value)
-                           ,@(or (rest c)
-                                 (list nil)))))
-                   clausules)))))
-
-(defmacro etypecase (x &rest clausules)
-  (let ((g!x (gensym)))
-    `(let ((,g!x ,x))
-       (typecase ,g!x
-         ,@clausules
-         (t (error "~S fell through etypecase expression." ,g!x))))))
-
-
-;;; No type system is implemented yet.
-(defun subtypep (type1 type2)
-  (cond
-    ((null type1)
-     (values t t))
-    ((eq type1 type2)
-     (values t t))
-    ((eq type2 'number)
-     (values (and (member type1 '(fixnum integer)) t)
-             t))
-    (t
-     (values nil nil))))
-
 (defun notany (fn seq)
   (not (some fn seq)))
 
@@ -512,11 +442,120 @@
 
 (defparameter *features* '(:jscl :common-lisp))
 
+;;; symbol-function from compiler macro
+(defun functionp (f) (functionp f))
+
+;;; types family section
+
+;;; tag's utils
+(defun object-type-code (object) (oget object "dt_Name"))
+(defun set-object-type-code (object tag) (oset tag object "dt_Name"))
+
+;;; types predicate's
+(defun mop-object-p (obj)
+    (and (consp obj)
+         (eql (object-type-code obj) :mop-object)
+         (= (length obj) 5)))
+
+(defun clos-object-p (object) (eql (object-type-code object) :clos_object))
+
+;;; macro's
+(defun %check-type-error (place value typespec string)
+   (error "Check type error.~%The value of ~s is ~s, is not ~a ~a."
+          place value typespec (if (null string) "" string)))
+
+(defmacro %check-type (place typespec &optional (string ""))
+  (let ((value (gensym)))
+    (if (symbolp place)
+        `(do ((,value ,place ,place))
+             ((!typep ,value ',typespec))
+           (setf ,place (%check-type-error ',place ,value ',typespec ,string)))
+        (if (!typep place typespec)
+            t
+            (%check-type-error place place typespec string)))))
+
+#+jscl
+(defmacro check-type (place typespec &optional (string ""))
+  `(%check-type ,place ,typespec ,string))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defmacro %push-end (thing place) `(setq ,place (append ,place (list ,thing))))
+
+  (defparameter *basic-type-predicates*
+    '((hash-table . hash-table-p) (package . packagep) (stream . streamp)
+      (atom . atom) (structure . structure-p) (js-object . js-object-p)
+      ;; todo: subtypep - remove mop-object from tables
+      (clos-object . mop-object-p) (mop-object . mop-object-p) (character . characterp)
+      (symbol . symbolp)  (keyword . keywordp)
+      (function . functionp) 
+      (number . numberp) (real . realp) (rational . rationalp) (float . floatp)
+      (integer . integerp)
+      (sequence .  sequencep) (list . listp) (cons . consp) (array . arrayp)
+      (vector . vectorp) (string . stringp) (null . null)))
+
+  (defun simple-base-predicate-p (expr)
+    (if (symbolp expr)
+        (let ((pair (assoc expr *basic-type-predicates*)))
+          (if pair (cdr pair) nil))))
+
+  (defun typecase-expander (object clausules)
+    (let ((key)
+          (body)
+          (std-p)
+          (g!x (gensym "TYPECASE"))
+          (result '()))
+      (dolist (it clausules (reverse result))
+        (setq key (car it)
+              body (cdr it)
+              std-p (simple-base-predicate-p key))
+        ;; (typecase keyform (type-spec form*))
+        ;; when: type-spec is symbol in *basic-type-predicates*, its predicate
+        ;;       -> (cond ((predicate keyform) form*))
+        ;; otherwise: (cond ((typep keyform (type-spec form*))))
+        (cond (std-p (%push-end `((,std-p ,g!x) ,@body) result))
+              ((or (eq key 't) (eq key 'otherwise))
+               (%push-end `(t ,@body) result))
+              (t (%push-end `((!typep ,g!x ',key) ,@body) result))))
+      `(let ((,g!x ,object))
+         (cond ,@result))))
+  )
+
+(defmacro typecase (form &rest clausules)
+  (typecase-expander `,form `,clausules))
+
+(defmacro etypecase (x &rest clausules)
+  `(typecase ,x
+     ,@clausules
+     (t (error "~S fell through etypecase expression." ,x))))
+
+
+;;; it remains so. not all at once. with these - live...
+(defun subtypep (type1 type2)
+  (cond
+    ((null type1)
+     (values t t))
+    ((eq type1 type2)
+     (values t t))
+    ((eq type2 'number)
+     (values (and (member type1 '(fixnum integer)) t)
+             t))
+    (t
+     (values nil nil))))
+
 ;;; Early error definition.
+(defun %coerce-panic-arg (arg)
+  (cond ((symbolp arg) (concat "symbol: " (symbol-name arg)))
+        ((consp arg ) (concat "cons: " (car arg)))
+        ((numberp arg) (concat "number:" arg))
+        (t " @ ")))
+
 (defun error (fmt &rest args)
   (if (fboundp 'format)
       (%throw (apply #'format nil fmt args))
-      (%throw (lisp-to-js (concat "BOOT PANIC! " (string fmt))))))
+    (%throw (lisp-to-js (concat "BOOT PANIC! "
+                                (string fmt)
+                                " "
+                                (%coerce-panic-arg (car args)))))))
 
 ;;; print-unreadable-object
 (defmacro !print-unreadable-object ((object stream &key type identity) &body body)
@@ -526,7 +565,6 @@
            (,g!object ,object))
        (simple-format ,g!stream "#<")
        ,(when type
-          (error "type-of yet not implemented")
           `(simple-format ,g!stream "~S" (type-of g!object)))
        ,(when (and type (or body identity))
           `(simple-format ,g!stream " "))
@@ -541,3 +579,4 @@
 (defmacro print-unreadable-object ((object stream &key type identity) &body body) 
     `(!print-unreadable-object (,object ,stream :type ,type :identity ,identity) ,@body))
 
+;;; EOF

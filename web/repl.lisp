@@ -1,3 +1,5 @@
+;;; -*- mode:lisp; coding:utf-8 -*-
+
 ;; JSCL is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation, either version 3 of the
@@ -67,6 +69,48 @@
             nil
             0)))
 
+;;; decode error.msg object from (js-try)
+(defun %map-js-object (job)
+  (mapcar (lambda (k) (list k (oget job k)))
+          (mapcar (lambda (x) (js-to-lisp x))
+                  (vector-to-list (#j:Object:keys job)))))
+
+(defun %console-terpri()
+  (#j:jqconsole:Write (string #\newline) "jqconsole-error"))
+
+(defun errmsg-prefix ()
+  (#j:jqconsole:Write "ERROR: " "jqconsole-error"))
+
+(defparameter +err-css+ "jqconsole-error")
+
+(defgeneric display-condition (c &optional style newline))
+
+(defmethod display-condition (c &optional (style +err-css+) ignore)
+  (errmsg-prefix)
+  (#j:jqconsole:Write
+   (format nil
+           "Unhandled error condition ~a~%" (class-name (class-of c)))
+   style))
+
+(defmethod display-condition ((c type-error) &optional (style +err-css+) ignore)
+  (errmsg-prefix)
+  (#j:jqconsole:Write
+   (format nil
+           "Type error.~% ~a does not designate a ~a~%"
+           (type-error-datum c)
+           (type-error-expected-type c))
+   style))
+
+(defmethod display-condition ((c simple-error) &optional (style +err-css+) (nl t))
+  (errmsg-prefix)
+  (#j:jqconsole:Write
+   (apply #'format nil
+          (simple-condition-format-control c)
+          (simple-condition-format-arguments c))
+   style)
+  (when nl (%console-terpri)))
+
+
 (defun toplevel ()
   (#j:jqconsole:RegisterMatching "(" ")" "parents")
   (let ((prompt (format nil "~a> " (package-name *package*))))
@@ -76,7 +120,6 @@
            ;; form and set successp to T. However, if a non-local exit
            ;; happens, we cancel it, so it is not propagated more.
            (%js-try
-
             ;; Capture unhandled Lisp conditions.
             (handler-case
                 (when (> (length input) 0)
@@ -84,20 +127,15 @@
                          (results (multiple-value-list (eval-interactive form))))
                     (dolist (x results)
                       (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return"))))
-              (error (err)
-                (#j:jqconsole:Write "ERROR: " "jqconsole-error")
-                (#j:jqconsole:Write (apply #'format nil (!condition-args err)) "jqconsole-error")
-                (#j:jqconsole:Write (string #\newline) "jqconsole-error")))
-            
-            (catch (err)
-              (#j:console:log err)
-              (let ((message (or (oget err "message") err)))
+              ;; only error condition's
+              (error (condition) (display-condition condition)))
+            (catch (js-err)
+              (#j:console:log js-err)
+              (let ((message (or (oget js-err "message") (%map-js-object js-err) js-err)))
                 (#j:jqconsole:Write (format nil "ERROR[!]: ~a~%" message) "jqconsole-error"))))
-           
            (save-history)
            (toplevel)))
     (#j:jqconsole:Prompt t #'process-input #'%sexpr-complete)))
-
 
 (defun web-init ()
   (load-history)
@@ -108,3 +146,5 @@
   (#j:window:addEventListener "load" (lambda (&rest args) (toplevel))))
 
 (web-init)
+
+;;; EOF

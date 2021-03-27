@@ -1,3 +1,7 @@
+;;; -*- mode:lisp; coding:utf-8 -*-
+
+(/debug "perform test/variables.lisp!")
+
 (defvar *x*)
 (setq *x* 0)
 
@@ -17,3 +21,5 @@
          *special-defparameter*))
   (let ((*special-defparameter* 2))
     (test (= (f) 2))))
+
+;;; EOF

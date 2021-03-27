@@ -1157,6 +1157,9 @@
 (define-builtin numberp (x)
   (convert-to-bool `(== (typeof ,x) "number")))
 
+(define-builtin %integer-p (x)
+  (convert-to-bool `(method-call |Number| "isInteger" ,x)))
+
 (define-builtin %truncate (x)
 `(method-call |Math| "trunc" ,x))
 

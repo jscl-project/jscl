@@ -1,5 +1,7 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
+(/debug "perform test/clos.lisp!")
+
 (test (string= "#<standard-class T>"  (write-to-string (find-class 't))))
 (test (string= "#<standard-class NULL>"  (write-to-string (find-class 'null))))
 

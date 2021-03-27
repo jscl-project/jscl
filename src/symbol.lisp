@@ -14,6 +14,8 @@
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 (/debug "loading symbol.lisp!")
 
+(defun symbolp (x) (symbolp x))
+
 (defun symbol-plist (x)
   (cond
     ((not (symbolp x))

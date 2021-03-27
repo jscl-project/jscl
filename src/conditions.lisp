@@ -1,3 +1,5 @@
+;;; -*- mode:lisp; coding:utf-8 -*-
+
 ;;; conditions.lisp ---
 
 ;; JSCL is free software: you can redistribute it and/or
@@ -20,17 +22,146 @@
 
 (/debug "loading conditions.lisp!")
 
+;;; Condition
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun %def-condition (name parents slots options)
+    (let*
+        ((cpl (if (and parents) (remove name parents) '(condition)))
+         (report (if (and options (assoc :report options))
+                     (cadr (assoc :report options))))
+         (class-options (if (and options)
+                            (remove :report options :key 'car)))
+         (class `(defclass ,name
+                     ,(progn
+                        (if (null cpl) '(condition) cpl))
+                   ,slots ,class-options))
+         (report-fn)
+         (method))
+      (when report
+        (typecase report
+          (string
+           (setq report-fn `(lambda (condition stream)
+                              (write-string ,report stream)
+                              ,report)))
+          (list
+           (if (not (eql (car report) 'lambda))
+               (error "Must be LAMBDA ~s." report))
+           (setq report-fn `,report))
+          (t (error "What can I compile it: ~s ?" report)))
+        (setq method
+              `(defmethod print-object ((condition ,name) &optional (stream *standard-output*))
+                 (if *print-escape*
+                     (call-next-method)
+                     (funcall #',report-fn condition stream))
+                 nil)))
+      (values name class method))))
 
+(defmacro %define-condition (name (&rest parents) (&rest slot-spec) &rest options)
+  (multiple-value-bind (name class method)
+      (%def-condition name parents slot-spec options)
+    `(progn
+       ,class
+       ,method
+       ',name)))
+
+;;; condition hierarhy
+(defclass condition ()())
+(%define-condition simple-condition (condition)
+  ((format-control :initarg :format-control
+                   :initform nil
+                   :reader simple-condition-format-control)
+   (format-arguments :initarg :format-arguments
+                     :initform nil
+                     :reader simple-condition-format-arguments)))
+(%define-condition serious-condition (condition) ())
+(%define-condition warning (condition) ())
+(%define-condition simple-warning (simple-condition warning) ())
+(%define-condition error (serious-condition) ())
+(%define-condition simple-error (simple-condition error) ())
+(%define-condition type-error (error)
+  ((datum :initform nil
+          :initarg :datum
+          :reader type-error-datum)
+   (expected-type :initform nil
+                  :initarg :expected-type
+                  :reader type-error-expected-type))
+  (:report (lambda (condition stream)
+             (format stream "~S does not designate a ~S.~%"
+                     (type-error-datum condition)
+                     (type-error-expected-type condition)))))
+
+(defun %%make-condition (type &rest slot-initializations)
+    (apply #'make-instance type slot-initializations))
+
+(defun %%coerce-condition (default datum arguments)
+  (cond ((symbolp datum)
+         (unless (find-class datum nil)
+           (%%error 'type-error :datum datum :expected-type 'condition))
+         (apply #'%%make-condition datum arguments))
+        ((or (stringp datum)(functionp datum))
+         (%%make-condition default
+                           ;; todo: formater function
+                           :format-control datum
+                           :format-arguments arguments))
+        ((!typep datum 'condition)
+         (check-type arguments null)
+         datum)
+        (t  (%%error 'type-error
+                     :datum datum
+                     :expected-type 'condition-designator))))
+
+;;; raise CONDITION with any type
+(defun %%signal (datum &rest args)
+  (let ((condition (%%coerce-condition 'simple-condition datum args)))
+    (dolist (binding *handler-bindings*)
+      (let ((type (car binding))
+            (handler (cdr binding)))
+        ;; Here  TYPE is one of: SYMBOL or (OR symbol ... symbol)
+        (when (typep condition type)
+          (funcall handler condition))))))
+
+(defun %%warn (datum &rest arguments)
+  (let ((stream *standard-output*)
+        (condition (%%coerce-condition 'simple-warning datum arguments)))
+    ;; prevent all conditions ERROR class
+    (check-type condition warning)
+    (%%signal condition)
+    (format stream "WARNING: ")
+    (format stream (simple-condition-format-control condition)
+            (simple-condition-format-arguments condition))
+    (write-char #\newline)
+    nil))
+
+(defun %%error (datum &rest args)
+  (let ((stream *standard-output*)
+        (condition (%%coerce-condition 'simple-error datum args)))
+    ;; prevent all condition WARNING class
+    (check-type condition error)
+    (%%signal condition)
+    ;;(format stream "~&ERROR: ~a~%" (type-of condition))
+    (typecase condition
+      (simple-error
+       (format stream (simple-condition-format-control condition)
+               (simple-condition-format-arguments condition)))
+      (type-error
+       (format stream "Type error. ~a does not designate a ~a" (type-error-datum condition)
+               (type-error-expected-type condition))))
+    nil))
+
+;;; handlers
 (defvar *handler-bindings* nil)
 
-(defmacro %handler-bind (bindings &body body)
+(defmacro %%handler-bind (bindings &body body)
   (let ((install-handlers nil))
-
     (dolist (binding bindings)
       (destructuring-bind (type handler) binding
+        (if (consp type)
+            ;; TYPEP OR form
+            ;; (error warning) -> (or error warning)
+            ;; unless form - if someone smart has already used OR
+            (unless (eq (car type) 'or) (setq type (push 'or type))))
         (push `(push (cons ',type #',handler) *handler-bindings*)
               install-handlers)))
-
     `(let ((*handler-bindings* *handler-bindings*))
        ,@install-handlers
        (%js-try
@@ -38,11 +169,9 @@
         (catch (err)
           (if (%%nlx-p err)
               (%%throw err)
-              (%error (or (oget err "message") err))))))))
+              (%%error (or (oget err "message") err))))))))
 
-
-;; Implementation if :NO-ERROR case is missing.
-(defmacro %handler-case-1 (form &body cases)
+(defmacro %%handler-case-1 (form &body cases)
   (let ((datum (gensym))
         (nlx (gensym))
         (tagbody-content nil))
@@ -69,13 +198,12 @@
       `(block ,nlx
          (let (,datum)
            (tagbody
-              (%handler-bind ,(mapcar #'translate-case cases)
+              (%%handler-bind ,(mapcar #'translate-case cases)
                 (return-from ,nlx ,form))
               ,@(reverse tagbody-content)))))))
 
 
-;;; General case
-(defmacro %handler-case (form &body cases)
+(defmacro %%handler-case (form &body cases)
   (let ((last-case (car (last cases))))
     (if (and last-case (eq (car last-case) :no-error))
         (destructuring-bind (lambda-list &body body) (cdr last-case)
@@ -85,72 +213,33 @@
                (multiple-value-call (lambda ,lambda-list ,@body)
                  (block ,normal-return
                    (return-from ,error-return
-                     (%handler-case-1 (return-from ,normal-return ,form)
+                     (%%handler-case-1 (return-from ,normal-return ,form)
                        ,@(butlast cases))))))))
-        `(%handler-case-1 ,form ,@cases))))
+        `(%%handler-case-1 ,form ,@cases))))
 
-
-
-;;; Fake condition objects until we have at least type system, but
-;;; final implementation would require CLOS.
-
-(def!struct !condition
-  type
-  args)
-
-(defun condition-type-p (x type)
-  (and (!condition-p x)
-       (equal (!condition-type x) type)))
-
-(defun coerce-to-condition (default datum args)
-  (cond
-    ((!condition-p datum)
-     datum)
-    ((stringp datum)
-     (make-!condition
-      :type default
-      :args (cons datum args)))
-    (t
-     (make-!condition
-      :type datum
-      :args args))))
-
-(defun %signal (datum &rest args)
-  (let ((condition (coerce-to-condition 'condition datum args)))
-    (dolist (binding *handler-bindings*)
-      (let ((type (car binding))
-            (handler (cdr binding)))
-        (when (condition-type-p condition type)
-          (funcall handler condition))))))
-
-(defun %warn (datum &rest args)
-  (let ((condition (coerce-to-condition 'warning datum args)))
-    (%signal condition)
-    ;; TODO: It should be *ERROR-OUTPUT*
-    (write-string "WARNING: ")
-    (apply #'format t datum args)
-    (write-char #\newline)
-    nil))
-
-(defun %error (datum &rest args)
-  (let ((condition (coerce-to-condition 'error datum args)))
-    (%signal condition)
-    ;; TODO: It should be *ERROR-OUTPUT*
-    (write-string "ERROR: ")
-    (apply #'format t datum args)
-    (write-char #\newline)
-    nil))
+(defmacro %%ignore-errors (&body forms)
+  `(%%handler-case
+    (progn ,@forms)
+    (error (condition) (values nil condition))))
 
 #+jscl
 (progn
+  (defmacro define-condition (name (&rest parents) (&rest slot-spec) &rest options)
+    `(%define-condition ,name (,@parents)
+                        (,@slot-spec) ,@options))
 
   (defmacro handler-bind (&rest body)
-    `(%handler-bind ,@body))
+    `(%%handler-bind ,@body))
 
   (defmacro handler-case (&rest body)
-    `(%handler-case ,@body))
+    `(%%handler-case ,@body))
 
-  (fset 'signal #'%signal)
-  (fset 'warn #'%warn)
-  (fset 'error #'%error))
+  (defmacro ignore-errors (&rest forms)
+    `(%%ignore-errors ,@forms))
 
+  (fset 'make-condition #'%%make-condition)
+  (fset 'signal #'%%signal)
+  (fset 'warn #'%%warn)
+  (fset 'error #'%%error))
+
+;;; EOF
