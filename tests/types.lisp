@@ -18,9 +18,9 @@
         (cons (make-package 'fake-pack)            'package)
         (cons (make-hash-table)                    'hash-table)
         (cons (defstruct atomic-test-struct)       'symbol)
-        (cons (make-atomic-test-struct)            'atomic-test-struct)
+        (cons (make-atomic-test-struct)            'jscl::atomic-test-struct)
         (cons (defclass atomic-test-class nil nil) 'standard-class)
-        (cons (make-instance 'atomic-test-class)   'atomic-test-class)
+        (cons (make-instance 'atomic-test-class)   'jscl::atomic-test-class)
         (cons (make-list 1)     'cons)
         (cons (make-array '(1)) '(vector 1))
         (cons (vector)          '(vector 0))
@@ -40,8 +40,8 @@
           '(BIT            FLOAT       SYMBOL     CHARACTER
             KEYWORD        SYMBOL      SYMBOL     FUNCTION
             NULL           NULL        NULL       BOOLEAN
-            package        hash-table  SYMBOL     atomic-test-struct
-            STANDARD-CLASS ATOMIC-TEST-class  CONS       (VECTOR 1)
+            package        hash-table  SYMBOL     jscl::atomic-test-struct
+            STANDARD-CLASS jscl::ATOMIC-TEST-class  CONS       (VECTOR 1)
             (VECTOR 0)     (STRING 3)  (STRING 2) JSCL::JS-OBJECT
             STANDARD-CLASS  FUNCTION)))
     (setq real-type-of (loop for x in +atomic-test-objects+ collect (type-of (car x))))
@@ -71,7 +71,12 @@
   (26 26 26)
   NIL
   NIL
-  ((14 HASH-TABLE) (16 CONS) (17 STANDARD-CLASS) (18 ATOMIC-TEST-CLASS) (19 CONS) (25 STANDARD-CLASS))))
+  ((14 HASH-TABLE)
+   (16 jscl::atomic-test-struct)
+   (17 STANDARD-CLASS)
+   (18 jscl::ATOMIC-TEST-CLASS)
+   (19 CONS)
+   (25 STANDARD-CLASS))))
 
 (test
  (mv-eql
