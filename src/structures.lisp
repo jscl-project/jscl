@@ -384,7 +384,6 @@
                       (t (list default custom))))))
     (flet ((option-present-p (bit-name)
              (let ((opnames #(:include :initial-offset :type :conc-name :copier :predicate)))
-               ;;(format t "OPTIONS-PRESENT FOR ~a~%" bit-name)
                (logbitp (position bit-name opnames) seen))))
       (if (option-present-p :include)
           (cond ((or (dsd-named-p dd) (null (dsd-type dd)))
