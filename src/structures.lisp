@@ -527,42 +527,6 @@
              collect `(check-type ,(dsd-slot-name slot) ,(dsd-slot-type slot) ))
        (make-instance ',class-name ,@(reverse keyargs)))))
 
-#+nil
-(defun das!make-clos-constructor (class-name constructor slots)
-  ;; at this point slots::=  (append include-slots own-slots)
-  ;;               constructor::= structure-constructor
-  (let* ((make-name (dsd-constructor-name constructor))
-         (boa (dsd-constructor-boa constructor))
-         (req (dsd-constructor-required constructor))
-         (opt (%atom-or-car (dsd-constructor-optional constructor)))
-         (key (%atom-or-car (dsd-constructor-key constructor)))
-         (aux (%atom-or-car (dsd-constructor-aux constructor)))
-         (assigned-slots (append req opt key aux))
-         (keyargs)
-         (body))
-    ;; make :key arg pair
-    (dolist (it assigned-slots)
-      ;;(push it keyargs)
-      (push (intern (symbol-name it) "KEYWORD") keyargs)
-      (push it keyargs))
-    ;;(warn "THIS?")
-    (setq body
-          (loop for slot in slots
-                when (and (memq (dsd-slot-name slot) assigned-slots)
-                          (dsd-slot-type slot)
-                          (not (dsd-slot-read-only slot)))
-                  collect `(check-type ,(dsd-slot-name slot) ,(dsd-slot-type slot) )))
-    ;;(format t "BODY: ~a~%" body)
-    `(defun ,make-name ,(das!reassemble-boa-list boa slots)
-       ,@(loop
-           ;; check-type's for slots if :type assigned
-             for slot in slots
-           when (and (memq (dsd-slot-name slot) assigned-slots)
-                     (dsd-slot-type slot)
-                     (not (dsd-slot-read-only slot)))
-             collect `(check-type ,(dsd-slot-name slot) ,(dsd-slot-type slot) ))
-       (make-instance ',class-name ,@(reverse keyargs)))))
-
 ;;; make standard structure predicate and copier
 (defun das!make-structure-class-predicate (structure-name predicate-p)
   `(defun ,predicate-p (obj)
