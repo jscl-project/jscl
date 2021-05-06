@@ -962,7 +962,6 @@
                           (dsd-prototype-map prototype)
                           (dsd-prototype-storage prototype)))))
     (dolist (pair slot-names)
-      ;;(sethash (cdr pair) (car pair) hash))
       (setf (gethash (car pair) hash) (cdr pair)))
     hash))
 
