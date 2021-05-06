@@ -55,7 +55,8 @@
                    (write-to-string list)))))
 
 
-;;; lisp structured objects pretty printed
+;;; lisp structured objects pretty printed - outdated
+#+nil
 (progn
   (defstruct struct name slots)
   (test (string= "#<structure struct>"  (write-to-string (make-struct))))
