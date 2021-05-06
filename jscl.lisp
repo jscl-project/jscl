@@ -73,6 +73,7 @@
     ("symbol"        :target)
     ("package"       :target)
     ("hash-table"    :target)
+    ("types-prelude" :both)
     ("types"         :target)
     ("clos"
      ("kludges"       :target)
@@ -84,11 +85,12 @@
      ("macros"        :target)
      ("methods"       :target))
     ("conditions"    :target)
+    ("ansiloop"
+     ("ansi-loop"    :both))
+    ("structures"    :both)
     ("stream"        :target)
     ("print"         :target)
     ("misc"          :target)
-    ("ansiloop"
-     ("ansi-loop"    :both))
     ("format"        :target)
     ("read"          :both)
     ("backquote"     :both)
