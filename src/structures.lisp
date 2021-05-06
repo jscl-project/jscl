@@ -517,7 +517,6 @@
       ;;(push it keyargs)
       (push (intern (symbol-name it) "KEYWORD") keyargs)
       (push it keyargs))
-    ;;(warn "THIS?")
     `(defun ,make-name ,(das!reassemble-boa-list boa slots)
        ,@(loop
            ;; check-type's for slots if :type assigned
