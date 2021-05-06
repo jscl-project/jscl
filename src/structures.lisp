@@ -757,7 +757,7 @@
            (list (das!make-struct-copier (dsd-name dd) (dsd-type dd) (dsd-named-p dd) (dsd-copier dd)))
            (list
             (if (and (dsd-type dd) (dsd-named-p dd)(dsd-predicate dd))
-                `(deftype ,(dsd-name dd) () (satisfies ,(dsd-predicate dd)))
+                `(deftype ,(dsd-name dd) () '(satisfies ,(dsd-predicate dd)))
                 nil))))
     (remove nil q)
     ))
