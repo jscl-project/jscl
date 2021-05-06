@@ -363,15 +363,15 @@
   T NIL T NIL T NIL T NIL T NIL T))
 
 ;;; defstruct with (:type list)
-(defstruct (struct-bus :named (:type list)) type signal r1 r2 r3)
-(deftype bus-alarm ()
+#+nil (defstruct (struct-bus :named (:type list)) type signal r1 r2 r3)
+#+nil (deftype bus-alarm ()
   `(cons (eql struct-bus)
          (cons (eql alarm)
                (cons (or (integer 0 22)
                          (member sigint trap segmentation))  *) )))
 
 ;;; structure as cons
-(test
+#+nil (test
  (mv-eql
   (values
    (typep (make-struct-bus :type 'alarm :signal 12) 'bus-alarm)
