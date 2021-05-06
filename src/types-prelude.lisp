@@ -116,4 +116,5 @@
         (setf (type-info-compound type) compound))
       (when predicate
         (setf (type-info-predicate type) predicate))))
+
 ;;; EOF
