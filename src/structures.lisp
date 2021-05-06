@@ -1037,13 +1037,6 @@
           (dsd-inherit-slots dd) (copy-tree to-inherit-slots)
           (dsd-prototype dd) (if lisp-type (copy-tree prototype) (list nil))
           (dsd-descriptor dd) (copy-tree descriptor))
-    #+nil
-    (multiple-value-bind (standard constructors accessors predicate copier)
-        (if lisp-type
-            (das!make-lisp-base-structure dd)
-            (das!make-standard-structure dd))
-      (das!finalize-structure dd)
-      standard)
     (setq standard (if lisp-type
                        (das!make-lisp-base-structure dd)
                        (das!make-standard-structure dd)))
