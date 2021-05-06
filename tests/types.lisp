@@ -18,7 +18,7 @@
         (cons (make-package 'fake-pack)            'package)
         (cons (make-hash-table)                    'hash-table)
         (cons (defstruct atomic-test-struct)       'symbol)
-        (cons (make-atomic-test-struct)            'cons)
+        (cons (make-atomic-test-struct)            'atomic-test-struct)
         (cons (defclass atomic-test-class nil nil) 'standard-class)
         (cons (make-instance 'atomic-test-class)   'atomic-test-class)
         (cons (make-list 1)     'cons)
@@ -40,7 +40,7 @@
           '(BIT            FLOAT       SYMBOL     CHARACTER
             KEYWORD        SYMBOL      SYMBOL     FUNCTION
             NULL           NULL        NULL       BOOLEAN
-            package        hash-table  SYMBOL     CONS
+            package        hash-table  SYMBOL     atomic-test-struct
             STANDARD-CLASS ATOMIC-TEST-class  CONS       (VECTOR 1)
             (VECTOR 0)     (STRING 3)  (STRING 2) JSCL::JS-OBJECT
             STANDARD-CLASS  FUNCTION)))
@@ -363,7 +363,7 @@
   T NIL T NIL T NIL T NIL T NIL T))
 
 ;;; defstruct with (:type list)
-(defstruct struct-bus type signal r1 r2 r3)
+(defstruct (struct-bus :named (:type list)) type signal r1 r2 r3)
 (deftype bus-alarm ()
   `(cons (eql struct-bus)
          (cons (eql alarm)
