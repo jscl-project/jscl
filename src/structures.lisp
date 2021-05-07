@@ -603,11 +603,13 @@
         (incf imap))
       (cond ((eql 'vector storage-type)
              `(defun ,predicate (obj)
-                #+jscl (and (vectorp obj)
+                (and (storage-vector-p obj)
+                     (> (length obj) ,imap)
                      (eql (storage-vector-ref obj ,imap) ',structure-type))))
             ((eql 'list storage-type)
              `(defun ,predicate (obj)
-                (and (consp obj)
+                (and (proper-list-p obj)
+                     (> (length obj) ,imap)
                      (eql (nth ,imap obj) ',structure-type))))))))
 
 ;;; COPIER
