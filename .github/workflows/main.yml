@@ -1,0 +1,26 @@
+name: Pipeline CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: "12.x"
+
+    - name: Install SBCL
+      run: sudo apt-get install sbcl
+
+    - name: Build JSCL
+      run: ./make.sh
+
+    - name: Run tests
+      run: ./run-tests.sh
