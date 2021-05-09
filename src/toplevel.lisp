@@ -283,7 +283,7 @@
 
 
 (defun welcome-message (&key (html nil))
-  (format t "Welcome to ~a ~a (~a)~%~%"
+  (format t "Welcome to ~a (version ~a ~a)~%~%"
           (lisp-implementation-type)
           (lisp-implementation-version)
           (compilation-notice))

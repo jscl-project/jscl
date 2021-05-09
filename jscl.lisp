@@ -22,24 +22,27 @@
 
 (in-package :jscl)
 
+(require :uiop)
+
 (defvar *base-directory*
   (if #.*load-pathname*
       (make-pathname :name nil :type nil :defaults #.*load-pathname*)
       *default-pathname-defaults*))
 
 (defvar *version*
-  ;; Read the version from the package.json file. We could have used a
-  ;; json library to parse this, but that would introduce a dependency
-  ;; and we are not using ASDF yet.
-  (with-open-file (in (merge-pathnames "package.json" *base-directory*))
-    (loop
-       for line = (read-line in nil)
-       while line
-       when (search "\"version\":" line)
-       do (let ((colon (position #\: line))
-                (comma (position #\, line)))
-            (return (string-trim '(#\newline #\" #\tab #\space)
-                                 (subseq line (1+ colon) comma)))))))
+  (or (uiop:getenv "JSCL_VERSION")
+      ;; Read the version from the package.json file. We could have used a
+      ;; json library to parse this, but that would introduce a dependency
+      ;; and we are not using ASDF yet.
+      (with-open-file (in (merge-pathnames "package.json" *base-directory*))
+        (loop
+          for line = (read-line in nil)
+          while line
+          when (search "\"version\":" line)
+            do (let ((colon (position #\: line))
+                     (comma (position #\, line)))
+                 (return (string-trim '(#\newline #\" #\tab #\space)
+                                      (subseq line (1+ colon) comma))))))))
 
 
 
