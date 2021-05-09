@@ -1,0 +1,40 @@
+name: Release latest
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: "12.x"
+
+    - name: Install SBCL
+      run: sudo apt-get install sbcl
+
+    - name: Build JSCL
+      run: JSCL_VERSION=$(git rev-parse --short HEAD) ./make.sh
+
+    - name: Run tests
+      run: ./run-tests.sh
+
+    - name: Prepare dist directory
+      run: |
+        mkdir dist/
+        cp jscl.html dist/index.html
+        cp jscl.js jscl-web.js style.css dist/
+        cp tests.html tests.js dist/
+        cp jquery.js jqconsole.min.js dist/
+
+    - name: Deploy latest version 🚀
+      uses: JamesIves/github-pages-deploy-action@4.1.1
+      with:
+        branch: master
+        folder: dist
+        repository-name: jscl-project/jscl-project.github.io
+        ssh-key: ${{ secrets.DEPLOY_KEY }}
