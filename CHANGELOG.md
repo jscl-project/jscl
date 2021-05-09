@@ -6,11 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### [0.8.2] - 2021-05-09
+
 ### Added
 
 - `describe` is implemented on top of CLOS now. [#343](https://github.com/jscl-project/jscl/pull/343)
 - `apropos` and `apropos-list` support regular expressions. [#343](https://github.com/jscl-project/jscl/pull/343)
 - Basic `load` is supported in browser and node environments [#343](https://github.com/jscl-project/jscl/pull/343)
+- Improved support for `defstruct` https://github.com/jscl-project/jscl/pull/393
+- Improved support for types and conditions https://github.com/jscl-project/jscl/pull/390
+- Added 32bit bitwise functions https://github.com/jscl-project/jscl/pull/379
+- Support for `#B`, `#O`, `#X` macro reader characters https://github.com/jscl-project/jscl/pull/357
 
 ### Fixed
 
@@ -57,7 +63,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Implement the [LOOP](https://github.com/jscl-project/jscl/pull/253) macro
 
-[Unreleased]: https://github.com/jscl-project/jscl/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/jscl-project/jscl/compare/v0.8.2...HEAD
+[0.8.2]: https://github.com/jscl-project/jscl/compare/v0.7.0...v0.8.2
 [0.7.0]: https://github.com/jscl-project/jscl/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/jscl-project/jscl/compare/v0.5.1...v0.6.1
 [0.5.1]: https://github.com/jscl-project/jscl/compare/v0.4.0...v0.5.1
