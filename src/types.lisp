@@ -409,7 +409,7 @@
 
 ;;; todo: canonical deftype lambda-list
 (defmacro deftype (&whole whole name lambda-list &body body)
-  (destructuring-bind (name args &body body) whole
+  (destructuring-bind (name (&rest args) &body body) whole
     (if (null args)
         (setq args '(&optional ignore)))
     (multiple-value-bind (body decls docstring)
