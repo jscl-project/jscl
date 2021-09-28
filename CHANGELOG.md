@@ -6,7 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-### [0.8.2] - 2021-05-09
+### Added
+
+- `Deno` support. [#408](https://github.com/jscl-project/jscl/pull/408)
+
+## [0.8.2] - 2021-05-09
 
 ### Added
 
