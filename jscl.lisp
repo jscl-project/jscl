@@ -251,7 +251,11 @@
     ;; Node REPL
     (compile-application (list (source-pathname "node.lisp" :directory '(:relative "node")))
                          (merge-pathnames "jscl-node.js" *base-directory*)
-                         :shebang t)))
+                         :shebang t)
+    ;; Deno REPL
+    (compile-application (list (source-pathname "deno.lisp" :directory '(:relative "deno")))
+                         (merge-pathnames "jscl-deno.js" *base-directory*)
+                         :shebang nil)))
 
 
 ;;; Run the tests in the host Lisp implementation. It is a quick way

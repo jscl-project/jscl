@@ -10,4 +10,5 @@ tests.js
 .tmp/
 
 /repl-node.js
+/repl-deno.js
 /repl-web.js

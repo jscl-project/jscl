@@ -19,7 +19,8 @@
 
 (defun web-worker-p ()
   (and (string= (%js-typeof |document|) "undefined")
-       (string= (%js-typeof |module|) "undefined")))
+       (string= (%js-typeof |module|)   "undefined")
+       (not (find :deno *features*))))
 
 (defvar *web-worker-session-id*)
 

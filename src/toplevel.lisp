@@ -278,9 +278,12 @@
                 year))))
 
 (when (and (string/= (%js-typeof |module|) "undefined")
-           (string= (%js-typeof |phantom|) "undefined"))
+           (string= (%js-typeof |phantom|) "undefined")
+           (string/= (%js-typeof |process|) "undefined"))
   (push :node *features*))
 
+(when (string/= (%js-typeof |Deno|) "undefined")
+  (push :deno *features*))
 
 (defun welcome-message (&key (html nil))
   (format t "Welcome to ~a (version ~a ~a)~%~%"

@@ -6,6 +6,7 @@
   "files": [
     "jscl.js",
     "jscl-node.js",
+    "jscl-deno.js",
     "jscl-web.js"
   ],
   "bin": {
