@@ -19,7 +19,7 @@
   (welcome-message)
   (setq *rl* (#j:readline:createInterface #j:process:stdin #j:process:stdout))
   (let ((*root* *rl*))
-    (#j:setPrompt "CL-USER> ")
+    (#j:setPrompt (format nil "~a> " (package-name *package*)))
     (#j:prompt)
     (#j:on "line"
            (lambda (line)
@@ -37,6 +37,9 @@
               (catch (err)
                 (let ((message (or (oget err "message") err)))
                   (format t "ERROR[!]: ~a~%" message))))
+             ;; Update prompt
+             (let ((*root* *rl*))
+               (#j:setPrompt (format nil "~a> " (package-name *package*))))
              ;; Continue
              ((oget *rl* "prompt"))))))
 
