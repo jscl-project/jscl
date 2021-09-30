@@ -116,7 +116,8 @@
            (export
             (mapcar (lambda (symbol) (intern (symbol-name symbol) package)) ',exports)
             package)
-           package)))))
+           package))
+       (find-package ,name))))
 
 
 (defun %redefine-package (package use)
