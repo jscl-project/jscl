@@ -17,7 +17,7 @@ CLOSETTE original code:
 
 **No forward-referenced superclasses**
 
-**Explicit generic function defenition** 
+**Explicit generic function definition** 
 - The release requires that a generic functions be explicitly introduced with `defgeneric` form before any methods are defined on it.
 
 **Standard method-combination only**  

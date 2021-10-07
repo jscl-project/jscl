@@ -2143,7 +2143,7 @@ collected result will be returned as the value of the LOOP."
   (loop-standard-expansion body env *loop-ansi-universe*))
 
 
-;;; FIXME: Somehow the pacakge is not being bound properly in
+;;; FIXME: Somehow the package is not being bound properly in
 ;;; !compile-file.
 #+jscl
 (progn

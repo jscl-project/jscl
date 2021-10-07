@@ -80,7 +80,7 @@
 ;;; (load name &key verbose sync output place hook)
 ;;;
 ;;; sync   -  use node.js 'fs' facilities for read/write ops
-;;;          automaticaly turned off for browser with warn
+;;;          automatically turned off for browser with warn
 ;;;
 ;;; output - optional mode
 ;;;          only for node/electron platform
@@ -89,7 +89,7 @@
 ;;;          by the function 'require'.
 ;;;
 ;;; place  - optional mode
-;;;          only for node/electron paltform
+;;;          only for node/electron platform
 ;;;          required 'jscl.js' path, by default eq './'
 ;;;          'place' it is the file system location from where the module 'jscl.js'
 ;;;          will be is load by function 'require'
@@ -118,7 +118,7 @@
 ;;;          (load "file3.lisp" :hook bin :output "lib.js")
 ;;;              => will be bundle js-code file1, file2, file3 from bin to "lib.js"
 ;;;
-;;;         you will be use (requie "./lib") or use html tag:
+;;;         you will be use (require "./lib") or use html tag:
 ;;;         <script src="lib.js" type="text/javascript" charset="utf-8"></script>
 ;;;         without compilation.
 ;;;
@@ -160,7 +160,7 @@
      (format t "~%Load: Can't load ~a~%     Status ~%" url status))))
 
 ;;; alowe make bundle from source received from local fs (by FILE:)
-;;; or from remote resourse (by HTTP:)
+;;; or from remote resource (by HTTP:)
 (defun loader-async-mode (name verbose bundle-name place hook)
   (_xhr_receiver_
    name
@@ -202,7 +202,7 @@
                (setq code (compile-toplevel expr t t))
                (setq rc (js-eval code))
                (when verbose (format t "  ~a~%" rc))
-               ;; so, expr already verifyed
+               ;; so, expr already verified
                ;; store expression after compilation/evaluated
                (cond (fbundle ((oget code-stor "push") code))
                      (hook ((oget code-stor "push") code))

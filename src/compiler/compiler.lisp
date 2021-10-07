@@ -55,7 +55,7 @@
 ;;; function call.
 (defvar *multiple-value-p* nil)
 
-;;; It is bound dinamically to the number of nested calls to
+;;; It is bound dynamically to the number of nested calls to
 ;;; `convert'. Therefore, a form is being compiled as toplevel if it
 ;;; is zero.
 (defvar *convert-level* -1)
@@ -445,7 +445,7 @@
 ;;; NAME is given, it should be a constant string and it will become
 ;;; the name of the function. If BLOCK is non-NIL, a named block is
 ;;; created around the body. NOTE: No block (even anonymous) is
-;;; created if BLOCk is NIL.
+;;; created if BLOCK is NIL.
 (defun compile-lambda (ll body &key name block)
   (multiple-value-bind (required-arguments
                         optional-arguments
@@ -872,7 +872,7 @@
   ;; generated object to identify the block. The instance of a empty
   ;; array is used to distinguish between nested dynamic Javascript
   ;; exceptions. See https://github.com/jscl-project/jscl/issues/64 for
-  ;; futher details.
+  ;; further details.
   (let* ((idvar (gvarname name))
          (b (make-binding :name name :type 'block :value idvar)))
     (when *multiple-value-p*

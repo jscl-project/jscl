@@ -45,7 +45,7 @@ functions and macros. In particular:
 
 - Multiple values
 
-- Explicit control tranfers
+- Explicit control transfers
   [tagbody](http://www.lispworks.com/documentation/HyperSpec/Body/s_tagbod.htm)
   and [go](http://www.lispworks.com/documentation/HyperSpec/Body/s_go.htm)
 
