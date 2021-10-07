@@ -57,7 +57,7 @@
 
 (defvar *js-pretty-print* t)
 
-;;; Two seperate functions are needed for escaping strings:
+;;; Two separate functions are needed for escaping strings:
 ;;;  One for producing JavaScript string literals (which are singly or
 ;;;   doubly quoted)
 ;;;  And one for producing Lisp strings (which are only doubly quoted)

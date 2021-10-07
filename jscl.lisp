@@ -222,7 +222,7 @@
           (!compile-file input out :print verbose))
         (dump-global-environment out)
 
-        ;; NOTE: Thie file must be compiled after the global
+        ;; NOTE: This file must be compiled after the global
         ;; environment. Because some web worker code may do some
         ;; blocking, like starting a REPL, we need to ensure that
         ;; *environment* and other critical special variables are

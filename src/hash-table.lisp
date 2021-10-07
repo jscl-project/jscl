@@ -14,7 +14,7 @@
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Plain Javascript objects are the natural way to implement Common
-;;; Lisp hash tables. However, there is a big differences betweent
+;;; Lisp hash tables. However, there is a big differences between
 ;;; them which we need to work around. Javascript objects require the
 ;;; keys to be strings. To solve that, we map Lisp objects to strings
 ;;; such that "equivalent" values map to the same string, regarding

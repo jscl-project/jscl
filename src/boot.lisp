@@ -42,7 +42,7 @@
                                           ,@decls
                                           ,@body))))))
 
-                    ;; If we are boostrapping JSCL, we need to quote the
+                    ;; If we are bootstrapping JSCL, we need to quote the
                     ;; macroexpander, because the macroexpander will
                     ;; need to be dumped in the final environment
                     ;; somehow.
@@ -137,7 +137,7 @@
                    (list g!newvalue)
                    `(,g!setter ,g!newvalue ,@arguments)
                    `(,g!getter ,@arguments)))))))
-        (t (error "defun ~a unknow function specifier" name))))
+        (t (error "defun ~a unknown function specifier" name))))
 
 (defmacro return (&optional value)
   `(return-from nil ,value))
@@ -282,7 +282,7 @@
       (cond
         ((null pairs) (return))
         ((null (cdr pairs))
-         (error "Odd paris in PSETQ"))
+         (error "Odd pairs in PSETQ"))
         (t
          (let ((variable (car pairs))
                (value (cadr pairs)))

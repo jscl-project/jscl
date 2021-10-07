@@ -8,7 +8,7 @@
 ;;;
 ;;; note: it works ? don't touch it!!!
 
-(/debug "build standard mop hierarhy")
+(/debug "build standard mop hierarchy")
 
 ;;; timestamp. todo: remove it
 (defvar *boot-stage-timestamp* (get-internal-real-time))

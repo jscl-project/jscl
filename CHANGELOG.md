@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   [#334](https://github.com/jscl-project/jscl/pull/334)
 
 ### Fixed
-- Infinite loop in the exprimental service-worker REPL on EOF [#318](https://github.com/jscl-project/jscl/issues/318)
+- Infinite loop in the experimental service-worker REPL on EOF [#318](https://github.com/jscl-project/jscl/issues/318)
 
 
 ## [0.6.1] - 2018-05-07
