@@ -381,6 +381,11 @@
      x)
     ((symbolp x)
      (symbol-function x))
+    ;; This is a HACK that relies on the current storage of setf definitions.
+    ;; See the comment on DEFUN for more information.
+    ((and (consp x) (eq (car x) 'setf))
+      (let ((pname (concat "(" (symbol-name (car x)) "_" (symbol-name (cadr x)) ")")))
+        (symbol-function (intern pname (symbol-package (cadr x))))))
     (t
      (error "Invalid function `~S'." x))))
 
