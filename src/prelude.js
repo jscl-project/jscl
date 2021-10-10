@@ -224,6 +224,7 @@ internals.safe_char_downcase = function(x) {
 };
 
 internals.xstring = function(x){
+  if(typeof x === "number") return x.toString();
   const hasFillPointer = typeof x.fillpointer === 'number'
   const activechars = hasFillPointer? x.slice(0, x.fillpointer): x
   return activechars.join('');

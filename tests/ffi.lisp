@@ -58,4 +58,11 @@
   (test (js-object-p obj))
   (test (js-object-signature obj)))
 
+;;; test in can handle numbers
+
+(let ((obj (make-new #j:Object)))
+  (test (js-object-p obj))
+  (test (oset 456 obj 123))
+  (test (equal 456 (oget obj 123))))
+
 ;;; EOF
