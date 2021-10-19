@@ -546,4 +546,16 @@
         (conc-name-nil-slot (make-conc-name-nil))
       (error (c) nil)))))
 
+(defstruct print-struct-test a b c)
+(test
+  ;; struct printing with only numbers
+  (string-equal
+    (format nil "~S" (make-print-struct-test :a 1 :b 2 :c 3))
+    "#S(JSCL::PRINT-STRUCT-TEST :A 1 :B 2 :C 3)"))
+(test
+  ;; struct printing with some strings in it
+  (string-equal
+    (format nil "~S" (make-print-struct-test :a "hello" :b "world" :c 3))
+    "#S(JSCL::PRINT-STRUCT-TEST :A \"hello\" :B \"world\" :C 3)"))
+
 ;;; EOF
