@@ -57,7 +57,9 @@
   (test (equal '(4 5 6 7) (setf (fn2 5 6 7) 4)))
   (let ((qq '(1 2 3)))
     (test (equal '(99 3) (setf (%cadr% qq) 99)))
-    (test (equal '(1 99 3) qq))))
+    (test (equal '(1 99 3) qq)))
+
+  (test (fdefinition '(setf fn1))))
 
 ;;; push/pop/incf/decf test
 #+jscl

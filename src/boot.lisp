@@ -104,6 +104,12 @@
      (fset ',name #'(named-lambda ,name ,args ,@body))
      ',name))
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defmacro %defun-setf-symbol (name)
+    `(intern
+      (concat "(" (symbol-name (car ,name)) "_" (symbol-name (cadr ,name)) ")")
+      (symbol-package (cadr ,name)))))
+
 (defmacro defun (name args &rest body)
   (cond ((symbolp name)
          `(%defun ,name ,args ,@body))
@@ -116,11 +122,7 @@
          ;; Also, the SETF expansion could be defined on demand in
          ;; get-setf-expansion by consulting this register of SETF
          ;; definitions.
-         (let ((sfn 
-                 (let ((pname
-                         (concat "(" (symbol-name (car name)) "_" (symbol-name (cadr name)) ")")))
-                   (intern pname
-                           (symbol-package (cadr name))))))
+         (let ((sfn (%defun-setf-symbol name)))
            `(progn
               (%defun ,sfn ,args ,@body)
               (define-setf-expander ,(cadr name) (&rest arguments)
@@ -381,6 +383,8 @@
      x)
     ((symbolp x)
      (symbol-function x))
+    ((and (consp x) (eq (car x) 'setf))
+      (symbol-function (%defun-setf-symbol x)))
     (t
      (error "Invalid function `~S'." x))))
 
