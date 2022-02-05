@@ -90,7 +90,14 @@
               (+ 1 2))))
 
 
-
+;;; ASSERT case
+(test
+ (equal '(t nil t nil)
+        (list
+         (not (assert (= 1 1)))
+         (trap-errors (assert (= 1 2)))
+         (not (assert (typep 1 'integer)))
+         (trap-errors (assert (typep 1 'list))))))
 
 
 ;;; EOF
