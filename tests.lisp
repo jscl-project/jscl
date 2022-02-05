@@ -72,7 +72,9 @@
            ,form)
        (error (msg)
          (format t " ERROR: ~a"
-                 (format nil (car (!condition-args msg)) (cadr (!condition-args msg))))
+                 (format nil
+                         (simple-condition-format-control msg)
+                         (simple-condition-format-arguments msg)))
          (values nil))))
     ',result))
 

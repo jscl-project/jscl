@@ -222,6 +222,26 @@
     (progn ,@forms)
     (error (condition) (values nil condition))))
 
+;;; Simple ASSERT release
+(defun %%assert-error (form datum &rest args)
+  (error
+   (if datum
+       (%%coerce-condition 'simple-error datum args)
+		   (%%make-condition 'simple-error
+				                 :format-control "Assert failed: ~s."
+				                 :format-arguments (list form)))))
+
+(defmacro %%assert (test &optional ignore datum &rest args)
+  (let ((value (gensym "ASSERT-VALUE"))
+        (name (gensym "ASSERT-BLOCK")))
+    `(block
+         ,name
+       (let ((,value ,test))
+         (when (not ,value)
+           (%%assert-error ',test ,datum ,@args))))))
+
+
+
 #+jscl
 (progn
   (defmacro define-condition (name (&rest parents) (&rest slot-spec) &rest options)
@@ -236,6 +256,9 @@
 
   (defmacro ignore-errors (&rest forms)
     `(%%ignore-errors ,@forms))
+
+  (defmacro assert (test &optional ignore datum &rest args)
+    `(%%assert ,test ,ignore ,datum ,@args))
 
   (fset 'make-condition #'%%make-condition)
   (fset 'signal #'%%signal)
