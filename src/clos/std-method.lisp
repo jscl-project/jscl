@@ -152,6 +152,7 @@
 
 ;;; ensure method
 ;;; @vlad-km
+;;; TODO: refactor this - remove canonical helpers from macro, add ensure-generic
 (defun ensure-method (gf &rest all-keys)
   (let ((new-method
           (apply
