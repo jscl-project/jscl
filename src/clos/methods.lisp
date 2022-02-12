@@ -31,6 +31,8 @@
   (setf (gethash symbol *class-table*) new-value))
 
 ;;; print-object
+;;; @vlad-km 2022 experimental - pre-upgrade to new version
+#+nil
 (defgeneric print-object (instance &optional stream))
 
 (defmethod print-object ((instance standard-object) &optional (stream *standard-output*))
@@ -54,6 +56,8 @@
 
 
 ;;; Slot access
+;;; @vlad-km 2022 experimental - pre-upgrade to new version
+#+nil
 (defgeneric slot-value-using-class (class instance slot-name))
 
 
@@ -61,6 +65,8 @@
   (std-slot-value instance slot-name))
 
 
+;;; @vlad-km 2022 experimental - pre-upgrade to new version
+#+nil
 (defgeneric (setf slot-value-using-class) (new-value class instance slot-name))
 
 (defmethod (setf slot-value-using-class) (new-value (class standard-class) instance slot-name)
@@ -80,6 +86,8 @@
 
 
 
+;;; @vlad-km 2022 experimental - pre-upgrade to new version
+#+nil
 (defgeneric slot-boundp-using-class (class instance slot-name))
 
 (defmethod slot-boundp-using-class
@@ -87,6 +95,8 @@
   (std-slot-boundp instance slot-name))
 
 
+;;; @vlad-km 2022 experimental - pre-upgrade to new version
+#+nil
 (defgeneric slot-makunbound-using-class (class instance slot-name))
 
 (defmethod slot-makunbound-using-class
@@ -95,6 +105,8 @@
 
 
 ;;; Instance creation and initialization
+;;; @vlad-km 2022 experimental - pre-upgrade to new version
+#+nil
 (defgeneric allocate-instance (class))
 
 (defmethod allocate-instance ((class standard-class))
@@ -103,6 +115,8 @@
 
 
 ;;;@vlad-km
+;;; @vlad-km 2022 experimental - pre-upgrade to new version
+#+nil
 (defgeneric make-instance (class &key))
 
 (defmethod make-instance ((class standard-class) &rest initargs)
@@ -115,6 +129,8 @@
 
 
 ;;; initialize-instance
+;;; @vlad-km 2022 experimental - pre-upgrade to new version
+#+nil
 (defgeneric initialize-instance (instance &key))
 
 (defmethod initialize-instance ((instance standard-object) &rest initargs)
@@ -131,6 +147,8 @@
 
 
 ;;; shared-initialize
+;;; @vlad-km 2022 experimental - pre-upgrade to new version
+#+nil
 (defgeneric shared-initialize (instance slot-names &key))
 
 (defmethod shared-initialize ((instance standard-object) slot-names &rest all-keys)

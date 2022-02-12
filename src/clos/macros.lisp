@@ -2,7 +2,7 @@
 
 ;;;
 ;;; CLOS macros
-;;; Modification for JSCL  @vlad-km, 2019
+;;; Modification for JSCL  @vlad-km, 2019, 2022
 ;;;
 ;;; JSCL compilation mode :target
 ;;;
@@ -30,6 +30,9 @@
 ;;; from std-method.lisp
 ;;; from original closette.lisp lines 919-931
 ;;; @vlad-km. modify :body. added :cmf
+;;;           add call without prior DEFGENERIC
+
+#+nil
 (defmacro defmethod (&rest args)
   (multiple-value-bind (function-name qualifiers lambda-list specializers body)
       (parse-defmethod args)
@@ -42,6 +45,26 @@
                       :cmf (compile-method-function ,function-name
                                                     ,(kludge-arglist lambda-list)
                                                     ,body)))))
+
+(defmacro defmethod (&rest args)
+  (multiple-value-bind (function-name qualifiers lambda-list specializers body)
+      (parse-defmethod args)
+    `(let ((gf (find-generic-function ',function-name nil)))
+       (unless gf
+         (setq gf (defgeneric ,function-name
+                      ,(mapcar
+                        (lambda (x)
+                          (if (consp x) (car x) x))
+                        lambda-list) )))
+       (ensure-method gf
+                      :lambda-list ,(canonicalize-defgeneric-ll lambda-list)
+                      :qualifiers ,(canonicalize-defgeneric-ll qualifiers)
+                      :specializers ,(canonicalize-specializers specializers)
+                      :body ',body
+                      :cmf (compile-method-function ,function-name
+                                                    ,(kludge-arglist lambda-list)
+                                                    ,body)))))
+
 
 ;;; @vlad-km
 ;;; added standard macro - with-slots
