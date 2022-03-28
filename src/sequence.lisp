@@ -458,6 +458,19 @@
 	  (funcall result-collector (apply function args))
 	  (apply function args)))))
 
+(defun check-sequence-type-specifier (specifier)
+  (unless (member specifier '(vector string list))
+    (error "Not a valid sequence type specifier")))
+
+(defun concatenate (result-type &rest sequences)
+  (check-sequence-type-specifier result-type)
+  (let ((iterators (mapcar #'make-iterator sequences))
+        (result-collector (make-collector result-type)))
+    (dolist (it iterators)
+      (do ((arg (funcall it) (funcall it)))
+          ((eq *iterator-done* arg))
+        (funcall result-collector arg)))
+    (funcall result-collector)))
 
 ;;; remove duplicates
 (defun %remove-duplicates (seq from-end test test-not key start end)

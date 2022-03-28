@@ -277,6 +277,24 @@
    (list acc result))
  '((3 2 1) t))
  
+;;; CONCATENATE
+(test-equal
+ (concatenate 'string "all" " " "together" " " "now")
+ "all together now")
+
+(test-equal
+ (concatenate 'list "ABC" '(d e f) #(1 2 3) "1011")
+ '(#\A #\B #\C D E F 1 2 3 #\1 #\0 #\1 #\1))
+
+(test-equal
+ (concatenate 'list)
+ nil)
+
+(test-equal
+ (handler-case
+     (concatenate '(vector * 2) "a" "bc")
+   (error () :signalled))
+ :signalled)
 
 
 ;;; REMOVE-DUPLICATES
