@@ -60,6 +60,11 @@ internals.forcemv = function(x) {
 };
 
 
+internals.n = function(n) {
+  return BigInt(n);
+}
+
+
 //
 // Workaround the problems with `new` for arbitrary number of
 // arguments. Some primitive constructors (like Date) differ if they
@@ -195,6 +200,7 @@ internals.char_to_codepoint = function(ch) {
 };
 
 internals.char_from_codepoint = function(x) {
+  x = Number(x)
   if (x <= 0xFFFF) {
     return String.fromCharCode(x);
   } else {

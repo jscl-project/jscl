@@ -575,7 +575,7 @@
 
 (defun literal (sexp &optional recursive)
   (cond
-    ((integerp sexp) sexp)
+    ((integerp sexp) `(call-internal |n| ,sexp))
     ((floatp sexp) sexp)
     ((characterp sexp) (string sexp))
     (t
@@ -1067,12 +1067,13 @@
     (with-collector (fargs)
       (with-collector (prelude)
         (dolist (x args)
-          (if (or (floatp x) (numberp x))
-              (collect-fargs x)
+          (if (or (floatp x) (integerp x))
+              (collect-fargs (convert x)) 
               (let ((v (make-symbol (concat "x" (integer-to-string (incf counter))))))
                 (collect-fargs v)
                 (collect-prelude `(var (,v ,(convert x))))
-                (collect-prelude `(if (!= (typeof ,v) "number")
+                (collect-prelude `(if (and (!= (typeof ,v) "number")
+                                           (!= (typeof ,v) "bigint"))
                                       (throw "Not a number!"))))))
         `(selfcall
           (progn ,@prelude)
@@ -1155,13 +1156,17 @@
 (define-builtin-comparison /= !=)
 
 (define-builtin numberp (x)
-  (convert-to-bool `(== (typeof ,x) "number")))
+  (convert-to-bool `(or (== (typeof ,x) "number")
+                        (== (typeof ,x) "bigint"))))
 
 (define-builtin %integer-p (x)
-  (convert-to-bool `(method-call |Number| "isInteger" ,x)))
+  (convert-to-bool `(or (method-call |Number| "isInteger" ,x)
+                        (== (typeof ,x) "bigint"))))
 
 (define-builtin %truncate (x)
-`(method-call |Math| "trunc" ,x))
+  `(if (== (typeof ,x) "bigint")
+       ,x
+       (method-call |Math| "trunc" ,x)))
 
 (define-builtin %floor (x)
   `(method-call |Math| "floor" ,x))
@@ -1170,10 +1175,13 @@
   `(method-call |Math| "ceil" ,x))
 
 (define-builtin expt (x y)
-  `(method-call |Math| "pow" ,x ,y))
+  `(method-call |Math| "pow" (call |Number| ,x) (call |Number| ,y)))
 
 (define-builtin sqrt (x)
   `(method-call |Math| "sqrt" ,x))
+
+(define-builtin float (x)
+  `(call |Number| ,x))
 
 (define-builtin float-to-string (x)
   `(call-internal |make_lisp_string| (method-call ,x |toString|)))
@@ -1331,14 +1339,14 @@
 (define-builtin make-storage-vector (n)
   `(selfcall
     (var (r #()))
-    (= (get r "length") ,n)
+    (= (get r "length") (call |Number| ,n))
     (return r)))
 
 (define-builtin storage-vector-size (x)
-  `(get ,x "length"))
+  `(call |BigInt| (get ,x "length")))
 
 (define-builtin resize-storage-vector (vector new-size)
-  `(= (get ,vector "length") ,new-size))
+  `(= (get ,vector "length") (call |Number| ,new-size)))
 
 (define-builtin storage-vector-ref (vector n)
   `(selfcall
