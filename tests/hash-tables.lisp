@@ -133,4 +133,19 @@
                 (let ((h (temp-hash-table :fill t)))
                   (remhash 'one h)
                   h))))
+
+;;; Test numbers as keys
+(let ((ht (make-hash-table)))
+  (test (eq nil (gethash 123 ht)))
+  (test (eq 'foo (setf (gethash 123 ht) 'foo)))
+  (test (eq 'foo (gethash 123 ht))))
+
+;;; Test numbers are different than strings
+(let ((ht (make-hash-table :test #'equal)))
+  (test (equal 'foo (setf (gethash 123 ht) 'foo)))
+  (test (equal 'bar (setf (gethash "123" ht) 'bar)))
+  (test (equal 'foo (gethash 123 ht)))
+  (test (equal 'bar (gethash "123" ht)))
+  (test (eq 2 (length (hash-table-keys ht)))))
+
 ;;; EOF
