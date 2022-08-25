@@ -339,7 +339,7 @@ internals.Symbol = function(name, package_name){
   this.name = name;
   this.package = package_name;
   this.value = undefined;
-  this.fvalue = internals.unboundFunction;
+  this.fvalue = internals.unboundFunction.bind(this);
   this.stack = [];
 };
 
