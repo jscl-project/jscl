@@ -59,7 +59,6 @@ internals.forcemv = function(x) {
   return typeof x == 'object' && x !== null && 'multiple-value' in x? x: internals.mv(x);
 };
 
-
 //
 // Workaround the problems with `new` for arbitrary number of
 // arguments. Some primitive constructors (like Date) differ if they
@@ -331,15 +330,21 @@ packages.KEYWORD = {
 
 jscl.CL = packages.CL.exports;
 
-internals.unboundFunction = function () {
-  throw new Error("Function '" + this.name + "' undefined");
+
+
+const UNBOUND = Symbol('UnboundFunction')
+
+internals.makeUnboundFunction = function (symbol) {
+  const fn = ()=>{ throw new Error("Function '" + symbol.name + "' undefined");}
+  fn[UNBOUND] = true;
+  return fn;
 };
 
 internals.Symbol = function(name, package_name){
   this.name = name;
   this.package = package_name;
   this.value = undefined;
-  this.fvalue = internals.unboundFunction.bind(this);
+  this.fvalue = internals.makeUnboundFunction(this)
   this.stack = [];
 };
 
@@ -352,9 +357,17 @@ internals.symbolValue = function (symbol){
   }
 };
 
+internals.fboundp = function (symbol) {
+  if (symbol instanceof internals.Symbol){
+    return !symbol.fvalue[UNBOUND]
+  } else {
+    throw new Error(`${symbol} is not a symbol`)
+  }
+}
+
 internals.symbolFunction = function (symbol){
   var fn = symbol.fvalue;
-  if (fn === internals.unboundFunction)
+  if (fn[UNBOUND])
     symbol.fvalue();
   return fn;
 };
