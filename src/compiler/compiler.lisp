@@ -1220,7 +1220,7 @@
 (define-builtin boundp (x)
   (convert-to-bool `(!== (get ,x "value") undefined)))
 
-(define-builtin fboundp (x)
+(define-builtin %fboundp (x)
   (convert-to-bool `(call-internal |fboundp| ,x)))
 
 (define-builtin symbol-value (x)
