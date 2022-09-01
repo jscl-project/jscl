@@ -16,7 +16,9 @@
 
 (defun function-lambda-list (function)
   "Return the lambda-list of FUNCTION."
-  (read-from-string (oget (fdefinition function) "lambdalist")))
+  (let ((lambda-list (oget (fdefinition function) "lambdalist")))
+    (when lambda-list
+      (read-from-string lambda-list))))
 
 ;;; APROPOS and friends
 
