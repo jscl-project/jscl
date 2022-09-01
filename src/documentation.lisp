@@ -14,6 +14,9 @@
        (error "The type of documentation `~S' is not a symbol." type))
      (oget x "vardoc"))))
 
+(defun function-lambda-list (function)
+  "Return the lambda-list of FUNCTION."
+  (read-from-string (oget (fdefinition function) "lambdalist")))
 
 ;;; APROPOS and friends
 
