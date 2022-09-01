@@ -266,14 +266,12 @@
     (remove nil (mapcar #'third args))))
 
 (defun lambda-name/docstring-wrapper (name docstring lambda-list code)
-  (if (or name docstring)
-      `(selfcall
-        (var (func ,code))
-        ,(when name `(= (get func "fname") ,name))
-        ,(when docstring `(= (get func "docstring") ,docstring))
-	(= (get func "lambdalist") ,(prin1-to-string lambda-list))
-        (return func))
-      code))
+  `(selfcall
+    (var (func ,code))
+    ,(when name `(= (get func "fname") ,name))
+    ,(when docstring `(= (get func "docstring") ,docstring))
+    (= (get func "lambdalist") ,(prin1-to-string lambda-list))
+    (return func)))
 
 (defun lambda-check-argument-count
     (n-required-arguments n-optional-arguments rest-p)
