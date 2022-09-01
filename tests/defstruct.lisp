@@ -113,7 +113,7 @@
 (test
  (mv-eql
   (values
-   (mapcar 'fboundp (list #'sbt-02-a #'sbt-02-p #'copy-sbt-02))
+   (mapcar 'fboundp (list 'sbt-02-a 'sbt-02-p 'copy-sbt-02))
    (sbt-02-con)
    (sbt-02-con :foo 99)
    (sbt-02-a (sbt-02-con :foo 1234)))

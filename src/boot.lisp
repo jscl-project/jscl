@@ -156,7 +156,9 @@
   (boundp x))
 
 (defun fboundp (x)
-  (fboundp x))
+  (if (functionp x)
+      (error "FBOUNDP - invalid function name ~a." x))
+  (%fboundp x))
 
 (defun eq (x y) (eq x y))
 (defun eql (x y) (eq x y))

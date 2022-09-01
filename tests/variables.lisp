@@ -22,4 +22,8 @@
   (let ((*special-defparameter* 2))
     (test (= (f) 2))))
 
+
+(test (not (fboundp 'abc)))
+
+
 ;;; EOF
