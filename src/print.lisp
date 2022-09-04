@@ -339,13 +339,13 @@
      (simple-format stream "#<JS-OBJECT ~a>" (#j:String form)))))
 
 
+#+jscl
 (defun output-stream-designator (x)
-  ;; TODO: signal error if X is not a stream designator
-  (cond
-    ((eq x nil) *standard-output*)
-    ((eq x t)   *standard-output*       ; *terminal-io*
-     )
-    (t x)))
+  (cond ((eq x nil) *standard-output*)
+        ((eq x t)   *standard-output*)  
+        (t (if (output-stream-p x)
+               x
+               (error "Form ~s is not output stream type." (write-to-string x))))))
 
 #+jscl
 (defun invoke-object-printer (fn form &optional (stream *standard-output*))
