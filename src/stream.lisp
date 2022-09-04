@@ -102,6 +102,15 @@
                (end (getf keys :end (length string))))
            (!write-string (subseq string start end) stream)))))
 
+(defun write-line (string &optional (stream *standard-output*) &rest keys)
+  (prog1
+      (if (null keys) 
+          (!write-string string stream)
+          (let ((start (getf keys :start 0))
+                (end (getf keys :end (length string))))
+            (!write-string (subseq string start end) stream)
+            (write-char #\Newline stream)))))
+
 (defun make-string-output-stream ()
   (let ((buffer (make-array 0 :element-type 'character :fill-pointer 0)))
     (make-stream
