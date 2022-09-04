@@ -118,7 +118,8 @@
        (dotimes (i (length string))
          (vector-push-extend (aref string i) buffer)))
      :kind 'string-stream
-     :data buffer)))
+     :data buffer
+     :at-line-start t)))
 
 (defmacro with-input-from-string ((var string) &body body)
   ;; TODO: &key start end index
