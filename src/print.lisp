@@ -113,6 +113,10 @@
 
 #+jscl (defvar *print-escape* t)
 #+jscl (defvar *print-circle* nil)
+;;; @vkm-path-printer 04-09-2022
+;;; add variables 
+#+jscl (defvar *print-base* 10)
+#+jscl (defvar *print-radix* nil)
 
 ;; To support *print-circle* some objects must be tracked for sharing:
 ;; conses, arrays and apparently-uninterned symbols.  These objects
