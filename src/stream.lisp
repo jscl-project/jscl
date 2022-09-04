@@ -78,7 +78,7 @@
   (funcall (stream-read-char-fn stream) eof-error-p))
 
 
-;;; Ouptut streams
+;;; Output streams
 
 (defun write-char (char &optional (stream *standard-output*))
   (setf (stream-at-line-start stream) nil)
