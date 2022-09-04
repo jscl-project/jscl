@@ -87,8 +87,20 @@
   (funcall (stream-write-fn stream) (string char))
   char)
 
-(defun write-string (string &optional (stream *standard-output*))
-  (funcall (stream-write-fn stream) string))
+(defun !write-string (string &optional (stream *standard-output*))
+  (if (eql (char string (1- (length string))) #\Newline)
+      (setf (stream-at-line-start stream) t)
+      (setf (stream-at-line-start stream) nil))
+  (funcall (stream-write-fn stream) string)
+  string)
+
+(defun write-string  (string &optional (stream *standard-output*) &rest keys)
+  (cond ((null keys)
+         (!write-string string stream))
+        (t
+         (let ((start (getf keys :start 0))
+               (end (getf keys :end (length string))))
+           (!write-string (subseq string start end) stream)))))
 
 (defun make-string-output-stream ()
   (let ((buffer (make-array 0 :element-type 'character :fill-pointer 0)))
