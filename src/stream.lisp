@@ -81,7 +81,11 @@
 ;;; Ouptut streams
 
 (defun write-char (char &optional (stream *standard-output*))
-  (funcall (stream-write-fn stream) (string char)))
+  (setf (stream-at-line-start stream) nil)
+  (if (eql char #\Newline)
+      (setf (stream-at-line-start stream) t))
+  (funcall (stream-write-fn stream) (string char))
+  char)
 
 (defun write-string (string &optional (stream *standard-output*))
   (funcall (stream-write-fn stream) string))
