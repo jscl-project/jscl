@@ -30,8 +30,23 @@
   peek-char-fn
   kind
   data
-  (direction :out))
+  (direction :out)
+  at-line-start)
 
+;;; @vkm path stream.lisp 04-09-2022
+(defun start-line-p (&optional (stream *standard-output*))
+  (stream-at-line-start stream))
+
+(defun stream-p (obj)
+  (if (and (structure-p obj)
+           (eql (car obj) 'stream))
+      t
+      nil))
+
+(defun output-stream-p (obj)
+  (and (stream-p obj)
+       (eql (stream-direction obj) :out)))
+;;; end @vkm path
 
 ;;; Input streams
 
