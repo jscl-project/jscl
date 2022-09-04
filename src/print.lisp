@@ -390,6 +390,16 @@
   (with-output-to-string (output)
     (write form :stream output)))
 
+;;; @vkm-path-printer 04-09-2022
+#+jscl
+(defun fresh-line (&optional (stream *standard-output*))
+  (let ((s (output-stream-designator stream)))
+    (cond ((start-line-p s)
+           nil)
+          (t (write-char #\Newline s)
+             t))))
+
+
 #+jscl
 (progn
   (defun prin1 (form &optional stream)
@@ -412,6 +422,7 @@
     (write-char #\newline)
     (values))
   
+  #+nil
   (defun write-line (x)
     (write-string x)
     (terpri)
