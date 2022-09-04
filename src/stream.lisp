@@ -29,7 +29,8 @@
   read-char-fn
   peek-char-fn
   kind
-  data)
+  data
+  (direction :out))
 
 
 ;;; Input streams
