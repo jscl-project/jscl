@@ -41,7 +41,7 @@
                ((< index (length string))
                 (char string index))
                (eof-error-p
-                (error "End of file"))
+                (error "make-string-input-stream end of file."))
                (t
                 nil))))
 
