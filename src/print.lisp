@@ -167,9 +167,31 @@
     (values known-objects object-ids)))
 
 ;;; Write an integer to stream.
-;;; TODO: Support for different basis.
-(defun write-integer (value stream)
-  (write-string (integer-to-string value) stream))
+
+;;; @vkm-path-printer 04-09-2022
+(defun write-integer (argument stream)
+  (let* ((print-base *print-base*)
+         (print-radix *print-radix*)
+         (result (if (eql print-base 10)
+                     (integer-to-string  argument)
+                     (funcall ((oget argument "toString" "bind") argument print-base)))))
+    (when print-radix
+      ;; print base prefix
+      (case print-base
+        (2 (write-string "#B" stream))
+        (8 (write-string "#O" stream))
+        (16 (write-string "#X" stream))
+        (10)
+        (otherwise
+         (write-char #\# stream)
+         (write-string print-base stream)
+         (write-char #\r stream))))
+    ;; print result
+    (write-string (string-upcase result) stream)
+    ;; print dot if need
+    (when (and print-radix (eql print-base 10))
+      (write-char #\. stream))
+    (values)))
 
 ;;; This version of format supports only ~A for strings and ~D for
 ;;; integers. It is used to avoid circularities. Indeed, it just
