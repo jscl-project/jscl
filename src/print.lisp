@@ -172,9 +172,11 @@
 (defun write-integer (argument stream)
   (let* ((print-base *print-base*)
          (print-radix *print-radix*)
-         (result (if (eql print-base 10)
-                     (integer-to-string  argument)
-                     (funcall ((oget argument "toString" "bind") argument print-base)))))
+         (result))
+    (setq result
+          (cond ((eql print-base 10)(jscl::integer-to-string  argument))
+                (t (check-type print-base (integer 2 36))
+                   (funcall ((jscl::oget argument "toString" "bind") argument print-base)))))
     (when print-radix
       ;; print base prefix
       (case print-base
@@ -418,8 +420,8 @@
     (with-output-to-string (output)
       (princ form output)))
 
-  (defun terpri ()
-    (write-char #\newline)
+  (defun terpri (&optional (stream *standard-output*))
+    (write-char #\newline stream)
     (values))
   
   #+nil
