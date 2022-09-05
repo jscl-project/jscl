@@ -468,8 +468,7 @@
       (prin1 form output)))
 
   (defun princ (form &optional stream)
-    (let ((*print-escape* nil))
-      (write form :stream stream :escape nil)))
+      (write form :stream stream :escape nil))
 
   (defun princ-to-string (form)
     (with-output-to-string (output)
@@ -478,13 +477,7 @@
   (defun terpri (&optional (stream *standard-output*))
     (write-char #\newline stream)
     (values))
-  
-  #+nil
-  (defun write-line (x)
-    (write-string x)
-    (terpri)
-    x)
-  
+ 
   ;;(defun print (x)
   ;;  (prog1 (prin1 x)
   ;;    (terpri)))
