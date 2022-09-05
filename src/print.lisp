@@ -217,9 +217,6 @@
          (write-char #\r stream))))
     ;; print result
     (write-string (string result) stream)
-    ;; print dot if need
-    ;;(when (and print-radix (eql print-base 10))
-    ;;  (write-char #\. stream))
     argument))
 
 ;;; @vkm-path-printer 04-09-2022
@@ -230,32 +227,30 @@
 
 #+jscl (defvar *print-gensym* t)
 
-(defun write-symbol (form &optional (stream *standard-output*))
-  (let ((name (symbol-name form))
-        (package (symbol-package form)))
-    ;; Check if the symbol is accesible from the current package. It
-    ;; is true even if the symbol's home package is not the current
-    ;; package, because it could be inherited.
-    (cond ((eq form (find-symbol (symbol-name form)))
-           (write-string (jscl::escape-token (symbol-name form)) stream))
-          ;; Symbol is not accesible from *PACKAGE*, so let us prefix
-          ;; the symbol with the optional package or uninterned mark.
-          (t
-           (cond
-            ((null package) (when *print-gensym*
-                              (write-char #\# stream)
-                              (write-char #\: stream)))
-            ((eq package (find-package "KEYWORD")) (write-char #\: stream))
-            (t (write-string (jscl::escape-token (package-name package)) stream)))
-           ;;(write-char #\: stream)
-           (when package
-             (multiple-value-bind (symbol type)
-                 (find-symbol name package)
-               ;;(declare (ignorable symbol))
-               (when (eq type :internal)
-                 (write-char #\: stream))))
-           (write-string (jscl::escape-token name) stream)))))
-
+#+nil
+(defun write-symbol (form &optiona (stream *standard-output*))
+     (let ((name (symbol-name form))
+           (package (symbol-package form)))
+       ;; Check if the symbol is accesible from the current package. It
+       ;; is true even if the symbol's home package is not the current
+       ;; package, because it could be inherited.
+       (if (eq form (find-symbol (symbol-name form)))
+           (write-string (escape-token (symbol-name form)) stream)
+           ;; Symbol is not accesible from *PACKAGE*, so let us prefix
+           ;; the symbol with the optional package or uninterned mark.
+           (progn
+             (cond
+               ((null package) (write-char #\# stream))
+               ((eq package (find-package "KEYWORD")))
+               (t (write-string (escape-token (package-name package)) stream)))
+             (write-char #\: stream)
+             (when package
+               (multiple-value-bind (symbol type)
+                   (find-symbol name package)
+                 ;;(declare (ignorable symbol))
+                 (when (eq type :internal)
+                   (write-char #\: stream))))
+             (write-string (escape-token name) stream)))))
 
 ;;; This version of format supports only ~A for strings and ~D for
 ;;; integers. It is used to avoid circularities. Indeed, it just
@@ -299,8 +294,28 @@
      (write-string "NIL" stream))
     ;; Symbols
     (symbol
-     (write-symbol form stream))
-
+     (let ((name (symbol-name form))
+           (package (symbol-package form)))
+       ;; Check if the symbol is accesible from the current package. It
+       ;; is true even if the symbol's home package is not the current
+       ;; package, because it could be inherited.
+       (if (eq form (find-symbol (symbol-name form)))
+           (write-string (escape-token (symbol-name form)) stream)
+           ;; Symbol is not accesible from *PACKAGE*, so let us prefix
+           ;; the symbol with the optional package or uninterned mark.
+           (progn
+             (cond
+               ((null package) (write-char #\# stream))
+               ((eq package (find-package "KEYWORD")))
+               (t (write-string (escape-token (package-name package)) stream)))
+             (write-char #\: stream)
+             (when package
+               (multiple-value-bind (symbol type)
+                   (find-symbol name package)
+                 (declare (ignorable symbol))
+                 (when (eq type :internal)
+                   (write-char #\: stream))))
+             (write-string (escape-token name) stream)))))
     ;; Integers
     (integer
      (write-integer form stream))
@@ -399,20 +414,6 @@
    (concat "#<hash-table :test " (%hash-fn-print-name form)
            " :count ~d>")
    (hash-table-count form)))
-
-#+nil
-(defun write (form &key (stream *standard-output*))
-  (cond ((mop-object-p form)
-         (invoke-object-printer #'mop-object-printer form stream))
-        ((hash-table-p form)
-         (invoke-object-printer #'hash-table-object-printer form stream))
-        ((structure-p form)
-         (invoke-object-printer #'structure-object-printer form stream))
-        (t  (let ((stream (output-stream-designator stream)))
-              (multiple-value-bind (objs ids)
-                  (scan-multiple-referenced-objects form)
-                (write-aux form stream objs ids)
-                form)))))
 
 #+jscl
 (defun write (form &key (stream *standard-output*)
