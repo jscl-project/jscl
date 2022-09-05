@@ -391,14 +391,14 @@
 (defun write (form &key (stream *standard-output*)
                    (escape *print-escape*)
                    (gensym *print-gensym*)
-                   (base *print-base)
+                   (base *print-base*)
                    (radix *print-radix*)
-                   (circle *print-circle))
+                   (circle *print-circle*))
   (let* ((*print-escape* escape)
          (*print-gensym* gensym)
-         (*print-base base)
+         (*print-base* base)
          (*print-radix* radix)
-         (*print-circle circle))
+         (*print-circle* circle))
     (cond ((mop-object-p form)
            (invoke-object-printer #'mop-object-printer form stream))
           ((hash-table-p form)
@@ -425,38 +425,6 @@
            nil)
           (t (write-char #\Newline s)
              t))))
-
-#+nil
-(progn
-  (defun prin1 (form &optional stream)
-    (let ((*print-escape* t))
-      (write form :stream stream)))
-
-  (defun prin1-to-string (form)
-    (with-output-to-string (output)
-      (prin1 form output)))
-
-  (defun princ (form &optional stream)
-    (let ((*print-escape* nil))
-      (write form :stream stream)))
-
-  (defun princ-to-string (form)
-    (with-output-to-string (output)
-      (princ form output)))
-
-  (defun terpri (&optional (stream *standard-output*))
-    (write-char #\newline stream)
-    (values))
-  
-  #+nil
-  (defun write-line (x)
-    (write-string x)
-    (terpri)
-    x)
-  
-  (defun print (x)
-    (prog1 (prin1 x)
-      (terpri))))
 
 #+jscl
 (progn
