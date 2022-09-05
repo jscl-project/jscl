@@ -169,14 +169,41 @@
 ;;; Write an integer to stream.
 
 ;;; @vkm-path-printer 04-09-2022
+#| write-integer test case
+   http://clhs.lisp.se/Body/v_pr_bas.htm
+
+(dolist (pb '(2 3 8 10 16))
+     (write 10 :base pb :radix t)
+     (terpri))
+=>
+#B1010
+#3.r101
+#O12
+10.
+#Xa
+
+(dotimes (i 35)
+    (let ((base (+ i 2)))
+      (write 40 :base base)
+      (if (zerop (mod i 10)) (terpri) (format t " "))))
+
+=>
+101000
+1111 220 130 104 55 50 44 40 37 34
+31 2C 2A 28 26 24 22 20 1J 1I
+1H 1G 1F 1E 1D 1C 1B 1A 19 18
+17 16 15 14
+
+|#
+
 (defun write-integer (argument stream)
   (let* ((print-base *print-base*)
          (print-radix *print-radix*)
          (result))
     (setq result
-          (cond ((eql print-base 10)(jscl::integer-to-string  argument))
+          (cond ((eql print-base 10)(integer-to-string  argument))
                 (t (check-type print-base (integer 2 36))
-                   (funcall ((jscl::oget argument "toString" "bind") argument print-base)))))
+                   (funcall ((oget argument "toString" "bind") argument print-base)))))
     (when print-radix
       ;; print base prefix
       (case print-base
@@ -184,16 +211,16 @@
         (8 (write-string "#O" stream))
         (16 (write-string "#X" stream))
         (10)
-        (otherwise
+        (t ;; #Nr prefix
          (write-char #\# stream)
-         (write-string print-base stream)
+         (write print-base :stream stream :base 10)
          (write-char #\r stream))))
     ;; print result
-    (write-string (string-upcase result) stream)
+    (write-string (string result) stream)
     ;; print dot if need
-    (when (and print-radix (eql print-base 10))
-      (write-char #\. stream))
-    (values)))
+    ;;(when (and print-radix (eql print-base 10))
+    ;;  (write-char #\. stream))
+    argument))
 
 ;;; @vkm-path-printer 04-09-2022
 (defun gensym-p (s)
@@ -220,7 +247,7 @@
                               (write-char #\: stream)))
             ((eq package (find-package "KEYWORD")) (write-char #\: stream))
             (t (write-string (jscl::escape-token (package-name package)) stream)))
-           (write-char #\: stream)
+           ;;(write-char #\: stream)
            (when package
              (multiple-value-bind (symbol type)
                  (find-symbol name package)
