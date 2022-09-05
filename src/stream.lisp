@@ -111,7 +111,7 @@
                      end (getf keys :end sl)
                      write-string-invalid-range-seq (/= start end)
                      write-string-nondecreasing-order-seq (<= 0 start end sl))
-               (assert write-string-range-seq)
+               (assert write-string-invalid-range-seq)
                (assert write-string-nondecreasing-order-seq)
                (!write-string (subseq string start end) stream))))))
 
