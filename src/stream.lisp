@@ -94,13 +94,26 @@
   (funcall (stream-write-fn stream) string)
   string)
 
-(defun write-string  (string &optional (stream *standard-output*) &rest keys)
-  (cond ((null keys)
-         (!write-string string stream))
-        (t
-         (let ((start (getf keys :start 0))
-               (end (getf keys :end (length string))))
-           (!write-string (subseq string start end) stream)))))
+
+(defun write-string  (string &optional (stream *standard-output* stream-p) &rest keys)
+  (let ((sl (length string)))
+    (let* ((no-keys (null keys))
+           (start)
+           (end)
+           (write-string-invalid-range-seq)
+           (write-string-nondecreasing-order-seq))
+      (cond (stream-p
+             (if (streamp stream) t
+               (error "write-string - malformed stream ~a. Use full (string stream ...) form." stream))))
+      (cond ((eq sl 0) "")
+            (no-keys (!write-string string stream))
+            (t (setq start (getf keys :start 0)
+                     end (getf keys :end sl)
+                     write-string-invalid-range-seq (/= start end)
+                     write-string-nondecreasing-order-seq (<= 0 start end sl))
+               (assert write-string-range-seq)
+               (assert write-string-nondecreasing-order-seq)
+               (!write-string (subseq string start end) stream))))))
 
 (defun write-line (string &optional (stream *standard-output*) &rest keys)
   (prog1
