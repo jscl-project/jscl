@@ -21,7 +21,34 @@
 (test (let ((x (read-from-string (prin1-to-string '1E+))))
         (and (symbolp x) (equal (symbol-name x) "1E+"))))
 
-
+(test
+ (let* ((so '(
+              (foo     .  "FOO")
+              (fo\o    .  "FOo")
+              (1..2    .  "1..2")
+              (\1      .  "1")
+              (\-10    .  "-10")
+              (\.\.\.  .  "...")
+              (\1E+2   .  "1E+2")
+              (1E+     .  "1E+")
+              (:kek    .  "KEK")
+              (:| |    .  " ")
+              (|case|  .  "_case")))
+        (x)
+        (tmp)
+        (result)
+        (expected (dotimes (i (length so) tmp) (push t tmp))))
+   (labels ((check-it (rec pair)
+                      (cond ((and (symbolp rec) (equal (symbol-name rec) (cdr pair))) t)
+                            (t (print (list :bad-math rec pair)) nil)))
+            (math-it (pair)
+                     (setq x (read-from-string (prin1-to-string (car pair))))
+                     (push (check-it x pair) result)))
+     (dolist (it so)
+       (math-it it))
+     ;;(print result)
+     ;;(print expected)
+     (equal (reverse result) expected))))
 
 ;;; Printing strings
 (test (string= "\"foobar\"" (write-to-string "foobar")))
