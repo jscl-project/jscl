@@ -373,7 +373,7 @@
            " :count ~d>")
    (hash-table-count form)))
 
-#+jscl
+#+nil
 (defun write (form &key (stream *standard-output*))
   (cond ((mop-object-p form)
          (invoke-object-printer #'mop-object-printer form stream))
@@ -386,6 +386,31 @@
                   (scan-multiple-referenced-objects form)
                 (write-aux form stream objs ids)
                 form)))))
+
+#+jscl
+(defun write (form &key (stream *standard-output*)
+                   (escape *print-escape*)
+                   (gensym *print-gensym*)
+                   (base *print-base)
+                   (radix *print-radix*)
+                   (circle *print-circle))
+  (let* ((*print-escape* escape)
+         (*print-gensym* gensym)
+         (*print-base base)
+         (*print-radix* radix)
+         (*print-circle circle))
+    (cond ((mop-object-p form)
+           (invoke-object-printer #'mop-object-printer form stream))
+          ((hash-table-p form)
+           (invoke-object-printer #'hash-table-object-printer form stream))
+          ((structure-p form)
+           (invoke-object-printer #'structure-object-printer form stream))
+          (t  (let ((stream (output-stream-designator stream)))
+                (multiple-value-bind (objs ids)
+                    (scan-multiple-referenced-objects form)
+                  (write-aux form stream objs ids)
+                  form))))))
+
 
 #+jscl
 (defun write-to-string (form)
@@ -401,8 +426,7 @@
           (t (write-char #\Newline s)
              t))))
 
-
-#+jscl
+#+nil
 (progn
   (defun prin1 (form &optional stream)
     (let ((*print-escape* t))
@@ -433,3 +457,41 @@
   (defun print (x)
     (prog1 (prin1 x)
       (terpri))))
+
+#+jscl
+(progn
+  (defun prin1 (form &optional stream)
+    (write form :stream stream :escape t))
+
+  (defun prin1-to-string (form)
+    (with-output-to-string (output)
+      (prin1 form output)))
+
+  (defun princ (form &optional stream)
+    (let ((*print-escape* nil))
+      (write form :stream stream :escape nil)))
+
+  (defun princ-to-string (form)
+    (with-output-to-string (output)
+      (princ form output)))
+
+  (defun terpri (&optional (stream *standard-output*))
+    (write-char #\newline stream)
+    (values))
+  
+  #+nil
+  (defun write-line (x)
+    (write-string x)
+    (terpri)
+    x)
+  
+  ;;(defun print (x)
+  ;;  (prog1 (prin1 x)
+  ;;    (terpri)))
+  (defun print (x &optional stream)
+    (let ((s (output-stream-designator stream)))
+      (terpri s)
+      (write x :stream s :escape t)
+      (write-char #\space s)))
+  )
+;;; EOF
