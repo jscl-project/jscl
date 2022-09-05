@@ -220,11 +220,11 @@
                               (write-char #\: stream)))
             ((eq package (find-package "KEYWORD")) (write-char #\: stream))
             (t (write-string (jscl::escape-token (package-name package)) stream)))
-           ;;(write-char #\: stream)
+           (write-char #\: stream)
            (when package
              (multiple-value-bind (symbol type)
                  (find-symbol name package)
-               (declare (ignorable symbol))
+               ;;(declare (ignorable symbol))
                (when (eq type :internal)
                  (write-char #\: stream))))
            (write-string (jscl::escape-token name) stream)))))
