@@ -112,7 +112,7 @@
                                (setq values (multiple-value-list (apply func args))))
                              (trace-report-return name values)
                              (values-list values))))
-              (push (cons name func) jscl::*traced-functions*))))))
+              (push (cons name func) *traced-functions*))))))
 
 (defun untrace-functions (names)
   (when (null names)
