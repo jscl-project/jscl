@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp;  coding:utf-8 -*-
 
-
 ;;;
 ;;; LOAD - load & compile Common Lisp file.
 ;;;        Simple implementation of the common Lisp function 'load'
@@ -41,14 +40,20 @@
 
 (defun _ldr_eval_ (sexpr verbose)
   (when verbose
-    (format t "~a ~a~%" (car sexpr) (cadr sexpr)))
+    (format *standard-output* "~a ~a~%" (car sexpr) (cadr sexpr)))
   (handler-case
       (progn
         (dolist (x (multiple-value-list (eval sexpr)))
-          (format t  "  ~a~%"  x))
+          (format *standard-output*  "  ~a~%"  x))
         t)
     (error (msg)
-      (format t "Error: ~a~%" (!condition-args msg))
+      (typecase condition
+        (simple-error
+         (apply #'format *standard-output*
+                (simple-condition-format-control condition)
+                (simple-condition-format-arguments condition)))
+        (t  (let* ((*print-escape* nil))
+              (print-object condition *standard-output*))))
       nil))
   nil)
 
@@ -112,12 +117,14 @@
 ;;;
 ;;; hook  - #() store place for js-code
 ;;;
-;;;          (setq bin #())
+;;;          IMPORTANT!! don't use literal #() (see Issue #345)
+;;;          (setq bin (make-array 0 :fillpointer 0)) 
 ;;;          (load "file1.lisp" :hook bin)
 ;;;          (load "file2.lisp" :hook bin)
 ;;;          (load "file3.lisp" :hook bin :output "lib.js")
 ;;;              => will be bundle js-code file1, file2, file3 from bin to "lib.js"
 ;;;
+;;;         
 ;;;         you will be use (require "./lib") or use html tag:
 ;;;         <script src="lib.js" type="text/javascript" charset="utf-8"></script>
 ;;;         without compilation.
@@ -128,7 +135,6 @@
 
 (defun node-environment-p ()
   (if (find :node *features*) t))
-
 
 (defun load (name &key verbose (sync (node-environment-p)) output place hook)
   (terpri)
@@ -142,12 +148,12 @@
          (loader-sync-mode name verbose output place hook)
          (loader-async-mode name verbose output place hook)))
     ;; browser platform
-    (t
-     (when sync
-       (warn "sync mode only for node/electron platform~%will be used async mode"))
-     (when (or output hook)
-       (warn "output/hook options only for node/electron platform"))
-     (loader-browser-mode name verbose)))
+    (t (when sync
+         (warn "sync mode only for node/electron platform~%will be used async mode"))
+       (when (or output hook)
+         (warn "output/hook options only for node/electron platform"))
+       (warn "In browser mode, the LOAD function is executed ONLY if `web-security` is DISABLED (CORS restriction)")
+       (loader-browser-mode name verbose)))
   (values))
 
 
@@ -157,17 +163,17 @@
    (lambda (input)
      (_load_form_eval_ (_ldr_ctrl-r_replace_ input) verbose))
    (lambda (url status)
-     (format t "~%Load: Can't load ~a~%     Status ~%" url status))))
+     (format *standard-output* "~%Load: Can't load ~a~%       Status: ~a~%" url status))))
 
 ;;; alowe make bundle from source received from local fs (by FILE:)
-;;; or from remote resource (by HTTP:)
+;;; or from remote resourse (by HTTP:)
 (defun loader-async-mode (name verbose bundle-name place hook)
   (_xhr_receiver_
    name
    (lambda (input)
      (_load_eval_bundle_ (_ldr_ctrl-r_replace_ input) verbose bundle-name place hook))
    (lambda (url status)
-     (format t "~%Load: Can't load ~a~%     Status ~%" url status))))
+     (format *standard-output* "~%Load: Can't load ~a~%       Status: ~a~%" url status))))
 
 ;;; sync mode
 (defun loader-sync-mode (name verbose bundle-name place hook)
@@ -188,7 +194,8 @@
     (when bundle-name
       (if hook
           (setq code-stor hook)
-          (setq code-stor #()))
+          ;; see Issue #345, #350, #397
+          (setq code-stor (make-array 0 :fill-pointer 0)))
       (setq fbundle t))
     (setq stream (make-string-input-stream input))
     (tagbody sync-loader-rdr
@@ -197,18 +204,19 @@
            (progn
              (setq expr (ls-read stream nil eof))
              (when (eq expr eof) (go _rdr_done_))
-             (when verbose (format t "~a ~a~%" (car expr) (cadr expr)))
+             (when verbose (format *standard-output* "~a ~a~%" (car expr) (cadr expr)))
              (with-compilation-environment
                (setq code (compile-toplevel expr t t))
                (setq rc (js-eval code))
                (when verbose (format t "  ~a~%" rc))
-               ;; so, expr already verified
+               ;; so, expr already verifyed
                ;; store expression after compilation/evaluated
                (cond (fbundle ((oget code-stor "push") code))
                      (hook ((oget code-stor "push") code))
                      (t t)) ))
          (error (msg)
-           (format t "Error: ~a~%" (!condition-args msg))
+           (format *standard-output* "   Error: ")
+           (err_p3010_ msg)
            ;; break read-eval loop
            ;; no bundle
            (setq fbundle nil)
@@ -221,6 +229,24 @@
       (_loader_make_bundle code-stor bundle-name place)
       (setq code-stor nil))
     (values)))
+
+;;; error message handle path
+(defun err_p3010_ (condition)
+  (typecase condition
+    (simple-error
+     (apply #'format *standard-output*
+            (simple-condition-format-control condition)
+            (simple-condition-format-arguments condition)))
+    (type-error
+     ;; note:
+     ;; there can be custom event handling here.
+     ;; while it remains as it was done.
+     ;; sometime later
+     (let* ((*print-escape* nil))
+       (print-object condition *standard-output*)))
+    (t  (let* ((*print-escape* nil))
+          (print-object condition *standard-output*))))
+  (write-char  #\newline *standard-output*))
 
 
 ;;; Check what output directory exists
@@ -269,7 +295,7 @@
        ((oget stream "write") (_loader_stm_wraper_ stm))))
     (_loader_bundle_stm_close_ stream place)
     ((oget stream "end"))
-    (format t "The bundle up ~d expressions into ~s~%" nums fname) ))
+    (format *standard-output* "The bundle up ~d expressions into ~s~%" nums fname) ))
 
 
 
@@ -289,7 +315,7 @@
           (oget link "type") "text/javascript"
           (oget link "src") from
           (oget link "onerror") (lambda (ignore)
-                                  (format t "~%Error loading ~s file.~%" from)
+                                  (format *standard-output* "~%Error loading ~s file.~%" from)
                                   (funcall ((oget body "removeChild" "bind") body link ))
                                   (values)))
     (when onload
@@ -313,7 +339,7 @@
           (oget link "type") "text/css"
           (oget link "href") from
           (oget link "onerror") (lambda (ignore)
-                                  (format t "~%Error loading ~s file.~%" from)
+                                  (format *standard-output* "~%Error loading ~s file.~%" from)
                                   (funcall ((oget body "removeChild" "bind") body link ))
                                   (values)))
     (when onload
