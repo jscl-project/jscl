@@ -136,6 +136,22 @@
 (defun node-environment-p ()
   (if (find :node *features*) t))
 
+;;;
+;;; how to bypass cors restrictions
+;;; 1. on the command line issue the command:
+;;;               chrome.exe --user-data-dir="????????" --disable-web-security
+;;; will launch chrome in disbale-websecurity mode. (By path "????????" will be you Chrome account) 
+;;; 2. enter devtool/source
+;;; 3. click add workspace
+;;; 4. add your folder with  jscl.js, jscl-web.js, jscl.html
+;;; 5. allow devtool to work with the filesystem
+;;;   all files from your directory will be loaded
+;;; 6. select the file JSCL.HTML and open it in a new tab
+;;;    now, you can load:
+;;;          source lisp files with the LOAD function
+;;;          js files - with function JS-LOAD
+;;;          css files - with function CSS-LOAD
+
 (defun load (name &key verbose (sync (node-environment-p)) output place hook)
   (terpri)
   (cond
