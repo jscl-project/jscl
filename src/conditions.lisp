@@ -231,17 +231,7 @@
 				                 :format-control "Assert failed: ~s."
 				                 :format-arguments (list form)))))
 
-#+nil
-(defmacro %%assert (test &optional ignore datum &rest args)
-  (let ((value (gensym "ASSERT-VALUE"))
-        (name (gensym "ASSERT-BLOCK")))
-    `(block
-         ,name
-       (let ((,value ,test))
-         (when (not ,value)
-           (%%assert-error ',test ,datum ,@args))))))
-
-
+;;; @vlad-km macro %%assert moved to boot.lisp
 
 #+jscl
 (progn
@@ -257,9 +247,6 @@
 
   (defmacro ignore-errors (&rest forms)
     `(%%ignore-errors ,@forms))
-
-  ;;(defmacro assert (test &optional ignore datum &rest args)
-  ;;  `(%%assert ,test ,ignore ,datum ,@args))
 
   (fset 'make-condition #'%%make-condition)
   (fset 'signal #'%%signal)
