@@ -108,7 +108,7 @@
               (fset name (lambda (&rest args)
                            (let (values)
                              (trace-report-call name args)
-                             (let ((:*trace-level* (1+ *trace-level*)))
+                             (let ((*trace-level* (1+ *trace-level*)))
                                (setq values (multiple-value-list (apply func args))))
                              (trace-report-return name values)
                              (values-list values))))
