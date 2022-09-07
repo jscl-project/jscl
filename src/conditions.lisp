@@ -127,9 +127,9 @@
     (check-type condition warning)
     (%%signal condition)
     (format stream "WARNING: ")
-    (format stream (simple-condition-format-control condition)
-            (simple-condition-format-arguments condition))
-    (write-char #\newline)
+    (apply 'format stream (simple-condition-format-control condition)
+           (simple-condition-format-arguments condition))
+    (write-char #\newline stream)
     nil))
 
 (defun %%error (datum &rest args)
