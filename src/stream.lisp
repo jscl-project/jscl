@@ -148,6 +148,7 @@
      ,@body
      (get-output-stream-string ,var)))
 
+#|
 ;;; replace sequences - http://clhs.lisp.se/Body/f_replac.htm
 ;;;   string <- string
 ;;;   vector <- vector
@@ -209,5 +210,6 @@
     (assert region-nondecreasing-order-seq-1)
     (assert region-nondecreasing-order-seq-2))
   (%replace-seq sequence-1 sequence-2 start1 end1 start2 end2))
+|#
 
 ;;; EOF
