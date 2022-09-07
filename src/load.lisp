@@ -232,7 +232,7 @@
                      (t t)) ))
          (error (msg)
            (format *standard-output* "   Error: ")
-           (err_p3010_ msg)
+           (load_cond_err_handl_ msg)
            ;; break read-eval loop
            ;; no bundle
            (setq fbundle nil)
@@ -247,7 +247,7 @@
     (values)))
 
 ;;; error message handle path
-(defun err_p3010_ (condition)
+(defun _load_cond_err_handl_(condition)
   (typecase condition
     (simple-error
      (apply #'format *standard-output*
