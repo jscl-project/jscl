@@ -1,6 +1,6 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/loop/base-tests.lisp!")
+(/debug "perform test/loop/validate-tests.lisp!")
 
 ;;;>
 ;;;> Portions of LOOP are Copyright (c) 1986 by the Massachusetts Institute of Technology.

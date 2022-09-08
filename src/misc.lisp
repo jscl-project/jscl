@@ -68,6 +68,25 @@
 (defvar *traced-functions* nil)
 (defvar *trace-level* 0)
 
+;;; @vlad-km 04-09-2022
+;;; Prevent RangeError: Maximum call stack size exceeded
+;;; on  trace call
+(defvar *prevent-trace-stop-list*
+  '(trace
+    princ prin1 prin1-to-string princ-to-string 
+    print
+    format !format
+    write write-char write-string write-integer write-symbol write-line write-to-string
+    terpri fresh-line))
+
+(defun %prevent-infinite-trace (name)
+  (typecase name
+    (symbol
+     (if (jscl::memq name *prevent-trace-stop-list*)
+         (error "Trace - `~S` this function is not traceable." name)))
+    (otherwise (error "Trace - the traceable function name `~S` must be a symbol." name))))
+
+
 (defun trace-report-call (name args)
   (dotimes (i *trace-level*) (write-string " "))
   (format t "~a: ~S~%" *trace-level* (cons name args)))
@@ -82,13 +101,14 @@
   (if (null names)
       (mapcar #'car *traced-functions*)
       (dolist (name names names)
+        (%prevent-infinite-trace name)
         (if (find name *traced-functions* :key #'car)
             (format t "`~S' is already traced.~%" name)
             (let ((func (fdefinition name)))
               (fset name (lambda (&rest args)
                            (let (values)
                              (trace-report-call name args)
-                             (let ((*trace-level* (+ *trace-level* 1)))
+                             (let ((*trace-level* (1+ *trace-level*)))
                                (setq values (multiple-value-list (apply func args))))
                              (trace-report-return name values)
                              (values-list values))))

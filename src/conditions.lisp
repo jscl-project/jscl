@@ -127,9 +127,9 @@
     (check-type condition warning)
     (%%signal condition)
     (format stream "WARNING: ")
-    (format stream (simple-condition-format-control condition)
-            (simple-condition-format-arguments condition))
-    (write-char #\newline)
+    (apply 'format stream (simple-condition-format-control condition)
+           (simple-condition-format-arguments condition))
+    (write-char #\newline stream)
     nil))
 
 (defun %%error (datum &rest args)
@@ -231,16 +231,7 @@
 				                 :format-control "Assert failed: ~s."
 				                 :format-arguments (list form)))))
 
-(defmacro %%assert (test &optional ignore datum &rest args)
-  (let ((value (gensym "ASSERT-VALUE"))
-        (name (gensym "ASSERT-BLOCK")))
-    `(block
-         ,name
-       (let ((,value ,test))
-         (when (not ,value)
-           (%%assert-error ',test ,datum ,@args))))))
-
-
+;;; @vlad-km macro %%assert moved to boot.lisp
 
 #+jscl
 (progn
@@ -256,9 +247,6 @@
 
   (defmacro ignore-errors (&rest forms)
     `(%%ignore-errors ,@forms))
-
-  (defmacro assert (test &optional ignore datum &rest args)
-    `(%%assert ,test ,ignore ,datum ,@args))
 
   (fset 'make-condition #'%%make-condition)
   (fset 'signal #'%%signal)

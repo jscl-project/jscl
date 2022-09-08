@@ -113,6 +113,10 @@
 
 #+jscl (defvar *print-escape* t)
 #+jscl (defvar *print-circle* nil)
+;;; @vkm-path-printer 04-09-2022
+;;; add variables 
+#+jscl (defvar *print-base* 10)
+#+jscl (defvar *print-radix* nil)
 
 ;; To support *print-circle* some objects must be tracked for sharing:
 ;; conses, arrays and apparently-uninterned symbols.  These objects
@@ -163,9 +167,90 @@
     (values known-objects object-ids)))
 
 ;;; Write an integer to stream.
-;;; TODO: Support for different basis.
-(defun write-integer (value stream)
-  (write-string (integer-to-string value) stream))
+
+;;; @vkm-path-printer 04-09-2022
+#| write-integer test case
+   http://clhs.lisp.se/Body/v_pr_bas.htm
+
+(dolist (pb '(2 3 8 10 16))
+     (write 10 :base pb :radix t)
+     (terpri))
+=>
+#B1010
+#3.r101
+#O12
+10.
+#Xa
+
+(dotimes (i 35)
+    (let ((base (+ i 2)))
+      (write 40 :base base)
+      (if (zerop (mod i 10)) (terpri) (format t " "))))
+
+=>
+101000
+1111 220 130 104 55 50 44 40 37 34
+31 2C 2A 28 26 24 22 20 1J 1I
+1H 1G 1F 1E 1D 1C 1B 1A 19 18
+17 16 15 14
+
+|#
+
+(defun write-integer (argument stream)
+  (let* ((print-base *print-base*)
+         (print-radix *print-radix*)
+         (result))
+    (setq result
+          (cond ((eql print-base 10)(integer-to-string  argument))
+                (t (check-type print-base (integer 2 36))
+                   (funcall ((oget argument "toString" "bind") argument print-base)))))
+    (when print-radix
+      ;; print base prefix
+      (case print-base
+        (2 (write-string "#B" stream))
+        (8 (write-string "#O" stream))
+        (16 (write-string "#X" stream))
+        (10)
+        (t ;; #Nr prefix
+         (write-char #\# stream)
+         (write print-base :stream stream :base 10)
+         (write-char #\r stream))))
+    ;; print result
+    (write-string (string result) stream)
+    argument))
+
+;;; @vkm-path-printer 04-09-2022
+(defun gensym-p (s)
+  (if (symbol-package s)
+      nil
+    (not (eq s (find-symbol (symbol-name s))))))
+
+#+jscl (defvar *print-gensym* t)
+
+#+nil
+(defun write-symbol (form &optiona (stream *standard-output*))
+     (let ((name (symbol-name form))
+           (package (symbol-package form)))
+       ;; Check if the symbol is accesible from the current package. It
+       ;; is true even if the symbol's home package is not the current
+       ;; package, because it could be inherited.
+       (if (eq form (find-symbol (symbol-name form)))
+           (write-string (escape-token (symbol-name form)) stream)
+           ;; Symbol is not accesible from *PACKAGE*, so let us prefix
+           ;; the symbol with the optional package or uninterned mark.
+           (progn
+             (cond
+               ((null package) (write-char #\# stream))
+               ((eq package (find-package "KEYWORD")))
+               (t (write-string (escape-token (package-name package)) stream)))
+             (write-char #\: stream)
+             (when package
+               (multiple-value-bind (symbol type)
+                   (find-symbol name package)
+                 ;;(declare (ignorable symbol))
+                 (when (eq type :internal)
+                   (write-char #\: stream))))
+             (write-string (escape-token name) stream)))))
 
 ;;; This version of format supports only ~A for strings and ~D for
 ;;; integers. It is used to avoid circularities. Indeed, it just
@@ -231,7 +316,6 @@
                  (when (eq type :internal)
                    (write-char #\: stream))))
              (write-string (escape-token name) stream)))))
-
     ;; Integers
     (integer
      (write-integer form stream))
@@ -299,13 +383,13 @@
      (simple-format stream "#<JS-OBJECT ~a>" (#j:String form)))))
 
 
+#+jscl
 (defun output-stream-designator (x)
-  ;; TODO: signal error if X is not a stream designator
-  (cond
-    ((eq x nil) *standard-output*)
-    ((eq x t)   *standard-output*       ; *terminal-io*
-     )
-    (t x)))
+  (cond ((eq x nil) *standard-output*)
+        ((eq x t)   *standard-output*)  
+        (t (if (output-stream-p x)
+               x
+               (error "Form ~s is not output stream type." (write-to-string x))))))
 
 #+jscl
 (defun invoke-object-printer (fn form &optional (stream *standard-output*))
@@ -332,51 +416,71 @@
    (hash-table-count form)))
 
 #+jscl
-(defun write (form &key (stream *standard-output*))
-  (cond ((mop-object-p form)
-         (invoke-object-printer #'mop-object-printer form stream))
-        ((hash-table-p form)
-         (invoke-object-printer #'hash-table-object-printer form stream))
-        ((structure-p form)
-         (invoke-object-printer #'structure-object-printer form stream))
-        (t  (let ((stream (output-stream-designator stream)))
-              (multiple-value-bind (objs ids)
-                  (scan-multiple-referenced-objects form)
-                (write-aux form stream objs ids)
-                form)))))
+(defun write (form &key (stream *standard-output*)
+                   (escape *print-escape*)
+                   (gensym *print-gensym*)
+                   (base *print-base*)
+                   (radix *print-radix*)
+                   (circle *print-circle*))
+  (let* ((*print-escape* escape)
+         (*print-gensym* gensym)
+         (*print-base* base)
+         (*print-radix* radix)
+         (*print-circle* circle))
+    (cond ((mop-object-p form)
+           (invoke-object-printer #'mop-object-printer form stream))
+          ((hash-table-p form)
+           (invoke-object-printer #'hash-table-object-printer form stream))
+          ((structure-p form)
+           (invoke-object-printer #'structure-object-printer form stream))
+          (t  (let ((stream (output-stream-designator stream)))
+                (multiple-value-bind (objs ids)
+                    (scan-multiple-referenced-objects form)
+                  (write-aux form stream objs ids)
+                  form))))))
+
 
 #+jscl
 (defun write-to-string (form)
   (with-output-to-string (output)
     (write form :stream output)))
 
+;;; @vkm-path-printer 04-09-2022
+#+jscl
+(defun fresh-line (&optional (stream *standard-output*))
+  (let ((s (output-stream-designator stream)))
+    (cond ((start-line-p s)
+           nil)
+          (t (write-char #\Newline s)
+             t))))
+
 #+jscl
 (progn
   (defun prin1 (form &optional stream)
-    (let ((*print-escape* t))
-      (write form :stream stream)))
+    (write form :stream stream :escape t))
 
   (defun prin1-to-string (form)
     (with-output-to-string (output)
       (prin1 form output)))
 
   (defun princ (form &optional stream)
-    (let ((*print-escape* nil))
-      (write form :stream stream)))
+      (write form :stream stream :escape nil))
 
   (defun princ-to-string (form)
     (with-output-to-string (output)
       (princ form output)))
 
-  (defun terpri ()
-    (write-char #\newline)
+  (defun terpri (&optional (stream *standard-output*))
+    (write-char #\newline stream)
     (values))
-  
-  (defun write-line (x)
-    (write-string x)
-    (terpri)
-    x)
-  
-  (defun print (x)
-    (prog1 (prin1 x)
-      (terpri))))
+ 
+  ;;(defun print (x)
+  ;;  (prog1 (prin1 x)
+  ;;    (terpri)))
+  (defun print (x &optional stream)
+    (let ((s (output-stream-designator stream)))
+      (terpri s)
+      (write x :stream s :escape t)
+      (write-char #\space s)))
+  )
+;;; EOF

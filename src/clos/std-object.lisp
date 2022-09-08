@@ -376,6 +376,7 @@
               ;; accessor writer fn
               ;; make (setf name) symbolic name
               (push-on-end `(setf ,(cadr olist)) writers))
+             (:documentation)
              (otherwise
               (push-on-end `',(car olist) other-options)
               (push-on-end `',(cadr olist) other-options))))
@@ -398,6 +399,7 @@
 (eval-always
  (defun canonicalize-defclass-option (option)
    (case (car option)
+     (:documentation)
      (:metaclass (list ':metaclass `(!find-class ',(cadr option))))
      (:default-initargs
       (list ':direct-default-initargs
@@ -492,6 +494,7 @@
 
 ;;; N.B. Quietly retain all unknown slot options (rather than signaling an
 ;;; error), so that it's easy to add new ones.
+;;; BUG: this lambda form is not working - &allow-other-keys parsed incorrectly 
 (defun make-direct-slot-definition
     (&rest properties
      &key name (initargs ()) (initform nil) (initfunction nil) (readers ()) (writers ()) (allocation :instance)
@@ -506,6 +509,7 @@
     (setf (getf* slot ':allocation) allocation)
     slot))
 
+;;; BUG: this lambda form is not working - &allow-other-keys parsed incorrectly
 (defun make-effective-slot-definition
     (&rest properties
      &key name (initargs ()) (initform nil) (initfunction nil) (allocation :instance)

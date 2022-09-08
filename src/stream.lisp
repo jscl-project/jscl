@@ -29,8 +29,24 @@
   read-char-fn
   peek-char-fn
   kind
-  data)
+  data
+  (direction :out)
+  at-line-start)
 
+;;; @vkm path stream.lisp 04-09-2022
+(defun start-line-p (&optional (stream *standard-output*))
+  (stream-at-line-start stream))
+
+(defun stream-p (obj)
+  (if (and (structure-p obj)
+           (eql (car obj) 'stream))
+      t
+      nil))
+
+(defun output-stream-p (obj)
+  (and (stream-p obj)
+       (eql (stream-direction obj) :out)))
+;;; end @vkm path
 
 ;;; Input streams
 
@@ -41,7 +57,7 @@
                ((< index (length string))
                 (char string index))
                (eof-error-p
-                (error "End of file"))
+                (error "make-string-input-stream end of file."))
                (t
                 nil))))
 
@@ -62,13 +78,51 @@
   (funcall (stream-read-char-fn stream) eof-error-p))
 
 
-;;; Ouptut streams
+;;; Output streams
 
 (defun write-char (char &optional (stream *standard-output*))
-  (funcall (stream-write-fn stream) (string char)))
+  (setf (stream-at-line-start stream) nil)
+  (if (eql char #\Newline)
+      (setf (stream-at-line-start stream) t))
+  (funcall (stream-write-fn stream) (string char))
+  char)
 
-(defun write-string (string &optional (stream *standard-output*))
-  (funcall (stream-write-fn stream) string))
+(defun !write-string (string &optional (stream *standard-output*))
+  (if (eql (char string (1- (length string))) #\Newline)
+      (setf (stream-at-line-start stream) t)
+      (setf (stream-at-line-start stream) nil))
+  (funcall (stream-write-fn stream) string)
+  string)
+
+
+(defun write-string  (string &optional (stream *standard-output* stream-p) &rest keys)
+  (let ((sl (length string)))
+    (let* ((no-keys (null keys))
+           (start)
+           (end)
+           (write-string-invalid-range-seq)
+           (write-string-nondecreasing-order-seq))
+      (cond (stream-p
+             (if (streamp stream) t
+               (error "write-string - malformed stream ~a. Use full (string stream ...) form." stream))))
+      (cond ((eq sl 0) "")
+            (no-keys (!write-string string stream))
+            (t (setq start (getf keys :start 0)
+                     end (getf keys :end sl)
+                     write-string-invalid-range-seq (/= start end)
+                     write-string-nondecreasing-order-seq (<= 0 start end sl))
+               (assert write-string-invalid-range-seq)
+               (assert write-string-nondecreasing-order-seq)
+               (!write-string (subseq string start end) stream))))))
+
+(defun write-line (string &optional (stream *standard-output*) &rest keys)
+  (prog1
+      (if (null keys) 
+          (!write-string string stream)
+          (let ((start (getf keys :start 0))
+                (end (getf keys :end (length string))))
+            (!write-string (subseq string start end) stream)
+            (write-char #\Newline stream)))))
 
 (defun make-string-output-stream ()
   (let ((buffer (make-array 0 :element-type 'character :fill-pointer 0)))
@@ -77,7 +131,8 @@
        (dotimes (i (length string))
          (vector-push-extend (aref string i) buffer)))
      :kind 'string-stream
-     :data buffer)))
+     :data buffer
+     :at-line-start t)))
 
 (defmacro with-input-from-string ((var string) &body body)
   ;; TODO: &key start end index
@@ -92,3 +147,6 @@
   `(let ((,var (make-string-output-stream)))
      ,@body
      (get-output-stream-string ,var)))
+
+
+;;; EOF
