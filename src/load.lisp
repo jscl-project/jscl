@@ -40,20 +40,20 @@
 
 (defun _ldr_eval_ (sexpr verbose)
   (when verbose
-    (format *standard-output* "~a ~a~%" (car sexpr) (cadr sexpr)))
+    (format t "~a ~a~%" (car sexpr) (cadr sexpr)))
   (handler-case
       (progn
         (dolist (x (multiple-value-list (eval sexpr)))
-          (format *standard-output*  "  ~a~%"  x))
+          (format t  "  ~a~%"  x))
         t)
     (error (msg)
       (typecase condition
         (simple-error
-         (apply #'format *standard-output*
+         (apply #'format t
                 (simple-condition-format-control condition)
                 (simple-condition-format-arguments condition)))
         (t  (let* ((*print-escape* nil))
-              (print-object condition *standard-output*))))
+              (print-object condition))))
       nil))
   nil)
 
@@ -179,7 +179,7 @@
    (lambda (input)
      (_load_form_eval_ (_ldr_ctrl-r_replace_ input) verbose))
    (lambda (url status)
-     (format *standard-output* "~%Load: Can't load ~a~%       Status: ~a~%" url status))))
+     (format t "~%Load: Can't load ~a~%       Status: ~a~%" url status))))
 
 ;;; alowe make bundle from source received from local fs (by FILE:)
 ;;; or from remote resourse (by HTTP:)
@@ -189,7 +189,7 @@
    (lambda (input)
      (_load_eval_bundle_ (_ldr_ctrl-r_replace_ input) verbose bundle-name place hook))
    (lambda (url status)
-     (format *standard-output* "~%Load: Can't load ~a~%       Status: ~a~%" url status))))
+     (format t "~%Load: Can't load ~a~%       Status: ~a~%" url status))))
 
 ;;; sync mode
 (defun loader-sync-mode (name verbose bundle-name place hook)
@@ -220,7 +220,7 @@
            (progn
              (setq expr (ls-read stream nil eof))
              (when (eq expr eof) (go _rdr_done_))
-             (when verbose (format *standard-output* "~a ~a~%" (car expr) (cadr expr)))
+             (when verbose (format t "~a ~a~%" (car expr) (cadr expr)))
              (with-compilation-environment
                (setq code (compile-toplevel expr t t))
                (setq rc (js-eval code))
@@ -231,7 +231,7 @@
                      (hook ((oget code-stor "push") code))
                      (t t)) ))
          (error (msg)
-           (format *standard-output* "   Error: ")
+           (format t "   Error: ")
            (load_cond_err_handl_ msg)
            ;; break read-eval loop
            ;; no bundle
@@ -250,7 +250,7 @@
 (defun _load_cond_err_handl_(condition)
   (typecase condition
     (simple-error
-     (apply #'format *standard-output*
+     (apply #'format t
             (simple-condition-format-control condition)
             (simple-condition-format-arguments condition)))
     (type-error
@@ -259,10 +259,10 @@
      ;; while it remains as it was done.
      ;; sometime later
      (let* ((*print-escape* nil))
-       (print-object condition *standard-output*)))
+       (print-object condition)))
     (t  (let* ((*print-escape* nil))
-          (print-object condition *standard-output*))))
-  (write-char  #\newline *standard-output*))
+          (print-object condition))))
+  (write-char  #\newline))
 
 
 ;;; Check what output directory exists
@@ -311,7 +311,7 @@
        ((oget stream "write") (_loader_stm_wraper_ stm))))
     (_loader_bundle_stm_close_ stream place)
     ((oget stream "end"))
-    (format *standard-output* "The bundle up ~d expressions into ~s~%" nums fname) ))
+    (format t "The bundle up ~d expressions into ~s~%" nums fname) ))
 
 
 
@@ -331,7 +331,7 @@
           (oget link "type") "text/javascript"
           (oget link "src") from
           (oget link "onerror") (lambda (ignore)
-                                  (format *standard-output* "~%Error loading ~s file.~%" from)
+                                  (format t "~%Error loading ~s file.~%" from)
                                   (funcall ((oget body "removeChild" "bind") body link ))
                                   (values)))
     (when onload
@@ -355,7 +355,7 @@
           (oget link "type") "text/css"
           (oget link "href") from
           (oget link "onerror") (lambda (ignore)
-                                  (format *standard-output* "~%Error loading ~s file.~%" from)
+                                  (format t "~%Error loading ~s file.~%" from)
                                   (funcall ((oget body "removeChild" "bind") body link ))
                                   (values)))
     (when onload
