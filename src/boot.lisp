@@ -585,15 +585,6 @@
 (defmacro print-unreadable-object ((object stream &key type identity) &body body) 
     `(!print-unreadable-object (,object ,stream :type ,type :identity ,identity) ,@body))
 
-#+nil
-(defmacro %%assert (test &optional ignore datum &rest args)
-  (let ((value (gensym "ASSERT-VALUE"))
-        (name (gensym "ASSERT-BLOCK")))
-    `(block
-         ,name
-       (let ((,value ,test))
-         (when (not ,value)
-           (%%assert-error ',test ,datum ,@args))))))
 
 (defmacro %%assert (test &optional ignore datum &rest args)
   (let ((value (gensym "ASSERT-VALUE")))
