@@ -525,7 +525,7 @@
          (back nil))
     (setq end1 (+ start1 trimed-end)
           end2 (+ start2 trimed-end))
-    ;; set copy bacward flag
+    ;; set copy backward flag
     (when (and (%replace-seq-eql seq-1 seq-2)
                (<= start2 start1)
                (or (and (<= start1 start2) (< start2 end1))
