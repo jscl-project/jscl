@@ -125,6 +125,13 @@
 (defun vector (&rest objects)
   (list-to-vector objects))
 
+(defun vector-pop (vector)
+  (unless (array-has-fill-pointer-p vector)
+    (error "~S does not have a fill pointer"))
+  (let ((element (aref vector (1- (length vector)))))
+    (decf (fill-pointer vector))
+    element))
+
 (defun vector-push-extend (new-element vector)
   (unless (vectorp vector)
     (error "~S is not a vector." vector))
