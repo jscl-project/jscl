@@ -72,8 +72,9 @@
     (error "~S is not an array." array))
   (oget array "dimensions"))
 
-;; TODO: Error checking
 (defun array-dimension (array axis)
+  (unless (arrayp array)
+    (error "~S is not an array." array))
   (nth axis (array-dimensions array)))
 
 (defun aref (array index)
