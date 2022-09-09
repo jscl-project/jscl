@@ -21,10 +21,17 @@
       'character
       t))
 
-(defun make-array (dimensions &key element-type initial-element adjustable fill-pointer)
+(defun make-array (dimensions &key element-type initial-element adjustable (fill-pointer nil fill-p))
   (let* ((dimensions (ensure-list dimensions))
          (size (!reduce #'* dimensions 1))
-         (array (make-storage-vector size)))
+         (array))
+    (if fill-p
+        (cond ((eq fill-pointer t) (setq fill-pointer size))
+              ((null fill-pointer) t)
+              ((integerp fill-pointer)
+               (if (or (< fill-pointer 0) (> fill-pointer size))
+                   (error "make-array - invalid fill-pointer ~a." fill-pointer)))
+              (t (error "make-array - bad fill-pointer ~s type ~a." fill-pointer (type-of fill-pointer)))))
     ;; Upgrade type
     (if (eq element-type 'character)
         (progn
@@ -32,18 +39,17 @@
           (setf element-type 'character
                 initial-element (or initial-element #\space)))
         (setf element-type t))
-
     (when (and (listp dimensions)
                (not (null (cdr dimensions)))
                fill-pointer)
-      (error "FILL-POINTER cannot be specified on multidimensional arrays."))
-
+      (error "make-array - FILL-POINTER cannot be specified on multidimensional arrays."))
     ;; Initialize array
+    (setq array (make-storage-vector size))
     (storage-vector-fill array initial-element)
     ;; Record and return the object
-    (setf (oget array "type") element-type)
-    (setf (oget array "dimensions") dimensions)
-    (setf (oget array "fillpointer") fill-pointer)
+    (setf (oget array "type") element-type
+          (oget array "dimensions") dimensions
+          (oget array "fillpointer") fill-pointer)
     array))
 
 (defun arrayp (x)
