@@ -132,6 +132,13 @@
     (decf (fill-pointer vector))
     element))
 
+(defun vector-push (element vector)
+  (cond ((>= (fill-pointer vector)
+             (array-dimension vector 0))
+         nil)
+        (t  (storage-vector-set! vector (fill-pointer vector) element)
+            (incf (fill-pointer vector)))))
+
 (defun vector-push-extend (new-element vector)
   (unless (vectorp vector)
     (error "~S is not a vector." vector))
