@@ -75,7 +75,11 @@
 (defun array-dimension (array axis)
   (unless (arrayp array)
     (error "~S is not an array." array))
-  (nth axis (array-dimensions array)))
+  (let ((dimensions (oget array "dimensions"))
+        (la (length dimensions)))
+    (if (>= dimension la)
+        (error "axis ~d is too big. Array ~s has ~d dimensions." axis array la))
+    (nth axis dimensions)))
 
 (defun aref (array index)
   (unless (arrayp array)
