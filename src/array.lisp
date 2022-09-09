@@ -30,8 +30,8 @@
               ((null fill-pointer) t)
               ((integerp fill-pointer)
                (if (or (< fill-pointer 0) (> fill-pointer size))
-                   (error "make-array - invalid fill-pointer ~a." fill-pointer)))
-              (t (error "make-array - bad fill-pointer ~s type ~a." fill-pointer (type-of fill-pointer)))))
+                   (error "make-array - invalid FILL-POINTER ~a." fill-pointer)))
+              (t (error "make-array - bad FILL-POINTER ~s type ~a." fill-pointer (type-of fill-pointer)))))
     ;; Upgrade type
     (if (eq element-type 'character)
         (progn
