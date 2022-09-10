@@ -170,12 +170,24 @@
     (decf (fill-pointer vector))
     element))
 
+;;; TODO: clear code
+#+nil
 (defun vector-push (element vector)
-  (cond ((>= (fill-pointer vector)
-             (array-dimension vector 0))
+  (cond ((= (fill-pointer vector)
+            (array-dimension vector 0))
          nil)
         (t  (storage-vector-set! vector (fill-pointer vector) element)
             (incf (fill-pointer vector)))))
+
+(defun vector-push (element vector)
+  (cond ((>= (fill-pointer vector)
+            (array-dimension vector 0))
+         nil)
+        (t  (let ((prev-idx (fill-pointer vector)))
+              ;; store and increment take place
+              (storage-vector-set! vector (fill-pointer vector) element)
+              (incf (fill-pointer vector))
+              prev-idx))))
 
 (defun vector-push-extend (new-element vector)
   (unless (vectorp vector)
