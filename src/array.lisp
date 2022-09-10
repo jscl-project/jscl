@@ -21,6 +21,7 @@
       'character
       t))
 
+;;; TODO: clear this code
 #+nil
 (defun make-array (dimensions &key element-type initial-element adjustable (fill-pointer nil fill-p))
   (let* ((dimensions (ensure-list dimensions))
@@ -53,16 +54,17 @@
           (oget array "fillpointer") fill-pointer)
     array))
 
+;;; TODO: clear this code
 (defun make-array (dimensions &key element-type initial-element adjustable fill-pointer)
   (let* ((dimensions (ensure-list dimensions))
          (size (!reduce #'* dimensions 1))
          (array (make-storage-vector size)))
-        (cond ((eq fill-pointer t) (setq fill-pointer size))
-              ((eq fill-pointer nil) nil)
-              ((integerp fill-pointer)
-               (if (or (< fill-pointer 0) (> fill-pointer size))
-                   (error "make-array - invalid FILL-POINTER ~a." fill-pointer)))
-              (t (error "make-array - bad FILL-POINTER ~s type ~a." fill-pointer (type-of fill-pointer))))
+    (cond ((eq fill-pointer t) (setq fill-pointer size))
+          ((eq fill-pointer nil) nil)
+          ((integerp fill-pointer)
+           (if (or (< fill-pointer 0) (> fill-pointer size))
+               (error "make-array - invalid FILL-POINTER ~a." fill-pointer)))
+          (t (error "make-array - bad FILL-POINTER ~s type ~a." fill-pointer (type-of fill-pointer))))
     ;; Upgrade type
     (if (eq element-type 'character)
         (progn
