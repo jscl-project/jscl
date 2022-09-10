@@ -78,9 +78,9 @@ internals.newInstance = function(values, ct){
 
 // Workaround the problem with send NULL for async XHR
 // BUG: future todo
-var reqXHRsendNull = function(req){
-  req.send(null);
-};
+//var reqXHRsendNull = function(req){
+//  req.send(null);
+//};
 
 // Workaround the problem with operator precedence
 // ash

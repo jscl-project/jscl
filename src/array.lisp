@@ -25,6 +25,12 @@
   (let* ((dimensions (ensure-list dimensions))
          (size (!reduce #'* dimensions 1))
          (array (make-storage-vector size)))
+    (cond ((eq fill-pointer t) (setq fill-pointer size))
+          ((eq fill-pointer nil) nil)
+          ((integerp fill-pointer)
+           (if (or (< fill-pointer 0) (> fill-pointer size))
+               (error "make-array - invalid FILL-POINTER ~a." fill-pointer)))
+          (t (error "make-array - bad FILL-POINTER ~s type ~a." fill-pointer (type-of fill-pointer))))
     ;; Upgrade type
     (if (eq element-type 'character)
         (progn
@@ -32,18 +38,16 @@
           (setf element-type 'character
                 initial-element (or initial-element #\space)))
         (setf element-type t))
-
     (when (and (listp dimensions)
                (not (null (cdr dimensions)))
                fill-pointer)
-      (error "FILL-POINTER cannot be specified on multidimensional arrays."))
-
+      (error "make-array - FILL-POINTER cannot be specified on multidimensional arrays."))
     ;; Initialize array
     (storage-vector-fill array initial-element)
     ;; Record and return the object
-    (setf (oget array "type") element-type)
-    (setf (oget array "dimensions") dimensions)
-    (setf (oget array "fillpointer") fill-pointer)
+    (setf (oget array "type") element-type
+          (oget array "dimensions") dimensions
+          (oget array "fillpointer") fill-pointer)
     array))
 
 (defun arrayp (x)
@@ -66,9 +70,14 @@
     (error "~S is not an array." array))
   (oget array "dimensions"))
 
-;; TODO: Error checking
 (defun array-dimension (array axis)
-  (nth axis (array-dimensions array)))
+  (unless (arrayp array)
+    (error "~S is not an array." array))
+  (let* ((dimensions (oget array "dimensions"))
+        (la (length dimensions)))
+    (if (>= axis la)
+        (error "axis ~d is too big. Array ~s has ~d dimensions." axis array la))
+    (nth axis dimensions)))
 
 (defun aref (array index)
   (unless (arrayp array)
@@ -119,6 +128,23 @@
 (defun vector (&rest objects)
   (list-to-vector objects))
 
+(defun vector-pop (vector)
+  (unless (array-has-fill-pointer-p vector)
+    (error "~S does not have a fill pointer"))
+  (let ((element (aref vector (1- (length vector)))))
+    (decf (fill-pointer vector))
+    element))
+
+(defun vector-push (element vector)
+  (cond ((>= (fill-pointer vector)
+            (array-dimension vector 0))
+         nil)
+        (t  (let ((prev-idx (fill-pointer vector)))
+              ;; store and increment take place
+              (storage-vector-set! vector prev-idx element)
+              (incf (fill-pointer vector))
+              prev-idx))))
+
 (defun vector-push-extend (new-element vector)
   (unless (vectorp vector)
     (error "~S is not a vector." vector))
@@ -126,3 +152,5 @@
   ;; are assigned, so no need to do `adjust-array` here.
   (storage-vector-set! vector (fill-pointer vector) new-element)
   (incf (fill-pointer vector)))
+
+;;; EOF
