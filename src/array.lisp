@@ -185,7 +185,7 @@
          nil)
         (t  (let ((prev-idx (fill-pointer vector)))
               ;; store and increment take place
-              (storage-vector-set! vector (fill-pointer vector) element)
+              (storage-vector-set! vector prev-idx element)
               (incf (fill-pointer vector))
               prev-idx))))
 
