@@ -2,7 +2,7 @@
 
 [![Pipeline CI](https://github.com/jscl-project/jscl/actions/workflows/main.yml/badge.svg)](https://github.com/jscl-project/jscl/actions/workflows/main.yml)
 
-JSCL is a Common Lisp to Javascript compiler, which is bootstrapped
+JSCL is a Common Lisp to JavaScript compiler, which is bootstrapped
 from Common Lisp and executed from the browser.
 
 <p align="center">
