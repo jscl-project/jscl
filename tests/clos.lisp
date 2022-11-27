@@ -328,6 +328,28 @@
              (mapcar (lambda (x) (class-name x)) (class-precedence-list (find-class 'q-clos)))))
 
 
+;;; test case (declaim (clos override))
+(defclass override-class nil (a))
+(test
+ (equal :good
+        (progn
+          (handler-case
+              (progn
+                (defclass override-class nil (e b d))
+                :bad)  
+            (error (m)  
+              (declaim (clos override))  
+              (handler-case  
+                  (progn
+                    (defclass override-class nil (e b d))
+                    (declaim (clos non-override))
+                    :good)  
+                (error (m)
+                  (declaim (clos non-override))
+                  :bad)))))))
+
+(test (null *clos-override-mode*))
+;;; end test case (declaim (clos override))
 
 
 
