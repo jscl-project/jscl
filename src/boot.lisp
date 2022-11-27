@@ -448,6 +448,12 @@
 
 (defparameter *features* '(:jscl :common-lisp))
 
+;;; @vlad-km 20112022
+;;; Enable/disable class redefinition mode. By default - disable
+;;;    (declaim (clos override))     -- enable class redefinition
+;;;    (declaim (clos non-override)) -- disable class redefinition
+(defparameter  *clos-override-mode* nil)
+
 ;;; symbol-function from compiler macro
 (defun functionp (f) (functionp f))
 
