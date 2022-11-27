@@ -496,6 +496,7 @@
   (defparameter *basic-type-predicates*
     '((hash-table . hash-table-p) (package . packagep) (stream . streamp)
       (atom . atom) (structure . structure-p) (js-object . js-object-p)
+      (js-null . js-null-p) (js-undefined . js-undefined-p)
       ;; todo: subtypep - remove mop-object from tables
       (clos-object . mop-object-p) (mop-object . mop-object-p) (character . characterp)
       (symbol . symbolp)  (keyword . keywordp)
