@@ -37,6 +37,50 @@ else if (typeof window !== 'undefined')
   window.jscl = jscl;
 
 
+// @vlad-km
+// EXPERIMENTAL features
+// object _jsBadValues
+// JS bad values such as `null` and `undefined` are now available
+// through this object in the lisp environment
+// o-JS-bv = oget #j:_jsBadValues
+// v-null = ((oget o-js-bv "gvN"))
+// (make-list 5 :initial-element  v-null)
+//
+// Important:
+//    (defvar *v-null* ((oget o-js-bv "gvN")))
+//                BUT!
+//    (defconstant +v-undef+ ((oget o-js-bv "gvN")))
+// 
+//    (defconstant v-undef (#j:_jsBadValues:makUndef))
+//    (defconstant v-null (#j:_jsBadValues:makNull))
+//
+// also you may use native array with null/undefined values
+// see test case for details
+window._jsBadValues = {
+ _n: null,
+ _u: undefined,
+ gvN: function () {return this._n;},
+ gvU: function () {return this._u;},
+ _wtf:[null, undefined],
+ makNull: function() { return this._wtf[0];},
+ makUndef: function () { return this._wtf[1];}
+};
+
+// @vlad-km
+// Next
+// in some cases, you may need to use direct access to these oddities.
+// the current implementation of ffi:get is not always predictable in the results.
+// it's an experiment.
+// for this, two functions have been implemented with access to an associative object
+// to obtain null and undef:
+//    (defvar *v-null* (#j:_makNull))
+//    (defconstant +v-undef+ (#j:_makUndef))
+var _wtf_ = {_n:null, _u:undefined};
+window._makNull = function() { return _wtf_['_n'];};
+window._makUndef = function () { return _wtf_['_u'];};
+
+
+
 var internals = jscl.internals = Object.create(null);
 
 internals.globalEval = function(code){
