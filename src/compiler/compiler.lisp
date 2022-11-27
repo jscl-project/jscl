@@ -1430,8 +1430,9 @@
 (define-builtin objectp (x)
   (convert-to-bool `(=== (typeof ,x) "object")))
 
+;;; @vlad-km
 (define-builtin js-undefined-p (x)
-  (convert-to-bool `(=== ,x undefined)))
+  (convert-to-bool `(== (typeof ,x) "undefined")))
 
 (define-builtin %%nlx-p (x)
   (convert-to-bool `(call-internal |isNLX| ,x)))
