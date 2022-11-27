@@ -66,7 +66,7 @@
   (test (equal 456 (oget obj 123))))
 
 
-;;; EXPEDRIMENTAL FFI
+;;; EXPERIMENTAL FFI
 ;;; _jsBadValues - new features
 (defconstant v-undef (#j:_jsBadValues:makUndef))
 (defconstant v-null (#j:_jsBadValues:makNull))
@@ -104,5 +104,51 @@
                 (lambda (x) (and (js-null-p x) (eq x v-null)))
                 js-ara))))
 
+;;; list-to-vector / vector-to-list / js-to-lisp / lisp-to-js test
+;;; with local lisp `constant` v-undef
+;;; type integrity check
+(test
+ (mv-eql
+  (let* ((varu (make-array 10 :initial-element v-undef))
+         (laru (make-list 10 :initial-element v-undef))
+         (u-type (*gensym*)))
+
+    (deftype js-evil-undef () `(satisfies jscl::js-undefined-p))
+    (deftype js-evil-null () `(satisfies jscl::js-null-p))
+    (deftype js-evils () `(or js-evil-undef js-evil-null))
+  
+    (let ((tl (jscl::vector-to-list varu))
+          (tv (jscl::list-to-vector laru))
+          (result0)
+          (result1))
+      ;; vector list -> list
+      (setq result0
+            (map 'list (lambda (x y)
+                         (and (jscl::js-undefined-p x) (jscl::js-undefined-p y))
+                         (eq x y))
+                 varu
+                 laru))
+      ;; converted vector list -> vector
+      (setq result1
+            (map 'vector (lambda (x y)
+                           (and (jscl::js-undefined-p x) (jscl::js-undefined-p y))
+                           (eq x y))
+                 tl
+                 tv))
+      (values
+       (every #'identity result0)
+       (every #'identity result1)
+       ;; very superficial type integrity check
+       (every (lambda (x) (typep x '(satisfies jscl::js-undefined-p))) varu)
+       (every (lambda (x) (typep x '(satisfies jscl::js-undefined-p))) laru)
+       (every (lambda (x) (typep x 'js-evils)) laru)
+       (every (lambda (x) (typep x 'js-evil-undef)) laru)
+       (every (lambda (x) (typep x 'js-evil-null)) laru)
+       (typecase (nth 3 laru)
+         (js-evil-undef :demigod) (js-evil-null :evil) (t :damn))
+       (typecase (aref varu (random 10))
+         (js-evil-undef :demigod) (js-evil-null :evil) (t :damn)) 
+       )))
+  T T T T T T NIL :DEMIGOD :DEMIGOD))
 
 ;;; EOF
