@@ -278,6 +278,12 @@
       (write-string (string-capitalize (char-name char)) stream)))
 
 (defun write-aux (form stream known-objects object-ids)
+  (when (js-null-p form)
+    (write "<JS-NULL>" :stream stream)
+    (return-from write-aux))
+  (when (js-undefined-p form)
+    (write "<JS-UNDEFINED>" :stream stream)
+    (return-from write-aux))
   (when *print-circle*
     (let* ((ix (or (position form known-objects) 0))
            (id (aref object-ids ix)))
