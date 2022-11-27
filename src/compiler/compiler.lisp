@@ -151,7 +151,10 @@
     (constant
      (dolist (name (cdr decl))
        (let ((b (global-binding name 'variable 'variable)))
-         (push 'constant (binding-declarations b)))))))
+         (push 'constant (binding-declarations b)))))
+    (clos
+     (setq *clos-override-mode* (car (memq (cadr decl) '(override)))))
+    (otherwise nil)))
 
 #+jscl
 (fset 'proclaim #'!proclaim)
