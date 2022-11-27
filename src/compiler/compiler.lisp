@@ -1343,10 +1343,21 @@
 (define-builtin resize-storage-vector (vector new-size)
   `(= (get ,vector "length") ,new-size))
 
+#+nil
 (define-builtin storage-vector-ref (vector n)
   `(selfcall
     (var (x (property ,vector ,n)))
     (if (=== x undefined) (throw "Out of range."))
+    (return x)))
+;;; @vald-km 20112022
+;;; if the object is a vector, if the vector index does not exceed its length,
+;;; we return any value at this index, and do not puzzle over what out of range is.
+;;; we deal with the content at the application level.
+(define-builtin storage-vector-ref (vector n)
+  `(selfcall
+    (if (>= ,n (get ,vector "length"))
+        (throw "ref vector index out of range."))
+    (var (x (property ,vector ,n)))
     (return x)))
 
 (define-builtin storage-vector-set (vector n value)
