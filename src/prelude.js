@@ -85,7 +85,7 @@ var _makNull = function() { return _wtf_['_n'];};
 var _makUndef = function () { return _wtf_['_u'];};
 
 if (typeof module !== 'undefined') {
-  module.exports = _wtf;
+  module.exports = _wtf_;
   module.exports = _makNull;
   module.exports = _makUndef;
     }
