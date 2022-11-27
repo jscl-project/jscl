@@ -22,6 +22,15 @@
 
 (/debug "loading std-object")
 
+;;; @vlad-km 20112022
+;;; clos override mode disable by default.
+;;; when you change this mode you know what you are doing
+(declaim (clos non-override))
+
+;;; manual op
+(defun clos-declaim-override (mode)
+  (setq *clos-override-mode*
+        (car (memq mode '(t nil)))))
 
 ;;; @vlad-km
 ;;; add hash/cn slots
@@ -431,17 +440,18 @@
 
 
 ;;; Ensure class
-;;; @vlad-km remove (setf...) form
+;;; @vlad-km 20112022 clos-override mode
 (defun ensure-class (name &rest all-keys)
   (if (!find-class name nil)
-      (error "Can't redefine the class named ~S." name)
-      (let* ((metaclass (get-keyword-from all-keys :metaclass *the-class-standard-class*))
-             (class (apply (if (eq metaclass *the-class-standard-class*)
-                               #'make-instance-standard-class
-                               #'make-instance)
-                           metaclass :name name all-keys)))
-        (setf-find-class name class)
-        class)))
+      (unless *clos-override-mode*
+        (error "Can't redefine the class named ~S." name)))
+  (let* ((metaclass (get-keyword-from all-keys :metaclass *the-class-standard-class*))
+         (class (apply (if (eq metaclass *the-class-standard-class*)
+                           #'make-instance-standard-class
+                           #'make-instance)
+                       metaclass :name name all-keys)))
+    (setf-find-class name class)
+    class))
 
 
 ;;; make-instance-standard-class creates and initializes an instance of
