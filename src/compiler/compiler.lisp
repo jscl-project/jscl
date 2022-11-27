@@ -1365,7 +1365,7 @@
     (var (x ,vector))
     (var (i ,n))
     (if (or (< i 0) (>= i (get x "length")))
-        (throw "Out of range."))
+        (throw "set vector index out of range."))
     (return (= (property x i) ,value))))
 
 (define-builtin storage-vector-set! (vector n value)
