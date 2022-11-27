@@ -56,7 +56,7 @@ else if (typeof window !== 'undefined')
 //
 // also you may use native array with null/undefined values
 // see test case for details
-window._jsBadValues = {
+var _jsBadValues = {
  _n: null,
  _u: undefined,
  gvN: function () {return this._n;},
@@ -65,6 +65,11 @@ window._jsBadValues = {
  makNull: function() { return this._wtf[0];},
  makUndef: function () { return this._wtf[1];}
 };
+
+if (typeof module !== 'undefined')
+  module.exports = _jsBadValues;
+else if (typeof window !== 'undefined')
+  window._jsBadValues = _jsBadValues;
 
 // @vlad-km
 // Next
@@ -76,8 +81,19 @@ window._jsBadValues = {
 //    (defvar *v-null* (#j:_makNull))
 //    (defconstant +v-undef+ (#j:_makUndef))
 var _wtf_ = {_n:null, _u:undefined};
-window._makNull = function() { return _wtf_['_n'];};
-window._makUndef = function () { return _wtf_['_u'];};
+var _makNull = function() { return _wtf_['_n'];};
+var _makUndef = function () { return _wtf_['_u'];};
+
+if (typeof module !== 'undefined') {
+  module.exports = _wtf;
+  module.exports = _makNull;
+  module.exports = _makUndef;
+    }
+else if (typeof window !== 'undefined') {
+  window._wtf = _wtf;
+  window._makNull = _makNull;
+  window._makUndef = _makUndef;
+    };
 
 
 
