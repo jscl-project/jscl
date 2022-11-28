@@ -1445,6 +1445,13 @@
 (define-builtin js-undefined-p (x)
   (convert-to-bool `(== (typeof ,x) "undefined")))
 
+;;; return `null`
+(define-builtin %get-js-null% () ` (call-internal |makJSnull|))
+;;; return `undefined`
+(define-builtin %get-js-undef% () `(call-internal |makJSundef|))
+;;; return object with props `null/undef` and access methods
+(define-builtin %get-js-bvo% ()   `(call-internal |badJSvalues|))
+
 (define-builtin %%nlx-p (x)
   (convert-to-bool `(call-internal |isNLX| ,x)))
 
