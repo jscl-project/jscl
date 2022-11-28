@@ -319,6 +319,9 @@
   (t
    (setq *root* (%js-vref "self"))))
 
+;;; mark *features* for this version
+(push :js-null-types *features*)
+
 (defun require (name)
   (if (find :node *features*)
       (funcall (%js-vref "require") name)))
