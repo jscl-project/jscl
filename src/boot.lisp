@@ -460,7 +460,10 @@
 ;;; types family section
 
 ;;; tag's utils
-(defun object-type-code (object) (oget object "dt_Name"))
+(defun object-type-code (object)
+  (%js-try
+   (progn (oget object "dt_Name"))
+    (catch (m) nil)))
 (defun set-object-type-code (object tag) (oset tag object "dt_Name"))
 
 ;;; types predicate's
