@@ -70,13 +70,13 @@
       nil
       t))
 
-(defun js-null-p (obj) (js-null-p obj))
-(defun js-undefined-p (obj) (js-undefined-p obj))
+(defun js-null-p (obj) (%js-null-p obj))
 
-;;; @vlad-km 2011 2022
+(defun js-undefined-p (obj) (%js-undefined-p obj))
+
 (defun get-js-null () (%get-js-null%))
+
 (defun get-js-undefined () (%get-js-undef%))
-(defun get-js-bvo () (%get-js-bvo%))
 
 
 ;;; EOF
