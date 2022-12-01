@@ -53,7 +53,6 @@ var internals = jscl.internals = Object.create(null);
 //    (defconstant v-null (get-js-null))
 internals.makJSnull = function () {return null;};
 internals.makJSundef = function () {return undefined;};
-internals.badJSvalues = function () {return _jsBadValues;};
 
 internals.globalEval = function(code){
   var geval = eval;             // Just an indirect eval
