@@ -448,7 +448,6 @@
 
 (defparameter *features* '(:jscl :common-lisp))
 
-;;; @vlad-km 20112022
 ;;; Enable/disable class redefinition mode. By default - disable
 ;;;    (declaim (clos override))     -- enable class redefinition
 ;;;    (declaim (clos non-override)) -- disable class redefinition
@@ -464,14 +463,18 @@
   (%js-try
    (progn (oget object "dt_Name"))
     (catch (m) nil)))
+
 (defun set-object-type-code (object tag) (oset tag object "dt_Name"))
 
 ;;; types predicate's
-(defun mop-object-p (obj)
-  (and (consp obj)
-       (= (length obj) 5)
-       (eql (object-type-code obj) :mop-object)))
 
+;;; consp this is a common predicate for cons and list
+;;; mop predicate evaluates the length of the list, which causes
+;;; an interrupt for the cons cell
+(defun mop-object-p (obj)
+  ;; evaluated only `proper list` not `cons cell`
+  (and (proper-list-length-p obj 5 5)
+       (eql (object-type-code obj) :mop-object)))
 
 (defun clos-object-p (object) (eql (object-type-code object) :clos_object))
 
