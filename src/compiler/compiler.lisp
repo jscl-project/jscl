@@ -1435,22 +1435,19 @@
 (define-raw-builtin oset (value object key &rest keys)
   (convert `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
 
-(define-builtin js-null-p (x)
+(define-builtin %js-null-p (x)
   (convert-to-bool `(=== ,x null)))
 
 (define-builtin objectp (x)
   (convert-to-bool `(=== (typeof ,x) "object")))
 
-;;; @vlad-km
-(define-builtin js-undefined-p (x)
+(define-builtin %js-undefined-p (x)
   (convert-to-bool `(== (typeof ,x) "undefined")))
 
-;;; return `null`
 (define-builtin %get-js-null% () ` (call-internal |makJSnull|))
-;;; return `undefined`
+
 (define-builtin %get-js-undef% () `(call-internal |makJSundef|))
-;;; return object with props `null/undef` and access methods
-(define-builtin %get-js-bvo% ()   `(call-internal |badJSvalues|))
+
 
 (define-builtin %%nlx-p (x)
   (convert-to-bool `(call-internal |isNLX| ,x)))
