@@ -67,40 +67,26 @@
 
 
 ;;; EXPERIMENTAL FFI
-;;; _jsBadValues - new features
 (defconstant v-undef (jscl::get-js-undefined))
 (defconstant v-null (jscl::get-js-null))
-(let* ((fob (jscl::get-js-bvo))
-       (js-null ((oget fob "gvN")))
-       (js-undef ((oget fob "gvU")))
-       ((abv (jscl::oget fob "_wtf")))
-       (js-ara (make-new #j:Array 1000))
+(let* ((js-ara (make-new #j:Array 1000))
        (nc)
        (nc2))
 ;;; test what v-undef & js-undef eq js: undefined
   (test (js-undefined-p v-undef))
   (test (js-null-p v-null))
-  (test (js-undefined-p js-undef))
-  (test (js-null-p js-null))
-;;; test native array with null/undefined values
-  ;;(test (eq (aref abv 0) js-null))
-  ;;(test (eq (aref abv 1) js-undef))
-  ;;(test (eq (aref abv 0) v-null))
-  ;;(test (eq (aref abv 1) v-undef))
-;;; array test with values `undefined` and/or `null`
   (test (eq (aref js-ara 0) v-undef))
-  (test (eq (aref js-ara 100) js-undef))
-  (test (eq 1000 (count js-undef js-ara)))
+  (test (eq 1000 (count v-undef js-ara)))
   (test (eq 1000 (count-if (lambda (x) (js-undefined-p x)) js-ara)))
   (test (eq 1000 (count v-undef js-ara)))
   (test (eq 1000 (count-if (lambda (x) (and (js-undefined-p x) (eq x v-undef))) js-ara)))
   (test (progn
           (handler-case
               (progn
-                (loop for i from 1 below 99 do (setf (aref js-ara i) js-null))
+                (loop for i from 1 below 99 do (setf (aref js-ara i) v-null))
                 t)
             (error (m) nil))))
-  (test (eq (count js-null js-ara)
+  (test (eq (count v-null js-ara)
             (count-if 
                 (lambda (x) (and (js-null-p x) (eq x v-null)))
                 js-ara))))
