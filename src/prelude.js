@@ -37,15 +37,12 @@ else if (typeof window !== 'undefined')
   window.jscl = jscl;
 
 
-// @vlad-km
-// EXPERIMENTAL features
-// object _jsBadValues
-// JS bad values such as `null` and `undefined` are now available
-// through this object in the lisp environment
-// bvo = (get-js-bvo)
-// v-null = (get-js-null)
-// u-null = (get-js-undefined)
-// (make-list 5 :initial-element  v-null)
+var internals = jscl.internals = Object.create(null);
+
+// NOTE: EXPERIMENTAL features
+//   v-null = (get-js-null)
+//   u-null = (get-js-undefined)
+//   (make-list 5 :initial-element  v-null)
 //
 // Important:
 //    (defvar *v-null* (get-js-null)
@@ -54,21 +51,6 @@ else if (typeof window !== 'undefined')
 // 
 //    (defconstant v-undef (get-js-undefined)
 //    (defconstant v-null (get-js-null))
-//
-// also you may use native array with null/undefined values
-// see test case for details
-var _jsBadValues = {
- _n: null,
- _u: undefined,
- gvN: function () {return this._n;},
- gvU: function () {return this._u;},
- _wtf:[null, undefined],
- makNull: function() { return this._wtf[0];},
- makUndef: function () { return this._wtf[1];}
-};
-
-var internals = jscl.internals = Object.create(null);
-
 internals.makJSnull = function () {return null;};
 internals.makJSundef = function () {return undefined;};
 internals.badJSvalues = function () {return _jsBadValues;};
