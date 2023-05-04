@@ -211,6 +211,14 @@
         (= #x3FFFC
            (ash #xFFFF 2))))
 
+;;; test LOG
+(test
+ (equal 0 (log 1)))
+(test
+ (equal 2 (log 100 10)))
+(test
+ (equal 3 (log 8.0 2)))
+
 ;;; test LOGNOT
 (test
  (equal '(-1 -2 0 999)

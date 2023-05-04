@@ -203,6 +203,15 @@
         (%ash-right x y)
         (%ash-left x  y))))
 
+;;; log
+(defun log (number &optional (base nil base-p))
+  "Return the logarithm of NUMBER in the base BASE, which defaults to e."
+  (if base-p
+      (/ (log number) (log base))
+      (if (numberp number)
+          (#j:Math:log number)
+          (error "`~S' is not a number." number))))
+
 ;;; lognot
 (defun lognot (x) (%lognot x))
 
