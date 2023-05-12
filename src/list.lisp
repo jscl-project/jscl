@@ -304,6 +304,94 @@
             `(progn (rplacd ,cons ,new-value) ,new-value)
             `(cdr ,cons))))
 
+;;; setf expanders for  CAR and CDR variants
+;;; why using `!get-setf-expansion' ?
+;;; https://github.com/jscl-project/jscl/issues/118
+
+(define-setf-expander caar (x)
+  (!get-setf-expansion `(car (car ,x))))
+
+(define-setf-expander cadr (x)
+  (!get-setf-expansion `(car (cdr ,x))))
+
+(define-setf-expander cdar (x)
+  (!get-setf-expansion `(cdr (car ,x))))
+
+(define-setf-expander cddr (x)
+  (!get-setf-expansion `(cdr (cdr ,x))))
+
+(define-setf-expander caaar (x)
+  (!get-setf-expansion `(car (car (car ,x)))))
+
+(define-setf-expander caadr (x)
+  (!get-setf-expansion `(car (car (cdr ,x)))))
+
+(define-setf-expander cadar (x)
+  (!get-setf-expansion `(car (cdr (car ,x)))))
+
+(define-setf-expander caddr (x)
+  (!get-setf-expansion `(car (cdr (cdr ,x)))))
+
+(define-setf-expander cdaar (x)
+  (!get-setf-expansion `(cdr (car (car ,x)))))
+
+(define-setf-expander cdadr (x)
+  (!get-setf-expansion `(cdr (car (cdr ,x)))))
+
+(define-setf-expander cddar (x)
+  (!get-setf-expansion `(cdr (cdr (car ,x)))))
+
+(define-setf-expander cdddr (x)
+  (!get-setf-expansion `(cdr (cdr (cdr ,x)))))
+
+(define-setf-expander caaaar (x)
+  (!get-setf-expansion `(car (car (car (car ,x))))))
+
+(define-setf-expander caaadr (x)
+  (!get-setf-expansion `(car (car (car (cdr ,x))))))
+
+(define-setf-expander caadar (x)
+  (!get-setf-expansion `(car (car (cdr (car ,x))))))
+
+(define-setf-expander caaddr (x)
+  (!get-setf-expansion `(car (car (cdr (cdr ,x))))))
+
+(define-setf-expander cadaar (x)
+  (!get-setf-expansion `(car (cdr (car (car ,x))))))
+
+(define-setf-expander cadadr (x)
+  (!get-setf-expansion `(car (cdr (car (cdr ,x))))))
+
+(define-setf-expander caddar (x)
+  (!get-setf-expansion `(car (cdr (cdr (car ,x))))))
+
+(define-setf-expander cadddr (x)
+  (!get-setf-expansion `(car (cdr (cdr (cdr ,x))))))
+
+(define-setf-expander cdaaar (x)
+  (!get-setf-expansion `(cdr (car (car (car ,x))))))
+
+(define-setf-expander cdaadr (x)
+  (!get-setf-expansion `(cdr (car (car (cdr ,x))))))
+
+(define-setf-expander cdadar (x)
+  (!get-setf-expansion `(cdr (car (cdr (car ,x))))))
+
+(define-setf-expander cdaddr (x)
+  (!get-setf-expansion `(cdr (car (cdr (cdr ,x))))))
+
+(define-setf-expander cddaar (x)
+  (!get-setf-expansion `(cdr (cdr (car (car ,x))))))
+
+(define-setf-expander cddadr (x)
+  (!get-setf-expansion `(cdr (cdr (car (cdr ,x))))))
+
+(define-setf-expander cdddar (x)
+  (!get-setf-expansion `(cdr (cdr (cdr (car ,x))))))
+
+(define-setf-expander cddddr (x)
+  (!get-setf-expansion `(cdr (cdr (cdr (cdr ,x))))))
+
 (define-setf-expander first (x)
   (get-setf-expansion `(car ,x)))
 

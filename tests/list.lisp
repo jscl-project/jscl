@@ -74,6 +74,42 @@
 (test (equal (cdddar '((1 2 3 4))) '(4)))
 (test (equal (cddddr '(1 2 3 4 5)) '(5)))
 
+;;; SETF with CAR, CDR and variants
+(test (equal (let ((x '(1 2))) (setf (car x) 0) x) '(0 2)))
+(test (equal (let ((x (cons 1 2))) (setf (cdr x) 0) x) '(1 . 0)))
+(test (equal (let ((x '(1 2))) (setf (cdr x) '(0)) x) '(1 0)))
+(test (equal (let ((x '(1 2))) (setf (cadr x) 0) x) '(1 0)))
+(test (equal (let ((x '(a b c))) (setf (car x) 'z) x) '(z b c)))
+(test (equal (let ((x '(a b c))) (setf (cdr x) '(y z)) x) '(a y z)))
+(test (equal (let ((x '((1 2) 3))) (setf (caar x) 0) x) '((0 2) 3)))
+(test (equal (let ((x '(1 2 3))) (setf (cadr x) 0) x) '(1 0 3)))
+(test (equal (let ((x '((1 2) 3))) (setf (cdar x) 0) x) '((1 . 0) 3)))
+(test (equal (let ((x '(1 2 3))) (setf (cddr x) '(0)) x)  '(1 2 0)))
+(test (equal (let ((x '(((1))))) (setf (caaar x) 0) x) '(((0)))))
+(test (equal (let ((x '(1 (2)))) (setf (caadr x) 0) x) '(1 (0))))
+(test (equal (let ((x '((1 2)))) (setf (cadar x) 0) x) '((1 0))))
+(test (equal (let ((x '(1 2 3))) (setf (caddr x) 0) x) '(1 2 0)))
+(test (equal (let ((x '(((1 2))))) (setf (cdaar x) '(0)) x) '(((1 0)))))
+(test (equal (let ((x '(1 (2 3)))) (setf (cdadr x) '(0)) x) '(1 (2 0))))
+(test (equal (let ((x '((1 2 3)))) (setf (cddar x) '(0)) x) '((1 2 0))))
+(test (equal (let ((x '(1 2 3 4))) (setf (cdddr x) '(0)) x) '(1 2 3 0)))
+(test (equal (let ((x '((((1)))))) (setf (caaaar x) 0) x) '((((0))))))
+(test (equal (let ((x '(1 ((2))))) (setf (caaadr x) 0) x) '(1 ((0)))))
+(test (equal (let ((x '((1 (2))))) (setf (caadar x) 0) x) '((1 (0)))))
+(test (equal (let ((x '(1 2 (3)))) (setf (caaddr x) 0) x) '(1 2 (0))))
+(test (equal (let ((x '(((1 2))))) (setf (cadaar x) 0) x) '(((1 0)))))
+(test (equal (let ((x '(1 (2 3)))) (setf (cadadr x) 0) x) '(1 (2 0))))
+(test (equal (let ((x '((1 2 3)))) (setf (caddar x) 0) x) '((1 2 0))))
+(test (equal (let ((x '(1 2 3 4))) (setf (cadddr x) 0) x) '(1 2 3 0)))
+(test (equal (let ((x '((((1 2)))))) (setf (cdaaar x) '(0)) x) '((((1 0))))))
+(test (equal (let ((x '(1 ((2 3))))) (setf (cdaadr x) '(0)) x) '(1 ((2 0)))))
+(test (equal (let ((x '((1 (2 3))))) (setf (cdadar x) '(0)) x) '((1 (2 0)))))
+(test (equal (let ((x '(1 2 (3 4)))) (setf (cdaddr x) '(0)) x) '(1 2 (3 0))))
+(test (equal (let ((x '(((1 2 3))))) (setf (cddaar x) '(0)) x) '(((1 2 0)))))
+(test (equal (let ((x '(1 (2 3 4)))) (setf (cddadr x) '(0)) x) '(1 (2 3 0))))
+(test (equal (let ((x '((1 2 3 4)))) (setf (cdddar x) '(0)) x)  '((1 2 3 0))))
+(test (equal (let ((x '(1 2 3 4 5))) (setf (cddddr x) '(0)) x) '(1 2 3 4 0)))
+
 ;;; SUBLIS
 (test (equal (sublis '((x . 100) (z . zprime))
                      '(plus x (minus g z x p) 4 . x))
@@ -121,9 +157,7 @@
 ;;; COPY-TREE
 (test (let* ((foo (list '(1 2) '(3 4)))
              (bar (copy-tree foo)))
-        ;; (SETF (CAR (CAR FOO)) 0) doesn't work in the test for some reason,
-        ;; despite working fine in the REPL
-        (rplaca (car foo) 0)
+        (setf (car (car foo)) 0)
         (not (= (car (car foo))
                 (car (car bar))))))
 
