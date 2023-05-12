@@ -311,5 +311,12 @@
   (list t t t t t)))
 
 
+;;; SETF with ELT
+;;; TODO: Rewrite this test when EQUALP exists and works on vectors
+;;; https://github.com/jscl-project/jscl/issues/479
+(test (equal '(42 0 0)
+             (let ((vec (vector 0 0 0)))
+               (setf (elt vec 0) 42)
+               (jscl::vector-to-list vec))))
 
 ;;; EOF

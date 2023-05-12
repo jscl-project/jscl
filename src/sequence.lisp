@@ -315,6 +315,16 @@
          (error "The index ~D is too large for ~A of length ~D." index 'vector length))
        (aref sequence index)))))
 
+(define-setf-expander elt (sequence index)
+  (let ((g!sequence (gensym))
+        (g!index (gensym))
+        (g!value (gensym)))
+    (values (list g!sequence g!index)
+            (list sequence index)
+            (list g!value)
+            `(jscl::aset ,g!sequence ,g!index ,g!value)
+            `(aref ,g!sequence ,g!index))))
+
 (defun zero-args-reduce (function initial-value initial-value-p)
   (if initial-value-p
       (funcall function initial-value)
