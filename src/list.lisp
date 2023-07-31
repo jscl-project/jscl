@@ -479,7 +479,7 @@
     (when (eq indicator car)
       ;; TODO: should be cadr, needs a defsetf for that
       (setf (car (cdr tail)) new-value)
-      (return tail))))
+      (return plist))))
 
 (define-setf-expander getf (plist indicator &optional default)
   (multiple-value-bind (dummies vals newval setter getter)
