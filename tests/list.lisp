@@ -266,6 +266,12 @@
 (test (null (getf '(a b c d) 'e)))
 (test (equal (let ((x (list 'a 1))) (setf (getf x 'a) 3) x) '(a 3)))
 (test (equal (let ((x (list 'a 1))) (incf (getf x 'a)) x) '(a 2)))
+(test (let ((x (list 'a 1 'b 2)))
+	(setf (getf x 'b) 0)
+        (setf (getf x 'c) 3)
+	(and (equal (getf x 'a) 1)
+	     (equal (getf x 'b) 0)
+             (equal (getf x 'c) 3))))
 
 ;;; GET-PROPERTIES
 (test (equal (multiple-value-list (get-properties '(a b c d) '(b d e))) '(NIL NIL NIL)))
