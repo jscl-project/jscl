@@ -464,7 +464,7 @@ function runCommonLispScripts() {
             continue;
         }
 
-        if("src" in documentScripts[i]) {
+        if("src" in documentScripts[i] && documentScripts[i].src.length != 0) {
             script = {
                 executed: false,
                 error: false,
