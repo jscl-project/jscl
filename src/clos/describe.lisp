@@ -276,10 +276,12 @@
 ;;; function
 (defmethod describe ((obj function) &optional (stream *standard-output*))
   (let ((name (oget obj "fname"))
+	(lambda-list (oget obj "lambdalist"))
         (doc (oget obj "docstring")))
     (with-pp-buffer (buf)
       (pp/presentation obj 'function stream)
       (format buf "Name:~a~%" (if name name "anonimous"))
+      (format buf "Lambda list:~a~%" lambda-list)
       (when doc
         (format buf "Documentation: ~a~%" doc))
       (flush-pp-buffer buf stream))
