@@ -85,4 +85,11 @@
       (incf (getr r 0)))
     (equal '(11 (3 2 1 :tail) nil) 
            (vector-to-list r))))
+
+;;; &allow-other-keys test
+(defun fff (&key a b &allow-other-keys)
+  (list a b))
+
+(test (equal '(1 2) (fff :a 1 :b 2 :c 3)))
+
 ;;; EOF
