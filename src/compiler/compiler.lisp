@@ -217,7 +217,7 @@
        ,(convert true *multiple-value-p*)
        ,(convert false *multiple-value-p*)))
 
-(defvar *ll-keywords* '(&optional &rest &key))
+(defvar *ll-keywords* '(&optional &rest &key &allow-other-keys))
 
 (defun list-until-keyword (list)
   (if (or (null list) (member (car list) *ll-keywords*))
@@ -241,6 +241,9 @@
     (when (cdr rest)
       (error "Bad lambda-list `~S'." ll))
     (car rest)))
+
+(defun ll-allow-other-keys (ll)
+  (member '&allow-other-keys ll))
 
 (defun ll-keyword-arguments-canonical (ll)
   (flet ((canonicalize (keyarg)
@@ -335,7 +338,8 @@
 	(n-optional-arguments
 	 (length (ll-optional-arguments ll)))
 	(keyword-arguments
-	 (ll-keyword-arguments-canonical ll)))
+	 (ll-keyword-arguments-canonical ll))
+  (allow-other-keys (ll-allow-other-keys ll)))
     `(progn
        ;; Declare variables
        ,@(with-collect
@@ -377,20 +381,22 @@
             (var (start ,(+ n-required-arguments n-optional-arguments)))
             (if (== (% (- (nargs) start) 2) 1)
                 (throw "Odd number of keyword arguments."))
-            (for ((= i start) (< i (nargs)) (+= i 2))
-                 (if (and ,@(mapcar (lambda (keyword-argument)
-                                 (destructuring-bind ((keyword-name var) &optional initform svar)
-                                     keyword-argument
-                                   (declare (ignore var initform svar))
-                                   `(!== (arg i) ,(convert keyword-name))))
-                               keyword-arguments))
-                     (throw (+ "Unknown keyword argument " (property (arg i) "name"))))))))))
+            ,@(when (not allow-other-keys)
+               `((for ((= i start) (< i (nargs)) (+= i 2))
+                   (if (and ,@(mapcar (lambda (keyword-argument)
+                                   (destructuring-bind ((keyword-name var) &optional initform svar)
+                                       keyword-argument
+                                     (declare (ignore var initform svar))
+                                     `(!== (arg i) ,(convert keyword-name))))
+                                 keyword-arguments))
+                       (throw (+ "Unknown keyword argument " (property (arg i) "name"))))))))))))
 
 (defun parse-lambda-list (ll)
   (values (ll-required-arguments ll)
           (ll-optional-arguments ll)
           (ll-keyword-arguments  ll)
-          (ll-rest-argument      ll)))
+          (ll-rest-argument      ll)
+          (ll-allow-other-keys   ll)))
 
 ;;; Process BODY for declarations and/or docstrings. Return as
 ;;; multiple values the BODY without docstrings or declarations, the
