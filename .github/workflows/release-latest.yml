@@ -32,9 +32,10 @@ jobs:
         cp jquery.js jqconsole.min.js dist/
 
     - name: Deploy latest version 🚀
-      uses: JamesIves/github-pages-deploy-action@4.1.1
+      uses: JamesIves/github-pages-deploy-action@4.7.3
       with:
         branch: master
         folder: dist
         repository-name: jscl-project/jscl-project.github.io
         ssh-key: ${{ secrets.DEPLOY_KEY }}
+        single-commit: true
