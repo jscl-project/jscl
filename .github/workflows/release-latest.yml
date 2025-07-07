@@ -32,7 +32,7 @@ jobs:
         cp jquery.js jqconsole.min.js dist/
 
     - name: Deploy latest version 🚀
-      uses: JamesIves/github-pages-deploy-action@4.7.3
+      uses: JamesIves/github-pages-deploy-action@v4.7.3
       with:
         branch: master
         folder: dist
