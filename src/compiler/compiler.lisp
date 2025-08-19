@@ -268,14 +268,13 @@
           (ll-optional-arguments-canonical lambda-list))))
     (remove nil (mapcar #'third args))))
 
-(defun lambda-name/docstring-wrapper (name docstring code)
-  (if (or name docstring)
-      `(selfcall
-        (var (func ,code))
-        ,(when name `(= (get func "fname") ,name))
-        ,(when docstring `(= (get func "docstring") ,docstring))
-        (return func))
-      code))
+(defun lambda-name/docstring-wrapper (name docstring lambda-list code)
+  `(selfcall
+    (var (func ,code))
+    ,(when name `(= (get func "fname") ,name))
+    ,(when docstring `(= (get func "docstring") ,docstring))
+    (= (get func "lambdalist") ,(prin1-to-string lambda-list))
+    (return func)))
 
 (defun lambda-check-argument-count
     (n-required-arguments n-optional-arguments rest-p)
@@ -470,7 +469,7 @@
                                     keyword-arguments
                                     (ll-svars ll)))))
 
-        (lambda-name/docstring-wrapper name documentation
+        (lambda-name/docstring-wrapper name documentation ll
          `(named-function ,(jsize-symbol name 'jscl_user_)
                           (|values| ,@(mapcar (lambda (x)
                                                 (translate-variable x))
