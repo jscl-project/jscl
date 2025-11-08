@@ -19,6 +19,8 @@
 (delete-package (find-package 'fubar))
 (test (null (find-package 'fubar)))
 
+(make-package 'fubar)
+
 (when (find-package 'foo)
      (delete-package (find-package 'foo)))
 (test
@@ -42,6 +44,25 @@
        (push symbol symbols))
      (and (member 'car symbols)
           (member baz symbols)))))
+
+(when (find-package 'foo)
+  (delete-package (find-package 'foo)))
+(when (find-package 'bar)
+  (delete-package (find-package 'bar)))
+(when (find-package 'baz)
+  (delete-package (find-package 'baz)))
+(test
+ (let* ((package (make-package 'foo :nicknames '(bar baz)))
+        (symbol (intern (string 'foo) package))
+        bar-symbols baz-symbols)
+   (do-symbols (symbol 'bar)
+     (push symbol bar-symbols))
+   (do-symbols (symbol 'baz)
+     (push symbol baz-symbols))
+   (and (eq package (find-package 'bar))
+        (eq package (find-package 'baz))
+        (member symbol bar-symbols)
+        (member symbol baz-symbols))))
 
 (test (member 'car (find-all-symbols (string 'car))))
 
