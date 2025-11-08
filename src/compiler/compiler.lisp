@@ -1699,26 +1699,14 @@
         (convert-toplevel sexp multiple-value-p return-p))))
   ;; Process as toplevel
   (let ((*convert-level* -1))
-    (cond
-      ;; Non-empty toplevel progn
-      ((and (consp sexp)
-            (eq (car sexp) 'progn)
-            (cdr sexp))
-       `(progn
-          ;; Discard all except the last value
-          ,@(mapcar (lambda (s) (convert-toplevel s nil))
-                    (butlast (cdr sexp)))
-          ;; Return the last value(s)
-          ,(convert-toplevel (first (last (cdr sexp))) multiple-value-p return-p)))
-      (t
-       (when *compile-print-toplevels*
-         (let ((form-string (prin1-to-string sexp)))
-           (format t "Compiling ~a...~%" (truncate-string form-string))))
+    (when *compile-print-toplevels*
+      (let ((form-string (prin1-to-string sexp)))
+        (format t "Compiling ~a...~%" (truncate-string form-string))))
 
-       (let ((code (convert sexp multiple-value-p)))
-         (if return-p
-             `(return ,code)
-             code))))))
+    (let ((code (convert sexp multiple-value-p)))
+      (if return-p
+          `(return ,code)
+          code))))
 
 
 (defun process-toplevel (sexp &optional multiple-value-p return-p)
