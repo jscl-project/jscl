@@ -124,15 +124,19 @@
             (!write-string (subseq string start end) stream)
             (write-char #\Newline stream)))))
 
-(defun make-string-output-stream ()
-  (let ((buffer (make-array 0 :element-type 'character :fill-pointer 0)))
-    (make-stream
-     :write-fn (lambda (string)
-       (dotimes (i (length string))
-         (vector-push-extend (aref string i) buffer)))
-     :kind 'string-stream
-     :data buffer
-     :at-line-start t)))
+(defun %make-fill-pointer-output-stream (buffer)
+  (make-stream
+   :write-fn (lambda (string)
+               (dotimes (i (length string))
+                 (vector-push-extend (aref string i) buffer)))
+   :kind 'string-stream
+   :data buffer
+   :at-line-start t))
+
+(defun make-string-output-stream (&key element-type)
+  (assert (eql element-type 'character))
+  (%make-fill-pointer-output-stream
+   (make-array 0 :element-type 'character :fill-pointer 0)))
 
 (defmacro with-input-from-string ((var string) &body body)
   ;; TODO: &key start end index
@@ -143,8 +147,12 @@
   (prog1 (stream-data stream)
     (setf (stream-data stream) (make-string 0))))
 
-(defmacro with-output-to-string ((var) &body body)
-  `(let ((,var (make-string-output-stream)))
+(defmacro with-output-to-string ((var &optional string-form
+                                  &key (element-type ''character))
+                                 &body body)
+  `(let ((,var (if ,string-form
+                   (%make-fill-pointer-output-stream string)
+                   (make-string-output-stream :element-type ,element-type))))
      ,@body
      (get-output-stream-string ,var)))
 
