@@ -119,6 +119,18 @@
 
 (defsetf fill-pointer set-fill-pointer)
 
+(defun row-major-aref (array index)
+  (unless (arrayp array)
+    (error "~S is not an array." array))
+  (storage-vector-ref array index))
+
+(defun row-major-aset (array index value)
+  (unless (arrayp array)
+    (error "~S is not an array." array))
+  (storage-vector-set array index value))
+
+(defsetf row-major-aref row-major-aset)
+
 
 ;;; Vectors
 
