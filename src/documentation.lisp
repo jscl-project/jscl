@@ -3,6 +3,8 @@
 (/debug "loading documentation.lisp!")
 
 ;;; Documentation.
+;; FIXME: Standard require documentation to be generic function.
+
 (defun documentation (x type)
   "Return the documentation of X. TYPE must be the symbol VARIABLE or FUNCTION."
   (ecase type
@@ -14,6 +16,19 @@
        (error "The type of documentation `~S' is not a symbol." type))
      (oget x "vardoc"))))
 
+(defun set-documentation (x type new-val)
+  (check-type new-val string)
+  (ecase type
+    (function
+     (let ((func (fdefinition x)))
+       (setf (oget func "docstring") new-val)))
+    (variable
+     (unless (symbolp x)
+       (error "The type of documentation `~S' is not a symbol." type))
+     (setf (oget x "vardoc") new-val)))
+  new-val)
+
+(defsetf documentation set-documentation)
 
 ;;; APROPOS and friends
 
