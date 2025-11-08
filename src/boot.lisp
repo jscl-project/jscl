@@ -147,6 +147,10 @@
 (defmacro while (condition &body body)
   `(block nil (%while ,condition ,@body)))
 
+;; Standard allows doing nothing for compiler macros.
+(defmacro define-compiler-macro (name args &rest body)
+  `',name)
+
 (defvar *gensym-counter* 0)
 (defun gensym (&optional (prefix "G"))
   (setq *gensym-counter* (+ *gensym-counter* 1))
