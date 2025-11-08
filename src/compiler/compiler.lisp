@@ -1641,8 +1641,7 @@
     (when expandedp
       (return-from convert-1 (convert sexp multiple-value-p)))
     ;; The expression has been macroexpanded. Now compile it!
-    (let ((*multiple-value-p* multiple-value-p)
-          (*convert-level* (1+ *convert-level*)))
+    (let ((*multiple-value-p* multiple-value-p))
       (cond
         ((symbolp sexp)
          (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
@@ -1657,8 +1656,15 @@
         ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp))
          (literal sexp))
         ((listp sexp)
-         (let ((name (car sexp))
-               (args (cdr sexp)))
+         (let* ((name (car sexp))
+                (args (cdr sexp))
+                (*convert-level*
+                  (case name
+                    ;; Top-level processing continue into these forms according
+                    ;; to CLHS 3.2.3.1
+                    ((progn macrolet symbol-macrolet locally)
+                     *convert-level*)
+                    (t (1+ *convert-level*)))))
            (cond
              ;; Special forms
              ((gethash name *compilations*)
