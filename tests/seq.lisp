@@ -143,6 +143,8 @@
 
 (test (equal (reduce #'cons '(1) :initial-value 0) '(0 . 1)))
 
+(test (equal 6 (reduce #'+ '("123" "456") :key #'length)))
+
 ;;; The following tests reduced reduce were copied from ANSI CL TESTS.
 (test (equal (reduce #'cons '(a b c d e f) :start 1 :end 4 :from-end t)
              '(b c . d)))
