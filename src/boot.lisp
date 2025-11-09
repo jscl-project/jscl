@@ -183,25 +183,29 @@
 (defmacro dolist ((var list &optional result) &body body)
   (let ((g!list (gensym)))
     (unless (symbolp var) (error "`~S' is not a symbol." var))
-    `(block nil
-       (let ((,g!list ,list)
-             (,var nil))
-         (%while ,g!list
-                 (setq ,var (car ,g!list))
-                 (tagbody ,@body)
-                 (setq ,g!list (cdr ,g!list)))
-         ,result))))
+    (multiple-value-bind (body decls) (parse-body body :declarations t)
+      `(block nil
+         (let ((,g!list ,list)
+               (,var nil))
+           ,@decls
+           (%while ,g!list
+                   (setq ,var (car ,g!list))
+                   (tagbody ,@body)
+                   (setq ,g!list (cdr ,g!list)))
+           ,result)))))
 
 (defmacro dotimes ((var count &optional result) &body body)
   (let ((g!count (gensym)))
     (unless (symbolp var) (error "`~S' is not a symbol." var))
-    `(block nil
-       (let ((,var 0)
-             (,g!count ,count))
-         (%while (< ,var ,g!count)
-                 (tagbody ,@body)
-                 (incf ,var))
-         ,result))))
+    (multiple-value-bind (body decls) (parse-body body :declarations t)
+      `(block nil
+         (let ((,var 0)
+               (,g!count ,count))
+           ,@decls
+           (%while (< ,var ,g!count)
+                   (tagbody ,@body)
+                   (incf ,var))
+           ,result)))))
 
 (defmacro cond (&rest clausules)
   (unless (null clausules)
@@ -275,8 +279,8 @@
 (defmacro prog2 (form1 result &body body)
   `(prog1 (progn ,form1 ,result) ,@body))
 
-(defmacro prog (inits &rest body )
-  (multiple-value-bind (forms decls docstring) (parse-body body)
+(defmacro prog (inits &rest body)
+  (multiple-value-bind (forms decls) (parse-body body :declarations t)
     `(block nil
        (let ,inits
          ,@decls
@@ -302,38 +306,42 @@
        (setq ,@(!reduce #'append (mapcar #'butlast assignments) nil)))))
 
 (defmacro do (varlist endlist &body body)
-  `(block nil
-     (let ,(mapcar (lambda (x) (if (symbolp x)
-                                   (list x nil)
-                                 (list (first x) (second x)))) varlist)
-       (while t
-         (when ,(car endlist)
-           (return (progn ,@(cdr endlist))))
-         (tagbody ,@body)
-         (psetq
-          ,@(apply #'append
-                   (mapcar (lambda (v)
-                             (and (listp v)
-                                  (consp (cddr v))
-                                  (list (first v) (third v))))
-                           varlist)))))))
+  (multiple-value-bind (body decls) (parse-body body :declarations t)
+    `(block nil
+       (let ,(mapcar (lambda (x) (if (symbolp x)
+                                     (list x nil)
+                                     (list (first x) (second x)))) varlist)
+         ,@decls
+         (while t
+           (when ,(car endlist)
+             (return (progn ,@(cdr endlist))))
+           (tagbody ,@body)
+           (psetq
+            ,@(apply #'append
+                     (mapcar (lambda (v)
+                               (and (listp v)
+                                    (consp (cddr v))
+                                    (list (first v) (third v))))
+                             varlist))))))))
 
 (defmacro do* (varlist endlist &body body)
-  `(block nil
-     (let* ,(mapcar (lambda (x1) (if (symbolp x1)
-                                     (list x1 nil)
-                                   (list (first x1) (second x1)))) varlist)
-       (while t
-         (when ,(car endlist)
-           (return (progn ,@(cdr endlist))))
-         (tagbody ,@body)
-         (setq
-          ,@(apply #'append
-                   (mapcar (lambda (v)
-                             (and (listp v)
-                                  (consp (cddr v))
-                                  (list (first v) (third v))))
-                           varlist)))))))
+  (multiple-value-bind (body decls) (parse-body body :declarations t)
+    `(block nil
+      (let* ,(mapcar (lambda (x1) (if (symbolp x1)
+                                      (list x1 nil)
+                                      (list (first x1) (second x1)))) varlist)
+        ,@decls
+        (while t
+          (when ,(car endlist)
+            (return (progn ,@(cdr endlist))))
+          (tagbody ,@body)
+          (setq
+           ,@(apply #'append
+                    (mapcar (lambda (v)
+                              (and (listp v)
+                                   (consp (cddr v))
+                                   (list (first v) (third v))))
+                            varlist))))))))
 
 (defun identity (x) x)
 
@@ -476,13 +484,9 @@
 
 (defmacro %check-type (place typespec &optional (string ""))
   (let ((value (gensym)))
-    (if (symbolp place)
-        `(do ((,value ,place ,place))
-             ((!typep ,value ',typespec))
-           (setf ,place (%check-type-error ',place ,value ',typespec ,string)))
-        (if (!typep place typespec)
-            t
-            (%check-type-error place place typespec string)))))
+    `(do ((,value ,place ,place))
+         ((!typep ,value ',typespec))
+       (setf ,place (%check-type-error ',place ,value ',typespec ,string)))))
 
 #+jscl
 (defmacro check-type (place typespec &optional (string ""))
