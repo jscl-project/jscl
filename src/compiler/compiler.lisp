@@ -573,8 +573,17 @@
                     ,(literal (cdr tail) t))))
 
 (defun dump-array (array)
-  (let ((elements (vector-to-list array)))
-    (list-to-vector (mapcar #'literal elements))))
+  (let ((elements (vector-to-list array))
+        (var (gvarname 'array)))
+    `(selfcall
+      (var (,var ,(list-to-vector (mapcar #'literal elements))))
+      (= (get ,var "type")
+         (call-internal |lisp_to_js| ,(literal (array-element-type array))))
+      (= (get ,var "dimensions")
+         (call-internal |lisp_to_js| ,(literal (array-dimensions array))))
+      ,(when (array-has-fill-pointer-p array)
+         `(= (get ,var "fillpointer") ,(fill-pointer array)))
+      (return ,var))))
 
 (defun dump-string (string)
   `(call-internal |make_lisp_string| ,string))
