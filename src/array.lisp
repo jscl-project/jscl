@@ -163,6 +163,9 @@
   ;; Note that JS will automatically grow the array as new elements
   ;; are assigned, so no need to do `adjust-array` here.
   (storage-vector-set! vector (fill-pointer vector) new-element)
-  (incf (fill-pointer vector)))
+  (prog1 (fill-pointer vector)
+    (incf (fill-pointer vector))
+    (when (> (fill-pointer vector) (array-dimension vector 0))
+      (setf (car (array-dimensions vector)) (fill-pointer vector)))))
 
 ;;; EOF

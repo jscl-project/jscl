@@ -278,6 +278,8 @@
 	(result (null (map nil (lambda (x) (push x acc)) '(1 2 3)))))
    (list acc result))
  '((3 2 1) t))
+
+(test (equal '(3) (array-dimensions (map 'vector #'identity '(1 2 3)))))
  
 ;;; CONCATENATE
 (test-equal
