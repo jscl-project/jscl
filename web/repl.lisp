@@ -83,32 +83,10 @@
 
 (defparameter +err-css+ "jqconsole-error")
 
-(defgeneric display-condition (c &optional style newline))
-
-(defmethod display-condition (c &optional (style +err-css+) ignore)
+(defun display-condition (c &optional (style +err-css+) (newline t))
   (errmsg-prefix)
-  (#j:jqconsole:Write
-   (format nil
-           "Unhandled error condition ~a~%" (class-name (class-of c)))
-   style))
-
-(defmethod display-condition ((c type-error) &optional (style +err-css+) ignore)
-  (errmsg-prefix)
-  (#j:jqconsole:Write
-   (format nil
-           "Type error.~% ~a does not designate a ~a~%"
-           (type-error-datum c)
-           (type-error-expected-type c))
-   style))
-
-(defmethod display-condition ((c simple-error) &optional (style +err-css+) (nl t))
-  (errmsg-prefix)
-  (#j:jqconsole:Write
-   (apply #'format nil
-          (simple-condition-format-control c)
-          (simple-condition-format-arguments c))
-   style)
-  (when nl (%console-terpri)))
+  (#j:jqconsole:Write (princ-to-string c) style)
+  (when newline (%console-terpri)))
 
 
 (defun toplevel ()

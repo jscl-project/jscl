@@ -339,7 +339,7 @@
            (simple-format stream "#<FUNCTION ~a>" name)
            (write-string "#<FUNCTION>" stream))))
     ;; mop object
-    (mop-object (mop-object-printer form stream))
+    (mop-object (print-object form stream))
     ;; structure object
     (structure (structure-object-printer form stream))
     ;; hash-table object
