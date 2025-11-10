@@ -578,12 +578,13 @@
     `(let ((,g!stream ,stream)
            (,g!object ,object))
        (simple-format ,g!stream "#<")
+       ;; TYPE argument can't be used before `print.lisp' is loaded
        ,(when type
-          `(simple-format ,g!stream "~S" (type-of g!object)))
+          `(prin1 (type-of ,g!object) ,g!stream))
        ,(when (and type (or body identity))
           `(simple-format ,g!stream " "))
        ,@body
-       ,(when (and identity body)
+       #+nil ,(when (and identity body)
           `(simple-format ,g!stream " "))
        (simple-format ,g!stream ">")
        nil)))
