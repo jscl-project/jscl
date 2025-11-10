@@ -192,7 +192,8 @@
 
 
 (defun compile-application (files output &key shebang)
-  (with-compilation-environment
+  (let ((*features* (list :jscl :jscl-xc)))
+    (with-compilation-environment
       (with-open-file (out output :direction :output :if-exists :supersede)
         (when shebang
           (format out "#!/usr/bin/env node~%"))
@@ -202,12 +203,12 @@
         (dolist (input files)
           (!compile-file input out))
         (format out "})(jscl.internals.pv, jscl.internals);~%")
-        (format out "})( typeof require !== 'undefined'? require('./jscl'): window.jscl )~%"))))
+        (format out "})( typeof require !== 'undefined'? require('./jscl'): window.jscl )~%")))))
 
 
 
 (defun bootstrap (&optional verbose)
-  (let ((*features* (list* :jscl :jscl-xc *features*))
+  (let ((*features* (list :jscl :jscl-xc))
         (*package* (find-package "JSCL"))
         (*default-pathname-defaults* *base-directory*))
     (setq *environment* (make-lexenv))

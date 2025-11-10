@@ -573,8 +573,17 @@
                     ,(literal (cdr tail) t))))
 
 (defun dump-array (array)
-  (let ((elements (vector-to-list array)))
-    (list-to-vector (mapcar #'literal elements))))
+  (let ((elements (vector-to-list array))
+        (var (gvarname 'array)))
+    `(selfcall
+      (var (,var ,(list-to-vector (mapcar #'literal elements))))
+      (= (get ,var "type")
+         (call-internal |lisp_to_js| ,(literal (array-element-type array))))
+      (= (get ,var "dimensions")
+         (call-internal |lisp_to_js| ,(literal (array-dimensions array))))
+      ,(when (array-has-fill-pointer-p array)
+         `(= (get ,var "fillpointer") ,(fill-pointer array)))
+      (return ,var))))
 
 (defun dump-string (string)
   `(call-internal |make_lisp_string| ,string))
@@ -1641,8 +1650,7 @@
     (when expandedp
       (return-from convert-1 (convert sexp multiple-value-p)))
     ;; The expression has been macroexpanded. Now compile it!
-    (let ((*multiple-value-p* multiple-value-p)
-          (*convert-level* (1+ *convert-level*)))
+    (let ((*multiple-value-p* multiple-value-p))
       (cond
         ((symbolp sexp)
          (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
@@ -1657,8 +1665,15 @@
         ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp))
          (literal sexp))
         ((listp sexp)
-         (let ((name (car sexp))
-               (args (cdr sexp)))
+         (let* ((name (car sexp))
+                (args (cdr sexp))
+                (*convert-level*
+                  (case name
+                    ;; Top-level processing continue into these forms according
+                    ;; to CLHS 3.2.3.1
+                    ((progn macrolet symbol-macrolet locally)
+                     *convert-level*)
+                    (t (1+ *convert-level*)))))
            (cond
              ;; Special forms
              ((gethash name *compilations*)
@@ -1693,26 +1708,14 @@
         (convert-toplevel sexp multiple-value-p return-p))))
   ;; Process as toplevel
   (let ((*convert-level* -1))
-    (cond
-      ;; Non-empty toplevel progn
-      ((and (consp sexp)
-            (eq (car sexp) 'progn)
-            (cdr sexp))
-       `(progn
-          ;; Discard all except the last value
-          ,@(mapcar (lambda (s) (convert-toplevel s nil))
-                    (butlast (cdr sexp)))
-          ;; Return the last value(s)
-          ,(convert-toplevel (first (last (cdr sexp))) multiple-value-p return-p)))
-      (t
-       (when *compile-print-toplevels*
-         (let ((form-string (prin1-to-string sexp)))
-           (format t "Compiling ~a...~%" (truncate-string form-string))))
+    (when *compile-print-toplevels*
+      (let ((form-string (prin1-to-string sexp)))
+        (format t "Compiling ~a...~%" (truncate-string form-string))))
 
-       (let ((code (convert sexp multiple-value-p)))
-         (if return-p
-             `(return ,code)
-             code))))))
+    (let ((code (convert sexp multiple-value-p)))
+      (if return-p
+          `(return ,code)
+          code))))
 
 
 (defun process-toplevel (sexp &optional multiple-value-p return-p)

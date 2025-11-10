@@ -36,24 +36,8 @@
 (defgeneric print-object (instance &optional stream))
 
 (defmethod print-object ((instance standard-object) &optional (stream *standard-output*))
-  (print-unreadable-object (instance stream :identity t)
-    (format stream "(~S)"
-            (class-name (class-of instance))))
+  (mop-object-printer instance stream)
   instance)
-
-
-(defmethod print-object ((instance standard-object) &optional (stream *standard-output*))
-  (if (built-in-class-of instance)
-      (print-unreadable-object (instance stream :identity t)
-        (format stream "(~S) ~a"
-                (class-name (class-of instance))
-                instance))
-      (print-unreadable-object (instance stream :identity t)
-        (format stream "(~S)"
-                (class-name (class-of instance)))))
-  instance)
-
-
 
 ;;; Slot access
 ;;; @vlad-km 2022 experimental - pre-upgrade to new version
@@ -211,7 +195,7 @@
 
 (defmethod print-object ((class standard-class) &optional (stream *standard-output*))
   (print-unreadable-object (class stream :identity t)
-    (format stream "(~S) ~S"
+    (format stream "~S ~S"
             (class-name (class-of class))
             (class-name class)))
   class)
@@ -250,7 +234,7 @@
 ;;;
 (defmethod print-object ((gf standard-generic-function)  &optional (stream *standard-output*))
   (print-unreadable-object (gf stream :identity t)
-    (format stream "(~S) ~S"
+    (format stream "~S ~S"
             (class-name (class-of gf))
             (generic-function-name gf)))
   gf)
@@ -266,7 +250,7 @@
 ;;;
 (defmethod print-object ((method standard-method) &optional (stream *standard-output*))
   (print-unreadable-object (method stream :identity t)
-    (format stream "(~S) ~S ~S  ~S"
+    (format stream "~S ~S ~S  ~S"
             (class-name (class-of method))
             (generic-function-name
              (method-generic-function method))

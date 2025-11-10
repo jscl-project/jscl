@@ -59,11 +59,11 @@
 (defun mop-object-printer (form stream)
   (let ((res (case (mop-class-name (mop-class-of form))
                (standard-class
-                (concat "#<standard-class " (write-to-string (mop-class-name form)) ">"))
+                (concat "#<STANDARD-CLASS " (write-to-string (mop-class-name form)) ">"))
                (standard-generic-function
-                (concat "#<standard-generic-function " (write-to-string (generic-function-name form)) ">"))
+                (concat "#<STANDARD-GENERIC-FUNCTION " (write-to-string (generic-function-name form)) ">"))
                (standard-method
-                (concat "#<standard-method " (write-to-string (generic-function-name (method-generic-function form)))
+                (concat "#<STANDARD-METHOD " (write-to-string (generic-function-name (method-generic-function form)))
                         (write-to-string (generate-specialized-arglist form)) ">"))
                (otherwise
                  (case (mop-class-name (mop-class-of (mop-class-of form)))
@@ -71,7 +71,7 @@
                                       (write-to-string (mop-class-name (mop-class-of form)))
                                       " " (mop-object-struct-slots form) ")"))
                    (otherwise
-                     (concat "#<instance " (write-to-string (mop-class-name (mop-class-of form))) " "
+                     (concat "#<INSTANCE " (write-to-string (mop-class-name (mop-class-of form))) " "
                        (mop-object-slots (std-instance-slots form)) ">")))))))
     (simple-format stream res)))
 

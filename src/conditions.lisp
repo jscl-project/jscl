@@ -72,7 +72,11 @@
                    :reader simple-condition-format-control)
    (format-arguments :initarg :format-arguments
                      :initform nil
-                     :reader simple-condition-format-arguments)))
+                     :reader simple-condition-format-arguments))
+  (:report (lambda (condition stream)
+             (apply #'format stream
+                    (simple-condition-format-control condition)
+                    (simple-condition-format-arguments condition)))))
 (%define-condition serious-condition (condition) ())
 (%define-condition warning (condition) ())
 (%define-condition simple-warning (simple-condition warning) ())

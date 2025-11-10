@@ -113,8 +113,67 @@
               ((null pairs)
                (reverse result)))))))
 
+;;; SETF variants
 
+(defmacro psetf (&rest pairs)
+  ;; We expand to (setf (values var*) (values val*)), because our
+  ;; implementation has essentially infinite multiple-values-limit
+  (let (vars vals)
+    (while pairs
+      (push (pop pairs) vars)
+      (unless pairs
+        (error "Odd number of arguments to psetf."))
+      (push (pop pairs) vals))
+    `(progn
+       (setf (values ,@(nreverse vars)) (values ,@(nreverse vals)))
+       nil)))
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun %gen-mv-bindings (mv-bindings getters body-forms)
+    (if mv-bindings
+        `((multiple-value-bind ,(car mv-bindings) ,(car getters)
+            ,@(%gen-mv-bindings (cdr mv-bindings) (cdr getters) body-forms)))
+        body-forms)))
+
+(defmacro shiftf (&rest args)
+  (when (< (length args) 2)
+    (error "~S called with too few arguments: ~S" 'shiftf args))
+  (let (let*-bindings mv-bindings setters getters)
+    (dolist (place (butlast args))
+      (multiple-value-bind (temps subforms store-vars setter getter)
+          (!get-setf-expansion place)
+        (push (mapcar #'list temps subforms) let*-bindings)
+        (push store-vars mv-bindings)
+        (push setter setters)
+        (push getter getters)))
+    (push (car (last args)) getters)
+    (setq let*-bindings (nreverse let*-bindings)
+          mv-bindings (nreverse mv-bindings)
+          setters (nreverse setters)
+          getters (nreverse getters))
+    (let ((outputs (mapcar (lambda (x) (gensym "OUT")) (car mv-bindings))))
+      `(let* ,(reduce #'nconc let*-bindings)
+         ,@(%gen-mv-bindings (cons outputs mv-bindings) getters
+                             `(,@setters (values ,@outputs)))))))
+
+(defmacro rotatef (&rest places)
+  (when places
+    (let (let*-bindings mv-bindings setters getters)
+      (dolist (place places)
+        (multiple-value-bind (temps subforms store-vars setter getter)
+            (!get-setf-expansion place)
+          (push (mapcar #'list temps subforms) let*-bindings)
+          (push store-vars mv-bindings)
+          (push setter setters)
+          (push getter getters)))
+      (push nil setters)
+      (push (car (last getters)) getters)
+      (setq let*-bindings (nreverse let*-bindings)
+            mv-bindings (nreverse mv-bindings)
+            setters (nreverse setters)
+            getters (cdr (nreverse getters)))
+      `(let* ,(reduce #'nconc let*-bindings)
+         ,@(%gen-mv-bindings mv-bindings getters setters)))))
 
 ;;; SETF-Based macros
 
@@ -173,3 +232,23 @@
              ,v
              (let ((,(car newval) (cons ,g ,getter)))
                ,setter))))))
+
+;;; Some SETF expanders
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  ;; Can't use define-setf-expander because it is defined in same file
+ (push (cons 'values
+             (lambda (&rest places)
+               (let (all-dummies all-vals newvals setters getters)
+                 (dolist (place places)
+                   (multiple-value-bind (dummies vals newval setter getter)
+                       (!get-setf-expansion place)
+                     (setq all-dummies (append all-dummies dummies (cdr newval))
+                           all-vals (append all-vals vals
+                                            (mapcar (constantly nil) (cdr newval)))
+                           newvals (append newvals (and newval (list (car newval)))))
+                     (push setter setters)
+                     (push getter getters)))
+                 (values all-dummies all-vals newvals
+                         `(values ,@(nreverse setters)) `(values ,@(nreverse getters))))))
+       *setf-expanders*))

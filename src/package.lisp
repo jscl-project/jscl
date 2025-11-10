@@ -34,18 +34,22 @@
   ;; name a package.
   ;; TODO: Implement unuse-package and remove the deleted package from packages
   ;; that use it.
-  (delete-property (package-name (find-package-or-fail package-designator))
-                   *package-table*))
+  (let ((package (find-package-or-fail package-designator)))
+    (dolist (n (cons (package-name package) (package-nicknames package)))
+      (delete-property (package-name package) *package-table*))))
 
-(defun %make-package (name use)
-  (when (find-package name)
-    (error "A package namded `~a' already exists." name))
+(defun %make-package (name use nicknames)
+  (dolist (n (cons name nicknames))
+    (when (find-package n)
+      (error "A package namded `~a' already exists." n)))
   (let ((package (new)))
     (setf (oget package "packageName") name)
     (setf (oget package "symbols") (new))
     (setf (oget package "exports") (new))
     (setf (oget package "use") use)
-    (setf (oget *package-table* name) package)
+    (setf (oget package "nicknames") nicknames)
+    (dolist (n (cons name nicknames))
+      (setf (oget *package-table* n) package))
     package))
 
 (defun resolve-package-list (packages)
@@ -54,10 +58,11 @@
       (pushnew package result :test #'eq))
     (reverse result)))
 
-(defun make-package (name &key use)
+(defun make-package (name &key use nicknames)
   (%make-package
    (string name)
-   (resolve-package-list use)))
+   (resolve-package-list use)
+   (mapcar #'string nicknames)))
 
 (defun packagep (x)
   (and (objectp x) (not (js-null-p x)) (in "symbols" x)))
@@ -65,6 +70,10 @@
 (defun package-name (package-designator)
   (let ((package (find-package-or-fail package-designator)))
     (oget package "packageName")))
+
+(defun package-nicknames (package-designator)
+  (let ((package (find-package-or-fail package-designator)))
+    (oget package "nicknames")))
 
 (defun %package-symbols (package-designator)
   (let ((package (find-package-or-fail package-designator)))
@@ -95,16 +104,18 @@
 
 
 (defmacro defpackage (name &rest options)
-  (let (exports use)
+  (let (exports use nicknames)
     (dolist (option options)
       (ecase (car option)
         (:export
          (setf exports (append exports (cdr option))))
         (:use
-         (setf use (append use (cdr option))))))
+         (setf use (append use (cdr option))))
+        (:nicknames
+         (setf nicknames (append nicknames (cdr option))))))
     `(progn
        (eval-when (:load-toplevel :execute)
-         (let ((package (%defpackage ',(string name) ',use)))
+         (let ((package (%defpackage ',(string name) ',use ',nicknames)))
            (export
             (mapcar (lambda (symbol) (intern (symbol-name symbol) package)) ',exports)
             package)
@@ -112,7 +123,7 @@
        (eval-when (:compile-toplevel)
          (let ((package
                  (or (find-package ,name)
-                     (make-package ',(string name) :use ',use))))
+                     (make-package ',(string name) :use ',use :nicknames ',nicknames))))
            (export
             (mapcar (lambda (symbol) (intern (symbol-name symbol) package)) ',exports)
             package)
@@ -120,16 +131,22 @@
        (find-package ,name))))
 
 
-(defun %redefine-package (package use)
+(defun %redefine-package (package use nicknames)
   (setf (oget package "use") use)
+  (dolist (old-nickname (oget package "nicknames"))
+    (delete-property old-nickname *package-table*))
+  (dolist (new-nickname nicknames)
+    (setf (oget *package-table* new-nickname) package))
+  (setf (oget package "nicknames") nicknames)
   package)
 
-(defun %defpackage (name use)
+(defun %defpackage (name use nicknames)
   (let ((package (find-package name))
-        (use (resolve-package-list use)))
+        (use (resolve-package-list use))
+        (nicknames (mapcar #'string nicknames)))
     (if package
-        (%redefine-package package use)
-        (make-package name :use use))))
+        (%redefine-package package use nicknames)
+        (make-package name :use use :nicknames nicknames))))
 
 
 (defun find-symbol (name &optional (package *package*))

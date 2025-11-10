@@ -339,7 +339,7 @@
            (simple-format stream "#<FUNCTION ~a>" name)
            (write-string "#<FUNCTION>" stream))))
     ;; mop object
-    (mop-object (mop-object-printer form stream))
+    (mop-object (print-object form stream))
     ;; structure object
     (structure (structure-object-printer form stream))
     ;; hash-table object
@@ -426,18 +426,12 @@
          (*print-gensym* gensym)
          (*print-base* base)
          (*print-radix* radix)
-         (*print-circle* circle))
-    (cond ((mop-object-p form)
-           (invoke-object-printer #'mop-object-printer form stream))
-          ((hash-table-p form)
-           (invoke-object-printer #'hash-table-object-printer form stream))
-          ((structure-p form)
-           (invoke-object-printer #'structure-object-printer form stream))
-          (t  (let ((stream (output-stream-designator stream)))
-                (multiple-value-bind (objs ids)
-                    (scan-multiple-referenced-objects form)
-                  (write-aux form stream objs ids)
-                  form))))))
+         (*print-circle* circle)
+         (stream (output-stream-designator stream)))
+    (multiple-value-bind (objs ids)
+        (scan-multiple-referenced-objects form)
+      (write-aux form stream objs ids)
+      form)))
 
 
 #+jscl

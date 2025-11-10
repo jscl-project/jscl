@@ -2,8 +2,8 @@
 
 (/debug "perform test/clos.lisp!")
 
-(test (string= "#<standard-class T>"  (write-to-string (find-class 't))))
-(test (string= "#<standard-class NULL>"  (write-to-string (find-class 'null))))
+(test (string= "#<STANDARD-CLASS T>"  (write-to-string (find-class 't))))
+(test (string= "#<STANDARD-CLASS NULL>"  (write-to-string (find-class 'null))))
 
 (defclass obj1 ()
   ((val :initform nil :initarg :value :reader obj-val :writer set-obj-val)))

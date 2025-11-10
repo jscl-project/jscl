@@ -351,7 +351,7 @@
                 (sequence (if from-end
                               (reverse sequence)
                               sequence))
-                (value (elt sequence 0)))
+                (value (funcall key (elt sequence 0))))
            (when initial-value-p
              (setf value (funcall function initial-value (funcall key value))))
            (etypecase sequence
