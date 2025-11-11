@@ -223,10 +223,11 @@
 ;;;  (op item 'nil) => (op item), if item is a splicable frob
 ;;;  (op item (op a b c)) => (op item a b c)
 (defun bq-attach-append (op item result)
-  (cond ((and (null-or-quoted item) (null-or-quoted result))
-         (list *bq-quote* (append (cadr item) (cadr result))))
-        ((or (null result) (equal result *bq-quote-nil*))
+  ;; switch order of first two branches due to issue #492
+  (cond ((or (null result) (equal result *bq-quote-nil*))
          (if (bq-splicing-frob item) (list op item) item))
+        ((and (null-or-quoted item) (null-or-quoted result))
+         (list *bq-quote* (append (cadr item) (cadr result))))
         ((and (consp result) (eq (car result) op))
          (list* (car result) item (cdr result)))
         (t (list op item result))))
