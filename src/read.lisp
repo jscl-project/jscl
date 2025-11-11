@@ -152,16 +152,21 @@
 (defun discard-char (stream expected)
   (let ((ch (%read-char stream)))
     (when (null ch)
-      (error "End of file when character ~S was expected." expected))
+      (simple-reader-error stream
+                           "End of file when character ~S was expected."
+                           expected))
     (unless (char= ch expected)
-      (error "Character ~S was found but ~S was expected." ch expected))))
+      (simple-reader-error stream
+                           "Character ~S was found but ~S was expected."
+                           ch
+                           expected))))
 
 (defun %read-list (stream &optional (eof-error-p t) eof-value)
   (skip-whitespaces-and-comments stream)
   (let ((ch (%peek-char stream)))
     (cond
       ((null ch)
-       (error "Unexpected EOF"))
+       (error 'reader-eof-error :stream stream))
       ((char= ch #\))
        (discard-char stream #\))
        nil)
@@ -192,7 +197,8 @@
                         (let ((ch (%peek-char stream)))
                           (if (or (null ch) (char= #\) ch))
                               (discard-char stream #\))
-                              (error "Multiple objects following . in a list"))))
+                              (simple-reader-error stream
+                                                   "Multiple objects following . in a list"))))
                       (let ((token (concat "." (read-escaped-until stream #'terminalp))))
                         (rplacd cell (cons (interpret-token token)
                                            (%read-list stream eof-error-p eof-value))))))
@@ -205,7 +211,7 @@
     (setq ch (%read-char stream))
     (while (not (eql ch #\"))
       (when (null ch)
-        (error "Unexpected EOF"))
+        (error 'reader-eof-error :stream stream))
       (when (eql ch #\\)
         (setq ch (%read-char stream)))
       (setq string (concat string (string ch)))
@@ -286,7 +292,7 @@
                  (ls-read stream eof-error-p eof-value t)))))
       ((#\J #\j)
        (unless (char= (%peek-char stream) #\:)
-         (error "FFI descriptor must start with a colon."))
+         (simple-reader-error stream "FFI descriptor must start with a colon."))
        (let ((descriptor (subseq (read-until stream #'terminalp) 1))
              (subdescriptors nil))
          (do* ((start 0 (1+ end))
@@ -320,7 +326,7 @@
               (#\=
                (%read-char stream)
                (if (find-labelled-object id)
-                   (error "Duplicated label #~S=" id)
+                   (simple-reader-error stream "Duplicated label #~S=" id)
                    (progn
                      (add-labelled-object id *future-value*)
                      (let ((obj (ls-read stream eof-error-p eof-value t)))
@@ -340,24 +346,24 @@
                                  *fixup-locations*)
                            *fixup-value*)
                          (cdr cell))
-                     (error "Invalid labelled object #~S#" id)))))))
+                     (simple-reader-error stream "Invalid labelled object #~S#" id)))))))
          (t
-          (error "Invalid dispatch character after #")))))))
+          (simple-reader-error stream "Invalid dispatch character after #")))))))
 
 (defun sharp-radix-reader (ch stream)
   ;; Sharp radix base #\B #\O #\X
   (let* ((fixed-base (assoc ch jscl::*fixed-radix-bases*))
 	       (base (cond (fixed-base (cdr fixed-base))
-		                 (t (error "No radix base in #~A" ch))))
+		                 (t (simple-reader-error stream "No radix base in #~A" ch))))
          (*read-base* base)
          (number nil)
          (string (read-until stream #'terminalp)))
     (setq number (read-integer string))
     (unless number
-      (error "#~c: bad base(~d) digit at ~s~%"
-             ch
-             base
-             string))
+      (simple-reader-error stream "#~c: bad base(~d) digit at ~s~%"
+                           ch
+                           base
+                           string))
     number))
 
 (defun unescape-token (x)
@@ -423,7 +429,10 @@
             (find-symbol name package)
           (if (eq external :external)
               symbol
-              (error "The symbol `~S' is not external in the package ~S." name package))))))
+              (error 'simple-reader-package-error
+                     :package package
+                     :format-control "The symbol `~S' is not external in the package ~S."
+                     :format-arguments (list name package)))))))
 
 
 (defun read-integer (string)
@@ -560,7 +569,7 @@
       (jscl::!parse-integer string start end radix junk-allowed)
     (if (or num junk-allowed)
         (values num index)
-        (error "Junk detected."))))
+        (error 'simple-parse-error :format-control "Junk detected."))))
 
 
 (defun interpret-token (string)
@@ -581,11 +590,11 @@
             (cond
               ((null ch)
                (if eof-error-p
-                   (error "End of file")
+                   (error 'reader-eof-error :stream stream)
                    eof-value))
               ((char= ch #\))
                (if eof-error-p
-                   (error "unmatched close parenthesis")
+                   (simple-reader-error stream "unmatched close parenthesis")
                    eof-value))
               ((char= ch #\()
                (%read-char stream)
@@ -624,3 +633,17 @@
 
 #+jscl
 (fset 'read-from-string #'ls-read-from-string)
+
+#+jscl
+(define-condition reader-error (parse-error stream-error) ())
+
+(define-condition simple-reader-error (simple-condition reader-error) ())
+(define-condition simple-reader-package-error (simple-reader-error package-error) ())
+(define-condition reader-eof-error (reader-error end-of-file) ())
+(define-condition simple-parse-error (simple-condition parse-error) ())
+
+(defun simple-reader-error (stream format-control &rest format-arguments)
+  (error 'simple-reader-error
+         :stream stream
+         :format-control control
+         :format-arguments args))
