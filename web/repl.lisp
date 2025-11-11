@@ -84,8 +84,9 @@
 (defparameter +err-css+ "jqconsole-error")
 
 (defun display-condition (c &optional (style +err-css+) (newline t))
-  (errmsg-prefix)
-  (#j:jqconsole:Write (princ-to-string c) style)
+  (#j:jqconsole:Write (format nil "~A: ~A"
+                              (class-name (class-of c)) c)
+                      style)
   (when newline (%console-terpri)))
 
 

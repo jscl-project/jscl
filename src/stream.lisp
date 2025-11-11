@@ -51,23 +51,25 @@
 ;;; Input streams
 
 (defun make-string-input-stream (string)
-  (let ((index 0))
+  (let ((index 0)
+        (stream nil))
     (flet ((peek (eof-error-p)
              (cond
                ((< index (length string))
                 (char string index))
                (eof-error-p
-                (error "make-string-input-stream end of file."))
+                (error 'end-of-file :stream stream))
                (t
                 nil))))
 
-      (make-stream
-       :read-char-fn (lambda (eof-error-p)
-                       (prog1 (peek eof-error-p)
-                         (incf index)))
+      (setq stream
+            (make-stream
+             :read-char-fn (lambda (eof-error-p)
+                             (prog1 (peek eof-error-p)
+                               (incf index)))
 
-       :peek-char-fn (lambda (eof-error-p)
-                       (peek eof-error-p))))))
+             :peek-char-fn (lambda (eof-error-p)
+                             (peek eof-error-p)))))))
 
 (defun peek-char (&optional type (stream *standard-input*) (eof-error-p t))
   (unless (null type)
@@ -156,5 +158,14 @@
      ,@body
      (get-output-stream-string ,var)))
 
+
+(define-condition stream-error (error)
+  ((stream :initform nil
+           :initarg :stream
+           :reader stream-error-stream)))
+
+(define-condition end-of-file (stream-error) ()
+  (:report (lambda (condition stream)
+             (format stream "End of file on ~S." (stream-error-stream condition)))))
 
 ;;; EOF

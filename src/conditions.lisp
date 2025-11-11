@@ -79,9 +79,13 @@
                     (simple-condition-format-arguments condition)))))
 (%define-condition serious-condition (condition) ())
 (%define-condition warning (condition) ())
+(%define-condition style-warning (warning condition) ())
 (%define-condition simple-warning (simple-condition warning) ())
 (%define-condition error (serious-condition) ())
 (%define-condition simple-error (simple-condition error) ())
+
+;;; FIXME: actually raise following conditions from JavaScript, instead of
+;;; generic SIMPLE-ERROR
 (%define-condition type-error (error)
   ((datum :initform nil
           :initarg :datum
@@ -90,9 +94,23 @@
                   :initarg :expected-type
                   :reader type-error-expected-type))
   (:report (lambda (condition stream)
-             (format stream "~S does not designate a ~S.~%"
+             (format stream "~S does not designate a ~S."
                      (type-error-datum condition)
                      (type-error-expected-type condition)))))
+(%define-condition simple-type-error (simple-condition type-error) ())
+(%define-condition parse-error (error) ())
+(%define-condition program-error (error) ())
+(%define-condition control-error (error) ())
+(%define-condition cell-error (error) ()
+   ((name :initform nil
+          :initarg :name
+          :reader cell-error-name)))
+(%define-condition undefined-function (cell-error) ())
+(%define-condition unbound-variable (cell-error) ())
+(%define-condition package-error (error) ()
+   ((package :initform nil
+             :initarg :package
+             :reader package-error-package)))
 
 (defun %%make-condition (type &rest slot-initializations)
     (apply #'make-instance type slot-initializations))
@@ -151,6 +169,14 @@
        (format stream "Type error. ~a does not designate a ~a" (type-error-datum condition)
                (type-error-expected-type condition))))
     nil))
+
+(defun %%check-type-error (place value typespec string)
+  (error 'simple-type-error
+         :datum value
+         :expected-type typespec
+         :format-control "Check type error.~%The value of ~s is ~s, is not ~a."
+         :format-arguments (list place value
+                                 (if (null string) (format nil "a ~s" typespec) string))))
 
 ;;; handlers
 (defvar *handler-bindings* nil)
@@ -255,6 +281,7 @@
   (fset 'make-condition #'%%make-condition)
   (fset 'signal #'%%signal)
   (fset 'warn #'%%warn)
-  (fset 'error #'%%error))
+  (fset 'error #'%%error)
+  (fset '%check-type-error #'%%check-type-error))
 
 ;;; EOF
