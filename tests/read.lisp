@@ -61,6 +61,9 @@
 
 
 (let ((*features* '(foo)))
+  (test (= (read-from-string "#+foo 1 2)") 2)))
+
+(let ((*features* '(:foo)))
   (test (= (read-from-string "#+foo 1 2)") 1)))
 
 ;;; sharp radix reader

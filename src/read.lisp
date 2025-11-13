@@ -223,7 +223,7 @@
 (defun eval-feature-expression (expression)
   (etypecase expression
     (symbol
-     (and (find (symbol-name expression) *features* :key #'symbol-name :test #'string=) t))
+     (and (find expression *features*) t))
     (list
      ;; Macrocharacters for conditional reading #+ and #- bind the
      ;; current package to KEYWORD so features are correctly
