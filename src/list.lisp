@@ -566,11 +566,11 @@
 
 
 ;;; set-difference
-(defun set-difference (list1 list2 &key key (test #'eq))
+(defun set-difference (list1 list2 &key (key #'identity) (test #'eq))
   (cond (list2
          (let ((result '()))
            (dolist (it list1)
-             (when (not (member it list2 :key key :test test))
+             (when (not (member (funcall key it) list2 :key key :test test))
                (push it result)))
            result))
         (t list1)))
@@ -587,11 +587,11 @@
      (go feed)))
 
 ;;; union
-(defun union (list1 list2 &key key (test #'eq))
+(defun union (list1 list2 &key (key #'identity) (test #'eq))
   (cond ((and list1 list2)
          (let ((result (makeset list2 :test #'equal)))
            (dolist (it list1)
-             (when (not (member it list2 :key key :test test))
+             (when (not (member (funcall key it) list2 :key key :test test))
                (push it result)))
            result))
         (list1)

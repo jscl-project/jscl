@@ -337,7 +337,7 @@
 (test 
  (equal (union '((x 5) (y 6)) '((z 2) (x 4) (z 2)) 
                :key #'car 
-               :test (lambda (x y) (equal (car x) y)))
+               :test #'equal)
         '((Y 6) (Z 2) (X 4))))
 
 
