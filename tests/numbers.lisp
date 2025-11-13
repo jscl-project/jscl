@@ -279,8 +279,8 @@
 (test (let ((n1 1) (n2 2)) (eq (lognor n1 n2) (lognot (logior n1 n2)))))
 (test (let ((n1 1) (n2 2)) (eq (logandc1 n1 n2) (logand (lognot n1)  n2))))
 (test (let ((n1 1) (n2 2)) (eq (logandc2 n1 n2) (logand n1 (lognot n2)))))
-(test (let ((n1 1) (n2 2)) (eq (logiorc1 n1 n2) (logior (lognot n1) n2))))
-(test (let ((n1 1) (n2 2)) (eq (logiorc2 n1 n2) (logior n1 (lognot n2)))))
+(test (let ((n1 1) (n2 2)) (eq (logorc1 n1 n2) (logior (lognot n1) n2))))
+(test (let ((n1 1) (n2 2)) (eq (logorc2 n1 n2) (logior n1 (lognot n2)))))
 (test (let ((j 1) (x 2))   (eq (logbitp j (lognot x)) (not (logbitp j x)))))
 
 (test

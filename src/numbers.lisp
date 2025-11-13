@@ -320,8 +320,8 @@
 (defun lognor   (x y)  (%lognot (%logior x y)))
 (defun logandc1 (x y)  (%logand (%lognot x) y))
 (defun logandc2 (x y)  (%logand x (%lognot y)))
-(defun logiorc1  (x y)  (%logior  (%lognot x) y))
-(defun logiorc2  (x y)  (%logior x (%lognot y)))
+(defun logorc1  (x y)  (%logior  (%lognot x) y))
+(defun logorc2  (x y)  (%logior x (%lognot y)))
 
 ;;; BOOLE
 (defun boole (op i1 i2)
