@@ -131,6 +131,19 @@
 
 (defsetf row-major-aref row-major-aset)
 
+;;; FIXME: implement proper (array bit)
+
+(defun bit-vector-p (x)
+  (storage-vector-p x))
+
+(defun bit (array index)
+  (aref array index))
+
+(defun set-bit (array index value)
+  (aset array index value))
+
+(defsetf bit set-bit)
+
 
 ;;; Vectors
 
