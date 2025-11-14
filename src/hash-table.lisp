@@ -68,11 +68,13 @@
       (eql (object-type-code obj) :hash-table)))
 
 (defun %select-hash-fn (fn)
+  (when (and (symbolp fn) (fboundp fn))
+    (setq fn (symbol-function fn)))
   (cond
     ((eql fn #'eq)     'eq-hash )
     ((eql fn #'eql)    'eql-hash )
     ((eql fn #'equal)  'equal-hash )
-    (t (error "Incorrect hash function: ~s." test))))
+    (t (error "Incorrect hash function: ~s." fn))))
 
 (defun make-hash-table (&key (test #'eql) size)
   (let ((cell (cons (%select-hash-fn test) (new))))
