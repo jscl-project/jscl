@@ -104,7 +104,7 @@
 
 
 (defmacro defpackage (name &rest options)
-  (let (exports use nicknames)
+  (let (exports use nicknames doc)
     (dolist (option options)
       (ecase (car option)
         (:export
@@ -112,14 +112,18 @@
         (:use
          (setf use (append use (cdr option))))
         (:nicknames
-         (setf nicknames (append nicknames (cdr option))))))
+         (setf nicknames (append nicknames (cdr option))))
+        (:documentation
+         (if doc
+             (error "More than one :DOCUMENTATION is not allowed")
+             (setq doc (cadr option))))))
     `(progn
        (eval-when (:load-toplevel :execute)
          (let ((package (%defpackage ',(string name) ',use ',nicknames)))
            (export
             (mapcar (lambda (symbol) (intern (symbol-name symbol) package)) ',exports)
             package)
-           package))
+           ,(when doc `(setf (documentation package 'package) ,doc))))
        (eval-when (:compile-toplevel)
          (let ((package
                  (or (find-package ',name)
@@ -127,7 +131,7 @@
            (export
             (mapcar (lambda (symbol) (intern (symbol-name symbol) package)) ',exports)
             package)
-           package))
+           ,(when doc `(setf (documentation package 'package) ,doc))))
        (find-package ',name))))
 
 
