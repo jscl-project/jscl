@@ -18,6 +18,16 @@
 
 (/debug "loading read.lisp!")
 
+#+jscl (defmacro with-standard-io-syntax (&body body)
+         `(let ((*package* (find-package-or-fail "CL-USER"))
+                (*print-base* 10)
+                (*print-circle* nil)
+                (*print-escape* t)
+                (*print-gensym* t)
+                (*print-radix* nil)
+                (*read-base* 10))
+            ,@body))
+
 ;;;; Reader
 
 #+jscl(defvar *read-base* 10)
