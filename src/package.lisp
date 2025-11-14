@@ -122,13 +122,13 @@
            package))
        (eval-when (:compile-toplevel)
          (let ((package
-                 (or (find-package ,name)
+                 (or (find-package ',name)
                      (make-package ',(string name) :use ',use :nicknames ',nicknames))))
            (export
             (mapcar (lambda (symbol) (intern (symbol-name symbol) package)) ',exports)
             package)
            package))
-       (find-package ,name))))
+       (find-package ',name))))
 
 
 (defun %redefine-package (package use nicknames)
