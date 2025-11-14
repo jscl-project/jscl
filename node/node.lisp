@@ -30,9 +30,9 @@
                                     (eval-interactive (read-from-string line)))))
                       (dolist (result results)
                         (print result)))
-                  (error (err)
-                    (format t "ERROR: ")
-                    (apply #'format t (!condition-args err))
+                  (error (c)
+                    (format t "~A: ~A"
+                            (class-name (class-of c)) c)
                     (terpri))))
               (catch (err)
                 (let ((message (or (oget err "message") err)))
