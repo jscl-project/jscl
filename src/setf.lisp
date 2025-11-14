@@ -177,35 +177,42 @@
 
 ;;; SETF-Based macros
 
+;; Expand a macro defined by DEFINE-MODIFY-MACRO.
+;; The generated call resembles (FUNCTION <before-args> PLACE <after-args>)
+;; but the read/write of PLACE is done after all {BEFORE,AFTER}-ARG-FORMS are
+;; evaluated. Subforms of PLACE are evaluated in the usual order.
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun expand-rmw-macro (function before-arg-forms place after-arg-forms)
+    (let ((before-vars (mapcar (lambda (x) (gensym "BEFORE")) before-arg-forms))
+          (after-vars (mapcar (lambda (x) (gensym "AFTER")) after-arg-forms)))
+      (multiple-value-bind (dummies vals newval setter getter)
+          (!get-setf-expansion place)
+        `(let* (,@(mapcar #'list before-vars before-arg-forms)
+                ,@(mapcar #'list dummies vals)
+                ,@(mapcar #'list after-vars after-arg-forms)
+                (,(car newval) (,function ,@before-vars ,getter ,@after-vars)))
+           ,setter)))))
+
+(defmacro define-modify-macro (name lambda-list function &optional documentation)
+  (multiple-value-bind (req opt key rest) (parse-lambda-list lambda-list)
+    (let ((place (gensym "PLACE")))
+      `(defmacro ,name (,place ,lambda-list)
+         ,@(when documentation (list documentation))
+         (expand-rmw-macro ',function '() ,place
+                           (list* ,@req ,@opt ,@key ,@(when rest (list rest))))))))
+
 (defmacro incf (place &optional (delta 1))
-  (multiple-value-bind (dummies vals newval setter getter)
-      (!get-setf-expansion place)
-    (let ((d (gensym)))
-      `(let* (,@(mapcar #'list dummies vals)
-              (,d ,delta)
-                (,(car newval) (+ ,getter ,d))
-                ,@(cdr newval))
-         ,setter))))
+  (expand-rmw-macro '+ '() place (list delta)))
 
 (defmacro decf (place &optional (delta 1))
-  (multiple-value-bind (dummies vals newval setter getter)
-      (!get-setf-expansion place)
-    (let ((d (gensym)))
-      `(let* (,@(mapcar #'list dummies vals)
-              (,d ,delta)
-              (,(car newval) (- ,getter ,d))
-              ,@(cdr newval))
-         ,setter))))
+  (expand-rmw-macro '- '() place (list delta)))
 
 (defmacro push (x place)
-  (multiple-value-bind (dummies vals newval setter getter)
-      (!get-setf-expansion place)
-    (let ((g (gensym)))
-      `(let* ((,g ,x)
-              ,@(mapcar #'list dummies vals)
-              (,(car newval) (cons ,g ,getter))
-              ,@(cdr newval))
-         ,setter))))
+  (expand-rmw-macro 'cons (list x) place '()))
+
+(defmacro pushnew (x place &rest keys &key key test test-not)
+  (declare (ignore key test test-not))
+  (expand-rmw-macro 'adjoin (list x) place keys))
 
 (defmacro pop (place)
   (multiple-value-bind (dummies vals newval setter getter)
@@ -217,21 +224,6 @@
               ,@(cdr newval))
          ,setter
          (car ,head)))))
-
-(defmacro pushnew (x place &rest keys &key key test test-not)
-  (declare (ignore key test test-not))
-  (multiple-value-bind (dummies vals newval setter getter)
-      (!get-setf-expansion place)
-    (let ((g (gensym))
-          (v (gensym)))
-      `(let* ((,g ,x)
-              ,@(mapcar #'list dummies vals)
-              ,@(cdr newval)
-              (,v ,getter))
-         (if (member ,g ,v ,@keys)
-             ,v
-             (let ((,(car newval) (cons ,g ,getter)))
-               ,setter))))))
 
 ;;; Some SETF expanders
 
