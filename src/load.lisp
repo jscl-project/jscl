@@ -216,7 +216,7 @@
                      (t t)) ))
          (error (msg)
            (format t "   Error: ")
-           (load_cond_err_handl_ msg)
+           (_load_cond_err_handl_ msg)
            ;; break read-eval loop
            ;; no bundle
            (setq fbundle nil)
