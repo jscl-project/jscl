@@ -29,7 +29,8 @@
                     (let ((results (multiple-value-list
                                     (eval-interactive (read-from-string line)))))
                       (dolist (result results)
-                        (print result)))
+                        (prin1 result)
+                        (terpri)))
                   (error (c)
                     (format t "~A: ~A"
                             (class-name (class-of c)) c)
