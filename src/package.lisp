@@ -35,8 +35,7 @@
   (let ((package (find-package-or-fail package-designator)))
     (if (find-package (package-name package))
         (progn
-          ;; TODO: following unuse loop is not efficient
-          (dolist (p (list-all-packages))
+          (dolist (p (package-used-by-list package))
             (unuse-package package p))
           (dolist (n (cons (package-name package) (package-nicknames package)) t)
             (delete-property n *package-table*)))
@@ -89,6 +88,10 @@
 (defun package-use-list (package-designator)
   (let ((package (find-package-or-fail package-designator)))
     (oget package "use")))
+
+(defun package-used-by-list (package-designator)
+  (let ((package (find-package-or-fail package-designator)))
+    (oget package "usedBy")))
 
 (defun %package-external-symbols (package-designator)
   (let ((package (find-package-or-fail package-designator)))
@@ -238,6 +241,7 @@
              (when (null (oget symb "package"))
                (setf (oget symb "package") package)))))))))
 
+;;; TODO: add error checking
 (defun use-package (use-list &optional (package *package*))
   (let ((package (find-package-or-fail package))
         (use-list (resolve-package-list (ensure-list use-list))))
@@ -246,14 +250,17 @@
     (when (member *keyword-package* use-list)
       (error "Cannot use keyword package"))
     (dolist (use use-list t)
-      (pushnew use (oget package "use")))))
+      (pushnew use (oget package "use"))
+      (pushnew package (oget use "usedBy")))))
 
 (defun unuse-package (unuse-list &optional (package *package*))
   (let ((package (find-package-or-fail package))
         (unuse-list (resolve-package-list (ensure-list unuse-list))))
     (dolist (unuse unuse-list t)
       (setf (oget package "use")
-            (remove unuse (oget package "use"))))))
+            (remove unuse (oget package "use")))
+      (setf (oget unuse "usedBy")
+            (remove package (oget unuse "usedBy"))))))
 
 (defun %map-external-symbols (function package)
   (map-for-in function (%package-external-symbols package)))
