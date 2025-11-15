@@ -43,7 +43,7 @@
         ;; This is a deleted package
         nil)))
 
-(defun %make-package (name use nicknames)
+(defun %make-package (name nicknames)
   (dolist (n (cons name nicknames))
     (when (find-package n)
       (error "A package namded `~a' already exists." n)))
@@ -51,11 +51,13 @@
     (setf (oget package "packageName") name)
     (setf (oget package "symbols") (new))
     (setf (oget package "exports") (new))
-    (setf (oget package "use") use)
     (setf (oget package "nicknames") nicknames)
-    (dolist (n (cons name nicknames))
-      (setf (oget *package-table* n) package))
     package))
+
+(defun %register-package (package)
+  (dolist (n (cons (oget package "packageName")
+                   (oget package "nicknames")))
+    (setf (oget *package-table* n) package)))
 
 (defun resolve-package-list (packages)
   (let (result)
@@ -64,10 +66,10 @@
     (reverse result)))
 
 (defun make-package (name &key use nicknames)
-  (%make-package
-   (string name)
-   (resolve-package-list use)
-   (mapcar #'string nicknames)))
+  (let ((package (%make-package (string name) (mapcar #'string nicknames))))
+    (use-package use package)
+    (%register-package package)
+    package))
 
 (defun packagep (x)
   (and (objectp x) (not (js-null-p x)) (in "symbols" x)))
@@ -91,9 +93,6 @@
 (defun %package-external-symbols (package-designator)
   (let ((package (find-package-or-fail package-designator)))
     (oget package "exports")))
-
-(defvar *user-package*
-  (make-package "CL-USER" :use (list (find-package "CL"))))
 
 (defvar *keyword-package*
   (find-package "KEYWORD"))
@@ -147,7 +146,12 @@
 
 
 (defun %redefine-package (package use nicknames)
-  (setf (oget package "use") use)
+  (dolist (n nicknames)
+    (unless (eq (find-package n) package)
+      (error "A package namded `~a' already exists." n)))
+  (let ((old-use (package-use-list package)))
+    (use-package use package)
+    (unuse-package (set-difference old-use use) package))
   (dolist (old-nickname (oget package "nicknames"))
     (delete-property old-nickname *package-table*))
   (dolist (new-nickname nicknames)
@@ -300,3 +304,6 @@
                       (pushnew symbol symbols :test #'eq))))
                 *package-table*)
     symbols))
+
+(defvar *user-package*
+  (make-package "CL-USER" :use (list (find-package "CL"))))
