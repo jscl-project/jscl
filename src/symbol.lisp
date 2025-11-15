@@ -16,6 +16,14 @@
 
 (defun symbolp (x) (symbolp x))
 
+(defvar *gentemp-counter* 0)
+(defun gentemp (&optional (prefix "T") (package *package*))
+  "Creates a new symbol interned in package PACKAGE with the given PREFIX."
+  (while t
+    (multiple-value-bind (sym accessibility)
+        (intern (concat prefix (integer-to-string *gensym-counter*)) package)
+      (unless accessibility (return sym)))))
+
 (defun symbol-plist (x)
   (cond
     ((not (symbolp x))
