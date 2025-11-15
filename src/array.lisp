@@ -144,6 +144,13 @@
 
 (defsetf bit set-bit)
 
+(defun svref (x i)
+  (row-major-aref x i))
+
+(defun svset (x i value)
+  (row-major-aset x i value))
+
+(defsetf svref svset)
 
 ;;; Vectors
 
