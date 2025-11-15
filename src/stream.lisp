@@ -161,6 +161,24 @@
      (get-output-stream-string ,var)))
 
 
+(defun read-line (&optional (stream *standard-input*) (eof-error-p t))
+  (let* ((eof nil)
+         (string
+           (with-output-to-string (s)
+             (loop
+               (let ((ch (read-char stream nil)))
+                 (case ch
+                   (#\newline (return))
+                   ((nil) (setq eof t) (return))
+                   (t (write-char ch s))))))))
+    (if (and eof (zerop (string-length string)))
+        (if eof-error-p
+            (error 'end-of-file :stream stream)
+            (values nil t))
+        (values string eof))))
+
+;;; Conditions
+
 (define-condition stream-error (error)
   ((stream :initform nil
            :initarg :stream
