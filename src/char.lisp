@@ -291,6 +291,12 @@ character exists."
          (or (< 31 n 127)
              (= n 10)))))
 
+(defun char-upcase (x)
+  (char-upcase x))
+
+(defun char-downcase (x)
+  (char-downcase x))
+
 (defun upper-case-p (character)
   (char/= character (char-downcase character)))
 
