@@ -303,7 +303,8 @@
     (setq assignments (reverse assignments))
     ;;
     `(let ,(mapcar #'cdr assignments)
-       (setq ,@(!reduce #'append (mapcar #'butlast assignments) nil)))))
+       (setq ,@(!reduce #'append (mapcar #'butlast assignments) nil))
+       nil)))
 
 (defmacro do (varlist endlist &body body)
   (multiple-value-bind (body decls) (parse-body body :declarations t)
