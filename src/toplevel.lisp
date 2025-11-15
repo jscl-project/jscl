@@ -307,7 +307,9 @@
 (setq *standard-output*
       (make-stream
        :write-fn (lambda (string)
-                   (#j:console:log string))))
+                   (#j:console:log string)))
+      *error-output* *standard-output*
+      *trace-output* *standard-output*)
 
 (cond
   ((find :node *features*)

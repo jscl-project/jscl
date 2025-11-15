@@ -107,7 +107,9 @@
 
 (defun initialize-web-worker ()
   (setq *standard-output*
-        (make-stream :write-fn #'%web-worker-write-string))
+        (make-stream :write-fn #'%web-worker-write-string)
+        *error-output* *standard-output*
+        *trace-output* *standard-output*)
 
   (setq *standard-input*
         (make-stream

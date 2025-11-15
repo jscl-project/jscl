@@ -23,6 +23,8 @@
 
 (defvar *standard-output*)
 (defvar *standard-input*)
+(defvar *error-output*)
+(defvar *trace-output*)
 
 (def!struct (stream (:predicate streamp))
   write-fn
