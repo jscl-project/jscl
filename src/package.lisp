@@ -109,14 +109,13 @@
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (setq *package* (find-package-or-fail ',string-designator))))
 
-(eval-when (#+jscl-xc :compile-toplevel :load-toplevel :execute)
-  (defun find-symbol-for-import (name package)
-    (let ((name (string name)))
-      (multiple-value-bind (symbol status) (find-symbol name package)
-        (unless status
-          (error "Symbol with name ~A not found in ~A"
-                 name package-from))
-        symbol))))
+(defun find-symbol-for-import (name package)
+  (let ((name (string name)))
+    (multiple-value-bind (symbol status) (find-symbol name package)
+      (unless status
+        (error "Symbol with name ~A not found in ~A"
+               name package-from))
+      symbol)))
 
 (defmacro defpackage (name &rest options)
   (let (exports use nicknames doc imports)
@@ -134,18 +133,22 @@
              (setq doc (cadr option))))
         (:import-from
          (setf imports (append imports (list (cdr option)))))))
-    `(eval-when (:compile-toplevel :load-toplevel :execute)
-       (let ((package (%defpackage ',(string name) ',use ',nicknames)))
-         (import (mapcan (lambda (import-spec)
-                           (mapcar (lambda (name)
-                                     (find-symbol-for-import name (car import-spec)))
-                                   (cdr import-spec)))
-                         ',imports)
-                 package)
-         (export (mapcar (lambda (name) (intern (string name) package)) ',exports)
-                 package)
-         ,(when doc `(setf (documentation package 'package) ,doc))
-         package))))
+    `(progn
+       #+jscl-xc
+       (eval-when (:compile-toplevel)
+         (defpackage ,name ,@options))
+       (eval-when (#-jscl-xc :compile-toplevel :load-toplevel :execute)
+         (let ((package (%defpackage ',(string name) ',use ',nicknames)))
+           (import (mapcan (lambda (import-spec)
+                             (mapcar (lambda (name)
+                                       (find-symbol-for-import name (car import-spec)))
+                                     (cdr import-spec)))
+                           ',imports)
+                   package)
+           (export (mapcar (lambda (name) (intern (string name) package)) ',exports)
+                   package)
+           ,(when doc `(setf (documentation package 'package) ,doc))
+           package)))))
 
 
 (defun %redefine-package (package use nicknames)
@@ -161,12 +164,6 @@
     (setf (oget *package-table* new-nickname) package))
   (setf (oget package "nicknames") nicknames)
   package)
-
-#+jscl-xc
-(eval-when (:compile-toplevel)
-  (defun %defpackage (name use nicknames)
-    (or (find-package name)
-        (make-package (string name) :use use :nicknames nicknames))))
 
 (defun %defpackage (name use nicknames)
   (let ((package (find-package name))
