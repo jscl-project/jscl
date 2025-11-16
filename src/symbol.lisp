@@ -66,3 +66,17 @@
   (symbol-value symbol))
 
 (defsetf symbol-value set)
+
+(defun copy-symbol (symbol &optional copy-props)
+  (unless (symbolp symbol)
+    (error "`~a' is not a symbol." symbol))
+  (cond (copy-props
+         (let ((new-symbol (make-symbol (string symbol))))
+           (when (boundp symbol)
+             (setf (symbol-value new-symbol) (symbol-value symbol)))
+           (when (fboundp symbol)
+             (setf (symbol-function new-symbol) (symbol-function symbol)))
+           (setf (symbol-plist new-symbol) (copy-list (symbol-plist symbol)))
+           new-symbol))
+        (t
+         (make-symbol (string symbol)))))
