@@ -14,6 +14,9 @@
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 (/debug "loading symbol.lisp!")
 
+(defun make-symbol (name)
+  (make-symbol name))
+
 (defun symbolp (x) (symbolp x))
 
 (defvar *gentemp-counter* 0)
@@ -58,3 +61,8 @@
   (symbol-function symbol))
 
 (defsetf symbol-function fset)
+
+(defun symbol-value (symbol)
+  (symbol-value symbol))
+
+(defsetf symbol-value set)
