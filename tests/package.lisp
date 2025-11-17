@@ -126,6 +126,22 @@
    (and (not (ignore-errors (export 'cl:car foo) t))
         (eq (find-symbol (string 'car) foo) nil))))
 
+;;; SHADOWING-IMPORT
+(when (find-package 'foo)
+  (delete-package (find-package 'foo)))
+(when (find-package 'bar)
+  (delete-package (find-package 'bar)))
+(test
+ (let* ((foo (make-package 'foo))
+        (bar (make-package 'bar :use '(cl)))
+        (symbol (intern (string 'car) 'foo)))
+   (and (not (ignore-errors (import symbol bar) t))
+        (shadowing-import symbol bar)
+        (eq (find-symbol (string 'car) bar) symbol)
+        (unintern symbol bar)
+        (eq (find-symbol (string 'car) bar) 'cl:car))))
+
+
 (test (member 'car (find-all-symbols (string 'car))))
 
 ;;; This test is failing. I have disabled temporarily.
