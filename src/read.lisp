@@ -292,8 +292,9 @@
            (t (char cname 0)))))
       ((#\+ #\-)
        (let* ((expression
-               (let ((*package* (find-package :keyword)))
-                 (ls-read stream eof-error-p eof-value t))))
+                (let ((*package* (find-package :keyword))
+                      (*read-skip-p* nil))
+                  (ls-read stream eof-error-p eof-value t))))
          
          (if (eql (char= ch #\+) (eval-feature-expression expression))
              (ls-read stream eof-error-p eof-value t)

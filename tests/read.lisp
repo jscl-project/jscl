@@ -66,6 +66,9 @@
 (let ((*features* '(:foo)))
   (test (= (read-from-string "#+foo 1 2)") 1)))
 
+(let ((*features* '(foo)))
+  (test (= (read-from-string "#+foo (1 #+(or) 2) 2)") 2)))
+
 ;;; sharp radix reader
 
 (test (string= "this is 1985" (format nil "this is ~a" #o3701)))
