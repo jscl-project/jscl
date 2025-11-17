@@ -102,6 +102,14 @@
         (unexport sym foo)
         (eq (find-symbol (string 'foo) bar) nil))))
 
+;;; EXPORT should not export inaccessible symbol
+(when (find-package 'foo)
+  (delete-package (find-package 'foo)))
+(test
+ (let ((foo (make-package 'foo)))
+   (and (not (ignore-errors (export 'cl:car foo) t))
+        (eq (find-symbol (string 'car) foo) nil))))
+
 (test (member 'car (find-all-symbols (string 'car))))
 
 ;;; This test is failing. I have disabled temporarily.
