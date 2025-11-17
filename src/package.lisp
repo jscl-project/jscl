@@ -195,22 +195,17 @@
 (defvar *intern-hook* nil)
 
 (defun intern (name &optional (package *package*))
-  (let ((package (find-package-or-fail package)))
+  (let ((name (string name))
+        (package (find-package-or-fail package)))
     (multiple-value-bind (symbol foundp)
         (find-symbol name package)
       (if foundp
           (values symbol foundp)
-          (let ((symbols (%package-symbols package)))
-            (oget symbols name)
-            (let ((symbol (make-symbol name)))
-              (setf (oget symbol "package") package)
-              (when (eq package *keyword-package*)
-                (setf (oget symbol "value") symbol)
-                (export (list symbol) package))
-              (when *intern-hook*
-                (funcall *intern-hook* symbol))
-              (setf (oget symbols name) symbol)
-              (values symbol nil)))))))
+          (let ((symbol (make-symbol name)))
+            (import symbol package)
+            (when *intern-hook*
+              (funcall *intern-hook* symbol))
+            (values symbol nil))))))
 
 (defun symbol-package (symbol)
   (unless (symbolp symbol)
