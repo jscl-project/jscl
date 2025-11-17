@@ -36,7 +36,7 @@
   ;; that use it.
   (let ((package (find-package-or-fail package-designator)))
     (dolist (n (cons (package-name package) (package-nicknames package)))
-      (delete-property (package-name package) *package-table*))))
+      (delete-property n *package-table*))))
 
 (defun %make-package (name use nicknames)
   (dolist (n (cons name nicknames))
