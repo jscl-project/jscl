@@ -207,6 +207,18 @@
               (funcall *intern-hook* symbol))
             (values symbol nil))))))
 
+(defun unintern (symbol &optional (package *package*))
+  (let ((name (symbol-name symbol))
+        (package (find-package-or-fail package)))
+    (multiple-value-bind (symbol-found status) (find-symbol name package)
+      (when (and (member status '(:internal :external))
+                 (eq symbol-found symbol))
+        (delete-property name (%package-external-symbols package))
+        (delete-property name (%package-symbols package))
+        (when (eq (symbol-package symbol) package)
+          (setf (oget symbol "package") nil))
+        t))))
+
 (defun symbol-package (symbol)
   (unless (symbolp symbol)
     (error "`~S' is not a symbol." symbol))
