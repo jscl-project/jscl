@@ -64,6 +64,29 @@
         (member symbol bar-symbols)
         (member symbol baz-symbols))))
 
+;;; (UN)USE-PACKAGE
+(when (find-package 'foo)
+  (delete-package (find-package 'foo)))
+(test (let ((package (make-package 'foo :use '(cl))))
+        (and (eq (find-symbol (string 'car) package) 'cl::car)
+             (unuse-package 'cl package)
+             (eq (find-symbol (string 'car) package) nil)
+             (use-package 'cl package)
+             (eq (find-symbol (string 'car) package) 'cl::car))))
+
+(when (find-package 'foo)
+  (delete-package (find-package 'foo)))
+(when (find-package 'bar)
+  (delete-package (find-package 'bar)))
+(test (let ((foo (make-package 'foo :use '(cl)))
+            (bar (make-package 'bar :use '(foo))))
+        (and (export 'cl:cdr foo)
+             (eq (find-symbol (string 'cdr) bar) 'cl::cdr)
+             (delete-package foo)
+             ;; Delete FOO unuses it in BAR
+             (eq (find-symbol (string 'cdr) bar) nil)
+             (eq (package-use-list bar) nil))))
+
 (test (member 'car (find-all-symbols (string 'car))))
 
 ;;; This test is failing. I have disabled temporarily.

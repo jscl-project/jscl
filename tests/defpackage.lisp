@@ -13,3 +13,13 @@
 (test (eq (defpackage :test-package (:use cl)) (find-package :test-package)))
 ;; Now we expect there to be symbols
 (test (eq (find-symbol "CAR" :test-package) 'cl::car))
+
+(delete-package :test-package)
+
+(test (defpackage :test-package (:import-from cl cdr)))
+(test (eq (find-symbol "CDR" :test-package) 'cl::cdr))
+
+(delete-package :test-package)
+
+(test (defpackage :test-package (:export cdr) (:import-from cl cdr)))
+(test (eq (nth-value 1 (find-symbol "CDR" :test-package)) :external))
