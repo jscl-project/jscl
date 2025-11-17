@@ -657,4 +657,4 @@
   (error 'simple-reader-error
          :stream stream
          :format-control format-control
-         :format-arguments args))
+         :format-arguments format-arguments))
