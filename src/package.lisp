@@ -222,6 +222,13 @@
     (dolist (symb (ensure-list symbols) t)
       (setf (oget exports (symbol-name symb)) symb))))
 
+(defun unexport (symbols &optional (package *package*))
+  (let ((exports (%package-external-symbols package)))
+    (dolist (symb (ensure-list symbols) t)
+      (let ((name (symbol-name symb)))
+        (when (eq symb (oget exports name))
+          (delete-property name exports))))))
+
 (defun import (symbols &optional (package *package*))
   (let ((package-syms (%package-symbols package)))
     (dolist (symb (ensure-list symbols) t)
