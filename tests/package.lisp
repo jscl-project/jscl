@@ -102,6 +102,22 @@
         (unexport sym foo)
         (eq (find-symbol (string 'foo) bar) nil))))
 
+;;; UNINTERN
+(when (find-package 'foo)
+  (delete-package (find-package 'foo)))
+(when (find-package 'bar)
+  (delete-package (find-package 'bar)))
+(test
+ (let* ((foo (make-package 'foo))
+        (bar (make-package 'bar))
+        (sym (intern (string 'foo) foo)))
+   (and (export sym foo)
+        (use-package foo bar)
+        (eq (find-symbol (string 'foo) bar) sym)
+        (unintern sym foo)
+        (eq (find-symbol (string 'foo) foo) nil)
+        (eq (find-symbol (string 'foo) bar) nil))))
+
 ;;; EXPORT should not export inaccessible symbol
 (when (find-package 'foo)
   (delete-package (find-package 'foo)))
