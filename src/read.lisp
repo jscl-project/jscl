@@ -656,5 +656,5 @@
 (defun simple-reader-error (stream format-control &rest format-arguments)
   (error 'simple-reader-error
          :stream stream
-         :format-control control
+         :format-control format-control
          :format-arguments args))
