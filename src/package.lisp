@@ -288,10 +288,10 @@
           (when shadow-p
             (pushnew symb (oget package "shadows"))))))))
 
-(defun import (symbols &optional package)
+(defun import (symbols &optional (package *package*))
   (%import (ensure-list symbols) (find-package-or-fail package) nil))
 
-(defun shadowing-import (symbols &optional package)
+(defun shadowing-import (symbols &optional (package *package*))
   (%import (ensure-list symbols) (find-package-or-fail package) t))
 
 ;;; TODO: add error checking
