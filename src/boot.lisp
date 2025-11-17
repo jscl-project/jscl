@@ -286,6 +286,13 @@
          ,@decls
          (tagbody ,@forms)))))
 
+(defmacro prog* (inits &rest body)
+  (multiple-value-bind (forms decls) (parse-body body :declarations t)
+    `(block nil
+       (let* ,inits
+         ,@decls
+         (tagbody ,@forms)))))
+
 (defmacro psetq (&rest pairs)
   (let (;; For each pair, we store here a list of the form
         ;; (VARIABLE GENSYM VALUE).
