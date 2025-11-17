@@ -32,11 +32,16 @@
 (defun delete-package (package-designator)
   ;; TODO: Signal a correctlable error in case the package-designator does not
   ;; name a package.
-  ;; TODO: Implement unuse-package and remove the deleted package from packages
-  ;; that use it.
   (let ((package (find-package-or-fail package-designator)))
-    (dolist (n (cons (package-name package) (package-nicknames package)))
-      (delete-property n *package-table*))))
+    (if (find-package (package-name package))
+        (progn
+          ;; TODO: following unuse loop is not efficient
+          (dolist (p (list-all-packages))
+            (unuse-package package p))
+          (dolist (n (cons (package-name package) (package-nicknames package)) t)
+            (delete-property n *package-table*)))
+        ;; This is a deleted package
+        nil)))
 
 (defun %make-package (name use nicknames)
   (dolist (n (cons name nicknames))
@@ -102,9 +107,17 @@
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (setq *package* (find-package-or-fail ',string-designator))))
 
+(eval-when (#+jscl-xc :compile-toplevel :load-toplevel :execute)
+  (defun find-symbol-for-import (name package)
+    (let ((name (string name)))
+      (multiple-value-bind (symbol status) (find-symbol name package)
+        (unless status
+          (error "Symbol with name ~A not found in ~A"
+                 name package-from))
+        symbol))))
 
 (defmacro defpackage (name &rest options)
-  (let (exports use nicknames doc)
+  (let (exports use nicknames doc imports)
     (dolist (option options)
       (ecase (car option)
         (:export
@@ -116,23 +129,21 @@
         (:documentation
          (if doc
              (error "More than one :DOCUMENTATION is not allowed")
-             (setq doc (cadr option))))))
-    `(progn
-       (eval-when (:load-toplevel :execute)
-         (let ((package (%defpackage ',(string name) ',use ',nicknames)))
-           (export
-            (mapcar (lambda (symbol) (intern (symbol-name symbol) package)) ',exports)
-            package)
-           ,(when doc `(setf (documentation package 'package) ,doc))))
-       (eval-when (:compile-toplevel)
-         (let ((package
-                 (or (find-package ',name)
-                     (make-package ',(string name) :use ',use :nicknames ',nicknames))))
-           (export
-            (mapcar (lambda (symbol) (intern (symbol-name symbol) package)) ',exports)
-            package)
-           ,(when doc `(setf (documentation package 'package) ,doc))))
-       (find-package ',name))))
+             (setq doc (cadr option))))
+        (:import-from
+         (setf imports (append imports (list (cdr option)))))))
+    `(eval-when (:compile-toplevel :load-toplevel :execute)
+       (let ((package (%defpackage ',(string name) ',use ',nicknames)))
+         (import (mapcan (lambda (import-spec)
+                           (mapcar (lambda (name)
+                                     (find-symbol-for-import name (car import-spec)))
+                                   (cdr import-spec)))
+                         ',imports)
+                 package)
+         (export (mapcar (lambda (name) (intern (string name) package)) ',exports)
+                 package)
+         ,(when doc `(setf (documentation package 'package) ,doc))
+         package))))
 
 
 (defun %redefine-package (package use nicknames)
@@ -143,6 +154,12 @@
     (setf (oget *package-table* new-nickname) package))
   (setf (oget package "nicknames") nicknames)
   package)
+
+#+jscl-xc
+(eval-when (:compile-toplevel)
+  (defun %defpackage (name use nicknames)
+    (or (find-package name)
+        (make-package (string name) :use use :nicknames nicknames))))
 
 (defun %defpackage (name use nicknames)
   (let ((package (find-package name))
@@ -200,6 +217,39 @@
   (let ((exports (%package-external-symbols package)))
     (dolist (symb (ensure-list symbols) t)
       (setf (oget exports (symbol-name symb)) symb))))
+
+(defun import (symbols &optional (package *package*))
+  (let ((package-syms (%package-symbols package)))
+    (dolist (symb (ensure-list symbols) t)
+      (let ((name (symbol-name symb)))
+        (multiple-value-bind (symbol-found status) (find-symbol name package)
+          (cond
+            ((and status (not (eq symb symbol-found)))
+             (error "Import ~a causes name conflict with ~a" symb symbol-found))
+            ((and (member status '(:internal :external))
+                  (eq symb symbol-found))
+             nil)
+            (t
+             (setf (oget package-syms (symbol-name symb)) symb)
+             (when (null (oget symb "package"))
+               (setf (oget symb "package") package)))))))))
+
+(defun use-package (use-list &optional (package *package*))
+  (let ((package (find-package-or-fail package))
+        (use-list (resolve-package-list (ensure-list use-list))))
+    (when (eq package *keyword-package*)
+      (error "Keyword package cannot use packages"))
+    (when (member *keyword-package* use-list)
+      (error "Cannot use keyword package"))
+    (dolist (use use-list t)
+      (pushnew use (oget package "use")))))
+
+(defun unuse-package (unuse-list &optional (package *package*))
+  (let ((package (find-package-or-fail package))
+        (unuse-list (resolve-package-list (ensure-list unuse-list))))
+    (dolist (unuse unuse-list t)
+      (setf (oget package "use")
+            (remove unuse (oget package "use"))))))
 
 (defun %map-external-symbols (function package)
   (map-for-in function (%package-external-symbols package)))
