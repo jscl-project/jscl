@@ -47,6 +47,8 @@
            (if (not (eql (car report) 'lambda))
                (error "Must be LAMBDA ~s." report))
            (setq report-fn `,report))
+          (symbol
+           (setq report-fn `#',report))
           (t (error "What can I compile it: ~s ?" report)))
         (setq method
               `(defmethod print-object ((condition ,name) &optional (stream *standard-output*))
