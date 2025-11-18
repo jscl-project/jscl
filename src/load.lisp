@@ -61,7 +61,8 @@
 (defun _load_form_eval_ (input verbose)
   (let ((stream)
         (expr)
-        (eof (gensym "LOADER" )))
+        (eof (gensym "LOADER" ))
+        (*package* *package*))
     (setq stream (make-string-input-stream input))
     (terpri)
     (tagbody
@@ -188,7 +189,8 @@
    hook))
 
 (defun _load_eval_bundle_ (input verbose bundle-name place hook)
-  (let (stream eof code expr rc code-stor fbundle)
+  (let ((*package* *package*)
+        stream eof code expr rc code-stor fbundle)
     (setq eof (gensym "LOADER"))
     (if hook (setq code-stor hook))
     (when bundle-name
