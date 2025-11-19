@@ -211,22 +211,31 @@
              (values nil nil)))))))
 
 
-;;; It is a function to call when a symbol is interned. The function
-;;; is invoked with the already interned symbol as argument.
-(defvar *intern-hook* nil)
-
 (defun intern (name &optional (package *package*))
-  (let ((name (string name))
-        (package (find-package-or-fail package)))
+  (let* ((name (string name))
+         (package (find-package-or-fail package))
+         (package-syms (%package-symbols package)))
     (multiple-value-bind (symbol foundp)
         (find-symbol name package)
       (if foundp
           (values symbol foundp)
           (let ((symbol (make-symbol name)))
-            (import symbol package)
-            (when *intern-hook*
-              (funcall *intern-hook* symbol))
+            (setf (oget package-syms name) symbol)
+            (setf (oget symbol "package") package)
             (values symbol nil))))))
+
+(defun shadow (names &optional (package *package*))
+  (let* ((names (mapcar #'string (ensure-list names)))
+         (package (find-package-or-fail package))
+         (package-syms (%package-symbols package)))
+    (dolist (name names t)
+      (multiple-value-bind (symbol foundp)
+          (find-symbol name package)
+        (unless (member foundp '(:internal :external))
+          (setq symbol (make-symbol name))
+          (setf (oget package-syms name) symbol)
+          (setf (oget symbol "package") package))
+        (pushnew symbol (oget package "shadows"))))))
 
 (defun unintern (symbol &optional (package *package*))
   (let ((name (symbol-name symbol))
