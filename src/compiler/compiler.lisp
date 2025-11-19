@@ -1470,7 +1470,7 @@
          key)
     (for-in (key o)
             (call g ,(if *multiple-value-p* '|values| '(internal |pv|))
-		  (property o key)))
+		  (call-internal |js_to_lisp| (property o key))))
     (return ,(convert nil))))
 
 (define-compilation %js-vref (var &optional raw)
