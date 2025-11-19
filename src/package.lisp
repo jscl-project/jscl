@@ -255,6 +255,14 @@
       (unless (and status (eq symbol symbol-found))
         (error "~a is not accessible in ~a" symbol package)))))
 
+(defun %check-name-conflict (symbol package)
+  (multiple-value-bind (symbol-found status)
+      (find-symbol (symbol-name symbol) package)
+    (when (and status
+               (not (eq symbol-found symbol))
+               (not (member symbol-found (package-shadowing-symbols package))))
+      (error "Name conflict between ~a and ~a" symbol symbol-found))))
+
 (defun export (symbols &optional (package *package*))
   (let ((package (find-package-or-fail package))
         (exports (%package-external-symbols package))
@@ -262,13 +270,8 @@
         (symbols (ensure-list symbols)))
     (%check-accessible symbols package)
     (dolist (symbol symbols)
-      (let ((name (symbol-name symbol)))
-        (dolist (p (package-used-by-list package))
-          (multiple-value-bind (symbol-found status) (find-symbol name p)
-            (when (and status
-                       (not (eq symbol-found symbol))
-                       (not (member symbol-found (package-shadowing-symbols p))))
-              (error "Export ~a causes name conflict with ~a" symbol symbol-found))))))
+      (dolist (p (package-used-by-list package))
+        (%check-name-conflict symbol p)))
     (import symbols package)
     (dolist (symb symbols t)
       (setf (oget exports (symbol-name symb)) symb))))
@@ -304,7 +307,6 @@
 (defun shadowing-import (symbols &optional (package *package*))
   (%import (ensure-list symbols) (find-package-or-fail package) t))
 
-;;; TODO: add error checking
 (defun use-package (use-list &optional (package *package*))
   (let ((package (find-package-or-fail package))
         (use-list (resolve-package-list (ensure-list use-list))))
@@ -312,6 +314,9 @@
       (error "Keyword package cannot use packages"))
     (when (member *keyword-package* use-list)
       (error "Cannot use keyword package"))
+    (%check-use-package-name-conflict
+     package
+     (set-difference use-list (package-use-list package)))
     (dolist (use use-list t)
       (pushnew use (oget package "use"))
       (pushnew package (oget use "usedBy")))))
@@ -359,6 +364,20 @@
       (lambda (,var) ,@body)
       (find-package ,package))
      ,result-form))
+
+(defun %check-use-package-name-conflict (package use-list)
+  ;; NAME-TABLE maps symbol name to a list of exported symbols from some
+  ;; package in USE-LIST
+  (let ((name-table (new)))
+    (dolist (use use-list)
+      (do-external-symbols (symbol use)
+        (pushnew symbol (oget name-table (symbol-name symbol)))))
+    (map-for-in (lambda (symbols)
+                  (when (cdr symbols)
+                    (error "Name conflict between ~a" symbols))
+                  (when symbols
+                    (%check-name-conflict (car symbols) package)))
+                name-table)))
 
 (defmacro do-all-symbols ((var &optional result-form) &body body)
   `(block nil (%map-all-symbols (lambda (,var) ,@body)) ,result-form))
