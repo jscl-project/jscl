@@ -137,7 +137,7 @@
    :data buffer
    :at-line-start t))
 
-(defun make-string-output-stream (&key element-type)
+(defun make-string-output-stream (&key (element-type 'character))
   (assert (eql element-type 'character))
   (%make-fill-pointer-output-stream
    (make-array 0 :element-type 'character :fill-pointer 0)))
