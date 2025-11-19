@@ -33,7 +33,7 @@
           (catch (err)
             (let ((message (or (oget err "message") err)))
               (format t "ERROR[!]: ~a~%" message))))
-        (setf prompt (format nil "~a>" (package-name *package*)))))))
+        (setf prompt (format nil "~a>" (package-name-for-prompt *package*)))))))
 
 (defun deno-init ()
   (let ((text-encoder (make-new #j:TextEncoder)))

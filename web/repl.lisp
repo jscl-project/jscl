@@ -92,7 +92,7 @@
 
 (defun toplevel ()
   (#j:jqconsole:RegisterMatching "(" ")" "parents")
-  (let ((prompt (format nil "~a> " (package-name *package*))))
+  (let ((prompt (format nil "~a> " (package-name-for-prompt *package*))))
     (#j:jqconsole:Write prompt "jqconsole-prompt"))
   (flet ((process-input (input)
            ;; Capture unhandled Javascript exceptions. We evaluate the

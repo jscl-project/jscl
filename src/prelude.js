@@ -313,7 +313,7 @@ packages.JSCL = {
 };
 
 packages.CL = {
-  packageName: 'CL',
+  packageName: 'COMMON-LISP',
   symbols: Object.create(null),
   exports: Object.create(null),
   use: nil
