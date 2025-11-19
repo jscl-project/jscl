@@ -82,10 +82,8 @@
             (bar (make-package 'bar :use '(foo))))
         (and (export 'cl:cdr foo)
              (eq (find-symbol (string 'cdr) bar) 'cl::cdr)
-             (delete-package foo)
-             ;; Delete FOO unuses it in BAR
-             (eq (find-symbol (string 'cdr) bar) nil)
-             (eq (package-use-list bar) nil))))
+             (delete-package bar)
+             (eq (package-used-by-list foo) nil))))
 
 ;;; UNEXPORT
 (when (find-package 'foo)

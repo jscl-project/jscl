@@ -33,12 +33,18 @@
   ;; TODO: Signal a correctlable error in case the package-designator does not
   ;; name a package.
   (let ((package (find-package-or-fail package-designator)))
-    (if (find-package (package-name package))
-        (progn
-          (dolist (p (package-used-by-list package))
-            (unuse-package package p))
+    (if (package-name package)
+        (let ((used-by (package-used-by-list package))
+              (use (package-use-list package)))
+          ;; TODO: provide a restart that does UNUSE-PACKAGE
+          (when used-by
+            (error "~a is used by ~a" package used-by))
+          (dolist (p use)
+            (unuse-package p package))
           (dolist (n (cons (package-name package) (package-nicknames package)) t)
-            (delete-property n *package-table*)))
+            (delete-property n *package-table*))
+          (setf (oget package "packageName") nil)
+          t)
         ;; This is a deleted package
         nil)))
 
@@ -49,7 +55,8 @@
     (reverse result)))
 
 (defun rename-package (package new-name &optional new-nicknames)
-  (let* ((new-name (string new-name))
+  (let* ((package (find-package-or-fail package))
+         (new-name (string new-name))
          (new-nicknames (mapcar #'string new-nicknames))
          (new-names (cons new-name new-nicknames))
          (old-names (cons (oget package "packageName")
@@ -120,7 +127,9 @@
 (defun keywordp (x)
   (and (symbolp x) (eq (symbol-package x) *keyword-package*)))
 
-(defvar *package* (find-package "CL"))
+(defvar *package* (find-package "COMMON-LISP"))
+
+(rename-package "COMMON-LISP" "COMMON-LISP" '("CL"))
 
 (defmacro in-package (string-designator)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
@@ -135,7 +144,8 @@
       symbol)))
 
 (defmacro defpackage (name &rest options)
-  (let (exports use nicknames doc imports shadowing-imports)
+  (let ( exports use nicknames doc imports shadowing-imports
+         shadow intern)
     (dolist (option options)
       (ecase (car option)
         (:export
@@ -151,7 +161,11 @@
         (:import-from
          (setf imports (append imports (list (cdr option)))))
         (:shadowing-import-from
-         (setf shadowing-imports (append shadowing-imports (list (cdr option)))))))
+         (setf shadowing-imports (append shadowing-imports (list (cdr option)))))
+        (:shadow (setf shadow (append shadow (cdr option))))
+        (:intern (setf intern (append intern (cdr option))))
+        ;; :size is currently ignored
+        (:size)))
     `(progn
        #+jscl-xc
        (eval-when (:compile-toplevel)
@@ -159,6 +173,7 @@
        (eval-when (#-jscl-xc :compile-toplevel :load-toplevel :execute)
          (let ((package (%defpackage ',(string name) ',nicknames)))
            (unuse-package (package-use-list package) package)
+           (shadow ',shadow package)
            (shadowing-import
             (mapcan (lambda (import-spec)
                       (mapcar (lambda (name)
@@ -173,6 +188,8 @@
                                      (cdr import-spec)))
                            ',imports)
                    package)
+           (dolist (symb ',intern)
+             (intern symb package))
            (export (mapcar (lambda (name) (intern (string name) package)) ',exports)
                    package)
            ,(when doc `(setf (documentation package 'package) ,doc))
@@ -250,6 +267,8 @@
                      symbol package inherited))))
         (delete-property name (%package-external-symbols package))
         (delete-property name (%package-symbols package))
+        (setf (oget package "shadows")
+              (remove symbol (oget package "shadows")))
         (when (eq (symbol-package symbol) package)
           (setf (oget symbol "package") nil))
         t))))
@@ -361,20 +380,22 @@
 
 (defmacro do-symbols ((var &optional (package '*package*) result-form)
                       &body body)
-  `(block nil
-     (%map-symbols
-      (lambda (,var) ,@body)
-      (find-package ,package))
-     ,result-form))
+  (multiple-value-bind (body decls) (parse-body body :declarations t)
+    `(block nil
+       (%map-symbols
+        (lambda (,var) (tagbody ,@body))
+        (find-package ,package))
+       (let (,var) ,result-form))))
 
 (defmacro do-external-symbols ((var &optional (package '*package*)
                                               result-form)
                                &body body)
-  `(block nil
-     (%map-external-symbols
-      (lambda (,var) ,@body)
-      (find-package ,package))
-     ,result-form))
+  (multiple-value-bind (body decls) (parse-body body :declarations t)
+    `(block nil
+       (%map-external-symbols
+        (lambda (,var) (tagbody ,@body))
+        (find-package ,package))
+       (let (,var) ,result-form))))
 
 (defun %check-use-package-name-conflict (package use-list)
   ;; NAME-TABLE maps symbol name to a list of exported symbols from some
@@ -391,15 +412,21 @@
                 name-table)))
 
 (defmacro do-all-symbols ((var &optional result-form) &body body)
-  `(block nil (%map-all-symbols (lambda (,var) ,@body)) ,result-form))
+  (multiple-value-bind (body decls) (parse-body body :declarations t)
+    `(block nil
+       (%map-all-symbols (lambda (,var) (tagbody ,@body)))
+       (let (,var) ,result-form))))
 
 (defmacro do-all-external-symbols ((var &optional result-form) &body body)
-  `(block nil (%map-all-external-symbols (lambda (,var) ,@body)) ,result-form))
+  (multiple-value-bind (body decls) (parse-body body :declarations t)
+    `(block nil
+       (%map-all-external-symbols (lambda (,var) (tagbody ,@body)))
+       (let (,var) ,result-form))))
 
-(defun find-all-symbols (string &optional external-only)
-  (let (symbols)
+(defun find-all-symbols (name &optional external-only)
+  (let ((name (string name)) symbols)
     (map-for-in (lambda (package)
-                  (multiple-value-bind (symbol status) (find-symbol string package)
+                  (multiple-value-bind (symbol status) (find-symbol name package)
                     (when (if external-only (eq status :external) status)
                       (pushnew symbol symbols :test #'eq))))
                 *package-table*)
