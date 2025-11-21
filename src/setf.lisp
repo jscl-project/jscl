@@ -80,11 +80,11 @@
   ;;
   (error "The long form of defsetf is not implemented"))
 
-(defmacro defsetf (&whole args first second &rest others)
+(defmacro defsetf (&whole form first second &rest others)
   (declare (ignore others))
   (if (consp second)
-      `(long-defsetf ,@args)
-      `(short-defsetf ,@args)))
+      `(long-defsetf ,@(cdr form))
+      `(short-defsetf ,@(cdr form))))
 
 
 
