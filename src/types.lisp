@@ -282,16 +282,15 @@
                 (check-numeric-limit high limit-type) ))
       (values '* '*)))
 
-(defmacro deftype-compound (&whole whole name args &body body)
-  (destructuring-bind (name lambda-list &body body) whole
-    (multiple-value-bind (body decls docstring)
-        (parse-body body :declarations t :docstring t)
-      (let* ((compound
-               `(function
-                 (lambda ,lambda-list
-                  ,@body))))
-        `(eval-when (:load-toplevel :execute)
-           (%deftype ',name :compound ,compound))))))
+(defmacro deftype-compound (name lambda-list &body body)
+  (multiple-value-bind (body decls docstring)
+      (parse-body body :declarations t :docstring t)
+    (let* ((compound
+             `(function
+               (lambda ,lambda-list
+                ,@body))))
+      `(eval-when (:load-toplevel :execute)
+         (%deftype ',name :compound ,compound)))))
 
 (macrolet ((dc (type-name predicate-name limit-type)
                `(deftype-compound ,type-name (object type)
@@ -408,21 +407,20 @@
 
 
 ;;; todo: canonical deftype lambda-list
-(defmacro deftype (&whole whole name lambda-list &body body)
-  (destructuring-bind (name (&rest args) &body body) whole
-    (if (null args)
-        (setq args '(&optional ignore)))
-    (multiple-value-bind (body decls docstring)
-        (parse-body body :declarations t :docstring t)
-      (let* ((expr (gensym (symbol-name name)))
-             (expander
-               `(function
-                 (lambda (,expr)
-                  (destructuring-bind ,args (cdr ,expr)
-                    ,@body)))))
-        `(progn
-           (%deftype ',name :expander ,expander)
-           ',name)))))
+(defmacro deftype (name (&rest args) &body body)
+  (if (null args)
+      (setq args '(&optional ignore)))
+  (multiple-value-bind (body decls docstring)
+      (parse-body body :declarations t :docstring t)
+    (let* ((expr (gensym (symbol-name name)))
+           (expander
+             `(function
+               (lambda (,expr)
+                (destructuring-bind ,args (cdr ,expr)
+                  ,@body)))))
+      `(progn
+         (%deftype ',name :expander ,expander)
+         ',name))))
 
 ;;; predefenition types
 ;;; (mod n) -> (1- n)
