@@ -721,10 +721,7 @@
     (dolist (def definitions)
       (destructuring-bind (name lambda-list &body body) def
         (let ((binding (make-binding :name name :type 'macro :value
-                                     (let ((g!form (gensym)))
-                                       `(lambda (,g!form)
-                                          (destructuring-bind ,lambda-list ,g!form
-                                            ,@body))))))
+                                     (!parse-macro name lambda-list body))))
           (push-to-lexenv binding  *environment* 'function))))
     (convert `(progn ,@body) *multiple-value-p*)))
 
@@ -1588,7 +1585,7 @@
       ((and (consp form) (symbolp (car form)))
        (let ((macrofun (!macro-function (car form))))
          (if macrofun
-             (values (funcall macrofun (cdr form)) t)
+             (values (funcall macrofun form *environment*) t)
              (values form nil))))
       (t
        (values form nil)))))

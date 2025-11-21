@@ -28,31 +28,23 @@
 
 (eval-when (:compile-toplevel)
   (let ((defmacro-macroexpander
-         '#'(lambda (form)
+         '#'(lambda (form env)
+              (declare (ignore env))
               (destructuring-bind (name args &body body)
-                  form
-                (multiple-value-bind (body decls docstring)
-                    (parse-body body :declarations t :docstring t)
-                  (let* ((whole (gensym))
-                         (expander `(function
-                                     (lambda (,whole)
-                                      ,docstring
-                                      (block ,name
-                                        (destructuring-bind ,args ,whole
-                                          ,@decls
-                                          ,@body))))))
+                  (cdr form)
+                (let* ((expander `(function ,(!parse-macro name args body))))
 
-                    ;; If we are bootstrapping JSCL, we need to quote the
-                    ;; macroexpander, because the macroexpander will
-                    ;; need to be dumped in the final environment
-                    ;; somehow.
-                    (when (find :jscl-xc *features*)
-                      (setq expander `(quote ,expander)))
+                  ;; If we are bootstrapping JSCL, we need to quote the
+                  ;; macroexpander, because the macroexpander will
+                  ;; need to be dumped in the final environment
+                  ;; somehow.
+                  (when (find :jscl-xc *features*)
+                    (setq expander `(quote ,expander)))
 
-                    `(eval-when (:compile-toplevel :execute)
-                       (%compile-defmacro ',name ,expander))
+                  `(eval-when (:compile-toplevel :execute)
+                     (%compile-defmacro ',name ,expander))
 
-                    ))))))
+                  )))))
     
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
 

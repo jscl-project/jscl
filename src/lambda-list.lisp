@@ -240,121 +240,134 @@
         (error "Odd number of keyword arguments.")))))
 
 
-(defun !expand-destructuring-bind (lambda-list expression &rest body)
-  (multiple-value-bind (ll)
-      (parse-destructuring-lambda-list lambda-list)
-    (let ((bindings '()))
-      (labels ( ;; Return a chain of the form (CAR (CDR (CDR ... (CDR X))),
-               ;; such that there are N calls to CDR.
-               (nth-chain (x n &optional tail)
-                 (if tail
-                     (if (zerop n) x `(cdr ,(nth-chain x (1- n) t)))
-                     `(car ,(nth-chain x n t))))
-               ;; Compute the bindings for a pattern against FORM. If
-               ;; PATTERN is a lambda-list the pattern is bound to an
-               ;; auxiliary variable, otherwise PATTERN must be a
-               ;; symbol it will be bound to the form. The variable
-               ;; where the form is bound is returned.
-               (compute-pbindings (pattern form)
-                 (cond
-                   ((null pattern))
-                   ((symbolp pattern)
-                    (push `(,pattern ,form) bindings)
-                    pattern)
-                   ((lambda-list-p pattern)
-                    (compute-bindings pattern form))))
-               
-               ;; Compute the bindings for the full LAMBDA-LIST ll
-               ;; against FORM.
-               (compute-bindings (ll form)
-                 (let ((reqvar-count (length (lambda-list-reqvars ll)))
-                       (optvar-count (length (lambda-list-optvars ll)))
-                       (whole (or (lambda-list-wholevar ll) (gensym))))
-                   ;; Create a binding for the whole expression
-                   ;; FORM. It will match to LL, so we validate the
-                   ;; number of elements on the result of FORM.
-                   (compute-pbindings whole `(validate-reqvars ,form ,reqvar-count))
-                   
-                   (let ((count 0))
-                     ;; Required vars
-                     (dolist (reqvar (lambda-list-reqvars ll))
-                       (compute-pbindings reqvar (nth-chain whole count))
-                       (incf count))
-                     ;; Optional vars
-                     (dolist (optvar (lambda-list-optvars ll))
-                       (when (optvar-supplied-p-parameter optvar)
-                         (compute-pbindings (optvar-supplied-p-parameter optvar)
-                                            `(not (null ,(nth-chain whole count t)))))
-                       (compute-pbindings (optvar-variable optvar)
-                                          `(if (null ,(nth-chain whole count t))
-                                               ,(optvar-initform optvar)
-                                               ,(nth-chain whole count)))
-                       (incf count))
+(defun !expand-destructuring-bind (ll expression body)
+  (let ((bindings '())
+        (ignorable-vars '()))
+    (labels (;; Save our GENSYMs to IGNORABLE-VARS, and we will emit
+             ;; ignorable declarations for them
+             (%gensym ()
+               (let ((sym (gensym)))
+                 (push sym ignorable-vars)
+                 sym))
+             ;; Return a chain of the form (CAR (CDR (CDR ... (CDR X))),
+             ;; such that there are N calls to CDR.
+             (nth-chain (x n &optional tail)
+               (if tail
+                   (if (zerop n) x `(cdr ,(nth-chain x (1- n) t)))
+                   `(car ,(nth-chain x n t))))
+             ;; Compute the bindings for a pattern against FORM. If
+             ;; PATTERN is a lambda-list the pattern is bound to an
+             ;; auxiliary variable, otherwise PATTERN must be a
+             ;; symbol it will be bound to the form. The variable
+             ;; where the form is bound is returned.
+             (compute-pbindings (pattern form)
+               (cond
+                 ((null pattern))
+                 ((symbolp pattern)
+                  (push `(,pattern ,form) bindings)
+                  pattern)
+                 ((lambda-list-p pattern)
+                  (compute-bindings pattern form))))
 
-                     ;; Rest-variable and keywords
-                     
-                     ;; If there is a rest or keyword variable, we
-                     ;; will add a binding for the rest or an
-                     ;; auxiliary variable. The computations in of the
-                     ;; keyword start in this variable, so we avoid
-                     ;; the long tail of nested CAR/CDR operations
-                     ;; each time. We also include validation of
-                     ;; keywords if there is any.
-                     (let* ((chain (nth-chain whole (+ reqvar-count optvar-count) t))
-                            (restvar (lambda-list-restvar ll))
-                            (pattern (or restvar (gensym)))
-                            (keywords (mapcar #'keyvar-keyword-name (lambda-list-keyvars ll)))
-                            (rest
-                             ;; Create a binding for the rest of the
-                             ;; arguments. If there is keywords, then
-                             ;; validate this list. If there is no
-                             ;; keywords and no &rest variable, then
-                             ;; validate that the rest is empty, it is
-                             ;; to say, there is no more arguments
-                             ;; that we expect.
-                             (cond
-                               (keywords (compute-pbindings pattern `(validate-keyvars ,chain ',keywords ,(lambda-list-allow-other-keys ll))))
-                               (restvar  (compute-pbindings pattern chain))
-                               (t        (compute-pbindings pattern `(validate-max-args ,chain))))))
-                       (when (lambda-list-keyvars ll)
-                         ;; Keywords
-                         (dolist (keyvar (lambda-list-keyvars ll))
-                           (let ((variable (keyvar-variable keyvar))
-                                 (keyword (keyvar-keyword-name keyvar))
-                                 (supplied (or (keyvar-supplied-p-parameter keyvar)
-                                               (gensym))))
-                             (when supplied
-                               (compute-pbindings supplied `(keyword-supplied-p ,keyword ,rest)))
-                             (compute-pbindings variable `(if ,supplied
-                                                              (keyword-lookup ,keyword ,rest)
-                                                              ,(keyvar-initform keyvar)))))))
-                     ;; Aux variables
-                     (dolist (auxvar (lambda-list-auxvars ll))
-                       (compute-pbindings (auxvar-variable auxvar) (auxvar-initform auxvar))))
-                   
-                   whole)))
+             ;; Compute the bindings for the full LAMBDA-LIST ll
+             ;; against FORM.
+             (compute-bindings (ll form)
+               (let ((reqvar-count (length (lambda-list-reqvars ll)))
+                     (optvar-count (length (lambda-list-optvars ll)))
+                     (whole (or (lambda-list-wholevar ll) (%gensym))))
+                 ;; Create a binding for the whole expression
+                 ;; FORM. It will match to LL, so we validate the
+                 ;; number of elements on the result of FORM.
+                 (compute-pbindings whole `(validate-reqvars ,form ,reqvar-count))
 
-        ;; Macroexpansion. Compute bindings and generate code for them
-        ;; and some necessary checking.
-        (compute-bindings ll expression)
-        `(let* ,(reverse bindings)
-           ,@body)))))
+                 (let ((count 0))
+                   ;; Required vars
+                   (dolist (reqvar (lambda-list-reqvars ll))
+                     (compute-pbindings reqvar (nth-chain whole count))
+                     (incf count))
+                   ;; Optional vars
+                   (dolist (optvar (lambda-list-optvars ll))
+                     (when (optvar-supplied-p-parameter optvar)
+                       (compute-pbindings (optvar-supplied-p-parameter optvar)
+                                          `(not (null ,(nth-chain whole count t)))))
+                     (compute-pbindings (optvar-variable optvar)
+                                        `(if (null ,(nth-chain whole count t))
+                                             ,(optvar-initform optvar)
+                                             ,(nth-chain whole count)))
+                     (incf count))
 
+                   ;; Rest-variable and keywords
 
-;;; Because DEFMACRO uses destructuring-bind to parse the arguments of
-;;; the macro-function, we can't define DESTRUCTURING-BIND with
-;;; defmacro to avoid a circularity. So just define the macro function
-;;; explicitly.
+                   ;; If there is a rest or keyword variable, we
+                   ;; will add a binding for the rest or an
+                   ;; auxiliary variable. The computations in of the
+                   ;; keyword start in this variable, so we avoid
+                   ;; the long tail of nested CAR/CDR operations
+                   ;; each time. We also include validation of
+                   ;; keywords if there is any.
+                   (let* ((chain (nth-chain whole (+ reqvar-count optvar-count) t))
+                          (restvar (lambda-list-restvar ll))
+                          (pattern (or restvar (%gensym)))
+                          (keywords (mapcar #'keyvar-keyword-name (lambda-list-keyvars ll)))
+                          (rest
+                            ;; Create a binding for the rest of the
+                            ;; arguments. If there is keywords, then
+                            ;; validate this list. If there is no
+                            ;; keywords and no &rest variable, then
+                            ;; validate that the rest is empty, it is
+                            ;; to say, there is no more arguments
+                            ;; that we expect.
+                            (cond
+                              (keywords (compute-pbindings pattern `(validate-keyvars ,chain ',keywords ,(lambda-list-allow-other-keys ll))))
+                              (restvar  (compute-pbindings pattern chain))
+                              (t        (compute-pbindings pattern `(validate-max-args ,chain))))))
+                     (when (lambda-list-keyvars ll)
+                       ;; Keywords
+                       (dolist (keyvar (lambda-list-keyvars ll))
+                         (let ((variable (keyvar-variable keyvar))
+                               (keyword (keyvar-keyword-name keyvar))
+                               (supplied (keyvar-supplied-p-parameter keyvar)))
+                           (when supplied
+                             (compute-pbindings supplied `(keyword-supplied-p ,keyword ,rest)))
+                           (compute-pbindings variable `(if ,supplied
+                                                            (keyword-lookup ,keyword ,rest)
+                                                            ,(keyvar-initform keyvar)))))))
+                   ;; Aux variables
+                   (dolist (auxvar (lambda-list-auxvars ll))
+                     (compute-pbindings (auxvar-variable auxvar) (auxvar-initform auxvar))))
 
-#-jscl
-(defmacro !destructuring-bind (lambda-list expression &body body)
-  (apply #'!expand-destructuring-bind lambda-list expression body))
+                 whole)))
+
+      ;; Macroexpansion. Compute bindings and generate code for them
+      ;; and some necessary checking.
+      (compute-bindings ll expression)
+      `(let* ,(reverse bindings)
+         (declare (ignorable ,@ignorable-vars))
+         ,@body))))
+
+;;; Return a lambda expression for use as macro expander, from CLtL2
+(defun !parse-macro (name lambda-list body)
+  (multiple-value-bind (body decls docstring)
+      (parse-body body :declarations t :docstring t)
+    (let* ((whole (gensym))
+           (env (gensym))
+           (ll (parse-destructuring-lambda-list lambda-list))
+           (whole-var (lambda-list-wholevar ll)))
+      (setf (lambda-list-wholevar ll) nil)
+      `(lambda (,whole ,env)
+         ,@(when docstring (list docstring))
+         (declare (ignorable ,env))
+         (block ,name
+           (let (,@(when whole-var
+                     `((,whole-var ,whole))))
+             ,(!expand-destructuring-bind
+               ll
+               `(cdr ,whole)
+               body)))))))
 
 #+jscl
-(eval-when (:compile-toplevel)
-  (let ((macroexpander
-         '#'(lambda (form &optional environment)
-              (declare (ignore environment))
-              (apply #'!expand-destructuring-bind form))))
-    (%compile-defmacro '!destructuring-bind macroexpander)
-    (%compile-defmacro  'destructuring-bind macroexpander)))
+(defmacro destructuring-bind (lambda-list expression &body body)
+  (!expand-destructuring-bind
+   (parse-destructuring-lambda-list lambda-list)
+   expression
+   body))
