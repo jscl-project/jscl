@@ -43,8 +43,9 @@
 
 (defun var-or-pattern (x)
   (etypecase x
-    (symbol x)
-    (cons (parse-destructuring-lambda-list x))))
+    ;; Symbol NIL should be considered a pattern, not variable
+    (list (parse-destructuring-lambda-list x))
+    (symbol x)))
 
 (defun parse-optvar (desc)
   (etypecase desc
