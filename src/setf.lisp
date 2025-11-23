@@ -19,7 +19,7 @@
 
 (eval-when(:compile-toplevel :load-toplevel :execute)
   (defvar *setf-expanders* nil)
-  (defun !get-setf-expansion (place)
+  (defun !get-setf-expansion (place &optional env)
     (if (symbolp place)
         (let ((value (gensym)))
           (values nil
@@ -39,7 +39,7 @@
               ;;   http://clhs.lisp.se/Body/05_abg.htm
               ;;
               (multiple-value-bind (macroexpansion macroexpanded)
-                  (!macroexpand-1 place)
+                  (!macroexpand-1 place env)
                 (if macroexpanded
                     (!get-setf-expansion macroexpansion)
                     (error "Unknown generalized reference."))))))))
@@ -98,7 +98,7 @@
      (let ((place (!macroexpand-1 (first pairs) *environment*))
            (value (second pairs)))
        (multiple-value-bind (vars vals store-vars writer-form reader-form)
-           (!get-setf-expansion place)
+           (!get-setf-expansion place *environment*)
          (declare (ignorable reader-form))
          ;; TODO: Optimize the expansion a little bit to avoid let*
          ;; or multiple-value-bind when unnecesary.
@@ -141,7 +141,7 @@
   (let (let*-bindings mv-bindings setters getters)
     (dolist (place (butlast args))
       (multiple-value-bind (temps subforms store-vars setter getter)
-          (!get-setf-expansion place)
+          (!get-setf-expansion place *environment*)
         (push (mapcar #'list temps subforms) let*-bindings)
         (push store-vars mv-bindings)
         (push setter setters)
@@ -161,7 +161,7 @@
     (let (let*-bindings mv-bindings setters getters)
       (dolist (place places)
         (multiple-value-bind (temps subforms store-vars setter getter)
-            (!get-setf-expansion place)
+            (!get-setf-expansion place *environment*)
           (push (mapcar #'list temps subforms) let*-bindings)
           (push store-vars mv-bindings)
           (push setter setters)
@@ -186,7 +186,7 @@
     (let ((before-vars (mapcar (lambda (x) (gensym "BEFORE")) before-arg-forms))
           (after-vars (mapcar (lambda (x) (gensym "AFTER")) after-arg-forms)))
       (multiple-value-bind (dummies vals newval setter getter)
-          (!get-setf-expansion place)
+          (!get-setf-expansion place *environment*)
         `(let* (,@(mapcar #'list before-vars before-arg-forms)
                 ,@(mapcar #'list dummies vals)
                 ,@(mapcar #'list after-vars after-arg-forms)
@@ -216,7 +216,7 @@
 
 (defmacro pop (place)
   (multiple-value-bind (dummies vals newval setter getter)
-    (!get-setf-expansion place)
+    (!get-setf-expansion place *environment*)
     (let ((head (gensym)))
       `(let* (,@(mapcar #'list dummies vals)
               (,head ,getter)
@@ -234,7 +234,7 @@
                (let (all-dummies all-vals newvals setters getters)
                  (dolist (place places)
                    (multiple-value-bind (dummies vals newval setter getter)
-                       (!get-setf-expansion place)
+                       (!get-setf-expansion place *environment*)
                      (setq all-dummies (append all-dummies dummies (cdr newval))
                            all-vals (append all-vals vals
                                             (mapcar (constantly nil) (cdr newval)))
