@@ -2,6 +2,11 @@
 
 (/debug "Perform tests/conditions.lisp")
 
+(test (block nil
+        (handler-bind
+            ((error #'(lambda (c) (return c))))
+          (error "Error"))))
+
 (defun condition-hierarhy-test (condition)
   (handler-case
       (progn

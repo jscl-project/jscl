@@ -192,7 +192,7 @@
             ;; (error warning) -> (or error warning)
             ;; unless form - if someone smart has already used OR
             (unless (eq (car type) 'or) (setq type (push 'or type))))
-        (push `(push (cons ',type #',handler) *handler-bindings*)
+        (push `(push (cons ',type ,handler) *handler-bindings*)
               install-handlers)))
     `(let ((*handler-bindings* *handler-bindings*))
        ,@install-handlers
