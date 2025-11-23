@@ -19,7 +19,7 @@
 
 
 (defvar !lambda-list-keywords
-  '(&optional &rest &key &aux &allow-other-keys &body &optional))
+  '(&optional &rest &key &aux &allow-other-keys &body &optional &environment))
 
 ;;;; Lambda list parsing
 
@@ -39,7 +39,8 @@
   restvar
   allow-other-keys
   keyvars
-  auxvars)
+  auxvars
+  envvar)
 
 (defun var-or-pattern (x)
   (etypecase x
@@ -105,41 +106,50 @@
        (make-auxvar :variable (var-or-pattern variable)
                     :initform initform)))))
 
-(defun parse-destructuring-lambda-list (lambda-list)
+(defun parse-destructuring-lambda-list (lambda-list &optional accept-environment-p)
   (let (;; Destructure lambda list structure where we accumulate the
         ;; results of the parsing.
         (ll (make-lambda-list))
         ;; List of lambda list keywords which we have already seen.
         (lambda-keywords nil))
-    (flet (;; Check if we are in the beginning of the section NAME in
-           ;; the lambda list. It also checks if the section is in the
-           ;; proper place and it is new.
-           (lambda-section (name)
-             (let ((section (and (consp lambda-list) (first lambda-list))))
-               (when (find section lambda-keywords)
-                 (error "Bad placed ~a in the lambda-list ~S." section lambda-list))
-               (when (eq name section)
-                 (push name lambda-keywords)
-                 (pop lambda-list)
-                 t)))
-           ;; Check if we are in the middle of a lambda list section,
-           ;; looking for a lambda list keyword in the current
-           ;; position of the lambda list.
-           (in-section-p ()
-             (and (consp lambda-list)
-                  (not (find (first lambda-list) !lambda-list-keywords)))))
+    (labels (;; Check if we are in the beginning of the section NAME in
+             ;; the lambda list. It also checks if the section is in the
+             ;; proper place and it is new.
+             (lambda-section (name)
+               (let ((section (and (consp lambda-list) (first lambda-list))))
+                 (when (find section lambda-keywords)
+                   (error "Bad placed ~a in the lambda-list ~S." section lambda-list))
+                 (when (eq name section)
+                   (push name lambda-keywords)
+                   (pop lambda-list)
+                   t)))
+             ;; Check if we are in the middle of a lambda list section,
+             ;; looking for a lambda list keyword in the current
+             ;; position of the lambda list.
+             (in-section-p ()
+               (and (consp lambda-list)
+                    (not (find (first lambda-list) !lambda-list-keywords))))
+             (maybe-parse-env ()
+               (when accept-environment-p
+                 (when (lambda-section '&environment)
+                   (let ((envvar (pop lambda-list)))
+                     (setf (lambda-list-envvar ll) (var-or-pattern envvar)))))))
       
       ;; &whole var
       (when (lambda-section '&whole)
         (let ((wholevar (pop lambda-list)))
           (setf (lambda-list-wholevar ll) (var-or-pattern wholevar))))
-      
+
+      (maybe-parse-env)
+
       ;; required vars
       (while (in-section-p)
         (let ((var (pop lambda-list)))
           (push (var-or-pattern var) (lambda-list-reqvars ll))))
       (setf (lambda-list-reqvars ll)
             (reverse (lambda-list-reqvars ll)))
+
+      (maybe-parse-env)
       
       ;; optional vars
       (when (lambda-section '&optional)
@@ -148,6 +158,8 @@
                 (lambda-list-optvars ll)))
         (setf (lambda-list-optvars ll)
               (reverse (lambda-list-optvars ll))))
+
+      (maybe-parse-env)
       
       ;; Dotted lambda-list and &rest/&body vars. If the lambda-list
       ;; is dotted. Convert it the tail to a &rest and finish.
@@ -159,15 +171,19 @@
         (setf (lambda-list-restvar ll)
               (var-or-pattern (pop lambda-list))))
 
+      (maybe-parse-env)
+
       ;; Keyword arguments
       (when (lambda-section '&key)
         (while (in-section-p)
           (push (parse-keyvar (pop lambda-list))
                 (lambda-list-keyvars ll)))
         (setf (lambda-list-keyvars ll)
-              (reverse (lambda-list-keyvars ll))))      
+              (reverse (lambda-list-keyvars ll))))
       (when (lambda-section '&allow-other-keys)
         (setf (lambda-list-allow-other-keys ll) t))
+
+      (maybe-parse-env)
 
       ;; Aux variables
       (when (lambda-section '&aux)
@@ -176,6 +192,9 @@
                 (lambda-list-auxvars ll)))
         (setf (lambda-list-auxvars ll)
               (reverse (lambda-list-auxvars ll))))
+
+      (maybe-parse-env)
+
       ll)))
 
 
@@ -352,15 +371,19 @@
       (parse-body body :declarations t :docstring t)
     (let* ((whole (gensym))
            (env (gensym))
-           (ll (parse-destructuring-lambda-list lambda-list))
-           (wholevar (lambda-list-wholevar ll)))
-      (setf (lambda-list-wholevar ll) nil)
+           (ll (parse-destructuring-lambda-list lambda-list t))
+           (wholevar (lambda-list-wholevar ll))
+           (envvar (lambda-list-envvar ll)))
+      (setf (lambda-list-wholevar ll) nil
+            (lambda-list-envvar ll) nil)
       `(lambda (,whole ,env)
          ,@(when docstring (list docstring))
-         (declare (ignorable ,env))
+         ,@(unless envvar `((declare (ignore ,env))))
          (block ,name
            (let (,@(when wholevar
-                     `((,wholevar ,whole))))
+                     `((,wholevar ,whole)))
+                 ,@(when envvar
+                     `((,envvar ,env))))
              ,(!expand-destructuring-bind
                ll
                `(cdr ,whole)

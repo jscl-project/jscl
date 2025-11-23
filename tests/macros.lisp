@@ -15,3 +15,8 @@
 (test (eq 2 (eval '(macrolet ((foo () 2))
                     (macrolet ((bar () (macroexpand-1 '(foo) *environment*)))
                       (bar))))))
+
+(test (eq 2 (eval '(macrolet ((foo () 2))
+                    (macrolet ((bar (&environment env)
+                                 (macroexpand-1 '(foo) env)))
+                      (bar))))))
