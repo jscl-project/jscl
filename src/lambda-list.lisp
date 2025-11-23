@@ -151,7 +151,7 @@
       ;; Dotted lambda-list and &rest/&body vars. If the lambda-list
       ;; is dotted. Convert it the tail to a &rest and finish.
       (when (and lambda-list (atom lambda-list))
-        (push lambda-list (lambda-list-restvar ll))
+        (setf (lambda-list-restvar ll) lambda-list)
         (setq lambda-list nil))
       (when (find (car lambda-list) '(&body &rest))
         (pop lambda-list)
