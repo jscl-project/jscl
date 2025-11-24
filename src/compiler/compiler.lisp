@@ -97,6 +97,7 @@
 
 
 (defvar *environment*)
+(defvar *global-environment*)
 (defvar *variable-counter*)
 
 (defun gvarname (symbol)
@@ -1575,7 +1576,7 @@
         nil)))
 
 (defun !macroexpand-1 (form &optional env)
-  (let ((*environment* (or env *environment*)))
+  (let ((*environment* (or env *global-environment*)))
     (cond
       ((symbolp form)
        (let ((b (lookup-in-lexenv form *environment* 'variable)))
@@ -1643,7 +1644,7 @@
         `(progn ,@(mapcar #'convert sexps)))))
 
 (defun convert-1 (sexp &optional multiple-value-p)
-  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
+  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp *environment*)
     (when expandedp
       (return-from convert-1 (convert sexp multiple-value-p)))
     ;; The expression has been macroexpanded. Now compile it!
@@ -1699,7 +1700,7 @@
 
 (defun convert-toplevel (sexp &optional multiple-value-p return-p)
   ;; Macroexpand sexp as much as possible
-  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp)
+  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp *environment*)
     (when expandedp
       (return-from convert-toplevel
         (convert-toplevel sexp multiple-value-p return-p))))

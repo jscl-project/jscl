@@ -180,7 +180,10 @@
     (dolist (b (lexenv-function *environment*))
       (when (eq (binding-type b) 'macro)
         (setf (binding-value b) `(,*magic-unquote-marker* ,(binding-value b)))))
-    (late-compile `(setq *environment* ',*environment*))
+    (late-compile
+     `(progn
+        (setq *environment* ',*environment*)
+        (setq *global-environment* *environment*)))
     ;; Set some counter variable properly, so user compiled code will
     ;; not collide with the compiler itself.
     (late-compile
@@ -212,6 +215,7 @@
         (*package* (find-package "JSCL"))
         (*default-pathname-defaults* *base-directory*))
     (setq *environment* (make-lexenv))
+    (setq *global-environment* *environment*)
     (with-compilation-environment
       (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
                            :direction :output

@@ -253,6 +253,13 @@
 
 (export '(mop-object mop-object-p) 'jscl)
 
+;;; Replace the bootstrap definition of DEFMACRO, evaluate
+;;; %COMPILE-DEFMACRO also at load time.
+(defmacro defmacro (name args &body body)
+  (let ((expander `(function ,(parse-macro name args body))))
+    `(eval-when (:compile-toplevel :load-toplevel :execute)
+       (%compile-defmacro ',name ,expander))))
+
 (setq *package* *user-package*)
 
 
