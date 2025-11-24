@@ -327,7 +327,7 @@
 
 (defun zero-args-reduce (function initial-value initial-value-p)
   (if initial-value-p
-      (funcall function initial-value)
+      initial-value
       (funcall function)))
 
 (defun one-args-reduce (function element from-end initial-value initial-value-p)
