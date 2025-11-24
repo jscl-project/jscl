@@ -31,44 +31,6 @@
   (#j:localStorage:setItem "jqhist" (#j:JSON:stringify (#j:jqconsole:GetHistory))))
 
 
-;;; Decides wheater the input the user has entered is completed or we
-;;; should accept one more line.
-(defun %sexpr-complete (string)
-    (let ((i 0)
-          (stringp nil)
-          (comments nil)
-          (s (length string))
-          (depth 0))
-        (while (< i s)
-            (cond
-              (comments 
-               (case (char string i)
-                 (#\newline 
-                  (setq comments nil))))
-              (stringp
-               (case (char string i)
-                 (#\\
-                  (incf i))
-                 (#\"
-                  (setq stringp nil)
-                  (decf depth))))
-              (t
-               (case (char string i)
-                 (#\; 
-                  (setq comments t))
-                 ;; skip character literals
-                 (#\\
-                  (incf i))
-                 (#\( (unless comments (incf depth)))
-                 (#\) (unless comments (decf depth)))
-                 (#\"
-                  (incf depth)
-                  (setq stringp t)))))
-            (incf i))
-        (if (<= depth 0)
-            nil
-            0)))
-
 ;;; decode error.msg object from (js-try)
 (defun %map-js-object (job)
   (mapcar (lambda (k) (list k (oget job k)))
@@ -114,7 +76,7 @@
                 (#j:jqconsole:Write (format nil "ERROR[!]: ~a~%" message) "jqconsole-error"))))
            (save-history)
            (toplevel)))
-    (#j:jqconsole:Prompt t #'process-input #'%sexpr-complete)))
+    (#j:jqconsole:Prompt t #'process-input #'%sexpr-incomplete)))
 
 (defun web-init ()
   (load-history)

@@ -18,31 +18,42 @@
 (defun start-repl ()
   (welcome-message)
   (setq *rl* (#j:readline:createInterface #j:process:stdin #j:process:stdout))
-  (let ((*root* *rl*))
-    (#j:setPrompt (format nil "~a> " (package-name-for-prompt *package*)))
-    (#j:prompt)
-    (#j:on "line"
-           (lambda (line)
-             (%js-try
-              (progn
-                (handler-case
-                    (let ((results (multiple-value-list
-                                    (eval-interactive (read-from-string line)))))
-                      (dolist (result results)
-                        (prin1 result)
-                        (terpri)))
-                  (error (c)
-                    (format t "~A: ~A"
-                            (class-name (class-of c)) c)
-                    (terpri))))
-              (catch (err)
-                (let ((message (or (oget err "message") err)))
-                  (format t "ERROR[!]: ~a~%" message))))
-             ;; Update prompt
-             (let ((*root* *rl*))
-               (#j:setPrompt (format nil "~a> " (package-name-for-prompt *package*))))
-             ;; Continue
-             ((oget *rl* "prompt"))))))
+  (let ((input-buffer (make-string-output-stream))
+        (linecont-prompt nil))
+    (flet ((set-prompt ()
+             (let ((name (package-name-for-prompt *package*)))
+               ((oget *rl* "setPrompt") (format nil "~a> " name))
+               (setq linecont-prompt
+                     (concat (make-string (1+ (length name)) :initial-element #\.) " ")))))
+      (set-prompt)
+      ((oget *rl* "prompt"))
+      ((oget *rl* "on") "line"
+       (lambda (line)
+         (write-line line input-buffer)
+         (let ((input (stream-data input-buffer)))
+           (if (%sexpr-incomplete input)
+               ((oget *rl* "setPrompt") linecont-prompt)
+               (progn
+                 (%js-try
+                  (progn
+                    (handler-case
+                        (let ((results (multiple-value-list
+                                        (eval-interactive (read-from-string input)))))
+                          (dolist (result results)
+                            (prin1 result)
+                            (terpri)))
+                      (error (c)
+                        (format t "~A: ~A"
+                                (class-name (class-of c)) c)
+                        (terpri))))
+                  (catch (err)
+                    (let ((message (or (oget err "message") err)))
+                      (format t "ERROR[!]: ~a~%" message))))
+                 (setf (fill-pointer (stream-data input-buffer)) 0)
+                 ;; Update prompt
+                 (set-prompt))))
+         ;; Continue
+         ((oget *rl* "prompt")))))))
 
 (defun node-init ()
   (setq *standard-output*

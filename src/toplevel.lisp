@@ -305,6 +305,44 @@
        nil)
       (format t "For more information, visit the project page at https://github.com/jscl-project/jscl.~%~%")))
 
+;;; Decides whether the input the user has entered is completed or we
+;;; should accept one more line.
+(defun %sexpr-incomplete (string)
+  (let ((i 0)
+        (stringp nil)
+        (comments nil)
+        (s (length string))
+        (depth 0))
+    (while (< i s)
+      (cond
+        (comments
+         (case (char string i)
+           (#\newline
+            (setq comments nil))))
+        (stringp
+         (case (char string i)
+           (#\\
+            (incf i))
+           (#\"
+            (setq stringp nil)
+            (decf depth))))
+        (t
+         (case (char string i)
+           (#\;
+            (setq comments t))
+           ;; skip character literals
+           (#\\
+            (incf i))
+           (#\( (unless comments (incf depth)))
+           (#\) (unless comments (decf depth)))
+           (#\"
+            (incf depth)
+            (setq stringp t)))))
+      (incf i))
+    (if (<= depth 0)
+        nil
+        0)))
+
 
 ;;; Basic *standard-output* stream. This will usually be overriden by
 ;;; web or node REPL.
