@@ -120,13 +120,13 @@
                (!write-string (subseq string start end) stream))))))
 
 (defun write-line (string &optional (stream *standard-output*) &rest keys)
-  (prog1
-      (if (null keys) 
-          (!write-string string stream)
-          (let ((start (getf keys :start 0))
-                (end (getf keys :end (length string))))
-            (!write-string (subseq string start end) stream)
-            (write-char #\Newline stream)))))
+  (if (null keys)
+      (!write-string string stream)
+      (let ((start (getf keys :start 0))
+            (end (getf keys :end (length string))))
+        (!write-string (subseq string start end) stream)))
+  (write-char #\Newline stream)
+  string)
 
 (defun %make-fill-pointer-output-stream (buffer)
   (make-stream
@@ -148,8 +148,8 @@
      ,@body))
 
 (defun get-output-stream-string (stream)
-  (prog1 (stream-data stream)
-    (setf (stream-data stream) (make-string 0))))
+  (prog1 (copy-seq (stream-data stream))
+    (setf (fill-pointer (stream-data stream)) 0)))
 
 (defmacro with-output-to-string ((var &optional string-form
                                   &key (element-type ''character))
