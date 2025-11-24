@@ -9,7 +9,7 @@
   "Return the documentation of X. TYPE must be the symbol VARIABLE or FUNCTION."
   (ecase type
     (function
-     (let ((func (fdefinition x)))
+     (let ((func (find-function x)))
        (oget func "docstring")))
     (variable
      (unless (symbolp x)
@@ -23,7 +23,7 @@
   (check-type new-val string)
   (ecase type
     (function
-     (let ((func (fdefinition x)))
+     (let ((func (find-function x)))
        (setf (oget func "docstring") new-val)))
     (variable
      (unless (symbolp x)

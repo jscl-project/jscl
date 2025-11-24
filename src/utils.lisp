@@ -137,3 +137,8 @@ accumulated, in the order."
 (defun find-package-or-fail (package-designator)
   (or (find-package package-designator)
       (error "The name `~S' does not designate any package." package-designator)))
+
+(defun find-function (function-designator)
+  (if (functionp function-designator)
+      function-designator
+      (fdefinition function-designator)))
