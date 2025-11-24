@@ -47,17 +47,29 @@
 (defun rplacd (cons x)
   (rplacd cons x))
 
-(defun first   (x) (car    x))
-(defun second  (x) (cadr   x))
-(defun third   (x) (caddr  x))
-(defun fourth  (x) (cadddr x))
-(defun fifth   (x) (car    (cddddr x)))
-(defun sixth   (x) (cadr   (cddddr x)))
-(defun seventh (x) (caddr  (cddddr x)))
-(defun eighth  (x) (cadddr (cddddr x)))
-(defun ninth   (x) (car  (cddddr (cddddr x))))
-(defun tenth   (x) (cadr (cddddr (cddddr x))))
-(defun rest    (x) (cdr x))
+;;; Define both CAR and CDR variants and their SETF expanders
+;;; why using `!get-setf-expansion' ?
+;;; https://github.com/jscl-project/jscl/issues/118
+
+(defmacro define-abbrev (name (arg) expr)
+  "Like DEFMACRO, but define a function and SETF expander for NAME."
+  `(progn
+     (macrolet ((%do (,arg) ,expr))
+       (defun ,name (arg) (%do arg)))
+     (define-setf-expander ,name (,arg)
+       (!get-setf-expansion ,expr))))
+
+(define-abbrev first   (x) `(car    ,x))
+(define-abbrev second  (x) `(cadr   ,x))
+(define-abbrev third   (x) `(caddr  ,x))
+(define-abbrev fourth  (x) `(cadddr ,x))
+(define-abbrev fifth   (x) `(car    (cddddr ,x)))
+(define-abbrev sixth   (x) `(cadr   (cddddr ,x)))
+(define-abbrev seventh (x) `(caddr  (cddddr ,x)))
+(define-abbrev eighth  (x) `(cadddr (cddddr ,x)))
+(define-abbrev ninth   (x) `(car  (cddddr (cddddr ,x))))
+(define-abbrev tenth   (x) `(cadr (cddddr (cddddr ,x))))
+(define-abbrev rest    (x) `(cdr ,x))
 
 (defun list (&rest args)
   args)
@@ -95,36 +107,36 @@
             `(rplaca (nthcdr ,g!index ,g!list) ,g!value)
             `(nth ,g!index ,g!list))))
 
-(defun caar (x) (car (car x)))
-(defun cadr (x) (car (cdr x)))
-(defun cdar (x) (cdr (car x)))
-(defun cddr (x) (cdr (cdr x)))
+(define-abbrev caar (x) `(car (car ,x)))
+(define-abbrev cadr (x) `(car (cdr ,x)))
+(define-abbrev cdar (x) `(cdr (car ,x)))
+(define-abbrev cddr (x) `(cdr (cdr ,x)))
 
-(defun caaar (x) (car (caar x)))
-(defun caadr (x) (car (cadr x)))
-(defun cadar (x) (car (cdar x)))
-(defun caddr (x) (car (cddr x)))
-(defun cdaar (x) (cdr (caar x)))
-(defun cdadr (x) (cdr (cadr x)))
-(defun cddar (x) (cdr (cdar x)))
-(defun cdddr (x) (cdr (cddr x)))
+(define-abbrev caaar (x) `(car (caar ,x)))
+(define-abbrev caadr (x) `(car (cadr ,x)))
+(define-abbrev cadar (x) `(car (cdar ,x)))
+(define-abbrev caddr (x) `(car (cddr ,x)))
+(define-abbrev cdaar (x) `(cdr (caar ,x)))
+(define-abbrev cdadr (x) `(cdr (cadr ,x)))
+(define-abbrev cddar (x) `(cdr (cdar ,x)))
+(define-abbrev cdddr (x) `(cdr (cddr ,x)))
 
-(defun caaaar (x) (car (caaar x)))
-(defun caaadr (x) (car (caadr x)))
-(defun caadar (x) (car (cadar x)))
-(defun caaddr (x) (car (caddr x)))
-(defun cadaar (x) (car (cdaar x)))
-(defun cadadr (x) (car (cdadr x)))
-(defun caddar (x) (car (cddar x)))
-(defun cadddr (x) (car (cdddr x)))
-(defun cdaaar (x) (cdr (caaar x)))
-(defun cdaadr (x) (cdr (caadr x)))
-(defun cdadar (x) (cdr (cadar x)))
-(defun cdaddr (x) (cdr (caddr x)))
-(defun cddaar (x) (cdr (cdaar x)))
-(defun cddadr (x) (cdr (cdadr x)))
-(defun cdddar (x) (cdr (cddar x)))
-(defun cddddr (x) (cdr (cdddr x)))
+(define-abbrev caaaar (x) `(car (caaar ,x)))
+(define-abbrev caaadr (x) `(car (caadr ,x)))
+(define-abbrev caadar (x) `(car (cadar ,x)))
+(define-abbrev caaddr (x) `(car (caddr ,x)))
+(define-abbrev cadaar (x) `(car (cdaar ,x)))
+(define-abbrev cadadr (x) `(car (cdadr ,x)))
+(define-abbrev caddar (x) `(car (cddar ,x)))
+(define-abbrev cadddr (x) `(car (cdddr ,x)))
+(define-abbrev cdaaar (x) `(cdr (caaar ,x)))
+(define-abbrev cdaadr (x) `(cdr (caadr ,x)))
+(define-abbrev cdadar (x) `(cdr (cadar ,x)))
+(define-abbrev cdaddr (x) `(cdr (caddr ,x)))
+(define-abbrev cddaar (x) `(cdr (cdaar ,x)))
+(define-abbrev cddadr (x) `(cdr (cdadr ,x)))
+(define-abbrev cdddar (x) `(cdr (cddar ,x)))
+(define-abbrev cddddr (x) `(cdr (cdddr ,x)))
 
 (defun append-two (list1 list2)
   (if (null list1)
@@ -303,100 +315,6 @@
             (list new-value)
             `(progn (rplacd ,cons ,new-value) ,new-value)
             `(cdr ,cons))))
-
-;;; setf expanders for  CAR and CDR variants
-;;; why using `!get-setf-expansion' ?
-;;; https://github.com/jscl-project/jscl/issues/118
-
-(define-setf-expander caar (x)
-  (!get-setf-expansion `(car (car ,x))))
-
-(define-setf-expander cadr (x)
-  (!get-setf-expansion `(car (cdr ,x))))
-
-(define-setf-expander cdar (x)
-  (!get-setf-expansion `(cdr (car ,x))))
-
-(define-setf-expander cddr (x)
-  (!get-setf-expansion `(cdr (cdr ,x))))
-
-(define-setf-expander caaar (x)
-  (!get-setf-expansion `(car (car (car ,x)))))
-
-(define-setf-expander caadr (x)
-  (!get-setf-expansion `(car (car (cdr ,x)))))
-
-(define-setf-expander cadar (x)
-  (!get-setf-expansion `(car (cdr (car ,x)))))
-
-(define-setf-expander caddr (x)
-  (!get-setf-expansion `(car (cdr (cdr ,x)))))
-
-(define-setf-expander cdaar (x)
-  (!get-setf-expansion `(cdr (car (car ,x)))))
-
-(define-setf-expander cdadr (x)
-  (!get-setf-expansion `(cdr (car (cdr ,x)))))
-
-(define-setf-expander cddar (x)
-  (!get-setf-expansion `(cdr (cdr (car ,x)))))
-
-(define-setf-expander cdddr (x)
-  (!get-setf-expansion `(cdr (cdr (cdr ,x)))))
-
-(define-setf-expander caaaar (x)
-  (!get-setf-expansion `(car (car (car (car ,x))))))
-
-(define-setf-expander caaadr (x)
-  (!get-setf-expansion `(car (car (car (cdr ,x))))))
-
-(define-setf-expander caadar (x)
-  (!get-setf-expansion `(car (car (cdr (car ,x))))))
-
-(define-setf-expander caaddr (x)
-  (!get-setf-expansion `(car (car (cdr (cdr ,x))))))
-
-(define-setf-expander cadaar (x)
-  (!get-setf-expansion `(car (cdr (car (car ,x))))))
-
-(define-setf-expander cadadr (x)
-  (!get-setf-expansion `(car (cdr (car (cdr ,x))))))
-
-(define-setf-expander caddar (x)
-  (!get-setf-expansion `(car (cdr (cdr (car ,x))))))
-
-(define-setf-expander cadddr (x)
-  (!get-setf-expansion `(car (cdr (cdr (cdr ,x))))))
-
-(define-setf-expander cdaaar (x)
-  (!get-setf-expansion `(cdr (car (car (car ,x))))))
-
-(define-setf-expander cdaadr (x)
-  (!get-setf-expansion `(cdr (car (car (cdr ,x))))))
-
-(define-setf-expander cdadar (x)
-  (!get-setf-expansion `(cdr (car (cdr (car ,x))))))
-
-(define-setf-expander cdaddr (x)
-  (!get-setf-expansion `(cdr (car (cdr (cdr ,x))))))
-
-(define-setf-expander cddaar (x)
-  (!get-setf-expansion `(cdr (cdr (car (car ,x))))))
-
-(define-setf-expander cddadr (x)
-  (!get-setf-expansion `(cdr (cdr (car (cdr ,x))))))
-
-(define-setf-expander cdddar (x)
-  (!get-setf-expansion `(cdr (cdr (cdr (car ,x))))))
-
-(define-setf-expander cddddr (x)
-  (!get-setf-expansion `(cdr (cdr (cdr (cdr ,x))))))
-
-(define-setf-expander first (x)
-  (get-setf-expansion `(car ,x)))
-
-(define-setf-expander rest (x)
-  (get-setf-expansion `(cdr ,x)))
 
 
 ;; The NCONC function is based on the SBCL's one.
