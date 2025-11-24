@@ -95,7 +95,7 @@
     ((null (cdr pairs))
      (error "Odd number of arguments to setf."))
     ((null (cddr pairs))
-     (let ((place (!macroexpand-1 (first pairs)))
+     (let ((place (!macroexpand-1 (first pairs) *environment*))
            (value (second pairs)))
        (multiple-value-bind (vars vals store-vars writer-form reader-form)
            (!get-setf-expansion place)
