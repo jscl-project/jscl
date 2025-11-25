@@ -129,13 +129,17 @@
   string)
 
 (defun %make-fill-pointer-output-stream (buffer)
-  (make-stream
-   :write-fn (lambda (string)
-               (dotimes (i (length string))
-                 (vector-push-extend (aref string i) buffer)))
-   :kind 'string-stream
-   :data buffer
-   :at-line-start t))
+  ;; WRITE-FN need to close over STREAM so it can access the buffer via
+  ;; STREAM-DATA. We will replace STREAM-DATA in GET-OUTPUT-STREAM-STRING.
+  (let ((stream nil))
+    (setq stream
+          (make-stream
+           :write-fn (lambda (string)
+                       (dotimes (i (length string))
+                         (vector-push-extend (aref string i) (stream-data stream))))
+           :kind 'string-stream
+           :data buffer
+           :at-line-start t))))
 
 (defun make-string-output-stream (&key (element-type 'character))
   (assert (eql element-type 'character))
@@ -148,8 +152,8 @@
      ,@body))
 
 (defun get-output-stream-string (stream)
-  (prog1 (copy-seq (stream-data stream))
-    (setf (fill-pointer (stream-data stream)) 0)))
+  (prog1 (stream-data stream)
+    (setf (stream-data stream) (make-array 0 :element-type 'character :fill-pointer 0))))
 
 (defmacro with-output-to-string ((var &optional string-form
                                   &key (element-type ''character))
