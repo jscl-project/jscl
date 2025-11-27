@@ -578,10 +578,9 @@
         (var (gvarname 'array)))
     `(selfcall
       (var (,var ,(list-to-vector (mapcar #'literal elements))))
-      (= (get ,var "type")
-         (call-internal |lisp_to_js| ,(literal (array-element-type array))))
-      (= (get ,var "dimensions")
-         (call-internal |lisp_to_js| ,(literal (array-dimensions array))))
+      ,(unless (vectorp array)
+         `(= (get ,var "dimensions")
+             (call-internal |lisp_to_js| ,(literal (array-dimensions array)))))
       ,(when (array-has-fill-pointer-p array)
          `(= (get ,var "fillpointer") ,(fill-pointer array)))
       (return ,var))))
@@ -1377,7 +1376,6 @@
   `(selfcall
      (var (sv1 ,sv1))
      (var (r (method-call sv1 "concat" ,sv2)))
-     (= (get r "type") (get sv1 "type"))
      (= (get r "stringp") (get sv1 "stringp"))
      (return r)))
 

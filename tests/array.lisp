@@ -39,5 +39,25 @@
      (eq (aref fa 2) fable)))
   2 3 t))
 
+(test (equal '(2 3) (array-dimensions (make-array '(2 3)))))
+
+(test (make-array '(2 3) :initial-contents '((1 2 3) (4 5 6))))
+
+(let ((x (make-array '(2 3) :initial-contents '((1 2 3) (4 5 6)))))
+  (expected-failure (aref x 0))
+  (test (eql (aref x 0 0) 1))
+  (test (eql (aref x 0 1) 2))
+  (test (eql (aref x 0 2) 3))
+  (test (eql (aref x 1 0) 4))
+  (test (eql (aref x 1 1) 5))
+  (test (eql (aref x 1 2) 6))
+  (expected-failure (aref x 0 4))
+  (expected-failure (aref x 2 0))
+  (expected-failure (aref x 2 4))
+  (expected-failure (aref x 0 0 0)))
+
+(expected-failure (make-array '(2 3) :initial-contents '(1 2)))
+(expected-failure (make-array '(3 2) :initial-contents
+                              '((1 2 3) (4 5 6))))
 
 ;;; EOF

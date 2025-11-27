@@ -159,10 +159,10 @@
                     (when (mark x)
                       (visit (car x))
                       (visit (cdr x))))
-                   ((vectorp x)
+                   ((arrayp x)
                     (when (mark x)
-                      (dotimes (i (length x))
-                        (visit (aref x i))))))))
+                      (dotimes (i (array-total-size x))
+                        (visit (row-major-aref x i))))))))
         (visit form)))
     (values known-objects object-ids)))
 
@@ -363,16 +363,15 @@
          (write-char #\space stream)
          (write-aux (car tail) stream known-objects object-ids)))
      (write-char #\) stream))
-    ;; Vectors
-    (vector
-     (write-string "#(" stream)
-     (when (plusp (length form))
-       (write-aux (aref form 0) stream known-objects object-ids)
-       (do ((i 1 (1+ i)))
-           ((= i (length form)))
-         (write-char #\space stream)
-         (write-aux (aref form i) stream known-objects object-ids)))
-     (write-char #\) stream))
+    ;; Arrays
+    (array
+     (write-char #\# stream)
+     (unless (vectorp form)
+       (simple-format stream "~dA" (array-rank form)))
+     (let ((contents (%array-to-lists form)))
+       (if contents
+           (write-aux contents stream known-objects object-ids)
+           (write-string "()" stream))))
     ;; Packages
     (package
      (simple-format stream "#<PACKAGE ~a>" (package-name form)))
