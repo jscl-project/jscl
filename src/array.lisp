@@ -13,6 +13,20 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
+;;; Notes on array representation:
+;;;
+;;; Arrays are represented with storage vectors (JavaScript arrays).
+;;; We add a "dimensions" property to the storage vector, if and
+;;; *only* if the array is not a vector.This makes sure plain
+;;; JavaScript arrays are valid Lisp vectors. Array with a non-list in
+;;; "dimensions" property is treated as vector (so that foreign
+;;; JavaScript array whose "dimensions" is "accidentally" set will be
+;;; recognized as vector).  We assume the invariance that if an array
+;;; has a list in "dimensions" property, it must *not* be a vector,
+;;; i.e. the list never has length 1.  Rank-0 arrays are distinguished
+;;; by having NIL in "dimensions" property, rather than not having
+;;; "dimensions" property (or have a non-list value).
+
 (/debug "loading array.lisp!")
 
 (defun upgraded-array-element-type (typespec &optional environment)
@@ -21,7 +35,41 @@
       'character
       t))
 
-(defun make-array (dimensions &key element-type initial-element adjustable fill-pointer)
+(defun %array-to-lists (array)
+  (let ((index 0))
+    (labels ((process (rest-dims)
+               (if (null rest-dims)
+                   (prog1 (row-major-aref array index)
+                     (incf index))
+                   (with-collect
+                     (dotimes (_ (car rest-dims))
+                       (collect (process (cdr rest-dims))))))))
+      (process (array-dimensions array)))))
+
+(defun %fill-array-contents (array contents)
+  "Fill content of array from nested sequences like :INITIAL-CONTENT.
+
+Signal error if CONTENTS structure does not match ARRAY's dimension,
+in which case ARRAY might be partially filled from CONTENTS."
+  (let ((index 0))
+    (labels ((process (rest-dims contents)
+               (if (null rest-dims)
+                   (progn
+                     (row-major-aset array index contents)
+                     (incf index))
+                   (if (= (length contents) (car rest-dims))
+                       (map nil (lambda (inner) (process (cdr rest-dims) inner))
+                            contents)
+                       (error "Length of ~a is not ~d"
+                              contents (car rest-dims))))))
+      (process (array-dimensions array) contents)
+      array)))
+
+(defun make-array (dimensions &key element-type
+                                (initial-element nil initial-element-p)
+                                (initial-contents nil initial-contents-p)
+                                adjustable
+                                fill-pointer)
   (let* ((dimensions (ensure-list dimensions))
          (size (!reduce #'* dimensions 1))
          (array (make-storage-vector size)))
@@ -42,12 +90,17 @@
                (not (null (cdr dimensions)))
                fill-pointer)
       (error "make-array - FILL-POINTER cannot be specified on multidimensional arrays."))
-    ;; Initialize array
-    (storage-vector-fill array initial-element)
-    ;; Record and return the object
+    ;; Record metadata
+    (when (or (null dimensions) (cdr dimensions))
+      (setf (oget array "dimensions") dimensions))
     (setf (oget array "type") element-type
-          (oget array "dimensions") dimensions
           (oget array "fillpointer") fill-pointer)
+    ;; Initialize array
+    (when (and initial-element-p initial-contents-p)
+      (error "make-array - INITIAL-ELEMENT and INITIAL-CONTENTS cannot both be provided"))
+    (if initial-contents-p
+        (%fill-array-contents array initial-contents)
+        (storage-vector-fill array initial-element))
     array))
 
 (defun arrayp (x)
@@ -68,36 +121,57 @@
 (defun array-dimensions (array)
   (unless (arrayp array)
     (error "~S is not an array." array))
-  (oget array "dimensions"))
+  (if (vectorp array)
+      (list (storage-vector-size array))
+      (oget array "dimensions")))
 
 (defun array-dimension (array axis)
-  (unless (arrayp array)
-    (error "~S is not an array." array))
-  (let* ((dimensions (oget array "dimensions"))
-        (la (length dimensions)))
+  (let* ((dimensions (array-dimensions array))
+         (la (length dimensions)))
     (if (>= axis la)
         (error "axis ~d is too big. Array ~s has ~d dimensions." axis array la))
     (nth axis dimensions)))
 
-(defun aref (array index)
-  (unless (arrayp array)
-    (error "~S is not an array." array))  
-  (storage-vector-ref array index))
+(defun aref (array &rest subscripts)
+  (storage-vector-ref array (apply #'array-row-major-index array subscripts)))
 
-(defun aset (array index value)
-  (unless (arrayp array)
-    (error "~S is not an array." array))  
-  (storage-vector-set array index value))
+(defun aset (array &rest subscripts-and-value)
+  (let ((value (car (last subscripts-and-value)))
+        (index (apply #'array-row-major-index array (nbutlast subscripts-and-value))))
+    (storage-vector-set array index value)))
 
-(define-setf-expander aref (array index)
-  (let ((g!array (gensym))
-        (g!index (gensym))
-        (g!value (gensym)))
-    (values (list g!array g!index)
-            (list array index)
-            (list g!value)
-            `(aset ,g!array ,g!index ,g!value)
-            `(aref ,g!array ,g!index))))
+(defsetf aref aset)
+
+(defun array-rank (array)
+  (unless (arrayp array)
+    (error "~S is not an array." array))
+  (if (vectorp array)
+      1
+      (length (oget array "dimensions"))))
+
+(defun array-row-major-index (array &rest subscripts)
+  (if (vectorp array)
+      (car subscripts)
+      (let ((result 0)
+            (subs subscripts)
+            (dimensions (oget array "dimensions")))
+        (while dimensions
+          (unless subs
+            (error "Too few subscripts ~a for ~a" subscripts array))
+          (let ((subscript (pop subs))
+                (dimension (pop dimensions)))
+            (unless (<= 0 subscript (1- dimension))
+              (error "Subscript ~d out of range for dimension ~d"
+                     subscript dimension))
+            (setq result (+ subscript (* result dimension)))))
+        (when subs
+          (error "Too many subscripts ~a for ~a" subscripts array))
+        result)))
+
+(defun array-total-size (array)
+  (unless (arrayp array)
+    (error "~S is not an array." array))
+  (storage-vector-size array))
 
 
 (defun array-has-fill-pointer-p (array)
@@ -163,7 +237,9 @@
 ;;; Vectors
 
 (defun vectorp (x)
-  (and (arrayp x) (null (cdr (array-dimensions x)))))
+  (and (arrayp x)
+       (not (and (in "dimensions" x)
+                 (listp (oget x "dimensions"))))))
 
 (defun vector (&rest objects)
   (list-to-vector objects))
@@ -192,8 +268,6 @@
   ;; are assigned, so no need to do `adjust-array` here.
   (storage-vector-set! vector (fill-pointer vector) new-element)
   (prog1 (fill-pointer vector)
-    (incf (fill-pointer vector))
-    (when (> (fill-pointer vector) (array-dimension vector 0))
-      (setf (car (array-dimensions vector)) (fill-pointer vector)))))
+    (incf (fill-pointer vector))))
 
 ;;; EOF
