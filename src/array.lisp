@@ -31,9 +31,10 @@
 
 (defun upgraded-array-element-type (typespec &optional environment)
   (declare (ignore environment))
-  (if (eq typespec 'character)
-      'character
-      t))
+  (case typespec
+    (character 'character)
+    ((nil) (error "NIL array element type unimplemented"))
+    (t t)))
 
 (defun %array-to-lists (array)
   (let ((index 0))
@@ -65,7 +66,7 @@ in which case ARRAY might be partially filled from CONTENTS."
       (process (array-dimensions array) contents)
       array)))
 
-(defun make-array (dimensions &key element-type
+(defun make-array (dimensions &key (element-type t)
                                 (initial-element nil initial-element-p)
                                 (initial-contents nil initial-contents-p)
                                 adjustable
@@ -80,12 +81,12 @@ in which case ARRAY might be partially filled from CONTENTS."
                (error "make-array - invalid FILL-POINTER ~a." fill-pointer)))
           (t (error "make-array - bad FILL-POINTER ~s type ~a." fill-pointer (type-of fill-pointer))))
     ;; Upgrade type
-    (if (eq element-type 'character)
-        (progn
-          (oset 1 array "stringp")
-          (setf element-type 'character
-                initial-element (or initial-element #\space)))
-        (setf element-type t))
+    (setq element-type (upgraded-array-element-type element-type))
+    (case element-type
+      (character
+       (oset 1 array "stringp")
+       (unless initial-element-p
+         (setq initial-element #\space))))
     (when (and (listp dimensions)
                (not (null (cdr dimensions)))
                fill-pointer)
@@ -93,8 +94,7 @@ in which case ARRAY might be partially filled from CONTENTS."
     ;; Record metadata
     (when (or (null dimensions) (cdr dimensions))
       (setf (oget array "dimensions") dimensions))
-    (setf (oget array "type") element-type
-          (oget array "fillpointer") fill-pointer)
+    (setf (oget array "fillpointer") fill-pointer)
     ;; Initialize array
     (when (and initial-element-p initial-contents-p)
       (error "make-array - INITIAL-ELEMENT and INITIAL-CONTENTS cannot both be provided"))
@@ -114,9 +114,8 @@ in which case ARRAY might be partially filled from CONTENTS."
 (defun array-element-type (array)
   (unless (arrayp array)
     (error "~S is not an array." array))
-  (if (eq (oget array "stringp") 1)
-      'character
-      (oget array "type")))
+  (cond ((eq (oget array "stringp") 1) 'character)
+        (t t)))
 
 (defun array-dimensions (array)
   (unless (arrayp array)
