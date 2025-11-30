@@ -226,8 +226,8 @@
 
 (defun some (function seq)
   (do-sequence (elt seq)
-    (when (funcall function elt)
-      (return-from some t))))
+    (awhen (funcall function elt)
+      (return-from some it))))
 
 ;;; more sequences version
 (defun every (predicate first-seq &rest more-sequences)

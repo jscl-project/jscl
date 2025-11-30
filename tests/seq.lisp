@@ -79,6 +79,16 @@
 (test (= 4 (position-if-not #'integerp '(1 2 3 4 X Y))))  ;; (hyperspec example used "5.0", but we don't have a full numeric tower yet!)
 (test (= 5 (position-if-not #'integerp '(1 2 3 4 X Y) :from-end t)))
 
+;;; SOME. EVERY
+(test (eql nil (some #'identity nil)))
+(test (eql nil (some #'identity '(nil nil))))
+(test (eql 1 (some #'identity '(nil 1))))
+(test (eql 1 (some #'identity '(1 2))))
+(test (eql nil (every #'identity '(1 nil))))
+(test (eql nil (every #'identity '(nil 1))))
+(test (eql t (every #'identity '(1 2 3))))
+(test (eql t (every #'identity nil)))
+
 ;;; REMOVE-IF
 (test (equal (remove-if     #'zerop '(1 0 2 0 3)) '(1 2 3)))
 (test (equal (remove-if-not #'zerop '(1 0 2 0 3)) '(0 0)))
