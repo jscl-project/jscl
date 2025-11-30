@@ -166,6 +166,18 @@
 (defmacro define-symbol-macro (name expansion)
   `(%define-symbol-macro ',name ',expansion))
 
+(defun !constantp (x &optional environment)
+  (let ((env (or environment *global-environment*)))
+    (cond
+      ((symbolp x)
+       (awhen (lookup-in-lexenv x env 'variable)
+         (member 'constant (binding-declarations it))))
+      ((consp x)
+       (eq (car x) 'quote))
+      (t t))))
+
+#+jscl
+(fset 'constantp #'!constantp)
 
 
 ;;; Report functions which are called but not defined
