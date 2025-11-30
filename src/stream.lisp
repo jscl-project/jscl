@@ -120,11 +120,7 @@
                (!write-string (subseq string start end) stream))))))
 
 (defun write-line (string &optional (stream *standard-output*) &rest keys)
-  (if (null keys)
-      (!write-string string stream)
-      (let ((start (getf keys :start 0))
-            (end (getf keys :end (length string))))
-        (!write-string (subseq string start end) stream)))
+  (apply #'write-string string stream keys)
   (write-char #\Newline stream)
   string)
 
