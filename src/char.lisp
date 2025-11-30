@@ -115,9 +115,8 @@
         ((and (stringp character)
               (= 1 (length character)))
          (char character 0))
-        ((and (symbolp character)
-              (= 1 (length (symbol-name character))))
-         (symbol-name character))
+        ((symbolp character)
+         (character (symbol-name character)))
         (t
          (error "not a valid character designator"))))
 
