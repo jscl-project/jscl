@@ -196,7 +196,7 @@
 (defmacro define-modify-macro (name lambda-list function &optional documentation)
   (multiple-value-bind (req opt key rest) (parse-lambda-list lambda-list)
     (let ((place (gensym "PLACE")))
-      `(defmacro ,name (,place ,lambda-list)
+      `(defmacro ,name (,place ,@lambda-list)
          ,@(when documentation (list documentation))
          (expand-rmw-macro ',function '() ,place
                            (list* ,@req ,@opt ,@key ,@(when rest (list rest))))))))
