@@ -21,6 +21,9 @@
 (defvar !lambda-list-keywords
   '(&optional &rest &key &aux &allow-other-keys &body &optional &environment))
 
+#+jscl
+(defconstant lambda-list-keywords !lambda-list-keywords)
+
 ;;;; Lambda list parsing
 
 (def!struct optvar

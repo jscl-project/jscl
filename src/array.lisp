@@ -131,6 +131,14 @@
 
 (defsetf row-major-aref row-major-aset)
 
+;;; Constants
+
+(defconstant array-dimension-limit (1- (expt 2 32)))
+
+(defconstant array-rank-limit (1- (expt 2 32)))
+
+(defconstant array-total-size-limit (1- (expt 2 32)))
+
 ;;; FIXME: implement proper (array bit)
 
 (defun bit-vector-p (x)
