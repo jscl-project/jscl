@@ -524,10 +524,10 @@
     (vector
      (and (vectorp y)
           (let ((lex (length x)))
-            (= lex (length y))
-            (dotimes (i lex t)
-              (when (not (%replace-seq-eql (aref x i) (aref y i)))
-                (return nil))))))
+            (when (= lex (length y))
+              (dotimes (i lex t)
+                (when (not (%replace-seq-eql (aref x i) (aref y i)))
+                  (return nil)))))))
     (t (equal x y))))
 
 (defun %replace-seq (seq-1 seq-2 start1 end1 start2 end2)
