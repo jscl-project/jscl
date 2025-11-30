@@ -226,10 +226,18 @@
 
 
 
-(defun last (x)
-  (while (consp (cdr x))
-    (setq x (cdr x)))
-  x)
+(defun last (x &optional (n 1))
+  (let ((returned-list x)
+        (checked-list x))
+    (while (< 0 n)
+      (unless (consp checked-list)
+        (return-from last returned-list))
+      (pop checked-list)
+      (decf n))
+    (while (consp checked-list)
+      (pop checked-list)
+      (pop returned-list))
+    returned-list))
 
 (defun butlast (x &optional (n 1))
   "Returns x, less the n last elements in the list."
