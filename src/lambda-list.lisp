@@ -346,7 +346,7 @@
                        (dolist (keyvar (lambda-list-keyvars ll))
                          (let ((variable (keyvar-variable keyvar))
                                (keyword (keyvar-keyword-name keyvar))
-                               (supplied (keyvar-supplied-p-parameter keyvar)))
+                               (supplied (or (keyvar-supplied-p-parameter keyvar) (gensym))))
                            (when supplied
                              (compute-pbindings supplied `(keyword-supplied-p ,keyword ,rest)))
                            (compute-pbindings variable `(if ,supplied
