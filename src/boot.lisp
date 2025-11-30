@@ -455,19 +455,6 @@
                           (nth ,n values))
      ,form))
 
-(defun constantp (x)
-  ;; TODO: Consider quoted forms, &environment and many other
-  ;; semantics of this function.
-  (cond
-    ((symbolp x)
-     (cond
-       ((eq x t) t)
-       ((eq x nil) t)))
-    ((atom x)
-     t)
-    (t
-     nil)))
-
 (defparameter *features* '(:jscl :common-lisp))
 
 ;;; symbol-function from compiler macro
