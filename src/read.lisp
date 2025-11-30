@@ -359,7 +359,7 @@
                          (cdr cell))
                      (simple-reader-error stream "Invalid labelled object #~S#" id)))))))
          (t
-          (simple-reader-error stream "Invalid dispatch character after #")))))))
+          (simple-reader-error stream "Invalid dispatch character ~S after #" ch)))))))
 
 (defun sharp-radix-reader (ch stream)
   ;; Sharp radix base #\B #\O #\X
