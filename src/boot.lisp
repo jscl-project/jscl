@@ -145,8 +145,9 @@
 
 (defvar *gensym-counter* 0)
 (defun gensym (&optional (prefix "G"))
-  (setq *gensym-counter* (+ *gensym-counter* 1))
-  (make-symbol (concat prefix (integer-to-string *gensym-counter*))))
+  (let ((symbol (make-symbol (concat prefix (integer-to-string *gensym-counter*)))))
+    (setq *gensym-counter* (+ *gensym-counter* 1))
+    symbol))
 
 (defun boundp (x)
   (boundp x))
