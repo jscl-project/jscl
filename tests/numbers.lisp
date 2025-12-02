@@ -46,15 +46,18 @@
 
 ;;; >, >=, =, <, <=, /=
 ;;; As above, we need to make sure the function is called, not the builtin
-(let ((a '(1 3 1 2 1))
-      (b '(2 2 2 2 1))
-      (c '(3 1 2 1 1)))
-  (test (equal (mapcar #'>  a b c) '(nil   t nil nil nil)))
-  (test (equal (mapcar #'>= a b c) '(nil   t nil   t   t)))
-  (test (equal (mapcar #'=  a b c) '(nil nil nil nil   t)))
-  (test (equal (mapcar #'<  a b c) '(  t nil nil nil nil)))
-  (test (equal (mapcar #'<= a b c) '(  t nil   t nil   t)))
-  (test (equal (mapcar #'/= a b c) '(  t   t nil nil nil))))
+(let ((a '(1 3 1 2 1 1))
+      (b '(2 2 2 2 1 2))
+      (c '(3 1 2 1 1 1)))
+  (test (equal (mapcar #'>  a b c) '(nil   t nil nil nil nil)))
+  (test (equal (mapcar #'>= a b c) '(nil   t nil   t   t nil)))
+  (test (equal (mapcar #'=  a b c) '(nil nil nil nil   t nil)))
+  (test (equal (mapcar #'<  a b c) '(  t nil nil nil nil nil)))
+  (test (equal (mapcar #'<= a b c) '(  t nil   t nil   t nil)))
+  (test (equal (mapcar #'/= a b c) '(  t   t nil nil nil nil))))
+
+(test (not (funcall #'< 1 2 4 3)))
+(test (not (funcall #'/= 1 2 3 3)))
 
 ;;; INTEGERP
 (test (integerp  1))

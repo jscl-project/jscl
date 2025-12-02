@@ -1165,7 +1165,6 @@
 (define-builtin-comparison >= >=)
 (define-builtin-comparison <= <=)
 (define-builtin-comparison = ==)
-(define-builtin-comparison /= !=)
 
 (define-builtin numberp (x)
   (convert-to-bool `(== (typeof ,x) "number")))
