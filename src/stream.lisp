@@ -118,11 +118,6 @@
   (write-char #\Newline stream)
   string)
 
-(defun fresh-line (&optional (stream *standard-output*))
-  (unless (stream-at-line-start stream)
-    (write-char #\Newline stream)
-    t))
-
 (defun %make-fill-pointer-output-stream (buffer)
   ;; WRITE-FN need to close over STREAM so it can access the buffer via
   ;; STREAM-DATA. We will replace STREAM-DATA in GET-OUTPUT-STREAM-STRING.
