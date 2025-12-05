@@ -151,7 +151,7 @@
     (check-type condition warning)
     (%%signal condition)
     (format stream "WARNING: ")
-    (apply 'format stream (simple-condition-format-control condition)
+    (apply #'format stream (simple-condition-format-control condition)
            (simple-condition-format-arguments condition))
     (write-char #\newline stream)
     nil))
@@ -165,8 +165,8 @@
     ;;(format stream "~&ERROR: ~a~%" (type-of condition))
     (typecase condition
       (simple-error
-       (format stream (simple-condition-format-control condition)
-               (simple-condition-format-arguments condition)))
+       (apply #'format stream (simple-condition-format-control condition)
+              (simple-condition-format-arguments condition)))
       (type-error
        (format stream "Type error. ~a does not designate a ~a" (type-error-datum condition)
                (type-error-expected-type condition))))
