@@ -217,12 +217,10 @@
           (if (gethash type-specifier *class-table*)
               (let ((class-object
                       (cond ((std-instance-p object) (class-name (class-of object)))
-                            ;; fixme: 
-                            ((std-instance-class object) (class-name object))
                             (t nil))))
-                (if class-object
-                    (return-from !typep
-                      (%subclass (%class-cpl class-object) type-specifier)))))))
+                (return-from !typep
+                  (and class-object
+                       (%subclass (%class-cpl class-object) type-specifier)))))))
     ;; may be compound type specifier
     (let ((test (get-compound-for type-specifier)))
       (if test
