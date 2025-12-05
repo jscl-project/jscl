@@ -54,7 +54,7 @@
               `(defmethod print-object ((condition ,name) &optional (stream *standard-output*))
                  (if *print-escape*
                      (call-next-method)
-                     (funcall #',report-fn condition stream))
+                     (funcall ,report-fn condition stream))
                  nil)))
       (values name class method))))
 
