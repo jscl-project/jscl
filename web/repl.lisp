@@ -15,11 +15,11 @@
 
 (/debug "loading repl-web/repl.lisp!")
 
-(defun %write-string (string &optional (escape t))
+(defun %write-string (string &optional (escape t) (style "jqconsole-output"))
     (if #j:jqconsole
         (if escape
-            (#j:jqconsole:Write string "jqconsole-output")
-            (#j:jqconsole:Write string "jqconsole-output" ""))
+            (#j:jqconsole:Write string style)
+            (#j:jqconsole:Write string style ""))
         (#j:console:log string)))
 
 (defun load-history ()
@@ -67,6 +67,9 @@
                   (let* ((form (read-from-string input))
                          (results (multiple-value-list (eval-interactive form))))
                     (dolist (x results)
+                      ;; ensure jqconsole is on fresh line
+                      (unless (zerop (#j:jqconsole:GetColumn))
+                        (#j:jqconsole:Write #\newline "jqconsole-return"))
                       (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return"))))
               ;; only error condition's
               (error (condition) (display-condition condition)))
@@ -82,7 +85,11 @@
   (load-history)
   (setq *standard-output*
         (make-stream
-         :write-fn (lambda (string) (%write-string string))))
+         :write-fn (lambda (string) (%write-string string)))
+        *error-output*
+        (make-stream
+         :write-fn (lambda (string) (%write-string string t "jqconsole-error")))
+        *trace-output* *standard-output*)
   (welcome-message :html t)
   (#j:window:addEventListener "load" (lambda (&rest args) (toplevel))))
 

@@ -40,6 +40,7 @@
                         (let ((results (multiple-value-list
                                         (eval-interactive (read-from-string input)))))
                           (dolist (result results)
+                            (fresh-line)
                             (prin1 result)
                             (terpri)))
                       (error (c)
