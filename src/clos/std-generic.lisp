@@ -188,18 +188,22 @@
       '())))
 
 (eval-always
- (defun canonicalize-defgeneric-option (option)
-   (case (car option)
-     (:generic-function-class
-      (list ':generic-function-class
-            `(!find-class ',(cadr option))))
-     (:method-class
-      (list ':method-class
-            `(!find-class ',(cadr option))))
-     (t (list `',(car option) `',(cadr option)))))
-
  (defun canonicalize-defgeneric-options (options)
-   (mapappend #'canonicalize-defgeneric-option options)))
+   "Return two values: canonicalized options and list of method descriptions."
+   (let ((methods '()))
+     (flet ((process-option (option)
+              (case (car option)
+                (:generic-function-class
+                 (list ':generic-function-class
+                       `(!find-class ',(cadr option))))
+                (:method-class
+                 (list ':method-class
+                       `(!find-class ',(cadr option))))
+                (:method
+                  (push (cdr option) methods)
+                  nil)
+                (t (list `',(car option) `',(cadr option))))))
+       (values (mapappend #'process-option options) (nreverse methods))))))
 
 
 ;;; find-generic-function looks up a generic function by name.  It's an

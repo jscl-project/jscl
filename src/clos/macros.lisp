@@ -21,9 +21,12 @@
 ;;; from std-generic.lisp
 ;;; from original closette.lisp lines 825-832
 (defmacro defgeneric (function-name lambda-list &rest options)
-  `(!ensure-generic-function ',function-name
-                             :lambda-list ,(canonicalize-defgeneric-ll lambda-list)
-                             ,@(canonicalize-defgeneric-options options)))
+  (multiple-value-bind (options methods) (canonicalize-defgeneric-options options)
+    `(progn
+       (!ensure-generic-function ',function-name
+                                 :lambda-list ,(canonicalize-defgeneric-ll lambda-list)
+                                 ,@options)
+       ,@(mapcar (lambda (desc) `(defmethod ,function-name ,@desc)) methods))))
 
 
 ;;; defmethod
