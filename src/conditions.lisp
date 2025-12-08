@@ -150,26 +150,17 @@
     ;; prevent all conditions ERROR class
     (check-type condition warning)
     (%%signal condition)
-    (format stream "WARNING: ")
-    (apply #'format stream (simple-condition-format-control condition)
-           (simple-condition-format-arguments condition))
+    (format t "~A: ~A" (class-name (class-of c)) c)
     (write-char #\newline stream)
     nil))
 
 (defun %%error (datum &rest args)
-  (let ((stream *standard-output*)
-        (condition (%%coerce-condition 'simple-error datum args)))
+  (let ((condition (%%coerce-condition 'simple-error datum args)))
     ;; prevent all condition WARNING class
     (check-type condition error)
     (%%signal condition)
     ;;(format stream "~&ERROR: ~a~%" (type-of condition))
-    (typecase condition
-      (simple-error
-       (apply #'format stream (simple-condition-format-control condition)
-              (simple-condition-format-arguments condition)))
-      (type-error
-       (format stream "Type error. ~a does not designate a ~a" (type-error-datum condition)
-               (type-error-expected-type condition))))
+    (format t "~A: ~A" (class-name (class-of c)) c)
     nil))
 
 (defun %%check-type-error (place value typespec string)
