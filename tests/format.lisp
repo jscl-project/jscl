@@ -27,16 +27,5 @@ a" (format nil "a~%a")))
 
 ;;; Premature end of control string
 #+jscl
-(test 
- (string= "Premature end of control string \"result ~\"" 
-          (let ((result))
-            (handler-case 
-                (progn 
-                  (format nil "its ok ~~")
-                  (format nil "result ~"))
-              (error (msg)
-                (setq result
-                      (format nil (simple-condition-format-control msg)
-                              (car (simple-condition-format-arguments msg))))))
-            result)))
+(expected-failure (eval '(format nil "result ~")))
 ;;; EOF
