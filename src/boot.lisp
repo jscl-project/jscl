@@ -139,9 +139,18 @@
 (defmacro while (condition &body body)
   `(block nil (%while ,condition ,@body)))
 
-;; Standard allows doing nothing for compiler macros.
 (defmacro define-compiler-macro (name args &rest body)
-  `',name)
+  (let* ((expander `(function ,(parse-macro name args body))))
+
+    ;; If we are bootstrapping JSCL, we need to quote the
+    ;; macroexpander, because the macroexpander will
+    ;; need to be dumped in the final environment
+    ;; somehow.
+    (when (find :jscl-xc *features*)
+      (setq expander `(quote ,expander)))
+
+    `(eval-when (:compile-toplevel :execute)
+       (%define-compiler-macro ',name ,expander))))
 
 (defvar *gensym-counter* 0)
 (defun gensym (&optional (prefix "G"))

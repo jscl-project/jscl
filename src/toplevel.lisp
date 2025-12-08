@@ -260,6 +260,11 @@
     `(eval-when (:compile-toplevel :load-toplevel :execute)
        (%compile-defmacro ',name ,expander))))
 
+(defmacro define-compiler-macro (name args &body body)
+  (let ((expander `(function ,(parse-macro name args body))))
+    `(eval-when (:compile-toplevel :load-toplevel :execute)
+       (%define-compiler-macro ',name ,expander))))
+
 (setq *package* *user-package*)
 
 
