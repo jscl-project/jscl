@@ -73,14 +73,16 @@
   variable
   function
   block
-  gotag)
+  gotag
+  compiler-macro)
 
 (defun lookup-in-lexenv (name lexenv namespace)
   (find name (ecase namespace
                 (variable (lexenv-variable lexenv))
                 (function (lexenv-function lexenv))
                 (block    (lexenv-block    lexenv))
-                (gotag    (lexenv-gotag    lexenv)))
+                (gotag    (lexenv-gotag    lexenv))
+                (compiler-macro (lexenv-compiler-macro lexenv)))
         :key #'binding-name))
 
 (defun push-to-lexenv (binding lexenv namespace)
@@ -88,7 +90,8 @@
     (variable (push binding (lexenv-variable lexenv)))
     (function (push binding (lexenv-function lexenv)))
     (block    (push binding (lexenv-block    lexenv)))
-    (gotag    (push binding (lexenv-gotag    lexenv)))))
+    (gotag    (push binding (lexenv-gotag    lexenv)))
+    (compiler-macro (push binding (lexenv-compiler-macro lexenv)))))
 
 (defun extend-lexenv (bindings lexenv namespace)
   (let ((env (copy-lexenv lexenv)))
@@ -127,6 +130,11 @@
 (defun %compile-defmacro (name lambda)
   (let ((binding (make-binding :name name :type 'macro :value lambda)))
     (push-to-lexenv binding  *environment* 'function))
+  name)
+
+(defun %define-compiler-macro (name lambda)
+  (let ((binding (make-binding :name name :type 'macro :value lambda)))
+    (push-to-lexenv binding  *environment* 'compiler-macro))
   name)
 
 (defun global-binding (name type namespace)
@@ -1549,10 +1557,10 @@
 (defvar *macroexpander-cache*
   (make-hash-table :test #'eq))
 
-(defun !macro-function (symbol)
+(defun !macro-function (symbol &optional (namespace 'function))
   (unless (symbolp symbol)
     (error "`~S' is not a symbol." symbol))
-  (let ((b (lookup-in-lexenv symbol *environment* 'function)))
+  (let ((b (lookup-in-lexenv symbol *environment* namespace)))
     (if (and b (eq (binding-type b) 'macro))
         (let ((expander (binding-value b)))
           (cond
@@ -1601,6 +1609,15 @@
 #+jscl
 (fset 'macroexpand #'!macroexpand)
 
+(defun compiler-macroexpand (form)
+  (when (and (consp form) (symbolp (car form)))
+    (awhen (!macro-function (car form) 'compiler-macro)
+      (while t
+        (let ((new-form (funcall it form *environment*)))
+          (when (eq new-form form)
+            (return-from compiler-macroexpand new-form))
+          (setq form new-form)))))
+  form)
 
 
 (defun compile-funcall (function args)
@@ -1643,7 +1660,8 @@
         `(progn ,@(mapcar #'convert sexps)))))
 
 (defun convert-1 (sexp &optional multiple-value-p)
-  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp *environment*)
+  (multiple-value-bind (sexp expandedp)
+      (!macroexpand-1 (compiler-macroexpand sexp) *environment*)
     (when expandedp
       (return-from convert-1 (convert sexp multiple-value-p)))
     ;; The expression has been macroexpanded. Now compile it!
