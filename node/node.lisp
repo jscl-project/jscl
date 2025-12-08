@@ -44,8 +44,7 @@
                             (prin1 result)
                             (terpri)))
                       (error (c)
-                        (format t "~A: ~A"
-                                (class-name (class-of c)) c)
+                        (format t "~A: ~A" (class-name (class-of c)) c)
                         (terpri))))
                   (catch (err)
                     (let ((message (or (oget err "message") err)))
