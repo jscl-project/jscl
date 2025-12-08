@@ -105,7 +105,7 @@
 
 
 (defun js-format (fmt &rest args)
-  (apply #'format *js-output* fmt args))
+  (apply #-jscl #'format #+jscl #'simple-format *js-output* fmt args))
 
 ;;; Check if STRING-DESIGNATOR is valid as a Javascript identifier. It
 ;;; returns a couple of values. The identifier itself as a string and
@@ -141,9 +141,9 @@
 (defun js-primary-expr (form)
   (cond
     ((numberp form)
-     (if (<= 0 form)
-         (js-format "~a" form)
-         (js-expr `(- ,(abs form)))))
+     (if (integerp form)
+         (js-format "~d" form)
+         (js-format "~f" form)))
     ((stringp form)
      (js-format "~a" (js-escape-string form)))
     ((symbolp form)

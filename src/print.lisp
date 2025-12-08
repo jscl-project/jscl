@@ -266,7 +266,9 @@
             (ecase next
               (#\~ (write-char #\~ stream))
               (#\d (write-integer (pop args) stream))
-              (#\a (write-string (pop args) stream)))
+              (#\f (write-string (float-to-string (pop args)) stream))
+              (#\a (write-string (pop args) stream))
+              (#\% (write-char #\newline stream)))
             (incf i))
           (write-char char stream)))))
 

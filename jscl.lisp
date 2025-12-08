@@ -94,12 +94,12 @@
     ("stream"        :target)
     ("print"         :target)
     ("misc"          :target)
-    ("format"        :target)
     ("read"          :both)
     ("backquote"     :both)
     ("compiler"
      ("codegen"      :both)
      ("compiler"     :both))
+    ("format"        :both)
     ("documentation" :target)
     ("worker"        :target)
     ("clos"

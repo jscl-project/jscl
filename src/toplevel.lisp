@@ -352,13 +352,14 @@
 ;;; Basic *standard-output* stream. This will usually be overriden by
 ;;; web or node REPL.
 ;;;
-;;; TODO: Cache character operation so they result in a single call to
-;;; console.log.
-;;;
 (setq *standard-output*
-      (make-stream
-       :write-fn (lambda (string)
-                   (#j:console:log string)))
+      ;; We buffer output strings until we see a newline
+      (let ((buffer (make-string-output-stream)))
+        (make-stream
+         :write-fn (lambda (string)
+                     (write-string string buffer)
+                     (when (find #\newline string)
+                       (#j:console:log (get-output-stream-string buffer))))))
       *error-output* *standard-output*
       *trace-output* *standard-output*)
 
