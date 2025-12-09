@@ -1620,13 +1620,14 @@
 (fset 'macroexpand #'!macroexpand)
 
 (defun compiler-macroexpand (form)
-  (when (and (consp form) (symbolp (car form)))
-    (awhen (!macro-function (car form) 'compiler-macro)
-      (while t
-        (let ((new-form (funcall it form *environment*)))
-          (when (eq new-form form)
-            (return-from compiler-macroexpand new-form))
-          (setq form new-form)))))
+  (while t
+    (let ((expander (and (consp form) (symbolp (car form))
+                         (!macro-function (car form) 'compiler-macro))))
+      (unless expander (return))
+      (let ((new-form (funcall expander form *environment*)))
+        (when (eq new-form form)
+          (return))
+        (setq form new-form))))
   form)
 
 
