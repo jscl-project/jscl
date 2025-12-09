@@ -255,11 +255,16 @@
 
 ;;; Replace the bootstrap definition of DEFMACRO, evaluate
 ;;; %COMPILE-DEFMACRO also at load time.
-(defmacro defmacro (name args &body body)
-  (let ((expander `(function ,(parse-macro name args body))))
-    `(eval-when (:compile-toplevel :load-toplevel :execute)
-       (%compile-defmacro ',name ,expander))))
+(eval-always
+ (%compile-defmacro
+  'defmacro
+  (lambda (form env)
+    (destructuring-bind (name args &body body) (cdr form)
+      (let ((expander `(function ,(parse-macro name args body))))
+        `(eval-when (:compile-toplevel :load-toplevel :execute)
+           (%compile-defmacro ',name ,expander)))))))
 
+;;; Do the same for DEFINE-COMPILER-MACRO
 (defmacro define-compiler-macro (name args &body body)
   (let ((expander `(function ,(parse-macro name args body))))
     `(eval-when (:compile-toplevel :load-toplevel :execute)
