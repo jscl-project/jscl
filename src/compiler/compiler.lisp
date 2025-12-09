@@ -1735,7 +1735,7 @@
   (let ((*convert-level* -1))
     (when *compile-print-toplevels*
       (let ((form-string (prin1-to-string sexp)))
-        (format t "Compiling ~a...~%" (truncate-string form-string))))
+        (simple-format *standard-output* "Compiling ~a...~%" (truncate-string form-string))))
 
     (let ((code (convert sexp multiple-value-p)))
       (if return-p
