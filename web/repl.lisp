@@ -63,14 +63,11 @@
            (%js-try
             ;; Capture unhandled Lisp conditions.
             (handler-case
-                (when (> (length input) 0)
-                  (let* ((form (read-from-string input))
-                         (results (multiple-value-list (eval-interactive form))))
-                    (dolist (x results)
-                      ;; ensure jqconsole is on fresh line
-                      (unless (zerop (#j:jqconsole:GetColumn))
-                        (#j:jqconsole:Write #\newline "jqconsole-return"))
-                      (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return"))))
+                (dolist (x (multiple-value-list (eval-interactive-input input)))
+                  ;; ensure jqconsole is on fresh line
+                  (unless (zerop (#j:jqconsole:GetColumn))
+                    (#j:jqconsole:Write #\newline "jqconsole-return"))
+                  (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return"))
               ;; only error condition's
               (error (condition) (display-condition condition)))
             (catch (js-err)

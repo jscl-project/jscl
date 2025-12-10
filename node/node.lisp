@@ -35,17 +35,14 @@
                ((oget *rl* "setPrompt") linecont-prompt)
                (progn
                  (%js-try
-                  (progn
-                    (handler-case
-                        (let ((results (multiple-value-list
-                                        (eval-interactive (read-from-string input)))))
-                          (dolist (result results)
-                            (fresh-line)
-                            (prin1 result)
-                            (terpri)))
-                      (error (c)
-                        (format t "~A: ~A" (class-name (class-of c)) c)
-                        (terpri))))
+                  (handler-case
+                      (dolist (result (multiple-value-list (eval-interactive-input input)))
+                        (fresh-line)
+                        (prin1 result)
+                        (terpri))
+                    (error (c)
+                      (format t "~A: ~A" (class-name (class-of c)) c)
+                      (terpri)))
                   (catch (err)
                     (let ((message (or (oget err "message") err)))
                       (format t "ERROR[!]: ~a~%" message))))

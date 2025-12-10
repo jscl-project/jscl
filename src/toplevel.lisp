@@ -52,6 +52,14 @@
         + -)
   (values-list /))
 
+(defun eval-interactive-input (input)
+  "Evaluate INPUT string. Return no values if INPUT is empty."
+  (let* ((eof (list :eof)) ; sentinel value
+         (form (read-from-string input nil eof)))
+    (if (eq form eof)
+        (values)
+        (eval-interactive form))))
+
 (export
  '(&allow-other-keys &aux &body &environment &key &optional &rest &whole
    * ** *** *break-on-signals* *compile-file-pathname*
