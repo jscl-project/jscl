@@ -39,10 +39,10 @@ else if (typeof self !== 'undefined')
 
 var internals = jscl.internals = Object.create(null);
 
-internals.globalEval = function(code){
+internals.globalEval = function(code, data){
   var geval = eval;             // Just an indirect eval
-  var fn = geval('(function(values, internals){ "use strict"; ' + code + '; })');
-  return fn(internals.mv, internals);
+  var fn = geval('(function(values, internals, data){ "use strict"; ' + code + '; })');
+  return fn(internals.mv, internals, data);
 };
 
 internals.pv = function(x) {
