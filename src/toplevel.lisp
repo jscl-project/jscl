@@ -19,10 +19,12 @@
 (/debug "loading toplevel.lisp!")
 
 (defun eval (x)
-  (let ((jscode
-         (with-compilation-environment
-             (compile-toplevel x t t))))
-    (js-eval jscode)))
+  (multiple-value-bind (jscode literal-table)
+      (let ((*compiling-file* nil)
+            (*compiling-in-process* t))
+        (with-compilation-environment
+          (values (compile-toplevel x t t) *literal-table*)))
+    (js-eval jscode (list-to-vector (nreverse (mapcar #'car literal-table))))))
 
 (defvar * nil)
 (defvar ** nil)

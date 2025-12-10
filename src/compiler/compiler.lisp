@@ -589,9 +589,9 @@
   (let ((head (butlast cons))
         (tail (last cons)))
     `(call-internal |QIList|
-                    ,@(mapcar (lambda (x) (literal x t)) head)
-                    ,(literal (car tail) t)
-                    ,(literal (cdr tail) t))))
+                    ,@(mapcar (lambda (x) (literal x)) head)
+                    ,(literal (car tail))
+                    ,(literal (cdr tail)))))
 
 (defun dump-array (array)
   (let ((elements (vector-to-list array))
@@ -608,33 +608,41 @@
 (defun dump-string (string)
   `(call-internal |make_lisp_string| ,string))
 
-(defun literal (sexp &optional recursive)
+;;; Was the compiler invoked by EVAL for in-process evaluation?
+(defvar *compiling-in-process* nil)
+
+(defun literal (sexp)
   (cond
     ((integerp sexp) sexp)
     ((floatp sexp) sexp)
     ((characterp sexp) (string sexp))
     (t
      (or (cdr (assoc sexp *literal-table* :test #'eql))
-         (let ((dumped (typecase sexp
-                         (symbol (dump-symbol sexp))
-                         (string (dump-string sexp))
-                         (cons
-                          ;; BOOTSTRAP MAGIC: See the root file
-                          ;; jscl.lisp and the function
-                          ;; `dump-global-environment' for further
-                          ;; information.
-                          (if (eq (car sexp) *magic-unquote-marker*)
-                              (convert (second sexp))
-                              (dump-cons sexp)))
-                         (array (dump-array sexp)))))
-           (if (and recursive (not (symbolp sexp)))
-               dumped
-               (let ((jsvar (genlit)))
-                 (push (cons sexp jsvar) *literal-table*)
+         (let ((index *literal-counter*)
+               (jsvar (genlit)))
+           (push (cons sexp jsvar) *literal-table*)
+           (if *compiling-in-process*
+               ;; If compiling for in-process evaluation, arrange to pass
+               ;; literals directly via data vector, instead of dumping
+               ;; them to reconstruction code
+               (toplevel-compilation
+                `(var (,jsvar (property |data| ,index))))
+               (let ((dumped (typecase sexp
+                               (symbol (dump-symbol sexp))
+                               (string (dump-string sexp))
+                               (cons
+                                ;; BOOTSTRAP MAGIC: See the root file
+                                ;; jscl.lisp and the function
+                                ;; `dump-global-environment' for further
+                                ;; information.
+                                (if (eq (car sexp) *magic-unquote-marker*)
+                                    (convert (second sexp))
+                                    (dump-cons sexp)))
+                               (array (dump-array sexp)))))
                  (toplevel-compilation `(var (,jsvar ,dumped)))
                  (when (keywordp sexp)
-                   (toplevel-compilation `(= (get ,jsvar "value") ,jsvar)))
-                 jsvar)))))))
+                   (toplevel-compilation `(= (get ,jsvar "value") ,jsvar)))))
+           jsvar)))))
 
 
 (define-compilation quote (sexp)
@@ -1316,12 +1324,12 @@
 			       this
 			       args))))))
 
-(define-builtin js-eval (string)
+(define-builtin js-eval (string data)
   (if *multiple-value-p*
       `(selfcall
-        (var (v (call-internal |globalEval| (call-internal |xstring| ,string))))
+        (var (v (call-internal |globalEval| (call-internal |xstring| ,string) ,data)))
         (return (method-call |values| "apply" this (call-internal |forcemv| v))))
-      `(call-internal |globalEval| (call-internal |xstring| ,string))))
+      `(call-internal |globalEval| (call-internal |xstring| ,string) ,data)))
 
 (define-builtin %throw (string)
   `(selfcall (throw ,string)))

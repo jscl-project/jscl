@@ -209,7 +209,7 @@
              (when verbose (format t "~a ~a~%" (car expr) (cadr expr)))
              (with-compilation-environment
                (setq code (compile-toplevel expr t t))
-               (setq rc (js-eval code))
+               (setq rc (js-eval code nil))
                (when verbose (format t "  ~a~%" rc))
                ;; so, expr already verifyed
                ;; store expression after compilation/evaluated
