@@ -53,3 +53,5 @@
     ;; other compiler - will be nil
     (if sde
         (+ (parse-integer sde) 2208988800))))
+
+(setf (symbol-function 'simple-format) #'format)
