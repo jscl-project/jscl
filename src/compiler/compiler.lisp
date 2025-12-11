@@ -727,10 +727,6 @@
     (t
      (convert nil))))
 
-(defmacro define-transformation (name args form)
-  `(define-compilation ,name ,args
-     (convert ,form)))
-
 (define-compilation progn (&rest body)
   `(progn
      ,@(append (mapcar #'convert (butlast body))
@@ -1056,11 +1052,6 @@
 
 (define-compilation the (value-type form)
   (convert form *multiple-value-p*))
-
-
-(define-transformation backquote (form)
-  (bq-completely-process form))
-
 
 ;;; Primitives
 
