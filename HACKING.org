@@ -156,3 +156,80 @@ function (values) {
   return f(values, 0);
 }
 #+END_SRC
+** Hacking the bootstrap code
+*** Functions are easy
+*It is okay to forward reference functions*. That allows us to write big part of the code without worrying about bootstrap.
+
+So:
+#+BEGIN_SRC common-lisp
+(defun f () (g))
+(defun g () (print "hello"))
+#+END_SRC
+is fine. Because the compiler can generate a function call to =g= without knowing what =g= is. Of course, you cannot invoke =f= until after the definition of =g=.
+
+To avoid collisions, a lot of JSCL code looks like
+=(defun !standard-function () ...) #+jscl (fset 'standard-function '!standard-function)=
+
+This means, we /can use any standard CL function/ in JSCL itself (given JSCL has implemented them).
+*** Macros are more complicated
+Macros are processed in two stages:
+
+1. Their macroexpander code runs in the host system, producing an expansion
+2. The expansion is compiled into the target system.
+
+Unlike functions,  *macros must be defined before used inside functions*. Because we need to call the macroexpander immediately.
+
+Additionally we cannot compile built-in macros from the host system, because their expansion might use functions that are not available in JSCL.
+
+*Inside the macros*, another macro can be used in two ways:
+
+a) As part of the macroexpansion itself
+b) To compute some intermediate value but does not show up in the macroexpansion.
+
+Any code can be used in the macroexpansion again, as long as we define it later. But only already define macros can be used in the macroexpansion.
+
+*** Loading order
+With this in minds, the loading / compilation phases are:
+- *Load all :host/:both files in the host system.* This add a bunch of code that do not collide with the host system. =def!struct=, =parse-macro=, =!loop=, ... they can all live aside the standard ones.
+
+This code is easier to write and debug. Because you can develop it in the host system. You can macroexpand any macro, run the compiler to see output of forms, etc.
+
+This includes the =compiler/compiler.lisp=.
+
+- *Compile :target/:both files to the runtime system with the jscl compiler.*
+
+The compiler will compile function calls as described, special forms and primitive functions, generating code in the output =jscl.js=.
+
+It starts with =boot.lisp=, to define the basic macros =defmacro=, =defun=, etc. These macros can use complicated functions like =parse-macro= as they wre loaded in the previous phase.
+
+Macros definitions are used to extend both the host and target environments. Macro usages use only the host macroexpansions during bootstrap.
+
+*** Runtime
+We have =jscl.js= with all the JSCL code crosscompiled. And macro definitions are recorded as their code. This includes the compiler. So we can enter some expressions in the REPL, and the compiler will produce additional JS code, and continue extending the environment with new macros.
+
+*** The bootstrap magic: why and how
+In an ideal world, the compiler implements a (hopefully small) set of primitives, then we compile the bootstrapping code one by one (the =*source*= list  in =jscl.lisp=) to get a full Lisp system. This means later files in the bootstrapping sequence (i.e. the =*source*= list) only depend on previous files, and =src/boot.lisp= depends only on the primitives. However, this is not practical. Look at the first form in =src/boot.lisp=: we define =defmacro=, and =defmacro= requires... at least a pattern matcher for the macro lambda list! It will be pages of unreadable code if we attempt to write the pattern matcher only from the primitives, inside the first top-level form of =src/boot.lisp=! (Remember we can't define macros, because we're defining =defmacro=).
+
+In practice, we have a bootstrap process (that has certain magical bits) so that we can use definitions later in =*source*= at compile time and specifically in =defmacro=. A good example is again the first form in =src/boot.lisp=. The definition relies on =destructuring-bind= and =parse-macro=, defined later in =src/lambda-list.lisp=, and backquotes, defined very late in =src/backquote.lisp=. Many other bootstrap code has such "apparent" forward reference, and it makes the life of writing bootstrap code much easier.
+
+Overall, the build process has three phases:
+- Phase 1 :: The source files (with =:host= or =:both= tag in =*source*=) are executed in the host CL.
+- Phase 2 :: The source files (with =:target= or =:both= tag in =*source*=) are compiled for the target in the host (cross compilation).
+
+  Note that compilation of a Lisp file involves both /compile time evaluation/ of some subforms (for =:compile-toplevel= =eval-when= situation), and /compilation/ of some subforms (for =:load-toplevel= =eval-when= situation). The compile time evaluation happens in the /host/ and use the host global environment, macro definitions, etc. It's the only choice because JSCL is a /compiler-only/ implementation. The compilation instead is completely controlled by us, uses our macroexpander, compiler and global environment =*environment*= representation. There're some tricky bits (i.e. the "bootstrap magic") to make this really work, which will be explained later.
+- Phase 2a :: Near the end of phase 2, the global lexical environment =*environment*= is dumped (serialized) by =dump-global-environment= in =jscl.lisp=. This is part of the "bootstrap magic"
+- Phase 3 :: The output (JavaScript) from Phase 2 is loaded (eval in JS) in the target.
+- Phase 3a :: Near the end of phase 3, the lexical environment dumped by Phase 2a is reinstalled as =*environment*= in the target. This is part of the "bootstrap magic".
+
+It's now clear how those "apparent" forward uses at compile time work. The compile time evaluation of Phase 2 happens in the host and has access to /all/ the definitions entered into the host in Phase 1, even if they occur apparently later in the =*source*= sequence.
+
+However, there's still a problem with =defmacro=. Look at the final definition of =defmacro= we use (in =src/toplevel.lisp= at the end of bootstrap), it's expanded to
+#+BEGIN_SRC
+`(eval-when (:compile-toplevel :load-toplevel :execute)
+   (%compile-defmacro ',name ,expander))
+#+END_SRC
+This has /both/ compile-time (=:compile-toplevel=) and load-time (=:load-toplevel=) side effect! A =defmacro= not only need to be /evaluated/ at compile time so the macro definition is available for /compiling/ later forms, it also need to be /compiled/ itself, so it produce the desired load-time side-effect in the target (making the macro available to later files and REPL). "Apparent" forward uses are not problematic for the evaluation, they in fact refer to definitions in the host environment earlier entered in Phase 1; but they are problematic for the compilation. We don't yet have the target macroexpander to expand them, these are entered into =*environment*= only later in Phase 2.
+
+The solution is the "bootstrap magic". During bootstrap, we use a special definition of =defmacro= (the first form in =src/boot.lisp=, yet again), that does not have the usual load-time side effect (=:load-toplevel= situation is missing). It simply records the expander (in S-exp representation) in =*environment*=. We delayed compilation of the macroexpanders to Phase 2a, at which time we have all the target macroexpanders (in S-exp reprensetation) in =*environment*=. =dump-global-environment= then compiles all the target macroexpanders.
+
+This has some extra consequences. The bootstrap definition of =defmacro= has non-standard semantics. The load-time side-effect is missing (waiting to be reproduced later by =dump-global-environment=), and the macroexpanders are always evaluated in null (global) lexical environment. We seldomly really need closures as macroexpanders, so these discrepancies are not really problematic for bootstrap code (which we fully control ourselves). But this makes it unsuitable for user code. Therefore, we replace it with the standard definition summarily after =dump-global-environment=, in =src/toplevel.lisp=.

@@ -67,13 +67,11 @@ functions and macros. In particular:
 
 - CLOS
 
+- The `format` function
+
 - Others
 
 The compiler is very verbose, some simple optimizations or
 *minification* could help to deal with it.
-
-Most of the above features are incomplete. The major features that are still missing are:
-
-- The `format` function
 
 *Feel free to hack it yourself*
