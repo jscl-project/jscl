@@ -48,6 +48,9 @@
     
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
+(defmacro backquote (form)
+  (bq-completely-process form))
+
 (defmacro declaim (&rest decls)
   `(eval-when (:compile-toplevel :execute)
      ,@(mapcar (lambda (decl) `(!proclaim ',decl)) decls)))
