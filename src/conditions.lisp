@@ -150,7 +150,7 @@
     ;; prevent all conditions ERROR class
     (check-type condition warning)
     (%%signal condition)
-    (format t "~A: ~A" (class-name (class-of c)) c)
+    (format t "~A: ~A" (class-name (class-of condition)) condition)
     (write-char #\newline stream)
     nil))
 
