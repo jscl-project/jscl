@@ -160,7 +160,7 @@
     (check-type condition error)
     (%%signal condition)
     ;;(format stream "~&ERROR: ~a~%" (type-of condition))
-    (format t "~A: ~A" (class-name (class-of c)) c)
+    (format t "~A: ~A" (class-name (class-of condition)) condition)
     nil))
 
 (defun %%check-type-error (place value typespec string)
