@@ -135,14 +135,6 @@
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (setq *package* (find-package-or-fail ',string-designator))))
 
-(defun find-symbol-for-import (name package)
-  (let ((name (string name)))
-    (multiple-value-bind (symbol status) (find-symbol name package)
-      (unless status
-        (error "Symbol with name ~A not found in ~A"
-               name package-from))
-      symbol)))
-
 (defmacro defpackage (name &rest options)
   (let ( exports use nicknames doc imports shadowing-imports
          shadow intern)
@@ -166,42 +158,30 @@
         (:intern (setf intern (append intern (cdr option))))
         ;; :size is currently ignored
         (:size)))
-    `(progn
-       #+jscl-xc
-       (eval-when (:compile-toplevel)
-         (defpackage ,name ,@options))
-       (eval-when (#-jscl-xc :compile-toplevel :load-toplevel :execute)
-         (let ((package (%defpackage ',(string name) ',nicknames)))
-           (unuse-package (package-use-list package) package)
-           (shadow ',shadow package)
-           (shadowing-import
-            (mapcan (lambda (import-spec)
-                      (mapcar (lambda (name)
-                                (find-symbol-for-import name (car import-spec)))
-                              (cdr import-spec)))
-                    ',shadowing-imports)
-            package)
-           (use-package ',use package)
-           (import (mapcan (lambda (import-spec)
-                             (mapcar (lambda (name)
-                                       (find-symbol-for-import name (car import-spec)))
-                                     (cdr import-spec)))
-                           ',imports)
-                   package)
-           (dolist (symb ',intern)
-             (intern symb package))
-           (export (mapcar (lambda (name) (intern (string name) package)) ',exports)
-                   package)
-           ,(when doc `(setf (documentation package 'package) ,doc))
-           package)))))
-
-
-(defun %defpackage (name nicknames)
-  (let ((package (find-package name))
-        (nicknames (mapcar #'string nicknames)))
-    (if package
-        (rename-package package name nicknames)
-        (make-package name :nicknames nicknames))))
+    `(eval-when (:compile-toplevel :load-toplevel :execute)
+       (let ((package (%defpackage ',(string name) ',nicknames)))
+         (unuse-package (package-use-list package) package)
+         (shadow ',shadow package)
+         (shadowing-import
+          (mapcan (lambda (import-spec)
+                    (mapcar (lambda (name)
+                              (find-symbol-for-import name (car import-spec)))
+                            (cdr import-spec)))
+                  ',shadowing-imports)
+          package)
+         (use-package ',use package)
+         (import (mapcan (lambda (import-spec)
+                           (mapcar (lambda (name)
+                                     (find-symbol-for-import name (car import-spec)))
+                                   (cdr import-spec)))
+                         ',imports)
+                 package)
+         (dolist (symb ',intern)
+           (intern symb package))
+         (export (mapcar (lambda (name) (intern (string name) package)) ',exports)
+                 package)
+         ,(when doc `(setf (documentation package 'package) ,doc))
+         package))))
 
 
 (defun %find-inherited-symbols (name package)

@@ -138,6 +138,21 @@ accumulated, in the order."
   (or (find-package package-designator)
       (error "The name `~S' does not designate any package." package-designator)))
 
+(defun find-symbol-for-import (name package)
+  (let ((name (string name)))
+    (multiple-value-bind (symbol status) (find-symbol name package)
+      (unless status
+        (error "Symbol with name ~A not found in ~A"
+               name package))
+      symbol)))
+
+(defun %defpackage (name nicknames)
+  (let ((package (find-package name))
+        (nicknames (mapcar #'string nicknames)))
+    (if package
+        (rename-package package name nicknames)
+        (make-package name :nicknames nicknames))))
+
 (defun find-function (function-designator)
   (if (functionp function-designator)
       function-designator
