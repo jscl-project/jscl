@@ -37,19 +37,20 @@
 
 (defun web-worker-repl ()
   (loop
-     (let ((*web-worker-output-class* "jqconsole-prompt"))
-       (format t "~a> " (package-name *package*)))
+    (let ((*web-worker-output-class* "jqconsole-prompt"))
+       (format t "~a> " (package-name-for-prompt *package*)))
      (%js-try
       (progn
         (handler-case
             (let ((results (multiple-value-list
                             (eval-interactive (read)))))
               (dolist (result results)
-                (print result)))
+                (prin1 result)
+                (terpri)))
           (error (err)
             (let ((*web-worker-output-class* "jqconsole-error"))
               (clear-buffer)
-              (format t "~A: ~A" (class-name (class-of c)) c)
+              (format t "~A: ~A" (class-name (class-of err)) err)
               (terpri)))))
       (catch (err)
         (let (((*web-worker-output-class* "jqconsole-error"))
