@@ -61,127 +61,97 @@
            ((< i (/ size 2)) sequence)
          (set (elt sequence i) (elt sequence (- size i 1))))))))
 
-
-(defmacro do-sequence ((elt seq &optional (index (gensym "i") index-p)) &body body)
-  (let ((nseq (gensym "seq")))
-    (unless (symbolp elt)
-      (error "`~S' must be a symbol." elt))
-    `(let ((,nseq ,seq))
-       (if (listp ,nseq)
-           ,(if index-p
-                `(let ((,index -1))
-                   (dolist (,elt ,nseq)
-                     (incf ,index)
-                     ,@body))
-                `(dolist (,elt ,nseq)
-                   ,@body))
-           (dotimes (,index (length ,nseq))
-             (let ((,elt (aref ,nseq ,index)))
-               ,@body))))))
-
-(defun count (item sequence &key from-end (start 0) end
-                                 key (test #'eql testp)
-                                 (test-not #'eql test-not-p))
-  ;; TODO: Implement START and END efficiently for all the sequence
-  ;; functions.
-  (let* ((l (length sequence))
-         (end (or end l))
-         (result 0))
+(defun map-sequence-list (fn seq &key from-end (start 0) end)
+  (let ((seq (nthcdr start seq)))
     (if from-end
-      (do-sequence (x (reverse sequence) index)
-        (when (and (<= start (- l index 1))
-                   (< (- l index 1) end)
-                   (satisfies-test-p item x
-                                     :key key :test test :testp testp
-                                     :test-not test-not :test-not-p test-not-p))
-          (incf result)))
-      (do-sequence (x sequence index)
-        (when (and (<= start index)
-                   (< index end)
-                   (satisfies-test-p item x
-                                     :key key :test test :testp testp
-                                     :test-not test-not :test-not-p test-not-p))
-          (incf result))))
-    result))
+        ;; FROM-END = T
+        (let ((index (1- start))
+              (revlist '()))
+          ;; Collect relevant elements in reverse first
+          (dolist (elt seq)
+            (incf index)
+            (when (and end (<= end index))
+              (decf index)
+              (return))
+            (push elt revlist))
+          ;; Iterate through reversed elements
+          (dolist (elt revlist)
+            (funcall fn elt index)
+            (decf index)))
+        ;; FROM-END = NIL
+        (let ((index (1- start)))
+          (dolist (elt seq)
+            (incf index)
+            (when (and end (<= end index))
+              (return))
+            (funcall fn elt index))))))
+
+(defun map-sequence-vector (fn seq &key from-end (start 0) end)
+  (let ((end (or end (length seq))))
+    (if from-end
+        (do ((index (1- end) (1- index)))
+            ((< index start))
+          (funcall fn (aref seq index) index))
+        (do ((index start (1+ index)))
+            ((<= end index))
+          (funcall fn (aref seq index) index)))))
+
+;;; TODO: more error checking for out of bound START/END
+(defun map-sequence (fn seq &rest options)
+  (if (listp seq)
+      (apply #'map-sequence-list fn seq options)
+      (apply #'map-sequence-vector fn seq options)))
+
+;;; Our strategy is to define *-IF first (because they are the most
+;;; general), then derive * and *-IF-NOT from it. This macro does the
+;;; latter conveniently.
+(defmacro define-seq-variants (if-op op if-not-op)
+  `(progn
+     (defun ,op (item sequence &key from-end key (start 0) end
+                                 (test #'eql testp) (test-not #'eql test-not-p))
+       (,if-op
+        (lambda (x)
+          (satisfies-test-p item x
+                            :key key :test test :testp testp
+                            :test-not test-not :test-not-p test-not-p))
+        sequence :from-end from-end :start start :end end))
+     (defun ,if-not-op (predicate sequence &key from-end (start 0) end key)
+       (,if-op (complement predicate) sequence
+               :from-end from-end :start start :end end :key key))))
 
 (defun count-if (predicate sequence &key from-end (start 0) end key)
-  ;; TODO: Implement START and END efficiently for all the sequence
-  ;; functions.
-  (let* ((l (length sequence))
-         (end (or end l))
-         (result 0))
-    (if from-end
-      (do-sequence (x (reverse sequence) index)
-        (when (and (<= start (- l index 1))
-                   (< (- l index 1) end)
-                   (funcall predicate (if key (funcall key x) x)))
-          (incf result)))
-      (do-sequence (x sequence index)
-        (when (and (<= start index)
-                   (< index end)
-                   (funcall predicate (if key (funcall key x) x)))
-          (incf result))))
+  (let ((result 0)
+        (key (or key #'identity)))
+    (map-sequence
+     (lambda (x index)
+       (when (funcall predicate (funcall key x))
+         (incf result)))
+     sequence :from-end from-end :start start :end end)
     result))
 
-(defun count-if-not (predicate sequence &key from-end (start 0) end key)
-  (count-if (complement predicate) sequence :from-end from-end
-            :start start :end end :key key))
+(define-seq-variants count-if count count-if-not)
 
-(defun find (item seq &key key (test #'eql testp) (test-not #'eql test-not-p))
-  (do-sequence (x seq)
-    (when (satisfies-test-p item x :key key :test test :testp testp
-                            :test-not test-not :test-not-p test-not-p)
-      (return x))))
+(defun find-if (predicate sequence &key from-end (start 0) end key)
+  (let ((key (or key #'identity)))
+    (map-sequence
+     (lambda (x index)
+       (when (funcall predicate (funcall key x))
+         (return-from find-if x)))
+     sequence :from-end from-end :start start :end end)))
 
-(defun find-if (predicate sequence &key key)
-  (if key
-      (do-sequence (x sequence)
-        (when (funcall predicate (funcall key x))
-          (return x)))
-      (do-sequence (x sequence)
-        (when (funcall predicate x)
-          (return x)))))
+(define-seq-variants find-if find find-if-not)
 
-(defun position (elt sequence
-                 &key from-end key (test #'eql testp)
-                   (test-not #'eql test-not-p)
-                   (start 0) end)
-  ;; TODO: Implement START and END efficiently for all the sequence
-  ;; functions.
-  (let ((end (or end (length sequence)))
-        (result nil))
-    (do-sequence (x sequence index)
-      (when (and (<= start index)
-                 (< index end)
-                 (satisfies-test-p elt x
-                                   :key key :test test :testp testp
-                                   :test-not test-not :test-not-p test-not-p))
-        (setf result index)
-        (unless from-end
-            (return))))
-    result))
+(defun position-if (predicate sequence &key from-end key (start 0) end)
+  (let ((key (or key #'identity)))
+    (map-sequence
+     (lambda (x index)
+       (when (funcall predicate (funcall key x))
+         (return-from position-if index)))
+     sequence :from-end from-end :start start :end end)))
 
-(defun position-if (predicate sequence
-                 &key from-end key (start 0) end)
-  ;; TODO: Implement START and END efficiently for all the sequence
-  ;; functions.
-  (let ((end (or end (length sequence)))
-        (result nil))
-    (do-sequence (x sequence index)
-      (when (and (<= start index)
-                 (< index end)
-                 (funcall predicate (if key (funcall key x) x)))
-        (setf result index)
-        (unless from-end
-          (return))))
-    result))
+(define-seq-variants position-if position position-if-not)
 
-(defun position-if-not (predicate sequence
-                 &key from-end key (start 0) end)
-  (position-if (complement predicate) sequence
-               :from-end from-end :key key :start start :end end))
-
-(defun substitute (new old seq 
+(defun substitute (new old seq
                    &key (key #'identity) (test #'eql))
   (and seq
        (map (cond
@@ -194,77 +164,63 @@
                   elt))
             seq)))
 
-(defun remove (x seq &key key (test #'eql testp) (test-not #'eql test-not-p))
-  (cond
-    ((null seq)
-     nil)
-    ((listp seq)
-     (let* ((head (cons nil nil))
-            (tail head))
-       (do-sequence (elt seq)
-         (unless (satisfies-test-p x elt :key key :test test :testp testp
-                                   :test-not test-not :test-not-p test-not-p)
-           (let ((new (list elt)))
-             (rplacd tail new)
-             (setq tail new))))
-       (cdr head)))
-    (t
-     (let (vector)
-       (do-sequence (elt seq index)
-         (if (satisfies-test-p x elt :key key :test test :testp testp
-                               :test-not test-not :test-not-p test-not-p)
-             ;; Copy the beginning of the vector only when we find an element
-             ;; that does not match.
-             (unless vector
-               (setq vector (make-array 0 :fill-pointer 0))
-               (dotimes (i index)
-                 (vector-push-extend (aref seq i) vector)))
-             (when vector
-               (vector-push-extend elt vector))))
-       (or vector seq)))))
+(defun remove-if (predicate seq &key from-end key (start 0) end)
+  (when from-end
+    (error "FROM-END for REMOVE-IF not implemented yet"))
+  (let* ((key (or key #'identity))
+         (removed nil)
+         (result nil)
+         (collect (if (listp seq)
+                      (lambda (x) (push x result))
+                      (lambda (x) (vector-push-extend x result)))))
+    (block nil
+      (map-sequence
+       (lambda (elt index)
+         (if (or (not end) (< index end))
+             (if (funcall predicate (funcall key elt))
+                 (unless removed
+                   ;; Copy the beginning of the sequence only when we find an element
+                   ;; that does not match.
+                   (setq removed t)
+                   (unless (listp seq)
+                     (setq result (make-array 0 :fill-pointer t)))
+                   (map-sequence
+                    (lambda (elt index) (funcall collect elt))
+                    seq :end index))
+                 (when removed
+                   (funcall collect elt)))
+             ;; Copy elements after END if needed
+             (if removed
+                 (funcall collect elt)
+                 (return))))
+       seq :start start))
+    (if removed
+        (if (listp seq)
+            (nreverse result)
+            result)
+        seq)))
 
+(define-seq-variants remove-if remove remove-if-not)
 
-(defun some (function seq)
-  (do-sequence (elt seq)
-    (awhen (funcall function elt)
-      (return-from some it))))
+(defun some (predicate first-seq &rest more-sequences)
+  (if more-sequences
+      (apply #'map nil (lambda (&rest elts)
+                         (awhen (apply predicate elts)
+                           (return-from some it)))
+             first-seq more-sequences)
+      (map-sequence (lambda (elt index)
+                      (awhen (funcall predicate elt)
+                        (return-from some it)))
+                    first-seq)))
 
-;;; more sequences version
 (defun every (predicate first-seq &rest more-sequences)
-  (apply #'map nil (lambda (&rest seqs)
-                     (when (not (apply predicate seqs))
-                       (return-from every nil)))
-         first-seq more-sequences)
-  t)
+  (not (apply #'some (complement predicate) first-seq more-sequences)))
 
+(defun notany (predicate first-seq &rest more-sequences)
+  (not (apply #'some predicate first-seq more-sequences)))
 
-(defun remove-if (func seq)
-  (cond
-    ((listp  seq) (list-remove-if   func seq nil))
-    ((arrayp seq) (vector-remove-if func seq nil))
-    (t (not-seq-error seq))))
-
-(defun remove-if-not (func seq)
-  (cond
-    ((listp  seq) (list-remove-if   func seq t))
-    ((arrayp seq) (vector-remove-if func seq t))
-    (t (not-seq-error seq))))
-
-(defun list-remove-if (func list negate)
-  (if (endp list)
-    ()
-    (let ((test (funcall func (car list))))
-      (if (if negate (not test) test)
-        (list-remove-if func (cdr list) negate)
-        (cons (car list) (list-remove-if func (cdr list) negate))))))
-
-(defun vector-remove-if (func vector negate)
-  (let ((out-vector (make-array 0 :fill-pointer 0)))
-    (do-sequence (element vector i)
-      (let ((test (funcall func element)))
-        (when (if negate test (not test))
-          (vector-push-extend element out-vector))))
-    out-vector))
+(defun notevery (predicate first-seq &rest more-sequences)
+  (apply #'some (complement predicate) first-seq more-sequences))
 
 (defun subseq (seq a &optional b)
   (cond
