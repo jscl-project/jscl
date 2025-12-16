@@ -27,8 +27,24 @@
 ;;; FIND
 (test (find 1 #(2 1 3)))
 (test (find 1 '(2 1 3)))
+(test (find 1 '(2 1 3) :start 1))
+(test (find 1 '(2 1 3) :end 2))
+(test (find 1 #(2 1 3) :start 1))
+(test (find 1 #(2 1 3) :end 2))
+(test (find 1 '(2 1 3) :start 1 :from-end t))
+(test (find 1 '(2 1 3) :end 2 :from-end t))
+(test (find 1 #(2 1 3) :start 1 :from-end t))
+(test (find 1 #(2 1 3) :end 2 :from-end t))
 (test (not (find 1 #(2 2 2))))
 (test (not (find 1 '(2 2 2))))
+(test (not (find 1 '(2 1 3) :start 2)))
+(test (not (find 1 '(2 1 3) :end 1)))
+(test (not (find 1 #(2 1 3) :start 2)))
+(test (not (find 1 #(2 1 3) :end 1)))
+(test (not (find 1 '(2 1 3) :start 2 :from-end t)))
+(test (not (find 1 '(2 1 3) :end 1 :from-end t)))
+(test (not (find 1 #(2 1 3) :start 2 :from-end t)))
+(test (not (find 1 #(2 1 3) :end 1 :from-end t)))
 (test (not (find 1 #(1 1 1) :test-not #'=)))
 (test (not (find 1 '(1 1 1) :test-not #'=)))
 (test (not (find 1 #(1 2 3) :key double)))
@@ -43,12 +59,40 @@
 (test (null          (remove '(1 2) '((1 2) (1 2)) :test #'equal)))
 (test (find 2 (remove 2 #(1 2 3) :test-not #'=)))
 (test (find 2 (remove 2 '(1 2 3) :test-not #'=)))
+(test (equal '(1 2 3 1) (remove 1 '(1 2 3 1) :count 0)))
+(test (equal '(2 3 1) (remove 1 '(1 2 3 1) :count 1)))
+(test (equal '(2 3) (remove 1 '(1 2 3 1) :count 2)))
+(test (equal '(1 2 3 2 1) (remove 1 '(1 2 3 1 1 2 1) :start 3 :end 5)))
+(test (equal '(1 2 3 1 2 1) (remove 1 '(1 2 3 1 1 2 1) :start 3 :end 5 :count 1)))
+(test (equal '(1 2 3 2 1) (remove 1 '(1 2 3 1 1 2 1) :start 3 :end 5 :count 2)))
+(test (equal '(1 2 3 2 3) (remove 1 '(1 2 3 1 1 2 3) :start 3)))
+(test (equal '(1 2 3 1 2 3) (remove 1 '(1 2 3 1 1 2 3) :start 3 :count 1)))
+(test (equal '(1 2 3 2 3) (remove 1 '(1 2 3 1 1 2 3) :start 3 :count 2)))
+(test (equal '(1 2 3 2 3) (remove 1 '(1 2 3 1 1 2 3) :start 3 :end 5)))
+
+(test (equal "1231" (remove #\1 "1231" :count 0)))
+(test (equal "231" (remove #\1 "1231" :count 1)))
+(test (equal "23" (remove #\1 "1231" :count 2)))
+(test (equal "12321" (remove #\1 "1231121" :start 3 :end 5)))
+(test (equal "123121" (remove #\1 "1231121" :start 3 :end 5 :count 1)))
+(test (equal "12321" (remove #\1 "1231121" :start 3 :end 5 :count 2)))
 
 ;;; SUBSTITUTE
 (test (equal (substitute #\_ #\- "Hello-World") "Hello_World"))
 (test (equal (substitute 4 5 '(1 2 3 4)) '(1 2 3 4)))
 (test (equal (substitute 99 3 '(1 2 3 4)) '(1 2 99 4)))
 (test (equal (substitute 99 3 '(1 2 3 4) :test #'<=) '(1 2 99 99)))
+
+(test (equal '(1 2 3 1) (substitute 99 1 '(1 2 3 1) :count 0)))
+(test (equal '(99 2 3 1) (substitute 99 1 '(1 2 3 1) :count 1)))
+(test (equal '(99 2 3 99) (substitute 99 1 '(1 2 3 1) :count 2)))
+(test (equal '(1 2 3 99 99 2 1) (substitute 99 1 '(1 2 3 1 1 2 1) :start 3 :end 5)))
+(test (equal '(1 2 3 99 1 2 1) (substitute 99 1 '(1 2 3 1 1 2 1) :start 3 :end 5 :count 1)))
+(test (equal '(1 2 3 99 99 2 1) (substitute 99 1 '(1 2 3 1 1 2 1) :start 3 :end 5 :count 2)))
+(test (equal '(1 2 3 99 99 2 3) (substitute 99 1 '(1 2 3 1 1 2 3) :start 3)))
+(test (equal '(1 2 3 99 1 2 3) (substitute 99 1 '(1 2 3 1 1 2 3) :start 3 :count 1)))
+(test (equal '(1 2 3 99 99 2 3) (substitute 99 1 '(1 2 3 1 1 2 3) :start 3 :count 2)))
+(test (equal '(1 2 3 99 99 2 3) (substitute 99 1 '(1 2 3 1 1 2 3) :start 3 :end 5)))
 
 ;;; This test fails expectely as you can't compare vectors with equal.
 #+nil
@@ -70,6 +114,10 @@
 (test (= (position 1 '(1 1 3) :from-end nil) 0))
 (test (= (position 1 '(1 1 3) :from-end t) 1))
 (test (= (position #\a "baobab" :from-end t) 4))
+(test (= (position 1 '(1 2 3 1) :start 1) 3))
+(test (not (position 1 '(2 2 3 1) :end 3)))
+(test (= (position 1 '(1 1 3 1) :start 1 :from-end t) 3))
+(test (= (position 1 '(1 3 1 1) :end 3 :from-end t) 2))
 
 ;;; POSITION-IF, POSITION-IF-NOT
 (test (= 2 (position-if #'oddp '((1) (2) (3) (4)) :start 1 :key #'car)))
@@ -83,15 +131,31 @@
 (test (eql nil (some #'identity '(nil nil))))
 (test (eql 1 (some #'identity '(nil 1))))
 (test (eql 1 (some #'identity '(1 2))))
+(test (eql 2 (some (lambda (a b) (or a b)) '(nil nil 3) '(nil 2 3))))
 (test (eql nil (every #'identity '(1 nil))))
 (test (eql nil (every #'identity '(nil 1))))
 (test (eql t (every #'identity '(1 2 3))))
 (test (eql t (every #'identity nil)))
 
+;;; NOTANY, NOTEVERY
+(test (eql t (notany #'identity nil)))
+(test (eql t (notany #'identity '(nil nil))))
+(test (eql nil (notany #'identity '(nil 1))))
+(test (eql nil (notany #'identity '(1 2))))
+(test (eql nil (notany (lambda (a b) (or a b)) '(nil nil 3) '(nil 2 3))))
+(test (eql t (notevery #'identity '(1 nil))))
+(test (eql t (notevery #'identity '(nil 1))))
+(test (eql nil (notevery #'identity '(1 2 3))))
+(test (eql nil (notevery #'identity nil)))
+
 ;;; REMOVE-IF
 (test (equal (remove-if     #'zerop '(1 0 2 0 3)) '(1 2 3)))
 (test (equal (remove-if-not #'zerop '(1 0 2 0 3)) '(0 0)))
 (test (equalp #(1 2 3) (remove-if #'zerop #(1 0 2 0 3))))
+(test (equal (remove-if     #'zerop '(1 0 2 0 3) :start 3) '(1 0 2 3)))
+(test (equal (remove-if-not #'zerop '(1 0 2 0 3) :start 3) '(1 0 2 0)))
+(test (equal (remove-if     #'zerop '(1 0 2 0 3) :end 3) '(1 2 0 3)))
+(test (equal (remove-if-not #'zerop '(1 0 2 0 3) :end 3) '(0 0 3)))
 (test (every #'zerop (remove-if-not #'zerop #(1 0 2 0 3))))
 
 ;;; SUBSEQ
@@ -100,6 +164,20 @@
   (test (equal (subseq nums 2 4) '(3 4)))
   ;; Test that nums hasn't been altered: SUBSEQ should construct fresh lists
   (test (equal nums '(1 2 3 4 5))))
+
+;;; SETF with SUBSEQ
+(test (let ((list (list 0 1 2 3 4 5)))
+        (setf (subseq list 4) '(a b c))
+        (equal list '(0 1 2 3 a b))))
+(test (let ((list (list 0 1 2 3 4 5)))
+        (setf (subseq list 0 2) '(a))
+        (equal list '(a 1 2 3 4 5))))
+(test (let ((str (copy-seq "012345")))
+        (setf (subseq str 4) "abc")
+        (equal str "0123ab")))
+(test (let ((str (copy-seq "012345")))
+        (setf (subseq str 0 2) "A")
+        (equal str "A12345")))
 
 ;;; REVERSE
 (test (eq (reverse nil) nil))
