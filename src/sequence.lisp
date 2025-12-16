@@ -61,210 +61,244 @@
            ((< i (/ size 2)) sequence)
          (set (elt sequence i) (elt sequence (- size i 1))))))))
 
+(defmacro do-sequence-list ((elt seq &key from-end (start 0) end
+                                       (index (gensym "I")))
+                            &body body)
+  (let ((nseq (gensym "SEQ"))
+        (revlist (gensym "REVLIST"))
+        (nstart (gensym "START"))
+        (nend (gensym "END")))
+    `(let* ((,nstart ,start)
+            (,nend ,end)
+            (,nseq (nthcdr ,nstart ,seq)))
+       (if ,from-end
+           ;; FROM-END = T
+           (let ((,index (1- ,nstart))
+                 (,revlist '()))
+             ;; Collect relevant elements in reverse first
+             (dolist (,elt ,nseq)
+               (incf ,index)
+               (when (and ,nend (<= ,nend ,index))
+                 (decf ,index)
+                 (return))
+               (push ,elt ,revlist))
+             ;; Iterate through reversed elements
+             (dolist (,elt ,revlist)
+               ,@body
+               (decf ,index)))
+           ;; FROM-END = NIL
+           (let ((,index (1- ,nstart)))
+             (dolist (,elt ,nseq)
+               (incf ,index)
+               (when (and ,nend (<= ,nend ,index))
+                 (return))
+               ,@body))))))
 
-(defmacro do-sequence ((elt seq &optional (index (gensym "i") index-p)) &body body)
-  (let ((nseq (gensym "seq")))
-    (unless (symbolp elt)
-      (error "`~S' must be a symbol." elt))
-    `(let ((,nseq ,seq))
-       (if (listp ,nseq)
-           ,(if index-p
-                `(let ((,index -1))
-                   (dolist (,elt ,nseq)
-                     (incf ,index)
-                     ,@body))
-                `(dolist (,elt ,nseq)
-                   ,@body))
-           (dotimes (,index (length ,nseq))
+(defmacro do-sequence-vector ((elt seq &key from-end (start 0) end
+                                         (index (gensym "I")))
+                              &body body)
+  (let ((nseq (gensym "SEQ"))
+        (nstart (gensym "START"))
+        (nend (gensym "END")))
+    `(let* ((,nseq ,seq)
+            (,nstart ,start)
+            (,nend (or ,end (length ,nseq))))
+       (if ,from-end
+           (do ((,index (1- ,nend) (1- ,index)))
+               ((< ,index ,nstart))
+             (let ((,elt (aref ,nseq ,index)))
+               ,@body))
+           (do ((,index ,nstart (1+ ,index)))
+               ((<= ,nend ,index))
              (let ((,elt (aref ,nseq ,index)))
                ,@body))))))
 
-(defun count (item sequence &key from-end (start 0) end
-                                 key (test #'eql testp)
-                                 (test-not #'eql test-not-p))
-  ;; TODO: Implement START and END efficiently for all the sequence
-  ;; functions.
-  (let* ((l (length sequence))
-         (end (or end l))
-         (result 0))
-    (if from-end
-      (do-sequence (x (reverse sequence) index)
-        (when (and (<= start (- l index 1))
-                   (< (- l index 1) end)
-                   (satisfies-test-p item x
-                                     :key key :test test :testp testp
-                                     :test-not test-not :test-not-p test-not-p))
-          (incf result)))
-      (do-sequence (x sequence index)
-        (when (and (<= start index)
-                   (< index end)
-                   (satisfies-test-p item x
-                                     :key key :test test :testp testp
-                                     :test-not test-not :test-not-p test-not-p))
-          (incf result))))
+;;; TODO: more error checking for out of bound START/END
+(defmacro do-sequence ((elt seq &rest options) &body body)
+  (let ((nseq (gensym "SEQ")))
+    (unless (symbolp elt)
+      (error "`~S' must be a symbol." elt))
+    `(let ((,nseq ,seq))
+       (cond ((listp ,nseq)
+              (do-sequence-list (,elt ,nseq ,@options) ,@body))
+             ((vectorp ,nseq)
+              (do-sequence-vector (,elt ,nseq ,@options) ,@body))
+             (t (not-seq-error ,nseq))))))
+
+(defmacro define-seq-variants
+    (op if-op if-not-op (&key more-reqs more-keys) &body body)
+  "Define *, *-IF and *-IF-NOT variants for sequence function OP.
+
+BODY has access to SEQUENCE, FROM-END, START, END arguments, and a
+local macro TEST. (TEST x) expand to the appropriate test for each
+variant.
+
+MORE-REQS are prepended as required arguments and MORE-KEYS are
+appended as keyword arguments, to all variants' lambda list."
+  `(progn
+     (defun ,op (,@more-reqs item sequence &key from-end key (start 0) end
+                                 (test #'eql testp) (test-not #'eql test-not-p)
+                                 ,@more-keys)
+       (macrolet ((test (x)
+                    `(satisfies-test-p item ,x
+                      :key key :test test :testp testp
+                      :test-not test-not :test-not-p test-not-p)))
+         ,@body))
+     (defun ,if-op (,@more-reqs predicate sequence
+                    &key from-end (start 0) end key ,@more-keys)
+       (macrolet ((test (x)
+                    `(funcall predicate (if key (funcall key ,x) ,x))))
+         ,@body))
+     (defun ,if-not-op (,@more-reqs predicate sequence
+                        &key from-end (start 0) end key ,@more-keys)
+       (macrolet ((test (x)
+                    `(not (funcall predicate (if key (funcall key ,x) ,x)))))
+         ,@body))))
+
+(define-seq-variants count count-if count-if-not ()
+  (let ((result 0))
+    (do-sequence (x sequence
+                    :from-end from-end :index index :start start :end end)
+      (when (test x)
+        (incf result)))
     result))
 
-(defun count-if (predicate sequence &key from-end (start 0) end key)
-  ;; TODO: Implement START and END efficiently for all the sequence
-  ;; functions.
-  (let* ((l (length sequence))
-         (end (or end l))
-         (result 0))
-    (if from-end
-      (do-sequence (x (reverse sequence) index)
-        (when (and (<= start (- l index 1))
-                   (< (- l index 1) end)
-                   (funcall predicate (if key (funcall key x) x)))
-          (incf result)))
-      (do-sequence (x sequence index)
-        (when (and (<= start index)
-                   (< index end)
-                   (funcall predicate (if key (funcall key x) x)))
-          (incf result))))
-    result))
-
-(defun count-if-not (predicate sequence &key from-end (start 0) end key)
-  (count-if (complement predicate) sequence :from-end from-end
-            :start start :end end :key key))
-
-(defun find (item seq &key key (test #'eql testp) (test-not #'eql test-not-p))
-  (do-sequence (x seq)
-    (when (satisfies-test-p item x :key key :test test :testp testp
-                            :test-not test-not :test-not-p test-not-p)
+(define-seq-variants find find-if find-if-not ()
+  (do-sequence (x sequence
+                  :from-end from-end :start start :end end)
+    (when (test x)
       (return x))))
 
-(defun find-if (predicate sequence &key key)
-  (if key
-      (do-sequence (x sequence)
-        (when (funcall predicate (funcall key x))
-          (return x)))
-      (do-sequence (x sequence)
-        (when (funcall predicate x)
-          (return x)))))
+(define-seq-variants position position-if position-if-not ()
+  (do-sequence (x sequence
+                  :from-end from-end :index index :start start :end end)
+    (when (test x)
+      (return index))))
 
-(defun position (elt sequence
-                 &key from-end key (test #'eql testp)
-                   (test-not #'eql test-not-p)
-                   (start 0) end)
-  ;; TODO: Implement START and END efficiently for all the sequence
-  ;; functions.
-  (let ((end (or end (length sequence)))
-        (result nil))
-    (do-sequence (x sequence index)
-      (when (and (<= start index)
-                 (< index end)
-                 (satisfies-test-p elt x
-                                   :key key :test test :testp testp
-                                   :test-not test-not :test-not-p test-not-p))
-        (setf result index)
-        (unless from-end
-            (return))))
-    result))
+(defmacro do-sequence-maybe-collect-list
+    ((elt sequence &key (start 0) end count) test-form &body body)
+  ;; @kchan smart (maximal sharing) list remove algorithm ;)
+  ;;
+  ;; Don't just copy when we see element to retain; instead, when
+  ;; we see an element to drop, copy the segment starting from
+  ;; last retainable element. Finally, share the tail.
+  `(let* ((head (cons nil nil))
+          (tail head)
+          (last-retain ,sequence)
+          (n-changed 0))
+     (macrolet ((collect (elt)
+                  `(progn
+                     (rplacd tail (cons ,elt nil))
+                     (setq tail (cdr tail)))))
+       (do ((scan (nthcdr ,start ,sequence) (cdr scan))
+            (index ,start (1+ index)))
+           ((or (null scan)
+                (and ,end (<= ,end index))
+                (and ,count (<= ,count n-changed))))
+         (let ((,elt (car scan)))
+           (when ,test-form
+             (incf n-changed)
+             (while (not (eq last-retain scan))
+               (collect (car last-retain))
+               (setq last-retain (cdr last-retain)))
+             (setq last-retain (cdr last-retain))
+             ,@body))))
+     (rplacd tail last-retain)
+     (cdr head)))
 
-(defun position-if (predicate sequence
-                 &key from-end key (start 0) end)
-  ;; TODO: Implement START and END efficiently for all the sequence
-  ;; functions.
-  (let ((end (or end (length sequence)))
-        (result nil))
-    (do-sequence (x sequence index)
-      (when (and (<= start index)
-                 (< index end)
-                 (funcall predicate (if key (funcall key x) x)))
-        (setf result index)
-        (unless from-end
-          (return))))
-    result))
+(defmacro do-sequence-maybe-collect-vector
+    ((elt sequence &key (start 0) end count) test-form &body body)
+  `(let ((vector nil)
+         (n-changed 0))
+     ;; Phase 1 - search if there's any element to drop
+     (macrolet ((collect (elt)
+                  `(vector-push-extend ,elt vector)))
+       (do-sequence-vector (,elt ,sequence :index index :start ,start :end ,end)
+         (when ,test-form
+           ;; Copy the beginning of the sequence only when we find an element
+           ;; that does not match.
+           (setq vector (make-array 0 :fill-pointer t
+                                      :element-type (array-element-type ,sequence)))
+           (dotimes (i index)
+             (collect (aref ,sequence i)))
+           (incf n-changed)
+           ,@body
+           ;; Phase 2 - if we have to copy, filter the rest of
+           ;; SEQUENCE into VECTOR
+           (do-sequence-vector (,elt ,sequence :index index :start (1+ index) :end ,end)
+             ;; Early stop because of COUNT. Tell phase 3 to
+             ;; start from INDEX.
+             (when (and ,count (<= ,count n-changed))
+               (setq ,end index)
+               (return))
+             (if ,test-form
+                 (progn
+                   (incf n-changed)
+                   ,@body)
+                 (vector-push-extend ,elt vector)))
+           (return))))
+     ;; Phase 3 - Copy elements after END if needed
+     (when (and vector ,end)
+       (do-sequence-vector (elt ,sequence :start ,end)
+         (vector-push-extend elt vector)))
+     (or vector ,sequence)))
 
-(defun position-if-not (predicate sequence
-                 &key from-end key (start 0) end)
-  (position-if (complement predicate) sequence
-               :from-end from-end :key key :start start :end end))
+;;; @kchan - TODO: support FROM-END
+(defmacro do-sequence-maybe-collect ((elt seq &key (start 0) end count)
+                                     test-form &body body)
+  "Iterate through SEQ and collect into a sequence of the same type.
 
-(defun substitute (new old seq 
-                   &key (key #'identity) (test #'eql))
-  (and seq
-       (map (cond
-              ((stringp seq) 'string)
-              ((vectorp seq) 'vector)
-              ((listp seq) 'list)) 
-            (lambda (elt)
-              (if (funcall test old (funcall key elt))
-                  new
-                  elt))
-            seq)))
+If TEST-FORM evaluates to false, copy the elements verbatim. If
+TEST-FORM evaluates to true, run BODY. BODY has access to a local
+macro COLLECT which can be used to accumulate value (if COLLECT is not
+used, the element is effectively dropped).
 
-(defun remove (x seq &key key (test #'eql testp) (test-not #'eql test-not-p))
-  (cond
-    ((null seq)
-     nil)
-    ((listp seq)
-     (let* ((head (cons nil nil))
-            (tail head))
-       (do-sequence (elt seq)
-         (unless (satisfies-test-p x elt :key key :test test :testp testp
-                                   :test-not test-not :test-not-p test-not-p)
-           (let ((new (list elt)))
-             (rplacd tail new)
-             (setq tail new))))
-       (cdr head)))
-    (t
-     (let (vector)
-       (do-sequence (elt seq index)
-         (if (satisfies-test-p x elt :key key :test test :testp testp
-                               :test-not test-not :test-not-p test-not-p)
-             ;; Copy the beginning of the vector only when we find an element
-             ;; that does not match.
-             (unless vector
-               (setq vector (make-array 0 :fill-pointer 0))
-               (dotimes (i index)
-                 (vector-push-extend (aref seq i) vector)))
-             (when vector
-               (vector-push-extend elt vector))))
-       (or vector seq)))))
+The return value will share structure with SEQ if possible."
+  (let ((nstart (gensym "START"))
+        (nend (gensym "END"))
+        (ncount (gensym "NCOUNT"))
+        (nseq (gensym "NSEQ")))
+    `(let ((,nstart ,start)
+           (,nend ,end)
+           (,ncount ,count)
+           (,nseq ,seq))
+       (cond ((and ,ncount (<= ,ncount 0)) ,nseq)
+             ((listp ,nseq)
+              (do-sequence-maybe-collect-list
+                  (,elt ,nseq :start ,nstart :end ,nend :count ,ncount)
+                ,test-form ,@body))
+             ((vectorp ,nseq)
+              (do-sequence-maybe-collect-vector
+                  (,elt ,nseq :start ,nstart :end ,nend :count ,ncount)
+                ,test-form ,@body))
+             (t (not-seq-error ,nseq))))))
+
+(define-seq-variants remove remove-if remove-if-not (:more-keys (count))
+  (do-sequence-maybe-collect (elt sequence :start start :end end :count count)
+    (test elt)))
+
+(define-seq-variants substitute substitute-if substitute-if-not
+  (:more-reqs (newitem) :more-keys (count))
+  (do-sequence-maybe-collect (elt sequence :start start :end end :count count)
+    (test elt)
+    (collect newitem)))
 
 
-(defun some (function seq)
-  (do-sequence (elt seq)
-    (awhen (funcall function elt)
-      (return-from some it))))
-
-;;; more sequences version
-(defun every (predicate first-seq &rest more-sequences)
-  (apply #'map nil (lambda (&rest seqs)
-                     (when (not (apply predicate seqs))
-                       (return-from every nil)))
-         first-seq more-sequences)
-  t)
-
-
-(defun remove-if (func seq)
-  (cond
-    ((listp  seq) (list-remove-if   func seq nil))
-    ((arrayp seq) (vector-remove-if func seq nil))
-    (t (not-seq-error seq))))
-
-(defun remove-if-not (func seq)
-  (cond
-    ((listp  seq) (list-remove-if   func seq t))
-    ((arrayp seq) (vector-remove-if func seq t))
-    (t (not-seq-error seq))))
-
-(defun list-remove-if (func list negate)
-  (if (endp list)
-    ()
-    (let ((test (funcall func (car list))))
-      (if (if negate (not test) test)
-        (list-remove-if func (cdr list) negate)
-        (cons (car list) (list-remove-if func (cdr list) negate))))))
-
-(defun vector-remove-if (func vector negate)
-  (let ((out-vector (make-array 0 :fill-pointer 0)))
-    (do-sequence (element vector i)
-      (let ((test (funcall func element)))
-        (when (if negate test (not test))
-          (vector-push-extend element out-vector))))
-    out-vector))
+(macrolet ((def (op found-test found-result unfound-result)
+             `(defun ,op (predicate first-seq &rest more-sequences)
+                (if more-sequences
+                    (apply #'map nil (lambda (&rest elts)
+                                       (,found-test (apply predicate elts)
+                                         (return-from ,op ,found-result)))
+                           first-seq more-sequences)
+                    (do-sequence (elt first-seq)
+                      (,found-test (funcall predicate elt)
+                         (return-from ,op ,found-result))))
+                ,unfound-result)))
+  (def some awhen it nil)
+  (def every unless nil t)
+  (def notany when nil t)
+  (def notevery unless t nil))
 
 (defun subseq (seq a &optional b)
   (cond
@@ -294,6 +328,38 @@
            ((= j b) new)
          (aset new i (aref seq j)))))
     (t (not-seq-error seq))))
+
+(defun set-subseq (new-val seq a &optional b)
+  (cond
+    ((listp seq)
+     (let ((tail (nthcdr a seq)))
+       (do-sequence (elt new-val)
+         (rplaca tail elt)
+         (setq tail (cdr tail))
+         (incf a)
+         (when (or (null tail) (and b (<= b a)))
+           (return)))
+       new-val))
+    ((vectorp seq)
+     (let ((b (or b (length seq))))
+       (do-sequence (elt new-val)
+         (setf (aref seq a) elt)
+         (incf a)
+         (when (<= b a)
+           (return)))
+       new-val))
+    (t (not-seq-error seq))))
+
+(define-setf-expander subseq (sequence a &optional b)
+  (let ((g!sequence (gensym "SEQUENCE"))
+        (g!a (gensym "A"))
+        (g!b (gensym "B"))
+        (g!value (gensym "VALUE")))
+    (values (list g!sequence g!a g!b)
+            (list sequence a b)
+            (list g!value)
+            `(set-subseq ,g!value ,g!sequence ,g!a ,g!b)
+            `(subseq ,g!sequence ,g!a ,g!b))))
 
 (defun copy-seq (sequence)
   (subseq sequence 0))
