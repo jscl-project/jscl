@@ -78,6 +78,16 @@
     ("hash-table"    :target)
     ("types-prelude" :both)
     ("types"         :target)
+    ("ansiloop"
+     ("ansi-loop"    :both))
+    ("stream"        :target)
+    ("print"         :target)
+    ("misc"          :target)
+    ("read"          :both)
+    ("backquote"     :both)
+    ("compiler"
+     ("codegen"      :both)
+     ("compiler"     :both))
     ("clos"
      ("kludges"       :target)
      ("std-object"    :target)
@@ -88,17 +98,7 @@
      ("macros"        :target)
      ("methods"       :target))
     ("conditions"    :target)
-    ("ansiloop"
-     ("ansi-loop"    :both))
     ("structures"    :both)
-    ("stream"        :target)
-    ("print"         :target)
-    ("misc"          :target)
-    ("read"          :both)
-    ("backquote"     :both)
-    ("compiler"
-     ("codegen"      :both)
-     ("compiler"     :both))
     ("format"        :both)
     ("documentation" :target)
     ("worker"        :target)

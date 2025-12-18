@@ -171,15 +171,4 @@
             (values nil t))
         (values string eof))))
 
-;;; Conditions
-
-(define-condition stream-error (error)
-  ((stream :initform nil
-           :initarg :stream
-           :reader stream-error-stream)))
-
-(define-condition end-of-file (stream-error) ()
-  (:report (lambda (condition stream)
-             (format stream "End of file on ~S." (stream-error-stream condition)))))
-
 ;;; EOF

@@ -556,18 +556,20 @@
 
 ;;; Early error definition.
 (defun %coerce-panic-arg (arg)
-  (cond ((symbolp arg) (concat "symbol: " (symbol-name arg)))
-        ((consp arg ) (concat "cons: " (car arg)))
-        ((numberp arg) (concat "number:" arg))
-        (t " @ ")))
+  (if (fboundp 'prin1-to-string)
+      (concat (prin1-to-string arg) " ")
+      (cond ((symbolp arg) (concat "symbol: " (symbol-name arg) " "))
+            ((consp arg) (concat "cons: " (car arg)  " "))
+            ((numberp arg) (concat "number:" arg  " "))
+            (t "@ "))))
 
 ;;; N.B. The following definition is functional after `string.lisp' is
 ;;; loaded, and superseded after `conditions.lisp' is loaded.
 (defun error (fmt &rest args)
-  (%throw (lisp-to-js (concat "BOOT PANIC! "
-                              (string fmt)
-                              " "
-                              (%coerce-panic-arg (car args))))))
+  (%throw (lisp-to-js (apply #'concat "BOOT PANIC! "
+                             (string fmt)
+                             " "
+                             (mapcar #'%coerce-panic-arg args)))))
 
 ;;; print-unreadable-object
 (defmacro !print-unreadable-object ((object stream &key type identity) &body body)
