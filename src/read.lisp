@@ -645,14 +645,6 @@
 #+jscl
 (fset 'read-from-string #'ls-read-from-string)
 
-#+jscl
-(define-condition reader-error (parse-error stream-error) ())
-
-(define-condition simple-reader-error (simple-condition reader-error) ())
-(define-condition simple-reader-package-error (simple-reader-error package-error) ())
-(define-condition reader-eof-error (reader-error end-of-file) ())
-(define-condition simple-parse-error (simple-condition parse-error) ())
-
 (defun simple-reader-error (stream format-control &rest format-arguments)
   (error 'simple-reader-error
          :stream stream

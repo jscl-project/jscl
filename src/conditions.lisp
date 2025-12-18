@@ -109,10 +109,24 @@
           :reader cell-error-name)))
 (%define-condition undefined-function (cell-error) ())
 (%define-condition unbound-variable (cell-error) ())
+
+;;; Conditions used in previous bootstrap process
 (%define-condition package-error (error) ()
    ((package :initform nil
              :initarg :package
              :reader package-error-package)))
+(%define-condition stream-error (error)
+   ((stream :initform nil
+            :initarg :stream
+            :reader stream-error-stream)))
+(%define-condition end-of-file (stream-error) ()
+   (:report (lambda (condition stream)
+              (format stream "End of file on ~S." (stream-error-stream condition)))))
+(%define-condition reader-error (parse-error stream-error) ())
+(%define-condition simple-reader-error (simple-condition reader-error) ())
+(%define-condition simple-reader-package-error (simple-reader-error package-error) ())
+(%define-condition reader-eof-error (reader-error end-of-file) ())
+(%define-condition simple-parse-error (simple-condition parse-error) ())
 
 (defun %%make-condition (type &rest slot-initializations)
     (apply #'make-instance type slot-initializations))
