@@ -158,41 +158,41 @@
                        (push (list (auxvar-variable it) (auxvar-initform it)) r)))))
     (values req opt key aux)))
 
-(%i-struct (dsd (:form &key))
-           name             
-           type
-           named-p
-           seen-options
-           conc-name 
-           predicate
-           copier
-           (initial-offset 0)
-           constructor
-           parent
-           (childs '())
-           slots
-           (slot-nums 0)
-           include
-           inherit-slots
-           (inherit-slot-nums 0)
-           (instance-len 0)
-           storage
-           prototype
-           descriptor
-           map-names)
+(def!struct dsd
+  name
+  type
+  named-p
+  seen-options
+  conc-name
+  predicate
+  copier
+  (initial-offset 0)
+  constructor
+  parent
+  (childs '())
+  slots
+  (slot-nums 0)
+  include
+  inherit-slots
+  (inherit-slot-nums 0)
+  (instance-len 0)
+  storage
+  prototype
+  descriptor
+  map-names)
 
 ;;; dd-slot slot descriptor
-(%i-struct (dsd-slot (:form &key)) name accessor initform type read-only)
+(def!struct dsd-slot name accessor initform type read-only)
 
 ;;; structure storage descriptor.
-(%i-struct (dsd-storage-descriptor (:form &key))
+(def!struct dsd-storage-descriptor
   leader  ;; -leader::= structure name, if structure is :named
   n       ;; -n::= storage slots number include named & initial-offset
   offset) ;; -offset::= some initial-offset
 
   
 ;;; structure-include
-(%i-struct (dsd-include (:form &key)) name assigned inherited sd descriptor)
+(def!struct dsd-include name assigned inherited sd descriptor)
 ;;; name::= name included structure
 ;;; inherited:: all slot-definitions from included structure-type-slots
 ;;;             used for make-constructor == ((descriptor) slot-definitions*)
@@ -204,10 +204,10 @@
 
   
 ;;; structure-prototype
-(%i-struct (dsd-prototype (:form &key)) n map storage)
+(def!struct dsd-prototype n map storage)
 
 ;;; structure-constructor.
-(%i-struct (dsd-constructor (:form &key)) name boa required optional key aux)
+(def!struct dsd-constructor name boa required optional key aux)
 
 #-jscl
 (defun %dsd-my-be-rewrite (name)
@@ -368,8 +368,8 @@
               (t (multiple-value-bind (req opt key aux)
                      (das!parse-struct-lambda-list boa-list)
                    (push
-                    (%make-dsd-constructor :name cname :boa boa-list :required req
-                                           :optional opt   :key key :aux aux)
+                    (make-dsd-constructor :name cname :boa boa-list :required req
+                                          :optional opt   :key key :aux aux)
                     custom)) )))
       (setf (dsd-constructor dd)
             ;; now dsd-constructor::= (default|nil custom|nil)
@@ -405,7 +405,7 @@
                    (unless (or (dsd-named-p parent) (null (dsd-type parent)))
                      ;; included is unnamed
                      (error "Unnamed structure ~a not included." parent-name))
-                   (setq include (%make-dsd-include :name parent-name))
+                   (setq include (make-dsd-include :name parent-name))
                    (setf (dsd-include-assigned include)
                          ;; checking that the slot name is valid for the structure
                          (let ((sd)
@@ -420,7 +420,8 @@
                              (setq sd (das!parse-struct-slot it))
                              (push sd r))))
                    (setf (dsd-include dd) include)
-                   (setf (dsd-include-inherited include) (copy-tree (dsd-inherit-slots parent)))
+                   (setf (dsd-include-inherited include)
+                         (mapcar #'copy-dsd-slot (dsd-inherit-slots parent)))
                    (setf (dsd-parent dd) parent-name)))
                 (t (error "DEFSTRUCT :include option provide only for named or clos structure."))))
       ;; predicate, copier, conc-name for named lisp structure
@@ -663,7 +664,7 @@
             (t (setq sym (nth map-position protos))
                (let (default)
                  (cond ((memq sym default-slots)
-                        (setq default (assoc sym slots))
+                        (setq default (find sym slots :key #'dsd-slot-name))
                         (push (dsd-slot-initform default) storage))
                        (t (push (nth map-position protos) storage))))))
       (incf map-position))
@@ -723,8 +724,8 @@
                   (constructor))
               (multiple-value-bind (req opt key) (das!parse-struct-lambda-list boa)
                 (setq constructor
-                      (%make-dsd-constructor :name (car default)
-                                             :boa boa :required req :optional opt :key key)))
+                      (make-dsd-constructor :name (car default)
+                                            :boa boa :required req :optional opt :key key)))
               (push (das!make-constructor-lv-for prototype storage-type constructor slots)
                     result)))))
     result))
@@ -796,8 +797,8 @@
                   (constructor))
               (multiple-value-bind (req opt key) (das!parse-struct-lambda-list boa)
                 (setq constructor
-                      (%make-dsd-constructor :name (car default)
-                                             :boa boa :required req :optional opt :key key)))
+                      (make-dsd-constructor :name (car default)
+                                            :boa boa :required req :optional opt :key key)))
               (push (das!make-clos-constructor name constructor slots) q))) ))
     (when (dsd-predicate dd)
       (push (das!make-structure-class-predicate name (dsd-predicate dd)) q))
@@ -835,7 +836,7 @@
              (keyword (error "DEFSTRUCT slot ~S syntax error." slot)))
            (values name default default-p type type-p read-only read-only-p)))
         (t (error " ~S is not a legal slot description." slot)))
-    (%make-dsd-slot :name name :accessor name :initform default :type type :read-only read-only)))
+    (make-dsd-slot :name name :accessor name :initform default :type type :read-only read-only)))
 
 ;;; compare include assigned and imherit slots
 ;;; check only :type & :read-only tags
@@ -863,16 +864,16 @@
 ;;; check duplicate & identical slot names
 (defun das!parse-struct-slots (dd slots)
   (let* ((sd (mapcar 'das!parse-struct-slot slots))
-         (raw (mapcar #'car sd))
+         (raw (mapcar #'dsd-slot-name sd))
          (parent (dsd-include dd))
          (inherit)
          (clear (remove-duplicates raw)))
-    (if (/= (length raw) (length clear))(error "Duplicate slot names ~a" raw))
+    (if (/= (length raw) (length clear)) (error "Duplicate slot names ~a" raw))
     ;; check identical names
     (when parent
       ;; parent slots without descriptor
       (setq inherit (rest (dsd-include-inherited parent)))
-      (let ((dup (intersection raw (mapcar #'car inherit))))
+      (let ((dup (intersection raw (mapcar #'dsd-slot-name inherit))))
         (if (not (null dup))
             (error "Have the some slot names ~a." dup)))
       (das!compare-asins (dsd-include-assigned (dsd-include dd)) inherit))
@@ -947,7 +948,7 @@
           (if (eql cell -2)
               (progn (setf (nth icell i-map-2) -3) (return)))
           (incf icell)))
-      (%make-dsd-prototype :n n-cells-2 :map (reverse i-map-2) :storage (reverse i-storage-2)))))
+      (make-dsd-prototype :n n-cells-2 :map (reverse i-map-2) :storage (reverse i-storage-2)))))
 
 ;;; compute structure-type-hash
 ;;; => hash-table (slot-name : storage position)
@@ -1006,7 +1007,7 @@
   (let ((dd) (include) (parent) (prototype) (descriptor)(standard) (lisp-type)
         (to-inherit-slots))
     #+jscl (unless (%dsd-my-be-rewrite name) (error "Structure ~a can't be overridden" name))
-    (setq dd (%make-dsd :name name))
+    (setq dd (make-dsd :name name))
     (das!parse-defstruct-options options dd)
     (when (dsd-named-p dd)
       (setf (dsd-named-p dd) (dsd-name dd))
@@ -1014,7 +1015,7 @@
     (das!parse-struct-slots dd slots)
     (incf (dsd-instance-len dd) (dsd-slot-nums dd))
     (setq lisp-type (if (memq (dsd-type dd) '(list vector)) t nil))
-    (setq descriptor (%make-dsd-storage-descriptor
+    (setq descriptor (make-dsd-storage-descriptor
                       :leader (dsd-named-p dd)
                       :n (dsd-instance-len dd)
                       :offset (dsd-initial-offset dd)))
@@ -1036,9 +1037,9 @@
                    prototype (das%compute-storage-prototype
                               :self (das%make-sod descriptor (dsd-slots dd) :zero)))))
     (setf (dsd-map-names dd) (das%compute-storage-hash prototype)
-          (dsd-inherit-slots dd) (copy-tree to-inherit-slots)
-          (dsd-prototype dd) (if lisp-type (copy-tree prototype) (list nil))
-          (dsd-descriptor dd) (copy-tree descriptor))
+          (dsd-inherit-slots dd) (mapcar #'copy-dsd-slot to-inherit-slots)
+          (dsd-prototype dd) (if lisp-type (copy-dsd-prototype prototype) (list nil))
+          (dsd-descriptor dd) (copy-dsd-storage-descriptor descriptor))
     (setq standard (if lisp-type
                        (das!make-lisp-base-structure dd)
                        (das!make-standard-structure dd)))

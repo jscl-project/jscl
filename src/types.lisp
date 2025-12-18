@@ -95,7 +95,7 @@
     (nil               null           nil  list sequence t)
     (t                 true           nil  t)))
 
-(%i-struct (basic-type (:form &key))  name predicate class-of supertype tpl)
+(def!struct basic-type name predicate class-of supertype tpl)
 
 (defvar *builtin-types* (make-hash-table :test #'eql)  "hand off")
 
@@ -103,7 +103,7 @@
   (/debug "            compile basic types")
   (dolist (it *types-basic-types*)
     (destructuring-bind (name predicate class-of &rest  tpl) it
-      (setq tip (%make-basic-type
+      (setq tip (make-basic-type
                  :name name
                  :predicate predicate
                  :supertype (car tpl)
