@@ -420,8 +420,7 @@
                              (setq sd (das!parse-struct-slot it))
                              (push sd r))))
                    (setf (dsd-include dd) include)
-                   (setf (dsd-include-inherited include)
-                         (mapcar #'copy-dsd-slot (dsd-inherit-slots parent)))
+                   (setf (dsd-include-inherited include) (copy-tree (dsd-inherit-slots parent)))
                    (setf (dsd-parent dd) parent-name)))
                 (t (error "DEFSTRUCT :include option provide only for named or clos structure."))))
       ;; predicate, copier, conc-name for named lisp structure
@@ -686,7 +685,7 @@
 (defun %update-include-slots (slots asis)
   (let (sname sval)
     (dolist (a asis)
-      (cond ((consp a)
+      (cond ((dsd-slot-p a)
              (setq sname (dsd-slot-name a) sval (dsd-slot-initform a))
              (map 'nil 
                   (lambda (slot)
@@ -1037,7 +1036,7 @@
                    prototype (das%compute-storage-prototype
                               :self (das%make-sod descriptor (dsd-slots dd) :zero)))))
     (setf (dsd-map-names dd) (das%compute-storage-hash prototype)
-          (dsd-inherit-slots dd) (mapcar #'copy-dsd-slot to-inherit-slots)
+          (dsd-inherit-slots dd) (copy-tree to-inherit-slots)
           (dsd-prototype dd) (if lisp-type (copy-dsd-prototype prototype) (list nil))
           (dsd-descriptor dd) (copy-dsd-storage-descriptor descriptor))
     (setq standard (if lisp-type
