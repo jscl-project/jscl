@@ -1,4 +1,4 @@
-;;; defstruct.lisp --- 
+;;; defstruct.lisp --- defstruct on JS object @kchan
 
 ;; JSCL is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -16,13 +16,29 @@
 (/debug "loading defstruct.lisp!")
 
 (defun structure-p (obj)
-  (and (consp obj)
-       (eql (object-type-code obj) :structure)))
+  #+jscl (eql (object-type-code obj) :structure)
+  #-jscl (typep obj 'structure-object))
 
-;; A very simple defstruct built on lists. It supports just slot with
-;; an optional default initform, and it will create a constructor,
-;; predicate and accessors for you.
-(defmacro def!struct (name-and-options &rest slots)
+(defun structure-name (obj)
+  #+jscl (oget* obj "structName")
+  #-jscl (class-name (class-of obj)))
+
+(defun def!struct-property-names (slots)
+  "Compute the list of JS property names to use for SLOTS.
+Append numbers to symbol names to make them unique."
+  (let ((index -1))
+    (mapcar (lambda (s)
+              (incf index)
+              (concat (symbol-name s)
+                      (integer-to-string index)))
+            slots)))
+
+;; A very simple defstruct built on JS objects. It supports just slot
+;; with an optional default initform, and it will create a
+;; constructor, predicate and accessors for you.
+;; @kchan -- also generate DUMP-*, which converts a struct to an alist
+;; of (property-name . value), to be used for dumping in the compiler
+(defmacro !def!struct (name-and-options &rest slots)
   (let* ((name-and-options (ensure-list name-and-options))
          (name (first name-and-options))
          (name-string (symbol-name name))
@@ -35,79 +51,95 @@
                         (intern (concat name-string "-P"))))
          (copier (if (assoc :copier options)
                      (second (assoc :copier options))
-                     (intern (concat "COPY-" name-string)))))
+                     (intern (concat "COPY-" name-string))))
+         (dumper (intern (concat "DUMP-" name-string))))
 
 
     (unless predicate
       (setq predicate (gensym "PREDICATE")))
 
     (let* ((slot-descriptions
-            (mapcar (lambda (sd)
-                      (cond
-                        ((symbolp sd)
-                         (list sd))
-                        ((and (listp sd) (car sd) (null (cddr sd)))
-                         sd)
-                        (t
-                         (error "Bad slot description `~S'." sd))))
-                    slots))
+             (mapcar (lambda (sd)
+                       (cond
+                         ((symbolp sd)
+                          (list sd))
+                         ((and (listp sd) (car sd) (null (cddr sd)))
+                          sd)
+                         (t
+                          (error "Bad slot description `~S'." sd))))
+                     slots))
+           (property-names
+             (def!struct-property-names (mapcar #'car slot-descriptions)))
 
            constructor-expansion
            predicate-expansion
            copier-expansion)
-      
 
-      ;; mark object as :structure 
+
+      ;; mark object as :structure
       (when constructor
         (setq constructor-expansion
               `(defun ,constructor (&key ,@slot-descriptions)
-                 (let ((obj (list ',name ,@(mapcar #'car slot-descriptions)))) 
-                   #+jscl (set-object-type-code obj  :structure)
+                 (let ((obj (new)))
+                   (set-object-type-code obj :structure)
+                   (oset* ',name obj "structName")
+                   ,@(mapcar (lambda (p s)
+                               `(oset* ,(car s) obj ,p))
+                             property-names slot-descriptions)
                    obj))))
 
       (when predicate
         (setq predicate-expansion
               `(defun ,predicate (x)
-                 (and (consp x) (eq (car x) ',name)))))
+                 (eq (oget* x "structName") ',name))))
 
-      ;; mark copy as :structure
       (when copier
         (setq copier-expansion
-              `(defun ,copier (x)
-                 (let ((obj (copy-list x)))
-                   #+jscl (oset :structure obj "tagName")
-                   obj))))
+              `(defun ,copier (x) (clone x))))
 
       `(progn
+         (defun ,dumper (x)
+           (list (cons "dt_Name" :structure)
+                 (cons "structName" ',name)
+                 ,@(mapcar (lambda (p) `(cons ,p (oget* x ,p))) property-names)))
          ,constructor-expansion
          ,predicate-expansion
          ,copier-expansion
          ;; Slot accessors
-         ,@(with-collect
-             (let ((index 1))
-               (dolist (slot slot-descriptions)
-                 (let* ((name (car slot))
-                        (accessor-name (intern (concat name-string "-" (string name)))))
-                   (collect
-                       `(defun ,accessor-name (x)
-                          (unless (,predicate x)
-                            (error "The object `~S' is not of type `~S'" x ,name-string))
-                          (nth ,index x)))
-                   ;; TODO: Implement this with a higher level
-                   ;; abstraction like defsetf or (defun (setf ..))
-                   (collect
-                       `(define-setf-expander ,accessor-name (x)
-                          (let ((object (gensym))
-                                (new-value (gensym)))
-                            (values (list object)
-                                    (list x)
-                                    (list new-value)
-                                    `(progn
-                                       (rplaca (nthcdr ,',index ,object) ,new-value) 
-                                       ,new-value)
-                                    `(,',accessor-name ,object)))))
-                   (incf index)))))
+         ,@(mapcan
+            (lambda (prop slot)
+              (let* ((name (car slot))
+                     (accessor-name (intern (concat name-string "-" (string name)))))
+                `((defun ,accessor-name (x)
+                    (oget* x ,prop))
+                  (define-setf-expander ,accessor-name (x)
+                    (let ((object (gensym))
+                          (new-value (gensym)))
+                      (values (list object)
+                              (list x)
+                              (list new-value)
+                              `(oset* ,new-value ,object ,',prop)
+                              `(oget* ,object ,',prop)))))))
+            property-names slot-descriptions)
          ',name))))
+
+;; Emulation of DEF!STRUCT and DUMP-* in the host, using host DEFSTRUCT
+#-jscl
+(defmacro def!struct (name-and-options &rest slots)
+  (flet ((atom-or-car (x) (if (atom x) x (car x))))
+    (let* ((name (atom-or-car name-and-options))
+           (dumper (intern (concat "DUMP-" (symbol-name name))))
+           (slot-names (mapcar #'atom-or-car slots))
+           (property-names (def!struct-property-names slot-names)))
+      `(progn
+         (defun ,dumper (x)
+           (list (cons "dt_Name" :structure)
+                 (cons "structName" ',name)
+                 ,@(mapcar (lambda (p n)
+                             `(cons ,p (slot-value x ',n)))
+                           property-names slot-names)))
+         (defstruct ,name-and-options ,@slots)))))
+
 #+jscl
-(defmacro defstruct (name-and-options &rest slots)
-  `(def!struct ,name-and-options ,@slots))
+(defmacro def!struct (name-and-options &rest slots)
+  `(!def!struct ,name-and-options ,@slots))

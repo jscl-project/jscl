@@ -533,10 +533,13 @@
      (when (eq (class-name (class-of (class-of obj))) 'structure-class)
        (eq (class-name (class-of obj)) ',structure-name))))
 
+#-jscl
 (defun das!clone-clos-base (object)
-  (let ((r (das!clone-list-base object)))
-    #+jscl (set-object-type-code  r :mop-object)
-    (setf (nth 2 r) (list-to-vector (vector-to-list (nth 2 object))))
+  (error "Clone not implemented in host: ~a" object))
+#+jscl
+(defun das!clone-clos-base (object)
+  (let ((r (copy-std-instance object)))
+    (setf (std-instance-slots r) (list-to-vector (vector-to-list (std-instance-slots r))))
     r))
 
 (defun das!make-structure-class-copier (structure-name copier-p)
@@ -614,17 +617,9 @@
 
 ;;; COPIER
 
-#-jscl
-(defun das!clone-list-base (object) (declare (ignore object)))
-#+jscl
-(defun das!clone-list-base (object)
-  (vector-to-list (list-to-vector object)))
+(defun das!clone-list-base (object) (copy-list object))
 
-#-jscl
-(defun das!clone-vector-base (object) (declare (ignore object)))
-#+jscl
-(defun das!clone-vector-base (object)
-  (list-to-vector (vector-to-list object)))
+(defun das!clone-vector-base (object) (copy-seq object))
 
 (defun das!make-struct-copier (name storage-type leader-p copier)
   (declare (ignore name leader-p))
