@@ -219,6 +219,8 @@
           (let ((symbol (make-symbol name)))
             (setf (oget package-syms name) symbol)
             (setf (oget symbol "package") package)
+            (when (eq package *keyword-package*)
+              (set symbol symbol))
             (values symbol nil))))))
 
 (defun shadow (names &optional (package *package*))
@@ -231,7 +233,9 @@
         (unless (member foundp '(:internal :external))
           (setq symbol (make-symbol name))
           (setf (oget package-syms name) symbol)
-          (setf (oget symbol "package") package))
+          (setf (oget symbol "package") package)
+          (when (eq package *keyword-package*)
+            (set symbol symbol)))
         (pushnew symbol (oget package "shadows"))))))
 
 (defun unintern (symbol &optional (package *package*))

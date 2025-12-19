@@ -140,5 +140,9 @@
 ;;; note: Fixed ? @vkm
 (test (eq (eval '(in-package #:cl-user)) (find-package '#:cl-user)))
 
+;;; Keywords are self-evaluating
+(test (eq (symbol-value :obscure-kw-12345) :obscure-kw-12345))
+(test (let ((kw (intern "obscure ###" "KEYWORD")))
+        (eq (symbol-value kw) kw)))
 
 ;;; EOF
