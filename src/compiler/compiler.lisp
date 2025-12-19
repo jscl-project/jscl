@@ -615,6 +615,12 @@
          `(= (get ,var "fillpointer") ,(fill-pointer array)))
       (return ,var))))
 
+(defun dump-structure (struct)
+  (let* ((name (structure-name struct))
+         (dumper (intern (concat "DUMP-" (symbol-name name)))))
+    `(object ,@(mapcan (lambda (kv) `(,(car kv) ,(literal (cdr kv))))
+                       (funcall dumper struct)))))
+
 (defun dump-string (string)
   `(call-internal |make_lisp_string| ,string))
 
@@ -648,7 +654,10 @@
                                 (if (eq (car sexp) *magic-unquote-marker*)
                                     (convert (second sexp))
                                     (dump-cons sexp)))
-                               (array (dump-array sexp)))))
+                               (array (dump-array sexp))
+                               (#-jscl structure-object
+                                #+jscl structure
+                                (dump-structure sexp)))))
                  (toplevel-compilation `(var (,jsvar ,dumped)))
                  (when (keywordp sexp)
                    (toplevel-compilation `(= (get ,jsvar "value") ,jsvar)))))
@@ -1426,8 +1435,12 @@
 
 ;;; Javascript FFI
 
+
 (define-builtin new ()
   '(object))
+
+(define-builtin clone (x)
+  `(method-call |Object| "assign" (object) ,x))
 
 (defun convert-xstring (form)
   (multiple-value-bind (value constantp) (constant-value form *environment*)
@@ -1716,7 +1729,8 @@
               `(get ,(convert `',sexp) "value"))
              (t
               (convert `(symbol-value ',sexp))))))
-        ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp))
+        ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp)
+             (structure-p sexp))
          (literal sexp))
         ((listp sexp)
          (let* ((name (car sexp))

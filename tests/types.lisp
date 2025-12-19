@@ -72,11 +72,7 @@
   NIL
   NIL
   ((14 HASH-TABLE)
-   (16 jscl::atomic-test-struct)
-   (17 STANDARD-CLASS)
-   (18 jscl::ATOMIC-TEST-CLASS)
-   (19 CONS)
-   (25 STANDARD-CLASS))))
+   (19 CONS))))
 
 (test
  (mv-eql
