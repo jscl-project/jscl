@@ -39,8 +39,7 @@
 (test (not (find 1 (remove 1 '(1 2 3 1)))))
 (test (not (find 2 (remove 1 #(1 2 3 1) :key halve))))
 (test (not (find 2 (remove 1 '(1 2 3 1) :key halve))))
-;;; TODO: Rewrite this test when EQUALP exists and works on vectors
-(test (equal (length (remove '(1 2) #((1 2) (1 2)) :test #'equal)) 0))
+(test (equalp #() (remove '(1 2) #((1 2) (1 2)) :test #'equal)))
 (test (null          (remove '(1 2) '((1 2) (1 2)) :test #'equal)))
 (test (find 2 (remove 2 #(1 2 3) :test-not #'=)))
 (test (find 2 (remove 2 '(1 2 3) :test-not #'=)))
@@ -92,9 +91,7 @@
 ;;; REMOVE-IF
 (test (equal (remove-if     #'zerop '(1 0 2 0 3)) '(1 2 3)))
 (test (equal (remove-if-not #'zerop '(1 0 2 0 3)) '(0 0)))
-;;; TODO: Rewrite these tests when EQUALP exists and works on vectors
-(let ((v1 (remove-if #'zerop #(1 0 2 0 3))))
-  (test (and (= (aref v1 0) 1) (= (aref v1 1) 2) (= (aref v1 2) 3)))) 
+(test (equalp #(1 2 3) (remove-if #'zerop #(1 0 2 0 3))))
 (test (every #'zerop (remove-if-not #'zerop #(1 0 2 0 3))))
 
 ;;; SUBSEQ
@@ -109,7 +106,7 @@
 (test (equal (reverse '(a b c)) '(c b a)))
 ;;; FIXME: When replace the following two cases when implemented.
 (test (zerop (length (reverse #()))))
-;;; (test (equalp (reverse #(a b c)) #(c b a)))
+(test (equalp (reverse #(a b c)) #(c b a)))
 (let ((xs (reverse #(a b c)))
       (pattern #(c b a)))
   (test (equal (aref xs 0) (aref pattern 0)))
@@ -326,11 +323,9 @@
 
 
 ;;; SETF with ELT
-;;; TODO: Rewrite this test when EQUALP exists and works on vectors
-;;; https://github.com/jscl-project/jscl/issues/479
-(test (equal '(42 0 0)
+(test (equalp #(42 0 0)
              (let ((vec (vector 0 0 0)))
                (setf (elt vec 0) 42)
-               (jscl::vector-to-list vec))))
+               vec)))
 
 ;;; EOF
