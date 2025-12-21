@@ -405,5 +405,9 @@
              (let ((vec (vector 0 0 0)))
                (setf (elt vec 0) 42)
                vec)))
+(test (equal '(42 0 0)
+             (let ((list (list 0 0 0)))
+               (setf (elt list 0) 42)
+               list)))
 
 ;;; EOF

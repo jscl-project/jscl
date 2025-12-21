@@ -369,17 +369,27 @@ The return value will share structure with SEQ if possible."
     (error "The index ~D is below zero." index))
   (etypecase sequence
     (list
-     (let ((i 0))
-       (dolist (elt sequence)
-         (when (eql index i)
-           (return-from elt elt))
-         (incf i))
-       (error "The index ~D is too large for ~A of length ~D." index 'list i)))
+     (let ((tail (nthcdr index sequence)))
+       (if tail (car tail)
+           (error "The index ~D is too large for ~A of length ~D."
+                  index 'list (length sequence)))))
     (array
-     (let ((length (length sequence)))
-       (when (>= index length)
-         (error "The index ~D is too large for ~A of length ~D." index 'vector length))
-       (aref sequence index)))))
+     (aref sequence index))))
+
+(defun set-elt (sequence index new-value)
+  (when (< index 0)
+    (error "The index ~D is below zero." index))
+  (etypecase sequence
+    (list
+     (let ((tail (nthcdr index sequence)))
+       (if tail
+           (progn
+             (rplaca tail new-value)
+             new-value)
+           (error "The index ~D is too large for ~A of length ~D."
+                  index 'list (length sequence)))))
+    (array
+     (aset sequence index new-value))))
 
 (define-setf-expander elt (sequence index)
   (let ((g!sequence (gensym))
@@ -388,8 +398,8 @@ The return value will share structure with SEQ if possible."
     (values (list g!sequence g!index)
             (list sequence index)
             (list g!value)
-            `(jscl::aset ,g!sequence ,g!index ,g!value)
-            `(aref ,g!sequence ,g!index))))
+            `(set-elt ,g!sequence ,g!index ,g!value)
+            `(elt ,g!sequence ,g!index))))
 
 (defun zero-args-reduce (function initial-value initial-value-p)
   (if initial-value-p
