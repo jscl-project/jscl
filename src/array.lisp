@@ -45,7 +45,9 @@
                    (with-collect
                      (dotimes (_ (car rest-dims))
                        (collect (process (cdr rest-dims))))))))
-      (process (array-dimensions array)))))
+      (process (if (array-has-fill-pointer-p array)
+                   (list (fill-pointer array))
+                   (array-dimensions array))))))
 
 (defun %fill-array-contents (array contents)
   "Fill content of array from nested sequences like :INITIAL-CONTENT.

@@ -58,6 +58,8 @@
 (test (string= "#()" (write-to-string #())))
 (test (string= "#(1)" (write-to-string #(1))))
 (test (string= "#(1 2 3)" (write-to-string #(1 2 3))))
+(test (string= "#(2 2)" (write-to-string
+                         (make-array 4 :initial-element 2 :fill-pointer 2))))
 
 ;;; Lists
 (test (string= "NIL" (write-to-string '())))
