@@ -406,25 +406,21 @@ The return value will share structure with SEQ if possible."
           element)))
 
 (defun reduce (function sequence &key (key #'identity) from-end (start 0) end (initial-value nil initial-value-p))
-  (let* ((sequence (subseq sequence start (when end end)))
-         (sequence-length (length sequence)))
-    (case sequence-length
+  (let ((end (or end (length sequence))))
+    (case (- end start)
       (0 (zero-args-reduce function initial-value initial-value-p))
-      (1 (one-args-reduce function (funcall key (elt sequence 0)) from-end initial-value initial-value-p))
-      (t (let* ((function (if from-end
-                             #'(lambda (x y) (funcall function y x))
-                             function))
-                (sequence (if from-end
-                              (reverse sequence)
-                              sequence))
-                (value (funcall key (elt sequence 0))))
+      (1 (one-args-reduce function (funcall key (elt sequence start)) from-end initial-value initial-value-p))
+      (t (let ((value (funcall key (elt sequence (if from-end (1- end) start))))
+               (function (if from-end
+                             (lambda (x y) (funcall function y x))
+                             function)))
            (when initial-value-p
              (setf value (funcall function initial-value (funcall key value))))
-           (etypecase sequence
-             (list (dolist (elt (cdr sequence) value)
-                     (setf value (funcall function value (funcall key elt)))))
-             (vector (dotimes (index (1- sequence-length) value)
-                       (setf value (funcall function value (funcall key (elt sequence (1+ index)))))))))))))
+           (do-sequence (elt sequence :start (if from-end start (1+ start))
+                                      :end (if from-end (1- end) end)
+                                      :from-end from-end)
+             (setf value (funcall function value (funcall key elt))))
+           value)))))
 
 (defun mismatch (sequence1 sequence2 &key key (test #'eql testp) (test-not nil test-not-p)
                                        (start1 0) (end1 (length sequence1))
