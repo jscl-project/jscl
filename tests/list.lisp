@@ -238,6 +238,13 @@
              (intersection '((1 . 2) (2 . 3)) '((9 . 2) (9 . 4))
                            :test #'equal :key #'cdr)))
 
+(test (equal (nintersection (list 1 2) (list 2 3)) '(2)))
+(test (not (nintersection (list 1 2 3) (list 4 5 6))))
+(test (equal (nintersection (list '(1) '(2)) (list '(2) '(3)) :test #'equal) '((2))))
+(test (equal '((1 . 2))
+             (nintersection (list '(1 . 2) '(2 . 3)) (list '(9 . 2) '(9 . 4))
+                            :test #'equal :key #'cdr)))
+
 ;;; POP
 (test (let* ((foo '(1 2 3))
              (bar (pop foo)))
@@ -333,19 +340,28 @@
 (test
  (equal (union '(a b c) '(f a d))
         '(C B F A D)))
+(test
+ (equal (nunion (list 'a 'b 'c) (list 'f 'a 'd))
+        '(C B F A D)))
 
 (test 
- (equal (union '((x 5) (y 6)) '((z 2) (x 4) (z 2)) 
+ (equal (union '((x 5) (y 6)) '((z 2) (x 4))
                :key #'car 
+               :test #'equal)
+        '((Y 6) (Z 2) (X 4))))
+(test
+ (equal (nunion (list '(x 5) '(y 6)) (list '(z 2) '(x 4))
+               :key #'car
                :test #'equal)
         '((Y 6) (Z 2) (X 4))))
 
 
-(test
- (let ((lst1 (list 1 2 '(1 2) "a" "b"))
-       (lst2 (list 2 3 '(2 3) "B" "C")))
-     (equal (union lst1 lst2) 
-            '("b" "a" (1 2) 1 2 3 (2 3) "B" "C"))))
+(let ((lst1 (list 1 2 '(1 2) "a" "b"))
+      (lst2 (list 2 3 '(2 3) "B" "C")))
+  (test (equal (union lst1 lst2)
+               '("b" "a" (1 2) 1 2 3 (2 3) "B" "C")))
+  (test (equal (nunion lst1 lst2)
+               '("b" "a" (1 2) 1 2 3 (2 3) "B" "C"))))
 
 
 ;;; See https://github.com/jscl-project/jscl/issues/369

@@ -374,6 +374,15 @@
         (push x new-list)))
     new-list))
 
+(defun nintersection (list1 list2 &key (test #'eql) (key #'identity))
+  (when (and list1 list2)
+    (let ((result nil))
+      (while list1
+        (if (member (funcall key (car list1)) list2 :key key :test test)
+            (shiftf list1 (cdr list1) result list1)
+            (pop list1)))
+      result)))
+
 (defun get-properties (plist indicator-list)
   (do* ((plist plist (cddr plist))
         (cdr (cdr plist) (cdr plist))
@@ -501,24 +510,23 @@
            result))
         (t list1)))
 
-;;; makeset
-(defun makeset (lst &key (test #'eq))
-  (prog ((result)
-         (seq lst))
-   feed
-     (when (null seq) (return (reverse result)))
-     (if (not (member (car seq) result :test test))
-         (setq result (cons (car seq) result)))
-     (setq seq (cdr seq))
-     (go feed)))
-
 ;;; union
 (defun union (list1 list2 &key (key #'identity) (test #'eq))
   (cond ((and list1 list2)
-         (let ((result (makeset list2 :test #'equal)))
-           (dolist (it list1)
-             (when (not (member (funcall key it) list2 :key key :test test))
-               (push it result)))
+         (let ((result list2))
+           (dolist (it list1 result)
+             (unless (member (funcall key it) list2 :key key :test test)
+               (push it result)))))
+        (list1)
+        (list2)))
+
+(defun nunion (list1 list2 &key (key #'identity) (test #'eq))
+  (cond ((and list1 list2)
+         (let ((result list2))
+           (while list1
+             (if (member (funcall key (car list1)) list2 :key key :test test)
+                 (pop list1)
+                 (shiftf list1 (cdr list1) result list1)))
            result))
         (list1)
         (list2)))
