@@ -209,7 +209,7 @@
            ,@decls
            (%while (< ,var ,g!count)
                    (tagbody ,@body)
-                   (incf ,var))
+                   (setq ,var (1+ ,var)))
            ,result)))))
 
 (defmacro cond (&rest clausules)
@@ -441,9 +441,6 @@
 
     `(multiple-value-call (lambda ,gvars ,@setqs)
        ,@form)))
-
-(defun notany (fn seq)
-  (not (some fn seq)))
 
 (defconstant internal-time-units-per-second 1000)
 
