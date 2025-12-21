@@ -151,23 +151,24 @@ in which case ARRAY might be partially filled from CONTENTS."
       (length (oget array "dimensions"))))
 
 (defun array-row-major-index (array &rest subscripts)
-  (if (vectorp array)
-      (car subscripts)
-      (let ((result 0)
-            (subs subscripts)
-            (dimensions (oget array "dimensions")))
-        (while dimensions
-          (unless subs
-            (error "Too few subscripts ~a for ~a" subscripts array))
-          (let ((subscript (pop subs))
-                (dimension (pop dimensions)))
-            (unless (<= 0 subscript (1- dimension))
-              (error "Subscript ~d out of range for dimension ~d"
-                     subscript dimension))
-            (setq result (+ subscript (* result dimension)))))
-        (when subs
-          (error "Too many subscripts ~a for ~a" subscripts array))
-        result)))
+  (cond ((vectorp array) (car subscripts))
+        ((arrayp array)
+         (let ((result 0)
+               (subs subscripts)
+               (dimensions (oget array "dimensions")))
+           (while dimensions
+             (unless subs
+               (error "Too few subscripts ~a for ~a" subscripts array))
+             (let ((subscript (pop subs))
+                   (dimension (pop dimensions)))
+               (unless (<= 0 subscript (1- dimension))
+                 (error "Subscript ~d out of range for dimension ~d"
+                        subscript dimension))
+               (setq result (+ subscript (* result dimension)))))
+           (when subs
+             (error "Too many subscripts ~a for ~a" subscripts array))
+           result))
+        (t (error 'type-error :datum array :expected-type 'array))))
 
 (defun array-total-size (array)
   (unless (arrayp array)
