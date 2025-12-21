@@ -644,4 +644,24 @@
     ;; TODO: descend into structure-object
     (t nil)))
 
+(defun coerce (object result-type)
+  (flet ((fail ()
+           (error "Can't coerce ~a to ~a" object result-type)))
+    (cond ((typep object result-type) object)
+          ((subtypep result-type 'list)
+           (if (vectorp object)
+               (vector-to-list object)
+               (fail)))
+          ((subtypep result-type 'vector)
+           (if (listp object)
+               (list-to-vector object)
+               (fail)))
+          ((eq result-type 'character)
+           (character object))
+          ((eq result-type 'function)
+           (if (and (listp object) (eq (car object) 'lambda))
+               (compile nil object)
+               (fdefinition object)))
+          (t (fail)))))
+
 ;;; EOF
