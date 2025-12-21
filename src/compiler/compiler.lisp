@@ -665,8 +665,8 @@
                        :block name)))
     ((symbolp x)
      (let ((b (lookup-in-lexenv x *environment* 'function)))
-       (if b
-	   (binding-value b)
+       ;; !PROCLAIM might create FUNCTION binding with NIL value
+       (or (and b (binding-value b))
 	   (convert `(symbol-function ',x)))))))
 
 (defun make-function-binding (fname)
