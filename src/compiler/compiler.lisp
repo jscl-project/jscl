@@ -691,7 +691,7 @@
                          *environment*
                          'function)))
     `(call (function ,(mapcar #'translate-function fnames)
-                ,(convert-block body t))
+                ,(convert-block body t t))
            ,@cfuncs)))
 
 (define-compilation labels (definitions &rest body)
@@ -706,7 +706,7 @@
                           ,(compile-lambda (cadr func)
                                            `((block ,(car func) ,@(cddr func)))))))
                 definitions)
-      ,(convert-block body t))))
+      ,(convert-block body t t))))
 
 
 ;;; Was the compiler invoked from !compile-file?
@@ -740,6 +740,10 @@
      ,@(append (mapcar #'convert (butlast body))
                (list (convert (car (last body)) *multiple-value-p*)))))
 
+(define-compilation locally (&rest body)
+  (let ((*environment* (copy-lexenv *environment*)))
+    `(selfcall ,(convert-block body t t))))
+
 (define-compilation macrolet (definitions &rest body)
   (let ((*environment* (copy-lexenv *environment*)))
     (dolist (def definitions)
@@ -747,7 +751,7 @@
         (let ((binding (make-binding :name name :type 'macro :value
                                      (parse-macro name lambda-list body))))
           (push-to-lexenv binding  *environment* 'function))))
-    (convert `(progn ,@body) *multiple-value-p*)))
+    (convert-block body nil t)))
 
 
 (defun special-variable-p (x)
