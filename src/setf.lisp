@@ -28,9 +28,10 @@
                   `(setq ,place ,value)
                   place))
         (let* ((access-fn (car place))
-               (expander (cdr (assoc access-fn *setf-expanders*))))
+               (expander (cdr (assoc access-fn *setf-expanders*)))
+               (env (or env *global-environment*)))
           (if expander
-              (apply expander (cdr place))
+              (funcall expander place env)
               ;; Only after the setf expansion is unkonwn, we should
               ;; try to macroexpand the form. See:
               ;;
@@ -50,9 +51,8 @@
     (error "ACCESS-FN `~S' must be a symbol." access-fn))
   (let ((g!args (gensym)))
     `(eval-when (:compile-toplevel :load-toplevel :execute)
-       (push (cons ',access-fn (lambda (&rest ,g!args)
-                                 (destructuring-bind ,lambda-list ,g!args
-                                   ,@body)))
+       (push (cons ',access-fn
+                   (function ,(parse-macro access-fn lambda-list body)))
              *setf-expanders*)
        ',access-fn)))
 
@@ -230,9 +230,10 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   ;; Can't use define-setf-expander because it is defined in same file
  (push (cons 'values
-             (lambda (&rest places)
+             (lambda (form env)
+               (declare (ignore env))
                (let (all-dummies all-vals newvals setters getters)
-                 (dolist (place places)
+                 (dolist (place (cdr form))
                    (multiple-value-bind (dummies vals newval setter getter)
                        (!get-setf-expansion place *environment*)
                      (setq all-dummies (append all-dummies dummies (cdr newval))
