@@ -26,6 +26,12 @@
           (values (compile-toplevel x t t) *literal-table*)))
     (js-eval jscode (list-to-vector (nreverse (mapcar #'car literal-table))))))
 
+(defun compile (name &optional definition)
+  ;; TODO: collect compiler warning,  when we have them
+  (let ((compiled (eval `(function ,definition))))
+    (when name (fset name compiled))
+    (values compiled nil nil)))
+
 (defvar * nil)
 (defvar ** nil)
 (defvar *** nil)

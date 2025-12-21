@@ -1591,6 +1591,16 @@
           expander)
         nil)))
 
+#+jscl
+(defun macro-function (symbol &optional environment)
+  (let ((*environment* (or environment *global-environment*)))
+    (!macro-function symbol 'function)))
+
+#+jscl
+(defun compiler-macro-function (symbol &optional environment)
+  (let ((*environment* (or environment *global-environment*)))
+    (!macro-function symbol 'compiler-macro)))
+
 (defun !macroexpand-1 (form &optional env)
   (let ((*environment* (or env *global-environment*)))
     (cond
