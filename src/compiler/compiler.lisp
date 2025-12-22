@@ -174,15 +174,22 @@
 (defmacro define-symbol-macro (name expansion)
   `(%define-symbol-macro ',name ',expansion))
 
-(defun !constantp (x &optional environment)
+(defun constant-value (x &optional environment)
   (let ((env (or environment *global-environment*)))
     (cond
+      ((keywordp x) (values x t))
       ((symbolp x)
        (awhen (lookup-in-lexenv x env 'variable)
-         (member 'constant (binding-declarations it))))
+         (when (member 'constant (binding-declarations it))
+           (values (symbol-value x) t))))
       ((consp x)
-       (eq (car x) 'quote))
-      (t t))))
+       (when (eq (car x) 'quote)
+         (values (cadr x) t)))
+      (t (values x t)))))
+
+(defun !constantp (x &optional environment)
+  (if (nth-value 1 (constant-value x environment))
+      t nil))
 
 #+jscl
 (fset 'constantp #'!constantp)
@@ -234,9 +241,12 @@
          (lambda ,args (block ,name ,@body))))
 
 (define-compilation if (condition true &optional false)
-  `(if (!== ,(convert condition) ,(convert nil))
-       ,(convert true *multiple-value-p*)
-       ,(convert false *multiple-value-p*)))
+  (multiple-value-bind (value constantp) (constant-value condition *environment*)
+    (if constantp
+        (convert (if value true false) *multiple-value-p*)
+        `(if (!== ,(convert condition) ,(convert nil))
+             ,(convert true *multiple-value-p*)
+             ,(convert false *multiple-value-p*)))))
 
 (defvar *ll-keywords* '(&optional &rest &key &allow-other-keys))
 
@@ -1419,14 +1429,18 @@
 (define-builtin new ()
   '(object))
 
+(defun convert-xstring (form)
+  (multiple-value-bind (value constantp) (constant-value form *environment*)
+    (if constantp value `(call-internal |xstring| ,(convert form)))))
+
 (define-raw-builtin oget* (object key &rest keys)
   `(selfcall
     (progn
-      (var (tmp (property ,(convert object) (call-internal |xstring| ,(convert key)))))
+      (var (tmp (property ,(convert object) ,(convert-xstring key))))
       ,@(mapcar (lambda (key)
                   `(progn
                      (if (=== tmp undefined) (return ,(convert nil)))
-                     (= tmp (property tmp (call-internal |xstring| ,(convert key))))))
+                     (= tmp (property tmp ,(convert-xstring key)))))
                 keys))
     (return (if (=== tmp undefined) ,(convert nil) tmp))))
 
@@ -1437,12 +1451,12 @@
         (var (obj ,(convert object)))
         ,@(mapcar (lambda (key)
                     `(progn
-                       (= obj (property obj (call-internal |xstring| ,(convert key))))
+                       (= obj (property obj ,(convert-xstring key)))
                        (if (=== obj undefined)
                            (throw "Impossible to set object property."))))
                   (butlast keys))
         (var (tmp
-              (= (property obj (call-internal |xstring| ,(convert (car (last keys)))))
+              (= (property obj ,(convert-xstring (car (last keys))))
                  ,(convert value))))
         (return (if (=== tmp undefined)
                     ,(convert nil)
@@ -1473,12 +1487,12 @@
 (define-builtin js-to-lisp (x) `(call-internal |js_to_lisp| ,x))
 
 
-(define-builtin in (key object)
-  (convert-to-bool `(in (call-internal |xstring| ,key) ,object)))
+(define-raw-builtin in (key object)
+  (convert-to-bool `(in ,(convert-xstring key) ,(convert object))))
 
-(define-builtin delete-property (key object)
+(define-raw-builtin delete-property (key object)
   `(selfcall
-    (delete (property ,object (call-internal |xstring| ,key)))))
+    (delete (property ,(convert object) ,(convert-xstring key)))))
 
 (define-builtin map-for-in (function object)
   `(selfcall
@@ -1665,8 +1679,9 @@
       ((and (consp function) (eq (car function) 'oget))
        `(call-internal |js_to_lisp|
               (call ,(reduce (lambda (obj p)
-                               `(property ,obj (call-internal |xstring| ,p)))
-                             (mapcar #'convert (cdr function)))
+                               `(property ,obj ,p))
+                             (mapcar #'convert-xstring (cddr function))
+                             :initial-value (convert (cadr function)))
                     ,@(mapcar (lambda (s)
                                 `(call-internal |lisp_to_js| ,(convert s)))
                               args))))
