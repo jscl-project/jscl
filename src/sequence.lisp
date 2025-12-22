@@ -73,26 +73,25 @@
             (,nseq (nthcdr ,nstart ,seq)))
        (if ,from-end
            ;; FROM-END = T
-           (let ((,index (1- ,nstart))
+           (let ((,index ,nstart)
                  (,revlist '()))
              ;; Collect relevant elements in reverse first
              (dolist (,elt ,nseq)
-               (incf ,index)
                (when (and ,nend (<= ,nend ,index))
-                 (decf ,index)
                  (return))
+               (incf ,index)
                (push ,elt ,revlist))
              ;; Iterate through reversed elements
              (dolist (,elt ,revlist)
-               ,@body
-               (decf ,index)))
+               (decf ,index)
+               ,@body))
            ;; FROM-END = NIL
-           (let ((,index (1- ,nstart)))
+           (let ((,index ,nstart))
              (dolist (,elt ,nseq)
-               (incf ,index)
                (when (and ,nend (<= ,nend ,index))
                  (return))
-               ,@body))))))
+               ,@body
+               (incf ,index)))))))
 
 (defmacro do-sequence-vector ((elt seq &key from-end (start 0) end
                                          (index (gensym "I")))
