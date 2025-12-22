@@ -136,10 +136,28 @@ in which case ARRAY might be partially filled from CONTENTS."
 (defun aref (array &rest subscripts)
   (storage-vector-ref array (apply #'array-row-major-index array subscripts)))
 
+(define-compiler-macro aref (&whole form array &rest subscripts)
+  (cond ((= (length subscripts) 1)
+         (let ((narray (gensym "ARRAY")))
+           `(let ((,narray ,array))
+              (if (vectorp ,narray)
+                  (storage-vector-ref ,narray ,@subscripts)
+                  (error 'type-error :datum ,narray :expected-type 'vector)))))
+        (t form)))
+
 (defun aset (array &rest subscripts-and-value)
   (let ((value (car (last subscripts-and-value)))
         (index (apply #'array-row-major-index array (nbutlast subscripts-and-value))))
     (storage-vector-set array index value)))
+
+(define-compiler-macro aset (&whole form array &rest subscripts-and-value)
+  (cond ((= (length subscripts-and-value) 2)
+         (let ((narray (gensym "ARRAY")))
+           `(let ((,narray ,array))
+              (if (vectorp ,narray)
+                  (storage-vector-set ,narray ,@subscripts-and-value)
+                  (error 'type-error :datum ,narray :expected-type 'vector)))))
+        (t form)))
 
 (defsetf aref aset)
 
