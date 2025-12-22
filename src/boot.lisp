@@ -325,9 +325,7 @@
                                      (list x nil)
                                      (list (first x) (second x)))) varlist)
          ,@decls
-         (while t
-           (when ,(car endlist)
-             (return (progn ,@(cdr endlist))))
+         (%while (not ,(car endlist))
            (tagbody ,@body)
            (psetq
             ,@(apply #'append
@@ -335,7 +333,8 @@
                                (and (listp v)
                                     (consp (cddr v))
                                     (list (first v) (third v))))
-                             varlist))))))))
+                             varlist))))
+         ,@(cdr endlist)))))
 
 (defmacro do* (varlist endlist &body body)
   (multiple-value-bind (body decls) (parse-body body :declarations t)
@@ -344,9 +343,7 @@
                                       (list x1 nil)
                                       (list (first x1) (second x1)))) varlist)
         ,@decls
-        (while t
-          (when ,(car endlist)
-            (return (progn ,@(cdr endlist))))
+        (%while (not ,(car endlist))
           (tagbody ,@body)
           (setq
            ,@(apply #'append
@@ -354,7 +351,8 @@
                               (and (listp v)
                                    (consp (cddr v))
                                    (list (first v) (third v))))
-                            varlist))))))))
+                            varlist))))
+        ,@(cdr endlist)))))
 
 (defun identity (x) x)
 
