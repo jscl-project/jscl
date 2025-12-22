@@ -227,21 +227,16 @@
 
 ;;; Some SETF expanders
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  ;; Can't use define-setf-expander because it is defined in same file
- (push (cons 'values
-             (lambda (form env)
-               (declare (ignore env))
-               (let (all-dummies all-vals newvals setters getters)
-                 (dolist (place (cdr form))
-                   (multiple-value-bind (dummies vals newval setter getter)
-                       (!get-setf-expansion place *environment*)
-                     (setq all-dummies (append all-dummies dummies (cdr newval))
-                           all-vals (append all-vals vals
-                                            (mapcar (constantly nil) (cdr newval)))
-                           newvals (append newvals (and newval (list (car newval)))))
-                     (push setter setters)
-                     (push getter getters)))
-                 (values all-dummies all-vals newvals
-                         `(values ,@(nreverse setters)) `(values ,@(nreverse getters))))))
-       *setf-expanders*))
+(define-setf-expander values (&rest places)
+  (let (all-dummies all-vals newvals setters getters)
+    (dolist (place places)
+      (multiple-value-bind (dummies vals newval setter getter)
+          (!get-setf-expansion place *environment*)
+        (setq all-dummies (append all-dummies dummies (cdr newval))
+              all-vals (append all-vals vals
+                               (mapcar (constantly nil) (cdr newval)))
+              newvals (append newvals (and newval (list (car newval)))))
+        (push setter setters)
+        (push getter getters)))
+    (values all-dummies all-vals newvals
+            `(values ,@(nreverse setters)) `(values ,@(nreverse getters)))))
