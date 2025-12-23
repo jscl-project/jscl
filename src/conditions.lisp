@@ -96,7 +96,7 @@
                   :initarg :expected-type
                   :reader type-error-expected-type))
   (:report (lambda (condition stream)
-             (format stream "~S does not designate a ~S."
+             (format stream "~S is not a ~S."
                      (type-error-datum condition)
                      (type-error-expected-type condition)))))
 (%define-condition simple-type-error (simple-condition type-error) ())
