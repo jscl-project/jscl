@@ -163,22 +163,12 @@
 
 ;;; type expander
 (defun %type-expand-1 (type)
-  (unless (symbolp type)
-    (unless (consp type)
-      (return-from %type-expand-1 (values type nil))))
-  (let ((expander (get-expander-for type)))
-    (cond (expander
-           (if (symbolp type)
-               (setq type (list type)))
-           (values (funcall expander type) t))
-          ((and (consp type)
-                (cadr type))
-           (multiple-value-bind (expansion expanded-p)
-               (%type-expand (cadr type))
-             (if expanded-p
-                 (values (list* (car type) expansion (cddr type)) t)
-                 (values type nil))))
-          (t (values type nil)))))
+  (if (or (symbolp type) (consp type))
+      (let ((expander (get-expander-for type)))
+        (if expander
+            (values (funcall expander (ensure-list type)) t)
+            (values type nil)))
+      (values type nil)))
 
 (defun %type-expand (form)
   (let ((expanded-p nil))
@@ -307,30 +297,26 @@
 
 ;;; type compound: (array type dimensions)
 (defun %compare-array-type (object type-spec)
-  (destructuring-bind (type-base &optional (type-element '* te-p) (type-dimensions '*))
+  (destructuring-bind (type-base &optional (type-element '*) (type-dimensions '*))
       type-spec
     (let ((object-type (array-element-type object))
           (object-dimensions (array-dimensions object)))
-      (when (and (eq object-type 'character) (not (eq type-element 'character)))
-             (if  te-p (return-from %compare-array-type nil)))
-      (when (null object-dimensions)
-        (setq object-dimensions (list (oget object "length"))))
-      (cond ((numberp type-dimensions)
-             (setq type-dimensions (make-list type-dimensions :initial-element '*)))
-            (t (if (eql '* type-dimensions)
-                   (setq type-dimensions
-                         (make-list (list-length object-dimensions) :initial-element '*)))))
-      (cond ((not (eql (list-length type-dimensions)
-                       (list-length object-dimensions)))
-             nil)
-            ((equal (make-list (list-length type-dimensions) :initial-element 't)
-                    (mapcar
-                     (lambda (axis-object axis-type)
-                       (cond ((eql axis-type '*) t)
-                             ((eql axis-object '*) nil)
-                             (t (= axis-object axis-type))))
-                     object-dimensions
-                     type-dimensions)))))))
+      (and
+       ;; check element type
+       (or (eq '* type-element)
+           ;; TODO: use subtypep
+           (not (and (eq object-type 'character) (not (eq type-element 'character)))))
+       ;; check dimensions
+       (or (eq '* type-dimensions)
+           (if (numberp type-dimensions)
+               (= type-dimensions (list-length object-dimensions))
+               (and (= (list-length type-dimensions)
+                       (list-length object-dimensions))
+                    (every (lambda (axis-object axis-type)
+                             (or (eql axis-type '*)
+                                 (= axis-object axis-type)))
+                           object-dimensions
+                           type-dimensions))))))))
 
 (defun %canonical-array-dimensions (dims)
   (cond ((consp dims)
@@ -477,7 +463,7 @@
 (deftype string (&optional (size '*))
   `(array character (,size)))
 
-(deftype vector (&optional (type 't) (size '*))
+(deftype vector (&optional (type '*) (size '*))
   `(array ,type (,size)))
 
 #+jscl (fset 'typep (fdefinition '!typep))

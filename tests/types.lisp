@@ -133,10 +133,10 @@
                             (and (array character 1) (array character (1)))
                             (or (array character 6) (array character (6)))
                             (array character (4))))
-        ;; only 4 elt correct
+        ;; 4 elt correct and last correct
         (type-as-array-3  '((array t 6) (array t 10) (array t 15)
                             (array character 1) (array * 6) (array * *)))
-        ;; first two, last two -correct spec
+        ;; first two, last three - correct spec
         (type-as-array-4  '((array) (array character) (array t)
                             (array * *) (string *) (string)))
         ;; corrected spec
@@ -190,8 +190,8 @@
   (ARRAY-0 (NIL NIL NIL T NIL NIL))
   (ARRAY-1 (T T T T T T))
   (ARRAY-2 (T T T T T T))
-  (ARRAY-3 (NIL NIL NIL T NIL NIL))
-  (ARRAY-4 (T T NIL NIL T T))
+  (ARRAY-3 (NIL NIL NIL T NIL T))
+  (ARRAY-4 (T T NIL T T T))
   (ARRAY-5 (T T T T T T))
   (T T T T T) ))
 
@@ -574,6 +574,8 @@
  (typep (cons 1 (list 1))
         '(cons (or (eql 1) (eql 2))
                (or (list-length 0) (list-length 1)))))
+
+(test (typep "abc" '(array *)))
 
 
 
