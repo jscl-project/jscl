@@ -580,34 +580,13 @@ The return value will share structure with SEQ if possible."
         (t (error "Its not sequence ~a" seq))))
 
 
-;;; replace sequences - http://clhs.lisp.se/Body/f_replac.htm
-;;;   string <- string
-;;;   vector <- vector
-;;;   otherwise =>error
-
-(defun %replace-seq-eql (x y)
-  (typecase x
-    (number (and (numberp y) (= x y)))
-    (character (and (characterp y) (char-equal x y)))
-    (string
-     (and (stringp y)
-          (equal x y) ))
-    (vector
-     (and (vectorp y)
-          (let ((lex (length x)))
-            (when (= lex (length y))
-              (dotimes (i lex t)
-                (when (not (%replace-seq-eql (aref x i) (aref y i)))
-                  (return nil)))))))
-    (t (equal x y))))
-
 (defun %replace-seq (seq-1 seq-2 start1 end1 start2 end2)
   (let* ((trimed-end (min (- end1 start1) (- end2 start2)))
          (back nil))
     (setq end1 (+ start1 trimed-end)
           end2 (+ start2 trimed-end))
     ;; set copy backward flag
-    (when (and (%replace-seq-eql seq-1 seq-2)
+    (when (and (eq seq-1 seq-2)
                (<= start2 start1)
                (or (and (<= start1 start2) (< start2 end1))
                    (and (< start1 end2) (<= end2 end1))
@@ -617,26 +596,29 @@ The return value will share structure with SEQ if possible."
         ;; nothing to copy
         (return-from %replace-seq seq-1))
       (setq back t))
-    (cond (back
-           (dotimes (i trimed-end seq-1)
-             (setf (aref seq-1 (- (+ start1 trimed-end) i 1))
-                   (aref seq-2 (- (+ start2 trimed-end) i 1)))))
-          (t
-           (dotimes (i trimed-end seq-1)
-             (setf (aref seq-1 (+ start1 i))
-                   (aref seq-2 (+ start2 i))))))
-    ))
+    (cond ((vectorp seq-1)
+           (let ((delta (- start1 start2)))
+             (do-sequence (elt seq-2 :index index :start start2 :end end2 :from-end back)
+               (setf (aref seq-1 (+ delta index)) elt))))
+          ((listp seq-1)
+           (let ((tail (nthcdr start1 seq-1)))
+             (if back
+                 (do-sequence-list (elt (subseq seq-2 start2 end2))
+                   (rplaca tail elt)
+                   (setq tail (cdr tail)))
+                 (do-sequence (elt seq-2 :start start2 :end end2)
+                   (rplaca tail elt)
+                   (setq tail (cdr tail))))))
+          (t (not-seq-error seq-1)))
+    seq-1))
 
 (defun replace (sequence-1
                 sequence-2
                 &key (start1 0)
                 (end1 (length sequence-1))
                 (start2 0) (end2 (length sequence-2)))
-  (let ((compatible-types-replace (eql (array-element-type sequence-1)
-                                       (array-element-type sequence-2)))
-        (region-nondecreasing-order-seq-1 (<= 0 start1 end1 (length sequence-1)))
+  (let ((region-nondecreasing-order-seq-1 (<= 0 start1 end1 (length sequence-1)))
         (region-nondecreasing-order-seq-2 (<= 0 start2 end2 (length sequence-2))))
-    (assert compatible-types-replace)
     ;; check region monotonically nondecreasing order
     (assert region-nondecreasing-order-seq-1)
     (assert region-nondecreasing-order-seq-2))
