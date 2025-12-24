@@ -20,10 +20,7 @@
 
 (/debug "loading structures.lisp!")
 
-#-jscl
-(setq *structures* (make-hash-table :test #'equal))
-#+jscl
-(setq *structures* (make-hash-table :test #'eql))
+(setq *structures* (make-hash-table))
 
 ;;; list length 1
 (defun singleton-p (list)
@@ -182,7 +179,7 @@
   map-names)
 
 ;;; dd-slot slot descriptor
-(def!struct dsd-slot name accessor initform type read-only)
+(def!struct dsd-slot name accessor initform (type t) read-only)
 
 ;;; structure storage descriptor.
 (def!struct dsd-storage-descriptor
@@ -811,24 +808,23 @@
 ;;; Parse slot definition
 ;;; catch bug (defstruct name (:copier cname) slot1 ... slotn)
 (defun das!parse-struct-slot (slot)
-  (multiple-value-bind (name default default-p type type-p read-only ro-p)
+  (multiple-value-bind (name default type read-only)
       (typecase slot
         (symbol
          (typecase slot
            ((or (member :conc-name :constructor :copier :predicate :named :include :type :initial-offset)
                 keyword)
             (error "DEFSTRUCT slot ~S syntax error" slot)))
-         slot)
+         (values slot nil t nil))
         (cons
-         (destructuring-bind (name &optional (default nil default-p)
-                              &key (type nil type-p) (read-only nil read-only-p))
+         (destructuring-bind (name &optional default &key (type t) read-only)
              slot
            (typecase name
              ((member :conc-name :constructor :copier :predicate :include :named :type :initial-offset)
               ;;catch bug (defstruct name (:copier cname) slot1 ... slotn)
               (error "Slot name of ~S indicates probable syntax error in DEFSTRUCT" name))
              (keyword (error "DEFSTRUCT slot ~S syntax error." slot)))
-           (values name default default-p type type-p read-only read-only-p)))
+           (values name default type read-only)))
         (t (error " ~S is not a legal slot description." slot)))
     (make-dsd-slot :name name :accessor name :initform default :type type :read-only read-only)))
 
