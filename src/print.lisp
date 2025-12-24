@@ -399,9 +399,8 @@
 
 ;;; structure object printer
 (defun structure-object-printer (form stream)
-  (let ((res))
-    (setq res (concat "#<structure " (string-downcase (string (car form))) ">"))
-    (simple-format stream res)))
+  (simple-format stream "#<structure ~a>"
+                 (string-downcase (string (structure-name form)))))
 
 ;;; hash-table printer
 (defun %hash-fn-print-name (form)
