@@ -216,6 +216,7 @@
         (*default-pathname-defaults* *base-directory*))
     (setq *environment* (make-lexenv))
     (setq *global-environment* *environment*)
+    (setq *fn-info* '())
     (with-compilation-environment
       (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
                            :direction :output

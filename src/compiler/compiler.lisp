@@ -1267,8 +1267,11 @@
 (define-builtin set (symbol value)
   `(= (get ,symbol "value") ,value))
 
-(define-builtin fset (symbol value)
-  `(= (get ,symbol "fvalue") ,value))
+(define-raw-builtin fset (symbol value)
+  (multiple-value-bind (value constantp) (constant-value symbol)
+    (when constantp
+      (fn-info value :defined t)))
+  `(= (get ,(convert symbol) "fvalue") ,(convert value)))
 
 (define-builtin boundp (x)
   (convert-to-bool `(!== (get ,x "value") undefined)))

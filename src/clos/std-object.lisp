@@ -380,6 +380,11 @@
              (otherwise
               (push-on-end `',(car olist) other-options)
               (push-on-end `',(cadr olist) other-options))))
+         ;; @kchan record fn-info
+         ;; TODO: move this into the macros that call this function.
+         ;; What if the result isn't actually used?
+         (dolist (reader readers)
+           (fn-info reader :defined t))
          `(list
            :name ',name
            ,@(when initfunction

@@ -20,9 +20,12 @@
 ;;; defgeneric
 ;;; from std-generic.lisp
 ;;; from original closette.lisp lines 825-832
+;;; @kchan record fn-info
 (defmacro defgeneric (function-name lambda-list &rest options)
   (multiple-value-bind (options methods) (canonicalize-defgeneric-options options)
     `(progn
+       (eval-when (:compile-toplevel)
+         (fn-info ',function-name :defined t))
        (!ensure-generic-function ',function-name
                                  :lambda-list ,(canonicalize-defgeneric-ll lambda-list)
                                  ,@options)
@@ -33,7 +36,7 @@
 ;;; from std-method.lisp
 ;;; from original closette.lisp lines 919-931
 ;;; @vlad-km. modify :body. added :cmf
-;;;           add call without prior DEFGENERIC
+;;; @kchan also call DEFGENERIC at *compile* time
 
 #+nil
 (defmacro defmethod (&rest args)
@@ -52,14 +55,13 @@
 (defmacro defmethod (&rest args)
   (multiple-value-bind (function-name qualifiers lambda-list specializers body)
       (parse-defmethod args)
-    `(let ((gf (find-generic-function ',function-name nil)))
-       (unless gf
-         (setq gf (defgeneric ,function-name
-                      ,(mapcar
-                        (lambda (x)
-                          (if (consp x) (car x) x))
-                        lambda-list) )))
-       (ensure-method gf
+    `(progn
+       (defgeneric ,function-name
+           ,(mapcar
+             (lambda (x)
+               (if (consp x) (car x) x))
+             lambda-list) )
+       (ensure-method (find-generic-function ',function-name nil)
                       :lambda-list ,(canonicalize-defgeneric-ll lambda-list)
                       :qualifiers ,(canonicalize-defgeneric-ll qualifiers)
                       :specializers ,(canonicalize-specializers specializers)
