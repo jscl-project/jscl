@@ -296,4 +296,11 @@ in which case ARRAY might be partially filled from CONTENTS."
   (prog1 (fill-pointer vector)
     (incf (fill-pointer vector))))
 
+(defun shrink-vector (vector length)
+  (unless (vectorp vector)
+    (error "~S is not a vector." vector))
+  (setf (oget vector "length") length)
+  (delete-property "fillpointer" vector)
+  vector)
+
 ;;; EOF

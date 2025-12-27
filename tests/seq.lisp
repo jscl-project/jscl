@@ -77,6 +77,33 @@
 (test (equal "123121" (remove #\1 "1231121" :start 3 :end 5 :count 1)))
 (test (equal "12321" (remove #\1 "1231121" :start 3 :end 5 :count 2)))
 
+;;; DELETE
+(test (not (find 1 (delete 1 (vector 1 2 3 1)))))
+(test (not (find 1 (delete 1 (list 1 2 3 1)))))
+(test (not (find 2 (delete 1 (vector 1 2 3 1) :key halve))))
+(test (not (find 2 (delete 1 (list 1 2 3 1) :key halve))))
+(test (equalp #() (delete '(1 2) (vector '(1 2) '(1 2)) :test #'equal)))
+(test (null (delete '(1 2) (list '(1 2) '(1 2)) :test #'equal)))
+(test (find 2 (delete 2 (vector 1 2 3) :test-not #'=)))
+(test (find 2 (delete 2 (list 1 2 3) :test-not #'=)))
+(test (equal '(1 2 3 1) (delete 1 (list 1 2 3 1) :count 0)))
+(test (equal '(2 3 1) (delete 1 (list 1 2 3 1) :count 1)))
+(test (equal '(2 3) (delete 1 (list 1 2 3 1) :count 2)))
+(test (equal '(1 2 3 2 1) (delete 1 (list 1 2 3 1 1 2 1) :start 3 :end 5)))
+(test (equal '(1 2 3 1 2 1) (delete 1 (list 1 2 3 1 1 2 1) :start 3 :end 5 :count 1)))
+(test (equal '(1 2 3 2 1) (delete 1 (list 1 2 3 1 1 2 1) :start 3 :end 5 :count 2)))
+(test (equal '(1 2 3 2 3) (delete 1 (list 1 2 3 1 1 2 3) :start 3)))
+(test (equal '(1 2 3 1 2 3) (delete 1 (list 1 2 3 1 1 2 3) :start 3 :count 1)))
+(test (equal '(1 2 3 2 3) (delete 1 (list 1 2 3 1 1 2 3) :start 3 :count 2)))
+(test (equal '(1 2 3 2 3) (delete 1 (list 1 2 3 1 1 2 3) :start 3 :end 5)))
+
+(test (equal "1231" (delete #\1 (copy-seq "1231") :count 0)))
+(test (equal "231" (delete #\1 (copy-seq "1231") :count 1)))
+(test (equal "23" (delete #\1 (copy-seq "1231") :count 2)))
+(test (equal "12321" (delete #\1 (copy-seq "1231121") :start 3 :end 5)))
+(test (equal "123121" (delete #\1 (copy-seq "1231121") :start 3 :end 5 :count 1)))
+(test (equal "12321" (delete #\1 (copy-seq "1231121") :start 3 :end 5 :count 2)))
+
 ;;; SUBSTITUTE
 (test (equal (substitute #\_ #\- "Hello-World") "Hello_World"))
 (test (equal (substitute 4 5 '(1 2 3 4)) '(1 2 3 4)))
@@ -93,10 +120,7 @@
 (test (equal '(1 2 3 99 1 2 3) (substitute 99 1 '(1 2 3 1 1 2 3) :start 3 :count 1)))
 (test (equal '(1 2 3 99 99 2 3) (substitute 99 1 '(1 2 3 1 1 2 3) :start 3 :count 2)))
 (test (equal '(1 2 3 99 99 2 3) (substitute 99 1 '(1 2 3 1 1 2 3) :start 3 :end 5)))
-
-;;; This test fails expectely as you can't compare vectors with equal.
-#+nil
-(test (equal (substitute 99 3 #(1 2 3 4) :test #'<=) #(1 2 99 99)))
+(test (equalp (substitute 99 3 #(1 2 3 4) :test #'<=) #(1 2 99 99)))
 
 ;;; POSITION
 (test (= (position 1 #(1 2 3))  0))
@@ -387,18 +411,37 @@
 
 
 ;;; REMOVE-DUPLICATES
-(test 
- (equal
-  (list
-   (equal (remove-duplicates "aBcDAbCd" :test #'char-equal :from-end t) "aBcD")
-   (equal (remove-duplicates '(a b c b d d e)) '(A C B D E))
-   (equal (remove-duplicates '(a b c b d d e) :from-end t) '(A B C D E))
-   (equal (remove-duplicates '((foo #\a) (bar #\%) (baz #\A))
-                             :test #'char-equal :key #'cadr) '((BAR #\%) (BAZ #\A)))
-   (equal (remove-duplicates '((foo #\a) (bar #\%) (baz #\A)) 
-                             :test #'char-equal :key #'cadr :from-end t) '((FOO #\a) (BAR #\%))))
-  (list t t t t t)))
+(test (equal (remove-duplicates "aBcDAbCd" :test #'char-equal :from-end t) "aBcD"))
+(test (equal (remove-duplicates '(a b c b d d e)) '(A C B D E)))
+(test (equal (remove-duplicates '(a b c b d d e) :from-end t) '(A B C D E)))
+(test (equal (remove-duplicates '((foo #\a) (bar #\%) (baz #\A))
+                                :test #'char-equal :key #'cadr)
+             '((BAR #\%) (BAZ #\A))))
+(test (equal (remove-duplicates '((foo #\a) (bar #\%) (baz #\A))
+                                :test #'char-equal :key #'cadr :from-end t)
+             '((FOO #\a) (BAR #\%))))
+(test (equal (remove-duplicates '(a a b b c b) :start 3) '(a a b c b)))
+(test (equal (remove-duplicates '(a a b b c b) :start 3 :from-end t) '(a a b b c)))
+(test (equal (remove-duplicates '(a a b b c b) :end 3) '(a b b c b)))
+(test (equal (remove-duplicates '(a a b b c b) :end 3 :from-end t) '(a b b c b)))
 
+;;; DELETE-DUPLICATES
+(test (equal (delete-duplicates (copy-seq "aBcDAbCd") :test #'char-equal :from-end t)
+             "aBcD"))
+(test (equal (delete-duplicates (copy-list '(a b c b d d e))) '(A C B D E)))
+(test (equal (delete-duplicates (copy-list '(a b c b d d e)) :from-end t) '(A B C D E)))
+(test (equal (delete-duplicates (list '(foo #\a) '(bar #\%) '(baz #\A))
+                                :test #'char-equal :key #'cadr)
+             '((BAR #\%) (BAZ #\A))))
+(test (equal (delete-duplicates (list '(foo #\a) '(bar #\%) '(baz #\A))
+                                :test #'char-equal :key #'cadr :from-end t)
+             '((FOO #\a) (BAR #\%))))
+(test (equal (delete-duplicates (copy-list '(a a b b c b)) :start 3) '(a a b c b)))
+(test (equal (delete-duplicates (copy-list '(a a b b c b)) :start 3 :from-end t)
+             '(a a b b c)))
+(test (equal (delete-duplicates (copy-list '(a a b b c b)) :end 3) '(a b b c b)))
+(test (equal (delete-duplicates (copy-list '(a a b b c b)) :end 3 :from-end t)
+             '(a b b c b)))
 
 ;;; SETF with ELT
 (test (equalp #(42 0 0)

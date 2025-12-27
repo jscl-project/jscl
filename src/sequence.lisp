@@ -273,14 +273,89 @@ The return value will share structure with SEQ if possible."
              (t (not-seq-error ,nseq))))))
 
 (define-seq-variants remove remove-if remove-if-not (:more-keys (count))
+  (when from-end
+    (warn "FROM-END not implemented, ignoring"))
   (do-sequence-maybe-collect (elt sequence :start start :end end :count count)
     (test elt)))
 
 (define-seq-variants substitute substitute-if substitute-if-not
   (:more-reqs (newitem) :more-keys (count))
+  (when from-end
+    (warn "FROM-END not implemented, ignoring"))
   (do-sequence-maybe-collect (elt sequence :start start :end end :count count)
     (test elt)
     (collect newitem)))
+
+(define-seq-variants delete delete-if delete-if-not (:more-keys (count))
+  (when from-end
+    (warn "FROM-END not implemented, ignoring"))
+  (cond ((and count (<= count 0)) sequence)
+        ((listp sequence)
+         (let* ((n-removed 0)
+                (handle (cons nil sequence))
+                (prev (nthcdr start handle)))
+           (do ((scan (cdr prev) (cdr scan))
+                (index start (1+ index)))
+               ((or (null scan)
+                    (and end (<= end index))
+                    (and count (<= count n-removed))))
+             (cond ((test (car scan))
+                    (rplacd prev (cdr scan))
+                    (incf n-removed))
+                   (t (pop prev))))
+           (cdr handle)))
+        ((vectorp sequence)
+         (let* ((length (length sequence))
+                (end (or end length))
+                (ic start) ; destination to write into
+                (n-removed 0))
+           ;; Phase 1 - filter from START to END
+           (do-sequence-vector (elt sequence :index index :start start :end end)
+             ;; Early stop because of COUNT. Tell phase 2 to
+             ;; start from INDEX.
+             (when (and count (<= count n-removed))
+               (setq end index)
+               (return))
+             (cond ((test elt)
+                    (incf n-removed))
+                   (t
+                    (setf (aref sequence ic) elt)
+                    (incf ic))))
+           ;; Phase 2 - copy the rest if needed
+           (when (plusp n-removed)
+             (do-sequence-vector (elt sequence :start end :end length)
+               (setf (aref sequence ic) elt)
+               (incf ic))
+             (shrink-vector sequence ic))
+           sequence))
+        (t (not-seq-error sequence))))
+
+(define-seq-variants nsubstitute nsubstitute-if nsubstitute-if-not
+  (:more-reqs (newitem) :more-keys (count))
+  (when from-end
+    (warn "FROM-END not implemented, ignoring"))
+  (cond ((and count (<= count 0)) sequence)
+        ((listp sequence)
+         (let ((n-changed 0))
+           (do ((scan (nthcdr start sequence) (cdr scan))
+                (index start (1+ index)))
+               ((or (null scan)
+                    (and end (<= end index))
+                    (and count (<= count n-changed)))
+                sequence)
+             (when (test (car scan))
+               (rplaca scan newitem)
+               (incf n-changed)))))
+        ((vectorp sequence)
+         (let ((n-changed 0))
+           (do-sequence-vector (elt sequence :index index :start start :end end)
+             (when (test elt)
+               (setf (aref sequence index) newitem)
+               (incf n-changed))
+             (when (and count (<= count n-changed))
+               (return)))
+           sequence))
+        (t (not-seq-error sequence))))
 
 
 (macrolet ((def (op found-test found-result unfound-result)
@@ -553,31 +628,70 @@ The return value will share structure with SEQ if possible."
         (funcall result-collector arg)))
     (funcall result-collector)))
 
-;;; remove duplicates
-(defun %remove-duplicates (seq from-end test test-not key start end)
-  (let ((result)
-        (test-fn test)
-        (sequence (if from-end seq (reverse seq))))
-    (when test-not 
-      (setq test-fn (complement test-not)))
-    (when (or (not (eql start 0))
-              end)
-      (setq sequence (subseq sequence start end)))
-    (dolist (it sequence)
-      (unless (find (funcall key it) result :key key :test test-fn)
-        (push it result)))
-    (if from-end
-        (reverse result)
-        result)))
+(defun %delete-duplicates-from-end (seq start end key test testp test-not test-not-p)
+  ;; We always use the FROM-END = T algorithm. Outer loop: START <= i
+  ;; < END, inner loop: START <= j < i. Remove i if we ever find (elt
+  ;; SEQ i) = (elt SEQ j). This algorithm is efficient because the
+  ;; inner loop doesn't scan duplicated element (they are already
+  ;; filtered).
+  (let ((key (or key #'identity)))
+    (cond ((listp seq)
+           (let* ((handle (cons nil seq))
+                  (prev (nthcdr start handle))
+                  (scan-start (cdr prev)))
+             (do ((scan scan-start (cdr scan))
+                  (index start (1+ index)))
+                 ((or (null scan)
+                      (and end (<= end index))))
+               (do ((scan-inner scan-start (cdr scan-inner))
+                    (index start (1+ index)))
+                   ((eq scan-inner scan)
+                    (pop prev))
+                 (when (satisfies-test-p (funcall key (car scan))
+                                         (funcall key (car scan-inner))
+                                         :test test :testp testp
+                                         :test-not test-not :test-not-p test-not-p)
+                   (rplacd prev (cdr scan))
+                   (return))))
+             (setq seq (cdr handle))))
+          ((vectorp seq)
+           (let ((ic start)
+                 (end (or end (length seq))))
+             (do ((i start (1+ i)))
+                 ((<= end i))
+               (do ((j start (1+ j)))
+                   ((<= i j)
+                    (setf (aref seq ic) (aref seq i))
+                    (incf ic))
+                 (when (satisfies-test-p (funcall key (aref seq i))
+                                         (funcall key (aref seq j))
+                                         :test test :testp testp
+                                         :test-not test-not :test-not-p test-not-p)
+                   (return))))
+             (shrink-vector seq ic)))
+          (t (not-seq-error seq))))
+  seq)
 
-(defun remove-duplicates (seq &key from-end (test 'eq) test-not (key 'identity) (start 0) end)
-  (cond ((listp seq)
-         (%remove-duplicates seq from-end test test-not key start end))
-        ((stringp seq)
-         (apply #'concat (%remove-duplicates (vector-to-list seq) from-end test test-not key start end)))
-        ((vectorp seq)
-         (list-to-vector (%remove-duplicates (vector-to-list seq) from-end test test-not key start end)))
-        (t (error "Its not sequence ~a" seq))))
+(defun delete-duplicates (seq &key from-end (start 0) end
+                                (test #'eql testp) (test-not #'eql test-not-p) key)
+  (unless from-end
+    (let ((length (length seq)))
+      (psetq seq (nreverse seq)
+             start (if end (- length end) 0)
+             end (- length start))))
+  (setq seq (%delete-duplicates-from-end seq start end key test testp test-not test-not-p))
+  (if from-end seq (nreverse seq)))
+
+(defun remove-duplicates (seq &key from-end (start 0) end
+                                (test #'eql testp) (test-not #'eql test-not-p) key)
+  (if from-end
+      (setq seq (copy-seq seq))
+      (let ((length (length seq)))
+        (psetq seq (reverse seq)
+               start (if end (- length end) 0)
+               end (- length start))))
+  (setq seq (%delete-duplicates-from-end seq start end key test testp test-not test-not-p))
+  (if from-end seq (nreverse seq)))
 
 
 (defun %replace-seq (seq-1 seq-2 start1 end1 start2 end2)
