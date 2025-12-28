@@ -61,12 +61,16 @@
   (values-list /))
 
 (defun eval-interactive-input (input)
-  "Evaluate INPUT string. Return no values if INPUT is empty."
-  (let* ((eof (list :eof)) ; sentinel value
-         (form (read-from-string input nil eof)))
-    (if (eq form eof)
-        (values)
-        (eval-interactive form))))
+  "Evaluate INPUT string. INPUT may contain multiple forms, which are
+evaluated sequentially. Return the result of the last form in INPUT, or
+no values if INPUT is empty."
+  (let ((eof (list :eof))               ; sentinel value
+        values
+        form)
+    (with-input-from-string (stream input)
+      (while (not (eq eof (setq form (read stream nil eof))))
+        (setq values (multiple-value-list (eval-interactive form)))))
+    (values-list values)))
 
 (export
  '(&allow-other-keys &aux &body &environment &key &optional &rest &whole
