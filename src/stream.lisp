@@ -30,19 +30,107 @@
   write-fn
   read-char-fn
   peek-char-fn
+  (finish-output-fn (lambda ()))
   kind
   data
-  (direction :out)
   at-line-start)
 
-;;; @vkm path stream.lisp 04-09-2022
 (defun start-line-p (&optional (stream *standard-output*))
   (stream-at-line-start stream))
 
 (defun output-stream-p (obj)
-  (and (streamp obj)
-       (eql (stream-direction obj) :out)))
-;;; end @vkm path
+  (and (streamp obj) (stream-write-fn obj)))
+
+(defun input-stream-p (obj)
+  (and (streamp obj) (peek-char-fn obj)))
+
+(defun stream-element-type (stream)
+  (unless (streamp stream)
+    (error 'type-error :datum stream :expected-type 'stream))
+  ;; Only CHARACTER is implemented
+  'character)
+
+;;; Input stream operations
+
+(defun peek-char (&optional type (stream *standard-input*) (eof-error-p t))
+  (unless (null type)
+    (error "peek-char with non-null TYPE is not implemented."))
+  (funcall (stream-peek-char-fn stream) eof-error-p))
+
+(defun read-char (&optional (stream *standard-input*) (eof-error-p t))
+  (funcall (stream-read-char-fn stream) eof-error-p))
+
+(defun read-line (&optional (stream *standard-input*) (eof-error-p t))
+  (let* ((eof nil)
+         (string
+           (with-output-to-string (s)
+             (loop
+               (let ((ch (read-char stream nil)))
+                 (case ch
+                   (#\newline (return))
+                   ((nil) (setq eof t) (return))
+                   (t (write-char ch s))))))))
+    (if (and eof (zerop (string-length string)))
+        (if eof-error-p
+            (error 'end-of-file :stream stream)
+            (values nil t))
+        (values string eof))))
+
+(defun read-sequence (sequence stream &key (start 0) end)
+  (cond ((vectorp sequence)
+         (let ((end (or end (length sequence))))
+           (do ((i start (1+ i)))
+               ((<= end i) i)
+             (let ((ch (read-char stream nil)))
+               (if ch (setf (aref sequence i) ch)
+                   (return i))))))
+        (t (error "read-sequence for sequence type ~A not implemented"
+                  (type-of sequence)))))
+
+;;; Output stream operations
+
+(defun write-char (char &optional (stream *standard-output*))
+  (setf (stream-at-line-start stream) nil)
+  (if (eql char #\Newline)
+      (setf (stream-at-line-start stream) t))
+  (funcall (stream-write-fn stream) (string char))
+  char)
+
+(defun !write-string (string &optional (stream *standard-output*))
+  (if (eql (char string (1- (length string))) #\Newline)
+      (setf (stream-at-line-start stream) t)
+      (setf (stream-at-line-start stream) nil))
+  (funcall (stream-write-fn stream) string)
+  string)
+
+(defun write-string (string &optional (stream *standard-output* stream-p) &key (start 0) end)
+  (let* ((sl (length string))
+         (end (or end sl)))
+    (unless (streamp stream)
+      (error "write-string - malformed stream ~a. Use full (string stream ...) form." stream))
+    (cond ((eq sl 0) "")
+          ((and (= 0 start) (= sl end))
+           (!write-string string stream))
+          (t (!write-string (subseq string start end) stream)))))
+
+(defun write-sequence (seq stream &key (start 0) end)
+  (if (stringp seq)
+      (write-string seq stream :start start :end end)
+      ;; TODO: use COERCE when it is ready
+      (write-string (map 'string #'identity (subseq seq start end)) stream)))
+
+(defun write-line (string &optional (stream *standard-output*) &rest keys)
+  (apply #'write-string string stream keys)
+  (write-char #\Newline stream)
+  string)
+
+(defun finish-output (&optional (stream *standard-output*))
+  (funcall (stream-finish-output-fn stream))
+  nil)
+
+(fset 'force-output #'finish-output)
+
+(fset 'clear-output #'finish-output)
 
 ;;; Input streams
 
@@ -63,60 +151,16 @@
              :read-char-fn (lambda (eof-error-p)
                              (prog1 (peek eof-error-p)
                                (incf index)))
-
              :peek-char-fn (lambda (eof-error-p)
-                             (peek eof-error-p)))))))
+                             (peek eof-error-p))
+             :kind 'string-input-stream)))))
 
-(defun peek-char (&optional type (stream *standard-input*) (eof-error-p t))
-  (unless (null type)
-    (error "peek-char with non-null TYPE is not implemented."))
-  (funcall (stream-peek-char-fn stream) eof-error-p))
-
-(defun read-char (&optional (stream *standard-input*) (eof-error-p t))
-  (funcall (stream-read-char-fn stream) eof-error-p))
-
+(defmacro with-input-from-string ((var string) &body body)
+  ;; TODO: &key start end index
+  `(let ((,var (make-string-input-stream ,string)))
+     ,@body))
 
 ;;; Output streams
-
-(defun write-char (char &optional (stream *standard-output*))
-  (setf (stream-at-line-start stream) nil)
-  (if (eql char #\Newline)
-      (setf (stream-at-line-start stream) t))
-  (funcall (stream-write-fn stream) (string char))
-  char)
-
-(defun !write-string (string &optional (stream *standard-output*))
-  (if (eql (char string (1- (length string))) #\Newline)
-      (setf (stream-at-line-start stream) t)
-      (setf (stream-at-line-start stream) nil))
-  (funcall (stream-write-fn stream) string)
-  string)
-
-
-(defun write-string  (string &optional (stream *standard-output* stream-p) &rest keys)
-  (let ((sl (length string)))
-    (let* ((no-keys (null keys))
-           (start)
-           (end)
-           (write-string-invalid-range-seq)
-           (write-string-nondecreasing-order-seq))
-      (cond (stream-p
-             (if (streamp stream) t
-               (error "write-string - malformed stream ~a. Use full (string stream ...) form." stream))))
-      (cond ((eq sl 0) "")
-            (no-keys (!write-string string stream))
-            (t (setq start (getf keys :start 0)
-                     end (getf keys :end sl)
-                     write-string-invalid-range-seq (/= start end)
-                     write-string-nondecreasing-order-seq (<= 0 start end sl))
-               (assert write-string-invalid-range-seq)
-               (assert write-string-nondecreasing-order-seq)
-               (!write-string (subseq string start end) stream))))))
-
-(defun write-line (string &optional (stream *standard-output*) &rest keys)
-  (apply #'write-string string stream keys)
-  (write-char #\Newline stream)
-  string)
 
 (defun %make-fill-pointer-output-stream (buffer)
   ;; WRITE-FN need to close over STREAM so it can access the buffer via
@@ -127,7 +171,7 @@
            :write-fn (lambda (string)
                        (dotimes (i (length string))
                          (vector-push-extend (aref string i) (stream-data stream))))
-           :kind 'string-stream
+           :kind 'string-output-stream
            :data buffer
            :at-line-start t))))
 
@@ -135,11 +179,6 @@
   (assert (eql element-type 'character))
   (%make-fill-pointer-output-stream
    (make-array 0 :element-type 'character :fill-pointer 0)))
-
-(defmacro with-input-from-string ((var string) &body body)
-  ;; TODO: &key start end index
-  `(let ((,var (make-string-input-stream ,string)))
-     ,@body))
 
 (defun get-output-stream-string (stream)
   (prog1 (stream-data stream)
@@ -154,21 +193,28 @@
      ,@body
      (get-output-stream-string ,var)))
 
+(defun make-broadcast-stream (&rest streams)
+  (make-stream :write-fn
+               (lambda (string)
+                 (dolist (s streams)
+                   (funcall (stream-write-fn s) string)))
+               :data streams
+               :kind 'broadcast-stream))
 
-(defun read-line (&optional (stream *standard-input*) (eof-error-p t))
-  (let* ((eof nil)
-         (string
-           (with-output-to-string (s)
-             (loop
-               (let ((ch (read-char stream nil)))
-                 (case ch
-                   (#\newline (return))
-                   ((nil) (setq eof t) (return))
-                   (t (write-char ch s))))))))
-    (if (and eof (zerop (string-length string)))
-        (if eof-error-p
-            (error 'end-of-file :stream stream)
-            (values nil t))
-        (values string eof))))
+(defun broadcast-stream-streams (stream)
+  (assert (eql (stream-kind stream) 'broadcast-stream))
+  (stream-data stream))
+
+(defun make-line-buffer-stream (stream)
+  "Buffer output to STREAM until we see a newline."
+  (let ((buffer (make-string-output-stream)))
+    (flet ((finish ()
+             (funcall (stream-write-fn stream) (get-output-stream-string buffer))))
+      (make-stream
+       :write-fn (lambda (string)
+                   (write-string string buffer)
+                   (when (find #\newline string) (finish)))
+       :finish-output-fn #'finish
+       :kind 'console-output-stream))))
 
 ;;; EOF

@@ -378,13 +378,10 @@ no values if INPUT is empty."
 ;;; web or node REPL.
 ;;;
 (setq *standard-output*
-      ;; We buffer output strings until we see a newline
-      (let ((buffer (make-string-output-stream)))
-        (make-stream
-         :write-fn (lambda (string)
-                     (write-string string buffer)
-                     (when (find #\newline string)
-                       (#j:console:log (get-output-stream-string buffer))))))
+      (make-line-buffer-stream
+       (make-stream
+        :write-fn (lambda (string) (#j:console:log string))
+        :kind 'console-output-stream))
       *error-output* *standard-output*
       *trace-output* *standard-output*)
 

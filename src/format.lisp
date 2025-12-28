@@ -1690,7 +1690,8 @@
 				                  'string-capitalize
 				                  'string-downcase))
                                          string)
-                                        stream)))))
+                                        stream))
+                                     :kind 'format-case-frob-stream)))
 	    ,@(expand-directive-list before)))
        after))))
 

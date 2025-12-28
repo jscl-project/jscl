@@ -19,4 +19,22 @@
 "
                       (get-output-stream-string stream)))))
 
+(with-input-from-string (in "abc
+def")
+  (let ((buf (make-array 3)))
+    (test (= 3 (read-sequence buf in)))
+    (test (equalp "abc" buf))
+    (test (= 2 (read-sequence buf in :end 2)))
+    (test (equalp "
+dc" buf))
+    (test (= 2 (read-sequence buf in)))
+    (test (equalp "efc" buf))))
+
+(test (equal "abcdef"
+             (with-output-to-string (o)
+               (with-input-from-string (i "abcdefg")
+                 (let ((buf (make-array 6)))
+                   (read-sequence buf i)
+                   (write-sequence buf o))))))
+
 ;;; EOF

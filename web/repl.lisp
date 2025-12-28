@@ -82,10 +82,12 @@
   (load-history)
   (setq *standard-output*
         (make-stream
-         :write-fn (lambda (string) (%write-string string)))
+         :write-fn (lambda (string) (%write-string string))
+         :kind 'web-repl-output-stream)
         *error-output*
         (make-stream
-         :write-fn (lambda (string) (%write-string string t "jqconsole-error")))
+         :write-fn (lambda (string) (%write-string string t "jqconsole-error"))
+         :kind 'web-repl-error-stream)
         *trace-output* *standard-output*)
   (welcome-message :html t)
   (#j:window:addEventListener "load" (lambda (&rest args) (toplevel))))
