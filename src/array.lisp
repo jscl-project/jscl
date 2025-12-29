@@ -263,7 +263,7 @@ in which case ARRAY might be partially filled from CONTENTS."
 ;;; Vectors
 
 (defun vectorp (x)
-  (and (arrayp x)
+  (and (storage-vector-p x)
        (not (and (in "dimensions" x)
                  (listp (oget x "dimensions"))))))
 

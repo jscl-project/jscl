@@ -168,18 +168,19 @@
     (s tree)))
 
 (defun subst (new old tree &key key (test #'eql testp) (test-not #'eql test-not-p))
-  (labels ((s (x)
-             (cond ((satisfies-test-p old x :key key :test test :testp testp
-                                      :test-not test-not :test-not-p test-not-p)
-                    new)
-                   ((atom x) x)
-                   (t (let ((a (s (car x)))
-                            (b (s (cdr x))))
-                        (if (and (eq a (car x))
-                                 (eq b (cdr x)))
-                            x
-                            (cons a b)))))))
-    (s tree)))
+  (let ((test-fn (make-test-p :key key :test test :testp testp
+                              :test-not test-not :test-not-p test-not-p)))
+    (labels ((s (x)
+               (cond ((funcall test-fn old x)
+                      new)
+                     ((atom x) x)
+                     (t (let ((a (s (car x)))
+                              (b (s (cdr x))))
+                          (if (and (eq a (car x))
+                                   (eq b (cdr x)))
+                              x
+                              (cons a b)))))))
+      (s tree))))
 
 (defun copy-list (x)
   (if (null x)
@@ -265,28 +266,31 @@
          x)))))
 
 (defun member (x list &key key (test #'eql testp) (test-not #'eql test-not-p))
-  (while list
-    (when (satisfies-test-p x (car list) :key key :test test :testp testp
-                            :test-not test-not :test-not-p test-not-p)
-      (return list))
-    (setq list (cdr list))))
+  (let ((test-fn (make-test-p :key key :test test :testp testp
+                              :test-not test-not :test-not-p test-not-p)))
+    (while list
+      (when (funcall test-fn x (car list))
+        (return list))
+      (setq list (cdr list)))))
 
 
 (defun assoc (x alist &key key (test #'eql testp) (test-not #'eql test-not-p))
-  (while alist
-    (if (satisfies-test-p x (caar alist) :key key :test test :testp testp
-                          :test-not test-not :test-not-p test-not-p)
-      (return)
-      (setq alist (cdr alist))))
+  (let ((test-fn (make-test-p :key key :test test :testp testp
+                              :test-not test-not :test-not-p test-not-p)))
+    (while alist
+      (if (funcall test-fn x (caar alist))
+          (return)
+          (setq alist (cdr alist)))))
   (car alist))
 
 (defun rassoc (x alist &key key (test #'eql) (test #'eql testp)
                  (test-not #'eql test-not-p))
-  (while alist
-    (if (satisfies-test-p x (cdar alist) :key key :test test :testp testp
-                          :test-not test-not :test-not-p test-not-p)
-      (return)
-      (setq alist (cdr alist))))
+  (let ((test-fn (make-test-p :key key :test test :testp testp
+                              :test-not test-not :test-not-p test-not-p)))
+    (while alist
+      (if (funcall test-fn x (cdar alist))
+          (return)
+          (setq alist (cdr alist)))))
   (car alist))
 
 (defun acons (key datum alist)

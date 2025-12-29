@@ -115,12 +115,16 @@ accumulated, in the order."
   #+jscl (float-to-string x)
   #-jscl (format nil "~f" x))
 
-(defun satisfies-test-p (x y &key key (test #'eql) testp (test-not #'eql) test-not-p)
+(defun make-test-p (&key key (test #'eql) testp (test-not #'eql) test-not-p)
   (when (and testp test-not-p)
     (error "Both test and test-not are set"))
-  (let ((key-val (if key (funcall key y) y))
-        (fn (if test-not-p (complement test-not) test)))
-    (funcall fn x key-val)))
+  (if key
+      (if test-not-p
+          (lambda (x y) (not (funcall test-not x (funcall key y))))
+          (lambda (x y) (funcall test x (funcall key y))))
+      (if test-not-p
+          (lambda (x y) (not (funcall test-not x y)))
+          test)))
 
 
 (defun interleave (list element &optional after-last-p)

@@ -138,11 +138,10 @@ appended as keyword arguments, to all variants' lambda list."
      (defun ,op (,@more-reqs item sequence &key from-end key (start 0) end
                                  (test #'eql testp) (test-not #'eql test-not-p)
                                  ,@more-keys)
-       (macrolet ((test (x)
-                    `(satisfies-test-p item ,x
-                      :key key :test test :testp testp
-                      :test-not test-not :test-not-p test-not-p)))
-         ,@body))
+       (let ((test-fn (make-test-p :key key :test test :testp testp
+                                   :test-not test-not :test-not-p test-not-p)))
+         (macrolet ((test (x) `(funcall test-fn item ,x)))
+           ,@body)))
      (defun ,if-op (,@more-reqs predicate sequence
                     &key from-end (start 0) end key ,@more-keys)
        (macrolet ((test (x)
@@ -510,13 +509,13 @@ The return value will share structure with SEQ if possible."
                                        (start1 0) (end1 (length sequence1))
                                        (start2 0) (end2 (length sequence2)))
   (let ((index1 start1)
-        (index2 start2))
+        (index2 start2)
+        (test-fn (make-test-p :key key :test test :testp testp
+                              :test-not test-not :test-not-p test-not-p)))
     (while (and (<= index1 end1) (<= index2 end2))
       (when (or (eql index1 end1) (eql index2 end2))
         (return-from mismatch (if (eql end1 end2) NIL index1)))
-      (unless (satisfies-test-p (elt sequence1 index1) (elt sequence2 index2)
-                                :key key :test test :testp testp
-                                :test-not test-not :test-not-p test-not-p)
+      (unless (funcall test-fn (elt sequence1 index1) (elt sequence2 index2))
         (return-from mismatch index1))
       (incf index1)
       (incf index2))))
@@ -634,7 +633,9 @@ The return value will share structure with SEQ if possible."
   ;; SEQ i) = (elt SEQ j). This algorithm is efficient because the
   ;; inner loop doesn't scan duplicated element (they are already
   ;; filtered).
-  (let ((key (or key #'identity)))
+  (let ((key (or key #'identity))
+        (test-fn (make-test-p :test test :testp testp
+                              :test-not test-not :test-not-p test-not-p)))
     (cond ((listp seq)
            (let* ((handle (cons nil seq))
                   (prev (nthcdr start handle))
@@ -647,10 +648,9 @@ The return value will share structure with SEQ if possible."
                     (index start (1+ index)))
                    ((eq scan-inner scan)
                     (pop prev))
-                 (when (satisfies-test-p (funcall key (car scan))
-                                         (funcall key (car scan-inner))
-                                         :test test :testp testp
-                                         :test-not test-not :test-not-p test-not-p)
+                 (when (funcall test-fn
+                                (funcall key (car scan))
+                                (funcall key (car scan-inner)))
                    (rplacd prev (cdr scan))
                    (return))))
              (setq seq (cdr handle))))
@@ -663,10 +663,9 @@ The return value will share structure with SEQ if possible."
                    ((<= i j)
                     (setf (aref seq ic) (aref seq i))
                     (incf ic))
-                 (when (satisfies-test-p (funcall key (aref seq i))
-                                         (funcall key (aref seq j))
-                                         :test test :testp testp
-                                         :test-not test-not :test-not-p test-not-p)
+                 (when (funcall test-fn
+                                (funcall key (aref seq i))
+                                (funcall key (aref seq j)))
                    (return))))
              (shrink-vector seq ic)))
           (t (not-seq-error seq))))
