@@ -119,29 +119,22 @@ internals.checkArgs = function(args, n){
 // Lists
 
 internals.Cons = function (car, cdr) {
-  this.car = car;
-  this.cdr = cdr;
+  this['$$jscl_car'] = car;
+  this['$$jscl_cdr'] = cdr;
 };
 
-internals.car = function(x){
-  if (x === nil)
-    return nil;
-  else if (x instanceof internals.Cons)
-    return x.car;
-  else {
-    console.log(x);
-    throw new Error('CAR called on non-list argument');
-  }
-};
+Object.defineProperty(Object.prototype, "$$jscl_car", {
+  get: (function () { throw new Error('CAR called on non-list argument'); }),
+  set: (function () { throw new Error('RPLACA called on non-list argument'); }),
+});
 
-internals.cdr = function(x){
-  if (x === nil)
-    return nil;
-  else if (x instanceof internals.Cons)
-    return x.cdr;
-  else
-    throw new Error('CDR called on non-list argument');
-};
+Object.defineProperty(Object.prototype, "$$jscl_cdr", {
+  get: (function () { throw new Error('CDR called on non-list argument'); }),
+  set: (function () { throw new Error('RPLACD called on non-list argument'); }),
+});
+
+Object.defineProperty(internals.Cons.prototype, "$$jscl_car", { writable: true });
+Object.defineProperty(internals.Cons.prototype, "$$jscl_cdr", { writable: true });
 
 // Improper list constructor (like LIST*)
 internals.QIList = function(){
@@ -495,6 +488,13 @@ function runCommonLispScripts() {
     }
     progressivelyRunScripts();
 }
+
+// NIL and T
+
+nil = internals.intern("NIL", "COMMON-LISP");
+t = internals.intern("T", "COMMON-LISP");
+Object.defineProperty(nil, "$$jscl_car", { value: nil, writable: false });
+Object.defineProperty(nil, "$$jscl_cdr", { value: nil, writable: false });
 
 // Node Readline
 if (typeof module !== 'undefined' &&

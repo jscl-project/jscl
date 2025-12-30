@@ -1238,21 +1238,21 @@
   (convert-to-bool `(instanceof ,x (internal |Cons|))))
 
 (define-builtin car (x)
-  `(call-internal |car| ,x))
+  `(property ,x "$$jscl_car"))
 
 (define-builtin cdr (x)
-  `(call-internal |cdr| ,x))
+  `(property ,x "$$jscl_cdr"))
 
 (define-builtin rplaca (x new)
   `(selfcall
      (var (tmp ,x))
-     (= (get tmp "car") ,new)
+     (= (property tmp "$$jscl_car") ,new)
      (return tmp)))
 
 (define-builtin rplacd (x new)
   `(selfcall
      (var (tmp ,x))
-     (= (get tmp "cdr") ,new)
+     (= (property tmp "$$jscl_cdr") ,new)
      (return tmp)))
 
 (define-builtin symbolp (x)
@@ -1341,8 +1341,8 @@
 			     (mapcar #'convert args)))))
 	  (var (tail ,(convert last)))
 	  (while (!= tail ,(convert nil))
-	    (method-call args "push" (get tail "car"))
-	    (= tail (get tail "cdr")))
+	    (method-call args "push" (get tail "$$jscl_car"))
+	    (= tail (get tail "$$jscl_cdr")))
 	  (return (method-call (if (=== (typeof f) "function")
 				   f
 				   (get f "fvalue"))
