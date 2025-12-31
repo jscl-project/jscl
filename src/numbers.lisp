@@ -216,7 +216,7 @@
       (/ (log number) (log base))
       (if (numberp number)
           (#j:Math:log number)
-          (error "`~S' is not a number." number))))
+          (error 'type-error :datum number :expected-type 'number))))
 
 ;;; lognot
 (defun lognot (x) (%lognot x))

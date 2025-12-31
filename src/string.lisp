@@ -25,7 +25,8 @@
   (make-array n :element-type 'character :initial-element initial-element))
 
 (defun char (string index)
-  (unless (stringp string) (error "~S is not a string" string))
+  (unless (stringp string)
+    (error 'type-error :datum string :expected-type 'string))
   (storage-vector-ref string index))
 
 (defun string (x)

@@ -259,7 +259,7 @@
 
 (defun symbol-package (symbol)
   (unless (symbolp symbol)
-    (error "`~S' is not a symbol." symbol))
+    (error 'type-error :datum symbol :expected-type 'symbol))
   (oget symbol "package"))
 
 (defun %check-accessible (symbols package)

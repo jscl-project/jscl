@@ -103,15 +103,31 @@
 (%define-condition parse-error (error) ())
 (%define-condition program-error (error) ())
 (%define-condition control-error (error) ())
-(%define-condition cell-error (error) ()
+(%define-condition cell-error (error)
    ((name :initform nil
           :initarg :name
           :reader cell-error-name)))
-(%define-condition undefined-function (cell-error) ())
-(%define-condition unbound-variable (cell-error) ())
+(%define-condition undefined-function (cell-error) ()
+   (:report (lambda (condition stream)
+              (format stream "Undefined function ~S" (cell-error-name condition)))))
+(%define-condition unbound-variable (cell-error) ()
+   (:report (lambda (condition stream)
+              (format stream "Unbound variable ~S" (cell-error-name condition)))))
+(%define-condition arithmetic-error (error)
+   ((operation :initform nil
+               :initarg :operation
+               :reader arithmetic-error-operation)
+    (operands :initform nil
+              :initarg :operands
+              :reader arithmetic-error-operands)))
+(%define-condition division-by-zero (arithmetic-error)
+   ((operation :initform '/))
+   (:report (lambda (condition stream)
+              (format stream "Division by zero: ~S" (arithmetic-error-operands condition)))))
+
 
 ;;; Conditions used in previous bootstrap process
-(%define-condition package-error (error) ()
+(%define-condition package-error (error)
    ((package :initform nil
              :initarg :package
              :reader package-error-package)))
