@@ -112,7 +112,10 @@
 (delete-test-packages)
 (test
  (let ((foo (make-package 'foo)))
-   (and (not (ignore-errors (export 'cl:car foo) t))
+   (and (handler-case
+            (progn (export 'cl:car foo) nil)
+          (package-error () t)
+          (error () nil))
         (eq (find-symbol (string 'car) foo) nil))))
 
 ;;; SHADOWING-IMPORT
@@ -121,7 +124,10 @@
  (let* ((foo (make-package 'foo))
         (bar (make-package 'bar :use '(cl)))
         (symbol (intern (string 'car) 'foo)))
-   (and (not (ignore-errors (import symbol bar) t))
+   (and (handler-case
+            (progn (import symbol bar) nil)
+          (package-error () t)
+          (error () nil))
         (shadowing-import symbol bar)
         (eq (find-symbol (string 'car) bar) symbol)
         (unintern symbol bar)
