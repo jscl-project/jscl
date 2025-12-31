@@ -38,7 +38,7 @@
               (use (package-use-list package)))
           ;; TODO: provide a restart that does UNUSE-PACKAGE
           (when used-by
-            (error "~a is used by ~a" package used-by))
+            (simple-package-error package "~a is used by ~a" package used-by))
           (dolist (p use)
             (unuse-package p package))
           (dolist (n (cons (package-name package) (package-nicknames package)) t)
@@ -64,7 +64,7 @@
     (dolist (n new-names)
       (let ((p (find-package n)))
         (when (and p (not (eq p package)))
-          (error "A package named `~a' already exists." n))))
+          (simple-package-error package "A package named `~a' already exists." n))))
     (dolist (n old-names)
       (delete-property n *package-table*))
     (setf (oget package "packageName") new-name
@@ -80,7 +80,7 @@
          (package (new)))
     (dolist (n names)
       (when (find-package n)
-        (error "A package named `~a' already exists." n)))
+        (simple-package-error name "A package named `~a' already exists." n)))
     (setf (oget package "packageName") name)
     (setf (oget package "symbols") (new))
     (setf (oget package "exports") (new))
@@ -247,8 +247,9 @@
         (when (member symbol (package-shadowing-symbols package))
           (let ((inherited (%find-inherited-symbols name package)))
             (when (cdr inherited)
-              (error "Unintern ~a in ~a would reveal name conflict: ~a"
-                     symbol package inherited))))
+              (simple-package-error package
+                                    "Unintern ~a in ~a would reveal name conflict: ~a"
+                                    symbol package inherited))))
         (delete-property name (%package-external-symbols package))
         (delete-property name (%package-symbols package))
         (setf (oget package "shadows")
@@ -267,7 +268,9 @@
     (multiple-value-bind (symbol-found status)
         (find-symbol (symbol-name symbol) package)
       (unless (and status (eq symbol symbol-found))
-        (error "~a is not accessible in ~a" symbol package)))))
+        (simple-package-error package
+                              "~a is not accessible in ~a"
+                              symbol package)))))
 
 (defun %check-name-conflict (symbol package)
   (multiple-value-bind (symbol-found status)
@@ -275,7 +278,9 @@
     (when (and status
                (not (eq symbol-found symbol))
                (not (member symbol-found (package-shadowing-symbols package))))
-      (error "Name conflict between ~a and ~a" symbol symbol-found))))
+      (simple-package-error package
+                            "Name conflict between ~a and ~a"
+                            symbol symbol-found))))
 
 (defun export (symbols &optional (package *package*))
   (let ((package (find-package-or-fail package))
@@ -306,7 +311,9 @@
           (when (and status (not (eq symb symbol-found)))
             (if shadow-p
                 (unintern symbol-found package)
-                (error "Import ~a causes name conflict with ~a" symb symbol-found)))
+                (simple-package-error package
+                                      "Import ~a causes name conflict with ~a"
+                                      symb symbol-found)))
           (unless (and (member status '(:internal :external))
                        (eq symb symbol-found))
             (setf (oget package-syms (symbol-name symb)) symb)
@@ -390,7 +397,7 @@
         (pushnew symbol (oget name-table (symbol-name symbol)))))
     (map-for-in (lambda (symbols)
                   (when (cdr symbols)
-                    (error "Name conflict between ~a" symbols))
+                    (simple-package-error package "Name conflict between ~a" symbols))
                   (when symbols
                     (%check-name-conflict (car symbols) package)))
                 name-table)))

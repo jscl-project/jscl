@@ -131,6 +131,7 @@
    ((package :initform nil
              :initarg :package
              :reader package-error-package)))
+(%define-condition simple-package-error (simple-condition package-error) ())
 (%define-condition stream-error (error)
    ((stream :initform nil
             :initarg :stream
