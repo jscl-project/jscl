@@ -19,6 +19,11 @@
 "
                       (get-output-stream-string stream)))))
 
+(test (with-input-from-string (in "abc
+def")
+        (equal '("abc" nil) (multiple-value-list (read-line in)))
+        (equal '("def" t) (multiple-value-list (read-line in)))))
+
 (with-input-from-string (in "abc
 def")
   (let ((buf (make-array 3)))

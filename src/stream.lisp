@@ -42,13 +42,29 @@
   (and (streamp obj) (stream-write-fn obj)))
 
 (defun input-stream-p (obj)
-  (and (streamp obj) (peek-char-fn obj)))
+  (and (streamp obj) (stream-peek-char-fn obj)))
 
 (defun stream-element-type (stream)
   (unless (streamp stream)
     (error 'type-error :datum stream :expected-type 'stream))
   ;; Only CHARACTER is implemented
   'character)
+
+;;; Macros
+
+(defmacro with-input-from-string ((var string) &body body)
+  ;; TODO: &key start end index
+  `(let ((,var (make-string-input-stream ,string)))
+     ,@body))
+
+(defmacro with-output-to-string ((var &optional string-form
+                                  &key (element-type ''character))
+                                 &body body)
+  `(let ((,var (if ,string-form
+                   (%make-fill-pointer-output-stream string)
+                   (make-string-output-stream :element-type ,element-type))))
+     ,@body
+     (get-output-stream-string ,var)))
 
 ;;; Input stream operations
 
@@ -155,11 +171,6 @@
                              (peek eof-error-p))
              :kind 'string-input-stream)))))
 
-(defmacro with-input-from-string ((var string) &body body)
-  ;; TODO: &key start end index
-  `(let ((,var (make-string-input-stream ,string)))
-     ,@body))
-
 ;;; Output streams
 
 (defun %make-fill-pointer-output-stream (buffer)
@@ -183,15 +194,6 @@
 (defun get-output-stream-string (stream)
   (prog1 (stream-data stream)
     (setf (stream-data stream) (make-array 0 :element-type 'character :fill-pointer 0))))
-
-(defmacro with-output-to-string ((var &optional string-form
-                                  &key (element-type ''character))
-                                 &body body)
-  `(let ((,var (if ,string-form
-                   (%make-fill-pointer-output-stream string)
-                   (make-string-output-stream :element-type ,element-type))))
-     ,@body
-     (get-output-stream-string ,var)))
 
 (defun make-broadcast-stream (&rest streams)
   (make-stream :write-fn
