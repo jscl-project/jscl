@@ -50,19 +50,17 @@ internals.pv = function(x) {
   return x==undefined? nil: x;
 };
 
-internals.mv = function(){
-  var r = [].slice.call(arguments);
-  r['multiple-value'] = true;
-  return r;
+internals.mv = function(...args){
+  args['multiple-value'] = true;
+  return args;
 };
 
 internals.forcemv = function(x) {
   return typeof x == 'object' && x !== null && 'multiple-value' in x? x: internals.mv(x);
 };
 
-internals.error = function(){
-  var args = Array.prototype.slice.call(arguments);
-  errorSym.fvalue.apply(null, [internals.pv].concat(args));
+internals.error = function(...args){
+  errorSym.fvalue(internals.pv, ...args);
 }
 
 internals.typeError = function (datum, expectedType) {
@@ -82,10 +80,9 @@ internals.typeError = function (datum, expectedType) {
 // #j:Date) will be converted into a Lisp function. We track the
 // original function in the jscl_original property as we can't wrap
 // the primitive constructor in a Lisp function or it will not work.
-internals.newInstance = function(values, ct){
-  var args = Array.prototype.slice.call(arguments);
-  var newCt = ct.bind.apply(ct.jscl_original || ct, args.slice(1));
-  return new newCt();
+internals.newInstance = function(values, ct, ...args){
+  var newCt = ct.bind.bind(ct.jscl_original || ct)(ct);
+  return new newCt(...args);
 };
 
 // Workaround the problem with send NULL for async XHR
@@ -248,11 +245,10 @@ internals.lisp_to_js = function (x) {
     if("jscl_original" in x) {
         return x.jscl_original
     } else {
-        return( function(){
-            var args = Array.prototype.slice.call(arguments);
+        return( function(...args){
             for (var i in args)
                 args[i] = internals.js_to_lisp(args[i]);
-            return internals.lisp_to_js(x.apply(this, [internals.pv].concat(args)));
+          return internals.lisp_to_js(x.bind(this)(internals.pv, ...args));
         });
     }
   }
@@ -268,11 +264,10 @@ internals.js_to_lisp = function (x) {
     return nil;
   else if (typeof x == 'function'){
     // Trampoline calling the JS function
-    var trampoline = function(values){
-      var args = Array.prototype.slice.call(arguments, 1);
+    var trampoline = function(values, ...args){
       for (var i in args)
         args[i] = internals.lisp_to_js(args[i]);
-      return values(internals.js_to_lisp(x.apply(this, args)));
+      return values(internals.js_to_lisp(x.bind(this)(...args)));
     };
     trampoline.jscl_original = x;
     return trampoline;
