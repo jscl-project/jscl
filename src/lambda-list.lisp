@@ -228,7 +228,7 @@
 
 (defun validate-reqvars (list n)
   (unless (listp list)
-    (error "`~S' is not a list." list))
+    (error 'type-error :datum list :expected-type 'list))
   (if (zerop n)
       list
       ;; Note that we don't mind if the list is an improper list.

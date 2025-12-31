@@ -522,7 +522,7 @@
 
 (defun setq-pair (var val)
   (unless (symbolp var)
-    (error "~a is not a symbol" var))
+    (error 'type-error :datum var :expected-type 'symbol))
   (let ((b (lookup-in-lexenv var *environment* 'variable)))
     (cond
       ((and b
@@ -1127,7 +1127,7 @@
                 (collect-fargs v)
                 (collect-prelude `(var (,v ,(convert x))))
                 (collect-prelude `(if (!= (typeof ,v) "number")
-                                      (throw "Not a number!"))))))
+                                      (call-internal "typeError" ,v ,(literal 'number)))))))
         `(selfcall
           (progn ,@prelude)
           ,(funcall function fargs))))))
@@ -1135,7 +1135,7 @@
 
 (defmacro variable-arity (args &body body)
   (unless (symbolp args)
-    (error "`~S' is not a symbol." args))
+    (error 'type-error :datum args :expected-type 'symbol))
   `(variable-arity-call ,args (lambda (,args) `(return  ,,@body))))
 
 (define-raw-builtin + (&rest numbers)
@@ -1532,7 +1532,7 @@
 (define-setf-expander %js-vref (var)
   (let ((new-value (gensym)))
     (unless (stringp var)
-      (error "`~S' is not a string." var))
+      (error 'type-error :datum var :expected-type 'string))
     (values nil
             (list var)
             (list new-value)
@@ -1602,7 +1602,7 @@
 
 (defun !macro-function (symbol &optional (namespace 'function))
   (unless (symbolp symbol)
-    (error "`~S' is not a symbol." symbol))
+    (error 'type-error :datum symbol :expected-type 'symbol))
   (let ((b (lookup-in-lexenv symbol *environment* namespace)))
     (if (and b (eq (binding-type b) 'macro))
         (let ((expander (binding-value b)))

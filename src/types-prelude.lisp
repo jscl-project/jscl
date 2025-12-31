@@ -66,7 +66,8 @@
 (def!struct type-info name expand compound predicate)
 
 (defun %deftype-info (name &optional (create t))
-  (unless (symbolp name) (error "Not a symbol ~a." name))
+  (unless (symbolp name)
+    (error 'type-error :datum name :expected-type 'symbol))
   (let ((exists (gethash name *types*)))
     (cond ((and (not exists) create)
            (setq exists (make-type-info :name name))

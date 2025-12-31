@@ -110,18 +110,18 @@ in which case ARRAY might be partially filled from CONTENTS."
 
 (defun adjustable-array-p (array)
   (unless (arrayp array)
-    (error "~S is not an array." array))
+    (error 'type-error :datum array :expected-type 'array))
   t)
 
 (defun array-element-type (array)
   (unless (arrayp array)
-    (error "~S is not an array." array))
+    (error 'type-error :datum array :expected-type 'array))
   (cond ((eq (oget array "stringp") 1) 'character)
         (t t)))
 
 (defun array-dimensions (array)
   (unless (arrayp array)
-    (error "~S is not an array." array))
+    (error 'type-error :datum array :expected-type 'array))
   (if (vectorp array)
       (list (storage-vector-size array))
       (oget array "dimensions")))
@@ -169,7 +169,7 @@ in which case ARRAY might be partially filled from CONTENTS."
 
 (defun array-rank (array)
   (unless (arrayp array)
-    (error "~S is not an array." array))
+    (error 'type-error :datum array :expected-type 'array))
   (if (vectorp array)
       1
       (length (oget array "dimensions"))))
@@ -196,7 +196,7 @@ in which case ARRAY might be partially filled from CONTENTS."
 
 (defun array-total-size (array)
   (unless (arrayp array)
-    (error "~S is not an array." array))
+    (error 'type-error :datum array :expected-type 'array))
   (storage-vector-size array))
 
 
@@ -205,14 +205,14 @@ in which case ARRAY might be partially filled from CONTENTS."
 
 (defun fill-pointer (array)
   (unless (arrayp array)
-    (error "~S is not an array" array))
+    (error 'type-error :datum array :expected-type 'array))
   (unless (array-has-fill-pointer-p array)
     (error "~S does not have a fill pointer" array))
   (oget array "fillpointer"))
 
 (defun set-fill-pointer (array new-value)
   (unless (arrayp array)
-    (error "~S is not an array" array))
+    (error 'type-error :datum array :expected-type 'array))
   (unless (array-has-fill-pointer-p array)
     (error "~S does not have a fill pointer" array))
   (setf (oget array "fillpointer") new-value))
@@ -221,12 +221,12 @@ in which case ARRAY might be partially filled from CONTENTS."
 
 (defun row-major-aref (array index)
   (unless (arrayp array)
-    (error "~S is not an array." array))
+    (error 'type-error :datum array :expected-type 'array))
   (storage-vector-ref array index))
 
 (defun row-major-aset (array index value)
   (unless (arrayp array)
-    (error "~S is not an array." array))
+    (error 'type-error :datum array :expected-type 'array))
   (storage-vector-set array index value))
 
 (defsetf row-major-aref row-major-aset)

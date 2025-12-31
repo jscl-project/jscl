@@ -28,6 +28,7 @@
 
 var t;
 var nil;
+var errorSym;
 
 var jscl = Object.create(null);
 
@@ -58,6 +59,17 @@ internals.mv = function(){
 internals.forcemv = function(x) {
   return typeof x == 'object' && x !== null && 'multiple-value' in x? x: internals.mv(x);
 };
+
+internals.error = function(){
+  var args = Array.prototype.slice.call(arguments);
+  errorSym.fvalue.apply(null, [internals.pv].concat(args));
+}
+
+internals.typeError = function (datum, expectedType) {
+  internals.error(internals.intern("TYPE-ERROR", "COMMON-LISP"),
+    internals.intern("DATUM", "KEYWORD"), datum,
+    internals.intern("EXPECTED-TYPE", "KEYWORD"), expectedType)
+}
 
 //
 // Workaround the problems with `new` for arbitrary number of
@@ -124,13 +136,13 @@ internals.Cons = function (car, cdr) {
 };
 
 Object.defineProperty(Object.prototype, "$$jscl_car", {
-  get: (function () { throw new Error('CAR called on non-list argument'); }),
-  set: (function () { throw new Error('RPLACA called on non-list argument'); }),
+  get: (function () { internals.typeError(this, internals.intern("CONS", "COMMON-LISP")); }),
+  set: (function () { internals.typeError(this, internals.intern("CONS", "COMMON-LISP")); }),
 });
 
 Object.defineProperty(Object.prototype, "$$jscl_cdr", {
-  get: (function () { throw new Error('CDR called on non-list argument'); }),
-  set: (function () { throw new Error('RPLACD called on non-list argument'); }),
+  get: (function () { internals.typeError(this, internals.intern("CONS", "COMMON-LISP")); }),
+  set: (function () { internals.typeError(this, internals.intern("CONS", "COMMON-LISP")); }),
 });
 
 Object.defineProperty(internals.Cons.prototype, "$$jscl_car", { writable: true });
@@ -156,7 +168,8 @@ internals.QIList = function(){
 // Arithmetic
 
 internals.handled_division = function (x, y) {
-  if (y == 0) throw "Division by zero";
+  if (y == 0) internals.error(internals.intern("DIVISION-BY-ZERO", "COMMON-LISP"),
+    internals.intern("OPERANDS","KEYWORD"), internals.QIList(x, y, nil));
   return x/y;
 };
 
@@ -328,7 +341,8 @@ jscl.CL = packages.CL.exports;
 const UNBOUND = Symbol('UnboundFunction')
 
 internals.makeUnboundFunction = function (symbol) {
-  const fn = ()=>{ throw new Error("Function '" + symbol.name + "' undefined");}
+  const fn = ()=>{ internals.error(internals.intern("UNDEFINED-FUNCTION","COMMON-LISP"),
+    internals.intern("NAME","KEYWORD"), symbol);}
   fn[UNBOUND] = true;
   return fn;
 };
@@ -344,7 +358,8 @@ internals.Symbol = function(name, package_name){
 internals.symbolValue = function (symbol){
   var value = symbol.value;
   if (value === undefined){
-    throw new Error("Variable " + symbol.name + " is unbound.");
+    internals.error(internals.intern("UNBOUND-VARIABLE", "COMMON-LISP"),
+      internals.intern("NAME", "KEYWORD"), symbol);
   } else {
     return value;
   }
@@ -354,7 +369,7 @@ internals.fboundp = function (symbol) {
   if (symbol instanceof internals.Symbol){
     return !symbol.fvalue[UNBOUND]
   } else {
-    throw new Error(`${symbol} is not a symbol`)
+    internals.typeError(symbol, internals.intern("SYMBOL", "COMMON-LISP"));
   }
 }
 
@@ -493,6 +508,7 @@ function runCommonLispScripts() {
 
 nil = internals.intern("NIL", "COMMON-LISP");
 t = internals.intern("T", "COMMON-LISP");
+errorSym = internals.intern("ERROR", "COMMON-LISP");
 Object.defineProperty(nil, "$$jscl_car", { value: nil, writable: false });
 Object.defineProperty(nil, "$$jscl_cdr", { value: nil, writable: false });
 

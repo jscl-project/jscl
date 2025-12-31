@@ -332,7 +332,7 @@
 ;; The NCONC function is based on the SBCL's one.
 (defun nconc (&rest lists)
   (flet ((fail (object)
-           (error "type-error in nconc")))
+           (error 'type-error :datum object :expected-type 'list)))
     (do ((top lists (cdr top)))
         ((null top) nil)
       (let ((top-of-top (car top)))

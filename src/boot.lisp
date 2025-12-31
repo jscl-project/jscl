@@ -183,7 +183,7 @@
 
 (defmacro dolist ((var list &optional result) &body body)
   (let ((g!list (gensym)))
-    (unless (symbolp var) (error "`~S' is not a symbol." var))
+    (check-type var symbol)
     (multiple-value-bind (body decls) (parse-body body :declarations t)
       `(block nil
          (let ((,g!list ,list)
@@ -197,7 +197,7 @@
 
 (defmacro dotimes ((var count &optional result) &body body)
   (let ((g!count (gensym)))
-    (unless (symbolp var) (error "`~S' is not a symbol." var))
+    (check-type var symbol)
     (multiple-value-bind (body decls) (parse-body body :declarations t)
       `(block nil
          (let ((,var 0)

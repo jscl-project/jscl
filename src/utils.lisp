@@ -140,14 +140,19 @@ accumulated, in the order."
 
 (defun find-package-or-fail (package-designator)
   (or (find-package package-designator)
-      (error "The name `~S' does not designate any package." package-designator)))
+      (error 'simple-package-error
+             :format-control "The name `~S' does not designate any package."
+             :format-arguments (list package-designator)
+             :package package-designator)))
 
 (defun find-symbol-for-import (name package)
   (let ((name (string name)))
     (multiple-value-bind (symbol status) (find-symbol name package)
       (unless status
-        (error "Symbol with name ~A not found in ~A"
-               name package))
+        (error 'simple-package-error
+               :format-control "Symbol with name ~A not found in ~A"
+               :format-arguments (list name package)
+               :package package))
       symbol)))
 
 (defun %defpackage (name nicknames)

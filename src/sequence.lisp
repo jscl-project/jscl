@@ -19,7 +19,7 @@
   (or (listp thing) (vectorp thing)))
 
 (defun not-seq-error (thing)
-  (error "`~S' is not of type SEQUENCE" thing))
+  (error 'type-error :datum thing :expected-type 'sequence))
 
 (defun length (seq)
   (cond
@@ -115,8 +115,7 @@
 ;;; TODO: more error checking for out of bound START/END
 (defmacro do-sequence ((elt seq &rest options) &body body)
   (let ((nseq (gensym "SEQ")))
-    (unless (symbolp elt)
-      (error "`~S' must be a symbol." elt))
+    (check-type elt symbol)
     `(let ((,nseq ,seq))
        (cond ((listp ,nseq)
               (do-sequence-list (,elt ,nseq ,@options) ,@body))
@@ -572,7 +571,7 @@ The return value will share structure with SEQ if possible."
 (defun make-iterator (sequence)
   (funcall (cond ((listp sequence) #'make-list-iterator)
 		 ((vectorp sequence) #'make-vector-iterator)
-		 (t (error "Not of type SEQUENCE")))
+		 (t (not-seq-error sequence)))
 	   sequence))
 
 (defun make-list-collector ()

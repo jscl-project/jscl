@@ -84,7 +84,11 @@
     (symbol
      (if (jscl::memq name *prevent-trace-stop-list*)
          (error "Trace - `~S` this function is not traceable." name)))
-    (otherwise (error "Trace - the traceable function name `~S` must be a symbol." name))))
+    (otherwise
+     (error 'simple-type-error
+            :format-control "Trace - the traceable function name `~S` must be a symbol."
+            :format-arguments (list name)
+            :datum name :expected-type 'symbol))))
 
 
 (defun trace-report-call (name args)
