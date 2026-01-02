@@ -104,5 +104,22 @@
          (not (assert (typep 1 'integer)))
          (trap-errors (assert (typep 1 'list))))))
 
+;;; JS level conditions
+
+(test (handler-case
+          (progn (+ 1 nil) nil)
+        (type-error (c)
+          (and (eq nil (type-error-datum c))
+               (eq 'number (type-error-expected-type c))))))
+
+(test (handler-case
+          (progn (test-undefined-function) nil)
+        (undefined-function (c)
+          (eq (cell-error-name c) 'test-undefined-function))))
+
+(test (handler-case
+          (progn test-unbound-variable nil)
+        (unbound-variable (c)
+          (eq (cell-error-name c) 'test-unbound-variable))))
 
 ;;; EOF
