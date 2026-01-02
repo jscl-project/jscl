@@ -80,13 +80,11 @@ Append numbers to symbol names to make them unique."
       (when constructor
         (setq constructor-expansion
               `(defun ,constructor (&key ,@slot-descriptions)
-                 (let ((obj (new)))
-                   (set-object-type-code obj :structure)
-                   (oset* ',name obj "structName")
-                   ,@(mapcar (lambda (p s)
-                               `(oset* ,(car s) obj ,p))
-                             property-names slot-descriptions)
-                   obj))))
+                 (new "dt_Name" :structure
+                      "structName" ',name
+                      ,@(mapcan (lambda (p s)
+                                  `(,p ,(car s)))
+                                property-names slot-descriptions)))))
 
       (when predicate
         (setq predicate-expansion

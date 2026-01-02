@@ -93,6 +93,10 @@ accumulated, in the order."
       (aset v i x)
       (incf i))))
 
+(defun mappend (fn &rest lists)
+  (apply #'mapcan (lambda (&rest args) (copy-list (apply fn args)))
+         lists))
+
 (defmacro awhen (condition &body body)
   `(let ((it ,condition))
      (when it ,@body)))

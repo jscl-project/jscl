@@ -558,4 +558,14 @@
     (format nil "~S" (make-print-struct-test :a "hello" :b "world" :c 3))
     "#S(JSCL::PRINT-STRUCT-TEST :A \"hello\" :B \"world\" :C 3)"))
 
+;;; Don't overwrite DSDs for included structures
+
+(defstruct ow1-foo x)
+(defstruct (ow1-bar (:include ow1-foo (x 1))))
+(defstruct (ow1-baz (:include ow1-foo)))
+
+(test (and (eql nil (ow1-foo-x (make-ow1-foo)))
+           (eql 1 (ow1-foo-x (make-ow1-bar)))
+           (eql nil (ow1-foo-x (make-ow1-baz)))))
+
 ;;; EOF

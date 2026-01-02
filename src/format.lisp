@@ -31,15 +31,15 @@
 (/debug "loading format.lisp!")
 
 
-(defstruct (format-directive
+(def!struct (format-directive
 	    #+nil (:print-function %print-format-directive))
-  (string (error "Required argument") :type string)
-  (start (error "Required argument") :type (and unsigned-byte fixnum))
-  (end (error "Required argument") :type (and unsigned-byte fixnum))
-  (character (error "Required argument") :type character)
-  (colonp nil :type (member t nil))
-  (atsignp nil :type (member t nil))
-  (params nil :type list))
+  (string (error "Required argument") #+nil :type #+nil string)
+  (start (error "Required argument") #+nil :type #+nil (and unsigned-byte fixnum))
+  (end (error "Required argument") #+nil :type #+nil (and unsigned-byte fixnum))
+  (character (error "Required argument") #+nil :type #+nil character)
+  (colonp nil #+nil :type #+nil (member t nil))
+  (atsignp nil #+nil :type #+nil (member t nil))
+  (params nil #+nil :type #+nil list))
 
 (defun %print-format-directive (struct stream depth)
   (declare (ignore depth))
@@ -368,8 +368,8 @@
     (reverse results)))
 
 (defun expand-directive (directive more-directives)
-  (etypecase directive
-    (format-directive
+  (cond
+    ((format-directive-p directive)
      (let ((expander
 	     (aref *format-directive-expanders*
 		   (char-code (format-directive-character directive))))
@@ -379,9 +379,10 @@
 	   (funcall expander directive more-directives)
 	   (error 'format-error
 		  :complaint "Unknown directive."))))
-    (string
+    ((stringp directive)
      (values `(write-string ,directive stream)
-	     more-directives))))
+	     more-directives))
+    (t (error "Format directive with wrong type ~S" directive))))
 
 (defun expand-next-arg (&optional offset)
   (if (or *orig-args-available* (not *only-simple-args*))
