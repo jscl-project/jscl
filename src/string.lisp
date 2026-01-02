@@ -32,7 +32,9 @@
 (defun string (x)
   (cond ((stringp x) x)
         ((symbolp x) (symbol-name x))
-        (t (make-string 1 :initial-element x))))
+        ((characterp x) (make-string 1 :initial-element x))
+        (t (error 'type-error :datum x
+                              :expected-type '(or string symbol character)))))
 
 (defun string= (s1 s2 &key (start1 0) end1 (start2 0) end2)
   (let* ((s1 (string s1))

@@ -99,7 +99,7 @@
  (mv-eql
   (let ((universum (list "string"
                          (make-string 10) (concat (make-string 10) "aaaa" 1 "")
-                         (string 1) (string 'symbol)
+                         (string #\1) (string 'symbol)
                          (symbol-name 'jjjj)))
         (type-spec '(string
                      string string
