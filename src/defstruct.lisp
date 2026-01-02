@@ -16,7 +16,7 @@
 (/debug "loading defstruct.lisp!")
 
 (defun structure-p (obj)
-  #+jscl (eql (object-type-code obj) :structure)
+  #+jscl (and (objectp obj) (eql (object-type-code obj) :structure))
   #-jscl (typep obj 'structure-object))
 
 (defun structure-name (obj)
@@ -91,7 +91,7 @@ Append numbers to symbol names to make them unique."
       (when predicate
         (setq predicate-expansion
               `(defun ,predicate (x)
-                 (eq (oget* x "structName") ',name))))
+                 (and (objectp x) (eq (oget* x "structName") ',name)))))
 
       (when copier
         (setq copier-expansion

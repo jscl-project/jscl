@@ -462,7 +462,7 @@
 
 ;;; types predicate's
 (defun mop-object-p (obj)
-  (eql (object-type-code obj) :mop-object))
+  (and (objectp obj) (eql (object-type-code obj) :mop-object)))
 
 (defun clos-object-p (object) (eql (object-type-code object) :clos_object))
 
