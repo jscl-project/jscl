@@ -125,7 +125,7 @@
 ;;; => class-cpl-list::= (name ... name)
 ;;;   name::= symbol
 (defun %class-cpl(class-name)
-  (%lmapcar #'class-name (class-precedence-list (find-class class-name nil))))
+  (mapcar #'class-name (class-precedence-list (find-class class-name nil))))
 
 ;;; c1-cpl::= symbol | cpl
 ;;; c2-name::= symbol | (find-class c2)

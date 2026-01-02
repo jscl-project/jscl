@@ -1439,8 +1439,16 @@
 ;;; Javascript FFI
 
 
-(define-builtin new ()
-  '(object))
+(define-raw-builtin new (&rest plist)
+  `(object
+    ,@(with-collect
+        (do ((tail plist (cddr tail)))
+            ((null tail))
+          (let ((key (car tail)))
+            (unless (stringp key)
+              (error 'type-error :datum key :expected-type 'string))
+            (collect key)
+            (collect (convert (cadr tail))))))))
 
 (define-builtin clone (x)
   `(method-call |Object| "assign" (object) ,x))
