@@ -1238,21 +1238,21 @@
   (convert-to-bool `(instanceof ,x (internal |Cons|))))
 
 (define-builtin car (x)
-  `(property ,x "$$jscl_car"))
+  `(get ,x "$$jscl_car"))
 
 (define-builtin cdr (x)
-  `(property ,x "$$jscl_cdr"))
+  `(get ,x "$$jscl_cdr"))
 
 (define-builtin rplaca (x new)
   `(selfcall
      (var (tmp ,x))
-     (= (property tmp "$$jscl_car") ,new)
+     (= (get tmp "$$jscl_car") ,new)
      (return tmp)))
 
 (define-builtin rplacd (x new)
   `(selfcall
      (var (tmp ,x))
-     (= (property tmp "$$jscl_cdr") ,new)
+     (= (get tmp "$$jscl_cdr") ,new)
      (return tmp)))
 
 (define-builtin symbolp (x)
@@ -1398,16 +1398,19 @@
 
 (define-builtin storage-vector-ref (vector n)
   `(selfcall
-    (var (x (property ,vector ,n)))
-    (if (=== x undefined) (throw "Out of range."))
-    (return x)))
+    (var (x ,vector) (i ,n) (j (get x "length")))
+    (if (or (< i 0) (>= i j))
+        (call-internal "error" ,(literal "ref vector out of range")))
+    (return (property x i))))
+
+(define-builtin storage-vector-ref! (vector n)
+  `(property ,vector ,n))
 
 (define-builtin storage-vector-set (vector n value)
   `(selfcall
-    (var (x ,vector))
-    (var (i ,n))
+    (var (x ,vector) (i ,n) (j (get x "length")))
     (if (or (< i 0) (>= i (get x "length")))
-        (throw "Out of range."))
+        (call-internal "error" ,(literal "set vector out of range")))
     (return (= (property x i) ,value))))
 
 (define-builtin storage-vector-set! (vector n value)

@@ -175,7 +175,10 @@ in which case ARRAY might be partially filled from CONTENTS."
       (length (oget array "dimensions"))))
 
 (defun array-row-major-index (array &rest subscripts)
-  (cond ((vectorp array) (car subscripts))
+  (cond ((vectorp array)
+         (when (or (null subscripts) (cdr subscripts))
+           (error "Wrong number of subscripts ~a for ~a" subscripts array))
+         (car subscripts))
         ((arrayp array)
          (let ((result 0)
                (subs subscripts)
