@@ -86,8 +86,6 @@
 (%define-condition error (serious-condition) ())
 (%define-condition simple-error (simple-condition error) ())
 
-;;; FIXME: actually raise following conditions from JavaScript, instead of
-;;; generic SIMPLE-ERROR
 (%define-condition type-error (error)
   ((datum :initform nil
           :initarg :datum
@@ -144,6 +142,7 @@
 (%define-condition simple-reader-package-error (simple-reader-error package-error) ())
 (%define-condition reader-eof-error (reader-error end-of-file) ())
 (%define-condition simple-parse-error (simple-condition parse-error) ())
+(%define-condition seq-out-of-bound (type-error) ())
 
 (defun %%make-condition (type &rest slot-initializations)
     (apply #'make-instance type slot-initializations))

@@ -36,7 +36,8 @@
   (let* ((length (length vector))
          (new-vector (make-array length :element-type (array-element-type vector))))
     (dotimes (index length new-vector)
-      (setf (aref new-vector index) (aref vector (- length (1+ index)))))))
+      (storage-vector-set! new-vector index
+                           (storage-vector-ref! vector (- length (1+ index)))))))
 
 (defun reverse (sequence)
   "Return a new sequence containing the same elements but in reverse order."
@@ -60,6 +61,17 @@
        (do ((i 0 (1+ i)))
            ((< i (/ size 2)) sequence)
          (set (elt sequence i) (elt sequence (- size i 1))))))))
+
+(defmacro check-ensure-bound (seq start end)
+  "Check START END bound for SEQ, set END to length of SEQ if it's nil.
+SEQ, START, END should all be plain variables."
+  `(let ((l (length ,seq)))
+     (unless (and (integerp ,start) (<= 0 ,start l))
+       (error 'seq-out-of-bound :datum ,start :expected-type `(integer 0 l)))
+     (if ,end
+         (unless (and (integerp ,end) (<= ,start ,end l))
+           (error 'seq-out-of-bound :datum ,end :expected-type `(integer ,start l)))
+         (setq ,end l))))
 
 (defmacro do-sequence-list ((elt seq &key from-end (start 0) end
                                        (index (gensym "I")))
@@ -105,11 +117,11 @@
        (if ,from-end
            (do ((,index (1- ,nend) (1- ,index)))
                ((< ,index ,nstart))
-             (let ((,elt (aref ,nseq ,index)))
+             (let ((,elt (storage-vector-ref! ,nseq ,index)))
                ,@body))
            (do ((,index ,nstart (1+ ,index)))
                ((<= ,nend ,index))
-             (let ((,elt (aref ,nseq ,index)))
+             (let ((,elt (storage-vector-ref! ,nseq ,index)))
                ,@body))))))
 
 ;;; TODO: more error checking for out of bound START/END
@@ -129,25 +141,29 @@
 
 BODY has access to SEQUENCE, FROM-END, START, END arguments, and a
 local macro TEST. (TEST x) expand to the appropriate test for each
-variant.
+variant. START and END are already bound checked, and END is set to
+length of SEQUENCE if not provided by caller.
 
 MORE-REQS are prepended as required arguments and MORE-KEYS are
 appended as keyword arguments, to all variants' lambda list."
   `(progn
      (defun ,op (,@more-reqs item sequence &key from-end key (start 0) end
                                  (test #'eql testp) (test-not #'eql test-not-p)
-                                 ,@more-keys)
+                                             ,@more-keys)
+       (check-ensure-bound sequence start end)
        (let ((test-fn (make-test-p :key key :test test :testp testp
                                    :test-not test-not :test-not-p test-not-p)))
          (macrolet ((test (x) `(funcall test-fn item ,x)))
            ,@body)))
      (defun ,if-op (,@more-reqs predicate sequence
                     &key from-end (start 0) end key ,@more-keys)
+       (check-ensure-bound sequence start end)
        (macrolet ((test (x)
                     `(funcall predicate (if key (funcall key ,x) ,x))))
          ,@body))
      (defun ,if-not-op (,@more-reqs predicate sequence
                         &key from-end (start 0) end key ,@more-keys)
+       (check-ensure-bound sequence start end)
        (macrolet ((test (x)
                     `(not (funcall predicate (if key (funcall key ,x) ,x)))))
          ,@body))))
@@ -217,7 +233,7 @@ appended as keyword arguments, to all variants' lambda list."
            (setq vector (make-array 0 :fill-pointer t
                                       :element-type (array-element-type ,sequence)))
            (dotimes (i index)
-             (collect (aref ,sequence i)))
+             (collect (storage-vector-ref! ,sequence i)))
            (incf n-changed)
            ,@body
            ;; Phase 2 - if we have to copy, filter the rest of
@@ -287,7 +303,8 @@ The return value will share structure with SEQ if possible."
 (define-seq-variants delete delete-if delete-if-not (:more-keys (count))
   (when from-end
     (warn "FROM-END not implemented, ignoring"))
-  (cond ((and count (<= count 0)) sequence)
+  (unless count (setq count end))
+  (cond ((<= count 0) sequence)
         ((listp sequence)
          (let* ((n-removed 0)
                 (handle (cons nil sequence))
@@ -295,8 +312,8 @@ The return value will share structure with SEQ if possible."
            (do ((scan (cdr prev) (cdr scan))
                 (index start (1+ index)))
                ((or (null scan)
-                    (and end (<= end index))
-                    (and count (<= count n-removed))))
+                    (<= end index)
+                    (<= count n-removed)))
              (cond ((test (car scan))
                     (rplacd prev (cdr scan))
                     (incf n-removed))
@@ -311,18 +328,18 @@ The return value will share structure with SEQ if possible."
            (do-sequence-vector (elt sequence :index index :start start :end end)
              ;; Early stop because of COUNT. Tell phase 2 to
              ;; start from INDEX.
-             (when (and count (<= count n-removed))
+             (when (<= count n-removed)
                (setq end index)
                (return))
              (cond ((test elt)
                     (incf n-removed))
                    (t
-                    (setf (aref sequence ic) elt)
+                    (storage-vector-set! sequence ic elt)
                     (incf ic))))
            ;; Phase 2 - copy the rest if needed
            (when (plusp n-removed)
              (do-sequence-vector (elt sequence :start end :end length)
-               (setf (aref sequence ic) elt)
+               (storage-vector-set! sequence ic elt)
                (incf ic))
              (shrink-vector sequence ic))
            sequence))
@@ -332,14 +349,15 @@ The return value will share structure with SEQ if possible."
   (:more-reqs (newitem) :more-keys (count))
   (when from-end
     (warn "FROM-END not implemented, ignoring"))
-  (cond ((and count (<= count 0)) sequence)
+  (unless count (setq count end))
+  (cond ((<= count 0) sequence)
         ((listp sequence)
          (let ((n-changed 0))
            (do ((scan (nthcdr start sequence) (cdr scan))
                 (index start (1+ index)))
                ((or (null scan)
-                    (and end (<= end index))
-                    (and count (<= count n-changed)))
+                    (<= end index)
+                    (<= count n-changed))
                 sequence)
              (when (test (car scan))
                (rplaca scan newitem)
@@ -348,9 +366,9 @@ The return value will share structure with SEQ if possible."
          (let ((n-changed 0))
            (do-sequence-vector (elt sequence :index index :start start :end end)
              (when (test elt)
-               (setf (aref sequence index) newitem)
+               (storage-vector-set! sequence index newitem)
                (incf n-changed))
-             (when (and count (<= count n-changed))
+             (when (<= count n-changed)
                (return)))
            sequence))
         (t (not-seq-error sequence))))
@@ -373,6 +391,7 @@ The return value will share structure with SEQ if possible."
   (def notevery unless t nil))
 
 (defun subseq (seq a &optional b)
+  (check-ensure-bound seq a b)
   (cond
     ((listp seq)
      (if b
@@ -392,16 +411,16 @@ The return value will share structure with SEQ if possible."
               drop-a))))
        (copy-list (nthcdr a seq))))
     ((vectorp seq)
-     (let* ((b (or b (length seq)))
-            (size (- b a))
+     (let* ((size (- b a))
             (new (make-array size :element-type (array-element-type seq))))
        (do ((i 0 (1+ i))
             (j a (1+ j)))
            ((= j b) new)
-         (aset new i (aref seq j)))))
+         (storage-vector-set! new i (storage-vector-ref! seq j)))))
     (t (not-seq-error seq))))
 
 (defun set-subseq (new-val seq a &optional b)
+  (check-ensure-bound seq a b)
   (cond
     ((listp seq)
      (let ((tail (nthcdr a seq)))
@@ -413,13 +432,11 @@ The return value will share structure with SEQ if possible."
            (return)))
        new-val))
     ((vectorp seq)
-     (let ((b (or b (length seq))))
-       (do-sequence (elt new-val)
-         (setf (aref seq a) elt)
-         (incf a)
-         (when (<= b a)
-           (return)))
-       new-val))
+     (do-sequence (elt new-val)
+       (storage-vector-set! seq a elt)
+       (incf a)
+       (when (<= b a)
+         (return))))
     (t (not-seq-error seq))))
 
 (define-setf-expander subseq (sequence a &optional b)
@@ -439,29 +456,28 @@ The return value will share structure with SEQ if possible."
 (defun elt (sequence index)
   (when (< index 0)
     (error "The index ~D is below zero." index))
-  (etypecase sequence
-    (list
-     (let ((tail (nthcdr index sequence)))
-       (if tail (car tail)
-           (error "The index ~D is too large for ~A of length ~D."
-                  index 'list (length sequence)))))
-    (array
-     (aref sequence index))))
+  (cond ((listp sequence)
+         (let ((tail (nthcdr index sequence)))
+           (if tail (car tail)
+               (error "The index ~D is too large for ~A of length ~D."
+                      index 'list (length sequence)))))
+        ((vectorp sequence)
+         (storage-vector-ref sequence index))))
 
 (defun set-elt (sequence index new-value)
   (when (< index 0)
     (error "The index ~D is below zero." index))
-  (etypecase sequence
-    (list
-     (let ((tail (nthcdr index sequence)))
-       (if tail
-           (progn
-             (rplaca tail new-value)
-             new-value)
-           (error "The index ~D is too large for ~A of length ~D."
-                  index 'list (length sequence)))))
-    (array
-     (aset sequence index new-value))))
+  (cond ((listp sequence)
+         (let ((tail (nthcdr index sequence)))
+           (if tail
+               (progn
+                 (rplaca tail new-value)
+                 new-value)
+               (error "The index ~D is too large for ~A of length ~D."
+                      index 'list (length sequence)))))
+        ((vectorp sequence)
+         (storage-vector-set sequence index new-value))
+        (t (not-seq-error sequence))))
 
 (define-setf-expander elt (sequence index)
   (let ((g!sequence (gensym))
@@ -564,9 +580,8 @@ The return value will share structure with SEQ if possible."
     (lambda ()
       (if (= i len)
 	  *iterator-done*
-	  (let ((item (aref the-vector i)))
-	    (incf i)
-	    item)))))
+          (prog1 (storage-vector-ref! the-vector i)
+            (incf i))))))
 
 (defun make-iterator (sequence)
   (funcall (cond ((listp sequence) #'make-list-iterator)
@@ -642,7 +657,7 @@ The return value will share structure with SEQ if possible."
              (do ((scan scan-start (cdr scan))
                   (index start (1+ index)))
                  ((or (null scan)
-                      (and end (<= end index))))
+                      (<= end index)))
                (do ((scan-inner scan-start (cdr scan-inner))
                     (index start (1+ index)))
                    ((eq scan-inner scan)
@@ -660,11 +675,11 @@ The return value will share structure with SEQ if possible."
                  ((<= end i))
                (do ((j start (1+ j)))
                    ((<= i j)
-                    (setf (aref seq ic) (aref seq i))
+                    (storage-vector-set! seq ic (storage-vector-ref! seq i))
                     (incf ic))
                  (when (funcall test-fn
-                                (funcall key (aref seq i))
-                                (funcall key (aref seq j)))
+                                (funcall key (storage-vector-ref! seq i))
+                                (funcall key (storage-vector-ref! seq j)))
                    (return))))
              (shrink-vector seq ic)))
           (t (not-seq-error seq))))
@@ -672,21 +687,23 @@ The return value will share structure with SEQ if possible."
 
 (defun delete-duplicates (seq &key from-end (start 0) end
                                 (test #'eql testp) (test-not #'eql test-not-p) key)
+  (check-ensure-bound seq start end)
   (unless from-end
     (let ((length (length seq)))
       (psetq seq (nreverse seq)
-             start (if end (- length end) 0)
+             start (- length end)
              end (- length start))))
   (setq seq (%delete-duplicates-from-end seq start end key test testp test-not test-not-p))
   (if from-end seq (nreverse seq)))
 
 (defun remove-duplicates (seq &key from-end (start 0) end
                                 (test #'eql testp) (test-not #'eql test-not-p) key)
+  (check-ensure-bound seq start end)
   (if from-end
       (setq seq (copy-seq seq))
       (let ((length (length seq)))
         (psetq seq (reverse seq)
-               start (if end (- length end) 0)
+               start (- length end)
                end (- length start))))
   (setq seq (%delete-duplicates-from-end seq start end key test testp test-not test-not-p))
   (if from-end seq (nreverse seq)))
@@ -711,7 +728,7 @@ The return value will share structure with SEQ if possible."
     (cond ((vectorp seq-1)
            (let ((delta (- start1 start2)))
              (do-sequence (elt seq-2 :index index :start start2 :end end2 :from-end back)
-               (setf (aref seq-1 (+ delta index)) elt))))
+               (storage-vector-set! seq-1 (+ delta index) elt))))
           ((listp seq-1)
            (let ((tail (nthcdr start1 seq-1)))
              (if back
