@@ -116,8 +116,7 @@
   slots                                 ; Direct slots
   include
   inherit-dsds ; List of inherited DSDs, from deepest ancestor to this DSD itself
-  prototype
-  map-names)
+  prototype)
 
 ;;; dd-slot slot descriptor
 (def!struct dsd-slot name initform (type t) read-only)
@@ -154,7 +153,7 @@
 
 (defun das!include-possible-p (self parent)
   (let ((s1 (mapcar 'dsd-slot-name (dsd-slots self)))
-        (s2 (mapcar 'dsd-slot-name (mappend #'dsd-slots (dsd-inherit-dsds parent)))))
+        (s2 (das!effective-slot-names parent)))
     (null (intersection s1 s2))))
 
 (deftype exists-structure-name ()	
@@ -302,8 +301,7 @@
                                     (get-structure-dsd parent-name)
                                     (error "Structure ~s not exists." parent-name)))
                         (include-slots (cdr (dsd-include dd)))
-                        (include-name-table (dsd-map-names parent))
-                        (include (make-dsd-include :name parent-name)))
+                        (parent-slot-names (das!effective-slot-names parent)))
                    (unless (eql (dsd-type dd) (dsd-type parent))
                      (error "Incompatible structure type (~a ~a : ~a ~a)"
                             (dsd-name dd) (dsd-type dd)
@@ -311,20 +309,19 @@
                    (unless (or (dsd-named-p parent) (null (dsd-type parent)))
                      ;; included is unnamed
                      (error "Unnamed structure ~a not included." parent-name))
-                   (setf (dsd-include-assigned include)
-                         ;; checking that the slot name is valid for the structure
-                         (mapcar (lambda (it)
-                                   (let ((slot-name
-                                           (typecase it
-                                             (list (car it))
-                                             (symbol it)
-                                             (t (raise-bad-include-slot it)))))
-                                     (unless (gethash slot-name include-name-table)
-                                      (raise-bad-include-slot it)))
-                                   (das!parse-struct-slot it))
-                                 include-slots))
-                   (setf (dsd-include dd) include)
-                   (setf (dsd-include-inherited include) (copy-list (dsd-inherit-dsds parent)))))
+                   (dolist (it include-slots)
+                     ;; checking that the slot name is valid for the structure
+                     (let ((slot-name (typecase it
+                                        (list (car it))
+                                        (symbol it)
+                                        (t (raise-bad-include-slot it)))))
+                       (unless (memq slot-name parent-slot-names)
+                         (raise-bad-include-slot it))))
+                   (setf (dsd-include dd)
+                         (make-dsd-include
+                          :name parent-name
+                          :inherited (copy-list (dsd-inherit-dsds parent))
+                          :assigned (mapcar #'das!parse-struct-slot include-slots)))))
                 (t (error "DEFSTRUCT :include option provide only for named or clos structure."))))
       ;; predicate, copier, conc-name for named lisp structure
       (unless (option-present-p :conc-name)
@@ -469,7 +466,7 @@
       (%symbolize conc-name (dsd-slot-name slot))
       (dsd-slot-name slot)))
 
-(defun das!make-struct-accessors-lv (storage-type hash slots conc-name)
+(defun das!make-struct-accessors-lv (storage-type prototype slots conc-name)
   (let ((fn-read 'das!%make-read-accessor-vector)
         (fn-write 'das!%make-write-accessor-vector))
     (cond ((eql storage-type 'list)
@@ -479,9 +476,10 @@
       (dolist (it slots)
         (let ((accessor-name (%slot-accessor-name it conc-name))
               (chk-t (dsd-slot-type it))
-              (index (gethash (dsd-slot-name it) hash)))
+              (index (position (dsd-slot-name it) (dsd-prototype-storage prototype))))
           (unless index
-            (error "Hash malformed : slot-name ~a accessor ~a" (dsd-slot-name it) accessor-name))
+            (error "Malformed prototype: slot-name ~a accessor ~a"
+                   (dsd-slot-name it) accessor-name))
           (collect (funcall fn-read accessor-name index))
           (unless (dsd-slot-read-only it)
             (collect (funcall fn-write accessor-name index chk-t))))))))
@@ -560,6 +558,9 @@
             (setf (dsd-slot-initform slot) sval)))))
     slots))
 
+(defun das!effective-slot-names (dd)
+  (mapcar #'dsd-slot-name (mappend #'dsd-slots (dsd-inherit-dsds dd))))
+
 ;;; entry point for lisp base object's
 (defun das!make-lisp-base-structure (dd)
   (let ((slots (das!effective-slots dd)))
@@ -567,7 +568,7 @@
      (mapcar (lambda (it)
                (das!make-constructor-lv-for  (dsd-prototype dd) (dsd-type dd) it slots))
              (dsd-constructors dd))
-     (das!make-struct-accessors-lv  (dsd-type dd) (dsd-map-names dd) slots (dsd-conc-name dd))
+     (das!make-struct-accessors-lv  (dsd-type dd) (dsd-prototype dd) slots (dsd-conc-name dd))
      (list (das!make-struct-predicate  (dsd-prototype dd) (dsd-name dd) (dsd-type dd)
                                        (dsd-named-p dd) (dsd-predicate dd)))
      (list (das!make-struct-copier (dsd-name dd) (dsd-type dd) (dsd-named-p dd) (dsd-copier dd)))
@@ -730,13 +731,12 @@
              ;; the structure included other structure
              (setf (dsd-inherit-dsds dd) (append (dsd-include-inherited include) (list dd))))
             (t (setf (dsd-inherit-dsds dd) (list dd)))))
-    ;; Compute prototype
-    (setf (dsd-prototype dd) (das%compute-storage-prototype (dsd-inherit-dsds dd))
-          (dsd-map-names dd) (das%compute-storage-hash (dsd-prototype dd)))
     (let ((lisp-type (memq (dsd-type dd) '(list vector))))
+      ;; Compute prototype
       ;; prototype is unused for object based structure
-      (when (null lisp-type)
-        (setf (dsd-prototype dd) (list nil)))
+      (when lisp-type
+        (setf (dsd-prototype dd)
+              (das%compute-storage-prototype (dsd-inherit-dsds dd))))
       (das!finalize-structure dd)
       (if lisp-type
           (das!make-lisp-base-structure dd)
