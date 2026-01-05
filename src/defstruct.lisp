@@ -22,7 +22,9 @@
   #-jscl (typep obj 'structure-object))
 
 (defun structure-name (obj)
-  #+jscl (oget* obj "structName")
+  #+jscl (if (in "structDescriptor" obj)
+             (dsd-name (oget* obj "structDescriptor"))
+             (oget* obj "structName"))
   #-jscl (class-name (class-of obj)))
 
 (defun def!struct-property-names (slots)
