@@ -343,7 +343,7 @@
     ;; mop object
     (mop-object (print-object form stream))
     ;; structure object
-    (structure
+    (structure-object
      (let* ((name (structure-name form))
             (dsd (get-structure-dsd name)))
        (if dsd

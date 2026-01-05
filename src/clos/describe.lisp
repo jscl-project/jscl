@@ -244,7 +244,7 @@
 
 
 ;;; structure
-(defmethod describe ((obj structure) &optional (stream *standard-output*))
+(defmethod describe ((obj structure-object) &optional (stream *standard-output*))
   (with-pp-buffer (buf)
     (pp/presentation obj 'structure buf)
     (let* ((slots (cdr obj))
