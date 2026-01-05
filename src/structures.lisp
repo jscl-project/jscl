@@ -114,20 +114,14 @@
   constructors
   (childs '())
   slots                                 ; Direct slots
-  include
+  parent                                ; include
+  assigned                              ; assigned slots from include
   inherit-dsds ; List of inherited DSDs, from deepest ancestor to this DSD itself
   prototype)
 
 ;;; dd-slot slot descriptor
 (def!struct dsd-slot name initform (type t) read-only)
-  
-;;; structure-include
-(def!struct dsd-include name assigned inherited)
-;;; name::= name included structure
-;;; inherited:: DSD-INHERIT-DSDS of the included DSD
-;;; assigned::= the names of the slots that were specified in the option :include
-;;;             filled in when parsing (:include name slots*)
-  
+
 ;;; structure-prototype
 (def!struct dsd-prototype n map storage)
 
@@ -145,11 +139,8 @@
   (let ((dd (get-structure-dsd name)))
     ;; structure not exists, so may be rewrite
     (or (null dd)
-        (and
-         ;; only list/vector base
-         (memq (dsd-type dd) '(list vector))
-         ;; childs structures - not exists
-         (null (dsd-childs dd))))))
+        ;; childs structures - not exists
+        (null (dsd-childs dd)))))
 
 (defun das!include-possible-p (self parent)
   (let ((s1 (mapcar 'dsd-slot-name (dsd-slots self)))
@@ -232,7 +223,8 @@
        (setf (dsd-initial-offset dd) arg)  )
       (:include
        ;; (:include name) | (:include name slots*)
-       (setf (dsd-include dd) args)  ) ;; end :include
+       (setf (dsd-parent dd) (car args)
+             (dsd-assigned dd) (cdr args))) ;; end :include
       (:constructor
           (unless (proper-list-length-p args 0 2)
             (error "Syntax error a DEFSTRUCT option ~s." option))
@@ -295,12 +287,12 @@
                (logbitp (position bit-name opnames) seen))))
       (if (option-present-p :include)
           (cond ((or (dsd-named-p dd) (null (dsd-type dd)))
-                 ;; present structure is named or clos based
-                 (let* ((parent-name (car (dsd-include dd)))
+                 ;; present structure is named or object based
+                 (let* ((parent-name (dsd-parent dd))
                         (parent (if (exists-structure-p parent-name)
                                     (get-structure-dsd parent-name)
                                     (error "Structure ~s not exists." parent-name)))
-                        (include-slots (cdr (dsd-include dd)))
+                        (include-slots (dsd-assigned dd))
                         (parent-slot-names (das!effective-slot-names parent)))
                    (unless (eql (dsd-type dd) (dsd-type parent))
                      (error "Incompatible structure type (~a ~a : ~a ~a)"
@@ -317,12 +309,9 @@
                                         (t (raise-bad-include-slot it)))))
                        (unless (memq slot-name parent-slot-names)
                          (raise-bad-include-slot it))))
-                   (setf (dsd-include dd)
-                         (make-dsd-include
-                          :name parent-name
-                          :inherited (copy-list (dsd-inherit-dsds parent))
-                          :assigned (mapcar #'das!parse-struct-slot include-slots)))))
-                (t (error "DEFSTRUCT :include option provide only for named or clos structure."))))
+                   (setf (dsd-parent dd) parent
+                         (dsd-assigned dd) (mapcar #'das!parse-struct-slot include-slots))))
+                (t (error "DEFSTRUCT :include option provide only for named or standard structure."))))
       ;; predicate, copier, conc-name for named lisp structure
       (unless (option-present-p :conc-name)
         (setf (dsd-conc-name dd) (%symbolize (dsd-name dd) "-")))
@@ -335,7 +324,7 @@
         (when (dsd-named-p dd)
           (unless (option-present-p :predicate)
             (setf (dsd-predicate dd) (%symbolize (dsd-name dd) "-P")))))
-      ;; initial-offset, predicate for clos structure
+      ;; initial-offset, predicate for object structure
       (when (null (dsd-type dd))
         (when (option-present-p :initial-offset)
           (warn "DEFSTRUCT option :INITIAL-OFFSET provided only for list/vector based structure.~%"))
@@ -364,34 +353,20 @@
           (dsd-constructor-assigns constructor)
           (mapcar #'dsd-slot-name slots))))
 
-
-#+jscl
-(defclass structure-class (standard-class) nil)
-
-(defun das!make-structure-class (name slots include)
-  (let ((class-slots (das!canonicalize-slots slots))
-        (cpl (if include (list (dsd-include-name include)) nil)))
-    `(defclass ,name ,cpl  ,class-slots (:metaclass structure-class))))
-
 ;;; accessors for each slots structure
-(defun das!%make-read-accessor-clos (name slot-name)
-  `(defun ,name (obj)
-     (slot-value obj ',slot-name)))
-
-(defun das!%make-write-accessor-clos (name slot-name chk-t)
-  `(defun (setf ,name) (value obj)
-     ,@(when chk-t (list `(check-type value ,chk-t)))
-     (setf (slot-value obj ',slot-name) value)))
-
-(defun das!make-struct-accessors-clos (slots conc-name)
+(defun das!make-struct-accessors-object (slots property-names conc-name)
   (with-collect
-    (dolist (it slots)
-      (let ((accessor-name (%slot-accessor-name it conc-name))
-            (chk-t (dsd-slot-type it))
-            (slot-name (dsd-slot-name it)))
-        (collect (das!%make-read-accessor-clos accessor-name slot-name))
-        (unless (dsd-slot-read-only it)
-          (collect (das!%make-write-accessor-clos accessor-name slot-name chk-t)))))))
+    (mapc
+     (lambda (it property-name)
+       (let ((accessor-name (%slot-accessor-name it conc-name))
+             (chk-t (dsd-slot-type it)))
+         (collect `(defun ,accessor-name (obj)
+                     (oget* obj ,property-name)))
+         (unless (dsd-slot-read-only it)
+           (collect `(defun (setf ,accessor-name) (value obj)
+                       ,@(when chk-t (list `(check-type value ,chk-t)))
+                       (oset* value obj ,property-name))))))
+     slots property-names)))
 
 (defun das!make-constructor-check-types (slots assigned-slots)
   (with-collect
@@ -402,48 +377,47 @@
         (collect `(check-type ,(dsd-slot-name slot) ,(dsd-slot-type slot)))))))
 
 ;;; each constructor from (:constructor) forms
-(defun das!make-clos-constructor (class-name constructor slots)
+(defun das!make-object-constructor (name constructor slots property-names)
   ;; at this point slots::=  (append include-slots own-slots)
   ;;               constructor::= structure-constructor
   (das!resolve-default-constructor constructor slots)
   (let* ((make-name (dsd-constructor-name constructor))
          (boa (dsd-constructor-boa constructor))
-         (assigned-slots (dsd-constructor-assigns constructor))
-         (keyargs))
-    ;; make :key arg pair
-    (dolist (it assigned-slots)
-      ;;(push it keyargs)
-      (push (intern (symbol-name it) "KEYWORD") keyargs)
-      (push it keyargs))
+         (assigned-slots (dsd-constructor-assigns constructor)))
     `(defun ,make-name ,(das!reassemble-boa-list boa slots)
        ,@(das!make-constructor-check-types slots assigned-slots)
-       (make-instance ',class-name ,@(reverse keyargs)))))
+       (new "dt_Name" :structure "structName" ',name
+            ,@(mapcan (lambda (it property-name)
+                        (list property-name
+                              (if (memq (dsd-slot-name it) assigned-slots)
+                                  (dsd-slot-name it)
+                                  (dsd-slot-initform it))))
+                      slots property-names)))))
 
 ;;; make standard structure predicate and copier
 (defun das!make-structure-class-predicate (structure-name predicate)
   (when predicate
     `(defun ,predicate (obj)
-       (when (eq (class-name (class-of (class-of obj))) 'structure-class)
-         (eq (class-name (class-of obj)) ',structure-name)))))
+       (and (objectp obj)
+            (memq (get-structure-dsd ',structure-name)
+                  (das!inherit-dsds (get-structure-dsd (oget* obj "structName"))))))))
 
 #-jscl
-(defun das!clone-clos-base (object)
+(defun das!clone-object-base (object)
   (error "Clone not implemented in host: ~a" object))
 #+jscl
-(defun das!clone-clos-base (object)
-  (let ((r (copy-std-instance object)))
-    (setf (std-instance-slots r) (list-to-vector (vector-to-list (std-instance-slots r))))
-    r))
+(defun das!clone-object-base (object)
+  (clone object))
 
 (defun das!make-structure-class-copier (structure-name copier)
   (when copier
     `(defun ,copier (obj)
-       (cond ((eq (class-name (class-of (class-of obj))) 'structure-class)
-              (if (eq (class-name (class-of obj)) ',structure-name)
-                  (das!clone-clos-base obj)
-                  (error "Object ~a not a structure ~a." obj ',structure-name)))
-             (t (error "Object ~a not a structure class." obj))))))
-;;; end CLOS section
+       (cond ((and (objectp obj)
+                   (memq (get-structure-dsd ',structure-name)
+                         (das!inherit-dsds (get-structure-dsd (oget* obj "structName")))))
+              (das!clone-object-base obj))
+             (t (error "Object ~a is not a structure ~a." obj ',structure-name))))))
+;;; end object section
 
 ;;; Lisp structure section
 ;;; ACCESSORS
@@ -544,8 +518,8 @@
 ;;; Compute list of effective slots for DD, include inherited slots,
 ;;; and handle assigned initform in (:include name slots*) options
 (defun das!effective-slots (dd)
-  (let ((asis (and (dsd-include dd) (dsd-include-assigned (dsd-include dd))))
-        (slots (mapcar #'copy-dsd-slot (mappend #'dsd-slots (dsd-inherit-dsds dd)))))
+  (let ((asis (dsd-assigned dd))
+        (slots (mapcar #'copy-dsd-slot (mappend #'dsd-slots (das!inherit-dsds dd)))))
     ;; TODO: check assigned options like :TYPE and :READONLY
     (dolist (a asis)
       (let ((sname (dsd-slot-name a))
@@ -559,7 +533,14 @@
     slots))
 
 (defun das!effective-slot-names (dd)
-  (mapcar #'dsd-slot-name (mappend #'dsd-slots (dsd-inherit-dsds dd))))
+  (mapcar #'dsd-slot-name (mappend #'dsd-slots (das!inherit-dsds dd))))
+
+(defun das!inherit-dsds (dd)
+  (let (result)
+    (while dd
+      (push dd result)
+      (setq dd (dsd-parent dd)))
+    result))
 
 ;;; entry point for lisp base object's
 (defun das!make-lisp-base-structure (dd)
@@ -575,20 +556,24 @@
      (list
       (if (and (dsd-type dd) (dsd-named-p dd) (dsd-predicate dd))
           `(deftype ,(dsd-name dd) () '(satisfies ,(dsd-predicate dd)))
-          nil)))))
+          nil))
+     (list `(eval-when (:compile-toplevel :load-toplevel :execute)
+              (das!finalize-structure ,dd))))))
 
-;;; entry point for clos base
+;;; entry point for object base
 (defun das!make-standard-structure (dd)
-  (let ((name (dsd-name dd))
-        (slots (das!effective-slots dd)))
+  (let* ((name (dsd-name dd))
+         (slots (das!effective-slots dd))
+         (property-names (def!struct-property-names (mapcar #'dsd-slot-name slots))))
     (append
-     (list (das!make-structure-class name (dsd-slots dd) (dsd-include dd)))
      (mapcar (lambda (it)
-               (das!make-clos-constructor name it slots))
+               (das!make-object-constructor name it slots property-names))
              (dsd-constructors dd))
-     (das!make-struct-accessors-clos slots (dsd-conc-name dd))
+     (das!make-struct-accessors-object slots property-names (dsd-conc-name dd))
      (list (das!make-structure-class-predicate name (dsd-predicate dd)))
-     (list (das!make-structure-class-copier name (dsd-copier dd))))))
+     (list (das!make-structure-class-copier name (dsd-copier dd)))
+     (list `(eval-when (:compile-toplevel :load-toplevel :execute)
+              (das!finalize-structure ,dd))))))
 
 ;;; DD BUNDLE
 ;;; parse slot definitions from rest das!struct
@@ -703,17 +688,15 @@
 
 ;;; finalize
 (defun das!finalize-structure (dd)
-  (let ((include (dsd-include dd)))
-    (when include
-      (push (dsd-name dd)
-            (dsd-childs (get-structure-dsd (dsd-include-name include)))))
-    #+nil
-    (if (and (dsd-type dd) (dsd-named-p dd)(dsd-predicate dd))
-        (%deftype (dsd-name dd)
-                  :expander (function (lambda (xz)
-                              (declare (ignore xz))
-                              `(satisfies ,(dsd-predicate dd))))))
-    (setf (gethash (dsd-name dd) *structures*) dd)))
+  (awhen (dsd-parent dd)
+    (pushnew (dsd-name dd) (dsd-childs it)))
+  #+nil
+  (if (and (dsd-type dd) (dsd-named-p dd)(dsd-predicate dd))
+      (%deftype (dsd-name dd)
+                :expander (function (lambda (xz)
+                            (declare (ignore xz))
+                            `(satisfies ,(dsd-predicate dd))))))
+  (setf (gethash (dsd-name dd) *structures*) dd))
 
 
 (defun das!defstruct-expand (name options slots)
@@ -721,23 +704,17 @@
   (let ((dd (make-dsd :name name)))
     (das!parse-defstruct-options options dd)
     (das!parse-struct-slots dd slots)
-    ;; Handle inherited DSDs
-    (setf (dsd-inherit-dsds dd) (list dd))
-    (let ((include (dsd-include dd)))
-      (cond (include
-             (unless (das!include-possible-p dd (get-structure-dsd (dsd-include-name include)))
-               (error "Structure ~A have overlapping slots with included ~A."
-                      name (dsd-include-name include)))
-             ;; the structure included other structure
-             (setf (dsd-inherit-dsds dd) (append (dsd-include-inherited include) (list dd))))
-            (t (setf (dsd-inherit-dsds dd) (list dd)))))
+    ;; Check inherited slots
+    (awhen (dsd-parent dd)
+      (unless (das!include-possible-p dd it)
+        (error "Structure ~A have overlapping slots with included ~A."
+               name (dsd-name it))))
     (let ((lisp-type (memq (dsd-type dd) '(list vector))))
       ;; Compute prototype
       ;; prototype is unused for object based structure
       (when lisp-type
         (setf (dsd-prototype dd)
-              (das%compute-storage-prototype (dsd-inherit-dsds dd))))
-      (das!finalize-structure dd)
+              (das%compute-storage-prototype (das!inherit-dsds dd))))
       (if lisp-type
           (das!make-lisp-base-structure dd)
           (das!make-standard-structure dd)))))

@@ -234,6 +234,7 @@
            (t 'integer)))
         ((characterp object) 'character)
         ((floatp object) 'float)
+        ((structure-p object) (structure-name object))
         ((mop-object-p object) (class-name (class-of object)))
         ((hash-table-p object) 'hash-table)
         ((consp object) 'cons)
