@@ -343,7 +343,23 @@
     ;; mop object
     (mop-object (print-object form stream))
     ;; structure object
-    (structure (structure-object-printer form stream))
+    (structure
+     (let* ((name (structure-name form))
+            (dsd (get-structure-dsd name)))
+       (if dsd
+           (let* ((slot-names (das!effective-slot-names dsd))
+                  (property-names (def!struct-property-names slot-names)))
+             (write-string "#S(" stream)
+             (write-aux name stream known-objects object-ids)
+             (mapc (lambda (slot prop)
+                     (write-string " :" stream)
+                     (write-string (symbol-name slot) stream)
+                     (write-string " " stream)
+                     (write-aux (oget* form prop) stream known-objects object-ids))
+                   slot-names property-names)
+             (write-string ")" stream))
+           (simple-format stream "#<structure ~a>"
+                          (string-downcase (string (structure-name form)))))))
     ;; hash-table object
     (hash-table (hash-table-object-printer form stream))
     ;; Lists
@@ -397,10 +413,6 @@
   (let ((stream (output-stream-designator stream)))
     (funcall fn form stream)))
 
-;;; structure object printer
-(defun structure-object-printer (form stream)
-  (simple-format stream "#<structure ~a>"
-                 (string-downcase (string (structure-name form)))))
 
 ;;; hash-table printer
 (defun %hash-fn-print-name (form)

@@ -16,23 +16,11 @@
 ;;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; DEFTYPE
-#-jscl
-(progn
-  (defvar *types* (make-hash-table :test #'equal))
+(defvar *types* (make-hash-table))
 ;;; DEFSTRUCT
-  ;;(defvar *structures* (make-hash-table :test #'equal))
-  (defvar *structures* nil "DEFSTRUCT STORE")
+(defvar *structures* (make-hash-table))
 ;;; DEFCLASS
-  (defvar *class-table* (make-hash-table :test #'equal)))
-
-#+jscl
-(progn
-  (defvar *types* (make-hash-table :test #'eql))
-;;; DEFSTRUCT
-  (defvar *structures* (make-hash-table :test #'eql))
-;;; DEFCLASS
-  (defvar *class-table* (make-hash-table :test #'eql)))
-
+(defvar *class-table* (make-hash-table :test #'equal))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun get-structure-dsd (name)
