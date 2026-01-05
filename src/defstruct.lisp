@@ -15,6 +15,8 @@
 
 (/debug "loading defstruct.lisp!")
 
+(defvar *structures* (make-hash-table))
+
 (defun structure-p (obj)
   #+jscl (and (objectp obj) (eql (object-type-code obj) :structure))
   #-jscl (typep obj 'structure-object))
@@ -33,12 +35,60 @@ Append numbers to symbol names to make them unique."
                       (integer-to-string index)))
             slots)))
 
+(defun def!struct-expand (name dumper constructor predicate copier slot-descriptions)
+  (let ((property-names
+          (def!struct-property-names (mapcar #'car slot-descriptions)))
+
+        constructor-expansion
+        predicate-expansion
+        copier-expansion)
+
+    ;; mark object as :structure
+    (when constructor
+      (setq constructor-expansion
+            `(defun ,constructor (&key ,@slot-descriptions)
+               (new "dt_Name" :structure
+                    "structName" ',name
+                    ,@(mapcan (lambda (p s)
+                                `(,p ,(car s)))
+                              property-names slot-descriptions)))))
+
+    (when predicate
+      (setq predicate-expansion
+            `(defun ,predicate (x)
+               (and (objectp x) (eq (oget* x "structName") ',name)))))
+
+    (when copier
+      (setq copier-expansion
+            `(defun ,copier (x) (clone x))))
+
+    `(progn
+       (defun ,dumper (x)
+         (list (cons "dt_Name" :structure)
+               (cons "structName" ',name)
+               ,@(mapcar (lambda (p) `(cons ,p (oget* x ,p))) property-names)))
+       ,constructor-expansion
+       ,predicate-expansion
+       ,copier-expansion
+       ;; Slot accessors
+       ,@(mapcan
+          (lambda (prop slot)
+            (let* ((slot-name (car slot))
+                   (accessor-name (intern (concat (symbol-name name) "-"
+                                                  (symbol-name slot-name)))))
+              `((defun ,accessor-name (x)
+                  (oget* x ,prop))
+                (defun (setf ,accessor-name) (new-val x)
+                  (oset* new-val x ,prop)))))
+          property-names slot-descriptions)
+       ',name)))
+
 ;; A very simple defstruct built on JS objects. It supports just slot
 ;; with an optional default initform, and it will create a
 ;; constructor, predicate and accessors for you.
 ;; @kchan -- also generate DUMP-*, which converts a struct to an alist
 ;; of (property-name . value), to be used for dumping in the compiler
-(defmacro !def!struct (name-and-options &rest slots)
+(defmacro def!struct (name-and-options &rest slots)
   (let* ((name-and-options (ensure-list name-and-options))
          (name (first name-and-options))
          (name-string (symbol-name name))
@@ -52,82 +102,25 @@ Append numbers to symbol names to make them unique."
          (copier (if (assoc :copier options)
                      (second (assoc :copier options))
                      (intern (concat "COPY-" name-string))))
-         (dumper (intern (concat "DUMP-" name-string))))
+         (dumper (intern (concat "DUMP-" name-string)))
 
+         (slot-descriptions
+           (mapcar (lambda (sd)
+                     (cond
+                       ((symbolp sd)
+                        (list sd))
+                       ((and (listp sd) (car sd) (null (cddr sd)))
+                        sd)
+                       (t
+                        (error "Bad slot description `~S'." sd))))
+                   slots)))
+    (declare (ignorable constructor predicate copier dumper))
 
-    (unless predicate
-      (setq predicate (gensym "PREDICATE")))
+    #+jscl (def!struct-expand name dumper constructor predicate copier slot-descriptions)
 
-    (let* ((slot-descriptions
-             (mapcar (lambda (sd)
-                       (cond
-                         ((symbolp sd)
-                          (list sd))
-                         ((and (listp sd) (car sd) (null (cddr sd)))
-                          sd)
-                         (t
-                          (error "Bad slot description `~S'." sd))))
-                     slots))
-           (property-names
-             (def!struct-property-names (mapcar #'car slot-descriptions)))
-
-           constructor-expansion
-           predicate-expansion
-           copier-expansion)
-
-
-      ;; mark object as :structure
-      (when constructor
-        (setq constructor-expansion
-              `(defun ,constructor (&key ,@slot-descriptions)
-                 (new "dt_Name" :structure
-                      "structName" ',name
-                      ,@(mapcan (lambda (p s)
-                                  `(,p ,(car s)))
-                                property-names slot-descriptions)))))
-
-      (when predicate
-        (setq predicate-expansion
-              `(defun ,predicate (x)
-                 (and (objectp x) (eq (oget* x "structName") ',name)))))
-
-      (when copier
-        (setq copier-expansion
-              `(defun ,copier (x) (clone x))))
-
-      `(progn
-         (defun ,dumper (x)
-           (list (cons "dt_Name" :structure)
-                 (cons "structName" ',name)
-                 ,@(mapcar (lambda (p) `(cons ,p (oget* x ,p))) property-names)))
-         ,constructor-expansion
-         ,predicate-expansion
-         ,copier-expansion
-         ;; Slot accessors
-         ,@(mapcan
-            (lambda (prop slot)
-              (let* ((name (car slot))
-                     (accessor-name (intern (concat name-string "-" (string name)))))
-                `((defun ,accessor-name (x)
-                    (oget* x ,prop))
-                  (define-setf-expander ,accessor-name (x)
-                    (let ((object (gensym))
-                          (new-value (gensym)))
-                      (values (list object)
-                              (list x)
-                              (list new-value)
-                              `(oset* ,new-value ,object ,',prop)
-                              `(oget* ,object ,',prop)))))))
-            property-names slot-descriptions)
-         ',name))))
-
-;; Emulation of DEF!STRUCT and DUMP-* in the host, using host DEFSTRUCT
-#-jscl
-(defmacro def!struct (name-and-options &rest slots)
-  (flet ((atom-or-car (x) (if (atom x) x (car x))))
-    (let* ((name (atom-or-car name-and-options))
-           (dumper (intern (concat "DUMP-" (symbol-name name))))
-           (slot-names (mapcar #'atom-or-car slots))
+    ;; Emulation of DEF!STRUCT and DUMP-* in the host, using host DEFSTRUCT
+    #-jscl
+    (let* ((slot-names (mapcar #'car slot-descriptions))
            (property-names (def!struct-property-names slot-names)))
       `(progn
          (defun ,dumper (x)
@@ -137,7 +130,3 @@ Append numbers to symbol names to make them unique."
                              `(cons ,p (slot-value x ',n)))
                            property-names slot-names)))
          (defstruct ,name-and-options ,@slots)))))
-
-#+jscl
-(defmacro def!struct (name-and-options &rest slots)
-  `(!def!struct ,name-and-options ,@slots))

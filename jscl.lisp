@@ -64,6 +64,7 @@
     ("compat"        :host)
     ("setf"          :target)
     ("utils"         :both)
+    ("hash-table"    :target)
     ("defstruct"     :both)
     ("lambda-list"   :both)
     ("ffi"           :target)
@@ -75,7 +76,6 @@
     ("sequence"      :target)
     ("symbol"        :target)
     ("package"       :target)
-    ("hash-table"    :target)
     ("types-prelude" :both)
     ("types"         :target)
     ("ansiloop"

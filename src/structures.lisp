@@ -20,8 +20,6 @@
 
 (/debug "loading structures.lisp!")
 
-(setq *structures* (make-hash-table))
-
 ;;; properly list predicate from alexandria pkg
 (defun proper-list-p (object)
   "Returns true if OBJECT is a proper list."
@@ -116,7 +114,6 @@
   slots                                 ; Direct slots
   parent                                ; include
   assigned                              ; assigned slots from include
-  inherit-dsds ; List of inherited DSDs, from deepest ancestor to this DSD itself
   prototype)
 
 ;;; dd-slot slot descriptor
@@ -129,18 +126,6 @@
 ;;; later using DAS!RESOLVE-DEFAULT-CONSTRUCTOR and effective slots
 ;;; information
 (def!struct dsd-constructor name boa assigns)
-
-#-jscl
-(defun %dsd-maybe-rewrite (name)
-  (declare (ignore name))
-  t)
-#+jscl
-(defun %dsd-maybe-rewrite (name)
-  (let ((dd (get-structure-dsd name)))
-    ;; structure not exists, so may be rewrite
-    (or (null dd)
-        ;; childs structures - not exists
-        (null (dsd-childs dd)))))
 
 (defun das!include-possible-p (self parent)
   (let ((s1 (mapcar 'dsd-slot-name (dsd-slots self)))
@@ -354,7 +339,7 @@
           (mapcar #'dsd-slot-name slots))))
 
 ;;; accessors for each slots structure
-(defun das!make-struct-accessors-object (slots property-names conc-name)
+(defun das!make-object-accessors (slots property-names conc-name)
   (with-collect
     (mapc
      (lambda (it property-name)
@@ -384,23 +369,25 @@
   (let* ((make-name (dsd-constructor-name constructor))
          (boa (dsd-constructor-boa constructor))
          (assigned-slots (dsd-constructor-assigns constructor)))
-    `(defun ,make-name ,(das!reassemble-boa-list boa slots)
-       ,@(das!make-constructor-check-types slots assigned-slots)
-       (new "dt_Name" :structure "structName" ',name
-            ,@(mapcan (lambda (it property-name)
-                        (list property-name
-                              (if (memq (dsd-slot-name it) assigned-slots)
-                                  (dsd-slot-name it)
-                                  (dsd-slot-initform it))))
-                      slots property-names)))))
+    `(let ((dd (get-structure-dsd ',name)))
+       (defun ,make-name ,(das!reassemble-boa-list boa slots)
+         ,@(das!make-constructor-check-types slots assigned-slots)
+         (new "dt_Name" :structure "structDescriptor" dd
+              ,@(mapcan (lambda (it property-name)
+                          (list property-name
+                                (if (memq (dsd-slot-name it) assigned-slots)
+                                    (dsd-slot-name it)
+                                    (dsd-slot-initform it))))
+                        slots property-names))))))
 
 ;;; make standard structure predicate and copier
-(defun das!make-structure-class-predicate (structure-name predicate)
+(defun das!make-object-predicate (structure-name predicate)
   (when predicate
-    `(defun ,predicate (obj)
-       (and (objectp obj)
-            (memq (get-structure-dsd ',structure-name)
-                  (das!inherit-dsds (get-structure-dsd (oget* obj "structName"))))))))
+    `(let ((dd (get-structure-dsd ',structure-name)))
+       (defun ,predicate (obj)
+         (and (objectp obj)
+              (if (memq dd (das!inherit-dsds (oget* obj "structDescriptor")))
+                  t nil))))))
 
 #-jscl
 (defun das!clone-object-base (object)
@@ -409,14 +396,14 @@
 (defun das!clone-object-base (object)
   (clone object))
 
-(defun das!make-structure-class-copier (structure-name copier)
+(defun das!make-object-copier (structure-name copier)
   (when copier
     `(defun ,copier (obj)
-       (cond ((and (objectp obj)
-                   (memq (get-structure-dsd ',structure-name)
-                         (das!inherit-dsds (get-structure-dsd (oget* obj "structName")))))
-              (das!clone-object-base obj))
-             (t (error "Object ~a is not a structure ~a." obj ',structure-name))))))
+       (let ((dd (get-structure-dsd ',structure-name)))
+         (cond ((and (objectp obj)
+                     (memq dd (das!inherit-dsds (oget* obj "structDescriptor"))))
+                (das!clone-object-base obj))
+               (t (error "Object ~a is not a structure ~a." obj ',structure-name)))))))
 ;;; end object section
 
 ;;; Lisp structure section
@@ -440,7 +427,7 @@
       (%symbolize conc-name (dsd-slot-name slot))
       (dsd-slot-name slot)))
 
-(defun das!make-struct-accessors-lv (storage-type prototype slots conc-name)
+(defun das!make-lisp-accessors (storage-type prototype slots conc-name)
   (let ((fn-read 'das!%make-read-accessor-vector)
         (fn-write 'das!%make-write-accessor-vector))
     (cond ((eql storage-type 'list)
@@ -462,11 +449,11 @@
 ;;;    A predicate can be defined only if the structure is named;
 ;;;    if :type is supplied and :named is not supplied,
 ;;;    then :predicate must either be unsupplied or have the value nil
-(defun das!make-struct-predicate (prototype structure-type storage-type leader-p predicate)
+(defun das!make-lisp-predicate (prototype structure-type storage-type leader-p predicate)
   (when predicate
     (when (and (memq storage-type '(vector list)) (not leader-p))
       (warn "predicate ~a unsupplied for unnamed vector/list structure " predicate)
-      (return-from das!make-struct-predicate nil))
+      (return-from das!make-lisp-predicate nil))
     (let ((imap (or (position -3 (dsd-prototype-map prototype))
                     (error "BUG: no self leader tag in DSD-PROTOTYPE ~a" prototype))))
       (cond ((eql 'vector storage-type)
@@ -486,8 +473,7 @@
 
 (defun das!clone-vector-base (object) (copy-seq object))
 
-(defun das!make-struct-copier (name storage-type leader-p copier)
-  (declare (ignore name leader-p))
+(defun das!make-lisp-copier (storage-type copier)
   (when copier
     (cond ((eq storage-type 'list)
            `(defun ,copier (object) (das!clone-list-base object)))
@@ -495,7 +481,7 @@
            `(defun ,copier (object) (das!clone-vector-base object))))))
 
 ;;; CONSTRUCTORS
-(defun das!make-constructor-lv-for (prototype storage-type constructor slots)
+(defun das!make-lisp-constructor (prototype storage-type constructor slots)
   (das!resolve-default-constructor constructor slots)
   (let* ((make-name (dsd-constructor-name constructor))
          (boa (dsd-constructor-boa constructor))
@@ -535,6 +521,7 @@
 (defun das!effective-slot-names (dd)
   (mapcar #'dsd-slot-name (mappend #'dsd-slots (das!inherit-dsds dd))))
 
+;;; Compute List of inherited DSDs, from deepest ancestor to this DSD itself
 (defun das!inherit-dsds (dd)
   (let (result)
     (while dd
@@ -546,19 +533,19 @@
 (defun das!make-lisp-base-structure (dd)
   (let ((slots (das!effective-slots dd)))
     (append
+     (list `(eval-when (:compile-toplevel :load-toplevel :execute)
+              (das!register-structure ,dd)))
      (mapcar (lambda (it)
-               (das!make-constructor-lv-for  (dsd-prototype dd) (dsd-type dd) it slots))
+               (das!make-lisp-constructor  (dsd-prototype dd) (dsd-type dd) it slots))
              (dsd-constructors dd))
-     (das!make-struct-accessors-lv  (dsd-type dd) (dsd-prototype dd) slots (dsd-conc-name dd))
-     (list (das!make-struct-predicate  (dsd-prototype dd) (dsd-name dd) (dsd-type dd)
-                                       (dsd-named-p dd) (dsd-predicate dd)))
-     (list (das!make-struct-copier (dsd-name dd) (dsd-type dd) (dsd-named-p dd) (dsd-copier dd)))
+     (das!make-lisp-accessors (dsd-type dd) (dsd-prototype dd) slots (dsd-conc-name dd))
+     (list (das!make-lisp-predicate (dsd-prototype dd) (dsd-name dd) (dsd-type dd)
+                                    (dsd-named-p dd) (dsd-predicate dd)))
+     (list (das!make-lisp-copier (dsd-type dd) (dsd-copier dd)))
      (list
       (if (and (dsd-type dd) (dsd-named-p dd) (dsd-predicate dd))
           `(deftype ,(dsd-name dd) () '(satisfies ,(dsd-predicate dd)))
-          nil))
-     (list `(eval-when (:compile-toplevel :load-toplevel :execute)
-              (das!finalize-structure ,dd))))))
+          nil)))))
 
 ;;; entry point for object base
 (defun das!make-standard-structure (dd)
@@ -566,22 +553,14 @@
          (slots (das!effective-slots dd))
          (property-names (def!struct-property-names (mapcar #'dsd-slot-name slots))))
     (append
+     (list `(eval-when (:compile-toplevel :load-toplevel :execute)
+              (das!register-structure ,dd)))
      (mapcar (lambda (it)
                (das!make-object-constructor name it slots property-names))
              (dsd-constructors dd))
-     (das!make-struct-accessors-object slots property-names (dsd-conc-name dd))
-     (list (das!make-structure-class-predicate name (dsd-predicate dd)))
-     (list (das!make-structure-class-copier name (dsd-copier dd)))
-     (list `(eval-when (:compile-toplevel :load-toplevel :execute)
-              (das!finalize-structure ,dd))))))
-
-;;; DD BUNDLE
-;;; parse slot definitions from rest das!struct
-(define-condition bad-dsd-slot-desc (error)
-  ((datum :initform nil :initarg :datum :reader bad-dsd-slot-desc-datum))
-  (:report (lambda (condition stream)
-             (format stream "Malformed DEFSTRUCT slot descriptor~% ~a."
-                     (bad-dsd-slot-desc-datum condition)))))
+     (das!make-object-accessors slots property-names (dsd-conc-name dd))
+     (list (das!make-object-predicate name (dsd-predicate dd)))
+     (list (das!make-object-copier name (dsd-copier dd))))))
 
 ;;; Parse slot definition
 ;;; catch bug (defstruct name (:copier cname) slot1 ... slotn)
@@ -686,21 +665,67 @@
           (dsd-prototype-storage prototype))
     hash))
 
-;;; finalize
-(defun das!finalize-structure (dd)
-  (awhen (dsd-parent dd)
-    (pushnew (dsd-name dd) (dsd-childs it)))
-  #+nil
-  (if (and (dsd-type dd) (dsd-named-p dd)(dsd-predicate dd))
-      (%deftype (dsd-name dd)
-                :expander (function (lambda (xz)
-                            (declare (ignore xz))
-                            `(satisfies ,(dsd-predicate dd))))))
-  (setf (gethash (dsd-name dd) *structures*) dd))
+(defun das!layout-compatible-p (dd old-dd)
+  (and (eql (dsd-type dd) (dsd-type old-dd))
+       (if (memq (dsd-type dd) '(list vector))
+           (let ((prototype (dsd-prototype dd))
+                 (old-prototype (dsd-prototype old-dd)))
+             (and (equal (dsd-prototype-map prototype)
+                         (dsd-prototype-map old-prototype))
+                  (equal (dsd-prototype-storage prototype)
+                         (dsd-prototype-storage old-prototype))))
+           (equal (das!effective-slot-names dd)
+                  (das!effective-slot-names old-dd)))))
+
+;;; Register DD into *STRUCTURES*, check for incompatible redefinition
+;;; beforehand
+;;;
+;;; This function should run at both compile and load time, before any
+;;; other forms (predicates, constructors etc) generated by DEFSTRUCT,
+;;; so that these other forms can then retrieve the up-to-date DSD by
+;;; (gethash name *STRUCTURES*).
+;;;
+;;; DEFSTRUCT macro computes DD at expansion time and pass it as
+;;; literal object to DAS!REGISTER-STRUCTURE. On the other hand, DD
+;;; entry in *STRUCTURES* might be mutated by later
+;;; redefinition. Therefore DAS!REGISTER-STRUCTURE cannot directly put
+;;; DD into *STRUCTURES* and have to either copy it or copy (merge)
+;;; its content into an existing *STRUCTURES* entry.
+(defun das!register-structure (dd)
+  (let ((dd (copy-dsd dd))
+        (old (gethash (dsd-name dd) *structures*)))
+    (cond (old
+           (if (das!layout-compatible-p dd old)
+               ;; Modify DSD in place, so old instances are still
+               ;; recognized by predicate and copier.
+
+               ;; Hypothesis: TYPE, NAMED-P, CONC-NAME, INITIAL-OFFSET
+               ;; cannot change, is this true?
+               (setf (dsd-predicate old) (dsd-predicate dd)
+                     (dsd-copier old) (dsd-copier dd)
+                     (dsd-constructors old) (dsd-constructors dd)
+                     (dsd-slots old) (dsd-slots dd) ; initform might change
+                     (dsd-assigned old) (dsd-assigned dd))
+               (if (dsd-childs old)
+                   (error "Cannot change layout of structure ~A, included in ~A"
+                          (dsd-name dd) (dsd-childs old))
+                   ;; Incompatible layout, invalidate old instances
+                   ;; by registering a new DSD
+                   (progn
+                     (warn "Redefining structure ~A" (dsd-name dd))
+                     (setf (gethash (dsd-name dd) *structures*) dd)))))
+          (t (setf (gethash (dsd-name dd) *structures*) dd)))
+    ;; The compile time parent-child link will be destroyed by COPY-DSD,
+    ;; therefore we need to re-lookup parent by name
+    (awhen (dsd-parent dd)
+      (setf (dsd-parent dd)
+            (or (get-structure-dsd (dsd-name it))
+                (error "BUG: parent DSD ~A (for ~A) not yet registered"
+                       (dsd-name it) (dsd-name dd))))
+      (push dd (dsd-childs (dsd-parent dd))))))
 
 
 (defun das!defstruct-expand (name options slots)
-  #+jscl (unless (%dsd-maybe-rewrite name) (error "Structure ~a can't be overridden" name))
   (let ((dd (make-dsd :name name)))
     (das!parse-defstruct-options options dd)
     (das!parse-struct-slots dd slots)
@@ -724,7 +749,7 @@
          (options (rest name-and-options))
          (name (car name-and-options)))
     `(progn 
-       ,@(das!defstruct-expand `,name `,options `,slots)
+       ,@(das!defstruct-expand name options slots)
        ',name)))
 
 #+jscl
