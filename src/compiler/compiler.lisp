@@ -655,9 +655,7 @@
                                     (convert (second sexp))
                                     (dump-cons sexp)))
                                (array (dump-array sexp))
-                               (#-jscl structure-object
-                                #+jscl structure
-                                (dump-structure sexp)))))
+                               (structure-object (dump-structure sexp)))))
                  (toplevel-compilation `(var (,jsvar ,dumped)))
                  (when (keywordp sexp)
                    (toplevel-compilation `(= (get ,jsvar "value") ,jsvar)))))

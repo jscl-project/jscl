@@ -140,7 +140,7 @@
   (typecase x
     (null                         (!find-class 'null))
     (hash-table                   (!find-class 'hash-table))
-    (structure                    (!find-class 'structure))
+    (structure-object             (!find-class 'structure-object))
     (stream                       (!find-class 'stream))
     (symbol                       (!find-class 'symbol))
     (keyword                      (!find-class 'keyword))

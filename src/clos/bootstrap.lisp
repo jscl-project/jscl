@@ -112,7 +112,7 @@
                 :direct-superclasses '()
                 :direct-slots   '())
 
-  (ensure-class 'structure
+  (ensure-class 'structure-object
                 :direct-superclasses '()
                 :direct-slots   '())
 
