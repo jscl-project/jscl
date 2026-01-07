@@ -18,6 +18,23 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
+;;; 2026-01-01 Redesigned by @kchanqvq:
+;;;
+;;; Standard structures are represented by JS objects.
+;;; "structDescriptors" property stores a vector of inherited DSDs,
+;;; include the most specific DSD (at the end). DSD stores their place
+;;; in inheritance hierarchy in DSD-INDEX, so that XXX-STRUCTURE-P
+;;; test can be done in O(1) time via (eq xxx-dsd (svref obj
+;;; (dsd-depth xxx-dsd)))
+;;;
+;;; We use direct reference of DSD instead of indirection via its name
+;;; symbol in most cases, so that redefinition can be managed. When
+;;; updating a compatible definition (e.g. just changing initforms),
+;;; we mutate DSD in place. For incompatible definition (slot layout
+;;; changed), we register a new DSD in *STRUCTURES*. This way,
+;;; obsolete instances that keep reference to the old DSD can be
+;;; detected.
+
 (/debug "loading structures.lisp!")
 
 ;;; properly list predicate from alexandria pkg
@@ -111,9 +128,10 @@
   (initial-offset 0)
   constructors
   (childs '())
-  slots                                 ; Direct slots
-  parent                                ; include
-  assigned                              ; assigned slots from include
+  slots                               ; Direct slots
+  parent                              ; include
+  assigned                            ; assigned slots from include
+  (depth 0)                           ; depth in inheritance hierarchy
   prototype)
 
 ;;; dd-slot slot descriptor
@@ -319,6 +337,7 @@
                        (unless (memq slot-name parent-slot-names)
                          (raise-bad-include-slot it))))
                    (setf (dsd-parent dd) parent
+                         (dsd-depth dd) (1+ (dsd-depth parent))
                          (dsd-assigned dd) (mapcar #'das!parse-struct-slot include-slots))))
                 (t (error "DEFSTRUCT :include option provide only for named or standard structure."))))
       ;; predicate, copier, conc-name for named lisp structure
@@ -413,8 +432,8 @@
           `(let ((dd (get-structure-dsd ',name)))
              (defun ,it (obj)
                (and (objectp obj)
-                    (if (memq dd (das!inherit-dsds (oget* obj "structDescriptor")))
-                        t nil))))))))
+                    (eq dd (storage-vector-ref! (oget* obj "structDescriptors")
+                                                ,(dsd-depth dd))))))))))
 
 ;;; COPIER
 #-jscl
@@ -431,7 +450,8 @@
          `(defun ,it (obj)
             (let ((dd (get-structure-dsd ',name)))
               (cond ((and (objectp obj)
-                          (memq dd (das!inherit-dsds (oget* obj "structDescriptor"))))
+                          (eq dd (storage-vector-ref! (oget* obj "structDescriptors")
+                                                      ,(dsd-depth dd))))
                      (clone obj))
                     (t (error 'type-error :datum obj :expected-type ',name))))))))))
 
@@ -444,8 +464,8 @@
          (make-name (dsd-constructor-name constructor))
          (boa (dsd-constructor-boa constructor))
          (assigned-slots (dsd-constructor-assigns constructor)))
-    `(let ((dd (get-structure-dsd ',name)))
-       (declare (ignorable dd))
+    `(let ,(when (null storage-type)
+             `((dvec (list-to-vector (das!inherit-dsds (get-structure-dsd ',name))))))
        (defun ,make-name ,(das!reassemble-boa-list boa slots)
          ;; check types
          ,@(with-collect
@@ -462,7 +482,7 @@
            ;; construct the structure
            ,(if storage-type
                 `(,storage-type ,@prototype)
-                `(new "dt_Name" :structure "structDescriptor" dd
+                `(new "dt_Name" :structure "structDescriptors" dvec
                       ,@(mapcan #'list (def!struct-property-names prototype) prototype))))))))
 
 (defun das!make-structure (dd)

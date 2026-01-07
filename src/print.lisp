@@ -344,16 +344,16 @@
     (mop-object (print-object form stream))
     ;; structure object
     (structure-object
-     (let ((dsd (oget* form "structDescriptor"))
-           (name (structure-name form)))
-       (cond ((null dsd)
-              (simple-format stream "#<~a (INTERNAL)>" (string name)))
+     (let ((dvec (oget* form "structDescriptors")))
+       (cond ((symbolp dvec)
+              (simple-format stream "#<~a (INTERNAL)>" (string dvec)))
              (t
-              (let* ((slot-names (das!effective-slot-names dsd))
+              (let* ((dsd (storage-vector-ref! dvec (1- (length dvec))))
+                     (slot-names (das!effective-slot-names dsd))
                      (property-names (def!struct-property-names slot-names))
-                     (obsolete (not (eq dsd (get-structure-dsd name)))))
+                     (obsolete (not (eq dsd (get-structure-dsd (dsd-name dsd))))))
                 (write-string (if obsolete "#<" "#S(") stream)
-                (write-aux name stream known-objects object-ids)
+                (write-aux (dsd-name dsd) stream known-objects object-ids)
                 (when obsolete (write-string " (OBSOLETE)" stream))
                 (mapc (lambda (slot prop)
                         (write-string " :" stream)

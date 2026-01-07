@@ -21,10 +21,15 @@
   #+jscl (and (objectp obj) (eql (object-type-code obj) :structure))
   #-jscl (typep obj 'structure-object))
 
+;;; Metadata is stored in "structDescriptors" property of instances.
+;;; For DEF!STRUCT, the name symbol is stored in "structDescriptors",
+;;; but for complete defstruct (see structures.lisp), a vector of DSD
+;;; is stored in "structDescriptors".
 (defun structure-name (obj)
-  #+jscl (if (in "structDescriptor" obj)
-             (dsd-name (oget* obj "structDescriptor"))
-             (oget* obj "structName"))
+  #+jscl (let ((desc (oget* obj "structDescriptors")))
+           (if (symbolp desc)
+               desc
+               (dsd-name (storage-vector-ref! desc (1- (length desc))))))
   #-jscl (class-name (class-of obj)))
 
 (defun def!struct-property-names (slots)
@@ -50,7 +55,7 @@ Append numbers to symbol names to make them unique."
       (setq constructor-expansion
             `(defun ,constructor (&key ,@slot-descriptions)
                (new "dt_Name" :structure
-                    "structName" ',name
+                    "structDescriptors" ',name
                     ,@(mapcan (lambda (p s)
                                 `(,p ,(car s)))
                               property-names slot-descriptions)))))
@@ -58,7 +63,7 @@ Append numbers to symbol names to make them unique."
     (when predicate
       (setq predicate-expansion
             `(defun ,predicate (x)
-               (and (objectp x) (eq (oget* x "structName") ',name)))))
+               (and (objectp x) (eq (oget* x "structDescriptors") ',name)))))
 
     (when copier
       (setq copier-expansion
@@ -67,7 +72,7 @@ Append numbers to symbol names to make them unique."
     `(progn
        (defun ,dumper (x)
          (list (cons "dt_Name" :structure)
-               (cons "structName" ',name)
+               (cons "structDescriptors" ',name)
                ,@(mapcar (lambda (p) `(cons ,p (oget* x ,p))) property-names)))
        ,constructor-expansion
        ,predicate-expansion
@@ -127,7 +132,7 @@ Append numbers to symbol names to make them unique."
       `(progn
          (defun ,dumper (x)
            (list (cons "dt_Name" :structure)
-                 (cons "structName" ',name)
+                 (cons "structDescriptors" ',name)
                  ,@(mapcar (lambda (p n)
                              `(cons ,p (slot-value x ',n)))
                            property-names slot-names)))
