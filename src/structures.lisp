@@ -119,9 +119,6 @@
 ;;; dd-slot slot descriptor
 (def!struct dsd-slot name initform (type t) read-only)
 
-;;; structure-prototype
-(def!struct dsd-prototype n map storage)
-
 ;;; structure-constructor. boa can be :DEFAULT, which should be filled
 ;;; later using DAS!RESOLVE-DEFAULT-CONSTRUCTOR and effective slots
 ;;; information
@@ -145,7 +142,6 @@
           :format-control "Malformed DEFSTRUCT :include option~% Bad name ~a.~%"
           :format-arguments datum))
 
-
 (deftype sop-symbolic-name ()
   `(and symbol (not (member t nil)) (not keyword)))
 
@@ -163,6 +159,34 @@
     (string  (intern conc-name))
     (symbol conc-name)
     (character (intern (string conc-name)))))
+
+;;; Compute list of effective slots for DD, include inherited slots,
+;;; and handle assigned initform in (:include name slots*) options
+(defun das!effective-slots (dd)
+  (let ((asis (dsd-assigned dd))
+        (slots (mapcar #'copy-dsd-slot (mappend #'dsd-slots (das!inherit-dsds dd)))))
+    ;; TODO: check assigned options like :TYPE and :READONLY
+    (dolist (a asis)
+      (let ((sname (dsd-slot-name a))
+            (sval (dsd-slot-initform a)))
+        (dolist (slot slots)
+          (when (eq (dsd-slot-name slot) sname)
+            (when (dsd-slot-type slot)
+              (unless (typep sval (dsd-slot-type slot))
+                (error 'type-error :datum a :expected-type (dsd-slot-type slot))))
+            (setf (dsd-slot-initform slot) sval)))))
+    slots))
+
+(defun das!effective-slot-names (dd)
+  (mapcar #'dsd-slot-name (mappend #'dsd-slots (das!inherit-dsds dd))))
+
+;;; Compute List of inherited DSDs, from deepest ancestor to this DSD itself
+(defun das!inherit-dsds (dd)
+  (let (result)
+    (while dd
+      (push dd result)
+      (setq dd (dsd-parent dd)))
+    result))
 
 ;;;(defparameter +dsd-option-names+ #(:include :initial-offset :type :conc-name :copier :predicate))
 
@@ -316,18 +340,6 @@
         (unless (option-present-p :predicate)
           (setf (dsd-predicate dd) (%symbolize (dsd-name dd) "-P")))))))
 
-(defun das!canonicalize-slots (slots)
-  (mapcar
-   (lambda (slot)
-     (let ((dv (dsd-slot-initform slot)))
-       (list (dsd-slot-name slot)
-             :initform (typecase dv
-                         (null nil)
-                         (symbol (list 'quote dv))
-                         (t dv))
-             :initarg (intern (symbol-name (dsd-slot-name slot)) "KEYWORD"))))
-   slots))
-
 (defun das!resolve-default-constructor (constructor slots)
   (when (eq :default (dsd-constructor-boa constructor))
     (setf (dsd-constructor-boa constructor)
@@ -338,229 +350,136 @@
           (dsd-constructor-assigns constructor)
           (mapcar #'dsd-slot-name slots))))
 
-;;; accessors for each slots structure
-(defun das!make-object-accessors (slots property-names conc-name)
-  (with-collect
-    (mapc
-     (lambda (it property-name)
-       (let ((accessor-name (%slot-accessor-name it conc-name))
-             (chk-t (dsd-slot-type it)))
-         (collect `(defun ,accessor-name (obj)
-                     (oget* obj ,property-name)))
-         (unless (dsd-slot-read-only it)
-           (collect `(defun (setf ,accessor-name) (value obj)
-                       ,@(when chk-t (list `(check-type value ,chk-t)))
-                       (oset* value obj ,property-name))))))
-     slots property-names)))
-
-(defun das!make-constructor-check-types (slots assigned-slots)
-  (with-collect
-    (dolist (slot slots)
-      (when (and (memq (dsd-slot-name slot) assigned-slots)
-                 (dsd-slot-type slot)
-                 (not (dsd-slot-read-only slot)))
-        (collect `(check-type ,(dsd-slot-name slot) ,(dsd-slot-type slot)))))))
-
-;;; each constructor from (:constructor) forms
-(defun das!make-object-constructor (name constructor slots property-names)
-  ;; at this point slots::=  (append include-slots own-slots)
-  ;;               constructor::= structure-constructor
-  (das!resolve-default-constructor constructor slots)
-  (let* ((make-name (dsd-constructor-name constructor))
-         (boa (dsd-constructor-boa constructor))
-         (assigned-slots (dsd-constructor-assigns constructor)))
-    `(let ((dd (get-structure-dsd ',name)))
-       (defun ,make-name ,(das!reassemble-boa-list boa slots)
-         ,@(das!make-constructor-check-types slots assigned-slots)
-         (new "dt_Name" :structure "structDescriptor" dd
-              ,@(mapcan (lambda (it property-name)
-                          (list property-name
-                                (if (memq (dsd-slot-name it) assigned-slots)
-                                    (dsd-slot-name it)
-                                    (dsd-slot-initform it))))
-                        slots property-names))))))
-
-;;; make standard structure predicate and copier
-(defun das!make-object-predicate (structure-name predicate)
-  (when predicate
-    `(let ((dd (get-structure-dsd ',structure-name)))
-       (defun ,predicate (obj)
-         (and (objectp obj)
-              (if (memq dd (das!inherit-dsds (oget* obj "structDescriptor")))
-                  t nil))))))
-
-#-jscl
-(defun das!clone-object-base (object)
-  (error "Clone not implemented in host: ~a" object))
-#+jscl
-(defun das!clone-object-base (object)
-  (clone object))
-
-(defun das!make-object-copier (structure-name copier)
-  (when copier
-    `(defun ,copier (obj)
-       (let ((dd (get-structure-dsd ',structure-name)))
-         (cond ((and (objectp obj)
-                     (memq dd (das!inherit-dsds (oget* obj "structDescriptor"))))
-                (das!clone-object-base obj))
-               (t (error "Object ~a is not a structure ~a." obj ',structure-name)))))))
-;;; end object section
-
-;;; Lisp structure section
 ;;; ACCESSORS
-(defun das!%make-read-accessor-vector (name index)
-  `(defun ,name (obj) (storage-vector-ref obj ,index)))
-(defun das!%make-write-accessor-vector (name index chk-t)
-  `(defun (setf ,name) (value obj)
-     ,@(if chk-t (list `(check-type value ,chk-t)))
-     (storage-vector-set! obj ,index value)))
-(defun das!%make-read-accessor-list (name index)
-  `(defun ,name (obj)
-     (nth ,index obj)) )
-(defun das!%make-write-accessor-list (name index chk-t)
-  `(defun (setf ,name) (value obj)
-     ,@(if chk-t (list `(check-type value ,chk-t)))
-     (rplaca (nthcdr ,index obj) value) ))
-
-(defun %slot-accessor-name (slot conc-name)
-  (if conc-name
-      (%symbolize conc-name (dsd-slot-name slot))
-      (dsd-slot-name slot)))
-
-(defun das!make-lisp-accessors (storage-type prototype slots conc-name)
-  (let ((fn-read 'das!%make-read-accessor-vector)
-        (fn-write 'das!%make-write-accessor-vector))
-    (cond ((eql storage-type 'list)
-           (setq fn-read 'das!%make-read-accessor-list)
-           (setq fn-write 'das!%make-write-accessor-list)))
+(defun das!make-accessors (dd slots)
+  (let ((storage-type (dsd-type dd))
+        (conc-name (dsd-conc-name dd))
+        (prototype (dsd-prototype dd)))
     (with-collect
       (dolist (it slots)
-        (let ((accessor-name (%slot-accessor-name it conc-name))
-              (chk-t (dsd-slot-type it))
-              (index (position (dsd-slot-name it) (dsd-prototype-storage prototype))))
-          (unless index
-            (error "Malformed prototype: slot-name ~a accessor ~a"
-                   (dsd-slot-name it) accessor-name))
-          (collect (funcall fn-read accessor-name index))
+        (let* ((slot-name (dsd-slot-name it))
+               (accessor-name (if conc-name
+                                  (%symbolize conc-name slot-name)
+                                  slot-name))
+               (chk-t (dsd-slot-type it))
+               (location (position slot-name prototype)))
+          (unless location
+            (error "BUG: slot-name ~a does not occur in prototype ~A"
+                   slot-name prototype))
+          (unless storage-type
+            (setq location (concat (symbol-name slot-name)
+                                   (integer-to-string location))))
+          (collect `(defun ,accessor-name (obj)
+                      ,(ecase storage-type
+                         (list `(nth ,location obj))
+                         (vector `(storage-vector-ref! obj ,location))
+                         ((nil) `(oget* obj ,location)))))
           (unless (dsd-slot-read-only it)
-            (collect (funcall fn-write accessor-name index chk-t))))))))
+            (collect `(defun (setf ,accessor-name) (value obj)
+                        ,@(if chk-t (list `(check-type value ,chk-t)))
+                        ,(ecase storage-type
+                           (list `(rplaca (nthcdr ,location obj) value))
+                           (vector `(storage-vector-set! obj ,location value))
+                           ((nil) `(oset* value obj ,location)))
+                        value))))))))
 
 ;;; PREDICATE
 ;;;    A predicate can be defined only if the structure is named;
 ;;;    if :type is supplied and :named is not supplied,
 ;;;    then :predicate must either be unsupplied or have the value nil
-(defun das!make-lisp-predicate (prototype structure-type storage-type leader-p predicate)
-  (when predicate
-    (when (and (memq storage-type '(vector list)) (not leader-p))
-      (warn "predicate ~a unsupplied for unnamed vector/list structure " predicate)
-      (return-from das!make-lisp-predicate nil))
-    (let ((imap (or (position -3 (dsd-prototype-map prototype))
-                    (error "BUG: no self leader tag in DSD-PROTOTYPE ~a" prototype))))
-      (cond ((eql 'vector storage-type)
-             `(defun ,predicate (obj)
-                (and (storage-vector-p obj)
-                     (> (length obj) ,imap)
-                     (eql (storage-vector-ref obj ,imap) ',structure-type))))
-            ((eql 'list storage-type)
-             `(defun ,predicate (obj)
-                (and (proper-list-p obj)
-                     (> (length obj) ,imap)
-                     (eql (nth ,imap obj) ',structure-type))))))))
+(defun das!make-predicate (dd)
+  (awhen (dsd-predicate dd)
+    (let ((name (dsd-name dd))
+          (storage-type (dsd-type dd))
+          (leader-p (dsd-named-p dd))
+          (prototype (dsd-prototype dd)))
+      (when (and storage-type (not leader-p))
+        (warn "predicate ~a unsupplied for unnamed vector/list structure " it)
+        (return-from das!make-predicate nil))
+      (if storage-type
+          (let ((imap (or (position `',name prototype :test 'equal)
+                          (error "BUG: '~a does not occur in prototype ~a"
+                                 name prototype))))
+            (cond ((eql 'vector storage-type)
+                   `(defun ,it (obj)
+                      (and (storage-vector-p obj)
+                           (> (length obj) ,imap)
+                           (eql (storage-vector-ref obj ,imap) ',name))))
+                  ((eql 'list storage-type)
+                   `(defun ,it (obj)
+                      (and (proper-list-p obj)
+                           (> (length obj) ,imap)
+                           (eql (nth ,imap obj) ',name))))))
+          `(let ((dd (get-structure-dsd ',name)))
+             (defun ,it (obj)
+               (and (objectp obj)
+                    (if (memq dd (das!inherit-dsds (oget* obj "structDescriptor")))
+                        t nil))))))))
 
 ;;; COPIER
+#-jscl
+(defun clone (x)
+  (error "Clone not implemented in host: ~a" x))
 
-(defun das!clone-list-base (object) (copy-list object))
-
-(defun das!clone-vector-base (object) (copy-seq object))
-
-(defun das!make-lisp-copier (storage-type copier)
-  (when copier
-    (cond ((eq storage-type 'list)
-           `(defun ,copier (object) (das!clone-list-base object)))
-          ((eq storage-type 'vector)
-           `(defun ,copier (object) (das!clone-vector-base object))))))
+(defun das!make-copier (dd)
+  (awhen (dsd-copier dd)
+    (ecase (dsd-type dd)
+      (list `(defun ,it (object) (copy-list object)))
+      (vector `(defun ,it (object) (copy-seq object)))
+      ((nil)
+       (let ((name (dsd-name dd)))
+         `(defun ,it (obj)
+            (let ((dd (get-structure-dsd ',name)))
+              (cond ((and (objectp obj)
+                          (memq dd (das!inherit-dsds (oget* obj "structDescriptor"))))
+                     (clone obj))
+                    (t (error 'type-error :datum obj :expected-type ',name))))))))))
 
 ;;; CONSTRUCTORS
-(defun das!make-lisp-constructor (prototype storage-type constructor slots)
+(defun das!make-constructor (dd constructor slots)
   (das!resolve-default-constructor constructor slots)
-  (let* ((make-name (dsd-constructor-name constructor))
+  (let* ((name (dsd-name dd))
+         (storage-type (dsd-type dd))
+         (prototype (dsd-prototype dd))
+         (make-name (dsd-constructor-name constructor))
          (boa (dsd-constructor-boa constructor))
-         (assigned-slots (dsd-constructor-assigns constructor))
-         (default-slots (set-difference (mapcar 'dsd-slot-name slots) assigned-slots))
-         (storage
-           (mapcar (lambda (it sym)
-                     (cond ((eql it -1) nil)
-                           ((or (eql it -2) (eql it -3)) `',sym)
-                           ((memq sym default-slots)
-                            (dsd-slot-initform (find sym slots :key #'dsd-slot-name)))
-                           (t sym)))
-                   (dsd-prototype-map prototype)
-                   (dsd-prototype-storage prototype))))
-    `(defun ,make-name ,(das!reassemble-boa-list boa slots)
-       ,@(das!make-constructor-check-types slots assigned-slots)
-       ;; and prototype into required form
-       (,storage-type ,@storage))))
+         (assigned-slots (dsd-constructor-assigns constructor)))
+    `(let ((dd (get-structure-dsd ',name)))
+       (declare (ignorable dd))
+       (defun ,make-name ,(das!reassemble-boa-list boa slots)
+         ;; check types
+         ,@(with-collect
+             (dolist (it slots)
+               (when (and (memq (dsd-slot-name it) assigned-slots)
+                          (dsd-slot-type it)
+                          (not (dsd-slot-read-only it)))
+                 (collect `(check-type ,(dsd-slot-name it) ,(dsd-slot-type it))))))
+         ;; bind default slot values
+         (let ,(with-collect
+                 (dolist (it slots)
+                   (unless (memq (dsd-slot-name it) assigned-slots)
+                     (collect `(,(dsd-slot-name it) ,(dsd-slot-initform it))))))
+           ;; construct the structure
+           ,(if storage-type
+                `(,storage-type ,@prototype)
+                `(new "dt_Name" :structure "structDescriptor" dd
+                      ,@(mapcan #'list (def!struct-property-names prototype) prototype))))))))
 
-;;; Compute list of effective slots for DD, include inherited slots,
-;;; and handle assigned initform in (:include name slots*) options
-(defun das!effective-slots (dd)
-  (let ((asis (dsd-assigned dd))
-        (slots (mapcar #'copy-dsd-slot (mappend #'dsd-slots (das!inherit-dsds dd)))))
-    ;; TODO: check assigned options like :TYPE and :READONLY
-    (dolist (a asis)
-      (let ((sname (dsd-slot-name a))
-            (sval (dsd-slot-initform a)))
-        (dolist (slot slots)
-          (when (eq (dsd-slot-name slot) sname)
-            (when (dsd-slot-type slot)
-              (unless (typep sval (dsd-slot-type slot))
-                (error 'type-error :datum a :expected-type (dsd-slot-type slot))))
-            (setf (dsd-slot-initform slot) sval)))))
-    slots))
-
-(defun das!effective-slot-names (dd)
-  (mapcar #'dsd-slot-name (mappend #'dsd-slots (das!inherit-dsds dd))))
-
-;;; Compute List of inherited DSDs, from deepest ancestor to this DSD itself
-(defun das!inherit-dsds (dd)
-  (let (result)
-    (while dd
-      (push dd result)
-      (setq dd (dsd-parent dd)))
-    result))
-
-;;; entry point for lisp base object's
-(defun das!make-lisp-base-structure (dd)
+(defun das!make-structure (dd)
   (let ((slots (das!effective-slots dd)))
     (append
      (list `(eval-when (:compile-toplevel :load-toplevel :execute)
               (das!register-structure ,dd)))
      (mapcar (lambda (it)
-               (das!make-lisp-constructor  (dsd-prototype dd) (dsd-type dd) it slots))
+               (das!make-constructor dd it slots))
              (dsd-constructors dd))
-     (das!make-lisp-accessors (dsd-type dd) (dsd-prototype dd) slots (dsd-conc-name dd))
-     (list (das!make-lisp-predicate (dsd-prototype dd) (dsd-name dd) (dsd-type dd)
-                                    (dsd-named-p dd) (dsd-predicate dd)))
-     (list (das!make-lisp-copier (dsd-type dd) (dsd-copier dd)))
+     (das!make-accessors dd slots)
+     (list (das!make-predicate dd))
+     (list (das!make-copier dd))
      (list
       (if (and (dsd-type dd) (dsd-named-p dd) (dsd-predicate dd))
           `(deftype ,(dsd-name dd) () '(satisfies ,(dsd-predicate dd)))
           nil)))))
-
-;;; entry point for object base
-(defun das!make-standard-structure (dd)
-  (let* ((name (dsd-name dd))
-         (slots (das!effective-slots dd))
-         (property-names (def!struct-property-names (mapcar #'dsd-slot-name slots))))
-    (append
-     (list `(eval-when (:compile-toplevel :load-toplevel :execute)
-              (das!register-structure ,dd)))
-     (mapcar (lambda (it)
-               (das!make-object-constructor name it slots property-names))
-             (dsd-constructors dd))
-     (das!make-object-accessors slots property-names (dsd-conc-name dd))
-     (list (das!make-object-predicate name (dsd-predicate dd)))
-     (list (das!make-object-copier name (dsd-copier dd))))))
 
 ;;; Parse slot definition
 ;;; catch bug (defstruct name (:copier cname) slot1 ... slotn)
@@ -591,7 +510,7 @@
          (raw (mapcar #'dsd-slot-name sd))
          (clear (remove-duplicates raw)))
     (when (/= (length raw) (length clear)) (error "Duplicate slot names ~a" raw))
-    (setf (dsd-slots dd) sd)))
+    sd))
 
 ;;; compute structure storage
 ;;; make prototype
@@ -599,17 +518,10 @@
 ;;;
 ;;;  das!compute-storage-prototype dd-list
 ;;;    dd-list ::= {inherited-dsd}* self-dsd
-;;; => (n-cells map prototype)
-;;;     n-cells ::= length of structure storage
-;;;     map::= tag*
-;;;     tag::= offset-tag | leader-tag |leader-self-tag | slot-position
-;;;     offset-tag::= -1
-;;;     leader-tag::= -2
-;;;     leader-self-tag::= -3
-;;;     slot-position::= non-negative-integer
-;;;     prototype::= {offset-cells* leader-cell? sn*}*
-;;;     offset-cells::= offset-tag *initial-offest (nothing if :initial-offset unused)
-;;;     leader-cell::= real structure-name (nothing if :named unused)
+;;; => prototype
+;;;     prototype::= {offset-cell* leader-cell? sn*}*
+;;;     offset-cell::= (quote nil) (nothing if :initial-offset unused)
+;;;     leader-cell::= (quote real-structure-name) (nothing if :named unused)
 ;;;     sn::= real slot-name
 ;;; for 
 ;;; (das!struct-storage-generate-prototype
@@ -621,61 +533,26 @@
 ;;;              :slots ((pas-a nil nil nil)(pas-b nil nil nil)))))
 ;;;  from  (defstruct (pas :named (:include maps) pas-a pas-b pas-c))
 ;;;
-;;;  n-cells::= 14
-;;;  map::=       (-1 -1  -2     3       4       -1  -1  -1  -2   9      10     -3  12    13)
-;;;  prototype::= (NIL NIL BINOP BINOP-A BINOP-B NIL NIL NIL MAPS MAPS-A MAPS-B PAS PAS-A PAS-B))
+;;;  prototype::= ('NIL 'NIL 'BINOP BINOP-A BINOP-B 'NIL 'NIL 'NIL 'MAPS MAPS-A MAPS-B 'PAS PAS-A PAS-B))
 ;;;
 
 ;;;  compute storage prototype from the descriptor list in DSD-INHERIT-DSDS
 (defun das%compute-storage-prototype (dd-list)
-  (let (storage (n-cell 0) i-map)
+  (with-collect
     (dolist (it dd-list)
       (let ((slots (dsd-slots it))
             (offset (dsd-initial-offset it)))
         (dotimes (i offset)
-          (push nil storage)
-          (push -1 i-map)
-          (incf n-cell))
+          (collect ''nil))
         ;; store tag for named structure
-        (when (dsd-named-p it)
-          (push (dsd-name it) storage)
-          (push -2 i-map)
-          (incf n-cell))
+        (when (and (dsd-type it) (dsd-named-p it))
+          (collect `',(dsd-name it)))
         (dolist (slot slots)
-          (push (dsd-slot-name slot) storage)
-          (push n-cell i-map)
-          (incf n-cell))))
-    ;; Change map of the tag of this structure type itself to -3
-    (let ((icell 0))
-      (dolist (cell i-map)
-        (if (eql cell -2)
-            (progn (setf (nth icell i-map) -3) (return)))
-        (incf icell)))
-    (make-dsd-prototype :n n-cell :map (reverse i-map) :storage (reverse storage))))
-
-;;; compute structure-type-hash
-;;; => hash-table (slot-name : storage position)
-(defun das%compute-storage-hash (prototype)
-  (let ((hash (make-hash-table :test #'eql)))
-    (mapc (lambda (it sym)
-            (when (>= it 0)
-              ;; IT is slot position
-              (setf (gethash sym hash) it)))
-          (dsd-prototype-map prototype)
-          (dsd-prototype-storage prototype))
-    hash))
+          (collect (dsd-slot-name slot)))))))
 
 (defun das!layout-compatible-p (dd old-dd)
   (and (eql (dsd-type dd) (dsd-type old-dd))
-       (if (memq (dsd-type dd) '(list vector))
-           (let ((prototype (dsd-prototype dd))
-                 (old-prototype (dsd-prototype old-dd)))
-             (and (equal (dsd-prototype-map prototype)
-                         (dsd-prototype-map old-prototype))
-                  (equal (dsd-prototype-storage prototype)
-                         (dsd-prototype-storage old-prototype))))
-           (equal (das!effective-slot-names dd)
-                  (das!effective-slot-names old-dd)))))
+       (equal (dsd-prototype dd) (dsd-prototype old-dd))))
 
 ;;; Register DD into *STRUCTURES*, check for incompatible redefinition
 ;;; beforehand
@@ -728,21 +605,15 @@
 (defun das!defstruct-expand (name options slots)
   (let ((dd (make-dsd :name name)))
     (das!parse-defstruct-options options dd)
-    (das!parse-struct-slots dd slots)
+    (setf (dsd-slots dd) (das!parse-struct-slots dd slots))
     ;; Check inherited slots
     (awhen (dsd-parent dd)
       (unless (das!include-possible-p dd it)
         (error "Structure ~A have overlapping slots with included ~A."
                name (dsd-name it))))
-    (let ((lisp-type (memq (dsd-type dd) '(list vector))))
-      ;; Compute prototype
-      ;; prototype is unused for object based structure
-      (when lisp-type
-        (setf (dsd-prototype dd)
-              (das%compute-storage-prototype (das!inherit-dsds dd))))
-      (if lisp-type
-          (das!make-lisp-base-structure dd)
-          (das!make-standard-structure dd)))))
+    ;; Compute prototype
+    (setf (dsd-prototype dd) (das%compute-storage-prototype (das!inherit-dsds dd)))
+    (das!make-structure dd)))
 
 (defmacro das!struct (name-and-options &rest slots)
   (let* ((name-and-options (ensure-list name-and-options))
