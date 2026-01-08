@@ -1436,13 +1436,21 @@
 ;;; Javascript FFI
 
 
-(define-raw-builtin new (&rest plist)
+(define-raw-builtin new! (&rest plist)
   `(object
     ,@(with-collect
         (do ((tail plist (cddr tail)))
             ((null tail))
           (collect (car tail))
           (collect (convert (cadr tail)))))))
+
+(define-raw-builtin new (&rest plist)
+  `(object
+    ,@(with-collect
+        (do ((tail plist (cddr tail)))
+            ((null tail))
+          (collect (car tail))
+          (collect (convert `(lisp-to-js ,(cadr tail))))))))
 
 (define-builtin clone (x)
   `(method-call |Object| "assign" (object) ,x))
@@ -1485,6 +1493,14 @@
 
 (define-raw-builtin oset (value object key &rest keys)
   (convert `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
+
+(define-raw-builtin oget! (object key &rest keys)
+  (let ((result (convert object)))
+    (dolist (k (cons key keys) result)
+      (setq result `(property ,result ,(convert-xstring k))))))
+
+(define-raw-builtin oset! (value object key &rest keys)
+  `(= ,(convert `(oget! ,object ,key ,@keys)) ,(convert value)))
 
 (define-builtin js-null-p (x)
   (convert-to-bool `(=== ,x null)))

@@ -344,7 +344,7 @@
     (mop-object (print-object form stream))
     ;; structure object
     (structure-object
-     (let ((dvec (oget* form "structDescriptors")))
+     (let ((dvec (oget! form "structDescriptors")))
        (cond ((symbolp dvec)
               (simple-format stream "#<~a (INTERNAL)>" (string dvec)))
              (t
@@ -359,7 +359,7 @@
                         (write-string " :" stream)
                         (write-string (symbol-name slot) stream)
                         (write-string " " stream)
-                        (write-aux (oget* form prop) stream known-objects object-ids))
+                        (write-aux (oget! form prop) stream known-objects object-ids))
                       slot-names property-names)
                 (write-string (if obsolete ">" ")") stream))))))
     ;; hash-table object
