@@ -64,7 +64,7 @@ internals.error = function(...args){
 }
 
 internals.typeError = function (datum, expectedType) {
-  internals.error(internals.intern("TYPE-ERROR", "COMMON-LISP"),
+  internals.error(internals.intern("TYPE-ERROR"),
     internals.intern("DATUM", "KEYWORD"), datum,
     internals.intern("EXPECTED-TYPE", "KEYWORD"), expectedType)
 }
@@ -133,13 +133,13 @@ internals.Cons = function (car, cdr) {
 };
 
 Object.defineProperty(Object.prototype, "$$jscl_car", {
-  get: (function () { internals.typeError(this, internals.intern("CONS", "COMMON-LISP")); }),
-  set: (function () { internals.typeError(this, internals.intern("CONS", "COMMON-LISP")); }),
+  get: (function () { internals.typeError(this, internals.intern("CONS")); }),
+  set: (function () { internals.typeError(this, internals.intern("CONS")); }),
 });
 
 Object.defineProperty(Object.prototype, "$$jscl_cdr", {
-  get: (function () { internals.typeError(this, internals.intern("CONS", "COMMON-LISP")); }),
-  set: (function () { internals.typeError(this, internals.intern("CONS", "COMMON-LISP")); }),
+  get: (function () { internals.typeError(this, internals.intern("CONS")); }),
+  set: (function () { internals.typeError(this, internals.intern("CONS")); }),
 });
 
 Object.defineProperty(internals.Cons.prototype, "$$jscl_car", { writable: true });
@@ -165,7 +165,7 @@ internals.QIList = function(){
 // Arithmetic
 
 internals.handled_division = function (x, y) {
-  if (y == 0) internals.error(internals.intern("DIVISION-BY-ZERO", "COMMON-LISP"),
+  if (y == 0) internals.error(internals.intern("DIVISION-BY-ZERO"),
     internals.intern("OPERANDS","KEYWORD"), internals.QIList(x, y, nil));
   return x/y;
 };
@@ -336,7 +336,7 @@ jscl.CL = packages.CL.exports;
 const UNBOUND = Symbol('UnboundFunction')
 
 internals.makeUnboundFunction = function (symbol) {
-  const fn = ()=>{ internals.error(internals.intern("UNDEFINED-FUNCTION","COMMON-LISP"),
+  const fn = ()=>{ internals.error(internals.intern("UNDEFINED-FUNCTION"),
     internals.intern("NAME","KEYWORD"), symbol);}
   fn[UNBOUND] = true;
   return fn;
@@ -353,7 +353,7 @@ internals.Symbol = function(name, package_name){
 internals.symbolValue = function (symbol){
   var value = symbol.value;
   if (value === undefined){
-    internals.error(internals.intern("UNBOUND-VARIABLE", "COMMON-LISP"),
+    internals.error(internals.intern("UNBOUND-VARIABLE"),
       internals.intern("NAME", "KEYWORD"), symbol);
   } else {
     return value;
@@ -364,7 +364,7 @@ internals.fboundp = function (symbol) {
   if (symbol instanceof internals.Symbol){
     return !symbol.fvalue[UNBOUND]
   } else {
-    internals.typeError(symbol, internals.intern("SYMBOL", "COMMON-LISP"));
+    internals.typeError(symbol, internals.intern("SYMBOL"));
   }
 }
 
@@ -392,7 +392,7 @@ internals.bindSpecialBindings = function (symbols, values, callback){
 };
 
 internals.intern = function (name, package_name){
-  package_name = package_name || "JSCL";
+  package_name = package_name || "COMMON-LISP";
   var lisp_package = packages[package_name];
   if (!lisp_package)
     throw "No package " + package_name;
@@ -501,9 +501,9 @@ function runCommonLispScripts() {
 
 // NIL and T
 
-nil = internals.intern("NIL", "COMMON-LISP");
-t = internals.intern("T", "COMMON-LISP");
-errorSym = internals.intern("ERROR", "COMMON-LISP");
+nil = internals.intern("NIL");
+t = internals.intern("T");
+errorSym = internals.intern("ERROR");
 Object.defineProperty(nil, "$$jscl_car", { value: nil, writable: false });
 Object.defineProperty(nil, "$$jscl_cdr", { value: nil, writable: false });
 

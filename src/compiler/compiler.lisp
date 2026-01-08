@@ -585,13 +585,9 @@
       ;; Uninterned symbol
       ((null package)
        `(new (call-internal |Symbol| ,(symbol-name symbol))))
-      ;; Special case for bootstrap. For now, we just load all the
-      ;; code with JSCL as the current package. We will compile the
-      ;; JSCL package as CL in the target.
-      #-jscl
-      ((eq package (find-package "JSCL"))
-       `(call-internal |intern| ,(symbol-name symbol)))
       ;; Interned symbol
+      ((eq package (find-package "COMMON-LISP"))
+       `(call-internal |intern| ,(symbol-name symbol)))
       (t
        `(call-internal |intern| ,(symbol-name symbol) ,(package-name package))))))
 
