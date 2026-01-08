@@ -6,11 +6,11 @@
   "files": [
     "jscl.js",
     "jscl-node.js",
-    "jscl-deno.js",
     "jscl-web.js"
   ],
+  "type": "commonjs",
   "bin": {
-    "jscl": "./jscl-node-wrapper.js"
+    "jscl": "./jscl-node.js"
   },
   "directories": {
     "test": "tests"
