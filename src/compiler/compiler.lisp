@@ -1088,7 +1088,7 @@
   (make-hash-table))
 
 (defun !special-operator-p (name)
-  (nth-value 1 (gethash name *builtins*)))
+  (nth-value 1 (gethash name *compilations*)))
 #+jscl
 (fset 'special-operator-p #'!special-operator-p)
 
