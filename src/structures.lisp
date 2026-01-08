@@ -392,14 +392,14 @@
                       ,(ecase storage-type
                          (list `(nth ,location obj))
                          (vector `(storage-vector-ref! obj ,location))
-                         ((nil) `(oget* obj ,location)))))
+                         ((nil) `(oget! obj ,location)))))
           (unless (dsd-slot-read-only it)
             (collect `(defun (setf ,accessor-name) (value obj)
                         ,@(if chk-t (list `(check-type value ,chk-t)))
                         ,(ecase storage-type
                            (list `(rplaca (nthcdr ,location obj) value))
                            (vector `(storage-vector-set! obj ,location value))
-                           ((nil) `(oset* value obj ,location)))
+                           ((nil) `(oset! value obj ,location)))
                         value))))))))
 
 ;;; PREDICATE
@@ -432,7 +432,7 @@
           `(let ((dd (get-structure-dsd ',name)))
              (defun ,it (obj)
                (and (objectp obj)
-                    (eq dd (storage-vector-ref! (oget* obj "structDescriptors")
+                    (eq dd (storage-vector-ref! (oget! obj "structDescriptors")
                                                 ,(dsd-depth dd))))))))))
 
 ;;; COPIER
@@ -450,7 +450,7 @@
          `(defun ,it (obj)
             (let ((dd (get-structure-dsd ',name)))
               (cond ((and (objectp obj)
-                          (eq dd (storage-vector-ref! (oget* obj "structDescriptors")
+                          (eq dd (storage-vector-ref! (oget! obj "structDescriptors")
                                                       ,(dsd-depth dd))))
                      (clone obj))
                     (t (error 'type-error :datum obj :expected-type ',name))))))))))
@@ -482,8 +482,8 @@
            ;; construct the structure
            ,(if storage-type
                 `(,storage-type ,@prototype)
-                `(new "dt_Name" :structure "structDescriptors" dvec
-                      ,@(mapcan #'list (def!struct-property-names prototype) prototype))))))))
+                `(new! "dt_Name" :structure "structDescriptors" dvec
+                       ,@(mapcan #'list (def!struct-property-names prototype) prototype))))))))
 
 (defun das!make-structure (dd)
   (let ((slots (das!effective-slots dd)))
