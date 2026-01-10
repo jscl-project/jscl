@@ -323,6 +323,9 @@ no values if INPUT is empty."
 (when (string/= (%js-typeof |Deno|) "undefined")
   (push :deno *features*))
 
+(when (string/= (%js-typeof "WorkerGlobalScope") "undefined")
+  (push :web-worker *features*))
+
 (defun welcome-message (&key (html nil))
   (format t "Welcome to ~a (version ~a ~a)~%~%"
           (lisp-implementation-type)
@@ -398,8 +401,3 @@ no values if INPUT is empty."
 (defun require (name)
   (if (find :node *features*)
       (funcall (%js-vref "require") name)))
-
-
-(when (jscl::web-worker-p)
-  (jscl::initialize-web-worker))
-

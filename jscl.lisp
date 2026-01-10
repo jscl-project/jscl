@@ -101,7 +101,6 @@
     ("structures"    :both)
     ("format"        :both)
     ("documentation" :target)
-    ("worker"        :target)
     ("clos"
      ("tools"         :target)
      ("exports"       :target)
@@ -192,7 +191,14 @@
         (setq *gensym-counter* ,*gensym-counter*)))
     (late-compile `(setq *literal-counter* ,*literal-counter*))))
 
+(defvar +application-prologue+ "if (typeof importScripts !== 'undefined') importScripts('jscl.js');
+(function(jscl){
+'use strict';
+(function(values, internals){")
 
+(defvar +application-epilogue+ "})(jscl.internals.pv, jscl.internals);
+})( typeof require !== 'undefined'? require('./jscl'):
+typeof window !== 'undefined'? window.jscl: self.jscl )")
 
 (defun compile-application (files output &key shebang)
   (let ((*features* (list :jscl :jscl-xc)))
@@ -200,13 +206,11 @@
       (with-open-file (out output :direction :output :if-exists :supersede)
         (when shebang
           (format out "#!/usr/bin/env node~%"))
-        (format out "(function(jscl){~%")
-        (format out "'use strict';~%")
-        (format out "(function(values, internals){~%")
+        (write-string +application-prologue+ out)
         (dolist (input files)
           (!compile-file input out))
-        (format out "})(jscl.internals.pv, jscl.internals);~%")
-        (format out "})( typeof require !== 'undefined'? require('./jscl'): window.jscl )~%")))))
+        (write-string +application-epilogue+ out)
+        nil))))
 
 
 
@@ -257,7 +261,11 @@
     ;; Node REPL
     (compile-application (list (source-pathname "node.lisp" :directory '(:relative "node")))
                          (merge-pathnames "jscl-node.js" *base-directory*)
-                         :shebang t)))
+                         :shebang t)
+
+    ;; Web worker REPL
+    (compile-application (list (source-pathname "worker.lisp" :directory '(:relative "worker")))
+                         (merge-pathnames "jscl-worker.js" *base-directory*))))
 
 
 ;;; Run the tests in the host Lisp implementation. It is a quick way
