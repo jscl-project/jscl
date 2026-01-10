@@ -26,7 +26,7 @@
 ;;; but for complete defstruct (see structures.lisp), a vector of DSD
 ;;; is stored in "structDescriptors".
 (defun structure-name (obj)
-  #+jscl (let ((desc (oget* obj "structDescriptors")))
+  #+jscl (let ((desc (oget! obj "structDescriptors")))
            (if (symbolp desc)
                desc
                (dsd-name (storage-vector-ref! desc (1- (length desc))))))
@@ -54,16 +54,16 @@ Append numbers to symbol names to make them unique."
     (when constructor
       (setq constructor-expansion
             `(defun ,constructor (&key ,@slot-descriptions)
-               (new "dt_Name" :structure
-                    "structDescriptors" ',name
-                    ,@(mapcan (lambda (p s)
-                                `(,p ,(car s)))
-                              property-names slot-descriptions)))))
+               (new! "dt_Name" :structure
+                     "structDescriptors" ',name
+                     ,@(mapcan (lambda (p s)
+                                 `(,p ,(car s)))
+                               property-names slot-descriptions)))))
 
     (when predicate
       (setq predicate-expansion
             `(defun ,predicate (x)
-               (and (objectp x) (eq (oget* x "structDescriptors") ',name)))))
+               (and (objectp x) (eq (oget! x "structDescriptors") ',name)))))
 
     (when copier
       (setq copier-expansion
@@ -73,7 +73,7 @@ Append numbers to symbol names to make them unique."
        (defun ,dumper (x)
          (list (cons "dt_Name" :structure)
                (cons "structDescriptors" ',name)
-               ,@(mapcar (lambda (p) `(cons ,p (oget* x ,p))) property-names)))
+               ,@(mapcar (lambda (p) `(cons ,p (oget! x ,p))) property-names)))
        ,constructor-expansion
        ,predicate-expansion
        ,copier-expansion
@@ -84,9 +84,9 @@ Append numbers to symbol names to make them unique."
                    (accessor-name (intern (concat (symbol-name name) "-"
                                                   (symbol-name slot-name)))))
               `((defun ,accessor-name (x)
-                  (oget* x ,prop))
+                  (oget! x ,prop))
                 (defun (setf ,accessor-name) (new-val x)
-                  (oset* new-val x ,prop)))))
+                  (oset! new-val x ,prop)))))
           property-names slot-descriptions)
        ',name)))
 
