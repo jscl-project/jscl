@@ -17,11 +17,6 @@
 
 (/debug "loading worker.lisp!")
 
-(defun web-worker-p ()
-  (and (string= (%js-typeof |document|) "undefined")
-       (string= (%js-typeof |module|)   "undefined")
-       (not (find :deno *features*))))
-
 (defvar *web-worker-session-id*)
 
 (defvar *web-worker-output-class* "jqconsole-output")
@@ -126,3 +121,5 @@
             (when (string= command "init")
               (setf *web-worker-session-id* sessionId)
               (web-worker-repl))))))
+
+(initialize-web-worker)
