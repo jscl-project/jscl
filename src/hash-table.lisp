@@ -63,9 +63,7 @@
   )
 
 (defun hash-table-p (obj)
-  (if (js-undefined-p obj)
-      nil
-      (eql (object-type-code obj) :hash-table)))
+  (and (objectp obj) (eql (object-type-code obj) :hash-table)))
 
 (defun %select-hash-fn (fn)
   (when (and (symbolp fn) (fboundp fn))
