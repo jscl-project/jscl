@@ -73,7 +73,7 @@ async function initialize() {
 }
 
 function loadJSCLWorker(sessionId) {
-  const jsclWorker = new Worker("jscl.js");
+  const jsclWorker = new Worker("jscl-worker.js");
   jsclWorker.onmessage = event => {
     const { string, stringclass } = event.data;
     jqconsole.Write(string, stringclass);
