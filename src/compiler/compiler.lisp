@@ -1506,7 +1506,10 @@
   (convert-to-bool `(=== ,x null)))
 
 (define-builtin objectp (x)
-  (convert-to-bool `(=== (typeof ,x) "object")))
+  `(selfcall
+    (var (x ,x))
+    (return ,(convert-to-bool
+              `(and (=== (typeof x) "object") (not (=== x null)))))))
 
 (define-builtin js-undefined-p (x)
   (convert-to-bool `(=== ,x undefined)))
