@@ -93,13 +93,13 @@
 
 (defun trace-report-call (name args)
   (dotimes (i *trace-level*) (write-string " "))
-  (format t "~a: ~S~%" *trace-level* (cons name args)))
+  (format *trace-output* "~a: ~S~%" *trace-level* (cons name args)))
 
 (defun trace-report-return (name values)
   (dotimes (i *trace-level*) (write-string " "))
-  (format t "~a: ~S returned " *trace-level* name)
+  (format *trace-output* "~a: ~S returned " *trace-level* name)
   (dolist (value values) (format t "~S " value))
-  (format t "~%"))
+  (format *trace-output* "~%"))
 
 (defun trace-functions (names)
   (if (null names)

@@ -51,7 +51,7 @@
                   ((serious-condition
                      (lambda (c)
                        (format *error-output* "~A: ~A~%" (class-name (class-of c)) c)
-                       (format-backtrace *error-output* :from #'signal)
+                       (format-backtrace *trace-output* :from #'signal)
                        (return-from bail-out))))
                 (dolist (x (multiple-value-list (eval-interactive-input input)))
                   ;; ensure jqconsole is on fresh line
