@@ -155,3 +155,53 @@
 (defmacro step (form)
   "Stepping is no currently available"
   form)
+
+(defun backtrace (&key (from #'backtrace))
+  "Capture stack trace as a list of frames.
+
+Currently represented as a list of strings. If FROM is provided and
+appears on stack, frames including and above the topmost FROM call is
+omitted. Note the function does NOT truncate the list according to
+*BACKTRACE-LIMIT*."
+  (let ((obj (new)))
+    (cond ((in "stackTraceLimit" (oget! *root* "Error"))
+           (let ((old-limit #j:Error:stackTraceLimit))
+             (setf #j:Error:stackTraceLimit (%js-vref "Infinity"))
+             ((oget! *root* "Error" "captureStackTrace") obj from)
+             (setf #j:Error:stackTraceLimit old-limit)))
+          (t ((oget! *root* "Error" "captureStackTrace") obj from)))
+    (let* ((str (oget! obj "stack"))
+           (list (map 'list #'js-to-lisp
+                      ((oget! str "split")
+                       (#j:RegExp (code-char 10) "g")))))
+      ;; Trim useless first line on V8
+      (when (equal (car list) "Error")
+        (pop list))
+      ;; Trim last empty line, if exists
+      (when (equal (car (last list)) "")
+        (rplacd (last list 2) nil))
+      list)))
+
+(defvar *backtrace-limit* 20
+  "Most number of stack traces to be printed by FORMAT-BACKTRACE.
+
+Set to NIL to always display full stack trace.")
+
+(defun format-backtrace (stream &key (from #'format-backtrace))
+  "Capture and format stack trace to STREAM.
+
+If stack trace has more frames than *BACKTRACE-LIMIT*, it is
+truncated."
+  (let* ((bt (backtrace :from from))
+         (truncate-p (and *backtrace-limit*
+                          (< *backtrace-limit* (length bt)))))
+    (dolist (frame (if truncate-p (subseq bt 0 *backtrace-limit*) bt))
+      ;; Ensure two space indentation, so it's easier to read in
+      ;; terminal
+      (unless (prefix-p "  " frame)
+        (write-string "  " stream))
+      (format stream "~A~%" frame))
+    (when truncate-p
+      (format stream "... ~A more frames, increase ~S to view more~%"
+              (- (length bt) *backtrace-limit*) '*backtrace-limit*))
+    nil))

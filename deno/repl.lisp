@@ -35,17 +35,19 @@
                ((oget *rl* "setPrompt") linecont-prompt)
                (progn
                  (%js-try
-                  (handler-case
+                  (block bail-out
+                    (handler-bind
+                        ((serious-condition
+                           (lambda (c)
+                             (format *error-output* "~A: ~A~%" (class-name (class-of c)) c)
+                             (format-backtrace *error-output* :from #'signal))))
                       (dolist (result (multiple-value-list (eval-interactive-input input)))
                         (fresh-line)
                         (prin1 result)
-                        (terpri))
-                    (error (c)
-                      (format t "~A: ~A" (class-name (class-of c)) c)
-                      (terpri)))
+                        (terpri))))
                   (catch (err)
                     (let ((message (or (oget err "message") err)))
-                      (format t "ERROR[!]: ~a~%" message))))
+                      (format *error-output* "ERROR[!]: ~a~%~A~%" message (oget err "stack")))))
                  (setf (fill-pointer (stream-data input-buffer)) 0)
                  ;; Update prompt
                  (set-prompt))))
