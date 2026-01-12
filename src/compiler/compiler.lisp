@@ -1700,7 +1700,7 @@
 			(mapcar #'convert args))))
     (unless (or (symbolp function)
                 (and (consp function)
-                     (member (car function) '(lambda oget))))
+                     (member (car function) '(lambda oget oget!))))
       (error "Bad function designator `~S'" function))
     (cond
       ((translate-function function)
@@ -1722,6 +1722,12 @@
                     ,@(mapcar (lambda (s)
                                 `(call-internal |lisp_to_js| ,(convert s)))
                               args))))
+      ((and (consp function) (eq (car function) 'oget!))
+       `(call ,(reduce (lambda (obj p)
+                         `(property ,obj ,p))
+                       (mapcar #'convert-xstring (cddr function))
+                       :initial-value (convert (cadr function)))
+              ,@(mapcar #'convert args)))
       (t
        (error "Bad function descriptor")))))
 

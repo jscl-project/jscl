@@ -80,6 +80,11 @@ accumulated, in the order."
 (defun mapconcat (func list)
   (join (mapcar func list)))
 
+(defun prefix-p (prefix string)
+  (let ((lx (length prefix))
+        (ly (length string)))
+    (and (<= lx ly) (string= prefix string :end2 lx))))
+
 (defun vector-to-list (vector)
   (let ((size (length vector)))
     (with-collect
