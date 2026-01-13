@@ -39,6 +39,11 @@ else if (typeof self !== 'undefined')
 
 
 var internals = jscl.internals = Object.create(null);
+internals.debug = function (str) {
+  if (globalThis.jscl_debug === true) {
+    console.log(internals.xstring(str));
+  }
+};
 
 internals.globalEval = function(code, data){
   var geval = eval;             // Just an indirect eval

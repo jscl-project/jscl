@@ -351,4 +351,93 @@
     (values) ))
 
 
+;;;
+;;; compile-application - Compile Lisp files into a JavaScript application
+;;;
+;;; This function compiles Lisp source files into a JavaScript file
+;;; that can be loaded as a JSCL application module. The output includes
+;;; the necessary wrapper to access JSCL internals.
+;;;
+
+(defun compile-application (files output &key shebang verbose place)
+  "Compile Lisp FILES into a JavaScript application OUTPUT.
+   Only available on Node.js platform.
+
+   FILES can be a single filename string or a list of filenames.
+
+   :shebang - if true, add #!/usr/bin/env node header for Node.js executables
+   :verbose - if true, print progress messages
+   :place - path to jscl.js for require(), defaults to './'"
+  (unless (node-environment-p)
+    (error "compile-application is only available on Node.js platform"))
+  ;; Normalize files to a list
+  (when (stringp files)
+    (setq files (list files)))
+  (unless place
+    (setq place "./"))
+  (let* ((*package* *package*)
+         (*compiling-file* t)
+         (code-parts (make-array 0 :fill-pointer 0)))
+    ;; Add header
+    (when shebang
+      (vector-push-extend (concat "#!/usr/bin/env node" (string #\newline)) code-parts))
+    (vector-push-extend (concat "(function(jscl){" (string #\newline)
+                                "'use strict';" (string #\newline)
+                                "(function(values, internals){" (string #\newline))
+                        code-parts)
+    ;; Compile each file
+    (with-compilation-environment
+      (dolist (input-file files)
+        (unless (#j:Fs:existsSync input-file)
+          (error "No such file ~s" input-file))
+        (when verbose
+          (format t "Compiling ~a...~%" input-file))
+        (let* ((source (_ldr_ctrl-r_replace_ (#j:Fs:readFileSync input-file "utf-8")))
+               (stream (make-string-input-stream source))
+               (eof (gensym "EOF")))
+          (loop
+            for expr = (ls-read stream nil eof)
+            until (eq expr eof)
+            do (let ((code (compile-toplevel expr)))
+                 (when (plusp (length code))
+                   (vector-push-extend code code-parts)))))))
+    ;; Add footer
+    (vector-push-extend (concat "})(jscl.internals.pv, jscl.internals);" (string #\newline)
+                                "})( typeof require !== 'undefined'? require('"
+                                place "jscl'): window.jscl )" (string #\newline))
+                        code-parts)
+    ;; Write output
+    (_loader_check_output_directory_ output)
+    (#j:Fs:writeFileSync output
+                         (apply #'concat (coerce code-parts 'list)))
+    (when verbose
+      (format t "Wrote ~a~%" output))
+    output))
+
+
+;;;
+;;; compile-file - Compile a Lisp file to JavaScript
+;;;
+;;; Convenience wrapper around compile-application for a single file.
+;;;
+
+(defun compile-file (input-file output-file &key verbose print shebang place)
+  "Compile INPUT-FILE to JavaScript and write to OUTPUT-FILE.
+   Only available on Node.js platform.
+
+   The output is a self-contained JavaScript module that can modify
+   the JSCL environment when loaded.
+
+   :verbose - if true, print progress messages
+   :print - currently unused, for CL compatibility
+   :shebang - if true, add #!/usr/bin/env node header
+   :place - path to jscl.js for require(), defaults to './'"
+  (declare (ignore print))
+  (compile-application input-file output-file
+                       :shebang shebang
+                       :verbose verbose
+                       :place place)
+  (values output-file nil nil))
+
+
 ;;; EOF

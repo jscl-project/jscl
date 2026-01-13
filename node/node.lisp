@@ -35,12 +35,6 @@
                                      "prompt" (get-prompt))))))
 
 (defun node-init ()
-  (setq *standard-output*
-        (make-stream
-         :write-fn (lambda (string)
-                     (#j:process:stdout:write string)))
-        *error-output* *standard-output*
-        *trace-output* *standard-output*)
   (let ((args (mapcar #'js-to-lisp (vector-to-list (subseq #j:process:argv 2)))))
     (cond
       ((null args)

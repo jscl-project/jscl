@@ -396,14 +396,19 @@ All errors are caught and report to *ERROR-OUTPUT*."
         0)))
 
 
-;;; Basic *standard-output* stream. This will usually be overriden by
-;;; web or node REPL.
+;;; Basic *standard-output* stream.
 ;;;
 (setq *standard-output*
-      (make-line-buffer-stream
-       (make-stream
-        :write-fn (lambda (string) (#j:console:log string))
-        :kind 'console-output-stream))
+      (if (find :node *features*)
+          ;; Node.js: use process.stdout.write directly
+          (make-stream
+           :write-fn (lambda (string)
+                       (#j:process:stdout:write string)))
+          ;; Browser: use console.log with line buffering
+          (make-line-buffer-stream
+           (make-stream
+            :write-fn (lambda (string) (#j:console:log string))
+            :kind 'console-output-stream)))
       *error-output* *standard-output*
       *trace-output* *standard-output*)
 

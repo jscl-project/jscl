@@ -5,7 +5,9 @@
   <body>
     <pre id="log"></pre>
     <script>
-      var log = document.getElementById('log');
+      globalThis.jscl_debug = true;
+
+      var log = document.getElementById("log");
       var console = {
         log: function(msg){ 
            log.appendChild ( document.createTextNode(msg + '\n') );

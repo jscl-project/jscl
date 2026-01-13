@@ -1358,7 +1358,7 @@
   (convert-to-bool `(=== (typeof ,x) "function")))
 
 (define-builtin /debug (x)
-  `(method-call |console| "log" (call-internal |xstring| ,x)))
+  `(call-internal "debug" ,x))
 
 (define-raw-builtin /log (x &rest y)
   `(selfcall
