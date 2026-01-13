@@ -359,7 +359,18 @@
 ;;; the necessary wrapper to access JSCL internals.
 ;;;
 
-(defun compile-application (files output &key shebang verbose place)
+(defvar *application-prologue*
+  "(function(jscl){
+'use strict';
+(function(values, internals){
+")
+
+(defun application-epilogue (place)
+  (format nil "})(jscl.internals.pv, jscl.internals);
+})( typeof require !== 'undefined'? require('~ajscl'): window.jscl )
+" place))
+
+(defun compile-application (files output &key shebang verbose (place "./"))
   "Compile Lisp FILES into a JavaScript application OUTPUT.
    Only available on Node.js platform.
 
@@ -370,46 +381,33 @@
    :place - path to jscl.js for require(), defaults to './'"
   (unless (node-environment-p)
     (error "compile-application is only available on Node.js platform"))
-  ;; Normalize files to a list
-  (when (stringp files)
-    (setq files (list files)))
-  (unless place
-    (setq place "./"))
-  (let* ((*package* *package*)
-         (*compiling-file* t)
-         (code-parts (make-array 0 :fill-pointer 0)))
-    ;; Add header
-    (when shebang
-      (vector-push-extend (concat "#!/usr/bin/env node" (string #\newline)) code-parts))
-    (vector-push-extend (concat "(function(jscl){" (string #\newline)
-                                "'use strict';" (string #\newline)
-                                "(function(values, internals){" (string #\newline))
-                        code-parts)
-    ;; Compile each file
-    (with-compilation-environment
-      (dolist (input-file files)
-        (unless (#j:Fs:existsSync input-file)
-          (error "No such file ~s" input-file))
-        (when verbose
-          (format t "Compiling ~a...~%" input-file))
-        (let* ((source (_ldr_ctrl-r_replace_ (#j:Fs:readFileSync input-file "utf-8")))
-               (stream (make-string-input-stream source))
-               (eof (gensym "EOF")))
-          (loop
-            for expr = (ls-read stream nil eof)
-            until (eq expr eof)
-            do (let ((code (compile-toplevel expr)))
-                 (when (plusp (length code))
-                   (vector-push-extend code code-parts)))))))
-    ;; Add footer
-    (vector-push-extend (concat "})(jscl.internals.pv, jscl.internals);" (string #\newline)
-                                "})( typeof require !== 'undefined'? require('"
-                                place "jscl'): window.jscl )" (string #\newline))
-                        code-parts)
-    ;; Write output
-    (_loader_check_output_directory_ output)
-    (#j:Fs:writeFileSync output
-                         (apply #'concat (coerce code-parts 'list)))
+  (setq files (ensure-list files))
+  (_loader_check_output_directory_ output)
+  (let ((code
+          (with-output-to-string (out)
+            (let ((*package* *package*)
+                  (*compiling-file* t))
+              ;; Add header
+              (when shebang
+                (write-string "#!/usr/bin/env node" out)
+                (terpri out))
+              (write-string *application-prologue* out)
+              ;; Compile each file
+              (with-compilation-environment
+                (dolist (input-file files)
+                  (unless (#j:Fs:existsSync input-file)
+                    (error "No such file ~s" input-file))
+                  (when verbose
+                    (format t "Compiling ~a...~%" input-file))
+                  (let* ((source (_ldr_ctrl-r_replace_ (#j:Fs:readFileSync input-file "utf-8")))
+                         (stream (make-string-input-stream source))
+                         (eof (gensym "EOF")))
+                    (do ((expr (ls-read stream nil eof) (ls-read stream nil eof)))
+                        ((eq expr eof))
+                      (write-string (compile-toplevel expr) out)))))
+              ;; Add footer
+              (write-string (application-epilogue place) out)))))
+    (#j:Fs:writeFileSync output code)
     (when verbose
       (format t "Wrote ~a~%" output))
     output))
