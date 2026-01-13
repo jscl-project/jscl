@@ -426,3 +426,13 @@ All errors are caught and report to *ERROR-OUTPUT*."
 (defun require (name)
   (if (find :node *features*)
       (funcall (%js-vref "require") name)))
+
+;; Process -e arguments in Node.js
+(when (find :node *features*)
+  (let ((args (vector-to-list (subseq #j:process:argv 2))))
+    (while args
+      (let ((arg (js-to-lisp (pop args))))
+        (cond
+          ((string= arg "-e")
+           (when args
+             (eval (read-from-string (js-to-lisp (pop args)))))))))))

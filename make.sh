@@ -19,3 +19,6 @@ OPTIND=1
 export SOURCE_DATE_EPOCH=$(git show -s --format=%ct HEAD)
 
 sbcl --load "$BASE/jscl.lisp" --eval "(jscl:bootstrap $VERBOSE)" --eval '(quit)'
+
+# Build jscl-node.js using the freshly built jscl.js
+node "$BASE/jscl.js" -e '(jscl:compile-application "node/node.lisp" "jscl-node.js" :shebang t)'
