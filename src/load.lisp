@@ -252,7 +252,8 @@
 
 
 (defvar *application-prologue*
-  "(function(jscl){
+  "if (typeof importScripts !== 'undefined') importScripts('jscl.js');
+(function(jscl){
 'use strict';
 (function(values, internals){
 ")
