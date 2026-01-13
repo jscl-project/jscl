@@ -72,6 +72,25 @@ no values if INPUT is empty."
         (setq values (multiple-value-list (eval-interactive form)))))
     (values-list values)))
 
+(defmacro with-toplevel-eval (() &body body)
+  "Run BODY and print the results (can be multiple values).
+All errors are caught and report to *ERROR-OUTPUT*."
+  `(%js-try
+    (block bail-out
+      (handler-bind
+          ((serious-condition
+             (lambda (c)
+               (format *error-output* "~A: ~A~%" (class-name (class-of c)) c)
+               (format-backtrace *trace-output* :from #'signal)
+               (return-from bail-out))))
+        (dolist (result (multiple-value-list (progn ,@body)))
+          (fresh-line)
+          (prin1 result)
+          (terpri))))
+    (catch (err)
+      (let ((message (or (oget err "message") err)))
+        (format *error-output* "ERROR[!]: ~a~%~A~%" message (oget err "stack"))))))
+
 (export
  '(&allow-other-keys &aux &body &environment &key &optional &rest &whole
    * ** *** *break-on-signals* *compile-file-pathname*
