@@ -179,10 +179,10 @@
 ;;; sync mode
 (defun loader-sync-mode (name verbose bundle-name place hook)
   ;; check what input file exists
-  (unless (#j:Fs:existsSync name)
+  (unless (probe-file name)
     (error "No such file ~s" name))
   (_load_eval_bundle_
-   (_ldr_ctrl-r_replace_ (#j:Fs:readFileSync name "utf-8"))
+   (_ldr_ctrl-r_replace_ (read-file-into-string name))
    verbose
    bundle-name
    place
@@ -227,7 +227,7 @@
      _rdr_done_
        (setq stream nil expr nil code nil))
     (when fbundle
-      (_loader_check_output_directory_ bundle-name)
+      (ensure-directories-exist bundle-name)
       (_loader_make_bundle code-stor bundle-name place)
       (setq code-stor nil))
     (values)))
@@ -250,17 +250,6 @@
           (print-object condition))))
   (write-char  #\newline))
 
-
-;;; Check what output directory exists
-(defun _loader_check_output_directory_ (path)
-  (let ((dir (oget (#j:FsPath:parse path) "dir")))
-    (if (> (length dir) 0)
-        (unless (#j:Fs:existsSync dir)
-          ;; dont create new directory
-          (error "No such output directory ~s" dir))
-        ;; path eq "file.lisp"
-        ;; so, dir eq "" and eq "./" by default
-        t )))
 
 ;;; header for jscl application module
 (defun _loader_bundle_stm_open_ (stream)
@@ -286,7 +275,7 @@
 
 ;;; bundle maker
 (defun _loader_make_bundle (code fname place)
-  (let ((stream (#j:Fs:createWriteStream fname))
+  (let ((stream (open-write-stream fname))
         (nums 0))
     (_loader_bundle_stm_open_ stream)
     ;; for each statement in code
@@ -382,7 +371,7 @@
   (unless (node-environment-p)
     (error "compile-application is only available on Node.js platform"))
   (setq files (ensure-list files))
-  (_loader_check_output_directory_ output)
+  (ensure-directories-exist output)
   (let ((code
           (with-output-to-string (out)
             (let ((*package* *package*)
@@ -395,11 +384,11 @@
               ;; Compile each file
               (with-compilation-environment
                 (dolist (input-file files)
-                  (unless (#j:Fs:existsSync input-file)
+                  (unless (probe-file input-file)
                     (error "No such file ~s" input-file))
                   (when verbose
                     (format t "Compiling ~a...~%" input-file))
-                  (let* ((source (_ldr_ctrl-r_replace_ (#j:Fs:readFileSync input-file "utf-8")))
+                  (let* ((source (_ldr_ctrl-r_replace_ (read-file-into-string input-file)))
                          (stream (make-string-input-stream source))
                          (eof (gensym "EOF")))
                     (do ((expr (ls-read stream nil eof) (ls-read stream nil eof)))
@@ -407,7 +396,7 @@
                       (write-string (compile-toplevel expr) out)))))
               ;; Add footer
               (write-string (application-epilogue place) out)))))
-    (#j:Fs:writeFileSync output code)
+    (write-string-into-file code output)
     (when verbose
       (format t "Wrote ~a~%" output))
     output))

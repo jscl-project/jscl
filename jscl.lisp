@@ -105,6 +105,7 @@
      ("tools"         :target)
      ("exports"       :target)
      ("describe"      :target))
+    ("file"          :target)
     ("load"          :target)))
 
 
