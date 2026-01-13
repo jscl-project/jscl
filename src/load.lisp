@@ -259,7 +259,8 @@
 
 (defun application-epilogue (place)
   (format nil "})(jscl.internals.pv, jscl.internals);
-})( typeof require !== 'undefined'? require('~ajscl'): window.jscl )
+})( typeof require !== 'undefined'? require('~ajscl'):
+typeof window !== 'undefined'? window.jscl: self.jscl )
 " place))
 
 ;;; wrapper for one module statement
