@@ -507,8 +507,11 @@ errorSym = internals.intern("ERROR");
 Object.defineProperty(nil, "$$jscl_car", { value: nil, writable: false });
 Object.defineProperty(nil, "$$jscl_cdr", { value: nil, writable: false });
 
-// Node Readline
+// Node/Deno REPL
 if (typeof module !== 'undefined' &&
     typeof global !== 'undefined' &&
     typeof phantom === 'undefined')
-  global.readline = require('readline');
+  {
+    global.readline = require('readline');
+    global.repl = require('repl');
+  }

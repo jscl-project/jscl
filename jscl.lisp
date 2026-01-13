@@ -265,7 +265,11 @@ typeof window !== 'undefined'? window.jscl: self.jscl )")
 
     ;; Web worker REPL
     (compile-application (list (source-pathname "worker.lisp" :directory '(:relative "worker")))
-                         (merge-pathnames "jscl-worker.js" *base-directory*))))
+                         (merge-pathnames "jscl-worker.js" *base-directory*))
+
+    ;; Deno REPL
+    (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "deno")))
+                         (merge-pathnames "jscl-deno.js" *base-directory*))))
 
 
 ;;; Run the tests in the host Lisp implementation. It is a quick way
