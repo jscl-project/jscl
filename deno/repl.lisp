@@ -34,20 +34,8 @@
            (if (%sexpr-incomplete input)
                ((oget *rl* "setPrompt") linecont-prompt)
                (progn
-                 (%js-try
-                  (block bail-out
-                    (handler-bind
-                        ((serious-condition
-                           (lambda (c)
-                             (format *error-output* "~A: ~A~%" (class-name (class-of c)) c)
-                             (format-backtrace *trace-output* :from #'signal))))
-                      (dolist (result (multiple-value-list (eval-interactive-input input)))
-                        (fresh-line)
-                        (prin1 result)
-                        (terpri))))
-                  (catch (err)
-                    (let ((message (or (oget err "message") err)))
-                      (format *error-output* "ERROR[!]: ~a~%~A~%" message (oget err "stack")))))
+                 (with-toplevel-eval ()
+                   (eval-interactive-input input))
                  (setf (fill-pointer (stream-data input-buffer)) 0)
                  ;; Update prompt
                  (set-prompt))))

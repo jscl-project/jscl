@@ -19,39 +19,21 @@
 
 (defvar *web-worker-session-id*)
 
-(defvar *web-worker-output-class* "jqconsole-output")
 
-
-(defun %web-worker-write-string (string)
+(defun %web-worker-write-string (string &optional (style "jqconsole-output"))
   (let ((obj (new)))
     (setf (oget obj "command") "output")
-    (setf (oget obj "stringclass") *web-worker-output-class*)
+    (setf (oget obj "stringclass") style)
     (setf (oget obj "string") string)
     (#j:postMessage obj)))
 
 
 (defun web-worker-repl ()
   (loop
-    (let ((*web-worker-output-class* "jqconsole-prompt"))
-       (format t "~a> " (package-name-for-prompt *package*)))
-     (%js-try
-      (progn
-        (handler-case
-            (let ((results (multiple-value-list
-                            (eval-interactive (read)))))
-              (dolist (result results)
-                (prin1 result)
-                (terpri)))
-          (error (err)
-            (let ((*web-worker-output-class* "jqconsole-error"))
-              (clear-buffer)
-              (format t "~A: ~A" (class-name (class-of err)) err)
-              (terpri)))))
-      (catch (err)
-        (let (((*web-worker-output-class* "jqconsole-error"))
-              (message (or (oget err "message") err)))
-          (clear-buffer)
-          (format t "ERROR[!]: ~a~%" message))))))
+    (%web-worker-write-string (concat (package-name-for-prompt *package*) "> ")
+                              "jqconsole-prompt")
+    (with-toplevel-eval ()
+      (eval-interactive (read)))))
 
 
 (defun sw-request-sync (command &optional (options (new)))
@@ -103,8 +85,11 @@
 (defun initialize-web-worker ()
   (setq *standard-output*
         (make-stream :write-fn #'%web-worker-write-string)
-        *error-output* *standard-output*
-        *trace-output* *standard-output*)
+        *error-output*
+        (make-stream
+         :write-fn (lambda (string)
+                     (%web-worker-write-string string "jqconsole-error")))
+        *trace-output* *error-output*)
 
   (setq *standard-input*
         (make-stream

@@ -31,12 +31,6 @@
   (#j:localStorage:setItem "jqhist" (#j:JSON:stringify (#j:jqconsole:GetHistory))))
 
 
-;;; decode error.msg object from (js-try)
-(defun %map-js-object (job)
-  (mapcar (lambda (k) (list k (oget job k)))
-          (mapcar (lambda (x) (js-to-lisp x))
-                  (vector-to-list (#j:Object:keys job)))))
-
 (defparameter +err-css+ "jqconsole-error")
 
 (defun toplevel ()
@@ -44,24 +38,8 @@
   (let ((prompt (format nil "~a> " (package-name-for-prompt *package*))))
     (#j:jqconsole:Write prompt "jqconsole-prompt"))
   (flet ((process-input (input)
-           (%js-try
-            ;; Capture unhandled Lisp conditions.
-            (block bail-out
-              (handler-bind
-                  ((serious-condition
-                     (lambda (c)
-                       (format *error-output* "~A: ~A~%" (class-name (class-of c)) c)
-                       (format-backtrace *trace-output* :from #'signal)
-                       (return-from bail-out))))
-                (dolist (x (multiple-value-list (eval-interactive-input input)))
-                  ;; ensure jqconsole is on fresh line
-                  (unless (zerop (#j:jqconsole:GetColumn))
-                    (#j:jqconsole:Write #\newline "jqconsole-return"))
-                  (#j:jqconsole:Write (format nil "~S~%" x) "jqconsole-return"))))
-            (catch (js-err)
-              (#j:console:log js-err)
-              (let ((message (or (oget js-err "message") (%map-js-object js-err) js-err)))
-                (format *error-output* "ERROR[!]: ~a~%~A~%" message (oget err "stack")))))
+           (with-toplevel-eval ()
+             (eval-interactive-input input))
            (save-history)
            (toplevel)))
     (#j:jqconsole:Prompt t #'process-input #'%sexpr-incomplete)))

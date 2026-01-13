@@ -25,21 +25,8 @@
              (if (%sexpr-incomplete input)
                  (funcall cb (make-new #j:repl:Recoverable))
                  (progn
-                   (%js-try
-                    (block bail-out
-                      (handler-bind
-                          ((serious-condition
-                             (lambda (c)
-                               (format *error-output* "~A: ~A~%" (class-name (class-of c)) c)
-                               (format-backtrace *trace-output* :from #'signal)
-                               (return-from bail-out))))
-                        (dolist (result (multiple-value-list (eval-interactive-input input)))
-                          (fresh-line)
-                          (prin1 result)
-                          (terpri))))
-                    (catch (err)
-                      (let ((message (or (oget err "message") err)))
-                        (format *error-output* "ERROR[!]: ~a~%~A~%" message (oget err "stack")))))
+                   (with-toplevel-eval ()
+                     (eval-interactive-input input))
                    ;; Update prompt
                    ((oget *repl* "setPrompt") (get-prompt))
                    (funcall cb nil)))))
