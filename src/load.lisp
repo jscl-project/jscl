@@ -337,16 +337,8 @@
       (setf (oget link "onload")
             (lambda (ignore) (funcall onload from))))
     (funcall ((oget body "appendChild" "bind" ) body link))
-    (values) ))
+    (values)))
 
-
-;;;
-;;; compile-application - Compile Lisp files into a JavaScript application
-;;;
-;;; This function compiles Lisp source files into a JavaScript file
-;;; that can be loaded as a JSCL application module. The output includes
-;;; the necessary wrapper to access JSCL internals.
-;;;
 
 (defvar *application-prologue*
   "(function(jscl){
@@ -358,6 +350,20 @@
   (format nil "})(jscl.internals.pv, jscl.internals);
 })( typeof require !== 'undefined'? require('~ajscl'): window.jscl )
 " place))
+
+(defun compile-file-1 (input-file out &key verbose)
+  "Compile INPUT-FILE and write compiled code to stream OUT.
+   This is the core compilation function used by compile-file and compile-application."
+  (unless (probe-file input-file)
+    (error "No such file ~s" input-file))
+  (when verbose
+    (format t "Compiling ~a...~%" input-file))
+  (let* ((source (_ldr_ctrl-r_replace_ (read-file-into-string input-file)))
+         (stream (make-string-input-stream source))
+         (eof (gensym "EOF")))
+    (do ((expr (ls-read stream nil eof) (ls-read stream nil eof)))
+        ((eq expr eof))
+      (write-string (compile-toplevel expr) out))))
 
 (defun compile-application (files output &key shebang verbose (place "./"))
   "Compile Lisp FILES into a JavaScript application OUTPUT.
@@ -376,55 +382,41 @@
           (with-output-to-string (out)
             (let ((*package* *package*)
                   (*compiling-file* t))
-              ;; Add header
               (when shebang
                 (write-string "#!/usr/bin/env node" out)
                 (terpri out))
               (write-string *application-prologue* out)
-              ;; Compile each file
               (with-compilation-environment
                 (dolist (input-file files)
-                  (unless (probe-file input-file)
-                    (error "No such file ~s" input-file))
-                  (when verbose
-                    (format t "Compiling ~a...~%" input-file))
-                  (let* ((source (_ldr_ctrl-r_replace_ (read-file-into-string input-file)))
-                         (stream (make-string-input-stream source))
-                         (eof (gensym "EOF")))
-                    (do ((expr (ls-read stream nil eof) (ls-read stream nil eof)))
-                        ((eq expr eof))
-                      (write-string (compile-toplevel expr) out)))))
-              ;; Add footer
+                  (compile-file-1 input-file out :verbose verbose)))
               (write-string (application-epilogue place) out)))))
     (write-string-into-file code output)
     (when verbose
       (format t "Wrote ~a~%" output))
     output))
 
-
-;;;
-;;; compile-file - Compile a Lisp file to JavaScript
-;;;
-;;; Convenience wrapper around compile-application for a single file.
-;;;
-
-(defun compile-file (input-file output-file &key verbose print shebang place)
+(defun compile-file (input-file output-file &key verbose print shebang (place "./"))
   "Compile INPUT-FILE to JavaScript and write to OUTPUT-FILE.
-   Only available on Node.js platform.
-
-   The output is a self-contained JavaScript module that can modify
-   the JSCL environment when loaded.
-
-   :verbose - if true, print progress messages
-   :print - currently unused, for CL compatibility
-   :shebang - if true, add #!/usr/bin/env node header
-   :place - path to jscl.js for require(), defaults to './'"
+   Only available on Node.js platform."
   (declare (ignore print))
-  (compile-application input-file output-file
-                       :shebang shebang
-                       :verbose verbose
-                       :place place)
-  (values output-file nil nil))
+  (unless (node-environment-p)
+    (error "compile-file is only available on Node.js platform"))
+  (ensure-directories-exist output-file)
+  (let ((code
+          (with-output-to-string (out)
+            (let ((*package* *package*)
+                  (*compiling-file* t))
+              (when shebang
+                (write-string "#!/usr/bin/env node" out)
+                (terpri out))
+              (write-string *application-prologue* out)
+              (with-compilation-environment
+                (compile-file-1 input-file out :verbose verbose))
+              (write-string (application-epilogue place) out)))))
+    (write-string-into-file code output-file)
+    (when verbose
+      (format t "Wrote ~a~%" output-file))
+    (values output-file nil nil)))
 
 
 ;;; EOF
