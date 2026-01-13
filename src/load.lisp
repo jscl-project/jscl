@@ -251,42 +251,36 @@
   (write-char  #\newline))
 
 
-;;; header for jscl application module
-(defun _loader_bundle_stm_open_ (stream)
-  ((oget stream "write")
-   (concat "(function(jscl){'use strict'; (function(values, internals){" #\newline)))
+(defvar *application-prologue*
+  "(function(jscl){
+'use strict';
+(function(values, internals){
+")
 
-;;; tail for jscl application module
-(defun _loader_bundle_stm_close_ (stream place)
-  ((oget stream "write")
-   (concat #\newline
-           "})(jscl.internals.pv, jscl.internals); })(typeof require !== 'undefined'? require('"
-           place
-           "jscl'): window.jscl)"
-           #\newline)))
+(defun application-epilogue (place)
+  (format nil "})(jscl.internals.pv, jscl.internals);
+})( typeof require !== 'undefined'? require('~ajscl'): window.jscl )
+" place))
 
 ;;; wrapper for one module statement
 (defun _loader_stm_wraper_ (code)
   (concat
    "(function(values, internals){"
    code
-   ";})(values,internals);"  #\newline) )
-
+   ";})(values,internals);"  #\newline))
 
 ;;; bundle maker
 (defun _loader_make_bundle (code fname place)
   (let ((stream (open-write-stream fname))
         (nums 0))
-    (_loader_bundle_stm_open_ stream)
-    ;; for each statement in code
+    ((oget stream "write") *application-prologue*)
     ((oget code "forEach")
      (lambda (stm &rest others)
        (setq nums (1+ nums))
-       ;; write to stream
        ((oget stream "write") (_loader_stm_wraper_ stm))))
-    (_loader_bundle_stm_close_ stream place)
+    ((oget stream "write") (application-epilogue place))
     ((oget stream "end"))
-    (format t "The bundle up ~d expressions into ~s~%" nums fname) ))
+    (format t "The bundle up ~d expressions into ~s~%" nums fname)))
 
 
 
@@ -339,17 +333,6 @@
     (funcall ((oget body "appendChild" "bind" ) body link))
     (values)))
 
-
-(defvar *application-prologue*
-  "(function(jscl){
-'use strict';
-(function(values, internals){
-")
-
-(defun application-epilogue (place)
-  (format nil "})(jscl.internals.pv, jscl.internals);
-})( typeof require !== 'undefined'? require('~ajscl'): window.jscl )
-" place))
 
 (defun compile-file-1 (input-file out &key verbose)
   "Compile INPUT-FILE and write compiled code to stream OUT.
