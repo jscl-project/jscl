@@ -36,7 +36,7 @@ compile the implementation itself:
 It will generate a `jscl.js` file in the top of the source tree. Now
 you can open `jscl.html` in your browser and use it. To use in Node,
 `node jscl-node.js`; to use in Deno,
-`deno --allow-env --allow-read jscl-node.js`.
+`deno --allow-env --allow-read jscl-deno.js`.
 
 
 ## Status
