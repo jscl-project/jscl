@@ -291,6 +291,7 @@ All errors are caught and report to *ERROR-OUTPUT*."
    yes-or-no-p zerop))
 
 (export '(mop-object mop-object-p) 'jscl)
+(export '(compile-application) 'jscl)
 
 ;;; Replace the bootstrap definition of DEFMACRO, evaluate
 ;;; %COMPILE-DEFMACRO also at load time.
