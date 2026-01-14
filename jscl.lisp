@@ -243,17 +243,6 @@ typeof window !== 'undefined'? window.jscl: self.jscl )")
 
     (report-undefined-functions)
 
-    ;; Tests
-    (compile-application
-     `(,(source-pathname "tests.lisp" :directory nil)
-        ,@(directory (source-pathname "*" :directory '(:relative "tests") :type "lisp"))
-        ;; Loop tests
-        ,(source-pathname "validate.lisp" :directory '(:relative "tests" "loop") :type "lisp")
-        ,(source-pathname "base-tests.lisp" :directory '(:relative "tests" "loop") :type "lisp")
-        
-        ,(source-pathname "tests-report.lisp" :directory nil))
-     (merge-pathnames "tests.js" *base-directory*))
-
     ;; Web REPL
     (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "web")))
                          (merge-pathnames "jscl-web.js" *base-directory*))
@@ -269,7 +258,18 @@ typeof window !== 'undefined'? window.jscl: self.jscl )")
 
     ;; Deno REPL
     (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "deno")))
-                         (merge-pathnames "jscl-deno.js" *base-directory*))))
+                         (merge-pathnames "jscl-deno.js" *base-directory*))
+
+    ;; Tests
+    (compile-application
+     `(,(source-pathname "tests.lisp" :directory nil)
+        ,@(directory (source-pathname "*" :directory '(:relative "tests") :type "lisp"))
+        ;; Loop tests
+        ,(source-pathname "validate.lisp" :directory '(:relative "tests" "loop") :type "lisp")
+        ,(source-pathname "base-tests.lisp" :directory '(:relative "tests" "loop") :type "lisp")
+
+        ,(source-pathname "tests-report.lisp" :directory nil))
+     (merge-pathnames "tests.js" *base-directory*))))
 
 
 ;;; Run the tests in the host Lisp implementation. It is a quick way
