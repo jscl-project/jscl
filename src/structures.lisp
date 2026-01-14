@@ -125,6 +125,8 @@
   conc-name
   predicate
   copier
+  docstring
+  print-function
   (initial-offset 0)
   constructors
   (childs '())
@@ -206,13 +208,13 @@
       (setq dd (dsd-parent dd)))
     result))
 
-;;;(defparameter +dsd-option-names+ #(:include :initial-offset :type :conc-name :copier :predicate))
+(defparameter +dsd-option-names+
+  #(:include :initial-offset :type :conc-name :copier :predicate :print-function))
 
 ;;; atomic option catched on top
 (defun das!parse-option (option dd seen)
   (let* ((keyword (car option))
-         (opnames #(:include :initial-offset :type :conc-name :copier :predicate))
-         (bit (position keyword opnames))
+         (bit (position keyword +dsd-option-names+))
          (args (cdr option))
          (arg-p (consp args))
          (arg (if arg-p (car args))))
@@ -268,6 +270,8 @@
              ;; may be (:type (vector type))
              ((and (listp arg) (eq (car arg) 'vector)) (setf (dsd-type dd) (car arg)))
              (t (error "Malformed DEFSTRUCT option ~a.~%" option))) ) ;; end :type
+      (:print-function
+       (setf (dsd-print-function dd) arg))
       (otherwise (error "Unknown or unsupplied DEFSTRUCT option ~s." option)))
     seen))
 
@@ -310,8 +314,7 @@
                 (list (make-dsd-constructor :name (%symbolize "MAKE-" (dsd-name dd))
                                             :boa :default)))))
     (flet ((option-present-p (bit-name)
-             (let ((opnames #(:include :initial-offset :type :conc-name :copier :predicate)))
-               (logbitp (position bit-name opnames) seen))))
+             (logbitp (position bit-name +dsd-option-names+) seen)))
       (when (option-present-p :include)
         (let* ((parent-name (dsd-parent dd))
                (parent (if (exists-structure-p parent-name)
@@ -340,6 +343,8 @@
       (unless (option-present-p :copier)
         (setf (dsd-copier dd) (%symbolize "COPY-" (dsd-name dd))))
       (when (memq (dsd-type dd) '(list vector))
+        (when (option-present-p :print-function)
+          (error "DEFSTRUCT option :print-function cannot apply to list/vector based structure"))
         (when (option-present-p :predicate)
           (unless (dsd-named-p dd)
             (error "DEFSTRUCT option :predicate provide only for named structure.~%")))
@@ -480,7 +485,11 @@
                        ,@(mapcan #'list (def!struct-property-names prototype) prototype))))))))
 
 (defun das!make-structure (dd)
-  (let ((slots (das!effective-slots dd)))
+  (let ((slots (das!effective-slots dd))
+        (print-function (dsd-print-function dd)))
+    ;; we generate code to initialize print-function to a compiled
+    ;; function under correct lexical environment, no need to dump it
+    (setf (dsd-print-function dd) nil)
     (append
      (list `(eval-when (:compile-toplevel :load-toplevel :execute)
               (das!register-structure ,dd)))
@@ -490,6 +499,9 @@
      (das!make-accessors dd slots)
      (list (das!make-predicate dd))
      (list (das!make-copier dd))
+     (when print-function
+       (list `(setf (dsd-print-function (get-structure-dsd ',(dsd-name dd)))
+                    (function ,print-function))))
      (list
       (if (and (dsd-type dd) (dsd-named-p dd) (dsd-predicate dd))
           `(deftype ,(dsd-name dd) () '(satisfies ,(dsd-predicate dd)))
@@ -619,6 +631,8 @@
 (defun das!defstruct-expand (name options slots)
   (let ((dd (make-dsd :name name)))
     (das!parse-defstruct-options options dd)
+    (when (stringp (car slots))
+      (setf (dsd-docstring dd) (pop slots)))
     (setf (dsd-slots dd) (das!parse-struct-slots dd slots))
     ;; Check inherited slots
     (awhen (dsd-parent dd)

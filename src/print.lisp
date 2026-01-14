@@ -351,17 +351,23 @@
               (let* ((dsd (storage-vector-ref! dvec (1- (length dvec))))
                      (slot-names (das!effective-slot-names dsd))
                      (property-names (def!struct-property-names slot-names))
+                     (print-function (dsd-print-function dsd))
                      (obsolete (not (eq dsd (get-structure-dsd (dsd-name dsd))))))
-                (write-string (if obsolete "#<" "#S(") stream)
-                (write-aux (dsd-name dsd) stream known-objects object-ids)
-                (when obsolete (write-string " (OBSOLETE)" stream))
-                (mapc (lambda (slot prop)
-                        (write-string " :" stream)
-                        (write-string (symbol-name slot) stream)
-                        (write-string " " stream)
-                        (write-aux (oget! form prop) stream known-objects object-ids))
-                      slot-names property-names)
-                (write-string (if obsolete ">" ")") stream))))))
+                (cond
+                  ((and print-function (not obsolete))
+                   ;; *PRINT-LEVEL* not implemented yet
+                   (funcall print-function form stream 0))
+                  (t
+                   (write-string (if obsolete "#<" "#S(") stream)
+                   (write-aux (dsd-name dsd) stream known-objects object-ids)
+                   (when obsolete (write-string " (OBSOLETE)" stream))
+                   (mapc (lambda (slot prop)
+                           (write-string " :" stream)
+                           (write-string (symbol-name slot) stream)
+                           (write-string " " stream)
+                           (write-aux (oget! form prop) stream known-objects object-ids))
+                         slot-names property-names)
+                   (write-string (if obsolete ">" ")") stream))))))))
     ;; hash-table object
     (hash-table (hash-table-object-printer form stream))
     ;; Lists

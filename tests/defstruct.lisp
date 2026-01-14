@@ -602,6 +602,28 @@
     (format nil "~S" (make-print-struct-test :a "hello" :b "world" :c 3))
     "#S(JSCL::PRINT-STRUCT-TEST :A \"hello\" :B \"world\" :C 3)"))
 
+;;;
+(defstruct (print-function-struct-test
+            (:print-function
+             (lambda (o s d)
+               (declare (ignore d))
+               (format s "~S,~S,~S"
+                       (print-function-struct-test-a o)
+                       (print-function-struct-test-b o)
+                       (print-function-struct-test-c o)))))
+  a b c)
+
+(test
+ (string-equal
+  (format nil "~S" (make-print-function-struct-test :a "hello" :b "world" :c 3))
+  "\"hello\",\"world\",3"))
+
+;;; Documentation
+(defstruct struct-doc-test "Test" a b)
+(test (string-equal (documentation 'struct-doc-test 'structure) "Test"))
+(setf (documentation 'struct-doc-test 'structure) "Another")
+(test (string-equal (documentation 'struct-doc-test 'structure) "Another"))
+
 ;;; Don't overwrite DSDs for included structures
 
 (defstruct ow1-foo x)

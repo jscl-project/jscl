@@ -17,7 +17,9 @@
      (oget x "vardoc"))
     (package
      (let ((package (find-package x)))
-       (oget package "docstring")))))
+       (oget package "docstring")))
+    (structure
+     (dsd-docstring (get-structure-dsd x)))))
 
 (defun set-documentation (x type new-val)
   (check-type new-val string)
@@ -31,7 +33,9 @@
      (setf (oget x "vardoc") new-val))
     (package
      (let ((package (find-package x)))
-       (setf (oget package "docstring") new-val))))
+       (setf (oget package "docstring") new-val)))
+    (structure
+     (setf (dsd-docstring (get-structure-dsd x)) new-val)))
   new-val)
 
 (defsetf documentation set-documentation)
