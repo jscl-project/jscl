@@ -93,10 +93,7 @@ class StreamBuffer {
 
   push(input) {
     this.buffer = this.buffer + input;
-    if (this.resolve) {
-      this.resolve();
-      this.resolve = undefined;
-    }
+    if (this.resolve) this.resolve();
   }
 
   async read() {
@@ -110,7 +107,11 @@ class StreamBuffer {
           throw new Error(`Concurrent reads on StreamBuffer are not supported`);
         }
         this.resolve = resolve;
+        // Respond (likely with an empty string) every 5 seconds
+        // to prevent browser killing XHR that waited too long
+        setTimeout(() => resolve(), 5000);
       });
+      this.resolve = undefined;
       return this.read();
     }
   }

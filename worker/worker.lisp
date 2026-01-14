@@ -56,6 +56,9 @@
 
 
 (defun sleep (seconds)
+  ;; FIXME: SLEEP for too long (90s on Firefox, 5min on Chromium)
+  ;; kills XHR -- everything burns. Implement sleep for at most 5
+  ;; seconds and retry in a loop.
   (let ((options (new)))
     (setf (oget options "seconds") seconds)
     (sw-request-sync "sleep" options)))
@@ -64,8 +67,13 @@
 (defvar *stdin-buffer* "")
 
 (defun read-stdin ()
-  (let ((input (sw-request-sync "readStdin")))
-    (setf *stdin-buffer* (concat *stdin-buffer* input))
+  (let ((input ""))
+    ;; readStdin might respond with empty string to prevent
+    ;; timeout (see jscl-worker-main.js), therefore we retry
+    ;; in a loop
+    (while (zerop (length input))
+      (setq input (sw-request-sync "readStdin")
+            *stdin-buffer* (concat *stdin-buffer* input)))
     *stdin-buffer*))
 
 (defun clear-buffer ()
@@ -89,7 +97,7 @@
         (make-stream
          :write-fn (lambda (string)
                      (%web-worker-write-string string "jqconsole-error")))
-        *trace-output* *error-output*)
+        *trace-output* *standard-output*)
 
   (setq *standard-input*
         (make-stream
