@@ -89,7 +89,7 @@
         (make-stream
          :write-fn (lambda (string)
                      (%web-worker-write-string string "jqconsole-error")))
-        *trace-output* *error-output*)
+        *trace-output* *standard-output*)
 
   (setq *standard-input*
         (make-stream
