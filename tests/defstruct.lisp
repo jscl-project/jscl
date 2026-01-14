@@ -318,6 +318,50 @@
   T))
 
 ;;;
+(defstruct (binop-unnamed (:type list)
+                          (:initial-offset 2))
+  (operator '? :type symbol)
+  operand-1
+  operand-2)
+
+(defstruct (annotated-binop-unnamed (:type list)
+                                    (:initial-offset 3)
+                                    (:include binop-unnamed))
+  commutative associative identity)
+
+(test
+ (mv-eql
+  (let ((p-binop (make-binop-unnamed ))
+        (p-anno (make-annotated-binop-unnamed :operator '*
+                                              :operand-1 'x
+                                              :operand-2 5
+                                              :commutative t
+                                              :associative t
+                                              :identity 1)))
+    (values p-binop p-anno))
+  (NIL NIL ? NIL NIL)
+  (NIL NIL * X 5 NIL NIL NIL T T 1)))
+
+(defstruct (annotated-binop-half-named (:type list)
+                                       (:initial-offset 3)
+                                       (:include binop))
+  commutative associative identity)
+
+(test
+ (mv-eql
+  (let ((p-anno (make-annotated-binop-half-named :operator '*
+                                                 :operand-1 'x
+                                                 :operand-2 5
+                                                 :commutative t
+                                                 :associative t
+                                                 :identity 1)))
+    (values
+     p-anno
+     (binop-p p-anno)))
+  (NIL NIL BINOP * X 5 NIL NIL NIL T T 1)
+  T))
+
+;;;
 (defstruct (sbt-null-list :named (:type list)))
 (defstruct (sbt-null-list-kind :named (:type list) (:initial-offset 3) (:include sbt-null-list)))
 (test

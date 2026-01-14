@@ -312,34 +312,28 @@
     (flet ((option-present-p (bit-name)
              (let ((opnames #(:include :initial-offset :type :conc-name :copier :predicate)))
                (logbitp (position bit-name opnames) seen))))
-      (if (option-present-p :include)
-          (cond ((or (dsd-named-p dd) (null (dsd-type dd)))
-                 ;; present structure is named or object based
-                 (let* ((parent-name (dsd-parent dd))
-                        (parent (if (exists-structure-p parent-name)
-                                    (get-structure-dsd parent-name)
-                                    (error "Structure ~s not exists." parent-name)))
-                        (include-slots (dsd-assigned dd))
-                        (parent-slot-names (das!effective-slot-names parent)))
-                   (unless (eql (dsd-type dd) (dsd-type parent))
-                     (error "Incompatible structure type (~a ~a : ~a ~a)"
-                            (dsd-name dd) (dsd-type dd)
-                            (dsd-name parent)(dsd-type parent)))
-                   (unless (or (dsd-named-p parent) (null (dsd-type parent)))
-                     ;; included is unnamed
-                     (error "Unnamed structure ~a not included." parent-name))
-                   (dolist (it include-slots)
-                     ;; checking that the slot name is valid for the structure
-                     (let ((slot-name (typecase it
-                                        (list (car it))
-                                        (symbol it)
-                                        (t (raise-bad-include-slot it)))))
-                       (unless (memq slot-name parent-slot-names)
-                         (raise-bad-include-slot it))))
-                   (setf (dsd-parent dd) parent
-                         (dsd-depth dd) (1+ (dsd-depth parent))
-                         (dsd-assigned dd) (mapcar #'das!parse-struct-slot include-slots))))
-                (t (error "DEFSTRUCT :include option provide only for named or standard structure."))))
+      (when (option-present-p :include)
+        (let* ((parent-name (dsd-parent dd))
+               (parent (if (exists-structure-p parent-name)
+                           (get-structure-dsd parent-name)
+                           (error "Structure ~s not exists." parent-name)))
+               (include-slots (dsd-assigned dd))
+               (parent-slot-names (das!effective-slot-names parent)))
+          (unless (eql (dsd-type dd) (dsd-type parent))
+            (error "Incompatible structure type (~a ~a : ~a ~a)"
+                   (dsd-name dd) (dsd-type dd)
+                   (dsd-name parent)(dsd-type parent)))
+          (dolist (it include-slots)
+            ;; checking that the slot name is valid for the structure
+            (let ((slot-name (typecase it
+                               (list (car it))
+                               (symbol it)
+                               (t (raise-bad-include-slot it)))))
+              (unless (memq slot-name parent-slot-names)
+                (raise-bad-include-slot it))))
+          (setf (dsd-parent dd) parent
+                (dsd-depth dd) (1+ (dsd-depth parent))
+                (dsd-assigned dd) (mapcar #'das!parse-struct-slot include-slots))))
       ;; predicate, copier, conc-name for named lisp structure
       (unless (option-present-p :conc-name)
         (setf (dsd-conc-name dd) (%symbolize (dsd-name dd) "-")))
