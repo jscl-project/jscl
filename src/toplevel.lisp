@@ -18,6 +18,23 @@
 
 (/debug "loading toplevel.lisp!")
 
+;;; Replace the bootstrap definition of DEFMACRO, evaluate
+;;; %COMPILE-DEFMACRO also at load time.
+(eval-always
+  (%compile-defmacro
+   'defmacro
+   (lambda (form env)
+     (destructuring-bind (name args &body body) (cdr form)
+       (let ((expander `(function ,(parse-macro name args body))))
+         `(eval-when (:compile-toplevel :load-toplevel :execute)
+            (%compile-defmacro ',name ,expander)))))))
+
+;;; Do the same for DEFINE-COMPILER-MACRO
+(defmacro define-compiler-macro (name args &body body)
+  (let ((expander `(function ,(parse-macro name args body))))
+    `(eval-when (:compile-toplevel :load-toplevel :execute)
+       (%define-compiler-macro ',name ,expander))))
+
 (defun eval (x)
   (multiple-value-bind (jscode literal-table)
       (let ((*compiling-file* nil)
@@ -291,23 +308,6 @@ All errors are caught and report to *ERROR-OUTPUT*."
    yes-or-no-p zerop))
 
 (export '(mop-object mop-object-p) 'jscl)
-
-;;; Replace the bootstrap definition of DEFMACRO, evaluate
-;;; %COMPILE-DEFMACRO also at load time.
-(eval-always
- (%compile-defmacro
-  'defmacro
-  (lambda (form env)
-    (destructuring-bind (name args &body body) (cdr form)
-      (let ((expander `(function ,(parse-macro name args body))))
-        `(eval-when (:compile-toplevel :load-toplevel :execute)
-           (%compile-defmacro ',name ,expander)))))))
-
-;;; Do the same for DEFINE-COMPILER-MACRO
-(defmacro define-compiler-macro (name args &body body)
-  (let ((expander `(function ,(parse-macro name args body))))
-    `(eval-when (:compile-toplevel :load-toplevel :execute)
-       (%define-compiler-macro ',name ,expander))))
 
 (setq *package* *user-package*)
 

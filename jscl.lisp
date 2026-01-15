@@ -232,11 +232,11 @@ typeof window !== 'undefined'? window.jscl: self.jscl )")
           (!compile-file input out :print verbose))
         (dump-global-environment out)
 
-        ;; NOTE: This file must be compiled after the global
-        ;; environment. Because some web worker code may do some
-        ;; blocking, like starting a REPL, we need to ensure that
-        ;; *environment* and other critical special variables are
-        ;; initialized before we do this.
+        ;; NOTE: This file must be compiled after dumping the global
+        ;; environment. In this file we replace the bootstrap DEFMACRO
+        ;; etc definition with the standard definition, from now on
+        ;; macro definition follow standard semantics but can no
+        ;; longer be handled by dumping magic.
         (!compile-file "src/toplevel.lisp" out :print verbose)
         
         (format out "})();~%")))
