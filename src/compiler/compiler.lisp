@@ -1790,8 +1790,10 @@
 (defun convert (sexp &optional multiple-value-p)
   (convert-1 sexp multiple-value-p))
 
-
-(defvar *compile-print-toplevels* nil)
+#+jscl
+(defvar *compile-print* nil)
+#+jscl
+(defvar *compile-verbose* nil)
 
 (defun truncate-string (string &optional (width 60))
   (let ((n (or (position #\newline string)
@@ -1806,7 +1808,7 @@
         (convert-toplevel sexp multiple-value-p return-p))))
   ;; Process as toplevel
   (let ((*convert-level* -1))
-    (when *compile-print-toplevels*
+    (when *compile-print*
       (let ((form-string (prin1-to-string sexp)))
         (simple-format *standard-output* "Compiling ~a...~%" (truncate-string form-string))))
 

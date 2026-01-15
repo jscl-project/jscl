@@ -20,85 +20,21 @@
 ;;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 
-;;;
-
-(defun _xhr_receiver_ (uri fn-ok &optional fn-err)
-  (let ((req (make-new #j:XMLHttpRequest)))
-    ((oget req "open" ) "GET" uri t)
-    ((oget req "setRequestHeader") "Cache-Control" "no-cache")
-    ((oget req "setRequestHeader") "Cache-Control" "no-store")
-    (setf (oget req "onreadystatechange")
-          (lambda (evt)
-            (if (= (oget req "readyState") 4)
-                (if (= (oget req "status") 200)
-                    (funcall fn-ok (oget req "responseText"))
-                    (if fn-err
-                        (funcall fn-err uri (oget req "status") )
-                        (format t "xhr: ~a~%    ~a~%" (oget req "statusText") uri )) ))))
-    ((oget req "send"))))
-
-
-(defun _ldr_eval_ (sexpr verbose)
-  (when verbose
-    (format t "~a ~a~%" (car sexpr) (cadr sexpr)))
-  (handler-case
-      (progn
-        (dolist (x (multiple-value-list (eval sexpr)))
-          (format t  "  ~a~%"  x))
-        t)
-    (error (msg)
-      (typecase condition
-        (simple-error
-         (apply #'format t
-                (simple-condition-format-control condition)
-                (simple-condition-format-arguments condition)))
-        (t  (let* ((*print-escape* nil))
-              (print-object condition))))
-      nil))
-  nil)
-
-
-(defun _load_form_eval_ (input verbose)
-  (let ((stream)
-        (expr)
-        (eof (gensym "LOADER" ))
-        (*package* *package*))
-    (setq stream (make-string-input-stream input))
-    (terpri)
-    (tagbody
-     rdr-feeder
-       (setq expr (ls-read stream nil eof))
-       (when (eql expr eof)
-         (go rdr-eof))
-       (_ldr_eval_ expr verbose)
-       (go rdr-feeder)
-     rdr-eof)
-    (values)))
-
-
-
-;;; replace cntrl-r from input
-(defun _ldr_ctrl-r_replace_ (src)
-  (let ((reg (#j:RegExp (code-char 13) "g")))
-    ((oget (lisp-to-js src) "replace") reg " ")))
-
-
 ;;; (load name &key verbose sync output place hook)
 ;;;
-;;; sync   -  use node.js 'fs' facilities for read/write ops
-;;;          automatically turned off for browser with warn
+;;; sync   -  use node.js 'fs' facilities for synchronous read/write ops
+;;;          if value is :maybe, use 'fs' if available, and async XHR otherwise
 ;;;
-;;; output - optional mode
-;;;          only for node/electron platform
-;;;          'output' it is the place of the local file system where will be saved the file
-;;;          with the javascript code after compilation for future loading
-;;;          by the function 'require'.
+;;; The following arguments are *deprecated*. Consider using standard COMPILE-FILE.
 ;;;
-;;; place  - optional mode
-;;;          only for node/electron platform
+;;; output - (deprecated) optional, only for node/electron platform
+;;;          A JavaScript file will be saved to 'output' path on the local file system,
+;;;          which can be loaded later by the function 'require'.
+;;;
+;;; place  - (deprecated) optional, only for node/electron platform
 ;;;          required 'jscl.js' path, by default eq './'
-;;;          'place' it is the file system location from where the module 'jscl.js'
-;;;          will be is load by function 'require'
+;;;          'place' is the file system location from where the module 'jscl.js'
+;;;          will be loaded by function 'require'
 ;;;
 ;;;          Example:
 ;;;
@@ -116,190 +52,54 @@
 ;;;
 ;;;          See node.js documentation for 'require' function
 ;;;
-;;; hook  - #() store place for js-code
+;;; hook  - (deprecated) an array to temporarily store js-code
 ;;;
 ;;;          IMPORTANT!! don't use literal #() (see Issue #345)
-;;;          (setq bin (make-array 0 :fillpointer 0)) 
+;;;          (setq bin (make-array 0))
 ;;;          (load "file1.lisp" :hook bin)
 ;;;          (load "file2.lisp" :hook bin)
 ;;;          (load "file3.lisp" :hook bin :output "lib.js")
-;;;              => will be bundle js-code file1, file2, file3 from bin to "lib.js"
+;;;              => will bundle js-code file1, file2, file3 from bin to "lib.js"
 ;;;
 ;;;         
-;;;         you will be use (require "./lib") or use html tag:
+;;;         you will use (require "./lib"), (load "./lib.js"), or use html tag:
 ;;;         <script src="lib.js" type="text/javascript" charset="utf-8"></script>
 ;;;         without compilation.
-;;;
 ;;;
 ;;; have a fun
 ;;;
 
-(defun node-environment-p ()
-  (if (find :node *features*) t))
-
-(defun load (name &key verbose (sync (node-environment-p)) output place hook)
-  (terpri)
-  (cond
-    ;; node.js/electron platform
-    ((node-environment-p)
-     (if place
-         (setq place (concat place "./"))
-         (setq place "./"))
-     (if sync
-         (loader-sync-mode name verbose output place hook)
-         (loader-async-mode name verbose output place hook)))
-    ;; browser platform
-    (t (when sync
-         (warn "sync mode only for node/electron platform~%will be used async mode"))
-       (when (or output hook)
-         (warn "output/hook options only for node/electron platform"))
-       (warn "In browser mode, the LOAD function is executed ONLY if `web-security` is DISABLED (CORS restriction)")
-       (loader-browser-mode name verbose)))
-  (values))
-
-
-(defun loader-browser-mode (name verbose)
-  (_xhr_receiver_
-   name
-   (lambda (input)
-     (_load_form_eval_ (_ldr_ctrl-r_replace_ input) verbose))
-   (lambda (url status)
-     (format t "~%Load: Can't load ~a~%       Status: ~a~%" url status))))
-
-;;; alowe make bundle from source received from local fs (by FILE:)
-;;; or from remote resourse (by HTTP:)
-(defun loader-async-mode (name verbose bundle-name place hook)
-  (_xhr_receiver_
-   name
-   (lambda (input)
-     (_load_eval_bundle_ (_ldr_ctrl-r_replace_ input) verbose bundle-name place hook))
-   (lambda (url status)
-     (format t "~%Load: Can't load ~a~%       Status: ~a~%" url status))))
-
-;;; sync mode
-(defun loader-sync-mode (name verbose bundle-name place hook)
-  ;; check what input file exists
-  (unless (#j:Fs:existsSync name)
-    (error "No such file ~s" name))
-  (_load_eval_bundle_
-   (_ldr_ctrl-r_replace_ (#j:Fs:readFileSync name "utf-8"))
-   verbose
-   bundle-name
-   place
-   hook))
-
-(defun _load_eval_bundle_ (input verbose bundle-name place hook)
-  (let ((*package* *package*)
-        stream eof code expr rc code-stor fbundle)
-    (setq eof (gensym "LOADER"))
-    (if hook (setq code-stor hook))
-    (when bundle-name
-      (if hook
-          (setq code-stor hook)
-          ;; see Issue #345, #350, #397
-          (setq code-stor (make-array 0 :fill-pointer 0)))
-      (setq fbundle t))
-    (setq stream (make-string-input-stream input))
-    (tagbody sync-loader-rdr
-     _feeder_
-       (handler-case
-           (progn
-             (setq expr (ls-read stream nil eof))
-             (when (eq expr eof) (go _rdr_done_))
-             (when verbose (format t "~a ~a~%" (car expr) (cadr expr)))
+(defun load (name &key verbose (sync :maybe) output (place "./") hook)
+  (let ((ext (string-downcase (filename-extension name))))
+    (cond ((member ext '("lisp" "lsp") :test #'string=)
+           (when output
+             (unless (find :node *features*)
+               (error "Cannot generate output file from load on this platform"))
+             (unless hook
+               (setq hook (make-array 0))))
+           (let ((stream (if hook
+                             (make-stream
+                              :write-fn (lambda (string) ((oget hook "push") string)))
+                             (make-broadcast-stream))))
              (with-compilation-environment
-               (setq code (compile-toplevel expr t t))
-               (setq rc (js-eval code nil))
-               (when verbose (format t "  ~a~%" rc))
-               ;; so, expr already verifyed
-               ;; store expression after compilation/evaluated
-               (cond (fbundle ((oget code-stor "push") code))
-                     (hook ((oget code-stor "push") code))
-                     (t t)) ))
-         (error (msg)
-           (format t "   Error: ")
-           (_load_cond_err_handl_ msg)
-           ;; break read-eval loop
-           ;; no bundle
-           (setq fbundle nil)
-           (go _rdr_done_)))
-       (go _feeder_)
-     _rdr_done_
-       (setq stream nil expr nil code nil))
-    (when fbundle
-      (_loader_check_output_directory_ bundle-name)
-      (_loader_make_bundle code-stor bundle-name place)
-      (setq code-stor nil))
-    (values)))
-
-;;; error message handle path
-(defun _load_cond_err_handl_(condition)
-  (typecase condition
-    (simple-error
-     (apply #'format t
-            (simple-condition-format-control condition)
-            (simple-condition-format-arguments condition)))
-    (type-error
-     ;; note:
-     ;; there can be custom event handling here.
-     ;; while it remains as it was done.
-     ;; sometime later
-     (let* ((*print-escape* nil))
-       (print-object condition)))
-    (t  (let* ((*print-escape* nil))
-          (print-object condition))))
-  (write-char  #\newline))
-
-
-;;; Check what output directory exists
-(defun _loader_check_output_directory_ (path)
-  (let ((dir (oget (#j:FsPath:parse path) "dir")))
-    (if (> (length dir) 0)
-        (unless (#j:Fs:existsSync dir)
-          ;; dont create new directory
-          (error "No such output directory ~s" dir))
-        ;; path eq "file.lisp"
-        ;; so, dir eq "" and eq "./" by default
-        t )))
-
-;;; header for jscl application module
-(defun _loader_bundle_stm_open_ (stream)
-  ((oget stream "write")
-   (concat "(function(jscl){'use strict'; (function(values, internals){" #\newline)))
-
-;;; tail for jscl application module
-(defun _loader_bundle_stm_close_ (stream place)
-  ((oget stream "write")
-   (concat #\newline
-           "})(jscl.internals.pv, jscl.internals); })(typeof require !== 'undefined'? require('"
-           place
-           "jscl'): window.jscl)"
-           #\newline)))
-
-;;; wrapper for one module statement
-(defun _loader_stm_wraper_ (code)
-  (concat
-   "(function(values, internals){"
-   code
-   ";})(values,internals);"  #\newline) )
-
-
-;;; bundle maker
-(defun _loader_make_bundle (code fname place)
-  (let ((stream (#j:Fs:createWriteStream fname))
-        (nums 0))
-    (_loader_bundle_stm_open_ stream)
-    ;; for each statement in code
-    ((oget code "forEach")
-     (lambda (stm &rest others)
-       (setq nums (1+ nums))
-       ;; write to stream
-       ((oget stream "write") (_loader_stm_wraper_ stm))))
-    (_loader_bundle_stm_close_ stream place)
-    ((oget stream "end"))
-    (format t "The bundle up ~d expressions into ~s~%" nums fname) ))
-
-
+               (!compile-file name stream
+                              :print verbose :verbose t :sync sync :load t)))
+           (when output
+             (with-open-file (out output :direction :output :if-exists :supersede)
+               (%write-file-prologue out place)
+               ((oget hook "forEach")
+                (lambda (stm &rest others)
+                  (write-string stm out)))
+               (format t "Bundled ~d expressions into ~a~%" (length hook) output)
+               (%write-file-epilogue out place)))
+           t)
+          ((member ext '("js" "cjs" "jso") :test #'string=)
+           (let ((*package* *package*))
+             (if (find :node *features*)
+                 (require (concat "./" name))
+                 (load-js name)))
+           t)
+          (t (error "Don't know how to LOAD ~a: ~a" ext name)))))
 
 ;;; other loader functions
 ;;;

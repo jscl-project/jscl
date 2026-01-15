@@ -419,4 +419,5 @@ All errors are caught and report to *ERROR-OUTPUT*."
 
 (defun require (name)
   (if (find :node *features*)
-      (funcall (%js-vref "require") name)))
+      (funcall (%js-vref "require") name)
+      (error "require not supported on this platform")))

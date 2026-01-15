@@ -85,6 +85,7 @@
     ("misc"          :target)
     ("read"          :both)
     ("backquote"     :both)
+    ("file"          :target)
     ("compiler"
      ("codegen"      :both)
      ("compiler"     :both))
@@ -105,6 +106,7 @@
      ("tools"         :target)
      ("exports"       :target)
      ("describe"      :target))
+    ("compile-file"  :both)
     ("load"          :target)))
 
 
@@ -155,21 +157,6 @@
            (char-count (read-sequence seq in)))
       (subseq seq 0 char-count))))
 
-(defun !compile-file (filename out &key print)
-  (let ((*compiling-file* t)
-        (*compile-print-toplevels* print)
-        (*package* *package*))
-    (let* ((source (read-whole-file filename))
-           (in (make-string-input-stream source)))
-      (format t "Compiling ~a...~%" (enough-namestring filename))
-      (loop
-         with eof-mark = (gensym)
-         for x = (ls-read in nil eof-mark)
-         until (eq x eof-mark)
-         do (let ((compilation (compile-toplevel x)))
-              (when (plusp (length compilation))
-                (write-string compilation out)))))))
-
 (defun dump-global-environment (stream)
   (flet ((late-compile (form)
            (let ((*standard-output* stream))
@@ -191,28 +178,6 @@
         (setq *gensym-counter* ,*gensym-counter*)))
     (late-compile `(setq *literal-counter* ,*literal-counter*))))
 
-(defvar +application-prologue+ "if (typeof importScripts !== 'undefined') importScripts('jscl.js');
-(function(jscl){
-'use strict';
-(function(values, internals){")
-
-(defvar +application-epilogue+ "})(jscl.internals.pv, jscl.internals);
-})( typeof require !== 'undefined'? require('./jscl'):
-typeof window !== 'undefined'? window.jscl: self.jscl )")
-
-(defun compile-application (files output &key shebang)
-  (let ((*features* (list :jscl :jscl-xc)))
-    (with-compilation-environment
-      (with-open-file (out output :direction :output :if-exists :supersede)
-        (when shebang
-          (format out "#!/usr/bin/env node~%"))
-        (write-string +application-prologue+ out)
-        (dolist (input files)
-          (!compile-file input out))
-        (write-string +application-epilogue+ out)
-        nil))))
-
-
 
 (defun bootstrap (&optional verbose)
   (let ((*features* (list :jscl :jscl-xc))
@@ -229,7 +194,7 @@ typeof window !== 'undefined'? window.jscl: self.jscl )")
         (format out "'use strict';~%")
         (write-string (read-whole-file (source-pathname "prelude.js")) out)
         (do-source input :target
-          (!compile-file input out :print verbose))
+          (!compile-file input out :verbose t :print verbose))
         (dump-global-environment out)
 
         ;; NOTE: This file must be compiled after dumping the global
@@ -237,8 +202,8 @@ typeof window !== 'undefined'? window.jscl: self.jscl )")
         ;; etc definition with the standard definition, from now on
         ;; macro definition follow standard semantics but can no
         ;; longer be handled by dumping magic.
-        (!compile-file "src/toplevel.lisp" out :print verbose)
-        
+        (!compile-file "src/toplevel.lisp" out :verbose t :print verbose)
+
         (format out "})();~%")))
 
     (report-undefined-functions)
