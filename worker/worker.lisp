@@ -37,22 +37,25 @@
 
 
 (defun sw-request-sync (command &optional (options (new)))
-  (let ((xhr (make-new #j:XMLHttpRequest))
-        (payload (new)))
+  (while t
+    (let ((xhr (make-new #j:XMLHttpRequest))
+          (payload (new)))
 
-    (setf (oget payload "command") command)
-    (setf (oget payload "sessionId") *web-worker-session-id*)
-    (setf (oget payload "options") options)
+      (setf (oget payload "command") command)
+      (setf (oget payload "sessionId") *web-worker-session-id*)
+      (setf (oget payload "options") options)
 
-    ((oget xhr "open") "POST" "__jscl" nil)
-    ((oget xhr "setRequestHeader") "ContentType" "application/json")
-    ((oget xhr "send") (#j:JSON:stringify payload))
+      ((oget xhr "open") "POST" "__jscl" nil)
+      ((oget xhr "setRequestHeader") "ContentType" "application/json")
+      ((oget xhr "send") (#j:JSON:stringify payload))
 
-    (if (eql (oget xhr "status") 200)
-        (let* ((text (oget xhr "responseText"))
-               (json (#j:JSON:parse text)))
-          (oget json "value")) 
-        (error "Could not contact with the service worker."))))
+      (if (eql (oget xhr "status") 200)
+          (let* ((text (oget xhr "responseText"))
+                 (json (#j:JSON:parse text)))
+            (if (oget json "timeout")
+                (setq command "wait")
+                (return (oget json "value"))))
+          (error "Could not contact with the service worker.")))))
 
 
 (defun sleep (seconds)
