@@ -307,7 +307,11 @@ All errors are caught and report to *ERROR-OUTPUT*."
    write-line write-sequence write-string write-to-string y-or-n-p
    yes-or-no-p zerop))
 
-(export '(mop-object mop-object-p) 'jscl)
+(export '(mop-object mop-object-p
+          compile-application
+          oget oset new oget! oset! new! make-new
+          lisp-to-js js-to-lisp js-object-p js-null-p js-undefined-p)
+        'jscl)
 
 (setq *package* *user-package*)
 
