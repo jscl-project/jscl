@@ -31,7 +31,7 @@
             `(oset ,g!value ,g!object ,@g!keys)
             `(oget ,g!object ,@g!keys))))
 
-(define-setf-expander oget* (object key &rest keys)
+(define-setf-expander oget! (object key &rest keys)
   (let* ((keys (cons key keys))
          (g!object (gensym))
          (g!keys (mapcar (lambda (s)
@@ -42,8 +42,8 @@
     (values `(,g!object ,@g!keys)
             `(,object ,@keys)
             `(,g!value)
-            `(oset* ,g!value ,g!object ,@g!keys)
-            `(oget* ,g!object ,@g!keys))))
+            `(oset! ,g!value ,g!object ,@g!keys)
+            `(oget! ,g!object ,@g!keys))))
 
 
 (defun make-new (constructor &rest args)
@@ -71,6 +71,7 @@
       t))
 
 (defun js-null-p (obj) (js-null-p obj))
+(defun objectp (obj) (objectp obj))
 (defun js-undefined-p (obj) (js-undefined-p obj))
 
 ;;; EOF
