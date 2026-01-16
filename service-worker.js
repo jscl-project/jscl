@@ -46,16 +46,21 @@ class Context {
   constructor(sessionId) {
     this.sessionId = sessionId;
     this.resolvePendingRequest = undefined;
+    this.pendingPromise = undefined;
   }
 
-  readStdin() {
-    return new Promise(async resolve => {
-      if (this.resolvePendingRequest) {
-        throw new Error(
-          `Concurrent requests from the same client are not allowed.`
-        );
-      }
+  checkPendingPromise(){
+    if (this.pendingPromise) {
+      throw new Error(
+        `Concurrent requests from the same client are not allowed.`
+      );
+    }
+  }
 
+  // readStdin and sleep initiate the request and return immediately
+  readStdin() {
+    this.checkPendingPromise();
+    this.pendingPromise = new Promise(async resolve => {
       const client = await self.clients.get(this.sessionId);
 
       client.postMessage({
@@ -66,9 +71,19 @@ class Context {
   }
 
   sleep({ seconds }) {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(true), seconds * 1000);
+    this.checkPendingPromise();
+    this.pendingPromise = new Promise(resolve => {
+      setTimeout(() => resolve({ value : true}), seconds * 1000);
     });
+  }
+
+  // wait for this.pendingPromise to resolve, with 5 second timeout to
+  // avoid browser killing XHR. Can be retried in a loop.
+  async wait(){
+    const resp = await Promise.race([this.pendingPromise,
+      new Promise(resolve => setTimeout(() => resolve({ timeout : true }), 5000))]);
+    if (resp.value) this.pendingPromise = undefined;
+    return resp;
   }
 
   static findOrCreate(clientId) {
@@ -86,7 +101,7 @@ class Context {
 self.addEventListener("message", function(event) {
   const { sessionId, input } = event.data;
   const context = Context.findOrCreate(sessionId);
-  context.resolvePendingRequest(input);
+  context.resolvePendingRequest({ value : input });
   context.resolvePendingRequest = undefined;
 });
 
@@ -97,29 +112,36 @@ self.addEventListener("fetch", event => {
       (async function() {
         const cmd = await request.json();
         const { command, sessionId, options } = cmd;
-        let value;
+        let resp;
 
         switch (command) {
           case "init": {
             // Note that the client INIT request is made from the main
             // thread.
             const context = Context.findOrCreate(event.clientId);
-            value = context.sessionId;
+            resp = { value : context.sessionId };
             break;
           }
           case "readStdin": {
             const context = Context.findOrCreate(sessionId);
-            value = await context.readStdin();
+            context.readStdin();
+            resp = await context.wait();
             break;
           }
           case "sleep": {
             const context = Context.findOrCreate(sessionId);
-            value = await context.sleep(options);
+            context.sleep(options);
+            resp = await context.wait();
+            break;
+          }
+          case "wait": {
+            const context = Context.findOrCreate(sessionId);
+            resp = await context.wait(options);
             break;
           }
         }
 
-        const response = new Response(JSON.stringify({ value: value }), {
+        const response = new Response(JSON.stringify(resp), {
           headers: { "Content-Type": "application/json" }
         });
         return response;
