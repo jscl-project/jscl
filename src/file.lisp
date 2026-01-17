@@ -13,20 +13,25 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-(defun receive-xhr (uri fn-ok &optional fn-err)
+(defun receive-xhr (method uri sync fn-ok &optional fn-err)
   (let ((req (make-new #j:XMLHttpRequest)))
-    ((oget req "open" ) "GET" uri t)
+    ((oget req "open") method uri (not sync))
     ((oget req "setRequestHeader") "Cache-Control" "no-cache")
     ((oget req "setRequestHeader") "Cache-Control" "no-store")
-    (setf (oget req "onreadystatechange")
-          (lambda (evt)
-            (when (= (oget req "readyState") 4)
-              (if (= (oget req "status") 200)
-                  (funcall fn-ok (oget req "responseText"))
-                  (if fn-err
-                      (funcall fn-err uri (oget req "status"))
-                      (error "Can't open ~a: ~a" uri (oget req "statusText")))))))
-    ((oget req "send"))))
+    ((oget req "send"))
+    (flet ((handler ()
+             (if (= (oget req "status") 200)
+                 (funcall fn-ok (oget req "responseText"))
+                 (if fn-err
+                     (funcall fn-err uri (oget req "status"))
+                     (error "Can't open ~a: ~a ~a"
+                            uri (oget req "status") (oget req "statusText"))))))
+      (cond (sync (handler))
+            (t (setf (oget req "onreadystatechange")
+                     (lambda (evt)
+                       (when (= (oget req "readyState") 4)
+                         (handler))))
+               nil)))))
 
 (defmacro with-open-file ((stream filespec &rest options
                            &key direction if-exists sync)
@@ -51,40 +56,50 @@ and asynchronously otherwise."
     ((oget (lisp-to-js src) "replace") reg " ")))
 
 (defun call-with-open-file (thunk name &key (direction :input) (if-exists :error) (sync t))
-  (ecase sync
-    (t (unless (find :node *features*)
-         (error "Synchronous file operations not supported on this platform, try `:sync nil'")))
-    (:maybe (setq sync (find :node *features*)))
-    (nil))
-  (if sync
-      (ecase direction
-        (:input
-         (unless (#j:Fs:existsSync name)
-           (error "No such file ~s" name))
-         (with-input-from-string
-             (s (ctrl-r-replace (#j:Fs:readFileSync name "utf-8")))
-           (funcall thunk s)))
-        (:output
-         (case if-exists
-           (:supersede
-            (%check-output-directory name)
-            (let ((buf (make-array 0 :element-type 'character :fill-pointer 0)))
-              (multiple-value-prog1
-                  (with-output-to-string (s buf) (funcall thunk s))
-                (#j:Fs:writeFileSync name buf))))
-           (t (error ":if-exists option ~a not implemented" if-exists)))))
-      (ecase direction
-        (:input
-         (receive-xhr
-          name
-          (lambda (input)
-            (with-input-from-string (s (ctrl-r-replace input))
-              (funcall thunk s)))))
-        (:output
-         (error "Output to file not supported on this platform.")))))
+  (ecase direction
+    (:input
+     (cond ((and sync (find :node *features*))
+            (unless (#j:Fs:existsSync name)
+              (error "No such file ~s" name))
+            (with-input-from-string
+                (s (ctrl-r-replace (#j:Fs:readFileSync name "utf-8")))
+              (funcall thunk s)))
+           ((and sync (find :web-worker *features*))
+            (receive-xhr
+             "GET" name t
+             (lambda (input)
+               (with-input-from-string (s (ctrl-r-replace input))
+                 (funcall thunk s)))))
+           ((eq sync t)
+            (error "Synchronous file input not supported on this platform, try `:sync nil'"))
+           (t
+            (receive-xhr
+             "GET" name nil
+             (lambda (input)
+               (with-input-from-string (s (ctrl-r-replace input))
+                 (funcall thunk s)))))))
+    (:output
+     ;; TODO: implement async version
+     (cond ((find :node *features*)
+            (case if-exists
+              (:supersede
+               (%check-output-directory name)
+               (let ((buf (make-array 0 :element-type 'character :fill-pointer 0)))
+                 (multiple-value-prog1
+                     (with-output-to-string (s buf) (funcall thunk s))
+                   (#j:Fs:writeFileSync name buf))))
+              (t (error ":if-exists option ~a not implemented" if-exists))))
+           (t (error "Output to file not supported on this platform."))))))
 
 (defun filename-extension (name)
   (let ((pos (position #\. name :from-end t)))
-    (unless pos
-      (error "Can't find extension of ~a" name))
-    (subseq name (1+ pos))))
+    (and pos (subseq name (1+ pos)))))
+
+(defun probe-file (name)
+  (cond ((find :node *features*)
+         (#j:Fs:existsSync name))
+        ((find :web-worker *features*)
+         (receive-xhr "HEAD" name t
+                      (lambda (body) t)
+                      (lambda (uri status) nil)))
+        (t (error "PROBE-FILE not supported on this platform"))))

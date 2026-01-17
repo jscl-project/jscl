@@ -70,7 +70,15 @@
 ;;;
 
 (defun load (name &key verbose (sync :maybe) output (place "./") hook)
-  (let ((ext (string-downcase (filename-extension name))))
+  (let ((ext (filename-extension name)))
+    ;; Try to guess extension
+    (unless ext
+      (dolist (ext-guess '(".js" ".lisp" ".jso" ".lsp" ".cjs")
+                         (error "Cannot guess extension for ~a" name))
+        (when (probe-file (concat name ext-guess))
+          (setq name (concat name ext-guess)
+                ext ext-guess)
+          (return))))
     (cond ((member ext '("lisp" "lsp") :test #'string=)
            (when output
              (unless (find :node *features*)
