@@ -42,4 +42,12 @@ dc" buf))
                    (read-sequence buf i)
                    (write-sequence buf o))))))
 
+(test (let ((buf (make-array 0 :element-type 'character :fill-pointer 0)))
+        (with-output-to-string (o buf)
+          (write-line "abc" o)
+          (write-line "def" o))
+        (equal buf "abc
+def
+")))
+
 ;;; EOF

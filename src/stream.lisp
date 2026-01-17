@@ -60,11 +60,13 @@
 (defmacro with-output-to-string ((var &optional string-form
                                   &key (element-type ''character))
                                  &body body)
-  `(let ((,var (if ,string-form
-                   (%make-fill-pointer-output-stream string)
-                   (make-string-output-stream :element-type ,element-type))))
-     ,@body
-     (get-output-stream-string ,var)))
+  (let ((g!string (gensym "STRING")))
+    `(let* ((,g!string ,string-form)
+            (,var (if ,g!string
+                      (%make-fill-pointer-output-stream ,g!string)
+                      (make-string-output-stream :element-type ,element-type))))
+       ,@body
+       (get-output-stream-string ,var))))
 
 ;;; Input stream operations
 
