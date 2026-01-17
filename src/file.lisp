@@ -68,13 +68,10 @@ and asynchronously otherwise."
          (case if-exists
            (:supersede
             (%check-output-directory name)
-            (let ((stream (#j:Fs:createWriteStream name)))
-              (unwind-protect
-                   (funcall thunk (make-stream
-                                   :write-fn
-                                   (lambda (string)
-                                     ((oget stream "write") string))))
-                ((oget stream "end")))))
+            (let ((buf (make-array 0 :element-type 'character :fill-pointer 0)))
+              (multiple-value-prog1
+                  (with-output-to-string (s buf) (funcall thunk s))
+                (#j:Fs:writeFileSync name buf))))
            (t (error ":if-exists option ~a not implemented" if-exists)))))
       (ecase direction
         (:input
