@@ -81,9 +81,8 @@
                              (make-stream
                               :write-fn (lambda (string) ((oget hook "push") string)))
                              (make-broadcast-stream))))
-             (with-compilation-environment
-               (!compile-file name stream
-                              :print verbose :verbose t :sync sync :load t)))
+             (!compile-file name stream
+                            :print verbose :verbose t :sync sync :load t))
            (when output
              (with-open-file (out output :direction :output :if-exists :supersede)
                (%write-file-prologue out place)

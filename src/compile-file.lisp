@@ -18,7 +18,14 @@
 
 If LOAD is true, behaves like LOAD instead: all EVAL-WHEN are
 processed under :execute situation, and each expression is evaluated
-immediately after compiled."
+immediately after compiled.
+
+If LOAD is false, the caller is responsible for establishing
+WITH-COMPILATION-ENVIRONMENT context, so that dumped literals etc can
+be shared potentially cross-file. If LOAD is true, !COMPILE-FILE wraps
+compilation of every expression inside a different
+WITH-COMPILATION-ENVIRONMENT context (to enable JS evaluation under
+global scope), thus no need for the caller to do so."
   (let ((*compiling-file* (not load))
         (*compiling-in-process* nil)
         (*compile-print* print)
@@ -35,7 +42,8 @@ immediately after compiled."
           (when (eql expr eof)
             (return))
           (let ((code (if load
-                          (compile-toplevel expr t t)
+                          (with-compilation-environment
+                            (compile-toplevel expr t t))
                           (compile-toplevel expr))))
             (write-string code out)
             (when load
