@@ -13,3 +13,5 @@
      (and (equal (read-line s nil) "abc")
           (equal (read-line s nil) "foo")
           (equal (read-line s nil) nil)))))
+
+(test (probe-file (concat *tmp-dir* "file-1.txt")))
