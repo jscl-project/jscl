@@ -43,7 +43,7 @@
                   (!macroexpand-1 place env)
                 (if macroexpanded
                     (!get-setf-expansion macroexpansion)
-                    (error "Unknown generalized reference."))))))))
+                    (error "Unknown generalized reference ~S" place))))))))
 (fset 'get-setf-expansion (fdefinition '!get-setf-expansion))
 
 (defmacro define-setf-expander (access-fn lambda-list &body body)

@@ -66,7 +66,10 @@
                       (%make-fill-pointer-output-stream ,g!string)
                       (make-string-output-stream :element-type ,element-type))))
        ,@body
-       (get-output-stream-string ,var))))
+       ;; If string-form is given, do not return the string but body
+       ,@(if string-form
+	     nil
+	     `((get-output-stream-string ,var))))))
 
 ;;; Input stream operations
 
