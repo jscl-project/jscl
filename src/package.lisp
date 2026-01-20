@@ -423,6 +423,12 @@
                 *package-table*)
     symbols))
 
+
+;; Make JSCL use CL so that standard symbols like LET, LAMBDA, etc.
+;; resolve correctly when reading code in the JSCL package.
+;; This matches the host environment where JSCL uses CL.
+(use-package "CL" "JSCL")
+
 (defvar *user-package*
   (make-package "COMMON-LISP-USER" :use (list (find-package "CL")) :nicknames '("CL-USER")))
 

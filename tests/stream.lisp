@@ -42,10 +42,12 @@ dc" buf))
                    (read-sequence buf i)
                    (write-sequence buf o))))))
 
-(test (let ((buf (make-array 0 :element-type 'character :fill-pointer 0)))
-        (with-output-to-string (o buf)
-          (write-line "abc" o)
-          (write-line "def" o))
+(test (let* ((buf (make-array 0 :element-type 'character :fill-pointer 0))
+	     (return-values (multiple-value-list (with-output-to-string (o buf)
+						   (write-line "abc" o)
+						   (write-line "def" o)
+						   (values 'value-1 'value-2)))))
+	(equal return-values '(value-1 value2))
         (equal buf "abc
 def
 ")))
