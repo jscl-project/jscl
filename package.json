@@ -1,6 +1,6 @@
 {
   "name": "jscl",
-  "version": "0.8.2",
+  "version": "0.9.0-alpha.0",
   "description": "A Common Lisp implementation for Javascript",
   "main": "dist/jscl.js",
   "workspaces": [
