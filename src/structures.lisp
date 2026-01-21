@@ -271,7 +271,15 @@
              ((and (listp arg) (eq (car arg) 'vector)) (setf (dsd-type dd) (car arg)))
              (t (error "Malformed DEFSTRUCT option ~a.~%" option))) ) ;; end :type
       (:print-function
-       (setf (dsd-print-function dd) arg))
+       ;; TODO: "function name" also includes SETF functions. But who
+       ;; the heck will do this?
+       (cond ((symbolp arg)
+              (setf (dsd-print-function dd) `',arg))
+             ((and (consp arg) (eq (car arg) 'lambda))
+              (setf (dsd-print-function dd) arg))
+             (t
+              (error "PRINT-FUNCTION option is not a function name or lambda expression: ~s"
+                     arg))))
       (otherwise (error "Unknown or unsupplied DEFSTRUCT option ~s." option)))
     seen))
 
@@ -501,7 +509,7 @@
      (list (das!make-copier dd))
      (when print-function
        (list `(setf (dsd-print-function (get-structure-dsd ',(dsd-name dd)))
-                    (function ,print-function))))
+                    ,print-function)))
      (list
       (if (and (dsd-type dd) (dsd-named-p dd) (dsd-predicate dd))
           `(deftype ,(dsd-name dd) () '(satisfies ,(dsd-predicate dd)))
