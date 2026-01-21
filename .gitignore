@@ -13,3 +13,5 @@ tests.js
 /repl-deno.js
 /repl-web.js
 /node_modules/
+/.jscl_test/
+/dist/

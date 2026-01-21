@@ -29,6 +29,9 @@
       (make-pathname :name nil :type nil :defaults #.*load-pathname*)
       *default-pathname-defaults*))
 
+(defvar *dist-directory*
+  (merge-pathnames "dist/" *base-directory*))
+
 (defvar *version*
   (or (uiop:getenv "JSCL_VERSION")
       ;; Read the version from the package.json file. We could have used a
@@ -187,7 +190,7 @@
     (setq *global-environment* *environment*)
     (setq *fn-info* '())
     (with-compilation-environment
-      (with-open-file (out (merge-pathnames "jscl.js" *base-directory*)
+      (with-open-file (out (merge-pathnames "jscl.js" *dist-directory*)
                            :direction :output
                            :if-exists :supersede)
         (format out "(function(){~%")
@@ -210,20 +213,20 @@
 
     ;; Web REPL
     (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "web")))
-                         (merge-pathnames "jscl-web.js" *base-directory*))
+                         (merge-pathnames "jscl-web.js" *dist-directory*))
 
     ;; Node REPL
     (compile-application (list (source-pathname "node.lisp" :directory '(:relative "node")))
-                         (merge-pathnames "jscl-node.js" *base-directory*)
+                         (merge-pathnames "jscl-node.js" *dist-directory*)
                          :shebang t)
 
     ;; Web worker REPL
     (compile-application (list (source-pathname "worker.lisp" :directory '(:relative "worker")))
-                         (merge-pathnames "jscl-worker.js" *base-directory*))
+                         (merge-pathnames "jscl-worker.js" *dist-directory*))
 
     ;; Deno REPL
     (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "deno")))
-                         (merge-pathnames "jscl-deno.js" *base-directory*))
+                         (merge-pathnames "jscl-deno.js" *dist-directory*))
 
     ;; Tests
     (compile-application
@@ -234,7 +237,7 @@
         ,(source-pathname "base-tests.lisp" :directory '(:relative "tests" "loop") :type "lisp")
 
         ,(source-pathname "tests-report.lisp" :directory nil))
-     (merge-pathnames "tests.js" *base-directory*))))
+     (merge-pathnames "tests.js" *dist-directory*))))
 
 
 ;;; Run the tests in the host Lisp implementation. It is a quick way
