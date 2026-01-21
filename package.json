@@ -16,7 +16,9 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prettier": "prettier --write .",
+    "prettier:check": "prettier --check ."
   },
   "repository": {
     "type": "git",
@@ -30,5 +32,8 @@
   "bugs": {
     "url": "https://github.com/jscl-project/jscl/pulls"
   },
-  "homepage": "https://github.com/jscl-project/jscl#readme"
+  "homepage": "https://github.com/jscl-project/jscl#readme",
+  "devDependencies": {
+    "prettier": "^3.8.0"
+  }
 }

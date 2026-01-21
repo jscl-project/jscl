@@ -12,3 +12,4 @@ tests.js
 /repl-node.js
 /repl-deno.js
 /repl-web.js
+/node_modules/
