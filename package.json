@@ -2,21 +2,26 @@
   "name": "jscl",
   "version": "0.8.2",
   "description": "A Common Lisp implementation for Javascript",
-  "main": "jscl.js",
+  "main": "dist/jscl.js",
+  "workspaces": [
+    "web"
+  ],
   "files": [
-    "jscl.js",
-    "jscl-node.js",
-    "jscl-web.js"
+    "dist/jscl.js",
+    "dist/jscl-node.js",
+    "dist/jscl-web.js"
   ],
   "type": "commonjs",
   "bin": {
-    "jscl": "./jscl-node.js"
+    "jscl": "./dist/jscl-node.js"
   },
   "directories": {
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./make.sh",
+    "test": "./run-tests.sh",
+    "serve": "serve dist",
     "prettier": "prettier --write .",
     "prettier:check": "prettier --check ."
   },
@@ -34,6 +39,7 @@
   },
   "homepage": "https://github.com/jscl-project/jscl#readme",
   "devDependencies": {
-    "prettier": "^3.8.0"
+    "prettier": "^3.8.0",
+    "serve": "^14.2.4"
   }
 }

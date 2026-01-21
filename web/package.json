@@ -1,0 +1,10 @@
+{
+  "name": "@jscl/web",
+  "version": "0.8.2",
+  "private": true,
+  "description": "JSCL web REPL dependencies",
+  "devDependencies": {
+    "jquery": "^3.7.1",
+    "jq-console": "^2.13.2"
+  }
+}
