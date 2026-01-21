@@ -1,6 +1,7 @@
-# JSCL 
+# JSCL
 
-[![Pipeline CI](https://github.com/jscl-project/jscl/actions/workflows/main.yml/badge.svg)](https://github.com/jscl-project/jscl/actions/workflows/main.yml)
+[![Pipeline CI](https://github.com/jscl-project/jscl/actions/workflows/pull-request.yml/badge.svg)](https://github.com/jscl-project/jscl/actions/workflows/pull-request.yml)
+[![npm](https://img.shields.io/npm/v/jscl)](https://www.npmjs.com/package/jscl)
 
 JSCL is a Common Lisp to JavaScript compiler, which is bootstrapped
 from Common Lisp and executed from the browser.
