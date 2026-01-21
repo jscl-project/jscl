@@ -55,17 +55,17 @@ async function initialize() {
   const response = await fetch("/__jscl", {
     method: "post",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      command: "init"
-    })
+      command: "init",
+    }),
   });
 
   const body = await response.json();
   const sessionId = body.value;
 
-  navigator.serviceWorker.onmessage = event => {
+  navigator.serviceWorker.onmessage = (event) => {
     handleServiceWorkerMessage(sessionId, event);
   };
 
@@ -74,13 +74,13 @@ async function initialize() {
 
 function loadJSCLWorker(sessionId) {
   const jsclWorker = new Worker("jscl-worker.js");
-  jsclWorker.onmessage = event => {
+  jsclWorker.onmessage = (event) => {
     const { string, stringclass } = event.data;
     jqconsole.Write(string, stringclass);
   };
   jsclWorker.postMessage({
     command: "init",
-    sessionId
+    sessionId,
   });
   prompt();
 }
@@ -105,7 +105,7 @@ class StreamBuffer {
       this.buffer = "";
       return value;
     } else {
-      await new Promise(resolve => {
+      await new Promise((resolve) => {
         if (this.resolve) {
           throw new Error(`Concurrent reads on StreamBuffer are not supported`);
         }
@@ -123,10 +123,10 @@ function handleServiceWorkerMessage(sessionId, event) {
   switch (command) {
     case "prompt":
       {
-        return stdin.read().then(value => {
+        return stdin.read().then((value) => {
           navigator.serviceWorker.controller.postMessage({
             sessionId,
-            input: value
+            input: value,
           });
         });
       }
@@ -135,7 +135,7 @@ function handleServiceWorkerMessage(sessionId, event) {
 }
 
 function prompt() {
-  jqconsole.Prompt(true, input => {
+  jqconsole.Prompt(true, (input) => {
     stdin.push(input + "\n");
     prompt();
   });

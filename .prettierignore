@@ -1,0 +1,7 @@
+# Ignore everything by default
+*
+
+# Except these JS files
+!src/prelude.js
+!jscl-worker-main.js
+!service-worker.js

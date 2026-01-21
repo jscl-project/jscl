@@ -1,11 +1,11 @@
 /* service-worker.js
- * 
+ *
  * This file is a service-worker which will be installed to provide
  * offline responses to a HTTP service, providing input and some other
  * async functionality to jscl. This allows to a jscl installed as a
  * web worker to request them synchronously, using the XMLHttpRequest
  * with async=false.
- * 
+ *
  */
 
 /* This file, unlike the rest of the project is distributed under a permissive
@@ -13,7 +13,7 @@
 
 /*
  * Copyright (C) 2018 David Vazquez Pua
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
@@ -49,10 +49,10 @@ class Context {
     this.pendingPromise = undefined;
   }
 
-  checkPendingPromise(){
+  checkPendingPromise() {
     if (this.pendingPromise) {
       throw new Error(
-        `Concurrent requests from the same client are not allowed.`
+        `Concurrent requests from the same client are not allowed.`,
       );
     }
   }
@@ -60,11 +60,11 @@ class Context {
   // readStdin and sleep initiate the request and return immediately
   readStdin() {
     this.checkPendingPromise();
-    this.pendingPromise = new Promise(async resolve => {
+    this.pendingPromise = new Promise(async (resolve) => {
       const client = await self.clients.get(this.sessionId);
 
       client.postMessage({
-        command: "prompt"
+        command: "prompt",
       });
       this.resolvePendingRequest = resolve;
     });
@@ -72,16 +72,20 @@ class Context {
 
   sleep({ seconds }) {
     this.checkPendingPromise();
-    this.pendingPromise = new Promise(resolve => {
-      setTimeout(() => resolve({ value : true}), seconds * 1000);
+    this.pendingPromise = new Promise((resolve) => {
+      setTimeout(() => resolve({ value: true }), seconds * 1000);
     });
   }
 
   // wait for this.pendingPromise to resolve, with 5 second timeout to
   // avoid browser killing XHR. Can be retried in a loop.
-  async wait(){
-    const resp = await Promise.race([this.pendingPromise,
-      new Promise(resolve => setTimeout(() => resolve({ timeout : true }), 5000))]);
+  async wait() {
+    const resp = await Promise.race([
+      this.pendingPromise,
+      new Promise((resolve) =>
+        setTimeout(() => resolve({ timeout: true }), 5000),
+      ),
+    ]);
     if (resp.value) this.pendingPromise = undefined;
     return resp;
   }
@@ -98,18 +102,18 @@ class Context {
 
 // Message handler
 
-self.addEventListener("message", function(event) {
+self.addEventListener("message", function (event) {
   const { sessionId, input } = event.data;
   const context = Context.findOrCreate(sessionId);
-  context.resolvePendingRequest({ value : input });
+  context.resolvePendingRequest({ value: input });
   context.resolvePendingRequest = undefined;
 });
 
-self.addEventListener("fetch", event => {
+self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.url.endsWith("/__jscl")) {
     event.respondWith(
-      (async function() {
+      (async function () {
         const cmd = await request.json();
         const { command, sessionId, options } = cmd;
         let resp;
@@ -119,7 +123,7 @@ self.addEventListener("fetch", event => {
             // Note that the client INIT request is made from the main
             // thread.
             const context = Context.findOrCreate(event.clientId);
-            resp = { value : context.sessionId };
+            resp = { value: context.sessionId };
             break;
           }
           case "readStdin": {
@@ -142,10 +146,10 @@ self.addEventListener("fetch", event => {
         }
 
         const response = new Response(JSON.stringify(resp), {
-          headers: { "Content-Type": "application/json" }
+          headers: { "Content-Type": "application/json" },
         });
         return response;
-      })()
+      })(),
     );
   } else {
     return fetch(event.request);
