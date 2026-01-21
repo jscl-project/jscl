@@ -5,37 +5,32 @@ on:
     branches: [master]
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
-      with:
-        node-version: "12.x"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
 
-    - name: Install SBCL
-      run: sudo apt-get install sbcl
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Build JSCL
-      run: JSCL_VERSION=$(git rev-parse --short HEAD) ./make.sh
+      - name: Install SBCL
+        run: sudo apt-get install sbcl
 
-    - name: Run tests
-      run: ./run-tests.sh
+      - name: Build
+        run: JSCL_VERSION=$(git rev-parse --short HEAD) npm run build
 
-    - name: Prepare dist directory
-      run: |
-        mkdir dist/
-        cp jscl.html dist/index.html
-        cp jscl.js jscl-web.js style.css dist/
-        cp tests.html tests.js dist/
-        cp jquery.js jqconsole.min.js dist/
+      - name: Run tests
+        run: npm test
 
-    - name: Deploy latest version 🚀
-      uses: JamesIves/github-pages-deploy-action@v4.7.3
-      with:
-        branch: master
-        folder: dist
-        repository-name: jscl-project/jscl-project.github.io
-        ssh-key: ${{ secrets.DEPLOY_KEY }}
-        single-commit: true
+      - name: Deploy latest version
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: master
+          folder: dist
+          repository-name: jscl-project/jscl-project.github.io
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
+          single-commit: true
