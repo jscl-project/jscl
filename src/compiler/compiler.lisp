@@ -399,7 +399,7 @@
                                 ,(when svar `(= ,(translate-variable svar)
                                                 ,(convert t)))
                                 (break))))
-                     (if (== i (nargs))
+                     (if (>= i (nargs))
                          (= ,(translate-variable var) ,(convert initform)))))))
          (when keyword-arguments
            `(progn

@@ -92,4 +92,17 @@
 
 (test (equal '(1 2) (fff :a 1 :b 2 :c 3)))
 
+;;; both &optional and &key
+(defun ggg (&optional a &key b) (list a b))
+
+(test (equal '(nil nil) (ggg)))
+(test (equal '(1 nil) (ggg 1)))
+(test (equal '(1 2) (ggg 1 :b 2)))
+
+(defun hhh (c &optional a &key b) (list c a b))
+
+(test (equal '(3 nil nil) (hhh 3)))
+(test (equal '(3 1 nil) (hhh 3 1)))
+(test (equal '(3 1 2) (hhh 3 1 :b 2)))
+
 ;;; EOF
