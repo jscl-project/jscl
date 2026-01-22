@@ -50,6 +50,8 @@
        (math-it it))
      (equal result expected))))
 
+(test (string= ":XXX" (prin1-to-string (read-from-string ":XXX"))))
+
 ;;; Printing strings
 (test (string= "\"foobar\"" (write-to-string "foobar")))
 (test (string= "\"foo\\\"bar\"" (write-to-string "foo\"bar")))

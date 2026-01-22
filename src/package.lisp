@@ -220,6 +220,7 @@
             (setf (oget package-syms name) symbol)
             (setf (oget symbol "package") package)
             (when (eq package *keyword-package*)
+              (setf (oget (%package-external-symbols package) name) symbol)
               (set symbol symbol))
             (values symbol nil))))))
 
@@ -235,6 +236,7 @@
           (setf (oget package-syms name) symbol)
           (setf (oget symbol "package") package)
           (when (eq package *keyword-package*)
+            (setf (oget (%package-external-symbols package) name) symbol)
             (set symbol symbol)))
         (pushnew symbol (oget package "shadows"))))))
 
