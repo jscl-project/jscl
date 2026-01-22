@@ -189,6 +189,7 @@
     (setq *environment* (make-lexenv))
     (setq *global-environment* *environment*)
     (setq *fn-info* '())
+    (ensure-directories-exist *dist-directory*)
     (with-compilation-environment
       (with-open-file (out (merge-pathnames "jscl.js" *dist-directory*)
                            :direction :output
