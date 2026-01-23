@@ -205,7 +205,7 @@
   called)
 
 (defun find-fn-info (symbol)
-  (let ((entry (find symbol *fn-info* :key #'fn-info-symbol)))
+  (let ((entry (find symbol *fn-info* :key #'fn-info-symbol :test 'equal)))
     (unless entry
       (setq entry (make-fn-info :symbol symbol))
       (push entry *fn-info*))
@@ -674,13 +674,16 @@
     ((and (listp x) (eq (car x) 'named-lambda))
      (destructuring-bind (name ll &rest body) (cdr x)
        (compile-lambda ll body
-                       :name (symbol-name name)
+                       :name (princ-to-string name)
                        :block name)))
+    ((and (listp x) (eq (car x) 'setf))
+     (convert `(symbol-set-function ',(cadr x))))
     ((symbolp x)
      (let ((b (lookup-in-lexenv x *environment* 'function)))
        ;; !PROCLAIM might create FUNCTION binding with NIL value
        (or (and b (binding-value b))
-	   (convert `(symbol-function ',x)))))))
+	   (convert `(symbol-function ',x)))))
+    (t (error "Illegal function ~a" x))))
 
 (defun make-function-binding (fname)
   (make-binding :name fname :type 'function :value (gvarname fname)))
@@ -1262,10 +1265,16 @@
   `(= (get ,symbol "value") ,value))
 
 (define-raw-builtin fset (symbol value)
-  (multiple-value-bind (value constantp) (constant-value symbol)
+  (multiple-value-bind (sym constantp) (constant-value symbol)
     (when constantp
-      (fn-info value :defined t)))
+      (fn-info sym :defined t)))
   `(= (get ,(convert symbol) "fvalue") ,(convert value)))
+
+(define-raw-builtin setfset (symbol value)
+  (multiple-value-bind (sym constantp) (constant-value symbol)
+    (when constantp
+      (fn-info `(setf ,sym) :defined t)))
+  `(= (get ,(convert symbol) "setfvalue") ,(convert value)))
 
 (define-builtin boundp (x)
   (convert-to-bool `(!== (get ,x "value") undefined)))
@@ -1273,11 +1282,17 @@
 (define-builtin %fboundp (x)
   (convert-to-bool `(call-internal |fboundp| ,x)))
 
+(define-builtin %setfboundp (x)
+  (convert-to-bool `(call-internal |setfboundp| ,x)))
+
 (define-builtin symbol-value (x)
   `(call-internal |symbolValue| ,x))
 
 (define-builtin symbol-function (x)
   `(call-internal |symbolFunction| ,x))
+
+(define-builtin symbol-set-function (x)
+  `(call-internal |symbolSetFunction| ,x))
 
 (define-builtin lambda-code (x)
   `(call-internal |make_lisp_string| (method-call ,x "toString")))
@@ -1315,13 +1330,18 @@
                     (== (get x "stringp") 1))))))
 
 (define-raw-builtin funcall (func &rest args)
-  `(selfcall
-    (var (f ,(convert func)))
-    (return (call (if (=== (typeof f) "function")
-                      f
-                      (get f "fvalue"))
-                  ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
-			  (mapcar #'convert args))))))
+  (cond ((and (consp func) (eq (car func) 'function))
+         `(call ,(convert func)
+                ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
+			(mapcar #'convert args))))
+        (t
+         `(selfcall
+           (var (f ,(convert func)))
+           (return (call (if (=== (typeof f) "function")
+                             f
+                             (get f "fvalue"))
+                         ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
+			         (mapcar #'convert args))))))))
 
 (define-raw-builtin apply (func &rest args)
   (if (null args)

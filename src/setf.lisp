@@ -43,7 +43,18 @@
                   (!macroexpand-1 place env)
                 (if macroexpanded
                     (!get-setf-expansion macroexpansion)
-                    (error "Unknown generalized reference ~S" place))))))))
+                    (let ((g!args (mapcar (lambda (it)
+                                            (declare (ignore it))
+                                            (gensym))
+                                          (cdr place)))
+                          (g!newvalue (gensym)))
+                      (fn-info `(setf ,access-fn) :called t)
+                      (values
+                       g!args
+                       (cdr place)
+                       (list g!newvalue)
+                       `(funcall #'(setf ,access-fn) ,g!newvalue ,@g!args)
+                       `(,access-fn ,@g!args))))))))))
 (fset 'get-setf-expansion (fdefinition '!get-setf-expansion))
 
 (defmacro define-setf-expander (access-fn lambda-list &body body)

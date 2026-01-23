@@ -17,6 +17,8 @@
 
 (defvar *root*)
 
+;; TODO: rewrite using DEFUN SETF, once we make OSET proper function,
+;; and figure out how to not pay to price for APPLY
 (define-setf-expander oget (object key &rest keys)
   (let* ((keys (cons key keys))
          (g!object (gensym))

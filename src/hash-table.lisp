@@ -86,25 +86,11 @@
         (values (cdr (oget table hash)) t)
         (values default nil))))
 
-(defun sethash (new-value key hash-table)
+(defun (setf gethash) (new-value key hash-table &optional defaults)
   (let ((table (cdr hash-table))
         (hash (funcall (car hash-table) key)))
     (oset (cons key new-value) table hash)
     new-value))
-
-(define-setf-expander gethash (key hash-table &optional defaults)
-  (let ((g!key (gensym))
-        (g!hash-table (gensym))
-        (g!defaults (gensym))
-        (g!new-value (gensym)))
-    (values (list g!key g!hash-table g!defaults)            ; temporary variables
-            (list key hash-table defaults)                  ; value forms
-            (list g!new-value)                              ; store variables
-            `(progn
-               (sethash ,g!new-value ,g!key ,g!hash-table)  ; storing form
-               ,g!new-value)              
-            `(gethash ,g!key ,g!hash-table)    ; accessing form
-            )))
 
 (defun remhash (key table)
   (unless (hash-table-p table)

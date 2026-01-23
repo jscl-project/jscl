@@ -89,47 +89,15 @@
      ,@(when (stringp docstring) `((oset ,docstring ',name "vardoc")))
      ',name))
 
-;;; Basic DEFUN for regular function names (not SETF)
-(defmacro %defun (name args &rest body)
-  `(progn
-     (fset ',name #'(named-lambda ,name ,args ,@body))
-     ',name))
-
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (defmacro %defun-setf-symbol (name)
-    `(intern
-      (concat "(" (symbol-name (car ,name)) "_" (symbol-name (cadr ,name)) ")")
-      (symbol-package (cadr ,name)))))
-
 (defmacro defun (name args &rest body)
   (cond ((symbolp name)
-         `(%defun ,name ,args ,@body))
+         `(progn
+            (fset ',name #'(named-lambda ,name ,args ,@body))
+            ',name))
         ((and (consp name) (eq (car name) 'setf))
-         ;; HACK: This stores SETF functions within regular symbols,
-         ;; built from using (SETF name) as a string. This of course
-         ;; is incorrect, and (SETF name) functions should be stored
-         ;; in a different place.
-         ;;
-         ;; Also, the SETF expansion could be defined on demand in
-         ;; get-setf-expansion by consulting this register of SETF
-         ;; definitions.
-         (let ((sfn (%defun-setf-symbol name)))
-           `(progn
-              (%defun ,sfn ,args ,@body)
-              (define-setf-expander ,(cadr name) (&rest arguments)
-                (let ((g!args (mapcar (lambda (it)
-                                        (declare (ignore it))
-                                        (gensym))
-                                      arguments))
-                      (g!newvalue (gensym))
-                      (g!setter ',sfn)
-                      (g!getter ',(cadr name)))
-                  (values 
-                   (list g!args)
-                   arguments
-                   (list g!newvalue)
-                   `(,g!setter ,g!newvalue ,@arguments)
-                   `(,g!getter ,@arguments)))))))
+         `(progn
+            (setfset ',(cadr name) #'(named-lambda ,name ,args ,@body))
+            ',name))
         (t (error "defun ~a unknown function specifier" name))))
 
 (defmacro return (&optional value)
@@ -159,11 +127,6 @@
 
 (defun boundp (x)
   (boundp x))
-
-(defun fboundp (x)
-  (if (functionp x)
-      (error "FBOUNDP - invalid function name ~a." x))
-  (%fboundp x))
 
 (defun eq (x y) (eq x y))
 (defun eql (x y) (eq x y))
@@ -398,14 +361,21 @@
      (and (stringp y) (string= x y)))
     (t nil)))
 
+(defun fboundp (x)
+  (cond
+    ((symbolp x)
+     (%fboundp x))
+    ((and (consp x) (eq (car x) 'setf))
+     (%setfboundp x))
+    (t
+     (error "Invalid function `~S'." x))))
+
 (defun fdefinition (x)
   (cond
-    ((functionp x)
-     x)
     ((symbolp x)
      (symbol-function x))
     ((and (consp x) (eq (car x) 'setf))
-      (symbol-function (%defun-setf-symbol x)))
+     (symbol-set-function (cadr x)))
     (t
      (error "Invalid function `~S'." x))))
 

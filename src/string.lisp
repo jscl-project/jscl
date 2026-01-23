@@ -120,15 +120,8 @@
   (compare-strings s1 s2 start1 end1 start2 end2
                    #'char-equal #'char-lessp t nil t))
 
-(define-setf-expander char (string index)
-  (let ((g!string (gensym))
-        (g!index (gensym))
-        (g!value (gensym)))
-    (values (list g!string g!index)
-            (list string index)
-            (list g!value)
-            `(aset ,g!string ,g!index ,g!value)
-            `(char ,g!string ,g!index))))
+(defun (setf char) (new-val string index)
+  (aset string index new-val))
 
 
 (defun concat (&rest strs)

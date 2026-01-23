@@ -86,7 +86,8 @@ Append numbers to symbol names to make them unique."
               `((defun ,accessor-name (x)
                   (oget! x ,prop))
                 (defun (setf ,accessor-name) (new-val x)
-                  (oset! new-val x ,prop)))))
+                  (oset! new-val x ,prop)
+                  new-val))))
           property-names slot-descriptions)
        ',name)))
 

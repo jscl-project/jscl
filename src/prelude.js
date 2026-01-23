@@ -358,11 +358,22 @@ internals.makeUnboundFunction = function (symbol) {
   return fn;
 };
 
-internals.Symbol = function (name, package_name) {
+internals.makeUnboundSetFunction = function (symbol) {
+  const fn = () => {
+    internals.error(internals.intern("UNDEFINED-FUNCTION"),
+      internals.intern("NAME", "KEYWORD"),
+      internals.QIList(internals.intern("SETF"), symbol, nil));
+  }
+  fn[UNBOUND] = true;
+  return fn;
+};
+
+internals.Symbol = function(name, package_name){
   this.name = name;
   this.package = package_name;
   this.value = undefined;
-  this.fvalue = internals.makeUnboundFunction(this);
+  this.fvalue = internals.makeUnboundFunction(this)
+  this.setfvalue = internals.makeUnboundSetFunction(this)
   this.stack = [];
 };
 
@@ -380,12 +391,12 @@ internals.symbolValue = function (symbol) {
 };
 
 internals.fboundp = function (symbol) {
-  if (symbol instanceof internals.Symbol) {
-    return !symbol.fvalue[UNBOUND];
-  } else {
-    internals.typeError(symbol, internals.intern("SYMBOL"));
-  }
-};
+  return !symbol.fvalue[UNBOUND];
+}
+
+internals.setfboundp = function (symbol) {
+  return !symbol.setfvalue[UNBOUND];
+}
 
 internals.symbolFunction = function (symbol) {
   var fn = symbol.fvalue;
@@ -393,7 +404,15 @@ internals.symbolFunction = function (symbol) {
   return fn;
 };
 
-internals.bindSpecialBindings = function (symbols, values, callback) {
+internals.symbolSetFunction = function (symbol) {
+  var fn = symbol.setfvalue;
+  if (fn[UNBOUND])
+    symbol.setfvalue();
+  return fn;
+};
+
+
+internals.bindSpecialBindings = function (symbols, values, callback){
   try {
     symbols.forEach(function (s, i) {
       s.stack = s.stack || [];

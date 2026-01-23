@@ -419,7 +419,7 @@ The return value will share structure with SEQ if possible."
          (storage-vector-set! new i (storage-vector-ref! seq j)))))
     (t (not-seq-error seq))))
 
-(defun set-subseq (new-val seq a &optional b)
+(defun (setf subseq) (new-val seq a &optional b)
   (check-ensure-bound seq a b)
   (cond
     ((listp seq)
@@ -439,17 +439,6 @@ The return value will share structure with SEQ if possible."
          (return))))
     (t (not-seq-error seq))))
 
-(define-setf-expander subseq (sequence a &optional b)
-  (let ((g!sequence (gensym "SEQUENCE"))
-        (g!a (gensym "A"))
-        (g!b (gensym "B"))
-        (g!value (gensym "VALUE")))
-    (values (list g!sequence g!a g!b)
-            (list sequence a b)
-            (list g!value)
-            `(set-subseq ,g!value ,g!sequence ,g!a ,g!b)
-            `(subseq ,g!sequence ,g!a ,g!b))))
-
 (defun copy-seq (sequence)
   (subseq sequence 0))
 
@@ -464,7 +453,7 @@ The return value will share structure with SEQ if possible."
         ((vectorp sequence)
          (storage-vector-ref sequence index))))
 
-(defun set-elt (sequence index new-value)
+(defun (setf elt) (new-value sequence index)
   (when (< index 0)
     (error "The index ~D is below zero." index))
   (cond ((listp sequence)
@@ -478,16 +467,6 @@ The return value will share structure with SEQ if possible."
         ((vectorp sequence)
          (storage-vector-set sequence index new-value))
         (t (not-seq-error sequence))))
-
-(define-setf-expander elt (sequence index)
-  (let ((g!sequence (gensym))
-        (g!index (gensym))
-        (g!value (gensym)))
-    (values (list g!sequence g!index)
-            (list sequence index)
-            (list g!value)
-            `(set-elt ,g!sequence ,g!index ,g!value)
-            `(elt ,g!sequence ,g!index))))
 
 (defun zero-args-reduce (function initial-value initial-value-p)
   (if initial-value-p
