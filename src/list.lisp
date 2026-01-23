@@ -97,15 +97,9 @@
 (defun nth (n list)
   (car (nthcdr n list)))
 
-(define-setf-expander nth (n list)
-  (let ((g!list (gensym))
-        (g!index (gensym))
-        (g!value (gensym)))
-    (values (list g!list g!index)
-            (list list n)
-            (list g!value)
-            `(rplaca (nthcdr ,g!index ,g!list) ,g!value)
-            `(nth ,g!index ,g!list))))
+(defun (setf nth) (new-val n list)
+  (rplaca (nthcdr n list) new-val)
+  new-val)
 
 (define-abbrev caar (x) `(car (car ,x)))
 (define-abbrev cadr (x) `(car (cdr ,x)))
@@ -310,23 +304,13 @@
       (collect (cons (caar alist) (cdar alist)))
       (setq alist (cdr alist)))))
 
-(define-setf-expander car (x)
-  (let ((cons (gensym))
-        (new-value (gensym)))
-    (values (list cons)
-            (list x)
-            (list new-value)
-            `(progn (rplaca ,cons ,new-value) ,new-value)
-            `(car ,cons))))
+(defun (setf car) (new-val x)
+  (rplaca x new-val)
+  new-val)
 
-(define-setf-expander cdr (x)
-  (let ((cons (gensym))
-        (new-value (gensym)))
-    (values (list cons)
-            (list x)
-            (list new-value)
-            `(progn (rplacd ,cons ,new-value) ,new-value)
-            `(cdr ,cons))))
+(defun (setf cdr) (new-val x)
+  (rplacd x new-val)
+  new-val)
 
 
 ;; The NCONC function is based on the SBCL's one.
@@ -416,8 +400,7 @@
     (when (null cdr)
       (error "malformed property list ~S" tail))
     (when (eq indicator car)
-      ;; TODO: should be cadr, needs a defsetf for that
-      (setf (car (cdr tail)) new-value)
+      (setf (cadr tail) new-value)
       (return plist))))
 
 (define-setf-expander getf (plist indicator &optional default)
