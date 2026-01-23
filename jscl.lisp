@@ -36,6 +36,9 @@
 (defun get-current-git-commit ()
   (uiop:run-program '("git" "rev-parse" "HEAD") :output '(:string :stripped t)))
 
+(defun is-release-build ()
+  (uiop:getenvp "JSCL_RELEASE"))
+
 (defun git-has-uncommited-changes ()
   (let ((error-status (nth-value 2 (uiop:run-program '("git" "diff-files" "--quiet") :ignore-error-status t))))
     (= error-status 1)))
@@ -54,6 +57,17 @@
 	     (return (string-trim '(#\newline #\" #\tab #\space)
 				  (subseq line (1+ colon) comma)))))))
 
+;; To be inlined into the `lisp-implementation-version' function.
+(defun jscl-implementation-version ()
+  (if (is-release-build)
+      (progn
+	(assert (not (git-has-uncommited-changes)))
+	*version*)
+      (format nil "dev-~a~a"
+	      (subseq (get-current-git-commit) 0 8)
+	      (if (git-has-uncommited-changes)
+		  "-dirty"
+		  ""))))
 
 ;;; List of all the source files that need to be compiled, and whether they
 ;;; are to be compiled just by the host, by the target JSCL, or by both.
