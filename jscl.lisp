@@ -32,21 +32,27 @@
 (defvar *dist-directory*
   (merge-pathnames "dist/" *base-directory*))
 
-(defvar *version*
-  (or (uiop:getenv "JSCL_VERSION")
-      ;; Read the version from the package.json file. We could have used a
-      ;; json library to parse this, but that would introduce a dependency
-      ;; and we are not using ASDF yet.
-      (with-open-file (in (merge-pathnames "package.json" *base-directory*))
-        (loop
-          for line = (read-line in nil)
-          while line
-          when (search "\"version\":" line)
-            do (let ((colon (position #\: line))
-                     (comma (position #\, line)))
-                 (return (string-trim '(#\newline #\" #\tab #\space)
-                                      (subseq line (1+ colon) comma))))))))
 
+(defun get-current-git-commit ()
+  (uiop:run-program '("git" "rev-parse" "HEAD") :output '(:string :stripped t)))
+
+(defun git-has-uncommited-changes ()
+  (let ((error-status (nth-value 2 (uiop:run-program '("git" "diff-files" "--quiet") :ignore-error-status t))))
+    (= error-status 1)))
+
+(defvar *version*
+  ;; Read the version from the package.json file. We could have used a
+  ;; json library to parse this, but that would introduce a dependency
+  ;; and we are not using ASDF yet.
+  (with-open-file (in (merge-pathnames "package.json" *base-directory*))
+    (loop
+      for line = (read-line in nil)
+      while line
+      when (search "\"version\":" line)
+	do (let ((colon (position #\: line))
+		 (comma (position #\, line)))
+	     (return (string-trim '(#\newline #\" #\tab #\space)
+				  (subseq line (1+ colon) comma)))))))
 
 
 ;;; List of all the source files that need to be compiled, and whether they
