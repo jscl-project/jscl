@@ -112,6 +112,24 @@
     ("compile-file"  :both)
     ("load"          :target)))
 
+;;; List of static files to copy to *DIST-DIRECTORY*
+
+;;; Each item should be either SRC-PATH or (SRC-PATH DST-PATH).
+;;; SRC-PATH is relative to *BASE-DIRECTORY* and DST-PATH is relative
+;;; to *DIST-DIRECTORY*. If DST-PATH is not provided, default to the
+;;; name/type components of SRC-PATH (directory nesting is
+;;; REMOVED). Unix namestrings are used for all paths and are parsed
+;;; with UIOP:PARSE-UNIX-NAMESTRING.
+(defvar *static-files*
+  '("web/index.html"
+    "web/style.css"
+    ("node_modules/jquery/dist/jquery.min.js" "jquery.js")
+    "node_modules/jq-console/lib/jqconsole.js"
+    ("worker/index.html" "worker.html" )
+    "worker/main.js"
+    "worker/service-worker.js"
+    "tests.html"))
+
 
 (defun source-pathname (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
   (merge-pathnames
@@ -189,7 +207,20 @@
     (setq *environment* (make-lexenv))
     (setq *global-environment* *environment*)
     (setq *fn-info* '())
+    (uiop:run-program (list "npm" "install"
+                            "--prefix" (uiop:native-namestring *base-directory*))
+                      :output t
+                      :error-output t)
     (ensure-directories-exist *dist-directory*)
+    (dolist (it *static-files*)
+      (let* ((it (uiop:ensure-list it))
+             (src-file (uiop:parse-unix-namestring (car it)))
+             (dst-file (if (cadr it)
+                           (uiop:parse-unix-namestring (cadr it))
+                           (make-pathname :directory '(:relative)
+                                          :defaults src-file))))
+        (uiop:copy-file (merge-pathnames src-file *base-directory*)
+                        (merge-pathnames dst-file *dist-directory*))))
     (with-compilation-environment
       (with-open-file (out (merge-pathnames "jscl.js" *dist-directory*)
                            :direction :output
