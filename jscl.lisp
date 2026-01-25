@@ -18,7 +18,8 @@
 
 (defpackage :jscl
   (:use :cl)
-  (:export #:bootstrap #:compile-application #:run-tests-in-host))
+  (:export #:bootstrap #:build-repls #:build-tests #:build-all
+           #:compile-application #:run-tests-in-host))
 
 (in-package :jscl)
 
@@ -112,24 +113,6 @@
     ("compile-file"  :both)
     ("load"          :target)))
 
-;;; List of static files to copy to *DIST-DIRECTORY*
-
-;;; Each item should be either SRC-PATH or (SRC-PATH DST-PATH).
-;;; SRC-PATH is relative to *BASE-DIRECTORY* and DST-PATH is relative
-;;; to *DIST-DIRECTORY*. If DST-PATH is not provided, default to the
-;;; name/type components of SRC-PATH (directory nesting is
-;;; REMOVED). Unix namestrings are used for all paths and are parsed
-;;; with UIOP:PARSE-UNIX-NAMESTRING.
-(defvar *static-files*
-  '("web/index.html"
-    "web/style.css"
-    ("node_modules/jquery/dist/jquery.min.js" "jquery.js")
-    "node_modules/jq-console/lib/jqconsole.js"
-    ("worker/index.html" "worker.html" )
-    "worker/main.js"
-    "worker/service-worker.js"
-    "tests.html"))
-
 
 (defun source-pathname (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
   (merge-pathnames
@@ -207,20 +190,7 @@
     (setq *environment* (make-lexenv))
     (setq *global-environment* *environment*)
     (setq *fn-info* '())
-    (uiop:run-program (list "npm" "install"
-                            "--prefix" (uiop:native-namestring *base-directory*))
-                      :output t
-                      :error-output t)
     (ensure-directories-exist *dist-directory*)
-    (dolist (it *static-files*)
-      (let* ((it (uiop:ensure-list it))
-             (src-file (uiop:parse-unix-namestring (car it)))
-             (dst-file (if (cadr it)
-                           (uiop:parse-unix-namestring (cadr it))
-                           (make-pathname :directory '(:relative)
-                                          :defaults src-file))))
-        (uiop:copy-file (merge-pathnames src-file *base-directory*)
-                        (merge-pathnames dst-file *dist-directory*))))
     (with-compilation-environment
       (with-open-file (out (merge-pathnames "jscl.js" *dist-directory*)
                            :direction :output
@@ -241,9 +211,32 @@
 
         (format out "})();~%")))
 
-    (report-undefined-functions)
+    (report-undefined-functions)))
+
+(defun copy-asset (src-path &optional dst-path)
+  "Copy static file from SRC-PATH to DST-PATH.
+SRC-PATH is relative to *BASE-DIRECTORY* and DST-PATH is relative to
+*DIST-DIRECTORY*. If DST-PATH is not provided, default to the
+name/type components of SRC-PATH (directory nesting is *removed*). Unix
+namestrings are used for all paths and are parsed with
+UIOP:PARSE-UNIX-NAMESTRING."
+  (let* ((src-path (uiop:parse-unix-namestring src-path))
+         (dst-path (if dst-path
+                       (uiop:parse-unix-namestring dst-path)
+                       (make-pathname :directory '(:relative)
+                                      :defaults src-path))))
+    (uiop:copy-file (merge-pathnames src-path *base-directory*)
+                    (merge-pathnames dst-path *dist-directory*))))
+
+(defun build-repls ()
+  (let ((*package* (find-package "JSCL"))
+        (*default-pathname-defaults* *base-directory*))
 
     ;; Web REPL
+    (copy-asset "web/index.html")
+    (copy-asset "web/style.css")
+    (copy-asset "node_modules/jquery/dist/jquery.min.js" "jquery.js")
+    (copy-asset "node_modules/jq-console/lib/jqconsole.js")
     (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "web")))
                          (merge-pathnames "jscl-web.js" *dist-directory*))
 
@@ -253,23 +246,35 @@
                          :shebang t)
 
     ;; Web worker REPL
+    (copy-asset "worker/index.html" "worker.html" )
+    (copy-asset "worker/main.js")
+    (copy-asset "worker/service-worker.js")
     (compile-application (list (source-pathname "worker.lisp" :directory '(:relative "worker")))
                          (merge-pathnames "jscl-worker.js" *dist-directory*))
 
     ;; Deno REPL
     (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "deno")))
-                         (merge-pathnames "jscl-deno.js" *dist-directory*))
+                         (merge-pathnames "jscl-deno.js" *dist-directory*))))
 
-    ;; Tests
+(defun build-tests ()
+  (let ((*package* (find-package "JSCL"))
+        (*default-pathname-defaults* *base-directory*))
+
+    (copy-asset "tests.html")
     (compile-application
      `(,(source-pathname "tests.lisp" :directory nil)
-        ,@(directory (source-pathname "*" :directory '(:relative "tests") :type "lisp"))
-        ;; Loop tests
-        ,(source-pathname "validate.lisp" :directory '(:relative "tests" "loop") :type "lisp")
-        ,(source-pathname "base-tests.lisp" :directory '(:relative "tests" "loop") :type "lisp")
+       ,@(directory (source-pathname "*" :directory '(:relative "tests") :type "lisp"))
+       ;; Loop tests
+       ,(source-pathname "validate.lisp" :directory '(:relative "tests" "loop") :type "lisp")
+       ,(source-pathname "base-tests.lisp" :directory '(:relative "tests" "loop") :type "lisp")
 
-        ,(source-pathname "tests-report.lisp" :directory nil))
+       ,(source-pathname "tests-report.lisp" :directory nil))
      (merge-pathnames "tests.js" *dist-directory*))))
+
+(defun build-all (&optional verbose)
+  (bootstrap verbose)
+  (build-repls)
+  (build-tests))
 
 
 ;;; Run the tests in the host Lisp implementation. It is a quick way

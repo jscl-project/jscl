@@ -18,4 +18,4 @@ OPTIND=1
 # Unix timestamp of the commit we are building
 export SOURCE_DATE_EPOCH=$(git show -s --format=%ct HEAD)
 
-sbcl --load "$BASE/jscl.lisp" --eval "(jscl:bootstrap $VERBOSE)" --eval '(quit)'
+sbcl --load "$BASE/jscl.lisp" --eval "(jscl:build-all $VERBOSE)" --eval '(quit)'
