@@ -33,22 +33,47 @@
 (defvar *dist-directory*
   (merge-pathnames "dist/" *base-directory*))
 
+(defun get-current-git-commit ()
+  (uiop:run-program `("git" "-C" ,(uiop:native-namestring *base-directory*)
+			    "rev-parse"
+			    "HEAD")
+		    :output '(:string :stripped t)))
+
+(defun is-release-build ()
+  (uiop:getenvp "JSCL_RELEASE"))
+
+(defun git-has-uncommited-changes ()
+  (let* ((command `("git" "-C" ,(uiop:native-namestring *base-directory*)
+			  "diff-files"
+			  "--quiet"))
+	 (error-status (nth-value 2 (uiop:run-program command :ignore-error-status t))))
+    (= error-status 1)))
+
 (defvar *version*
-  (or (uiop:getenv "JSCL_VERSION")
-      ;; Read the version from the package.json file. We could have used a
-      ;; json library to parse this, but that would introduce a dependency
-      ;; and we are not using ASDF yet.
-      (with-open-file (in (merge-pathnames "package.json" *base-directory*))
-        (loop
-          for line = (read-line in nil)
-          while line
-          when (search "\"version\":" line)
-            do (let ((colon (position #\: line))
-                     (comma (position #\, line)))
-                 (return (string-trim '(#\newline #\" #\tab #\space)
-                                      (subseq line (1+ colon) comma))))))))
+  ;; Read the version from the package.json file. We could have used a
+  ;; json library to parse this, but that would introduce a dependency
+  ;; and we are not using ASDF yet.
+  (with-open-file (in (merge-pathnames "package.json" *base-directory*))
+    (loop
+      for line = (read-line in nil)
+      while line
+      when (search "\"version\":" line)
+	do (let ((colon (position #\: line))
+		 (comma (position #\, line)))
+	     (return (string-trim '(#\newline #\" #\tab #\space)
+				  (subseq line (1+ colon) comma)))))))
 
-
+;; To be inlined into the `lisp-implementation-version' function.
+(defun jscl-implementation-version ()
+  (if (is-release-build)
+      (progn
+	(assert (not (git-has-uncommited-changes)))
+	*version*)
+      (format nil "dev-~a~a"
+	      (subseq (get-current-git-commit) 0 8)
+	      (if (git-has-uncommited-changes)
+		  "-dirty"
+		  ""))))
 
 ;;; List of all the source files that need to be compiled, and whether they
 ;;; are to be compiled just by the host, by the target JSCL, or by both.

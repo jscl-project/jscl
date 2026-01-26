@@ -19,7 +19,7 @@
   "JSCL")
 
 (defun lisp-implementation-version ()
-  #.*version*)
+  #.(jscl-implementation-version))
 
 (defun short-site-name ()
   nil)

@@ -21,7 +21,9 @@ jobs:
         run: sudo apt-get install sbcl
 
       - name: Build
-        run: JSCL_VERSION=$(git rev-parse --short HEAD) npm run build
+        run: npm run build
+        env:
+          JSCL_RELEASE: true
 
       - name: Run tests
         run: npm test
