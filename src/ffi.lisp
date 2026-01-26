@@ -48,10 +48,6 @@
             `(oget! ,g!object ,@g!keys))))
 
 
-(defun make-new (constructor &rest args)
-  (apply (%js-internal "newInstance") constructor args))
-
-
 (defun lisp-to-js (x)
   (lisp-to-js x))
 

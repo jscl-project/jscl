@@ -36,6 +36,50 @@
 
 (defvar *eq-hash-counter* 0)
 
+;;; sxhash - Standard hash function
+;;; Returns a non-negative fixnum hash code for any object.
+;;; Objects that are EQUAL must return the same hash code.
+
+;; WeakMap to store hash codes for objects where equal is eq
+(defvar *sxhash-weak-map* (make-new (%js-vref "WeakMap" t)))
+(defvar *sxhash-counter* 0)
+
+(defun sxhash-string (s)
+  "Hash a string based on its content using a simple hash algorithm."
+  (let ((hash 5381)
+        (len (length s)))
+    (dotimes (i len)
+      ;; djb2-like hash: hash * 33 + char
+      (setq hash (logand (+ (ash hash 5) hash (char-code (char s i)))
+                         #x7FFFFFFF)))
+    hash))
+
+(defun sxhash-cons (x)
+  "Recursively hash a cons cell."
+  (let ((car-hash (sxhash (car x)))
+        (cdr-hash (sxhash (cdr x))))
+    ;; Combine hashes
+    (logand (+ (* car-hash 31) cdr-hash) #x7FFFFFFF)))
+
+(defun sxhash (x)
+  "Return a hash code for any object. Objects that are EQUAL have the same hash."
+  (cond
+    ((null x) 0)
+    ((numberp x)
+     (logand (if (< x 0) (- x) x) #x7FFFFFFF))
+    ((characterp x)
+     (char-code x))
+    ((stringp x)
+     (sxhash-string x))
+    ((consp x)
+     (sxhash-cons x))
+    (t
+     (if ((oget *sxhash-weak-map* "has") x)
+         ((oget *sxhash-weak-map* "get") x)
+         (let ((new-hash (incf *sxhash-counter*)))
+           ((oget *sxhash-weak-map* "set") x new-hash)
+           new-hash)))))
+
 (defun eq-hash (x)
   (cond ((numberp x) x)
         (t (unless (in "$$jscl_id" x)

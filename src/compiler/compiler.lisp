@@ -1472,6 +1472,10 @@
           (collect (car tail))
           (collect (convert `(lisp-to-js ,(cadr tail))))))))
 
+(define-raw-builtin make-new (constructor &rest args)
+  ;; newInstance expects (values, ct, ...args) where values is for multiple-value handling
+  `(call-internal |newInstance| null ,(convert constructor) ,@(mapcar #'convert args)))
+
 (define-builtin clone (x)
   `(method-call |Object| "assign" (object) ,x))
 

@@ -148,4 +148,40 @@
   (test (equal 'bar (gethash "123" ht)))
   (test (eq 2 (length (hash-table-keys ht)))))
 
+;;; SXHASH
+
+;; sxhash returns a non-negative integer
+(test (integerp (sxhash 'foo)))
+(test (>= (sxhash 'foo) 0))
+
+;; sxhash returns consistent results for the same object
+(test (= (sxhash 'foo) (sxhash 'foo)))
+(test (= (sxhash "hello") (sxhash "hello")))
+(test (= (sxhash 42) (sxhash 42)))
+(test (= (sxhash #\a) (sxhash #\a)))
+
+;; equal objects must have the same sxhash
+(test (= (sxhash "test") (sxhash "test")))
+(test (= (sxhash '(1 2 3)) (sxhash '(1 2 3))))
+(test (= (sxhash '(a b c)) (sxhash '(a b c))))
+(test (= (sxhash '((a . 1) (b . 2))) (sxhash '((a . 1) (b . 2)))))
+
+;; different types produce different hashes
+(test (not (= (sxhash 123) (sxhash "123"))))
+
+;; nil has a defined hash
+(test (integerp (sxhash nil)))
+(test (= (sxhash nil) (sxhash nil)))
+
+;; characters hash to their char-code
+(test (= (sxhash #\A) (char-code #\A)))
+
+;; numbers hash based on value
+(test (= (sxhash 0) 0))
+(test (= (sxhash 42) 42))
+
+;; symbols get consistent hash codes
+(let ((sym 'test-symbol))
+  (test (= (sxhash sym) (sxhash sym))))
+
 ;;; EOF
