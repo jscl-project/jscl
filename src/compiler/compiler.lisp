@@ -1380,6 +1380,9 @@
 (define-builtin /debug (x)
   `(method-call |console| "log" (call-internal |xstring| ,x)))
 
+(define-builtin /debug! (x)
+  `(method-call |console| "dir" ,x (object "depth" 3)))
+
 (define-raw-builtin /log (x &rest y)
   `(selfcall
     (call (get |console| "log")
@@ -1529,6 +1532,9 @@
 (define-builtin js-null-p (x)
   (convert-to-bool `(=== ,x null)))
 
+(define-builtin js-undefined-p (x)
+  (convert-to-bool `(=== ,x undefined)))
+
 (define-builtin objectp (x)
   `(selfcall
     (var (x ,x))
@@ -1545,6 +1551,11 @@
   `(selfcall (throw ,x)))
 
 (define-builtin lisp-to-js (x) `(call-internal |lisp_to_js| ,x))
+
+;; Convert a Lisp function to JS but that retrns the primary value but does not
+;; convert its arguments
+(define-builtin fn-to-js (x) `(call-internal |fn_to_js| ,x))
+
 (define-builtin js-to-lisp (x) `(call-internal |js_to_lisp| ,x))
 
 

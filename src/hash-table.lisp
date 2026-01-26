@@ -23,10 +23,9 @@
 ;;; Objects that are EQUAL must return the same hash code.
 
 ;; Counter for identity-based hash codes
-;; We use a property on objects to store their hash, since WeakMap
-;; operations were causing issues during bootstrap
+;; We use a WeakMap to store hash codes without polluting objects
 (defvar *sxhash-counter* 0)
-(defvar *sxhash-property* "$$jscl_sxhash")
+(defvar *sxhash-table* (make-new (%js-vref "WeakMap" t)))
 
 (defun sxhash-string (s)
   "Hash a string based on its content using a simple hash algorithm."
@@ -48,7 +47,8 @@
 (defun sxhash (x)
   "Return a hash code for any object. Objects that are EQUAL have the same hash."
   (cond
-    ((null x) 0)
+    ; This line is causing an infinite lop, why?
+    ;; ((null x) 0)
     ((numberp x)
      (logand (truncate (if (< x 0) (- x) x)) #x7FFFFFFF))
     ((characterp x)
@@ -58,34 +58,13 @@
     ((consp x)
      (sxhash-cons x))
     (t
-     ;; For other objects, use identity-based hash via property
-     (if (in *sxhash-property* x)
-         (oget! x *sxhash-property*)
+     ;; For other objects, use identity-based hash via WeakMap
+     (if (eq ((oget! *sxhash-table* "has") x)
+	     (%js-vref "true" t))
+         ((oget! *sxhash-table* "get") x)
          (let ((new-hash (incf *sxhash-counter*)))
-           (oset! new-hash x *sxhash-property*)
+           ((oget! *sxhash-table* "set") x new-hash)
            new-hash)))))
-
-;;; Hash functions for different equality predicates
-
-(defun eq-hash (x)
-  "Hash function for eq-based hash tables."
-  (cond
-    ((null x) 0)
-    ((numberp x)
-     (logand (truncate (if (< x 0) (- x) x)) #x7FFFFFFF))
-    ((characterp x)
-     (char-code x))
-    (t
-     ;; For objects, use identity hash via property
-     (if (in *sxhash-property* x)
-         (oget! x *sxhash-property*)
-         (let ((new-hash (incf *sxhash-counter*)))
-           (oset! new-hash x *sxhash-property*)
-           new-hash)))))
-
-;; eql is equivalent to eq for us (no bignums)
-(defun eql-hash (x)
-  (eq-hash x))
 
 ;; equal uses sxhash which handles structural equality
 (defun equal-hash (x)
@@ -113,14 +92,19 @@
          ;; For equal, use EqualMap with custom hash and equality functions.
          (ht (if (eq test-symbol 'equal)
                  (make-new (oget! (%js-vref "internals" t) "EqualMap")
-                           (lisp-to-js #'equal-hash)
-                           (lisp-to-js #'equal))
+                           (fn-to-js #'equal-hash)
+                           (fn-to-js #'equal))
                  (make-new (%js-vref "Map" t)))))
     (oset! t ht "$$jscl_hash_table")
     (oset! test-symbol ht "$$jscl_test")
     ht))
 
+(defun check-is-hash-table (x)
+  (unless (hash-table-p x)
+    (error 'type-error :datum hash-table :expected-type 'hash-table)))
+
 (defun gethash (key hash-table &optional default)
+  (check-is-hash-table hash-table)
   (let ((has-key ((oget! hash-table "has") key)))
     (if has-key
         (values ((oget! hash-table "get") key) t)
@@ -128,6 +112,7 @@
 
 (defun (setf gethash) (new-value key hash-table &optional defaults)
   (declare (ignore defaults))
+  (check-is-hash-table hash-table)
   ((oget! hash-table "set") key new-value)
   new-value)
 
@@ -140,8 +125,7 @@
     had-key))
 
 (defun clrhash (hash-table)
-  (unless (hash-table-p hash-table)
-    (error 'type-error :datum hash-table :expected-type 'hash-table))
+  (check-is-hash-table hash-table)
   ((oget! hash-table "clear"))
   hash-table)
 
@@ -152,8 +136,7 @@
       0))
 
 (defun maphash (function hash-table)
-  (unless (hash-table-p hash-table)
-    (error 'type-error :datum hash-table :expected-type 'hash-table))
+  (check-is-hash-table hash-table)
   ((oget! hash-table "forEach")
    (lisp-to-js (lambda (value key &optional this-map)
                  (declare (ignore this-map))
@@ -161,13 +144,10 @@
   nil)
 
 (defun hash-table-test (hash-table)
-  (unless (hash-table-p hash-table)
-    (error 'type-error :datum hash-table :expected-type 'hash-table))
+  (check-is-hash-table hash-table)
   (oget! hash-table "$$jscl_test"))
 
 (defun copy-hash-table (origin)
-  (unless (hash-table-p origin)
-    (error 'type-error :datum origin :expected-type 'hash-table))
   (let ((new-ht (make-hash-table :test (hash-table-test origin))))
     (maphash (lambda (k v)
                (setf (gethash k new-ht) v))
@@ -189,5 +169,6 @@
                (push v values))
              hash-table)
     values))
+
 
 ;;; EOF
