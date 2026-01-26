@@ -33,13 +33,18 @@
   (merge-pathnames "dist/" *base-directory*))
 
 (defun get-current-git-commit ()
-  (uiop:run-program `("git" "-C" ,(namestring *base-directory*) "rev-parse" "HEAD") :output '(:string :stripped t)))
+  (uiop:run-program `("git" "-C" ,(uiop:native-namestring *base-directory*)
+			    "rev-parse"
+			    "HEAD")
+		    :output '(:string :stripped t)))
 
 (defun is-release-build ()
   (uiop:getenvp "JSCL_RELEASE"))
 
 (defun git-has-uncommited-changes ()
-  (let* ((command `("git" "-C" ,(namestring *base-directory*) "diff-files" "--quiet"))
+  (let* ((command `("git" "-C" ,(uiop:native-namestring *base-directory*)
+			  "diff-files"
+			  "--quiet"))
 	 (error-status (nth-value 2 (uiop:run-program command :ignore-error-status t))))
     (= error-status 1)))
 
