@@ -107,19 +107,15 @@
                         ((or (eq test #'eql) (eq test 'eql)) 'eql)
                         ((or (eq test #'equal) (eq test 'equal)) 'equal)
                         (t (error "Invalid hash table test: ~S" test))))
-         ;; For eq test, use native JS Map (faster, uses identity comparison)
-         ;; For eql/equal, use EqualMap with custom hash and equality functions
-         (ht (if (eq test-symbol 'eq)
-                 (make-new (%js-vref "Map" t))
-                 (let* ((hash-fn (case test-symbol
-                                   (eql #'eql-hash)
-                                   (equal #'equal-hash)))
-                        (equality-fn (case test-symbol
-                                       (eql #'eql)
-                                       (equal #'equal))))
-                   (make-new (oget! (%js-vref "internals" t) "EqualMap")
-                             (lisp-to-js hash-fn)
-                             (lisp-to-js equality-fn))))))
+         ;; For eq/eql tests, use native JS Map (faster, uses SameValueZero comparison)
+         ;; This works because in JSCL, numbers and characters are JS primitives
+         ;; compared by value, so eq and eql behave the same.
+         ;; For equal, use EqualMap with custom hash and equality functions.
+         (ht (if (eq test-symbol 'equal)
+                 (make-new (oget! (%js-vref "internals" t) "EqualMap")
+                           (lisp-to-js #'equal-hash)
+                           (lisp-to-js #'equal))
+                 (make-new (%js-vref "Map" t)))))
     (oset! t ht "$$jscl_hash_table")
     (oset! test-symbol ht "$$jscl_test")
     ht))
