@@ -47,8 +47,7 @@
 (defun sxhash (x)
   "Return a hash code for any object. Objects that are EQUAL have the same hash."
   (cond
-    ; This line is causing an infinite lop, why?
-    ;; ((null x) 0)
+    ((null x) 0)
     ((numberp x)
      (logand (truncate (if (< x 0) (- x) x)) #x7FFFFFFF))
     ((characterp x)
