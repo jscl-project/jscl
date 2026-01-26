@@ -121,14 +121,14 @@
   '(t)))
 
 ;;; test hash-table-printer
-(test (string= "#<hash-table :test eq :count 0>"
+(test (string= "#<HASH-TABLE :TEST eq :COUNT 0>"
                (write-to-string (temp-hash-table :test #'eq))))
-(test (string= "#<hash-table :test eql :count 0>"
+(test (string= "#<HASH-TABLE :TEST eql :COUNT 0>"
                (write-to-string (temp-hash-table))))
-(test (string= "#<hash-table :test equal :count 0>"
+(test (string= "#<HASH-TABLE :TEST equal :COUNT 0>"
                (write-to-string (temp-hash-table :test #'equal))))
-(test (string= "#<hash-table :test eql :count 6>"  (write-to-string (temp-hash-table :fill t))))
-(test (string= "#<hash-table :test eql :count 5>"
+(test (string= "#<HASH-TABLE :TEST eql :COUNT 6>"  (write-to-string (temp-hash-table :fill t))))
+(test (string= "#<HASH-TABLE :TEST eql :COUNT 5>"
                (write-to-string
                 (let ((h (temp-hash-table :fill t)))
                   (remhash 'one h)

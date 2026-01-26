@@ -425,11 +425,9 @@
 ;;; hash-table printer
 (defun hash-table-object-printer (form stream)
   ;; object printer called under typecase. so, check-type not do
-  (simple-format
-   stream
-   (concat "#<hash-table :test " (string-downcase (hash-table-test form))
-           " :count ~d>")
-   (hash-table-count form)))
+  (simple-format stream "#<HASH-TABLE :TEST ~a :COUNT ~d>"
+		 (string-downcase (hash-table-test form))
+		 (hash-table-count form)))
 
 #+jscl
 (defun write (form &key (stream *standard-output*)
