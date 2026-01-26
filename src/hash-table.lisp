@@ -13,36 +13,20 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-;;; Plain Javascript objects are the natural way to implement Common
-;;; Lisp hash tables. However, there is a big differences between
-;;; them which we need to work around. Javascript objects require the
-;;; keys to be strings. To solve that, we map Lisp objects to strings
-;;; such that "equivalent" values map to the same string, regarding
-;;; the equality predicate used (one of `eq', `eql', `equal' and
-;;; `equalp').
-;;;
-
-;;; Additionally, we want to iterate across the hash table
-;;; key-values. So we use a cons (key  . value)
-;;; as value in the Javascript object. It implicitly gives the
-;;; inverse mapping of strings to our objects.
-
-;;; If a hash table has `eq' as test, we need to generate unique
-;;; strings for each Lisp object. To do this, we tag the objects with
-;;; a `$$jscl_id' property. As a special case, numbers do not need to
-;;; be tagged, as they can be used to index Javascript objects.
+;;; Hash tables implemented using the EqualMap JavaScript class from
+;;; prelude.js. EqualMap supports custom hash and equality functions.
 
 (/debug "loading hash-table.lisp!")
-
-(defvar *eq-hash-counter* 0)
 
 ;;; sxhash - Standard hash function
 ;;; Returns a non-negative fixnum hash code for any object.
 ;;; Objects that are EQUAL must return the same hash code.
 
-;; WeakMap to store hash codes for objects where equal is eq
-(defvar *sxhash-weak-map* (make-new (%js-vref "WeakMap" t)))
+;; Counter for identity-based hash codes
+;; We use a property on objects to store their hash, since WeakMap
+;; operations were causing issues during bootstrap
 (defvar *sxhash-counter* 0)
+(defvar *sxhash-property* "$$jscl_sxhash")
 
 (defun sxhash-string (s)
   "Hash a string based on its content using a simple hash algorithm."
@@ -66,7 +50,7 @@
   (cond
     ((null x) 0)
     ((numberp x)
-     (logand (if (< x 0) (- x) x) #x7FFFFFFF))
+     (logand (truncate (if (< x 0) (- x) x)) #x7FFFFFFF))
     ((characterp x)
      (char-code x))
     ((stringp x)
@@ -74,132 +58,139 @@
     ((consp x)
      (sxhash-cons x))
     (t
-     (if ((oget *sxhash-weak-map* "has") x)
-         ((oget *sxhash-weak-map* "get") x)
+     ;; For other objects, use identity-based hash via property
+     (if (in *sxhash-property* x)
+         (oget! x *sxhash-property*)
          (let ((new-hash (incf *sxhash-counter*)))
-           ((oget *sxhash-weak-map* "set") x new-hash)
+           (oset! new-hash x *sxhash-property*)
            new-hash)))))
 
-(defun eq-hash (x)
-  (cond ((numberp x) x)
-        (t (unless (in "$$jscl_id" x)
-             (oset (concat "$" *eq-hash-counter*) x "$$jscl_id")
-             (incf *eq-hash-counter*))
-           (oget x "$$jscl_id"))))
+;;; Hash functions for different equality predicates
 
-;;; We do not have bignums, so eql is equivalent to eq.
+(defun eq-hash (x)
+  "Hash function for eq-based hash tables."
+  (cond
+    ((null x) 0)
+    ((numberp x)
+     (logand (truncate (if (< x 0) (- x) x)) #x7FFFFFFF))
+    ((characterp x)
+     (char-code x))
+    (t
+     ;; For objects, use identity hash via property
+     (if (in *sxhash-property* x)
+         (oget! x *sxhash-property*)
+         (let ((new-hash (incf *sxhash-counter*)))
+           (oset! new-hash x *sxhash-property*)
+           new-hash)))))
+
+;; eql is equivalent to eq for us (no bignums)
 (defun eql-hash (x)
   (eq-hash x))
 
-;;; In the case of equal-based hash tables, we do not store the hash
-;;; in the objects, but compute a hash from the elements it contains.
+;; equal uses sxhash which handles structural equality
 (defun equal-hash (x)
-  (cond ((consp x)
-         (concat "(" (equal-hash (car x)) (equal-hash (cdr x)) ")"))
-        ((stringp x)
-         ;; at this place x always string, so used (oget length)
-         (concat "s" (storage-vector-size x) ":" (lisp-to-js x)))
-        (t (eql-hash x))))
+  (sxhash x))
 
-(defun equalp-hash (x)
-  ;; equalp is not implemented as predicate. So I am skipping this one
-  ;; by now.
-  )
+;;; Hash table structure:
+;;; An EqualMap instance (JS object) with additional properties:
+;;;   $$jscl_hash_table = t (marker to identify hash tables)
+;;;   $$jscl_test = test function symbol (eq, eql, or equal)
 
 (defun hash-table-p (obj)
-  (and (objectp obj) (eql (object-type-code obj) :hash-table)))
-
-(defun %select-hash-fn (fn)
-  (when (and (symbolp fn) (fboundp fn))
-    (setq fn (symbol-function fn)))
-  (cond
-    ((eql fn #'eq)     'eq-hash )
-    ((eql fn #'eql)    'eql-hash )
-    ((eql fn #'equal)  'equal-hash )
-    (t (error "Incorrect hash function: ~s." fn))))
+  (and (objectp obj)
+       (in "$$jscl_hash_table" obj)))
 
 (defun make-hash-table (&key (test #'eql) size)
-  (let ((cell (cons (%select-hash-fn test) (new))))
-    (set-object-type-code cell :hash-table)
-    cell))
+  (declare (ignore size))
+  (let* ((test-symbol (cond
+                        ((or (eq test #'eq) (eq test 'eq)) 'eq)
+                        ((or (eq test #'eql) (eq test 'eql)) 'eql)
+                        ((or (eq test #'equal) (eq test 'equal)) 'equal)
+                        (t (error "Invalid hash table test: ~S" test))))
+         (hash-fn (case test-symbol
+                    (eq #'eq-hash)
+                    (eql #'eql-hash)
+                    (equal #'equal-hash)))
+         (equality-fn (case test-symbol
+                        (eq #'eq)
+                        (eql #'eql)
+                        (equal #'equal)))
+         (js-hash-fn (lisp-to-js hash-fn))
+         (js-test-fn (lisp-to-js equality-fn))
+         (ht (make-new (oget! (%js-vref "internals" t) "EqualMap")
+                       js-hash-fn
+                       js-test-fn)))
+    (oset! t ht "$$jscl_hash_table")
+    (oset! test-symbol ht "$$jscl_test")
+    ht))
 
 (defun gethash (key hash-table &optional default)
-  (let ((table (cdr hash-table))
-        (hash (funcall (car hash-table) key)))
-    (if (in hash table)
-        (values (cdr (oget table hash)) t)
+  (let ((has-key ((oget! hash-table "has") key)))
+    (if has-key
+        (values ((oget! hash-table "get") key) t)
         (values default nil))))
 
 (defun (setf gethash) (new-value key hash-table &optional defaults)
-  (let ((table (cdr hash-table))
-        (hash (funcall (car hash-table) key)))
-    (oset (cons key new-value) table hash)
-    new-value))
+  (declare (ignore defaults))
+  ((oget! hash-table "set") key new-value)
+  new-value)
 
-(defun remhash (key table)
-  (unless (hash-table-p table)
-    (error 'type-error :datum table :expected-type 'hash-table))
-  (let ((obj (cdr table))
-        (hash (funcall (car table) key)))
-    (prog1
-        (in hash obj)
-      (delete-property hash obj))))
+(defun remhash (key hash-table)
+  (unless (hash-table-p hash-table)
+    (error 'type-error :datum hash-table :expected-type 'hash-table))
+  ;; Use js-to-lisp to convert JS boolean to Lisp boolean
+  (let ((had-key (js-to-lisp ((oget! hash-table "has") key))))
+    ((oget! hash-table "delete") key)
+    had-key))
 
-(defun clrhash (obj)
-  (if (hash-table-p obj)
-      (progn
-        (rplacd obj (new))
-        obj)
-      (error 'type-error :datum obj :expected-type 'hash-table)))
+(defun clrhash (hash-table)
+  (unless (hash-table-p hash-table)
+    (error 'type-error :datum hash-table :expected-type 'hash-table))
+  ((oget! hash-table "clear"))
+  hash-table)
 
-(defun hash-table-count (obj)
-  (if (and (consp obj) (eql (object-type-code obj) :hash-table))
-      (oget (#j:Object:entries (cdr obj)) "length")
+(defun hash-table-count (hash-table)
+  (if (hash-table-p hash-table)
+      (oget! hash-table "_size")
       0))
 
-(defun maphash (function table)
-  (unless (hash-table-p table)
-    (error 'type-error :datum table :expected-type 'hash-table))
-  (map-for-in
-   (lambda (x) (funcall function (car x) (cdr x)))
-	 (cdr table))
+(defun maphash (function hash-table)
+  (unless (hash-table-p hash-table)
+    (error 'type-error :datum hash-table :expected-type 'hash-table))
+  ((oget! hash-table "forEach")
+   (lisp-to-js (lambda (value key &optional this-map)
+                 (declare (ignore this-map))
+                 (funcall function key value))))
   nil)
 
-;;; the test value returned is always a symbol
-(defun hash-table-test (obj)
-  (unless (hash-table-p obj)
-    (error 'type-error :datum obj :expected-type 'hash-table))
-  (let ((test (car obj)))
-    (cond ((eq test 'eq-hash) 'eq)
-          ((eq test 'eql-hash) 'eql)
-          (t 'equal))))
+(defun hash-table-test (hash-table)
+  (unless (hash-table-p hash-table)
+    (error 'type-error :datum hash-table :expected-type 'hash-table))
+  (oget! hash-table "$$jscl_test"))
 
-;;; copy-hash-table - not in standard
 (defun copy-hash-table (origin)
   (unless (hash-table-p origin)
     (error 'type-error :datum origin :expected-type 'hash-table))
-  (let ((cell (cons (car origin)
-                    ;; todo: Object.assign as builtin method-call?
-                    (#j:Object:assign (new) (cdr origin)))))
-    (oset :hash-table cell "td_Name")
-    cell))
+  (let ((new-ht (make-hash-table :test (hash-table-test origin))))
+    (maphash (lambda (k v)
+               (setf (gethash k new-ht) v))
+             origin)
+    new-ht))
 
-;;; all keys containing
-(defun hash-table-keys (table)
+(defun hash-table-keys (hash-table)
   (let ((keys nil))
     (maphash (lambda (k v)
                (declare (ignore v))
                (push k keys))
-             table)
+             hash-table)
     keys))
 
-;;; all values containing
-(defun hash-table-values (table)
+(defun hash-table-values (hash-table)
   (let ((values nil))
     (maphash (lambda (k v)
                (declare (ignore k))
                (push v values))
-             table)
+             hash-table)
     values))
 
 ;;; EOF
