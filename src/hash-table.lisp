@@ -107,19 +107,19 @@
                         ((or (eq test #'eql) (eq test 'eql)) 'eql)
                         ((or (eq test #'equal) (eq test 'equal)) 'equal)
                         (t (error "Invalid hash table test: ~S" test))))
-         (hash-fn (case test-symbol
-                    (eq #'eq-hash)
-                    (eql #'eql-hash)
-                    (equal #'equal-hash)))
-         (equality-fn (case test-symbol
-                        (eq #'eq)
-                        (eql #'eql)
-                        (equal #'equal)))
-         (js-hash-fn (lisp-to-js hash-fn))
-         (js-test-fn (lisp-to-js equality-fn))
-         (ht (make-new (oget! (%js-vref "internals" t) "EqualMap")
-                       js-hash-fn
-                       js-test-fn)))
+         ;; For eq test, use native JS Map (faster, uses identity comparison)
+         ;; For eql/equal, use EqualMap with custom hash and equality functions
+         (ht (if (eq test-symbol 'eq)
+                 (make-new (%js-vref "Map" t))
+                 (let* ((hash-fn (case test-symbol
+                                   (eql #'eql-hash)
+                                   (equal #'equal-hash)))
+                        (equality-fn (case test-symbol
+                                       (eql #'eql)
+                                       (equal #'equal))))
+                   (make-new (oget! (%js-vref "internals" t) "EqualMap")
+                             (lisp-to-js hash-fn)
+                             (lisp-to-js equality-fn))))))
     (oset! t ht "$$jscl_hash_table")
     (oset! test-symbol ht "$$jscl_test")
     ht))
@@ -151,7 +151,8 @@
 
 (defun hash-table-count (hash-table)
   (if (hash-table-p hash-table)
-      (oget! hash-table "_size")
+      ;; Both native Map and EqualMap have a 'size' getter
+      (oget hash-table "size")
       0))
 
 (defun maphash (function hash-table)
