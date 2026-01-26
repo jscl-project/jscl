@@ -29,10 +29,11 @@ If you want to hack JSCL, you will have to download the repository
 
     git clone https://github.com/jscl-project/jscl.git
 
-*load* `jscl.lisp` in your Lisp, and call the bootstrap function to
-compile the implementation itself:
+Run `npm install` under the `jscl` directory. Then *load* `jscl.lisp`
+in your Lisp, and call the build-all function to compile the
+implementation itself:
 
-    (jscl:bootstrap)
+    (jscl:build-all)
 
 It will generate a `jscl.js` file in the top of the source tree. Now
 you can open `jscl.html` in your browser and use it. To use in Node,
