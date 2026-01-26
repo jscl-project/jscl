@@ -1381,7 +1381,7 @@
   `(method-call |console| "log" (call-internal |xstring| ,x)))
 
 (define-builtin /debug! (x)
-  `(method-call |console| "dir" ,x (object "depth" 3)))
+  `(method-call |console| "dir" ,x))
 
 (define-raw-builtin /log (x &rest y)
   `(selfcall
