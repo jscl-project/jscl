@@ -90,6 +90,91 @@ internals.newInstance = function (values, ct, ...args) {
   return new newCt(...args);
 };
 
+// EqualMap: A Map-like class with custom hash and equality functions.
+// hashFn(key) returns a hash code (number)
+// testFn(key1, key2) returns truthy if keys are equal
+// Invariant: testFn(x, y) => hashFn(x) === hashFn(y)
+internals.EqualMap = class EqualMap {
+  constructor(hashFn, testFn) {
+    this._map = new Map();  // hash -> [[key, value], ...]
+    this._size = 0;
+    this._hashFn = hashFn;
+    this._testFn = testFn;
+  }
+
+  get size() {
+    return this._size;
+  }
+
+  _findInBucket(bucket, key) {
+    for (let i = 0; i < bucket.length; i++) {
+      if (this._testFn(bucket[i][0], key)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  get(key) {
+    const hash = this._hashFn(key);
+    const bucket = this._map.get(hash);
+    if (!bucket) return undefined;
+    const idx = this._findInBucket(bucket, key);
+    return idx >= 0 ? bucket[idx][1] : undefined;
+  }
+
+  set(key, value) {
+    const hash = this._hashFn(key);
+    let bucket = this._map.get(hash);
+    if (!bucket) {
+      bucket = [];
+      this._map.set(hash, bucket);
+    }
+    const idx = this._findInBucket(bucket, key);
+    if (idx >= 0) {
+      bucket[idx][1] = value;
+    } else {
+      bucket.push([key, value]);
+      this._size++;
+    }
+    return this;
+  }
+
+  has(key) {
+    const hash = this._hashFn(key);
+    const bucket = this._map.get(hash);
+    if (!bucket) return false;
+    return this._findInBucket(bucket, key) >= 0;
+  }
+
+  delete(key) {
+    const hash = this._hashFn(key);
+    const bucket = this._map.get(hash);
+    if (!bucket) return false;
+    const idx = this._findInBucket(bucket, key);
+    if (idx < 0) return false;
+    bucket.splice(idx, 1);
+    this._size--;
+    if (bucket.length === 0) {
+      this._map.delete(hash);
+    }
+    return true;
+  }
+
+  clear() {
+    this._map.clear();
+    this._size = 0;
+  }
+
+  forEach(callback) {
+    this._map.forEach((bucket) => {
+      bucket.forEach(([key, value]) => {
+        callback(value, key, this);
+      });
+    });
+  }
+};
+
 // Workaround the problem with send NULL for async XHR
 // BUG: future todo
 //var reqXHRsendNull = function(req){
