@@ -35,10 +35,10 @@ implementation itself:
 
     (jscl:build-all)
 
-It will generate a `jscl.js` file in the top of the source tree. Now
-you can open `jscl.html` in your browser and use it. To use in Node,
-`node jscl-node.js`; to use in Deno,
-`deno --allow-env --allow-read jscl-deno.js`.
+It will generate a `jscl.js` file in the `jscl/dist` directory. Now
+you can open `dist/jscl.html` in your browser and use it. To use in Node,
+`node dist/jscl-node.js`; to use in Deno,
+`deno --allow-env --allow-read dist/jscl-deno.js`.
 
 
 ## Status
