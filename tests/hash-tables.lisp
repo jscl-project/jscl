@@ -229,4 +229,64 @@
     (test (= value 123))
     (test (eq found-p t))))
 
+;;; Test EQUAL hash table equality function
+;;; These tests verify that the equal function correctly distinguishes
+;;; between different keys. This catches the bug where Lisp's NIL return
+;;; value was treated as truthy by JavaScript (all objects are truthy in JS).
+
+;; Different list keys should not collide
+(let ((ht (make-hash-table :test #'equal)))
+  (setf (gethash '(a b) ht) 1)
+  (setf (gethash '(c d) ht) 2)
+  (setf (gethash '(e f) ht) 3)
+  (test (= (gethash '(a b) ht) 1))
+  (test (= (gethash '(c d) ht) 2))
+  (test (= (gethash '(e f) ht) 3))
+  (test (= (hash-table-count ht) 3)))
+
+;; Equal (but not eq) keys should be treated as the same key
+(let ((ht (make-hash-table :test #'equal)))
+  (setf (gethash (list 'x 'y) ht) 'first)
+  (setf (gethash (list 'x 'y) ht) 'second)
+  (test (eq (gethash (list 'x 'y) ht) 'second))
+  (test (= (hash-table-count ht) 1)))
+
+;; Mixed key types should be distinguished
+(let ((ht (make-hash-table :test #'equal)))
+  (setf (gethash "foo" ht) 'string-key)
+  (setf (gethash '(foo) ht) 'list-key)
+  (setf (gethash 'foo ht) 'symbol-key)
+  (test (eq (gethash "foo" ht) 'string-key))
+  (test (eq (gethash '(foo) ht) 'list-key))
+  (test (eq (gethash 'foo ht) 'symbol-key))
+  (test (= (hash-table-count ht) 3)))
+
+;; Nested list keys
+(let ((ht (make-hash-table :test #'equal)))
+  (setf (gethash '((a b) (c d)) ht) 'nested1)
+  (setf (gethash '((a b) (c e)) ht) 'nested2)
+  (test (eq (gethash '((a b) (c d)) ht) 'nested1))
+  (test (eq (gethash '((a b) (c e)) ht) 'nested2))
+  (test (= (hash-table-count ht) 2)))
+
+;; Test with actual hash collision
+;; (1 2) and (3 0) have the same sxhash (93) due to how sxhash-cons works:
+;;   sxhash((1 2)) = 1*31 + (2*31 + 0) = 93
+;;   sxhash((3 0)) = 3*31 + (0*31 + 0) = 93
+;; This test catches the bug where Lisp NIL was truthy in JS, causing
+;; all keys in the same hash bucket to appear equal.
+(test (= (sxhash '(1 2)) (sxhash '(3 0))))  ; verify collision
+(test (not (equal '(1 2) '(3 0))))          ; verify not equal
+(let ((ht (make-hash-table :test #'equal)))
+  (setf (gethash '(1 2) ht) 'value-a)
+  (setf (gethash '(3 0) ht) 'value-b)
+  ;; With broken equality, value-b would overwrite value-a since both
+  ;; keys are in the same bucket and broken equality returns truthy for all
+  (test (eq (gethash '(1 2) ht) 'value-a))
+  (test (eq (gethash '(3 0) ht) 'value-b))
+  (test (= (hash-table-count ht) 2))
+  ;; Also verify lookup with fresh equal keys works
+  (test (eq (gethash (list 1 2) ht) 'value-a))
+  (test (eq (gethash (list 3 0) ht) 'value-b)))
+
 ;;; EOF
