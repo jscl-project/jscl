@@ -71,7 +71,6 @@
   (26 26 26)
   NIL
   NIL
-  ;; Only CONS is not an atom; hash tables are now atoms (not cons-based)
   ((19 CONS))))
 
 (test
