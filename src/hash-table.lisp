@@ -84,10 +84,14 @@
          ;; This works because in JSCL, numbers and characters are JS primitives
          ;; compared by value, so eq and eql behave the same.
          ;; For equal, use EqualMap with custom hash and equality functions.
+	 ;;
+         ;; NOTE: We wrap equal to return JS booleans since JS treats
+         ;; all objects (including NIL symbol) as truthy.
          (ht (if (eq test-symbol 'equal)
                  (make-new (oget! (%js-vref "internals" t) "EqualMap")
                            (fn-to-js #'sxhash)
-                           (fn-to-js #'equal))
+                           (fn-to-js (lambda (a b)
+                                       (if (equal a b) +true+ +false+))))
                  (make-new (%js-vref "Map" t)))))
     (oset! t ht "$$jscl_hash_table")
     (oset! test-symbol ht "$$jscl_test")
