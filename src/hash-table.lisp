@@ -65,10 +65,6 @@
            ((oget! *sxhash-table* "set") x new-hash)
            new-hash)))))
 
-;; equal uses sxhash which handles structural equality
-(defun equal-hash (x)
-  (sxhash x))
-
 ;;; Hash table structure:
 ;;; An EqualMap instance (JS object) with additional properties:
 ;;;   $$jscl_hash_table = t (marker to identify hash tables)
@@ -91,7 +87,7 @@
          ;; For equal, use EqualMap with custom hash and equality functions.
          (ht (if (eq test-symbol 'equal)
                  (make-new (oget! (%js-vref "internals" t) "EqualMap")
-                           (fn-to-js #'equal-hash)
+                           (fn-to-js #'sxhash)
                            (fn-to-js #'equal))
                  (make-new (%js-vref "Map" t)))))
     (oset! t ht "$$jscl_hash_table")
