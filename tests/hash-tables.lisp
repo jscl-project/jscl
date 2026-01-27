@@ -184,4 +184,49 @@
 (let ((sym 'test-symbol))
   (test (= (sxhash sym) (sxhash sym))))
 
+;;; Test gethash second return value (found-p)
+;;; These tests verify the fix for the JS boolean issue where
+;;; JavaScript's `false` was incorrectly treated as truthy in Lisp.
+
+;; gethash should return nil as second value when key is not found
+(let ((ht (make-hash-table)))
+  (multiple-value-bind (value found-p) (gethash 'missing ht)
+    (test (null value))
+    (test (null found-p))))
+
+;; gethash should return t as second value when key IS found
+(let ((ht (make-hash-table)))
+  (setf (gethash 'present ht) 42)
+  (multiple-value-bind (value found-p) (gethash 'present ht)
+    (test (= value 42))
+    (test (eq found-p t))))
+
+;; Distinguish between key not found vs key with nil value
+(let ((ht (make-hash-table)))
+  (setf (gethash 'nil-value ht) nil)
+  ;; Key exists with nil value - found-p should be t
+  (multiple-value-bind (value found-p) (gethash 'nil-value ht)
+    (test (null value))
+    (test (eq found-p t)))
+  ;; Key does not exist - found-p should be nil
+  (multiple-value-bind (value found-p) (gethash 'not-there ht)
+    (test (null value))
+    (test (null found-p))))
+
+;; gethash should return the default when key is not found
+(let ((ht (make-hash-table)))
+  (test (eq (gethash 'missing ht 'default) 'default))
+  (setf (gethash 'present ht) 'value)
+  (test (eq (gethash 'present ht 'default) 'value)))
+
+;; Test with equal hash tables too
+(let ((ht (make-hash-table :test #'equal)))
+  (multiple-value-bind (value found-p) (gethash "missing" ht)
+    (test (null value))
+    (test (null found-p)))
+  (setf (gethash "present" ht) 123)
+  (multiple-value-bind (value found-p) (gethash "present" ht)
+    (test (= value 123))
+    (test (eq found-p t))))
+
 ;;; EOF
