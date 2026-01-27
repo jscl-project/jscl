@@ -58,8 +58,7 @@
      (sxhash-cons x))
     (t
      ;; For other objects, use identity-based hash via WeakMap
-     (if (eq ((oget! *sxhash-table* "has") x)
-	     (%js-vref "true" t))
+     (if (eq ((oget! *sxhash-table* "has") x) +true+)
          ((oget! *sxhash-table* "get") x)
          (let ((new-hash (incf *sxhash-counter*)))
            ((oget! *sxhash-table* "set") x new-hash)
@@ -100,7 +99,8 @@
 
 (defun gethash (key hash-table &optional default)
   (check-is-hash-table hash-table)
-  (let ((has-key ((oget! hash-table "has") key)))
+  ;; .has() returns a JS boolean, must convert to Lisp boolean
+  (let ((has-key (js-to-lisp ((oget! hash-table "has") key))))
     (if has-key
         (values ((oget! hash-table "get") key) t)
         (values default nil))))
