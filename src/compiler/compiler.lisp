@@ -1529,20 +1529,11 @@
 (define-raw-builtin oset! (value object key &rest keys)
   `(= ,(convert `(oget! ,object ,key ,@keys)) ,(convert value)))
 
-(define-builtin js-null-p (x)
-  (convert-to-bool `(=== ,x null)))
-
-(define-builtin js-undefined-p (x)
-  (convert-to-bool `(=== ,x undefined)))
-
 (define-builtin objectp (x)
   `(selfcall
     (var (x ,x))
     (return ,(convert-to-bool
               `(and (=== (typeof x) "object") (not (=== x null)))))))
-
-(define-builtin js-undefined-p (x)
-  (convert-to-bool `(=== ,x undefined)))
 
 (define-builtin %%nlx-p (x)
   (convert-to-bool `(call-internal |isNLX| ,x)))

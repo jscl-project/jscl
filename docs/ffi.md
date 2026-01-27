@@ -115,12 +115,53 @@ JSCL automatically converts types when using `oget`/`oset`:
 | Numbers            | Numbers         |
 | Lisp functions     | JS functions    |
 
-Use `lisp-to-js` and `js-to-lisp` for explicit conversion:
+### Explicit Conversion Functions
+
+Use these functions when you need to convert values explicitly:
+
+#### `lisp-to-js`
+
+Converts a Lisp value to its JavaScript equivalent:
 
 ```lisp
-(lisp-to-js my-lisp-value)
-(js-to-lisp my-js-value)
+(lisp-to-js t)      ; => true
+(lisp-to-js nil)    ; => false
+(lisp-to-js "foo")  ; => "foo" (JS string)
 ```
+
+#### `js-to-lisp`
+
+Converts a JavaScript value to its Lisp equivalent:
+
+```lisp
+(js-to-lisp +true+)   ; => t
+(js-to-lisp +false+)  ; => nil
+```
+
+#### `fn-to-js`
+
+Wraps a Lisp function to be called from JavaScript. The wrapped function receives its arguments as raw JavaScript values without any conversion, which is useful when you need to work with JavaScript objects directly:
+
+```lisp
+;; Create a callback for JavaScript
+(setf (oget obj "onclick")
+      (fn-to-js (lambda (event)
+                  (print "clicked!")
+                  t)))
+```
+
+## JavaScript Constants
+
+JSCL provides constants for JavaScript's primitive values:
+
+| Constant      | JavaScript Value |
+|---------------|------------------|
+| `+true+`      | `true`           |
+| `+false+`     | `false`          |
+| `+null+`      | `null`           |
+| `+undefined+` | `undefined`      |
+
+These are useful when you need to pass or compare against JavaScript primitive values directly, without automatic conversion.
 
 ## Testing JavaScript Values
 
@@ -146,3 +187,16 @@ For direct access to JavaScript global variables by name:
 ;; Write a global variable
 (setf (%js-vref "variableName") value)
 ```
+
+## Caveats
+
+### JavaScript `false` and `null` are truthy in Lisp
+
+The JavaScript constants `+false+` and `+null+` are *not* the same as `nil`. In Lisp, only `nil` is considered false in conditionals. This means `+false+` is still truthy:
+
+```lisp
+(if +false+ "truthy" "falsy")  ; => "truthy"
+(if nil "truthy" "falsy")      ; => "falsy"
+```
+
+If you need to test JavaScript boolean values, use explicit checks or convert them to Lisp booleans first.
