@@ -548,6 +548,13 @@ errorSym = internals.intern("ERROR");
 Object.defineProperty(nil, "$$jscl_car", { value: nil, writable: false });
 Object.defineProperty(nil, "$$jscl_cdr", { value: nil, writable: false });
 
+// Early error definition
+
+errorSym.fvalue = function earlyError(mv, ...args){
+  console.debug("BOOT PANIC! Arguments to ERROR:", ...args.map(internals.lisp_to_js));
+  throw "BOOT PANIC!";
+}
+
 // Node/Deno REPL
 if (
   typeof module !== "undefined" &&

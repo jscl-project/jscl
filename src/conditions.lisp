@@ -125,6 +125,19 @@
 
 
 ;;; Conditions used in previous bootstrap process
+(%define-condition check-type-error (type-error)
+   ((place :initform nil
+           :initarg :place
+           :reader check-type-error-place)
+    (description :initform nil
+                 :initarg :description
+                 :reader check-type-error-description))
+   (:report (lambda (condition stream)
+              (format stream "The value of ~s is ~s, is not ~a."
+                      (check-type-error-place condition)
+                      (type-error-datum condition)
+                      (or (check-type-error-description condition)
+                          (format nil "a ~s" (type-error-expected-type condition)))))))
 (%define-condition package-error (error)
    ((package :initform nil
              :initarg :package
@@ -192,14 +205,6 @@
     ;;(format stream "~&ERROR: ~a~%" (type-of condition))
     (format t "~A: ~A" (class-name (class-of condition)) condition)
     nil))
-
-(defun %%check-type-error (place value typespec string)
-  (error 'simple-type-error
-         :datum value
-         :expected-type typespec
-         :format-control "Check type error.~%The value of ~s is ~s, is not ~a."
-         :format-arguments (list place value
-                                 (if (null string) (format nil "a ~s" typespec) string))))
 
 ;;; handlers
 (defvar *handler-bindings* nil)
@@ -304,7 +309,6 @@
   (fset 'make-condition #'%%make-condition)
   (fset 'signal #'%%signal)
   (fset 'warn #'%%warn)
-  (fset 'error #'%%error)
-  (fset '%check-type-error #'%%check-type-error))
+  (fset 'error #'%%error))
 
 ;;; EOF

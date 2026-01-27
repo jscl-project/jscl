@@ -438,17 +438,14 @@
 
 ;;; macro's
 
-;;; N.B. The following definition is functional after `string.lisp' is
-;;; loaded, and superseded after `conditions.lisp' is loaded.
-(defun %check-type-error (place value typespec string)
-   (error "Check type error.~%The value of ~s is ~s, is not ~a."
-          place value (if (null string) (format nil "a ~s" typespec) string)))
-
 (defmacro %check-type (place typespec &optional string)
   (let ((value (gensym)))
     `(do ((,value ,place ,place))
          ((!typep ,value ',typespec))
-       (setf ,place (%check-type-error ',place ,value ',typespec ,string)))))
+       (setf ,place (error 'check-type-error :datum ,value
+                                             :expected-type ',typespec
+                                             :place ',place
+                                             :description ,string)))))
 
 #+jscl
 (defmacro check-type (place typespec &optional string)
@@ -517,23 +514,6 @@
              t))
     (t
      (values nil nil))))
-
-;;; Early error definition.
-(defun %coerce-panic-arg (arg)
-  (if (fboundp 'prin1-to-string)
-      (concat (prin1-to-string arg) " ")
-      (cond ((symbolp arg) (concat "symbol: " (symbol-name arg) " "))
-            ((consp arg) (concat "cons: " (car arg)  " "))
-            ((numberp arg) (concat "number:" arg  " "))
-            (t "@ "))))
-
-;;; N.B. The following definition is functional after `string.lisp' is
-;;; loaded, and superseded after `conditions.lisp' is loaded.
-(defun error (fmt &rest args)
-  (%throw (lisp-to-js (apply #'concat "BOOT PANIC! "
-                             (string fmt)
-                             " "
-                             (mapcar #'%coerce-panic-arg args)))))
 
 ;;; print-unreadable-object
 (defmacro !print-unreadable-object ((object stream &key type identity) &body body)
