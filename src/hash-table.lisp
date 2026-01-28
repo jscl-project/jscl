@@ -116,8 +116,7 @@
   new-value)
 
 (defun remhash (key hash-table)
-  (unless (hash-table-p hash-table)
-    (error 'type-error :datum hash-table :expected-type 'hash-table))
+  (check-is-hash-table hash-table)
   ;; Use js-to-lisp to convert JS boolean to Lisp boolean
   (let ((had-key (js-to-lisp ((oget! hash-table "has") key))))
     ((oget! hash-table "delete") key)
@@ -129,10 +128,8 @@
   hash-table)
 
 (defun hash-table-count (hash-table)
-  (if (hash-table-p hash-table)
-      ;; Both native Map and EqualMap have a 'size' getter
-      (oget hash-table "size")
-      0))
+  (check-is-hash-table hash-table)
+  (oget hash-table "size"))
 
 (defun maphash (function hash-table)
   (check-is-hash-table hash-table)
