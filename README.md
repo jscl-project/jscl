@@ -20,7 +20,7 @@ you can install the JSCL npm package:
 
     npm install -g jscl
     
-to run `jscl-repl` in NodeJS.
+to run `jscl` in NodeJS.
 
 
 ## Build
@@ -36,7 +36,7 @@ implementation itself:
     (jscl:build-all)
 
 It will generate a `jscl.js` file in the `jscl/dist` directory. Now
-you can open `dist/jscl.html` in your browser and use it. To use in Node,
+you can open `dist/index.html` in your browser and use it. To use in Node,
 `node dist/jscl-node.js`; to use in Deno,
 `deno --allow-env --allow-read dist/jscl-deno.js`.
 

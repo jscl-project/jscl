@@ -1380,6 +1380,9 @@
 (define-builtin /debug (x)
   `(method-call |console| "log" (call-internal |xstring| ,x)))
 
+(define-builtin /debug! (x)
+  `(method-call |console| "dir" ,x))
+
 (define-raw-builtin /log (x &rest y)
   `(selfcall
     (call (get |console| "log")
@@ -1455,6 +1458,11 @@
 
 ;;; Javascript FFI
 
+(define-builtin instanceof (x class)
+  (convert-to-bool `(instanceof ,x ,class)))
+
+(define-builtin typeof (x)
+  `(call-internal |make_lisp_string| (typeof ,x)))
 
 (define-raw-builtin new! (&rest plist)
   `(object
@@ -1471,6 +1479,10 @@
             ((null tail))
           (collect (car tail))
           (collect (convert `(lisp-to-js ,(cadr tail))))))))
+
+(define-raw-builtin make-new (constructor &rest args)
+  ;; newInstance expects (values, ct, ...args) where values is for multiple-value handling
+  `(call-internal |newInstance| null ,(convert constructor) ,@(mapcar #'convert args)))
 
 (define-builtin clone (x)
   `(method-call |Object| "assign" (object) ,x))
@@ -1522,17 +1534,11 @@
 (define-raw-builtin oset! (value object key &rest keys)
   `(= ,(convert `(oget! ,object ,key ,@keys)) ,(convert value)))
 
-(define-builtin js-null-p (x)
-  (convert-to-bool `(=== ,x null)))
-
 (define-builtin objectp (x)
   `(selfcall
     (var (x ,x))
     (return ,(convert-to-bool
               `(and (=== (typeof x) "object") (not (=== x null)))))))
-
-(define-builtin js-undefined-p (x)
-  (convert-to-bool `(=== ,x undefined)))
 
 (define-builtin %%nlx-p (x)
   (convert-to-bool `(call-internal |isNLX| ,x)))
@@ -1541,6 +1547,11 @@
   `(selfcall (throw ,x)))
 
 (define-builtin lisp-to-js (x) `(call-internal |lisp_to_js| ,x))
+
+;; Convert a Lisp function to JS but that retrns the primary value but does not
+;; convert its arguments
+(define-builtin fn-to-js (x) `(call-internal |fn_to_js| ,x))
+
 (define-builtin js-to-lisp (x) `(call-internal |js_to_lisp| ,x))
 
 

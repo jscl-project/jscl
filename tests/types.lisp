@@ -71,8 +71,7 @@
   (26 26 26)
   NIL
   NIL
-  ((14 HASH-TABLE)
-   (19 CONS))))
+  ((19 CONS))))
 
 (test
  (mv-eql

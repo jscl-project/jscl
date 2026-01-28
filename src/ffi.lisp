@@ -17,6 +17,17 @@
 
 (defvar *root*)
 
+(defconstant +true+ (%js-vref "true" t))
+(defconstant +false+ (%js-vref "false" t))
+(defconstant +undefined+ (%js-vref "undefined" t))
+(defconstant +null+ (%js-vref "null" t))
+
+(defun instanceof (x class)
+  (instanceof x class))
+
+(defun typeof (x)
+  (typeof x))
+
 ;; TODO: rewrite using DEFUN SETF, once we make OSET proper function,
 ;; and figure out how to not pay to price for APPLY
 (define-setf-expander oget (object key &rest keys)
@@ -48,10 +59,6 @@
             `(oget! ,g!object ,@g!keys))))
 
 
-(defun make-new (constructor &rest args)
-  (apply (%js-internal "newInstance") constructor args))
-
-
 (defun lisp-to-js (x)
   (lisp-to-js x))
 
@@ -72,8 +79,8 @@
       nil
       t))
 
-(defun js-null-p (obj) (js-null-p obj))
+(defun js-null-p (obj) (eq obj +null+))
 (defun objectp (obj) (objectp obj))
-(defun js-undefined-p (obj) (js-undefined-p obj))
+(defun js-undefined-p (obj) (eq obj +undefined+))
 
 ;;; EOF
