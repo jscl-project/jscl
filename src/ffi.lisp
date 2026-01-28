@@ -22,6 +22,12 @@
 (defconstant +undefined+ (%js-vref "undefined" t))
 (defconstant +null+ (%js-vref "null" t))
 
+(defun instanceof (x class)
+  (instanceof x class))
+
+(defun typeof (x)
+  (typeof x))
+
 ;; TODO: rewrite using DEFUN SETF, once we make OSET proper function,
 ;; and figure out how to not pay to price for APPLY
 (define-setf-expander oget (object key &rest keys)

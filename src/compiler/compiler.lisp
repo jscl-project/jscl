@@ -1458,6 +1458,11 @@
 
 ;;; Javascript FFI
 
+(define-builtin instanceof (x class)
+  (convert-to-bool `(instanceof ,x ,class)))
+
+(define-builtin typeof (x)
+  `(call-internal |make_lisp_string| (typeof ,x)))
 
 (define-raw-builtin new! (&rest plist)
   `(object

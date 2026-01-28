@@ -289,4 +289,40 @@
   (test (eq (gethash (list 1 2) ht) 'value-a))
   (test (eq (gethash (list 3 0) ht) 'value-b)))
 
+;;; HASH-TABLE-P
+
+(test (hash-table-p (make-hash-table)))
+(test (hash-table-p (make-hash-table :test #'equal)))
+(test (not (hash-table-p nil)))
+(test (not (hash-table-p t)))
+(test (not (hash-table-p 42)))
+(test (not (hash-table-p "hash")))
+(test (not (hash-table-p '(a b c))))
+(test (not (hash-table-p #(1 2 3))))
+
+;; A raw JS Map counts as a hash table with EQ test
+(let ((js-map (make-new #j:Map)))
+  (test (hash-table-p js-map))
+  (test (eq (hash-table-test js-map) 'eq)))
+
+;;; HASH-TABLE-TEST
+
+;; hash-table-test returns the correct symbol for each test function
+(test (eq (hash-table-test (make-hash-table :test #'eq)) 'eq))
+(test (eq (hash-table-test (make-hash-table :test #'eql)) 'eql))
+(test (eq (hash-table-test (make-hash-table :test #'equal)) 'equal))
+
+;; hash-table-test also accepts symbol arguments and returns the same symbol
+(test (eq (hash-table-test (make-hash-table :test 'eq)) 'eq))
+(test (eq (hash-table-test (make-hash-table :test 'eql)) 'eql))
+(test (eq (hash-table-test (make-hash-table :test 'equal)) 'equal))
+
+;; the default test is eql
+(test (eq (hash-table-test (make-hash-table)) 'eql))
+
+;; hash-table-test returns a symbol, not a function
+(test (symbolp (hash-table-test (make-hash-table :test #'eq))))
+(test (symbolp (hash-table-test (make-hash-table :test #'eql))))
+(test (symbolp (hash-table-test (make-hash-table :test #'equal))))
+
 ;;; EOF

@@ -64,6 +64,8 @@
            ((oget! *sxhash-table* "set") x new-hash)
            new-hash)))))
 
+(defconstant EqualMap (oget! (%js-vref "internals" t) "EqualMap"))
+
 ;;; Hash table structure:
 ;;; An EqualMap instance (JS object) with additional properties:
 ;;;   $$jscl_hash_table = t (marker to identify hash tables)
@@ -71,7 +73,8 @@
 
 (defun hash-table-p (obj)
   (and (objectp obj)
-       (in "$$jscl_hash_table" obj)))
+       (or (instanceof obj (%js-vref "Map" t))
+	   (instanceof obj EqualMap))))
 
 (defun make-hash-table (&key (test #'eql) size)
   (declare (ignore size))
@@ -88,7 +91,7 @@
          ;; NOTE: We wrap equal to return JS booleans since JS treats
          ;; all objects (including NIL symbol) as truthy.
          (ht (if (eq test-symbol 'equal)
-                 (make-new (oget! (%js-vref "internals" t) "EqualMap")
+                 (make-new EqualMap
                            (fn-to-js #'sxhash)
                            (fn-to-js (lambda (a b)
                                        (if (equal a b) +true+ +false+))))
@@ -141,7 +144,10 @@
 
 (defun hash-table-test (hash-table)
   (check-is-hash-table hash-table)
-  (oget! hash-table "$$jscl_test"))
+  (let ((test (oget! hash-table "$$jscl_test")))
+    (if (eq test +undefined+)
+	'eq
+      test)))
 
 (defun copy-hash-table (origin)
   (let ((new-ht (make-hash-table :test (hash-table-test origin))))
