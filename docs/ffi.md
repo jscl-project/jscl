@@ -2,7 +2,7 @@
 
 JSCL provides a FFI to interact with JavaScript from Lisp code.
 
-The FFI is a bit rought at the moment, but here is the documentation.
+The FFI is a bit rought at the moment, but here is the documentation, as an effort to facilitate coming up with an improved one.
 
 ## Accessing JavaScript Globals
 
@@ -25,28 +25,85 @@ The `#j:` syntax expands to `(oget *root* ...)` where `*root*` is the global obj
 
 ## Reading and Writing Object Properties
 
-### With Type Conversion
+There are three variants of property access, differing in type conversion and safety:
 
-`oget` and `oset` automatically convert values between Lisp and JavaScript:
+| Reader   | Writer   | Type Conversion | Safe Chaining |
+|----------|----------|-----------------|---------------|
+| `oget`   | `oset`   | Yes             | Yes           |
+| `oget*`  | `oset*`  | No              | Yes           |
+| `oget!`  | `oset!`  | No              | No            |
+
+### `oget` / `oset` — With Type Conversion
+
+`oget` reads a property and converts the result from JavaScript to Lisp
+using `js-to-lisp` (see [Type Conversions](#type-conversions) below).
+When accessing nested properties, intermediate `undefined` values
+short-circuit and return `nil` instead of throwing an error.
+
+`oset` converts the value from Lisp to JavaScript using `lisp-to-js`
+before writing. When writing to a nested path, intermediate properties
+are traversed safely — if any intermediate is `undefined`, an error is
+thrown rather than silently failing.
 
 ```lisp
-;; Read a property
-(oget obj "property")
+;; Read a property (result is a Lisp value)
+(oget obj "name")             ; JS string → Lisp string
 
-;; Read nested properties
+;; Read nested properties safely
 (oget obj "foo" "bar" "baz")  ; obj.foo.bar.baz
+;; If obj.foo is undefined, returns nil instead of erroring
 
-;; Write a property (using setf)
-(setf (oget obj "property") value)
+;; Write a property (value is converted from Lisp to JS)
+(setf (oget obj "name") "Alice")
+
+;; Write to a nested path (intermediate properties must exist)
+(setf (oget obj "foo" "bar") 42)
+;; Throws if obj.foo is undefined
 ```
 
-### Without Type Conversion
+### `oget*` / `oset*` — Raw Access with Safe Chaining
 
-`oget!` and `oset!` access properties without conversion (raw JavaScript values):
+`oget*` reads a property without type conversion, returning the raw
+JavaScript value. Like `oget`, nested access is safe: if any intermediate
+property is `undefined`, it returns `nil` early instead of throwing.
+The final value is also returned as `nil` if it is `undefined`.
+
+`oset*` writes a raw JavaScript value without conversion. Like `oset`,
+intermediate properties in a nested path are traversed safely — if any
+intermediate is `undefined`, an error is thrown.
+
+Use `oget*`/`oset*` when you want to work with raw JavaScript values
+(e.g., a JS string rather than a Lisp string) but still want safe
+nested access.
 
 ```lisp
-;; Read without conversion
+;; Read a property (result is a raw JS value)
+(oget* obj "name")            ; returns a JS string, not a Lisp string
+
+;; Safe nested access
+(oget* obj "foo" "bar" "baz") ; nil if any intermediate is undefined
+
+;; Write a raw JS value (no lisp-to-js conversion)
+(setf (oget* obj "name") raw-js-string)
+```
+
+### `oget!` / `oset!` — Raw Access without Safe Chaining
+
+`oget!` reads a property without type conversion and without any safety
+checks. It compiles to a direct JavaScript property access chain
+(`obj.foo.bar.baz`). If any intermediate property is `undefined`,
+accessing further properties will throw a JavaScript `TypeError`.
+
+Use `oget!` when you need maximum performance and are certain the
+property chain is valid, or when you intentionally want `undefined`
+as a return value rather than `nil`.
+
+```lisp
+;; Direct property access (no conversion, no safety checks)
 (oget! obj "property")
+
+;; Nested access — throws if obj.foo is undefined
+(oget! obj "foo" "bar")
 
 ;; Write without conversion
 (setf (oget! obj "property") value)
