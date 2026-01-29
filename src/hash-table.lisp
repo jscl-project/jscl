@@ -68,7 +68,6 @@
 
 ;;; Hash table structure:
 ;;; An EqualMap instance (JS object) with additional properties:
-;;;   $$jscl_hash_table = t (marker to identify hash tables)
 ;;;   $$jscl_test = test function symbol (eq, eql, or equal)
 
 (defun hash-table-p (obj)
@@ -96,13 +95,12 @@
                            (fn-to-js (lambda (a b)
                                        (if (equal a b) +true+ +false+))))
                  (make-new (%js-vref "Map" t)))))
-    (oset! t ht "$$jscl_hash_table")
     (oset! test-symbol ht "$$jscl_test")
     ht))
 
 (defun check-is-hash-table (x)
   (unless (hash-table-p x)
-    (error 'type-error :datum hash-table :expected-type 'hash-table)))
+    (error 'type-error :datum x :expected-type 'hash-table)))
 
 (defun gethash (key hash-table &optional default)
   (check-is-hash-table hash-table)
