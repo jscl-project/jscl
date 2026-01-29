@@ -325,4 +325,24 @@
 (test (symbolp (hash-table-test (make-hash-table :test #'eql))))
 (test (symbolp (hash-table-test (make-hash-table :test #'equal))))
 
+;;; WITH-HASH-TABLE-ITERATOR
+
+(test
+ (let ((h (make-hash-table)))
+   (setf (gethash 'foo h) 1)
+   (setf (gethash 2 h) 'bar)
+   (with-hash-table-iterator (i h)
+     (and (mv-eql (i) t foo 1)
+          (mv-eql (i) t 2 bar)
+          (mv-eql (i) nil nil nil)))))
+
+(test
+ (let ((h (make-hash-table :test 'equal)))
+   (setf (gethash "foo" h) "test")
+   (setf (gethash "bar" h) 2)
+   (with-hash-table-iterator (i h)
+     (and (mv-eql (i) t "foo" "test")
+          (mv-eql (i) t "bar" 2)
+          (mv-eql (i) nil nil nil)))))
+
 ;;; EOF

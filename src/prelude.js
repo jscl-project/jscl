@@ -173,6 +173,14 @@ internals.EqualMap = class EqualMap {
       });
     });
   }
+
+  *[Symbol.iterator]() {
+    for (const bucket of this._map.values()) {
+      for (const pair of bucket) {
+        yield pair;
+      }
+    }
+  }
 };
 
 // Workaround the problem with send NULL for async XHR

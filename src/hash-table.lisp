@@ -170,5 +170,15 @@
              hash-table)
     values))
 
+(defmacro with-hash-table-iterator ((name hash-table) &body body)
+  (let ((iterator (gensym "ITERATOR"))
+        (ivalue (gensym "IVALUE")))
+    `(macrolet ((,name ()
+                  '(let ((,ivalue (oget! ((oget! ,iterator "next")) "value")))
+                    (if (storage-vector-p ,ivalue)
+                        (values t (oget! ,ivalue 0) (oget! ,ivalue 1))
+                        (values nil nil nil)))))
+       (let ((,iterator (#j:Iterator:from ,hash-table)))
+         ,@body))))
 
 ;;; EOF
