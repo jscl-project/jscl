@@ -767,7 +767,7 @@
         (let ((binding (make-binding :name name :type 'macro :value
                                      (parse-macro name lambda-list body))))
           (push-to-lexenv binding  *environment* 'function))))
-    (convert-block body t t)))
+    `(selfcall ,(convert-block body t t))))
 
 
 (defun special-variable-p (x)
@@ -1645,7 +1645,7 @@
         (let ((b (make-binding :name symbol :type 'macro :value expansion)))
           (push-to-lexenv b new 'variable))))
     (let ((*environment* new))
-      (convert-block body nil t))))
+      `(selfcall ,(convert-block body t t)))))
 
 
 #-jscl
