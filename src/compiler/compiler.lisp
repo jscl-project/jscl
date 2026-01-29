@@ -767,7 +767,7 @@
         (let ((binding (make-binding :name name :type 'macro :value
                                      (parse-macro name lambda-list body))))
           (push-to-lexenv binding  *environment* 'function))))
-    (convert-block body nil t)))
+    (convert-block body t t)))
 
 
 (defun special-variable-p (x)
