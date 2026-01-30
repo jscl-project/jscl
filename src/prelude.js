@@ -301,6 +301,7 @@ function codepoints(string) {
 internals.make_lisp_string = function (string) {
   var array = codepoints(string);
   array.stringp = 1;
+  array.toString = function () { return internals.xstring(this); };
   return array;
 };
 
