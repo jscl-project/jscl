@@ -87,4 +87,17 @@
 ;; princ prints the raw contents without #j or quotes
 (test (string= (princ-to-string #j"bar") "bar"))
 
+;;; FFI constants printing
+
+(test (string= (write-to-string +true+) "+TRUE+"))
+(test (string= (write-to-string +false+) "+FALSE+"))
+(test (string= (write-to-string +null+) "+NULL+"))
+(test (string= (write-to-string +undefined+) "+UNDEFINED+"))
+
+;; princ prints the same (no escaping distinction for constants)
+(test (string= (princ-to-string +true+) "+TRUE+"))
+(test (string= (princ-to-string +false+) "+FALSE+"))
+(test (string= (princ-to-string +null+) "+NULL+"))
+(test (string= (princ-to-string +undefined+) "+UNDEFINED+"))
+
 ;;; EOF

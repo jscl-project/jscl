@@ -404,6 +404,10 @@
     ;; Others
     (js-object
      (cond
+       ((eq form +true+)      (write-string "+TRUE+" stream))
+       ((eq form +false+)     (write-string "+FALSE+" stream))
+       ((eq form +null+)      (write-string "+NULL+" stream))
+       ((eq form +undefined+) (write-string "+UNDEFINED+" stream))
        ((string= (typeof form) "string")
         (if *print-escape*
             (progn
