@@ -65,4 +65,26 @@
   (test (oset 456 obj 123))
   (test (equal 456 (oget obj 123))))
 
+;;; jsstring
+
+;; constant case: the compiler can inline #j"..." to a JS string literal
+(test (eq #j"hello" #j"hello"))
+(test (eq (jsstring "hello") #j"hello"))
+(test (eq #j"" #j""))
+
+;; non-constant case: jsstring on a dynamically constructed string
+(let ((s (copy-seq "world")))
+  (test (eq (jsstring s) (jsstring s))))
+
+;; jsstring as a function value
+(test (eq (funcall #'jsstring "abc") #j"abc"))
+
+;; reader macro round-trip through the printer
+(test (string= (write-to-string #j"foo") "#j\"foo\""))
+(test (string= (write-to-string #j"") "#j\"\""))
+(test (string= (write-to-string #j"a\"b") "#j\"a\\\"b\""))
+
+;; princ prints the raw contents without #j or quotes
+(test (string= (princ-to-string #j"bar") "bar"))
+
 ;;; EOF

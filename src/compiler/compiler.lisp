@@ -1491,6 +1491,9 @@
   (multiple-value-bind (value constantp) (constant-value form *environment*)
     (if constantp value `(call-internal |xstring| ,(convert form)))))
 
+(define-raw-builtin jsstring (x)
+  (convert-xstring x))
+
 (define-raw-builtin oget* (object key &rest keys)
   `(selfcall
     (progn

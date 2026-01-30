@@ -402,8 +402,16 @@
     (package
      (simple-format stream "#<PACKAGE ~a>" (package-name form)))
     ;; Others
-    (js-object 
-     (simple-format stream "#<JS-OBJECT ~a>" (js-object-signature form)))
+    (js-object
+     (cond
+       ((string= (typeof form) "string")
+        (if *print-escape*
+            (progn
+              (write-string "#j" stream)
+              (write-string (lisp-escape-string (js-to-lisp form)) stream))
+            (write-string (js-to-lisp form) stream)))
+       (t
+        (simple-format stream "#<JS-OBJECT ~a>" (js-object-signature form)))))
     (otherwise
      (simple-format stream "#<JS-OBJECT ~a>" (#j:String form)))))
 

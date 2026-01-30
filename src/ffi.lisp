@@ -59,6 +59,9 @@
             `(oget! ,g!object ,@g!keys))))
 
 
+(defun jsstring (x)
+  (jsstring x))
+
 (defun lisp-to-js (x)
   (lisp-to-js x))
 
