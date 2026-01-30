@@ -1464,7 +1464,7 @@
 (define-builtin typeof (x)
   `(call-internal |make_lisp_string| (typeof ,x)))
 
-(define-raw-builtin new! (&rest plist)
+(define-raw-builtin object! (&rest plist)
   `(object
     ,@(with-collect
         (do ((tail plist (cddr tail)))
@@ -1472,7 +1472,7 @@
           (collect (car tail))
           (collect (convert (cadr tail)))))))
 
-(define-raw-builtin new (&rest plist)
+(define-raw-builtin object (&rest plist)
   `(object
     ,@(with-collect
         (do ((tail plist (cddr tail)))
@@ -1480,8 +1480,7 @@
           (collect (car tail))
           (collect (convert `(lisp-to-js ,(cadr tail))))))))
 
-(define-raw-builtin make-new (constructor &rest args)
-  ;; newInstance expects (values, ct, ...args) where values is for multiple-value handling
+(define-raw-builtin new (constructor &rest args)
   `(call-internal |newInstance| null ,(convert constructor) ,@(mapcar #'convert args)))
 
 (define-builtin clone (x)

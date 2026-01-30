@@ -489,7 +489,7 @@
            ;; construct the structure
            ,(if storage-type
                 `(,storage-type ,@prototype)
-                `(new! "dt_Name" :structure "structDescriptors" dvec
+                `(object! "dt_Name" :structure "structDescriptors" dvec
                        ,@(mapcan #'list (def!struct-property-names prototype) prototype))))))))
 
 (defun das!make-structure (dd)

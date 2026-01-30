@@ -14,7 +14,7 @@
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 (defun receive-xhr (method uri sync fn-ok &optional fn-err)
-  (let ((req (make-new #j:XMLHttpRequest)))
+  (let ((req (new #j:XMLHttpRequest)))
     ((oget req "open") method uri (not sync))
     ((oget req "setRequestHeader") "Cache-Control" "no-cache")
     ((oget req "setRequestHeader") "Cache-Control" "no-store")

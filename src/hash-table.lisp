@@ -25,7 +25,7 @@
 ;; Counter for identity-based hash codes
 ;; We use a WeakMap to store hash codes without polluting objects
 (defvar *sxhash-counter* 0)
-(defvar *sxhash-table* (make-new (%js-vref "WeakMap" t)))
+(defvar *sxhash-table* (new (%js-vref "WeakMap" t)))
 
 (defun sxhash-string (s)
   "Hash a string based on its content using a simple hash algorithm."
@@ -90,11 +90,11 @@
          ;; NOTE: We wrap equal to return JS booleans since JS treats
          ;; all objects (including NIL symbol) as truthy.
          (ht (if (eq test-symbol 'equal)
-                 (make-new EqualMap
+                 (new EqualMap
                            (fn-to-js #'sxhash)
                            (fn-to-js (lambda (a b)
                                        (if (equal a b) +true+ +false+))))
-                 (make-new (%js-vref "Map" t)))))
+                 (new (%js-vref "Map" t)))))
     (oset! test-symbol ht "$$jscl_test")
     ht))
 

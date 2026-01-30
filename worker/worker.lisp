@@ -23,7 +23,7 @@
 
 
 (defun %web-worker-write-string (string &optional (style "jqconsole-output"))
-  (let ((obj (new)))
+  (let ((obj (object)))
     (setf (oget obj "command") "output")
     (setf (oget obj "stringclass") style)
     (setf (oget obj "string") string)
@@ -38,10 +38,10 @@
       (eval-interactive (read)))))
 
 
-(defun sw-request-sync (command &optional (options (new)))
+(defun sw-request-sync (command &optional (options (object)))
   (while t
-    (let ((xhr (make-new #j:XMLHttpRequest))
-          (payload (new)))
+    (let ((xhr (new #j:XMLHttpRequest))
+          (payload (object)))
 
       (setf (oget payload "command") command)
       (setf (oget payload "sessionId") *web-worker-session-id*)
@@ -61,7 +61,7 @@
 
 
 (defun sleep (seconds)
-  (let ((options (new)))
+  (let ((options (object)))
     (setf (oget options "seconds") seconds)
     (sw-request-sync "sleep" options)))
 

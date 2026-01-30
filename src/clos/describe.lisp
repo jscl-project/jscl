@@ -129,7 +129,7 @@
     (format buf "Fixnum: ~a~%" obj)
     (labels
         ((make-number (value)
-           (make-new #j:Number value))
+           (new #j:Number value))
          (number-to-fixed (value &optional (digits 0))
            ((oget  (make-Number value) "toFixed") digits))
          (number-to-exponent (value)
@@ -148,7 +148,7 @@
         ;; char code restrict
         (if (<= obj 2028)
             (format buf "Character: ~a~%" (code-char obj)))
-        (format buf "As time: ~a~%" (string (make-new #j:Date obj)))))
+        (format buf "As time: ~a~%" (string (new #j:Date obj)))))
     (flush-pp-buffer buf stream)
     (values)))
 

@@ -163,7 +163,7 @@ Currently represented as a list of strings. If FROM is provided and
 appears on stack, frames including and above the topmost FROM call is
 omitted. Note the function does NOT truncate the list according to
 *BACKTRACE-LIMIT*."
-  (let ((obj (new)))
+  (let ((obj (object)))
     (cond ((in "stackTraceLimit" (oget! *root* "Error"))
            (let ((old-limit #j:Error:stackTraceLimit))
              (setf #j:Error:stackTraceLimit (%js-vref "Infinity"))

@@ -301,7 +301,7 @@
 (test (not (hash-table-p #(1 2 3))))
 
 ;; A raw JS Map counts as a hash table with EQ test
-(let ((js-map (make-new #j:Map)))
+(let ((js-map (new #j:Map)))
   (test (hash-table-p js-map))
   (test (eq (hash-table-test js-map) 'eq)))
 
