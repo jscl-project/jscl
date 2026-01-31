@@ -109,39 +109,4 @@ the values array set by `values`. This captures the multiple-value
 state so the caller can inspect or save it.
 
 This is used when the compiler needs to **observe** the secondary
-values rather than just propagate them:
-
-- **`return-from`** and **`throw`** — capture the values to store
-  in the NLX (non-local exit) object so that `block`/`catch` can
-  restore `_mv` when it catches the exception.
-
-  ```lisp
-  ;; return-from (multiple-value case)
-  `(selfcall
-    (var (_r (call-internal |withMV| (function () (return ,(convert value t))))))
-    (throw (new (call-internal |BlockNLX| ... (property _r 0) (property _r 1) ...))))
-  ```
-
-- **`unwind-protect`** and **`multiple-value-prog1`** — save the
-  values before side-effect forms execute, then restore `_mv`
-  afterward.
-
-  ```lisp
-  ;; multiple-value-prog1 (multiple-value case)
-  `(selfcall
-    (var (_r (call-internal |withMV| (function () (return ,(convert first-form t))))))
-    (progn ,@(mapcar #'convert forms))
-    (= (internal |_mv|) (property _r 1))
-    (return (property _r 0)))
-  ```
-
-- **`multiple-value-call`** — collects values from each argument
-  form into an array, then dispatches with `mvcall`.
-
-  ```lisp
-  ;; per-form collection inside multiple-value-call
-  (collect `(= _r (call-internal |withMV| (function () (return ,(convert form t))))))
-  (collect `(if (!== (property _r 1) null)
-                (= args (method-call args "concat" (property _r 1)))
-                (method-call args "push" (property _r 0))))
-  ```
+values rather than just propagate them.
