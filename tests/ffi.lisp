@@ -100,4 +100,56 @@
 (test (string= (princ-to-string +null+) "+NULL+"))
 (test (string= (princ-to-string +undefined+) "+UNDEFINED+"))
 
+;;; clstring
+
+;; JS string -> CL string
+(test (stringp (clstring #j"hello")))
+(test (string= (clstring #j"hello") "hello"))
+(test (string= (clstring #j"") ""))
+
+;; CL string passes through
+(test (let ((s "world")) (eq (clstring s) s)))
+(test (string= (clstring "abc") "abc"))
+
+;; type error for non-strings
+(test (handler-case (progn (clstring 42) nil)
+        (type-error () t)))
+(test (handler-case (progn (clstring +true+) nil)
+        (type-error () t)))
+
+;; clstring as a function value
+(test (string= (funcall #'clstring #j"test") "test"))
+
+;;; jsbool
+
+;; nil -> +false+, anything else -> +true+
+(test (eq (jsbool nil) +false+))
+(test (eq (jsbool t) +true+))
+(test (eq (jsbool 42) +true+))
+(test (eq (jsbool "hello") +true+))
+
+;; jsbool as a function value
+(test (eq (funcall #'jsbool nil) +false+))
+(test (eq (funcall #'jsbool t) +true+))
+
+;;; clbool
+
+;; +true+ -> t, +false+/+null+/+undefined+ -> nil
+(test (eq (clbool +true+) t))
+(test (eq (clbool +false+) nil))
+(test (eq (clbool +null+) nil))
+(test (eq (clbool +undefined+) nil))
+
+;; CL booleans pass through
+(test (eq (clbool t) t))
+(test (eq (clbool nil) nil))
+
+;; type error for non-booleans
+(test (handler-case (progn (clbool 42) nil)
+        (type-error () t)))
+
+;; clbool as a function value
+(test (eq (funcall #'clbool +true+) t))
+(test (eq (funcall #'clbool +false+) nil))
+
 ;;; EOF

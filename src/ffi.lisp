@@ -59,6 +59,28 @@
             `(oget! ,g!object ,@g!keys))))
 
 
+(defun clstring (x)
+  (cond
+    ;; TODO: Should we do this? or just accept js booleans? similar for clbool
+    ((stringp x) x)
+    ((string= (typeof x) "string") (js-to-lisp x))
+    (t (error 'type-error :datum x :expected-type 'string))))
+
+(defun clbool (x)
+  (cond
+    ;; TODO: Should we do this? or just accept js booleans? similar for clstring
+    ((eq x t) t)
+    ((eq x nil) nil)
+
+    ((eq x +true+) t)
+    ((eq x +false+) nil)
+    ((eq x +null+) nil)
+    ((eq x +undefined+) nil)
+    (t (error 'type-error :datum x :expected-type 'js-boolean))))
+
+(defun jsbool (x)
+  (if x +true+ +false+))
+
 (defun jsstring (x)
   (jsstring x))
 
