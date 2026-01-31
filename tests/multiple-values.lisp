@@ -435,4 +435,35 @@
              'error))
 
 
+;;;; =============================================
+;;;; Stale _mv side channel from argument evaluation
+;;;; =============================================
+
+;;; When a function call is in a multiple-value context, _mv must
+;;; reflect the values from that call, not from sub-expressions
+;;; evaluated as arguments. intern returns 2 values, and that must not
+;;; leak through when it appears as a sub-expression.
+
+;;; multiple-value-list should see the single value from list, not the
+;;; two values from intern inside the argument
+(test (equal '((FOO))
+             (multiple-value-list (list (intern "FOO" "CL-USER")))))
+
+;;; Same issue with other functions that return multiple values
+(test (equal '((1 2))
+             (multiple-value-list (list (floor 5 3)))))
+
+;;; Nested: values from inner calls must not leak to outer
+;;; multiple-value-call
+(test (equal '(3)
+             (multiple-value-list (+ 1 (nth-value 0 (values 2 99))))))
+
+;;; The stale _mv bug caused defstruct to fail because the setf of
+;;; dsd-constructors received MAKE-ES (from intern inside %symbolize)
+;;; instead of the actual list of constructor descriptors.
+(test (handler-case
+          (progn (macroexpand '(defstruct stale-mv-test-struct a b))
+                 t)
+        (error (e) nil)))
+
 ;;; EOF
