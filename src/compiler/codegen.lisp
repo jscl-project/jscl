@@ -273,11 +273,15 @@
       (call
        (js-expr (car args) 20)
        (js-format "(")
-       (when (cdr args)
-         (js-expr (cadr args) no-comma)
-         (dolist (operand (cddr args))
-           (js-format ",")
-           (js-expr operand no-comma)))
+       (flet ((output-arg (arg)
+                (if (and (consp arg) (eq (car arg) 'spread))
+                    (progn (js-format "...") (js-expr (cadr arg) no-comma))
+                    (js-expr arg no-comma))))
+         (when (cdr args)
+           (output-arg (cadr args))
+           (dolist (operand (cddr args))
+             (js-format ",")
+             (output-arg operand))))
        (js-format ")"))
       ;; Object syntax
       (object

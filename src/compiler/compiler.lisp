@@ -962,12 +962,11 @@
     ;; capture it in a closure.
     (if multiple-value-p
         `(selfcall
-          (= (internal |_mv|) null)
-          (var (|_result| ,(convert value t)))
+          (var (_r (call-internal |withMV| (function () (return ,(convert value t))))))
           (throw (new (call-internal |BlockNLX|
                                      ,(binding-value b)
-                                     |_result|
-                                     (internal |_mv|)
+                                     (property _r 0)
+                                     (property _r 1)
                                      ,(symbol-name name)))))
         `(selfcall
           (throw (new (call-internal |BlockNLX|
@@ -992,12 +991,11 @@
 
 (define-compilation throw (id value)
   `(selfcall
-    (= (internal |_mv|) null)
-    (var (|_result| ,(convert value t)))
+    (var (_r (call-internal |withMV| (function () (return ,(convert value t))))))
     (throw (new (call-internal |CatchNLX|
                                ,(convert id)
-                               |_result|
-                               (internal |_mv|))))))
+                               (property _r 0)
+                               (property _r 1))))))
 
 
 (defun go-tag-p (x)
@@ -1063,16 +1061,13 @@
 (define-compilation unwind-protect (form &rest clean-up)
   (if *multiple-value-p*
       `(selfcall
-        (var ret)
-        (var saved_mv)
+        (var _r)
         (try
-         (= (internal |_mv|) null)
-         (= ret ,(convert form t))
-         (= saved_mv (internal |_mv|)))
+         (= _r (call-internal |withMV| (function () (return ,(convert form t))))))
         (finally
          ,(convert-block clean-up))
-        (= (internal |_mv|) saved_mv)
-        (return ret))
+        (= (internal |_mv|) (property _r 1))
+        (return (property _r 0)))
       `(selfcall
         (var (ret ,(convert nil)))
         (try
@@ -1085,29 +1080,23 @@
   `(selfcall
     (var (func ,(convert func-form)))
     (var (args #()))
-    (var vs)
-    (var mv)
+    (var _r)
     (progn
       ,@(with-collect
          (dolist (form forms)
-           (collect `(= (internal |_mv|) null))
-           (collect `(= vs ,(convert form t)))
-           (collect `(= mv (internal |_mv|)))
-           (collect `(if (!== mv null)
-                         (= args (method-call args "concat" mv))
-                         (method-call args "push" vs))))))
-    ,@(when *multiple-value-p* (list `(= (internal |_mv|) null)))
-    (return (method-call func "apply" null args))))
+           (collect `(= _r (call-internal |withMV| (function () (return ,(convert form t))))))
+           (collect `(if (!== (property _r 1) null)
+                         (= args (method-call args "concat" (property _r 1)))
+                         (method-call args "push" (property _r 0)))))))
+    (return (call-internal |mvcall| func (spread args)))))
 
 (define-compilation multiple-value-prog1 (first-form &rest forms)
   (if *multiple-value-p*
       `(selfcall
-        (= (internal |_mv|) null)
-        (var (result ,(convert first-form t)))
-        (var (saved_mv (internal |_mv|)))
+        (var (_r (call-internal |withMV| (function () (return ,(convert first-form t))))))
         (progn ,@(mapcar #'convert forms))
-        (= (internal |_mv|) saved_mv)
-        (return result))
+        (= (internal |_mv|) (property _r 1))
+        (return (property _r 0)))
       `(selfcall
         (var (result ,(convert first-form)))
         (progn ,@(mapcar #'convert forms))
@@ -1365,19 +1354,21 @@
                     (== (get x "stringp") 1))))))
 
 (define-raw-builtin funcall (func &rest args)
-  (let ((compiled-args (mapcar #'convert args))
-        (clear-mv (when *multiple-value-p* `(= (internal |_mv|) null))))
+  (let ((compiled-args (mapcar #'convert args)))
     (cond ((and (consp func) (eq (car func) 'function))
-           (let ((call `(call ,(convert func) ,@compiled-args)))
-             (if clear-mv `(progn ,clear-mv ,call) call)))
+           (let ((fn-expr (convert func)))
+             (if *multiple-value-p*
+                 `(call-internal |mvcall| ,fn-expr ,@compiled-args)
+                 `(call ,fn-expr ,@compiled-args))))
           (t
-           `(selfcall
-             (var (f ,(convert func)))
-             ,@(when clear-mv (list clear-mv))
-             (return (call (if (=== (typeof f) "function")
-                               f
-                               (get f "fvalue"))
-                           ,@compiled-args)))))))
+           (let ((dispatch `(if (=== (typeof f) "function")
+                                f
+                                (get f "fvalue"))))
+             `(selfcall
+               (var (f ,(convert func)))
+               (return ,(if *multiple-value-p*
+                            `(call-internal |mvcall| ,dispatch ,@compiled-args)
+                            `(call ,dispatch ,@compiled-args)))))))))
 
 (define-raw-builtin apply (func &rest args)
   (if (null args)
@@ -1391,13 +1382,10 @@
 	  (while (!= tail ,(convert nil))
 	    (method-call args "push" (get tail "$$jscl_car"))
 	    (= tail (get tail "$$jscl_cdr")))
-          ,@(when *multiple-value-p* (list `(= (internal |_mv|) null)))
-	  (return (method-call (if (=== (typeof f) "function")
-				   f
-				   (get f "fvalue"))
-			       "apply"
-			       this
-			       args))))))
+	  (return ,(let ((resolved '(if (=== (typeof f) "function") f (get f "fvalue"))))
+                     (if *multiple-value-p*
+                         `(call-internal |mvcall| ,resolved (spread args))
+                         `(method-call ,resolved "apply" this args))))))))
 
 (define-builtin js-eval (string data)
   (if *multiple-value-p*
@@ -1767,18 +1755,23 @@
       (error "Bad function designator `~S'" function))
     (cond
       ((translate-function function)
-       (let ((call `(call ,(translate-function function) ,@arglist)))
-         (if *multiple-value-p* `(progn (= (internal |_mv|) null) ,call) call)))
+       (if *multiple-value-p*
+           `(call-internal |mvcall| ,(translate-function function) ,@arglist)
+           `(call ,(translate-function function) ,@arglist)))
       ((symbolp function)
        (fn-info function :called t)
        ;; This code will work even if the symbol-function is unbound,
        ;; as it is represented by a function that throws the expected
        ;; error.
-       (let ((call `(method-call ,(convert `',function) "fvalue" ,@arglist)))
-         (if *multiple-value-p* `(progn (= (internal |_mv|) null) ,call) call)))
+       (let ((sym (convert `',function)))
+         (if *multiple-value-p*
+             `(call-internal |mvcall| (get ,sym "fvalue") ,@arglist)
+             `(method-call ,sym "fvalue" ,@arglist))))
       ((and (consp function) (eq (car function) 'lambda))
-       (let ((call `(call ,(convert `(function ,function)) ,@arglist)))
-         (if *multiple-value-p* `(progn (= (internal |_mv|) null) ,call) call)))
+       (let ((fn-expr (convert `(function ,function))))
+         (if *multiple-value-p*
+             `(call-internal |mvcall| ,fn-expr ,@arglist)
+             `(call ,fn-expr ,@arglist))))
       ((and (consp function) (eq (car function) 'oget))
        `(call-internal |js_to_lisp|
               (call ,(reduce (lambda (obj p)

@@ -56,6 +56,17 @@ internals.values = function (...args) {
   return args.length > 0 ? (args[0] == undefined ? nil : args[0]) : nil;
 };
 
+internals.mvcall = function(fn, ...args) {
+  internals._mv = null;
+  return fn(...args);
+};
+
+internals.withMV = function(fn) {
+  internals._mv = null;
+  var result = fn();
+  return [result, internals._mv];
+};
+
 internals.error = function (...args) {
   errorSym.fvalue(...args);
 };

@@ -446,11 +446,12 @@
 
 ;;; multiple-value-list should see the single value from list, not the
 ;;; two values from intern inside the argument
-(test (equal '((FOO))
+(test (equal (list (list (intern "FOO" "CL-USER")))
              (multiple-value-list (list (intern "FOO" "CL-USER")))))
 
 ;;; Same issue with other functions that return multiple values
-(test (equal '((1 2))
+;;; floor returns 1 as primary value; the remainder 2 must NOT leak
+(test (equal '((1))
              (multiple-value-list (list (floor 5 3)))))
 
 ;;; Nested: values from inner calls must not leak to outer
