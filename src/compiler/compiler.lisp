@@ -965,8 +965,8 @@
           (var (_r (call-internal |withMV| (function () (return ,(convert value t))))))
           (throw (new (call-internal |BlockNLX|
                                      ,(binding-value b)
-                                     (property _r 0)
-                                     (property _r 1)
+                                     (get _r "result")
+                                     (get _r "mv")
                                      ,(symbol-name name)))))
         `(selfcall
           (throw (new (call-internal |BlockNLX|
@@ -994,8 +994,8 @@
     (var (_r (call-internal |withMV| (function () (return ,(convert value t))))))
     (throw (new (call-internal |CatchNLX|
                                ,(convert id)
-                               (property _r 0)
-                               (property _r 1))))))
+                               (get _r "result")
+                               (get _r "mv"))))))
 
 
 (defun go-tag-p (x)
@@ -1066,8 +1066,8 @@
          (= _r (call-internal |withMV| (function () (return ,(convert form t))))))
         (finally
          ,(convert-block clean-up))
-        (= (internal |_mv|) (property _r 1))
-        (return (property _r 0)))
+        (= (internal |_mv|) (get _r "mv"))
+        (return (get _r "result")))
       `(selfcall
         (var (ret ,(convert nil)))
         (try
@@ -1085,9 +1085,9 @@
       ,@(with-collect
          (dolist (form forms)
            (collect `(= _r (call-internal |withMV| (function () (return ,(convert form t))))))
-           (collect `(if (!== (property _r 1) null)
-                         (= args (method-call args "concat" (property _r 1)))
-                         (method-call args "push" (property _r 0)))))))
+           (collect `(if (!== (get _r "mv") null)
+                         (= args (method-call args "concat" (get _r "mv")))
+                         (method-call args "push" (get _r "result")))))))
     (return (call-internal |mvcall| func (spread args)))))
 
 (define-compilation multiple-value-prog1 (first-form &rest forms)
@@ -1095,8 +1095,8 @@
       `(selfcall
         (var (_r (call-internal |withMV| (function () (return ,(convert first-form t))))))
         (progn ,@(mapcar #'convert forms))
-        (= (internal |_mv|) (property _r 1))
-        (return (property _r 0)))
+        (= (internal |_mv|) (get _r "mv"))
+        (return (get _r "result")))
       `(selfcall
         (var (result ,(convert first-form)))
         (progn ,@(mapcar #'convert forms))

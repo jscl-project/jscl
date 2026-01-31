@@ -53,10 +53,11 @@ internals.pv = function (x) {
 
 internals.values = function (...args) {
   internals._mv = args;
-  return args.length > 0 ? (args[0] == undefined ? nil : args[0]) : nil;
+  return args.length > 0 ? args[0] : nil;
 };
 
 internals.mvcall = function(fn, ...args) {
+  // TODO: comment why this exists
   internals._mv = null;
   return fn(...args);
 };
@@ -64,7 +65,7 @@ internals.mvcall = function(fn, ...args) {
 internals.withMV = function(fn) {
   internals._mv = null;
   var result = fn();
-  return [result, internals._mv];
+  return { result, mv: internals._mv };
 };
 
 internals.error = function (...args) {

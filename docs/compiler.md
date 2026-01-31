@@ -99,12 +99,12 @@ Compiler example (`compile-funcall`):
 internals.withMV = function(fn) {
   internals._mv = null;
   var result = fn();
-  return [result, internals._mv];
+  return { result, mv: internals._mv };
 };
 ```
 
-Clears `_mv`, calls a thunk, and returns a two-element array
-`[primaryValue, mv]` where `mv` is either `null` (single value) or
+Clears `_mv`, calls a thunk, and returns an object
+`{result, mv}` where `mv` is either `null` (single value) or
 the values array set by `values`. This captures the multiple-value
 state so the caller can inspect or save it.
 
