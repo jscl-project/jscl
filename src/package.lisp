@@ -95,7 +95,8 @@
 
 (defun package-name (package-designator)
   (let ((package (find-package-or-fail package-designator)))
-    (oget package "packageName")))
+    (let ((name (oget package "packageName")))
+      (if name (clstring name) nil))))
 
 (defun package-nicknames (package-designator)
   (let ((package (find-package-or-fail package-designator)))

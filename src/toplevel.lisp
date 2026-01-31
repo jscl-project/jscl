@@ -105,8 +105,10 @@ All errors are caught and report to *ERROR-OUTPUT*."
           (prin1 result)
           (terpri))))
     (catch (err)
-      (let ((message (or (oget err "message") err)))
-        (format *error-output* "ERROR[!]: ~a~%~A~%" message (oget err "stack"))))))
+      (let ((message (let ((msg (oget err "message")))
+                       (if msg (clstring msg) err))))
+        (format *error-output* "ERROR[!]: ~a~%~A~%" message
+                (let ((s (oget err "stack"))) (if s (clstring s) "")))))))
 
 (export
  '(&allow-other-keys &aux &body &environment &key &optional &rest &whole
@@ -309,7 +311,7 @@ All errors are caught and report to *ERROR-OUTPUT*."
 
 (export '(mop-object mop-object-p
           compile-application
-          oget oset new oget! oset! object
+          oget oset new object
           lisp-to-js js-to-lisp js-object-p js-null-p js-undefined-p)
         'jscl)
 
@@ -406,7 +408,7 @@ All errors are caught and report to *ERROR-OUTPUT*."
 (setq *standard-output*
       (make-line-buffer-stream
        (make-stream
-        :write-fn (lambda (string) (#j:console:log string))
+        :write-fn (lambda (string) (#j:console:log (jsstring string)))
         :kind 'console-output-stream))
       *error-output* *standard-output*
       *trace-output* *standard-output*)

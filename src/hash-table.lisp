@@ -58,13 +58,13 @@
      (sxhash-cons x))
     (t
      ;; For other objects, use identity-based hash via WeakMap
-     (if (eq ((oget! *sxhash-table* "has") x) +true+)
-         ((oget! *sxhash-table* "get") x)
+     (if (eq ((oget *sxhash-table* "has") x) +true+)
+         ((oget *sxhash-table* "get") x)
          (let ((new-hash (incf *sxhash-counter*)))
-           ((oget! *sxhash-table* "set") x new-hash)
+           ((oget *sxhash-table* "set") x new-hash)
            new-hash)))))
 
-(defconstant EqualMap (oget! (%js-vref "internals" t) "EqualMap"))
+(defconstant EqualMap (oget (%js-vref "internals" t) "EqualMap"))
 
 ;;; Hash table structure:
 ;;; An EqualMap instance (JS object) with additional properties:
@@ -95,7 +95,7 @@
                            (fn-to-js (lambda (a b)
                                        (if (equal a b) +true+ +false+))))
                  (new (%js-vref "Map" t)))))
-    (oset! test-symbol ht "$$jscl_test")
+    (oset test-symbol ht "$$jscl_test")
     ht))
 
 (defun check-is-hash-table (x)
@@ -105,27 +105,27 @@
 (defun gethash (key hash-table &optional default)
   (check-is-hash-table hash-table)
   ;; .has() returns a JS boolean, must convert to Lisp boolean
-  (let ((has-key (js-to-lisp ((oget! hash-table "has") key))))
+  (let ((has-key (js-to-lisp ((oget hash-table "has") key))))
     (if has-key
-        (values ((oget! hash-table "get") key) t)
+        (values ((oget hash-table "get") key) t)
         (values default nil))))
 
 (defun (setf gethash) (new-value key hash-table &optional defaults)
   (declare (ignore defaults))
   (check-is-hash-table hash-table)
-  ((oget! hash-table "set") key new-value)
+  ((oget hash-table "set") key new-value)
   new-value)
 
 (defun remhash (key hash-table)
   (check-is-hash-table hash-table)
   ;; Use js-to-lisp to convert JS boolean to Lisp boolean
-  (let ((had-key (js-to-lisp ((oget! hash-table "has") key))))
-    ((oget! hash-table "delete") key)
+  (let ((had-key (js-to-lisp ((oget hash-table "has") key))))
+    ((oget hash-table "delete") key)
     had-key))
 
 (defun clrhash (hash-table)
   (check-is-hash-table hash-table)
-  ((oget! hash-table "clear"))
+  ((oget hash-table "clear"))
   hash-table)
 
 (defun hash-table-count (hash-table)
@@ -134,7 +134,7 @@
 
 (defun maphash (function hash-table)
   (check-is-hash-table hash-table)
-  ((oget! hash-table "forEach")
+  ((oget hash-table "forEach")
    (lisp-to-js (lambda (value key &optional this-map)
                  (declare (ignore this-map))
                  (funcall function key value))))
@@ -142,8 +142,8 @@
 
 (defun hash-table-test (hash-table)
   (check-is-hash-table hash-table)
-  (let ((test (oget! hash-table "$$jscl_test")))
-    (if (eq test +undefined+)
+  (let ((test (oget hash-table "$$jscl_test")))
+    (if (null test)
 	'eq
       test)))
 
@@ -174,9 +174,9 @@
   (let ((iterator (gensym "ITERATOR"))
         (ivalue (gensym "IVALUE")))
     `(macrolet ((,name ()
-                  '(let ((,ivalue (oget! ((oget! ,iterator "next")) "value")))
+                  '(let ((,ivalue (oget ((oget ,iterator "next")) "value")))
                     (if (storage-vector-p ,ivalue)
-                        (values t (oget! ,ivalue 0) (oget! ,ivalue 1))
+                        (values t (oget ,ivalue 0) (oget ,ivalue 1))
                         (values nil nil nil)))))
        (let ((,iterator (#j:Iterator:from ,hash-table)))
          ,@body))))

@@ -15,17 +15,17 @@
 
 (defun receive-xhr (method uri sync fn-ok &optional fn-err)
   (let ((req (new #j:XMLHttpRequest)))
-    ((oget req "open") method uri (not sync))
-    ((oget req "setRequestHeader") "Cache-Control" "no-cache")
-    ((oget req "setRequestHeader") "Cache-Control" "no-store")
+    ((oget req "open") (jsstring method) (jsstring uri) (jsbool (not sync)))
+    ((oget req "setRequestHeader") #j"Cache-Control" #j"no-cache")
+    ((oget req "setRequestHeader") #j"Cache-Control" #j"no-store")
     ((oget req "send"))
     (flet ((handler ()
              (if (= (oget req "status") 200)
-                 (funcall fn-ok (oget req "responseText"))
+                 (funcall fn-ok (clstring (oget req "responseText")))
                  (if fn-err
                      (funcall fn-err uri (oget req "status"))
                      (error "Can't open ~a: ~a ~a"
-                            uri (oget req "status") (oget req "statusText"))))))
+                            uri (oget req "status") (clstring (oget req "statusText")))))))
       (cond (sync (handler))
             (t (setf (oget req "onreadystatechange")
                      (lambda (evt)
@@ -44,25 +44,26 @@ and asynchronously otherwise."
   `(call-with-open-file (lambda (,stream) ,@body) ,filespec ,@options))
 
 (defun %check-output-directory (path)
-  (let ((dir (oget (#j:FsPath:parse path) "dir")))
+  (let ((dir (let ((d (oget (#j:FsPath:parse (jsstring path)) "dir")))
+               (if d (clstring d) ""))))
     (when (> (length dir) 0)
-      (unless (#j:Fs:existsSync dir)
+      (unless (clbool (#j:Fs:existsSync (jsstring dir)))
         ;; dont create new directory
         (error "No such output directory ~s" dir)))))
 
 ;;; replace ctrl-r from input
 (defun ctrl-r-replace (src)
-  (let ((reg (#j:RegExp (code-char 13) "g")))
-    ((oget (lisp-to-js src) "replace") reg " ")))
+  (let ((reg (#j:RegExp (code-char 13) #j"g")))
+    (clstring ((oget (lisp-to-js src) "replace") reg #j" "))))
 
 (defun call-with-open-file (thunk name &key (direction :input) (if-exists :error) (sync t))
   (ecase direction
     (:input
      (cond ((and sync (find :node *features*))
-            (unless (#j:Fs:existsSync name)
+            (unless (clbool (#j:Fs:existsSync (jsstring name)))
               (error "No such file ~s" name))
             (with-input-from-string
-                (s (ctrl-r-replace (#j:Fs:readFileSync name "utf-8")))
+                (s (ctrl-r-replace (clstring (#j:Fs:readFileSync (jsstring name) #j"utf-8"))))
               (funcall thunk s)))
            ((and sync (find :web-worker *features*))
             (receive-xhr
@@ -87,7 +88,7 @@ and asynchronously otherwise."
                (let ((buf (make-array 0 :element-type 'character :fill-pointer 0)))
                  (multiple-value-prog1
                      (with-output-to-string (s buf) (funcall thunk s))
-                   (#j:Fs:writeFileSync name buf))))
+                   (#j:Fs:writeFileSync (jsstring name) (jsstring buf)))))
               (t (error ":if-exists option ~a not implemented" if-exists))))
            (t (error "Output to file not supported on this platform."))))))
 
@@ -97,7 +98,7 @@ and asynchronously otherwise."
 
 (defun probe-file (name)
   (cond ((find :node *features*)
-         (#j:Fs:existsSync name))
+         (clbool (#j:Fs:existsSync (jsstring name))))
         ((find :web-worker *features*)
          (receive-xhr "HEAD" name t
                       (lambda (body) t)

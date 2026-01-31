@@ -203,7 +203,7 @@
     (setq result
           (cond ((eql print-base 10)(integer-to-string  argument))
                 (t (check-type print-base (integer 2 36))
-                   (funcall ((oget argument "toString" "bind") argument print-base)))))
+                   (clstring ((oget argument "toString") print-base)))))
     (when print-radix
       ;; print base prefix
       (case print-base
@@ -344,7 +344,7 @@
     (mop-object (print-object form stream))
     ;; structure object
     (structure-object
-     (let ((dvec (oget! form "structDescriptors")))
+     (let ((dvec (oget form "structDescriptors")))
        (cond ((symbolp dvec)
               (simple-format stream "#<~a (INTERNAL)>" (string dvec)))
              (t
@@ -365,7 +365,7 @@
                            (write-string " :" stream)
                            (write-string (symbol-name slot) stream)
                            (write-string " " stream)
-                           (write-aux (oget! form prop) stream known-objects object-ids))
+                           (write-aux (oget form prop) stream known-objects object-ids))
                          slot-names property-names)
                    (write-string (if obsolete ">" ")") stream))))))))
     ;; hash-table object
@@ -417,7 +417,7 @@
        (t
         (simple-format stream "#<JS-OBJECT ~a>" (js-object-signature form)))))
     (otherwise
-     (simple-format stream "#<JS-OBJECT ~a>" (#j:String form)))))
+     (simple-format stream "#<JS-OBJECT ~a>" (clstring (#j:String form))))))
 
 
 #+jscl

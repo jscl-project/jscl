@@ -28,7 +28,7 @@
                    (with-toplevel-eval ()
                      (eval-interactive-input input))
                    ;; Update prompt
-                   ((oget *repl* "setPrompt") (get-prompt))
+                   ((oget *repl* "setPrompt") (jsstring (get-prompt)))
                    (funcall cb nil)))))
     (setq *repl* (#j:repl:start (object "input" #j:process:stdin "output" #j:process:stdout
                                         "eval" (lisp-to-js #'repl-eval) "writer" (lisp-to-js (constantly ""))
@@ -38,7 +38,7 @@
   (setq *standard-output*
         (make-stream
          :write-fn (lambda (string)
-                     (#j:process:stdout:write string)))
+                     (#j:process:stdout:write (jsstring string))))
         *error-output* *standard-output*
         *trace-output* *standard-output*)
   (let ((args (mapcar #'js-to-lisp (vector-to-list (subseq #j:process:argv 2)))))

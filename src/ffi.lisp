@@ -44,20 +44,6 @@
             `(oset ,g!value ,g!object ,@g!keys)
             `(oget ,g!object ,@g!keys))))
 
-(define-setf-expander oget! (object key &rest keys)
-  (let* ((keys (cons key keys))
-         (g!object (gensym))
-         (g!keys (mapcar (lambda (s)
-                           (declare (ignore s))
-                           (gensym))
-                         keys))
-         (g!value (gensym)))
-    (values `(,g!object ,@g!keys)
-            `(,object ,@keys)
-            `(,g!value)
-            `(oset! ,g!value ,g!object ,@g!keys)
-            `(oget! ,g!object ,@g!keys))))
-
 
 (defun clstring (x)
   (cond

@@ -8,8 +8,8 @@
 ;;; using JSCL:: prefix.
 
 (test (= ((jscl::oget (jscl::new #j:Date 0) "getTime")) 0))
-(test (stringp (#j:Date 0)))
-(test (< 32 (length (#j:Date 0))))
+(test (stringp (clstring (#j:Date 0))))
+(test (< 32 (length (clstring (#j:Date 0)))))
 
 ;;; Array
 (let ((v1 #(mediane)))
@@ -24,23 +24,23 @@
   (test (equal (jscl::vector-to-list v2) '(left "Mediane" right))))
 
 ;;; String
-(test (string= ((oget (jscl::lisp-to-js "abcdef") "substr") 1 2) "bc"))
+(test (string= (clstring ((oget (jscl::lisp-to-js "abcdef") "substr") 1 2)) "bc"))
 
 ;;; Number's format output
 ;;; for future features
 (let ()
   (labels
-      ((make-number (value) 
+      ((make-number (value)
          (jscl::new #j:Number value))
        (float-Exponential (value &optional (fraction 5))
-         ((jscl::oget (make-Number value) "toExponential") fraction))
+         (clstring ((jscl::oget (make-Number value) "toExponential") fraction)))
        (number-to-fixed (value &optional (digits 0))
-         ((jscl::oget  (make-Number value) "toFixed") digits))
+         (clstring ((jscl::oget (make-Number value) "toFixed") digits)))
        (number-by-radix (value &optional (radix 10))
-         ((jscl::oget (make-Number value) "toString") radix)))
+         (clstring ((jscl::oget (make-Number value) "toString") radix))))
     (test (string= "1.23e+2" (float-exponential 123.1 2)))
     (test (string= "123.01" (number-to-fixed 123.012345 2)))
-    (test (string= "a" (number-by-radix 10 16))) 
+    (test (string= "a" (number-by-radix 10 16)))
     (test (string= "1100100" (number-by-radix 100 2)))))
 
 ;;; test what simple-object (Object.create(null)) 

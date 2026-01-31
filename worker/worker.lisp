@@ -24,9 +24,9 @@
 
 (defun %web-worker-write-string (string &optional (style "jqconsole-output"))
   (let ((obj (object)))
-    (setf (oget obj "command") "output")
-    (setf (oget obj "stringclass") style)
-    (setf (oget obj "string") string)
+    (setf (oget obj "command") #j"output")
+    (setf (oget obj "stringclass") (jsstring style))
+    (setf (oget obj "string") (jsstring string))
     (#j:postMessage obj)))
 
 
@@ -43,12 +43,12 @@
     (let ((xhr (new #j:XMLHttpRequest))
           (payload (object)))
 
-      (setf (oget payload "command") command)
+      (setf (oget payload "command") (jsstring command))
       (setf (oget payload "sessionId") *web-worker-session-id*)
       (setf (oget payload "options") options)
 
-      ((oget xhr "open") "POST" "__jscl" nil)
-      ((oget xhr "setRequestHeader") "ContentType" "application/json")
+      ((oget xhr "open") #j"POST" #j"__jscl" +false+)
+      ((oget xhr "setRequestHeader") #j"ContentType" #j"application/json")
       ((oget xhr "send") (#j:JSON:stringify payload))
 
       (if (eql (oget xhr "status") 200)
@@ -56,7 +56,7 @@
                  (json (#j:JSON:parse text)))
             (if (oget json "timeout")
                 (setq command "wait")
-                (return (oget json "value"))))
+                (return (clstring (oget json "value")))))
           (error "Could not contact with the service worker.")))))
 
 
@@ -106,7 +106,7 @@
   (setf #j:onmessage
         (lambda (event)
           (let* ((data (oget event "data"))
-                 (command (oget data "command"))
+                 (command (clstring (oget data "command")))
                  (sessionId (oget data "sessionId")))
             (when (string= command "init")
               (setf *web-worker-session-id* sessionId)

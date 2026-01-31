@@ -1283,7 +1283,8 @@
   `(new (call-internal |Symbol| (call-internal |lisp_to_js| ,name))))
 
 (define-compilation symbol-name (x)
-  (convert `(oget ,x "name")))
+  (let ((sym (convert x)))
+    `(call-internal |make_lisp_string| (get ,sym "name"))))
 
 (define-builtin set (symbol value)
   `(= (get ,symbol "value") ,value))
@@ -1540,18 +1541,16 @@
                     tmp))))))
 
 (define-raw-builtin oget (object key &rest keys)
-  `(call-internal |js_to_lisp| ,(convert `(oget* ,object ,key ,@keys))))
+  (let ((result (convert object)))
+    (dolist (k (cons key keys))
+      (setq result `(property ,result ,(convert-xstring k))))
+    `(call-internal |undefinedToNil| ,result)))
 
 (define-raw-builtin oset (value object key &rest keys)
-  (convert `(oset* (lisp-to-js ,value) ,object ,key ,@keys)))
-
-(define-raw-builtin oget! (object key &rest keys)
   (let ((result (convert object)))
-    (dolist (k (cons key keys) result)
-      (setq result `(property ,result ,(convert-xstring k))))))
-
-(define-raw-builtin oset! (value object key &rest keys)
-  `(= ,(convert `(oget! ,object ,key ,@keys)) ,(convert value)))
+    (dolist (k (cons key keys))
+      (setq result `(property ,result ,(convert-xstring k))))
+    `(= ,result ,(convert value))))
 
 (define-builtin objectp (x)
   `(selfcall
@@ -1751,7 +1750,7 @@
   (let* ((arglist (mapcar #'convert args)))
     (unless (or (symbolp function)
                 (and (consp function)
-                     (member (car function) '(lambda oget oget!))))
+                     (member (car function) '(lambda oget))))
       (error "Bad function designator `~S'" function))
     (cond
       ((translate-function function)
@@ -1773,15 +1772,6 @@
              `(call-internal |mvcall| ,fn-expr ,@arglist)
              `(call ,fn-expr ,@arglist))))
       ((and (consp function) (eq (car function) 'oget))
-       `(call-internal |js_to_lisp|
-              (call ,(reduce (lambda (obj p)
-                               `(property ,obj ,p))
-                             (mapcar #'convert-xstring (cddr function))
-                             :initial-value (convert (cadr function)))
-                    ,@(mapcar (lambda (s)
-                                `(call-internal |lisp_to_js| ,(convert s)))
-                              args))))
-      ((and (consp function) (eq (car function) 'oget!))
        `(call ,(reduce (lambda (obj p)
                          `(property ,obj ,p))
                        (mapcar #'convert-xstring (cddr function))

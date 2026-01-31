@@ -55,11 +55,11 @@
             (do-all-symbols (symbol) (handle-symbol symbol))))))
 
 (defun apropos/regexp-test (pattern str)
-  ((oget pattern "test")  str))
+  (clbool ((oget pattern "test") (jsstring str))))
 
 (defun apropos-list (string &optional package externals-only)
   (let* ((result '())
-         (pattern (#j:RegExp string))
+         (pattern (#j:RegExp (jsstring string)))
          (comparator (lambda (x)
                        (let ((name (symbol-name x)))
                          (when (apropos/regexp-test pattern name)

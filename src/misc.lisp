@@ -164,16 +164,16 @@ appears on stack, frames including and above the topmost FROM call is
 omitted. Note the function does NOT truncate the list according to
 *BACKTRACE-LIMIT*."
   (let ((obj (object)))
-    (cond ((in "stackTraceLimit" (oget! *root* "Error"))
+    (cond ((in "stackTraceLimit" (oget *root* "Error"))
            (let ((old-limit #j:Error:stackTraceLimit))
              (setf #j:Error:stackTraceLimit (%js-vref "Infinity"))
-             ((oget! *root* "Error" "captureStackTrace") obj from)
+             ((oget *root* "Error" "captureStackTrace") obj from)
              (setf #j:Error:stackTraceLimit old-limit)))
-          (t ((oget! *root* "Error" "captureStackTrace") obj from)))
-    (let* ((str (oget! obj "stack"))
+          (t ((oget *root* "Error" "captureStackTrace") obj from)))
+    (let* ((str (oget obj "stack"))
            (list (map 'list #'js-to-lisp
-                      ((oget! str "split")
-                       (#j:RegExp (code-char 10) "g")))))
+                      ((oget str "split")
+                       (#j:RegExp (code-char 10) #j"g")))))
       ;; Trim useless first line on V8
       (when (equal (car list) "Error")
         (pop list))

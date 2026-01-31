@@ -34,7 +34,7 @@
             ;;   [object Object]
             ;;   [object HTMLxxxx]
             ;;   undefined
-            (#j:String obj))
+            (clstring (#j:String obj)))
         (error (msg)
           ;; js-object created with Object.create(Null) ?
           ;; legal signature 'simple-object'
@@ -131,11 +131,11 @@
         ((make-number (value)
            (new #j:Number value))
          (number-to-fixed (value &optional (digits 0))
-           ((oget  (make-Number value) "toFixed") digits))
+           (clstring ((oget (make-Number value) "toFixed") digits)))
          (number-to-exponent (value)
-           ((oget  (make-Number value) "toExponential")))
+           (clstring ((oget (make-Number value) "toExponential"))))
          (number-by-radix (value &optional (radix 10))
-           ((oget (make-Number value) "toString") radix)))
+           (clstring ((oget (make-Number value) "toString") radix))))
       (format buf "Exponential: ~a~%" (number-to-exponent obj))
       (when (> obj 0)
         ;; not display for negative value

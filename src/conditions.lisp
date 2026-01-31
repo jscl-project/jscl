@@ -227,7 +227,8 @@
         (catch (err)
           (if (%%nlx-p err)
               (%%throw err)
-              (%%error (or (oget err "message") err))))))))
+              (%%error (let ((msg (oget err "message")))
+                        (if msg (clstring msg) err)))))))))
 
 (defmacro %%handler-case-1 (form &body cases)
   (let ((datum (gensym))
