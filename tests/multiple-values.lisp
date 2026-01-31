@@ -417,4 +417,22 @@
 (test (objectp (new #j:Object)))
 
 
+;;;; =============================================
+;;;; HANDLER-CASE with multiple values
+;;;; =============================================
+
+;;; handler-case propagates multiple values from successful macroexpand
+(test (equal '((if t (progn 42) nil) t)
+             (multiple-value-list
+              (handler-case
+                  (progn (macroexpand '(when t 42)))
+                (error (e) :error)))))
+
+;;; handler-case catches error from failed macroexpansion
+(test (typep (handler-case
+                 (progn (macroexpand '(when)))
+               (error (e) e))
+             'error))
+
+
 ;;; EOF

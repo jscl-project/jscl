@@ -1737,10 +1737,13 @@
 (fset 'macroexpand-1 #'!macroexpand-1)
 
 (defun !macroexpand (form &optional env)
-  (let ((continue t))
+  (let ((continue t) expanded-p)
     (while continue
-      (multiple-value-setq (form continue) (!macroexpand-1 form env)))
-    form))
+      (multiple-value-setq (form continue) (!macroexpand-1 form env))
+      (when continue
+	(setq expanded-p t)))
+    (values form expanded-p)))
+
 #+jscl
 (fset 'macroexpand #'!macroexpand)
 
