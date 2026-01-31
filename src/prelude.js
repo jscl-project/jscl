@@ -40,28 +40,24 @@ var internals = (jscl.internals = Object.create(null));
 internals.globalEval = function (code, data) {
   var geval = eval; // Just an indirect eval
   var fn = geval(
-    '(function(values, internals, data){ "use strict"; ' + code + "; })",
+    '(function(internals, data){ "use strict"; var values = internals.values; ' + code + "; })",
   );
-  return fn(internals.mv, internals, data);
+  return fn(internals, data);
 };
+
+internals._mv = null;
 
 internals.pv = function (x) {
   return x == undefined ? nil : x;
 };
 
-internals.mv = function (...args) {
-  args["multiple-value"] = true;
-  return args;
-};
-
-internals.forcemv = function (x) {
-  return typeof x == "object" && x !== null && "multiple-value" in x
-    ? x
-    : internals.mv(x);
+internals.values = function (...args) {
+  internals._mv = args;
+  return args.length > 0 ? (args[0] == undefined ? nil : args[0]) : nil;
 };
 
 internals.error = function (...args) {
-  errorSym.fvalue(internals.pv, ...args);
+  errorSym.fvalue(...args);
 };
 
 internals.typeError = function (datum, expectedType) {
@@ -85,7 +81,7 @@ internals.typeError = function (datum, expectedType) {
 // #j:Date) will be converted into a Lisp function. We track the
 // original function in the jscl_original property as we can't wrap
 // the primitive constructor in a Lisp function or it will not work.
-internals.newInstance = function (values, ct, ...args) {
+internals.newInstance = function (ct, ...args) {
   var newCt = ct.bind.bind(ct.jscl_original || ct)(ct);
   return new newCt(...args);
 };
@@ -218,7 +214,7 @@ internals.Bitwise_and = function (x, y) {
 // `eval' compiles the forms and execute the Javascript code at
 // toplevel with `js-eval', so it is necessary to return multiple
 // values from the eval function.
-var values = internals.mv;
+var values = internals.values;
 
 internals.checkArgsAtLeast = function (args, n) {
   if (args < n) throw "too few arguments";
@@ -354,8 +350,8 @@ internals.xstring = function (x) {
 // Convert a Lisp function to JS without converting its arguments
 internals.fn_to_js = function (fn) {
   return function (...args) {
-    const result = fn(internals.pv, ...args);
-    return result;
+    internals._mv = null;
+    return fn(...args);
   };
 }
 
@@ -371,7 +367,8 @@ internals.lisp_to_js = function (x) {
     } else {
       return function (...args) {
         for (var i in args) args[i] = internals.js_to_lisp(args[i]);
-        return internals.lisp_to_js(x.bind(this)(internals.pv, ...args));
+        internals._mv = null;
+        return internals.lisp_to_js(x.bind(this)(...args));
       };
     }
   } else return x;
@@ -383,9 +380,9 @@ internals.js_to_lisp = function (x) {
   else if (x === false) return nil;
   else if (typeof x == "function") {
     // Trampoline calling the JS function
-    var trampoline = function (values, ...args) {
+    var trampoline = function (...args) {
       for (var i in args) args[i] = internals.lisp_to_js(args[i]);
-      return values(internals.js_to_lisp(x.bind(this)(...args)));
+      return internals.values(internals.js_to_lisp(x.bind(this)(...args)));
     };
     trampoline.jscl_original = x;
     return trampoline;
@@ -394,15 +391,17 @@ internals.js_to_lisp = function (x) {
 
 // Non-local exits
 
-internals.BlockNLX = function (id, values, name) {
+internals.BlockNLX = function (id, value, mv, name) {
   this.id = id;
-  this.values = values;
+  this.value = value;
+  this.mv = mv;
   this.name = name;
 };
 
-internals.CatchNLX = function (id, values) {
+internals.CatchNLX = function (id, value, mv) {
   this.id = id;
-  this.values = values;
+  this.value = value;
+  this.mv = mv;
 };
 
 internals.TagNLX = function (id, label) {
@@ -514,12 +513,12 @@ internals.symbolSetFunction = function (symbol) {
 };
 
 
-internals.bindSpecialBindings = function (symbols, values, callback){
+internals.bindSpecialBindings = function (symbols, vals, callback){
   try {
     symbols.forEach(function (s, i) {
       s.stack = s.stack || [];
       s.stack.push(s.value);
-      s.value = values[i];
+      s.value = vals[i];
     });
     return callback();
   } finally {
@@ -652,7 +651,7 @@ Object.defineProperty(nil, "$$jscl_cdr", { value: nil, writable: false });
 
 // Early error definition
 
-errorSym.fvalue = function earlyError(mv, ...args){
+errorSym.fvalue = function earlyError(...args){
   console.debug("BOOT PANIC! Arguments to ERROR:", ...args.map(internals.lisp_to_js));
   throw "BOOT PANIC!";
 }

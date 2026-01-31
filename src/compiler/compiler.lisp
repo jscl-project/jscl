@@ -29,10 +29,10 @@
   `(call (get ,x ,method) ,@args))
 
 (define-js-macro nargs ()
-  `(- (get |arguments| |length|) 1))
+  `(get |arguments| |length|))
 
 (define-js-macro arg (n)
-  `(property |arguments| (+ ,n 1)))
+  `(property |arguments| ,n))
 
 ;;; Runtime
 
@@ -503,9 +503,9 @@
 
         (lambda-name/docstring-wrapper name documentation
          `(named-function ,(jsize-symbol name 'jscl_user_)
-                          (|values| ,@(mapcar (lambda (x)
-                                                (translate-variable x))
-                                              (append required-arguments optional-arguments)))
+                          (,@(mapcar (lambda (x)
+                                       (translate-variable x))
+                                     (append required-arguments optional-arguments)))
                           ;; Check number of arguments
                           ,(lambda-check-argument-count n-required-arguments
                                                         n-optional-arguments
@@ -943,9 +943,10 @@
             (catch (cf)
               (if (and (instanceof cf (internal |BlockNLX|)) (== (get cf "id") ,idvar))
                   ,(if *multiple-value-p*
-                       `(return (method-call |values| "apply" this
-                                             (call-internal |forcemv| (get cf "values"))))
-                       `(return (get cf "values")))
+                       `(progn
+                          (= (internal |_mv|) (get cf "mv"))
+                          (return (get cf "value")))
+                       `(return (get cf "value")))
                   (throw cf))))
           `(selfcall ,cbody)))))
 
@@ -959,29 +960,44 @@
     ;; unique identifier of the block as exception. We can't use the
     ;; variable name itself, because it could not to be unique, so we
     ;; capture it in a closure.
-    `(selfcall
-      ,(when multiple-value-p `(var (|values| (internal |mv|))))
-      (throw (new (call-internal |BlockNLX|
-                                 ,(binding-value b)
-                                 ,(convert value multiple-value-p)
-                                 ,(symbol-name name)))))))
+    (if multiple-value-p
+        `(selfcall
+          (= (internal |_mv|) null)
+          (var (|_result| ,(convert value t)))
+          (throw (new (call-internal |BlockNLX|
+                                     ,(binding-value b)
+                                     |_result|
+                                     (internal |_mv|)
+                                     ,(symbol-name name)))))
+        `(selfcall
+          (throw (new (call-internal |BlockNLX|
+                                     ,(binding-value b)
+                                     ,(convert value)
+                                     null
+                                     ,(symbol-name name))))))))
 
 (define-compilation catch (id &rest body)
-  (let ((values (if *multiple-value-p* '|values| '(internal |pv|))))
-    `(selfcall
-      (var (id ,(convert id)))
-      (try
-       ,(convert-block body t))
-      (catch (cf)
-        (if (and (instanceof cf (internal |CatchNLX|)) (== (get cf "id") id))
-            (return (method-call ,values "apply" this
-                                 (call-internal |forcemv| (get cf "values"))))
-            (throw cf))))))
+  `(selfcall
+    (var (id ,(convert id)))
+    (try
+     ,(convert-block body t))
+    (catch (cf)
+      (if (and (instanceof cf (internal |CatchNLX|)) (== (get cf "id") id))
+          ,(if *multiple-value-p*
+               `(progn
+                  (= (internal |_mv|) (get cf "mv"))
+                  (return (get cf "value")))
+               `(return (get cf "value")))
+          (throw cf)))))
 
 (define-compilation throw (id value)
   `(selfcall
-    (var (|values| (internal |mv|)))
-    (throw (new (call-internal |CatchNLX| ,(convert id) ,(convert value t))))))
+    (= (internal |_mv|) null)
+    (var (|_result| ,(convert value t)))
+    (throw (new (call-internal |CatchNLX|
+                               ,(convert id)
+                               |_result|
+                               (internal |_mv|))))))
 
 
 (defun go-tag-p (x)
@@ -1045,38 +1061,57 @@
                                  ,(second (binding-value b))))))))
 
 (define-compilation unwind-protect (form &rest clean-up)
-  `(selfcall
-    (var (ret ,(convert nil)))
-    (try
-     (= ret ,(convert form)))
-    (finally
-     ,(convert-block clean-up))
-    (return ret)))
+  (if *multiple-value-p*
+      `(selfcall
+        (var ret)
+        (var saved_mv)
+        (try
+         (= (internal |_mv|) null)
+         (= ret ,(convert form t))
+         (= saved_mv (internal |_mv|)))
+        (finally
+         ,(convert-block clean-up))
+        (= (internal |_mv|) saved_mv)
+        (return ret))
+      `(selfcall
+        (var (ret ,(convert nil)))
+        (try
+         (= ret ,(convert form)))
+        (finally
+         ,(convert-block clean-up))
+        (return ret))))
 
 (define-compilation multiple-value-call (func-form &rest forms)
   `(selfcall
     (var (func ,(convert func-form)))
-    (var (args ,(vector (if *multiple-value-p* '|values| '(internal |pv|)))))
-    (return
-      (selfcall
-       (var (|values| (internal |mv|)))
-       (var vs)
-       (progn
-         ,@(with-collect
-            (dolist (form forms)
-              (collect `(= vs ,(convert form t)))
-              (collect `(if (and (=== (typeof vs) "object")
-                                 vs
-                                 (in "multiple-value" vs))
-                            (= args (method-call args "concat" vs))
-                            (method-call args "push" vs))))))
-       (return (method-call func "apply" null args))))))
+    (var (args #()))
+    (var vs)
+    (var mv)
+    (progn
+      ,@(with-collect
+         (dolist (form forms)
+           (collect `(= (internal |_mv|) null))
+           (collect `(= vs ,(convert form t)))
+           (collect `(= mv (internal |_mv|)))
+           (collect `(if (!== mv null)
+                         (= args (method-call args "concat" mv))
+                         (method-call args "push" vs))))))
+    ,@(when *multiple-value-p* (list `(= (internal |_mv|) null)))
+    (return (method-call func "apply" null args))))
 
 (define-compilation multiple-value-prog1 (first-form &rest forms)
-  `(selfcall
-    (var (args ,(convert first-form *multiple-value-p*)))
-    (progn ,@(mapcar #'convert forms))
-    (return args)))
+  (if *multiple-value-p*
+      `(selfcall
+        (= (internal |_mv|) null)
+        (var (result ,(convert first-form t)))
+        (var (saved_mv (internal |_mv|)))
+        (progn ,@(mapcar #'convert forms))
+        (= (internal |_mv|) saved_mv)
+        (return result))
+      `(selfcall
+        (var (result ,(convert first-form)))
+        (progn ,@(mapcar #'convert forms))
+        (return result))))
 
 (define-compilation the (value-type form)
   (convert form *multiple-value-p*))
@@ -1330,18 +1365,19 @@
                     (== (get x "stringp") 1))))))
 
 (define-raw-builtin funcall (func &rest args)
-  (cond ((and (consp func) (eq (car func) 'function))
-         `(call ,(convert func)
-                ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
-			(mapcar #'convert args))))
-        (t
-         `(selfcall
-           (var (f ,(convert func)))
-           (return (call (if (=== (typeof f) "function")
-                             f
-                             (get f "fvalue"))
-                         ,@(cons (if *multiple-value-p* '|values| '(internal |pv|))
-			         (mapcar #'convert args))))))))
+  (let ((compiled-args (mapcar #'convert args))
+        (clear-mv (when *multiple-value-p* `(= (internal |_mv|) null))))
+    (cond ((and (consp func) (eq (car func) 'function))
+           (let ((call `(call ,(convert func) ,@compiled-args)))
+             (if clear-mv `(progn ,clear-mv ,call) call)))
+          (t
+           `(selfcall
+             (var (f ,(convert func)))
+             ,@(when clear-mv (list clear-mv))
+             (return (call (if (=== (typeof f) "function")
+                               f
+                               (get f "fvalue"))
+                           ,@compiled-args)))))))
 
 (define-raw-builtin apply (func &rest args)
   (if (null args)
@@ -1350,13 +1386,12 @@
             (last (car (last args))))
         `(selfcall
 	  (var (f ,(convert func)))
-	  (var (args ,(list-to-vector
-		       (cons (if *multiple-value-p* '|values| '(internal |pv|))
-			     (mapcar #'convert args)))))
+	  (var (args ,(list-to-vector (mapcar #'convert args))))
 	  (var (tail ,(convert last)))
 	  (while (!= tail ,(convert nil))
 	    (method-call args "push" (get tail "$$jscl_car"))
 	    (= tail (get tail "$$jscl_cdr")))
+          ,@(when *multiple-value-p* (list `(= (internal |_mv|) null)))
 	  (return (method-call (if (=== (typeof f) "function")
 				   f
 				   (get f "fvalue"))
@@ -1366,9 +1401,9 @@
 
 (define-builtin js-eval (string data)
   (if *multiple-value-p*
-      `(selfcall
-        (var (v (call-internal |globalEval| (call-internal |xstring| ,string) ,data)))
-        (return (method-call |values| "apply" this (call-internal |forcemv| v))))
+      `(progn
+         (= (internal |_mv|) null)
+         (call-internal |globalEval| (call-internal |xstring| ,string) ,data))
       `(call-internal |globalEval| (call-internal |xstring| ,string) ,data)))
 
 (define-builtin %throw (string)
@@ -1448,13 +1483,15 @@
 
 (define-builtin values-array (array)
   (if *multiple-value-p*
-      `(method-call |values| "apply" this ,array)
-      `(method-call (internals |pv|) "apply" this ,array)))
+      `(method-call |values| "apply" null ,array)
+      `(call-internal |pv| (property ,array 0))))
 
 (define-raw-builtin values (&rest args)
   (if *multiple-value-p*
       `(call |values| ,@(mapcar #'convert args))
-      `(call-internal |pv| ,@(mapcar #'convert args))))
+      (if args
+          (convert (car args))
+          (convert nil))))
 
 ;;; Javascript FFI
 
@@ -1473,7 +1510,7 @@
           (collect (convert (cadr tail)))))))
 
 (define-raw-builtin new (constructor &rest args)
-  `(call-internal |newInstance| null ,(convert constructor) ,@(mapcar #'convert args)))
+  `(call-internal |newInstance| ,(convert constructor) ,@(mapcar #'convert args)))
 
 (define-builtin clone (x)
   `(method-call |Object| "assign" (object) ,x))
@@ -1563,8 +1600,7 @@
          (o ,object)
          key)
     (for-in (key o)
-            (call g ,(if *multiple-value-p* '|values| '(internal |pv|))
-		  (call-internal |js_to_lisp| (property o key))))
+            (call g (call-internal |js_to_lisp| (property o key))))
     (return ,(convert nil))))
 
 (define-compilation %js-vref (var &optional raw)
@@ -1721,23 +1757,25 @@
 
 
 (defun compile-funcall (function args)
-  (let* ((arglist (cons (if *multiple-value-p* '|values| '(internal |pv|))
-			(mapcar #'convert args))))
+  (let* ((arglist (mapcar #'convert args)))
     (unless (or (symbolp function)
                 (and (consp function)
                      (member (car function) '(lambda oget oget!))))
       (error "Bad function designator `~S'" function))
     (cond
       ((translate-function function)
-       `(call ,(translate-function function) ,@arglist))
+       (let ((call `(call ,(translate-function function) ,@arglist)))
+         (if *multiple-value-p* `(progn (= (internal |_mv|) null) ,call) call)))
       ((symbolp function)
        (fn-info function :called t)
        ;; This code will work even if the symbol-function is unbound,
        ;; as it is represented by a function that throws the expected
        ;; error.
-       `(method-call ,(convert `',function) "fvalue" ,@arglist))
+       (let ((call `(method-call ,(convert `',function) "fvalue" ,@arglist)))
+         (if *multiple-value-p* `(progn (= (internal |_mv|) null) ,call) call)))
       ((and (consp function) (eq (car function) 'lambda))
-       `(call ,(convert `(function ,function)) ,@arglist))
+       (let ((call `(call ,(convert `(function ,function)) ,@arglist)))
+         (if *multiple-value-p* `(progn (= (internal |_mv|) null) ,call) call)))
       ((and (consp function) (eq (car function) 'oget))
        `(call-internal |js_to_lisp|
               (call ,(reduce (lambda (obj p)

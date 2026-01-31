@@ -205,11 +205,17 @@
   (js-format ")")
   (js-stmt `(group ,@body) t))
 
+(defun valid-lvalue-p (x)
+  (or (symbolp x)
+      (nth-value 1 (valid-js-identifier x))
+      (and (consp x)
+           (member (car x) '(get = property)))
+      ;; JS macro forms that expand to valid lvalues
+      (and (consp x) (assoc (car x) *js-macros*)
+           (valid-lvalue-p (js-macroexpand x)))))
+
 (defun check-lvalue (x)
-  (unless (or (symbolp x)
-              (nth-value 1 (valid-js-identifier x))
-              (and (consp x)
-                   (member (car x) '(get = property))))
+  (unless (valid-lvalue-p x)
     (error "Bad Javascript lvalue ~S" x)))
 
 ;;; Process the Javascript AST to reduce some syntax sugar.
