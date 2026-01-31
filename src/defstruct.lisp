@@ -54,7 +54,7 @@ Append numbers to symbol names to make them unique."
     (when constructor
       (setq constructor-expansion
             `(defun ,constructor (&key ,@slot-descriptions)
-               (object! "dt_Name" :structure
+               (object "dt_Name" :structure
                      "structDescriptors" ',name
                      ,@(mapcan (lambda (p s)
                                  `(,p ,(car s)))

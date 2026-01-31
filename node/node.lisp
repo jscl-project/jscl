@@ -31,8 +31,8 @@
                    ((oget *repl* "setPrompt") (get-prompt))
                    (funcall cb nil)))))
     (setq *repl* (#j:repl:start (object "input" #j:process:stdin "output" #j:process:stdout
-                                        "eval" #'repl-eval "writer" (constantly "")
-                                        "prompt" (get-prompt))))))
+                                        "eval" (lisp-to-js #'repl-eval) "writer" (lisp-to-js (constantly ""))
+                                        "prompt" (lisp-to-js (get-prompt)))))))
 
 (defun node-init ()
   (setq *standard-output*
