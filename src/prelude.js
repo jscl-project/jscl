@@ -86,6 +86,59 @@ internals.typeError = function (datum, expectedType) {
   );
 };
 
+// Symbol infrastructure
+
+const UNBOUND = Symbol("UnboundFunction");
+
+internals.makeUnboundFunction = function (symbol) {
+  const fn = () => {
+    internals.error(
+      internals.intern("UNDEFINED-FUNCTION"),
+      internals.intern("NAME", "KEYWORD"),
+      symbol,
+    );
+  };
+  fn[UNBOUND] = true;
+  return fn;
+};
+
+internals.makeUnboundSetFunction = function (symbol) {
+  const fn = () => {
+    internals.error(internals.intern("UNDEFINED-FUNCTION"),
+      internals.intern("NAME", "KEYWORD"),
+      internals.QIList(internals.intern("SETF"), symbol, nil));
+  }
+  fn[UNBOUND] = true;
+  return fn;
+};
+
+internals.Symbol = function (name, pkg) {
+  this.name = name;
+  this.package = pkg;
+  this.value = undefined;
+  this.fvalue = internals.makeUnboundFunction(this)
+  this.setfvalue = internals.makeUnboundSetFunction(this)
+  this.stack = [];
+};
+
+// NIL and T
+//
+// Created as uninterned symbols so they are available early.
+// They are registered into the CL package once it exists.
+
+nil = new internals.Symbol("NIL", null);
+t = new internals.Symbol("T", null);
+errorSym = new internals.Symbol("ERROR", null);
+Object.defineProperty(nil, "$$jscl_car", { value: nil, writable: false });
+Object.defineProperty(nil, "$$jscl_cdr", { value: nil, writable: false });
+
+// Early error definition
+
+errorSym.fvalue = function earlyError(...args){
+  console.debug("BOOT PANIC! Arguments to ERROR:", ...args.map(internals.lisp_to_js));
+  throw "BOOT PANIC!";
+}
+
 //
 // Workaround the problems with `new` for arbitrary number of
 // arguments. Some primitive constructors (like Date) differ if they
@@ -462,38 +515,13 @@ packages.KEYWORD = {
 
 jscl.CL = packages.CL.exports;
 
-const UNBOUND = Symbol("UnboundFunction");
-
-internals.makeUnboundFunction = function (symbol) {
-  const fn = () => {
-    internals.error(
-      internals.intern("UNDEFINED-FUNCTION"),
-      internals.intern("NAME", "KEYWORD"),
-      symbol,
-    );
-  };
-  fn[UNBOUND] = true;
-  return fn;
-};
-
-internals.makeUnboundSetFunction = function (symbol) {
-  const fn = () => {
-    internals.error(internals.intern("UNDEFINED-FUNCTION"),
-      internals.intern("NAME", "KEYWORD"),
-      internals.QIList(internals.intern("SETF"), symbol, nil));
-  }
-  fn[UNBOUND] = true;
-  return fn;
-};
-
-internals.Symbol = function(name, package_name){
-  this.name = name;
-  this.package = package_name;
-  this.value = undefined;
-  this.fvalue = internals.makeUnboundFunction(this)
-  this.setfvalue = internals.makeUnboundSetFunction(this)
-  this.stack = [];
-};
+// Register nil, t, and error into the CL package
+nil.package = packages.CL;
+packages.CL.symbols["NIL"] = nil;
+t.package = packages.CL;
+packages.CL.symbols["T"] = t;
+errorSym.package = packages.CL;
+packages.CL.symbols["ERROR"] = errorSym;
 
 internals.symbolValue = function (symbol) {
   var value = symbol.value;
@@ -656,21 +684,6 @@ function runCommonLispScripts() {
     }
   }
   progressivelyRunScripts();
-}
-
-// NIL and T
-
-nil = internals.intern("NIL");
-t = internals.intern("T");
-errorSym = internals.intern("ERROR");
-Object.defineProperty(nil, "$$jscl_car", { value: nil, writable: false });
-Object.defineProperty(nil, "$$jscl_cdr", { value: nil, writable: false });
-
-// Early error definition
-
-errorSym.fvalue = function earlyError(...args){
-  console.debug("BOOT PANIC! Arguments to ERROR:", ...args.map(internals.lisp_to_js));
-  throw "BOOT PANIC!";
 }
 
 // Node/Deno REPL
