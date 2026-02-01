@@ -54,7 +54,7 @@ and asynchronously otherwise."
 ;;; replace ctrl-r from input
 (defun ctrl-r-replace (src)
   (let ((reg (#j:RegExp (code-char 13) #j"g")))
-    (clstring ((oget (lisp-to-js src) "replace") reg #j" "))))
+    (clstring ((oget (jsstring src) "replace") reg #j" "))))
 
 (defun call-with-open-file (thunk name &key (direction :input) (if-exists :error) (sync t))
   (ecase direction

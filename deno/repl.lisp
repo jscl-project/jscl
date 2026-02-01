@@ -49,7 +49,7 @@
                      (#j:process:stdout:write (jsstring string))))
         *error-output* *standard-output*
         *trace-output* *standard-output*)
-  (let ((args (mapcar #'js-to-lisp (vector-to-list (subseq #j:process:argv 2)))))
+  (let ((args (mapcar #'clstring (vector-to-list (subseq #j:process:argv 2)))))
     (cond
       ((null args)
        (start-repl))

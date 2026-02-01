@@ -24,7 +24,7 @@
   (test (equal (jscl::vector-to-list v2) '(left "Mediane" right))))
 
 ;;; String
-(test (string= (clstring ((oget (jscl::lisp-to-js "abcdef") "substr") 1 2)) "bc"))
+(test (string= (clstring ((oget #j"abcdef" "substr") 1 2)) "bc"))
 
 ;;; Number's format output
 ;;; for future features

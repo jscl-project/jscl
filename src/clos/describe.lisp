@@ -110,7 +110,7 @@
       (pp/presentation obj 'js-value buf)
       (format buf "Signature: ~a~%" (js-object-signature obj))
       (if (and keys (> (length keys) 0))
-          (format buf "Keys: ~a~%" (map 'list (lambda (obj) (js-to-lisp obj)) keys)))
+          (format buf "Keys: ~a~%" (map 'list #'clstring keys)))
       (flush-pp-buffer buf stream)
       (values) )))
 
@@ -321,7 +321,7 @@
         (when (and keys (> (length keys) 0))
           (with-pp-buffer (buf)
             (format buf "Associative JS array~%Keys: ~a~%"
-                    (map 'list (lambda (obj) (js-to-lisp obj)) keys))
+                    (map 'list #'clstring keys))
             (flush-pp-buffer buf stream)))))
   (values) )
 

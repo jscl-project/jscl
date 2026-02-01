@@ -171,7 +171,7 @@ omitted. Note the function does NOT truncate the list according to
              (setf #j:Error:stackTraceLimit old-limit)))
           (t ((oget *root* "Error" "captureStackTrace") obj from)))
     (let* ((str (oget obj "stack"))
-           (list (map 'list #'js-to-lisp
+           (list (map 'list #'clstring
                       ((oget str "split")
                        (#j:RegExp (code-char 10) #j"g")))))
       ;; Trim useless first line on V8

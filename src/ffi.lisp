@@ -38,10 +38,7 @@
 ;;;   clstring%   (x)           — JS string → Lisp string (no type check)
 ;;;   instanceof  (x class)     — JS instanceof operator
 ;;;   objectp     (obj)         — JS typeof === "object" && not null
-;;;
-;;; To remove:
-;;;   js-to-lisp  (x)           — JS value → Lisp value
-;;;   lisp-to-js  (x)           — Lisp value → JS value
+;;;   lisp-to-js  (x)           — Lisp value → JS value (for JS callbacks)
 
 
 
@@ -83,13 +80,6 @@
 (defun jsstring (x)
   #+jscl (jsstring x)
   #-jscl (make-js-string x))
-
-(defun js-to-lisp (x)
-  #+jscl (js-to-lisp x)
-  #-jscl
-  (typecase x
-    (js-string (js-string-value x))
-    (t (error "js-to-lisp: cannot convert ~S" x))))
 
 (defun clstring% (x)
   #+jscl (clstring% x)

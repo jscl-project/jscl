@@ -32,7 +32,7 @@
                    (funcall cb nil)))))
     (setq *repl* (#j:repl:start (object "input" #j:process:stdin "output" #j:process:stdout
                                         "eval" (lisp-to-js #'repl-eval) "writer" (lisp-to-js (constantly ""))
-                                        "prompt" (lisp-to-js (get-prompt)))))))
+                                        "prompt" (jsstring (get-prompt)))))))
 
 (defun node-init ()
   (setq *standard-output*
@@ -41,7 +41,7 @@
                      (#j:process:stdout:write (jsstring string))))
         *error-output* *standard-output*
         *trace-output* *standard-output*)
-  (let ((args (mapcar #'js-to-lisp (vector-to-list (subseq #j:process:argv 2)))))
+  (let ((args (mapcar #'clstring (vector-to-list (subseq #j:process:argv 2)))))
     (cond
       ((null args)
        (start-repl))

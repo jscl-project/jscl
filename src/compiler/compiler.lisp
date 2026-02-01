@@ -1588,8 +1588,6 @@
 ;; convert its arguments
 (define-builtin fn-to-js (x) `(call-internal |fn_to_js| ,x))
 
-(define-builtin js-to-lisp (x) `(call-internal |js_to_lisp| ,x))
-
 (define-builtin clstring% (x) `(call-internal |make_lisp_string| ,x))
 
 

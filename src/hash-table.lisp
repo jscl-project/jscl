@@ -105,7 +105,7 @@
 (defun gethash (key hash-table &optional default)
   (check-is-hash-table hash-table)
   ;; .has() returns a JS boolean, must convert to Lisp boolean
-  (let ((has-key (js-to-lisp ((oget hash-table "has") key))))
+  (let ((has-key (clbool ((oget hash-table "has") key))))
     (if has-key
         (values ((oget hash-table "get") key) t)
         (values default nil))))
@@ -118,8 +118,8 @@
 
 (defun remhash (key hash-table)
   (check-is-hash-table hash-table)
-  ;; Use js-to-lisp to convert JS boolean to Lisp boolean
-  (let ((had-key (js-to-lisp ((oget hash-table "has") key))))
+  ;; .has() returns a JS boolean, convert to Lisp boolean
+  (let ((had-key (clbool ((oget hash-table "has") key))))
     ((oget hash-table "delete") key)
     had-key))
 
@@ -135,9 +135,9 @@
 (defun maphash (function hash-table)
   (check-is-hash-table hash-table)
   ((oget hash-table "forEach")
-   (lisp-to-js (lambda (value key &optional this-map)
-                 (declare (ignore this-map))
-                 (funcall function key value))))
+   (lambda (value key &optional this-map)
+     (declare (ignore this-map))
+     (funcall function key value)))
   nil)
 
 (defun hash-table-test (hash-table)
