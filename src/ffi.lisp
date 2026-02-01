@@ -73,8 +73,7 @@
     (js-string "string")
     (js-boolean "boolean")
     (js-undefined "undefined")
-    (js-null "object")
-    (js-value "object")))
+    (otherwise "object")))
 
 (defun jsstring (x)
   #+jscl (jsstring x)
