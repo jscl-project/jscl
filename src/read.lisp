@@ -302,22 +302,7 @@
                       (ls-read stream))
                  (ls-read stream eof-error-p eof-value t)))))
       ((#\J #\j)
-       (cond
-         ((char= (%peek-char stream) #\")
-          (let ((string (ls-read stream)))
-            `(jsstring ,string)))
-         ((char= (%peek-char stream) #\:)
-          (let ((descriptor (subseq (read-until stream #'terminalp) 1))
-                (subdescriptors nil))
-            (do* ((start 0 (1+ end))
-                  (end (position #\: descriptor :start start)
-                       (position #\: descriptor :start start)))
-                 ((null end)
-                  (push (subseq descriptor start) subdescriptors)
-                  `(oget *root* ,@(reverse subdescriptors)))
-              (push (subseq descriptor start end) subdescriptors))))
-         (t
-          (simple-reader-error stream "Invalid FFI descriptor. Expected #j: or #j\"."))))
+       (read-sharp-j stream))
       ;; Sharp radix 
       ((#\B #\b #\O #\o #\X #\x)
        (sharp-radix-reader ch stream))

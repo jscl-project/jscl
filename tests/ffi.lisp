@@ -65,6 +65,13 @@
   (test (oset 456 obj 123))
   (test (equal 456 (oget obj 123))))
 
+;;; #j"..." reader
+
+;; the reader produces a JS string directly, not a form like (jsstring "foo")
+(let ((val (read-from-string "#j\"foo\"")))
+  (test (string= (typeof val) "string"))
+  (test (string= (clstring val) "foo")))
+
 ;;; jsstring
 
 ;; constant case: the compiler can inline #j"..." to a JS string literal

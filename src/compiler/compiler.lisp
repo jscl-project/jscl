@@ -620,6 +620,11 @@
 (defun dump-string (string)
   `(call-internal |make_lisp_string| ,string))
 
+(defun dump-js-object (sexp)
+  (if (string= (typeof sexp) "string")
+      (clstring sexp)
+      (error "Cannot dump JS object ~S as a literal." sexp)))
+
 ;;; Was the compiler invoked by EVAL for in-process evaluation?
 (defvar *compiling-in-process* nil)
 
@@ -651,6 +656,7 @@
                                     (convert (second sexp))
                                     (dump-cons sexp)))
                                (array (dump-array sexp))
+                               (js-object (dump-js-object sexp))
                                (structure-object (dump-structure sexp)))))
                  (toplevel-compilation `(var (,jsvar ,dumped)))
                  (when (keywordp sexp)
@@ -1483,6 +1489,10 @@
           (convert nil))))
 
 ;;; Javascript FFI
+;;;
+;;; This implements the primitives necessary to bootstrap the ffi system.
+;;; Check the ffi.lisp file and the JS compatibility layer.
+;;;
 
 (define-builtin instanceof (x class)
   (convert-to-bool `(instanceof ,x ,class)))
@@ -1571,6 +1581,8 @@
 (define-builtin fn-to-js (x) `(call-internal |fn_to_js| ,x))
 
 (define-builtin js-to-lisp (x) `(call-internal |js_to_lisp| ,x))
+
+(define-builtin clstring% (x) `(call-internal |make_lisp_string| ,x))
 
 
 (define-raw-builtin in (key object)
@@ -1809,7 +1821,8 @@
              (t
               (convert `(symbol-value ',sexp))))))
         ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp)
-             (structure-p sexp))
+             (structure-p sexp)
+             (js-object-p sexp))
          (literal sexp))
         ((listp sexp)
          (let* ((name (car sexp))

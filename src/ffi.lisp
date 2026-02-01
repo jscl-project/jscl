@@ -13,21 +13,85 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
+#+jscl
 (/debug "loading ffi.lisp!")
 
-(defvar *root*
-  (%js-vref "globalThis" t))
+;;; Dual-Environment Architecture
+;;;
+;;; This file is tagged :both in *source*, so it is loaded in the host
+;;; CL (for macro expansion during cross-compilation) AND compiled to
+;;; JavaScript for the target.
+;;;
+;;; In the host, JS values don't exist.  We define struct types so that
+;;; #j"..." produces a value the compiler can recognize and dump into
+;;; the literal table.
+;;;
+;;; In the target, several functions defined here are "self-referencing
+;;; builtins": ffi.lisp provides the Lisp-level defun, but the
+;;; compiler intercepts calls and replaces them with inline JS (via
+;;; define-builtin / define-raw-builtin in compiler.lisp).
+;;;
+;;; Compiler Primitive Contract
+;;;
+;;;   typeof      (x)           — JS typeof, returns Lisp string
+;;;   jsstring    (x)           — Lisp string → JS string
+;;;   clstring%   (x)           — JS string → Lisp string (no type check)
+;;;   instanceof  (x class)     — JS instanceof operator
+;;;   objectp     (obj)         — JS typeof === "object" && not null
+;;;
+;;; To remove:
+;;;   js-to-lisp  (x)           — JS value → Lisp value
+;;;   lisp-to-js  (x)           — Lisp value → JS value
 
-(defconstant +true+ (%js-vref "true" t))
-(defconstant +false+ (%js-vref "false" t))
-(defconstant +undefined+ (%js-vref "undefined" t))
-(defconstant +null+ (%js-vref "null" t))
 
-(defun instanceof (x class)
-  (instanceof x class))
+
+;;;; Host compatibility types
+
+#-jscl
+(progn
+  (defstruct js-object)
+
+  (defstruct (js-string (:include js-object)
+			(:constructor make-js-string (value))
+			(:predicate %host-js-string-p))
+    value))
+
+
+;;;; Core functions (both environments)
 
 (defun typeof (x)
-  (typeof x))
+  #+jscl (typeof x)
+  #-jscl
+  (typecase x
+    (js-string "string")
+    (js-object "object")))
+
+(defun jsstring (x)
+  #+jscl (jsstring x)
+  #-jscl (make-js-string x))
+
+(defun js-to-lisp (x)
+  #+jscl (js-to-lisp x)
+  #-jscl
+  (typecase x
+    (js-string (js-string-value x))
+    (t (error "js-to-lisp: cannot convert ~S" x))))
+
+(defun clstring% (x)
+  #+jscl (clstring% x)
+  #-jscl (js-string-value x))
+
+(defun clstring (x)
+  (cond
+    ((stringp x) x)
+    ((string= (typeof x) "string") (clstring% x))
+    (t (error 'type-error :datum x :expected-type 'string))))
+
+(defun objectp (obj)
+  #-jscl (js-object-p obj)
+  #+jscl
+  (objectp obj))
+
 
 ;; TODO: rewrite using DEFUN SETF, once we make OSET proper function,
 ;; and figure out how to not pay to price for APPLY
@@ -46,13 +110,30 @@
             `(oget ,g!object ,@g!keys))))
 
 
-(defun clstring (x)
-  (cond
-    ;; TODO: Should we do this? or just accept js booleans? similar for clbool
-    ((stringp x) x)
-    ((string= (typeof x) "string") (js-to-lisp x))
-    (t (error 'type-error :datum x :expected-type 'string))))
+;;;; Target-only runtime
 
+#+jscl
+(defvar *root*
+  (%js-vref "globalThis" t))
+
+#+jscl
+(defconstant +true+ (%js-vref "true" t))
+#+jscl
+(defconstant +false+ (%js-vref "false" t))
+#+jscl
+(defconstant +undefined+ (%js-vref "undefined" t))
+#+jscl
+(defconstant +null+ (%js-vref "null" t))
+
+#+jscl
+(defun instanceof (x class)
+  (instanceof x class))
+
+#+jscl
+(defun lisp-to-js (x)
+  (lisp-to-js x))
+
+#+jscl
 (defun clbool (x)
   (cond
     ;; TODO: Should we do this? or just accept js booleans? similar for clstring
@@ -65,22 +146,11 @@
     ((eq x +undefined+) nil)
     (t (error 'type-error :datum x :expected-type 'js-boolean))))
 
+#+jscl
 (defun jsbool (x)
   (if x +true+ +false+))
 
-(defun jsstring (x)
-  (jsstring x))
-
-(defun lisp-to-js (x)
-  (lisp-to-js x))
-
-(defun js-to-lisp (x)
-  (js-to-lisp x))
-
-(%js-vset "eval_in_lisp"
-          (lambda (form)
-            (eval (read-from-string form))))
-
+#+jscl
 (defun js-object-p (obj)
   (if (or (sequencep obj)
           (numberp obj)
@@ -91,8 +161,15 @@
       nil
       t))
 
+#+jscl
 (defun js-null-p (obj) (eq obj +null+))
-(defun objectp (obj) (objectp obj))
+
+#+jscl
 (defun js-undefined-p (obj) (eq obj +undefined+))
+
+#+jscl
+(%js-vset "eval_in_lisp"
+          (lambda (form)
+            (eval (read-from-string form))))
 
 ;;; EOF
