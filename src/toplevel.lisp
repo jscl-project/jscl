@@ -415,15 +415,9 @@ All errors are caught and report to *ERROR-OUTPUT*."
       *error-output* *standard-output*
       *trace-output* *standard-output*)
 
-(cond
-  ((find :node *features*)
-   (setq *root* (%js-vref "global"))
-   (setf #j:Fs (funcall (%js-vref "require") "fs")) 
-   (setf #j:FsPath (funcall (%js-vref "require") "path")))
-  ((string/= (%js-typeof |window|) "undefined")
-   (setq *root* (%js-vref "window")))
-  (t
-   (setq *root* (%js-vref "self"))))
+(when (find :node *features*)
+  (setf #j:Fs (funcall (%js-vref "require") "fs"))
+  (setf #j:FsPath (funcall (%js-vref "require") "path")))
 
 (defun require (name)
   (if (find :node *features*)

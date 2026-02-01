@@ -15,7 +15,8 @@
 
 (/debug "loading ffi.lisp!")
 
-(defvar *root*)
+(defvar *root*
+  (%js-vref "globalThis" t))
 
 (defconstant +true+ (%js-vref "true" t))
 (defconstant +false+ (%js-vref "false" t))
