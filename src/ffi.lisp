@@ -37,8 +37,6 @@
 ;;;   jsstring    (x)           — Lisp string → JS string
 ;;;   clstring%   (x)           — JS string → Lisp string (no type check)
 ;;;   instanceof  (x class)     — JS instanceof operator
-;;;   objectp     (obj)         — JS typeof === "object" && not null
-
 
 
 ;;;; Host compatibility types
@@ -88,12 +86,6 @@
     ((stringp x) x)
     ((string= (typeof x) "string") (clstring% x))
     (t (error 'type-error :datum x :expected-type 'string))))
-
-(defun objectp (obj)
-  #-jscl (js-value-p obj)
-  #+jscl
-  (objectp obj))
-
 
 ;; TODO: rewrite using DEFUN SETF, once we make OSET proper function,
 ;; and figure out how to not pay to price for APPLY

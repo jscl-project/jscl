@@ -429,14 +429,14 @@
 ;;; types family section
 
 ;;; tag's utils
-(defun object-type-code (object) (oget object "dt_Name"))
-(defun set-object-type-code (object tag) (oset tag object "dt_Name"))
+(defun object-type-code (object)
+  (let ((code (oget? object "dt_Name")))
+    (if (eq code #j:undefined)
+	nil
+	code)))
 
-;;; types predicate's
-(defun mop-object-p (obj)
-  (and (objectp obj) (eql (object-type-code obj) :mop-object)))
-
-(defun clos-object-p (object) (eql (object-type-code object) :clos_object))
+(defun set-object-type-code (object tag)
+  (oset tag object "dt_Name"))
 
 ;;; macro's
 

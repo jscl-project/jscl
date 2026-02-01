@@ -26,11 +26,18 @@ Note: for now, key strings are constants. So no need for #j.
 ## Property access: `oget` / `oset`
 
 ```lisp
+(oget obj "name")                   ; property access
+(oget obj "foo" "bar" "baz")        ; chained: obj.foo.bar.baz
+(setf (oget obj "name") value)      ; write (via oset)
+```
 
-(oget obj #j"name")                ; read with conversion
-(oget obj "name")                  ; also works, because CL strings support .toString()
-(oget obj #j"foo" #j"bar" #j"baz") ; chained access; nil if intermediate is undefined
-(setf (oget obj #j"name") value)   ; write with conversion (via oset)
+## Optional chaining: `oget?`
+
+Uses JavaScript's `?.` operator. Returns `#j:undefined` instead of
+throwing when an intermediate value is nullish.
+
+```lisp
+(oget? obj "foo" "bar")             ; obj?.["foo"]?.["bar"]
 ```
 
 ## `#j:` reader macro for references

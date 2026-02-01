@@ -71,9 +71,8 @@
 ;;;   $$jscl_test = test function symbol (eq, eql, or equal)
 
 (defun hash-table-p (obj)
-  (and (objectp obj)
-       (or (instanceof obj (%js-vref "Map" t))
-	   (instanceof obj EqualMap))))
+  (or (instanceof obj (%js-vref "Map" t))
+      (instanceof obj EqualMap)))
 
 (defun make-hash-table (&key (test #'eql) size)
   (declare (ignore size))

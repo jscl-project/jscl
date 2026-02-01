@@ -22,6 +22,14 @@
 (defun false () nil)
 (defun void () (values))
 
+;;; types predicate's
+(defun mop-object-p (obj)
+  (eql (object-type-code obj) :mop-object))
+
+(defun clos-object-p (object)
+  (eql (object-type-code object) :clos_object))
+
+
 ;;; For to accurately definition  LIST and CONS forms.
 ;;; Now inferno gate is opened. Welcome to DOOM
 ;;;

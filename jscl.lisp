@@ -94,6 +94,7 @@
     ("setf"          :target)
     ("utils"         :both)
     ("ffi"           :both)
+    ("read-j"        :both)
     ("hash-table"    :target)
     ("defstruct"     :both)
     ("lambda-list"   :both)
@@ -113,7 +114,6 @@
     ("print"         :target)
     ("misc"          :target)
     ("read"          :both)
-    ("read-j"        :both)
     ("backquote"     :both)
     ("file"          :target)
     ("compiler"

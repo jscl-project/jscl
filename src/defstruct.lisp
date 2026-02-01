@@ -18,7 +18,7 @@
 (defvar *structures* (make-hash-table))
 
 (defun structure-p (obj)
-  #+jscl (and (objectp obj) (eql (object-type-code obj) :structure))
+  #+jscl (eql (object-type-code obj) :structure)
   #-jscl (typep obj 'structure-object))
 
 ;;; Metadata is stored in "structDescriptors" property of instances.
@@ -63,7 +63,7 @@ Append numbers to symbol names to make them unique."
     (when predicate
       (setq predicate-expansion
             `(defun ,predicate (x)
-               (and (objectp x) (eq (oget x "structDescriptors") ',name)))))
+               (and (eq (oget? x "structDescriptors") ',name)))))
 
     (when copier
       (setq copier-expansion

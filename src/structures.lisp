@@ -438,9 +438,8 @@
                            (eql (nth ,imap obj) ',name))))))
           `(let ((dd (get-structure-dsd ',name)))
              (defun ,it (obj)
-               (and (objectp obj)
-                    (eq dd (storage-vector-ref! (oget obj "structDescriptors")
-                                                ,(dsd-depth dd))))))))))
+               (eq dd (storage-vector-ref! (oget? obj "structDescriptors")
+					   ,(dsd-depth dd)))))))))
 
 ;;; COPIER
 #-jscl
@@ -456,9 +455,8 @@
        (let ((name (dsd-name dd)))
          `(defun ,it (obj)
             (let ((dd (get-structure-dsd ',name)))
-              (cond ((and (objectp obj)
-                          (eq dd (storage-vector-ref! (oget obj "structDescriptors")
-                                                      ,(dsd-depth dd))))
+              (cond ((eq dd (storage-vector-ref! (oget? obj "structDescriptors")
+						 ,(dsd-depth dd)))
                      (clone obj))
                     (t (error 'type-error :datum obj :expected-type ',name))))))))))
 

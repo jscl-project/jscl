@@ -97,7 +97,9 @@
     package))
 
 (defun packagep (x)
-  (and (objectp x) (not (eq x #j:null)) (in "symbols" x)))
+  (and (string= (typeof x) "object")
+       (not (eq x #j:null))
+       (in "symbols" x)))
 
 (defun package-name (package-designator)
   (let ((package (find-package-or-fail package-designator)))

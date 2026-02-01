@@ -50,8 +50,7 @@
 ;;; test what new Array isnt js-object
 (let ((obj (new #j:Array)))
   (setf (oget obj "name") 'one)
-  (test (and (objectp obj)
-             (not (js-value-p obj)))))
+  (test (not (js-value-p obj))))
 
 ;;; test what new Date is js-object & have a signature 
 (let ((obj (new #j:Date)))

@@ -413,9 +413,6 @@
 ;;; oget retrieves property correctly
 (test (= 0 ((oget (new #j:Date 0) "getTime"))))
 
-;;; new does not require values parameter
-(test (objectp (new #j:Object)))
-
 
 ;;;; =============================================
 ;;;; HANDLER-CASE with multiple values

@@ -261,6 +261,11 @@
        (js-format "[")
        (js-expr (cadr args))
        (js-format "]"))
+      (property?
+       (js-expr (car args) 20)
+       (js-format "?.[")
+       (js-expr (cadr args))
+       (js-format "]"))
       (get
        (multiple-value-bind (accessor accessorp)
            (valid-js-identifier (cadr args))
