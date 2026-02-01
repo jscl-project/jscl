@@ -21,17 +21,18 @@
              (concat (package-name-for-prompt *package*) "> "))
            (repl-eval (input context resource-name cb)
              ;; Replace #\return with #\newline
-             (setq input (nsubstitute (code-char 10) (code-char 13) input))
-             (if (%sexpr-incomplete input)
-                 (funcall cb (new #j:repl:Recoverable))
-                 (progn
-                   (with-toplevel-eval ()
-                     (eval-interactive-input input))
-                   ;; Update prompt
-                   ((oget *repl* "setPrompt") (jsstring (get-prompt)))
-                   (funcall cb nil)))))
+             (let ((input (clstring input)))
+               (setq input (nsubstitute (code-char 10) (code-char 13) input))
+               (if (%sexpr-incomplete input)
+                   (funcall cb (new #j:repl:Recoverable))
+                   (progn
+                     (with-toplevel-eval ()
+                       (eval-interactive-input input))
+                     ;; Update prompt
+                     ((oget *repl* "setPrompt") (jsstring (get-prompt)))
+                     (funcall cb #j:null))))))
     (setq *repl* (#j:repl:start (object "input" #j:process:stdin "output" #j:process:stdout
-                                        "eval" (lisp-to-js #'repl-eval) "writer" (lisp-to-js (constantly ""))
+                                        "eval" #'repl-eval "writer" (lambda (&rest _) #j"")
                                         "prompt" (jsstring (get-prompt)))))))
 
 (defun node-init ()

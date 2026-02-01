@@ -314,7 +314,7 @@ All errors are caught and report to *ERROR-OUTPUT*."
 (export '(mop-object mop-object-p
           compile-application
           oget oset new object
-          lisp-to-js js-value-p)
+          js-value-p)
         'jscl)
 
 (setq *package* *user-package*)
@@ -416,10 +416,10 @@ All errors are caught and report to *ERROR-OUTPUT*."
       *trace-output* *standard-output*)
 
 (when (find :node *features*)
-  (setf #j:Fs (funcall (%js-vref "require") "fs"))
-  (setf #j:FsPath (funcall (%js-vref "require") "path")))
+  (setf #j:Fs (funcall (%js-vref "require") #j"fs"))
+  (setf #j:FsPath (funcall (%js-vref "require") #j"path")))
 
 (defun require (name)
   (if (find :node *features*)
-      (funcall (%js-vref "require") name)
+      (funcall (%js-vref "require") (jsstring name))
       (error "require not supported on this platform")))

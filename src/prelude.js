@@ -131,7 +131,7 @@ Object.defineProperty(nil, "$$jscl_cdr", { value: nil, writable: false });
 // Early error definition
 
 errorSym.fvalue = function earlyError(...args){
-  console.debug("BOOT PANIC! Arguments to ERROR:", ...args.map(internals.lisp_to_js));
+  console.debug("BOOT PANIC! Arguments to ERROR:", ...args);
   throw "BOOT PANIC!";
 }
 
@@ -411,40 +411,6 @@ internals.xstring = function (x) {
   const hasFillPointer = typeof x.fillpointer === "number";
   const activechars = hasFillPointer ? x.slice(0, x.fillpointer) : x;
   return activechars.join("");
-};
-
-internals.lisp_to_js = function (x) {
-  if (typeof x == "object" && x !== null && "length" in x && x.stringp == 1)
-    return internals.xstring(x);
-  else if (x === t) return true;
-  else if (x === nil) return false;
-  else if (typeof x == "function") {
-    // Trampoline calling the Lisp function
-    if ("jscl_original" in x) {
-      return x.jscl_original;
-    } else {
-      return function (...args) {
-        for (var i in args) args[i] = internals.js_to_lisp(args[i]);
-        internals._mv = null;
-        return internals.lisp_to_js(x.bind(this)(...args));
-      };
-    }
-  } else return x;
-};
-
-internals.js_to_lisp = function (x) {
-  if (typeof x == "string") return internals.make_lisp_string(x);
-  else if (x === true) return t;
-  else if (x === false) return nil;
-  else if (typeof x == "function") {
-    // Trampoline calling the JS function
-    var trampoline = function (...args) {
-      for (var i in args) args[i] = internals.lisp_to_js(args[i]);
-      return internals.values(internals.js_to_lisp(x.bind(this)(...args)));
-    };
-    trampoline.jscl_original = x;
-    return trampoline;
-  } else return x;
 };
 
 // Non-local exits

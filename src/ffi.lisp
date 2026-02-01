@@ -38,7 +38,6 @@
 ;;;   clstring%   (x)           — JS string → Lisp string (no type check)
 ;;;   instanceof  (x class)     — JS instanceof operator
 ;;;   objectp     (obj)         — JS typeof === "object" && not null
-;;;   lisp-to-js  (x)           — Lisp value → JS value (for JS callbacks)
 
 
 
@@ -125,10 +124,6 @@
   (instanceof x class))
 
 #+jscl
-(defun lisp-to-js (x)
-  (lisp-to-js x))
-
-#+jscl
 (defun clbool (x)
   (cond
     ;; TODO: Should we do this? or just accept js booleans? similar for clstring
@@ -159,6 +154,6 @@
 #+jscl
 (%js-vset "eval_in_lisp"
           (lambda (form)
-            (eval (read-from-string form))))
+            (eval (read-from-string (clstring form)))))
 
 ;;; EOF

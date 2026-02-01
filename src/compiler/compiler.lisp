@@ -606,7 +606,7 @@
       (var (,var ,(list-to-vector (mapcar #'literal elements))))
       ,(unless (vectorp array)
          `(= (get ,var "dimensions")
-             (call-internal |lisp_to_js| ,(literal (array-dimensions array)))))
+             ,(literal (array-dimensions array))))
       ,(when (array-has-fill-pointer-p array)
          `(= (get ,var "fillpointer") ,(fill-pointer array)))
       (return ,var))))
@@ -1294,7 +1294,7 @@
   (convert-to-bool `(instanceof ,x (internal |Symbol|))))
 
 (define-builtin make-symbol (name)
-  `(new (call-internal |Symbol| (call-internal |lisp_to_js| ,name))))
+  `(new (call-internal |Symbol| (call-internal |xstring| ,name))))
 
 (define-compilation symbol-name (x)
   (let ((sym (convert x)))
@@ -1582,8 +1582,6 @@
 (define-builtin %%throw (x)
   `(selfcall (throw ,x)))
 
-(define-builtin lisp-to-js (x) `(call-internal |lisp_to_js| ,x))
-
 (define-builtin clstring% (x) `(call-internal |make_lisp_string| ,x))
 
 
@@ -1601,16 +1599,14 @@
          (o ,object)
          key)
     (for-in (key o)
-            (call g (call-internal |js_to_lisp| (property o key))))
+            (call g (property o key)))
     (return ,(convert nil))))
 
 (define-compilation %js-vref (var &optional raw)
-  (if raw
-      (make-symbol var)
-      `(call-internal |js_to_lisp| ,(make-symbol var))))
+  (make-symbol var))
 
 (define-compilation %js-vset (var val)
-  `(= ,(make-symbol var) (call-internal |lisp_to_js| ,(convert val))))
+  `(= ,(make-symbol var) ,(convert val)))
 
 (define-setf-expander %js-vref (var)
   (let ((new-value (gensym)))
@@ -1623,7 +1619,7 @@
             `(%js-vref ,var))))
 
 (define-compilation %js-typeof (x)
-  `(call-internal |js_to_lisp| (typeof ,x)))
+  `(call-internal |make_lisp_string| (typeof ,x)))
 
 ;;; Access a function defined in the internals runtime object.
 (define-compilation %js-internal (name)
@@ -1652,7 +1648,6 @@
                 (let* ((*environment* (extend-local-env (list var)))
                        (tvar (translate-variable var)))
                   `(catch (,tvar)
-                     (= ,tvar (call-internal |js_to_lisp| ,tvar))
                      ,(convert-block body t))))))
 
         (finally-compilation
