@@ -620,10 +620,18 @@
 (defun dump-string (string)
   `(call-internal |make_lisp_string| ,string))
 
-(defun dump-js-object (sexp)
-  (if (string= (typeof sexp) "string")
-      (clstring sexp)
-      (error "Cannot dump JS object ~S as a literal." sexp)))
+(defun dump-js-value (sexp)
+  (cond
+    ((string= (typeof sexp) "string")
+     (clstring sexp))
+    #-jscl
+    ((js-boolean-p sexp)
+     (if (js-boolean-value sexp) 'true 'false))
+    #-jscl
+    ((js-null-p sexp) 'null)
+    #-jscl
+    ((js-undefined-p sexp) 'undefined)
+    (t (error "Cannot dump JS value ~S as a literal." sexp))))
 
 ;;; Was the compiler invoked by EVAL for in-process evaluation?
 (defvar *compiling-in-process* nil)
@@ -656,7 +664,7 @@
                                     (convert (second sexp))
                                     (dump-cons sexp)))
                                (array (dump-array sexp))
-                               (js-object (dump-js-object sexp))
+                               (js-value (dump-js-value sexp))
                                (structure-object (dump-structure sexp)))))
                  (toplevel-compilation `(var (,jsvar ,dumped)))
                  (when (keywordp sexp)
@@ -1822,7 +1830,7 @@
               (convert `(symbol-value ',sexp))))))
         ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp)
              (structure-p sexp)
-             (js-object-p sexp))
+             (js-value-p sexp))
          (literal sexp))
         ((listp sexp)
          (let* ((name (car sexp))

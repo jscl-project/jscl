@@ -402,18 +402,18 @@
     (package
      (simple-format stream "#<PACKAGE ~a>" (package-name form)))
     ;; Others
-    (js-object
+    (js-value
      (cond
-       ((eq form +true+)      (write-string "+TRUE+" stream))
-       ((eq form +false+)     (write-string "+FALSE+" stream))
-       ((eq form +null+)      (write-string "+NULL+" stream))
-       ((eq form +undefined+) (write-string "+UNDEFINED+" stream))
+       ((eq form #j:true)      (write-string "#j:true" stream))
+       ((eq form #j:false)     (write-string "#j:false" stream))
+       ((eq form #j:null)      (write-string "#j:null" stream))
+       ((eq form #j:undefined) (write-string "#j:undefined" stream))
        ((string= (typeof form) "string")
         (if *print-escape*
             (progn
               (write-string "#j" stream)
-              (write-string (lisp-escape-string (js-to-lisp form)) stream))
-            (write-string (js-to-lisp form) stream)))
+              (write-string (lisp-escape-string (clstring form)) stream))
+            (write-string (clstring form) stream)))
        (t
         (simple-format stream "#<JS-OBJECT ~a>" (js-object-signature form)))))
     (otherwise

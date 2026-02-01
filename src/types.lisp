@@ -67,7 +67,7 @@
     ;;(stream            streamp        t    t )
     (atom              atom           t    t )
     ;;(structure         structure-p    t    t )
-    (js-object         js-object-p    t    t )
+    (js-value          js-value-p     t    t )
     (js-null           js-null-p      t    t )
     (clos-object       mop-object-p   nil  t)
     (character         characterp     t    t )
@@ -157,7 +157,7 @@
     (array                        (!find-class 'array))
     ;;(sequence                     (!find-class 'sequence))
     (function                     (!find-class 'function))
-    (js-object                    (!find-class 'js-object))
+    (js-value                     (!find-class 'js-value))
     ;;; and Root of the Evil
     (t                            (!find-class 't))))
 
@@ -249,7 +249,7 @@
                ((keywordp object) 'keyword)
                (t 'symbol)))
         ((functionp object) 'function)
-        ((js-object-p object) 'js-object)
+        ((js-value-p object) 'js-value)
         ((packagep object) 'package)
         (t 'unreadable-object)))
 

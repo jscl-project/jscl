@@ -45,23 +45,23 @@
 
 ;;; test what simple-object (Object.create(null)) 
 (test (string= "#<JS-OBJECT [object Simple-object]>" (write-to-string *package-table*)))
-(test (equal t (js-object-p *package-table*)))
+(test (equal t (js-value-p *package-table*)))
 
 ;;; test what new Array isnt js-object
 (let ((obj (new #j:Array)))
   (setf (oget obj "name") 'one)
   (test (and (objectp obj)
-             (not (js-object-p obj)))))
+             (not (js-value-p obj)))))
 
 ;;; test what new Date is js-object & have a signature 
 (let ((obj (new #j:Date)))
-  (test (js-object-p obj))
+  (test (js-value-p obj))
   (test (js-object-signature obj)))
 
 ;;; test in can handle numbers
 
 (let ((obj (new #j:Object)))
-  (test (js-object-p obj))
+  (test (js-value-p obj))
   (test (oset 456 obj 123))
   (test (equal 456 (oget obj 123))))
 
@@ -96,16 +96,43 @@
 
 ;;; FFI constants printing
 
-(test (string= (write-to-string +true+) "+TRUE+"))
-(test (string= (write-to-string +false+) "+FALSE+"))
-(test (string= (write-to-string +null+) "+NULL+"))
-(test (string= (write-to-string +undefined+) "+UNDEFINED+"))
+(test (string= (write-to-string #j:true) "#j:true"))
+(test (string= (write-to-string #j:false) "#j:false"))
+(test (string= (write-to-string #j:null) "#j:null"))
+(test (string= (write-to-string #j:undefined) "#j:undefined"))
 
 ;; princ prints the same (no escaping distinction for constants)
-(test (string= (princ-to-string +true+) "+TRUE+"))
-(test (string= (princ-to-string +false+) "+FALSE+"))
-(test (string= (princ-to-string +null+) "+NULL+"))
-(test (string= (princ-to-string +undefined+) "+UNDEFINED+"))
+(test (string= (princ-to-string #j:true) "#j:true"))
+(test (string= (princ-to-string #j:false) "#j:false"))
+(test (string= (princ-to-string #j:null) "#j:null"))
+(test (string= (princ-to-string #j:undefined) "#j:undefined"))
+
+;;; #j:true etc. reader
+
+;; the reader produces JS values directly, not symbols or forms
+(let ((val (read-from-string "#j:true")))
+  (test (not (symbolp val)))
+  (test (not (consp val)))
+  (test (string= (typeof val) "boolean"))
+  (test (eq val #j:true)))
+
+(let ((val (read-from-string "#j:false")))
+  (test (not (symbolp val)))
+  (test (not (consp val)))
+  (test (string= (typeof val) "boolean"))
+  (test (eq val #j:false)))
+
+(let ((val (read-from-string "#j:null")))
+  (test (not (symbolp val)))
+  (test (not (consp val)))
+  (test (string= (typeof val) "object"))
+  (test (eq val #j:null)))
+
+(let ((val (read-from-string "#j:undefined")))
+  (test (not (symbolp val)))
+  (test (not (consp val)))
+  (test (string= (typeof val) "undefined"))
+  (test (eq val #j:undefined)))
 
 ;;; clstring
 
@@ -121,7 +148,7 @@
 ;; type error for non-strings
 (test (handler-case (progn (clstring 42) nil)
         (type-error () t)))
-(test (handler-case (progn (clstring +true+) nil)
+(test (handler-case (progn (clstring #j:true) nil)
         (type-error () t)))
 
 ;; clstring as a function value
@@ -129,23 +156,23 @@
 
 ;;; jsbool
 
-;; nil -> +false+, anything else -> +true+
-(test (eq (jsbool nil) +false+))
-(test (eq (jsbool t) +true+))
-(test (eq (jsbool 42) +true+))
-(test (eq (jsbool "hello") +true+))
+;; nil -> #j:false, anything else -> #j:true
+(test (eq (jsbool nil) #j:false))
+(test (eq (jsbool t) #j:true))
+(test (eq (jsbool 42) #j:true))
+(test (eq (jsbool "hello") #j:true))
 
 ;; jsbool as a function value
-(test (eq (funcall #'jsbool nil) +false+))
-(test (eq (funcall #'jsbool t) +true+))
+(test (eq (funcall #'jsbool nil) #j:false))
+(test (eq (funcall #'jsbool t) #j:true))
 
 ;;; clbool
 
-;; +true+ -> t, +false+/+null+/+undefined+ -> nil
-(test (eq (clbool +true+) t))
-(test (eq (clbool +false+) nil))
-(test (eq (clbool +null+) nil))
-(test (eq (clbool +undefined+) nil))
+;; #j:true -> t, #j:false/#j:null/#j:undefined -> nil
+(test (eq (clbool #j:true) t))
+(test (eq (clbool #j:false) nil))
+(test (eq (clbool #j:null) nil))
+(test (eq (clbool #j:undefined) nil))
 
 ;; CL booleans pass through
 (test (eq (clbool t) t))
@@ -156,8 +183,8 @@
         (type-error () t)))
 
 ;; clbool as a function value
-(test (eq (funcall #'clbool +true+) t))
-(test (eq (funcall #'clbool +false+) nil))
+(test (eq (funcall #'clbool #j:true) t))
+(test (eq (funcall #'clbool #j:false) nil))
 
 
 (test

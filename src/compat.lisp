@@ -36,9 +36,7 @@
 
 (defun j-reader (stream subchar arg)
   (declare (ignorable subchar arg))
-  (assert (char= #\: (read-char stream nil :eof)) nil "FFI descriptor must start with a semicolon.")
-  (loop :for ch := (read-char stream nil #\Space)
-        :until (terminalp ch)))
+  (read-sharp-j stream))
 
 (set-dispatch-macro-character #\# #\J #'j-reader)
 

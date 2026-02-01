@@ -47,7 +47,7 @@
       (setf (oget payload "sessionId") *web-worker-session-id*)
       (setf (oget payload "options") options)
 
-      ((oget xhr "open") #j"POST" #j"__jscl" +false+)
+      ((oget xhr "open") #j"POST" #j"__jscl" #j:false)
       ((oget xhr "setRequestHeader") #j"ContentType" #j"application/json")
       ((oget xhr "send") (#j:JSON:stringify payload))
 

@@ -26,7 +26,7 @@
 ;;; for example look *package-table* into prelude.js
 ;;; attempt print this, caused error
 (defun js-object-signature (obj)
-  (if (not (js-object-p obj))
+  (if (not (js-value-p obj))
       nil
       (handler-case
           (progn
@@ -104,10 +104,10 @@
 
 
 ;;; js-object
-(defmethod describe ((obj js-object) &optional (stream *standard-output*))
+(defmethod describe ((obj js-value) &optional (stream *standard-output*))
   (let ((keys (#j:Object:keys obj)))
     (with-pp-buffer (buf)
-      (pp/presentation obj 'js-object buf)
+      (pp/presentation obj 'js-value buf)
       (format buf "Signature: ~a~%" (js-object-signature obj))
       (if (and keys (> (length keys) 0))
           (format buf "Keys: ~a~%" (map 'list (lambda (obj) (js-to-lisp obj)) keys)))

@@ -34,7 +34,16 @@
                   (position #\: descriptor :start start)))
             ((null end)
              (push (subseq descriptor start) subdescriptors)
-             `(oget *root* ,@(reverse subdescriptors)))
+             (let ((parts (reverse subdescriptors)))
+               (if (and (null (cdr parts))
+                        (member (car parts) '("true" "false" "null" "undefined") :test #'string=))
+                   (let ((name (car parts)))
+                     (cond
+                       ((string= name "true") +js-true+)
+                       ((string= name "false") +js-false+)
+                       ((string= name "null") +js-null+)
+                       ((string= name "undefined") +js-undefined+)))
+                   `(oget *root* ,@parts))))
          (push (subseq descriptor start end) subdescriptors))))
     (t
      (simple-reader-error stream "Invalid FFI descriptor. Expected #j: or #j\"."))))

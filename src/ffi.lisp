@@ -49,12 +49,40 @@
 
 #-jscl
 (progn
-  (defstruct js-object)
+  (defstruct js-value)
 
-  (defstruct (js-string (:include js-object)
+  (defstruct (js-string (:include js-value)
 			(:constructor make-js-string (value))
 			(:predicate %host-js-string-p))
-    value))
+    value)
+
+  (defstruct (js-boolean (:include js-value)
+                         (:constructor %make-js-boolean (value)))
+    value)
+
+  (defstruct (js-null (:include js-value)
+                      (:constructor %make-js-null)))
+
+  (defstruct (js-undefined (:include js-value)
+                           (:constructor %make-js-undefined))))
+
+;; These constants are only used for bootstrapping reasons. Use #j:X elsewhere
+
+(defvar +js-true+
+  #-jscl (%make-js-boolean t)
+  #+jscl (%js-vref "true" t))
+
+(defvar +js-false+
+  #-jscl (%make-js-boolean nil)
+  #+jscl (%js-vref "false" t))
+
+(defvar +js-null+
+  #-jscl (%make-js-null)
+  #+jscl (%js-vref "null" t))
+
+(defvar +js-undefined+
+  #-jscl (%make-js-undefined)
+  #+jscl (%js-vref "undefined" t))
 
 
 ;;;; Core functions (both environments)
@@ -63,8 +91,12 @@
   #+jscl (typeof x)
   #-jscl
   (typecase x
+    (number "number")
     (js-string "string")
-    (js-object "object")))
+    (js-boolean "boolean")
+    (js-undefined "undefined")
+    (js-null "object")
+    (js-value "object")))
 
 (defun jsstring (x)
   #+jscl (jsstring x)
@@ -88,7 +120,7 @@
     (t (error 'type-error :datum x :expected-type 'string))))
 
 (defun objectp (obj)
-  #-jscl (js-object-p obj)
+  #-jscl (js-value-p obj)
   #+jscl
   (objectp obj))
 
@@ -117,15 +149,6 @@
   (%js-vref "globalThis" t))
 
 #+jscl
-(defconstant +true+ (%js-vref "true" t))
-#+jscl
-(defconstant +false+ (%js-vref "false" t))
-#+jscl
-(defconstant +undefined+ (%js-vref "undefined" t))
-#+jscl
-(defconstant +null+ (%js-vref "null" t))
-
-#+jscl
 (defun instanceof (x class)
   (instanceof x class))
 
@@ -140,18 +163,18 @@
     ((eq x t) t)
     ((eq x nil) nil)
 
-    ((eq x +true+) t)
-    ((eq x +false+) nil)
-    ((eq x +null+) nil)
-    ((eq x +undefined+) nil)
+    ((eq x +js-true+) t)
+    ((eq x +js-false+) nil)
+    ((eq x +js-null+) nil)
+    ((eq x +js-undefined+) nil)
     (t (error 'type-error :datum x :expected-type 'js-boolean))))
 
 #+jscl
 (defun jsbool (x)
-  (if x +true+ +false+))
+  (if x +js-true+ +js-false+))
 
 #+jscl
-(defun js-object-p (obj)
+(defun js-value-p (obj)
   (if (or (sequencep obj)
           (numberp obj)
           (symbolp obj)
@@ -162,10 +185,10 @@
       t))
 
 #+jscl
-(defun js-null-p (obj) (eq obj +null+))
+(defun js-null-p (obj) (eq obj +js-null+))
 
 #+jscl
-(defun js-undefined-p (obj) (eq obj +undefined+))
+(defun js-undefined-p (obj) (eq obj +js-undefined+))
 
 #+jscl
 (%js-vset "eval_in_lisp"

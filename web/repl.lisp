@@ -44,7 +44,7 @@
              (eval-interactive-input (clstring input)))
            (save-history)
            (toplevel)))
-    (#j:jqconsole:Prompt +true+ (lisp-to-js #'process-input) (lisp-to-js #'%sexpr-incomplete))))
+    (#j:jqconsole:Prompt #j:true (lisp-to-js #'process-input) (lisp-to-js #'%sexpr-incomplete))))
 
 (defun web-init ()
   (load-history)

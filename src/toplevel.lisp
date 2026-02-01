@@ -314,7 +314,7 @@ All errors are caught and report to *ERROR-OUTPUT*."
 (export '(mop-object mop-object-p
           compile-application
           oget oset new object
-          lisp-to-js js-to-lisp js-object-p js-null-p js-undefined-p)
+          lisp-to-js js-to-lisp js-value-p js-null-p js-undefined-p)
         'jscl)
 
 (setq *package* *user-package*)
