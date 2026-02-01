@@ -66,24 +66,6 @@
   (defstruct (js-undefined (:include js-value)
                            (:constructor %make-js-undefined))))
 
-;; These constants are only used for bootstrapping reasons. Use #j:X elsewhere
-
-(defvar +js-true+
-  #-jscl (%make-js-boolean t)
-  #+jscl (%js-vref "true" t))
-
-(defvar +js-false+
-  #-jscl (%make-js-boolean nil)
-  #+jscl (%js-vref "false" t))
-
-(defvar +js-null+
-  #-jscl (%make-js-null)
-  #+jscl (%js-vref "null" t))
-
-(defvar +js-undefined+
-  #-jscl (%make-js-undefined)
-  #+jscl (%js-vref "undefined" t))
-
 
 ;;;; Core functions (both environments)
 
@@ -163,15 +145,15 @@
     ((eq x t) t)
     ((eq x nil) nil)
 
-    ((eq x +js-true+) t)
-    ((eq x +js-false+) nil)
-    ((eq x +js-null+) nil)
-    ((eq x +js-undefined+) nil)
+    ((eq x (%js-vref "true" t)) t)
+    ((eq x (%js-vref "false" t)) nil)
+    ((eq x (%js-vref "null" t)) nil)
+    ((eq x (%js-vref "undefined" t)) nil)
     (t (error 'type-error :datum x :expected-type 'js-boolean))))
 
 #+jscl
 (defun jsbool (x)
-  (if x +js-true+ +js-false+))
+  (if x (%js-vref "true" t) (%js-vref "false" t)))
 
 #+jscl
 (defun js-value-p (obj)
@@ -185,10 +167,10 @@
       t))
 
 #+jscl
-(defun js-null-p (obj) (eq obj +js-null+))
+(defun js-null-p (obj) (eq obj (%js-vref "null" t)))
 
 #+jscl
-(defun js-undefined-p (obj) (eq obj +js-undefined+))
+(defun js-undefined-p (obj) (eq obj (%js-vref "undefined" t)))
 
 #+jscl
 (%js-vset "eval_in_lisp"
