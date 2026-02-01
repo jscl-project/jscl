@@ -55,11 +55,11 @@ global scope), thus no need for the caller to do so."
   (format out "if (typeof importScripts !== 'undefined') importScripts('~Ajscl.js');
 (function(jscl){
 'use strict';
-(function(values, internals){"
+(function(internals){ var values = internals.values;"
           place))
 
 (defun %write-file-epilogue (out place)
-  (format out "})(jscl.internals.pv, jscl.internals);
+  (format out "})(jscl.internals);
 })( typeof require !== 'undefined'? require('~Ajscl'):
 typeof window !== 'undefined'? window.jscl: self.jscl )"
           place))

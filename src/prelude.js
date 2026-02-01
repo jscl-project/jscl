@@ -40,28 +40,36 @@ var internals = (jscl.internals = Object.create(null));
 internals.globalEval = function (code, data) {
   var geval = eval; // Just an indirect eval
   var fn = geval(
-    '(function(values, internals, data){ "use strict"; ' + code + "; })",
+    '(function(internals, data){ "use strict"; var values = internals.values; ' + code + "; })",
   );
-  return fn(internals.mv, internals, data);
+  return fn(internals, data);
 };
+
+internals._mv = null;
 
 internals.pv = function (x) {
   return x == undefined ? nil : x;
 };
 
-internals.mv = function (...args) {
-  args["multiple-value"] = true;
-  return args;
+internals.values = function (...args) {
+  internals._mv = args;
+  return args.length > 0 ? args[0] : nil;
 };
 
-internals.forcemv = function (x) {
-  return typeof x == "object" && x !== null && "multiple-value" in x
-    ? x
-    : internals.mv(x);
+internals.mvcall = function(fn, ...args) {
+  // TODO: comment why this exists
+  internals._mv = null;
+  return fn(...args);
+};
+
+internals.withMV = function(fn) {
+  internals._mv = null;
+  var result = fn();
+  return { result, mv: internals._mv };
 };
 
 internals.error = function (...args) {
-  errorSym.fvalue(internals.pv, ...args);
+  errorSym.fvalue(...args);
 };
 
 internals.typeError = function (datum, expectedType) {
@@ -74,6 +82,59 @@ internals.typeError = function (datum, expectedType) {
   );
 };
 
+// Symbol infrastructure
+
+const UNBOUND = Symbol("UnboundFunction");
+
+internals.makeUnboundFunction = function (symbol) {
+  const fn = () => {
+    internals.error(
+      internals.intern("UNDEFINED-FUNCTION"),
+      internals.intern("NAME", "KEYWORD"),
+      symbol,
+    );
+  };
+  fn[UNBOUND] = true;
+  return fn;
+};
+
+internals.makeUnboundSetFunction = function (symbol) {
+  const fn = () => {
+    internals.error(internals.intern("UNDEFINED-FUNCTION"),
+      internals.intern("NAME", "KEYWORD"),
+      internals.QIList(internals.intern("SETF"), symbol, nil));
+  }
+  fn[UNBOUND] = true;
+  return fn;
+};
+
+internals.Symbol = function (name, pkg) {
+  this.name = name;
+  this.package = pkg !== undefined ? pkg : nil;
+  this.value = undefined;
+  this.fvalue = internals.makeUnboundFunction(this)
+  this.setfvalue = internals.makeUnboundSetFunction(this)
+  this.stack = [];
+};
+
+// NIL and T
+//
+// Created as uninterned symbols so they are available early.
+// They are registered into the CL package once it exists.
+
+nil = new internals.Symbol("NIL", null);
+t = new internals.Symbol("T", null);
+errorSym = new internals.Symbol("ERROR", null);
+Object.defineProperty(nil, "$$jscl_car", { value: nil, writable: false });
+Object.defineProperty(nil, "$$jscl_cdr", { value: nil, writable: false });
+
+// Early error definition
+
+errorSym.fvalue = function earlyError(...args){
+  console.debug("BOOT PANIC! Arguments to ERROR:", ...args.map(internals.lisp_to_js));
+  throw "BOOT PANIC!";
+}
+
 //
 // Workaround the problems with `new` for arbitrary number of
 // arguments. Some primitive constructors (like Date) differ if they
@@ -85,7 +146,7 @@ internals.typeError = function (datum, expectedType) {
 // #j:Date) will be converted into a Lisp function. We track the
 // original function in the jscl_original property as we can't wrap
 // the primitive constructor in a Lisp function or it will not work.
-internals.newInstance = function (values, ct, ...args) {
+internals.newInstance = function (ct, ...args) {
   var newCt = ct.bind.bind(ct.jscl_original || ct)(ct);
   return new newCt(...args);
 };
@@ -218,7 +279,7 @@ internals.Bitwise_and = function (x, y) {
 // `eval' compiles the forms and execute the Javascript code at
 // toplevel with `js-eval', so it is necessary to return multiple
 // values from the eval function.
-var values = internals.mv;
+var values = internals.values;
 
 internals.checkArgsAtLeast = function (args, n) {
   if (args < n) throw "too few arguments";
@@ -301,6 +362,7 @@ function codepoints(string) {
 internals.make_lisp_string = function (string) {
   var array = codepoints(string);
   array.stringp = 1;
+  array.toString = function () { return internals.xstring(this); };
   return array;
 };
 
@@ -344,6 +406,7 @@ internals.safe_char_downcase = function (x) {
 };
 
 internals.xstring = function (x) {
+  if (typeof x === "string") return x;
   if (typeof x === "number") return x.toString();
   const hasFillPointer = typeof x.fillpointer === "number";
   const activechars = hasFillPointer ? x.slice(0, x.fillpointer) : x;
@@ -353,8 +416,8 @@ internals.xstring = function (x) {
 // Convert a Lisp function to JS without converting its arguments
 internals.fn_to_js = function (fn) {
   return function (...args) {
-    const result = fn(internals.pv, ...args);
-    return result;
+    internals._mv = null;
+    return fn(...args);
   };
 }
 
@@ -370,7 +433,8 @@ internals.lisp_to_js = function (x) {
     } else {
       return function (...args) {
         for (var i in args) args[i] = internals.js_to_lisp(args[i]);
-        return internals.lisp_to_js(x.bind(this)(internals.pv, ...args));
+        internals._mv = null;
+        return internals.lisp_to_js(x.bind(this)(...args));
       };
     }
   } else return x;
@@ -382,9 +446,9 @@ internals.js_to_lisp = function (x) {
   else if (x === false) return nil;
   else if (typeof x == "function") {
     // Trampoline calling the JS function
-    var trampoline = function (values, ...args) {
+    var trampoline = function (...args) {
       for (var i in args) args[i] = internals.lisp_to_js(args[i]);
-      return values(internals.js_to_lisp(x.bind(this)(...args)));
+      return internals.values(internals.js_to_lisp(x.bind(this)(...args)));
     };
     trampoline.jscl_original = x;
     return trampoline;
@@ -393,15 +457,17 @@ internals.js_to_lisp = function (x) {
 
 // Non-local exits
 
-internals.BlockNLX = function (id, values, name) {
+internals.BlockNLX = function (id, value, mv, name) {
   this.id = id;
-  this.values = values;
+  this.value = value;
+  this.mv = mv;
   this.name = name;
 };
 
-internals.CatchNLX = function (id, values) {
+internals.CatchNLX = function (id, value, mv) {
   this.id = id;
-  this.values = values;
+  this.value = value;
+  this.mv = mv;
 };
 
 internals.TagNLX = function (id, label) {
@@ -424,14 +490,20 @@ packages.JSCL = {
   packageName: "JSCL",
   symbols: Object.create(null),
   exports: Object.create(null),
+  nicknames: nil,
+  shadows: nil,
   use: nil,
+  usedBy: nil,
 };
 
 packages.CL = {
   packageName: "COMMON-LISP",
   symbols: Object.create(null),
   exports: Object.create(null),
+  nicknames: nil,
+  shadows: nil,
   use: nil,
+  usedBy: nil,
 };
 
 packages["COMMON-LISP"] = packages.CL;
@@ -440,43 +512,21 @@ packages.KEYWORD = {
   packageName: "KEYWORD",
   symbols: Object.create(null),
   exports: Object.create(null),
+  nicknames: nil,
+  shadows: nil,
   use: nil,
+  usedBy: nil,
 };
 
 jscl.CL = packages.CL.exports;
 
-const UNBOUND = Symbol("UnboundFunction");
-
-internals.makeUnboundFunction = function (symbol) {
-  const fn = () => {
-    internals.error(
-      internals.intern("UNDEFINED-FUNCTION"),
-      internals.intern("NAME", "KEYWORD"),
-      symbol,
-    );
-  };
-  fn[UNBOUND] = true;
-  return fn;
-};
-
-internals.makeUnboundSetFunction = function (symbol) {
-  const fn = () => {
-    internals.error(internals.intern("UNDEFINED-FUNCTION"),
-      internals.intern("NAME", "KEYWORD"),
-      internals.QIList(internals.intern("SETF"), symbol, nil));
-  }
-  fn[UNBOUND] = true;
-  return fn;
-};
-
-internals.Symbol = function(name, package_name){
-  this.name = name;
-  this.package = package_name;
-  this.value = undefined;
-  this.fvalue = internals.makeUnboundFunction(this)
-  this.setfvalue = internals.makeUnboundSetFunction(this)
-  this.stack = [];
-};
+// Register nil, t, and error into the CL package
+nil.package = packages.CL;
+packages.CL.symbols["NIL"] = nil;
+t.package = packages.CL;
+packages.CL.symbols["T"] = t;
+errorSym.package = packages.CL;
+packages.CL.symbols["ERROR"] = errorSym;
 
 internals.symbolValue = function (symbol) {
   var value = symbol.value;
@@ -513,12 +563,12 @@ internals.symbolSetFunction = function (symbol) {
 };
 
 
-internals.bindSpecialBindings = function (symbols, values, callback){
+internals.bindSpecialBindings = function (symbols, vals, callback){
   try {
     symbols.forEach(function (s, i) {
       s.stack = s.stack || [];
       s.stack.push(s.value);
-      s.value = values[i];
+      s.value = vals[i];
     });
     return callback();
   } finally {
@@ -639,21 +689,6 @@ function runCommonLispScripts() {
     }
   }
   progressivelyRunScripts();
-}
-
-// NIL and T
-
-nil = internals.intern("NIL");
-t = internals.intern("T");
-errorSym = internals.intern("ERROR");
-Object.defineProperty(nil, "$$jscl_car", { value: nil, writable: false });
-Object.defineProperty(nil, "$$jscl_cdr", { value: nil, writable: false });
-
-// Early error definition
-
-errorSym.fvalue = function earlyError(mv, ...args){
-  console.debug("BOOT PANIC! Arguments to ERROR:", ...args.map(internals.lisp_to_js));
-  throw "BOOT PANIC!";
 }
 
 // Node/Deno REPL

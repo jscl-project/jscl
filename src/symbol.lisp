@@ -32,14 +32,14 @@
     ((not (symbolp x))
      (error "`~a' is not a symbol." x))
     ((in "plist" x)
-     (oget! x "plist"))))
+     (oget x "plist"))))
 
 (defun (setf symbol-plist) (new-value x)
   (unless (symbolp x)
     (error "`~a' is not a symbol." x))
   (unless (listp new-value)
     (error "`~a' is not a list." new-value))
-  (oset! new-value x "plist")
+  (oset new-value x "plist")
   new-value)
 
 (defun get (symbol indicator &optional default)

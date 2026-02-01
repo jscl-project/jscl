@@ -26,7 +26,7 @@
         (cons (vector)          '(vector 0))
         (cons "sss"             '(string 3))
         (cons (make-string 2)   '(string 2))
-        (cons (jscl::new)       'jscl::js-object)
+        (cons (jscl::object)       'jscl::js-object)
         (cons (find-class 'atomic-test-class) 'standard-class)
         (cons (let nil (lambda nil nil))      'function)))
 

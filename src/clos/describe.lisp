@@ -34,7 +34,7 @@
             ;;   [object Object]
             ;;   [object HTMLxxxx]
             ;;   undefined
-            (#j:String obj))
+            (clstring (#j:String obj)))
         (error (msg)
           ;; js-object created with Object.create(Null) ?
           ;; legal signature 'simple-object'
@@ -129,13 +129,13 @@
     (format buf "Fixnum: ~a~%" obj)
     (labels
         ((make-number (value)
-           (make-new #j:Number value))
+           (new #j:Number value))
          (number-to-fixed (value &optional (digits 0))
-           ((oget  (make-Number value) "toFixed") digits))
+           (clstring ((oget (make-Number value) "toFixed") digits)))
          (number-to-exponent (value)
-           ((oget  (make-Number value) "toExponential")))
+           (clstring ((oget (make-Number value) "toExponential"))))
          (number-by-radix (value &optional (radix 10))
-           ((oget (make-Number value) "toString") radix)))
+           (clstring ((oget (make-Number value) "toString") radix))))
       (format buf "Exponential: ~a~%" (number-to-exponent obj))
       (when (> obj 0)
         ;; not display for negative value
@@ -148,7 +148,7 @@
         ;; char code restrict
         (if (<= obj 2028)
             (format buf "Character: ~a~%" (code-char obj)))
-        (format buf "As time: ~a~%" (string (make-new #j:Date obj)))))
+        (format buf "As time: ~a~%" (string (new #j:Date obj)))))
     (flush-pp-buffer buf stream)
     (values)))
 
@@ -192,9 +192,8 @@
       ;; check bounded
       (when (boundp obj)
         (format buf "~A names a special variable~%" (symbol-name obj))
-        (let ((doc (oget obj "vardoc")))
-          (when doc
-            (format buf "Documentation: ~a~%" doc)))
+        (when (in "vardoc" obj)
+          (format buf "Documentation: ~a~%" (oget obj "vardoc")))
         (format buf "Value: ~a~%" (symbol-value obj))
         (when (not (keywordp obj))
           (describe (symbol-value obj) buf)
@@ -275,8 +274,8 @@
 
 ;;; function
 (defmethod describe ((obj function) &optional (stream *standard-output*))
-  (let ((name (oget obj "fname"))
-        (doc (oget obj "docstring")))
+  (let ((name (if (in "fname" obj) (oget obj "fname") nil))
+        (doc (if (in "docstring" obj) (oget obj "docstring") nil)))
     (with-pp-buffer (buf)
       (pp/presentation obj 'function stream)
       (format buf "Name:~a~%" (if name name "anonimous"))

@@ -205,11 +205,17 @@
   (js-format ")")
   (js-stmt `(group ,@body) t))
 
+(defun valid-lvalue-p (x)
+  (or (symbolp x)
+      (nth-value 1 (valid-js-identifier x))
+      (and (consp x)
+           (member (car x) '(get = property)))
+      ;; JS macro forms that expand to valid lvalues
+      (and (consp x) (assoc (car x) *js-macros*)
+           (valid-lvalue-p (js-macroexpand x)))))
+
 (defun check-lvalue (x)
-  (unless (or (symbolp x)
-              (nth-value 1 (valid-js-identifier x))
-              (and (consp x)
-                   (member (car x) '(get = property))))
+  (unless (valid-lvalue-p x)
     (error "Bad Javascript lvalue ~S" x)))
 
 ;;; Process the Javascript AST to reduce some syntax sugar.
@@ -267,11 +273,15 @@
       (call
        (js-expr (car args) 20)
        (js-format "(")
-       (when (cdr args)
-         (js-expr (cadr args) no-comma)
-         (dolist (operand (cddr args))
-           (js-format ",")
-           (js-expr operand no-comma)))
+       (flet ((output-arg (arg)
+                (if (and (consp arg) (eq (car arg) 'spread))
+                    (progn (js-format "...") (js-expr (cadr arg) no-comma))
+                    (js-expr arg no-comma))))
+         (when (cdr args)
+           (output-arg (cadr args))
+           (dolist (operand (cddr args))
+             (js-format ",")
+             (output-arg operand))))
        (js-format ")"))
       ;; Object syntax
       (object
