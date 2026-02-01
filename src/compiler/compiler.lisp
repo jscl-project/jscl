@@ -1584,10 +1584,6 @@
 
 (define-builtin lisp-to-js (x) `(call-internal |lisp_to_js| ,x))
 
-;; Convert a Lisp function to JS but that retrns the primary value but does not
-;; convert its arguments
-(define-builtin fn-to-js (x) `(call-internal |fn_to_js| ,x))
-
 (define-builtin clstring% (x) `(call-internal |make_lisp_string| ,x))
 
 

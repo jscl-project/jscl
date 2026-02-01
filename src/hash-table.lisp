@@ -91,9 +91,9 @@
          ;; all objects (including NIL symbol) as truthy.
          (ht (if (eq test-symbol 'equal)
                  (new EqualMap
-                           (fn-to-js #'sxhash)
-                           (fn-to-js (lambda (a b)
-                                       (if (equal a b) #j:true #j:false))))
+                           #'sxhash
+                           (lambda (a b)
+                             (if (equal a b) #j:true #j:false)))
                  (new (%js-vref "Map" t)))))
     (oset test-symbol ht "$$jscl_test")
     ht))

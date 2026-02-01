@@ -406,8 +406,8 @@
 ;;;; FFI with multiple values
 ;;;; =============================================
 
-;;; fn-to-js returns primary value from a multi-value Lisp function
-(let ((jsfn (fn-to-js (lambda (x) (values x (* x 2))))))
+;;; Lisp functions called from JS return primary value
+(let ((jsfn (lambda (x) (values x (* x 2)))))
   (test (= 5 (funcall jsfn 5))))
 
 ;;; oget retrieves property correctly

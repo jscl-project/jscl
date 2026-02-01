@@ -413,14 +413,6 @@ internals.xstring = function (x) {
   return activechars.join("");
 };
 
-// Convert a Lisp function to JS without converting its arguments
-internals.fn_to_js = function (fn) {
-  return function (...args) {
-    internals._mv = null;
-    return fn(...args);
-  };
-}
-
 internals.lisp_to_js = function (x) {
   if (typeof x == "object" && x !== null && "length" in x && x.stringp == 1)
     return internals.xstring(x);
