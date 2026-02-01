@@ -106,11 +106,11 @@ All errors are caught and report to *ERROR-OUTPUT*."
           (terpri))))
     (catch (err)
       (let ((message (let ((msg (oget err "message")))
-                       (if (js-undefined-p msg)
+                       (if (eq msg #j:undefined)
 			   (clstring err)
 			   (clstring msg)))))
         (format *error-output* "ERROR[!]: ~a~%~A~%" message
-                (let ((s (oget err "stack"))) (if (js-undefined-p s) "" (clstring s))))))))
+                (let ((s (oget err "stack"))) (if (eq s #j:undefined) "" (clstring s))))))))
 
 (export
  '(&allow-other-keys &aux &body &environment &key &optional &rest &whole
@@ -314,7 +314,7 @@ All errors are caught and report to *ERROR-OUTPUT*."
 (export '(mop-object mop-object-p
           compile-application
           oget oset new object
-          lisp-to-js js-value-p js-null-p js-undefined-p)
+          lisp-to-js js-value-p)
         'jscl)
 
 (setq *package* *user-package*)

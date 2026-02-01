@@ -26,7 +26,7 @@
 
 (defun load-history ()
   (let ((raw (#j:localStorage:getItem #j"jqhist")))
-    (unless (js-null-p raw)
+    (unless (eq raw #j:null)
       (#j:jqconsole:SetHistory (#j:JSON:parse raw)))))
 
 (defun save-history ()

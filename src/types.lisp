@@ -68,7 +68,6 @@
     (atom              atom           t    t )
     ;;(structure         structure-p    t    t )
     (js-value          js-value-p     t    t )
-    (js-null           js-null-p      t    t )
     (clos-object       mop-object-p   nil  t)
     (character         characterp     t    t )
     ;; symbol relations
@@ -111,6 +110,9 @@
                  :tpl tpl))
       (setf (gethash name *builtin-types*) tip)
       (%deftype name :predicate predicate))))
+
+;; js-null uses an inline eq check instead of a named predicate
+(%deftype 'js-null :predicate (lambda (x) (eq x #j:null)))
 
 (defun builtin-type-p (name &optional (content-p nil))
   (let (type-info)
@@ -227,7 +229,7 @@
           (error "Unknown type-specifier ~a."  type-specifier)))))
 
 (defun type-of (object)
-  (cond ((js-null-p object) 'js-null)
+  (cond ((eq object #j:null) 'js-null)
         ((integerp object)
          (case object
            ((0 1) 'bit)

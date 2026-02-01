@@ -157,12 +157,6 @@
       t))
 
 #+jscl
-(defun js-null-p (obj) (eq obj (%js-vref "null" t)))
-
-#+jscl
-(defun js-undefined-p (obj) (eq obj (%js-vref "undefined" t)))
-
-#+jscl
 (%js-vset "eval_in_lisp"
           (lambda (form)
             (eval (read-from-string form))))
