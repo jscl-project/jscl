@@ -54,7 +54,7 @@
       (if (eql (oget xhr "status") 200)
           (let* ((text (oget xhr "responseText"))
                  (json (#j:JSON:parse text)))
-            (if (oget json "timeout")
+            (if (and (in "timeout" json) (oget json "timeout"))
                 (setq command "wait")
                 (return (clstring (oget json "value")))))
           (error "Could not contact with the service worker.")))))

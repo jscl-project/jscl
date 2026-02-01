@@ -192,9 +192,8 @@
       ;; check bounded
       (when (boundp obj)
         (format buf "~A names a special variable~%" (symbol-name obj))
-        (let ((doc (oget obj "vardoc")))
-          (when doc
-            (format buf "Documentation: ~a~%" doc)))
+        (when (in "vardoc" obj)
+          (format buf "Documentation: ~a~%" (oget obj "vardoc")))
         (format buf "Value: ~a~%" (symbol-value obj))
         (when (not (keywordp obj))
           (describe (symbol-value obj) buf)
@@ -275,8 +274,8 @@
 
 ;;; function
 (defmethod describe ((obj function) &optional (stream *standard-output*))
-  (let ((name (oget obj "fname"))
-        (doc (oget obj "docstring")))
+  (let ((name (if (in "fname" obj) (oget obj "fname") nil))
+        (doc (if (in "docstring" obj) (oget obj "docstring") nil)))
     (with-pp-buffer (buf)
       (pp/presentation obj 'function stream)
       (format buf "Name:~a~%" (if name name "anonimous"))

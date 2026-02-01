@@ -10,14 +10,14 @@
   (ecase type
     (function
      (let ((func (find-function x)))
-       (oget func "docstring")))
+       (if (in "docstring" func) (oget func "docstring") nil)))
     (variable
      (unless (symbolp x)
        (error "The type of documentation `~S' is not a symbol." type))
-     (oget x "vardoc"))
+     (if (in "vardoc" x) (oget x "vardoc") nil))
     (package
      (let ((package (find-package x)))
-       (oget package "docstring")))
+       (if (in "docstring" package) (oget package "docstring") nil)))
     (structure
      (dsd-docstring (get-structure-dsd x)))))
 

@@ -9,7 +9,7 @@
 
 #+jscl
 (progn
-  (when #j:phantom
+  (when (in "phantom" *root*)
     (#j:phantom:exit *failed-tests*))
-  (when #j:process
+  (when (in "process" *root*)
     (#j:process:exit *failed-tests*)))

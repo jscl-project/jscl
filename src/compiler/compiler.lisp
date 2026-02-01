@@ -1544,7 +1544,7 @@
   (let ((result (convert object)))
     (dolist (k (cons key keys))
       (setq result `(property ,result ,(convert-xstring k))))
-    `(call-internal |undefinedToNil| ,result)))
+    result))
 
 (define-raw-builtin oset (value object key &rest keys)
   (let ((result (convert object)))
@@ -1771,7 +1771,7 @@
          (if *multiple-value-p*
              `(call-internal |mvcall| ,fn-expr ,@arglist)
              `(call ,fn-expr ,@arglist))))
-      ((and (consp function) (eq (car function) 'oget))
+      ((and (consp function) (member (car function) '(oget)))
        `(call ,(reduce (lambda (obj p)
                          `(property ,obj ,p))
                        (mapcar #'convert-xstring (cddr function))

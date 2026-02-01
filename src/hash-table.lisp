@@ -142,10 +142,9 @@
 
 (defun hash-table-test (hash-table)
   (check-is-hash-table hash-table)
-  (let ((test (oget hash-table "$$jscl_test")))
-    (if (null test)
-	'eq
-      test)))
+  (if (in "$$jscl_test" hash-table)
+      (oget hash-table "$$jscl_test")
+      'eq))
 
 (defun copy-hash-table (origin)
   (let ((new-ht (make-hash-table :test (hash-table-test origin))))

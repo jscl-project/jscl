@@ -27,7 +27,10 @@
 (defun find-package (package-designator)
   (if (packagep package-designator)
       package-designator
-      (oget *package-table* (string package-designator))))
+      (let ((name (string package-designator)))
+        (if (in name *package-table*)
+            (oget *package-table* name)
+            nil))))
 
 (defun delete-package (package-designator)
   ;; TODO: Signal a correctlable error in case the package-designator does not
@@ -85,6 +88,9 @@
     (setf (oget package "symbols") (object))
     (setf (oget package "exports") (object))
     (setf (oget package "nicknames") nicknames)
+    (setf (oget package "shadows") nil)
+    (setf (oget package "use") nil)
+    (setf (oget package "usedBy") nil)
     (use-package use package)
     (dolist (n names)
       (setf (oget *package-table* n) package))
@@ -397,7 +403,9 @@
   (let ((name-table (object)))
     (dolist (use use-list)
       (do-external-symbols (symbol use)
-        (pushnew symbol (oget name-table (symbol-name symbol)))))
+        (let ((name (symbol-name symbol)))
+          (setf (oget name-table name)
+                (adjoin symbol (if (in name name-table) (oget name-table name) nil))))))
     (map-for-in (lambda (symbols)
                   (when (cdr symbols)
                     (simple-package-error package "Name conflict between ~a" symbols))

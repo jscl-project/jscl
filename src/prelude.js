@@ -51,10 +51,6 @@ internals.pv = function (x) {
   return x == undefined ? nil : x;
 };
 
-internals.undefinedToNil = function (x) {
-  return x === undefined ? nil : x;
-};
-
 internals.values = function (...args) {
   internals._mv = args;
   return args.length > 0 ? args[0] : nil;
@@ -114,7 +110,7 @@ internals.makeUnboundSetFunction = function (symbol) {
 
 internals.Symbol = function (name, pkg) {
   this.name = name;
-  this.package = pkg;
+  this.package = pkg !== undefined ? pkg : nil;
   this.value = undefined;
   this.fvalue = internals.makeUnboundFunction(this)
   this.setfvalue = internals.makeUnboundSetFunction(this)
@@ -494,14 +490,20 @@ packages.JSCL = {
   packageName: "JSCL",
   symbols: Object.create(null),
   exports: Object.create(null),
+  nicknames: nil,
+  shadows: nil,
   use: nil,
+  usedBy: nil,
 };
 
 packages.CL = {
   packageName: "COMMON-LISP",
   symbols: Object.create(null),
   exports: Object.create(null),
+  nicknames: nil,
+  shadows: nil,
   use: nil,
+  usedBy: nil,
 };
 
 packages["COMMON-LISP"] = packages.CL;
@@ -510,7 +512,10 @@ packages.KEYWORD = {
   packageName: "KEYWORD",
   symbols: Object.create(null),
   exports: Object.create(null),
+  nicknames: nil,
+  shadows: nil,
   use: nil,
+  usedBy: nil,
 };
 
 jscl.CL = packages.CL.exports;
