@@ -43,10 +43,10 @@
 
 
 (defconstant most-positive-fixnum
-  (oget (%js-vref "Number" t) "MAX_SAFE_INTEGER"))
+  #j:Number:MAX_SAFE_INTEGER)
 
 (defconstant most-negative-fixnum
-  (oget (%js-vref "Number" t) "MIN_SAFE_INTEGER"))
+  #j:Number:MIN_SAFE_INTEGER)
 
 (defun fixnump (n)
   (and (integerp n)(>= most-negative-fixnum) (<= most-positive-fixnum)))

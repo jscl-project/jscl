@@ -108,7 +108,7 @@
 
 #+jscl
 (defvar *root*
-  (%js-vref "globalThis" t))
+  (%js-vref "globalThis"))
 
 #+jscl
 (defun instanceof (x class)
@@ -121,15 +121,16 @@
     ((eq x t) t)
     ((eq x nil) nil)
 
-    ((eq x (%js-vref "true" t)) t)
-    ((eq x (%js-vref "false" t)) nil)
-    ((eq x (%js-vref "null" t)) nil)
-    ((eq x (%js-vref "undefined" t)) nil)
+    ((eq x (%js-vref "true")) t)
+    ((eq x (%js-vref "false")) nil)
+    ((eq x (%js-vref "null")) nil)
+    ((eq x (%js-vref "undefined")) nil)
     (t (error 'type-error :datum x :expected-type 'js-boolean))))
 
 #+jscl
 (defun jsbool (x)
-  (if x (%js-vref "true" t) (%js-vref "false" t)))
+  (if x (%js-vref "true") (%js-vref "false")))
+
 
 #+jscl
 (defun js-value-p (obj)

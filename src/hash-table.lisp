@@ -25,7 +25,7 @@
 ;; Counter for identity-based hash codes
 ;; We use a WeakMap to store hash codes without polluting objects
 (defvar *sxhash-counter* 0)
-(defvar *sxhash-table* (new (%js-vref "WeakMap" t)))
+(defvar *sxhash-table* (new #j:WeakMap))
 
 (defun sxhash-string (s)
   "Hash a string based on its content using a simple hash algorithm."
@@ -64,14 +64,14 @@
            ((oget *sxhash-table* "set") x new-hash)
            new-hash)))))
 
-(defconstant EqualMap (oget (%js-vref "internals" t) "EqualMap"))
+(defconstant EqualMap (%js-internal "EqualMap"))
 
 ;;; Hash table structure:
 ;;; An EqualMap instance (JS object) with additional properties:
 ;;;   $$jscl_test = test function symbol (eq, eql, or equal)
 
 (defun hash-table-p (obj)
-  (or (instanceof obj (%js-vref "Map" t))
+  (or (instanceof obj #j:Map)
       (instanceof obj EqualMap)))
 
 (defun make-hash-table (&key (test #'eql) size)
@@ -93,7 +93,7 @@
                            #'sxhash
                            (lambda (a b)
                              (if (equal a b) #j:true #j:false)))
-                 (new (%js-vref "Map" t)))))
+                 (new #j:Map))))
     (oset test-symbol ht "$$jscl_test")
     ht))
 

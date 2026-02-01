@@ -1529,35 +1529,6 @@
 (define-raw-builtin jsstring (x)
   (convert-xstring x))
 
-(define-raw-builtin oget* (object key &rest keys)
-  `(selfcall
-    (progn
-      (var (tmp (property ,(convert object) ,(convert-xstring key))))
-      ,@(mapcar (lambda (key)
-                  `(progn
-                     (if (=== tmp undefined) (return ,(convert nil)))
-                     (= tmp (property tmp ,(convert-xstring key)))))
-                keys))
-    (return (if (=== tmp undefined) ,(convert nil) tmp))))
-
-(define-raw-builtin oset* (value object key &rest keys)
-  (let ((keys (cons key keys)))
-    `(selfcall
-      (progn
-        (var (obj ,(convert object)))
-        ,@(mapcar (lambda (key)
-                    `(progn
-                       (= obj (property obj ,(convert-xstring key)))
-                       (if (=== obj undefined)
-                           (throw "Impossible to set object property."))))
-                  (butlast keys))
-        (var (tmp
-              (= (property obj ,(convert-xstring (car (last keys))))
-                 ,(convert value))))
-        (return (if (=== tmp undefined)
-                    ,(convert nil)
-                    tmp))))))
-
 (define-raw-builtin oget (object key &rest keys)
   (let ((result (convert object)))
     (dolist (k (cons key keys))
@@ -1602,7 +1573,7 @@
             (call g (property o key)))
     (return ,(convert nil))))
 
-(define-compilation %js-vref (var &optional raw)
+(define-compilation %js-vref (var)
   (make-symbol var))
 
 (define-compilation %js-vset (var val)

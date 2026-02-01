@@ -94,9 +94,9 @@
   (test (string= "#<structure struct>"  (write-to-string (make-struct :name 'definition :slots #(a b c))))))
 
 ;;; JS values
-(test (string= "#j:true" (write-to-string (%js-vref "true" t))))
-(test (string= "#j:false" (write-to-string (%js-vref "false" t))))
-(test (string= "#j:undefined" (write-to-string (%js-vref "undefined" t))))
-(test (string= "#j:null" (write-to-string (%js-vref "null" t))))
+(test (string= "#j:true" (write-to-string #j:true)))
+(test (string= "#j:false" (write-to-string #j:false)))
+(test (string= "#j:undefined" (write-to-string #j:undefined)))
+(test (string= "#j:null" (write-to-string #j:null)))
 
 ;;; EOF
