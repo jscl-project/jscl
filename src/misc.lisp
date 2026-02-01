@@ -166,7 +166,7 @@ omitted. Note the function does NOT truncate the list according to
   (let ((obj (object)))
     (cond ((in "stackTraceLimit" (oget *root* "Error"))
            (let ((old-limit #j:Error:stackTraceLimit))
-             (setf #j:Error:stackTraceLimit (%js-vref "Infinity"))
+             (setf #j:Error:stackTraceLimit #j:Infinity)
              ((oget *root* "Error" "captureStackTrace") obj from)
              (setf #j:Error:stackTraceLimit old-limit)))
           (t ((oget *root* "Error" "captureStackTrace") obj from)))

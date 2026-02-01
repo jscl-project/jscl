@@ -16,15 +16,14 @@
 #+jscl
 (/debug "loading ffi.lisp!")
 
-;;; Dual-Environment Architecture
+;;; FFI primitives
 ;;;
 ;;; This file is tagged :both in *source*, so it is loaded in the host
 ;;; CL (for macro expansion during cross-compilation) AND compiled to
 ;;; JavaScript for the target.
 ;;;
-;;; In the host, JS values don't exist.  We define struct types so that
-;;; #j"..." produces a value the compiler can recognize and dump into
-;;; the literal table.
+;;; Host compatibility types (js-value structs) and the #j: reader
+;;; macro are defined in compat.lisp, which is loaded before this file.
 ;;;
 ;;; In the target, several functions defined here are "self-referencing
 ;;; builtins": ffi.lisp provides the Lisp-level defun, but the
@@ -39,28 +38,6 @@
 ;;;   instanceof  (x class)     — JS instanceof operator
 
 
-;;;; Host compatibility types
-
-#-jscl
-(progn
-  (defstruct js-value)
-
-  (defstruct (js-string (:include js-value)
-			(:constructor make-js-string (value))
-			(:predicate %host-js-string-p))
-    value)
-
-  (defstruct (js-boolean (:include js-value)
-                         (:constructor %make-js-boolean (value)))
-    value)
-
-  (defstruct (js-null (:include js-value)
-                      (:constructor %make-js-null)))
-
-  (defstruct (js-undefined (:include js-value)
-                           (:constructor %make-js-undefined))))
-
-
 ;;;; Core functions (both environments)
 
 (defun typeof (x)
@@ -73,9 +50,11 @@
     (js-undefined "undefined")
     (otherwise "object")))
 
+;;; Host jsstring is defined in compat.lisp.
+;;; Target jsstring is a self-referencing builtin.
+#+jscl
 (defun jsstring (x)
-  #+jscl (jsstring x)
-  #-jscl (make-js-string x))
+  (jsstring x))
 
 (defun clstring% (x)
   #+jscl (clstring% x)
@@ -121,15 +100,15 @@
     ((eq x t) t)
     ((eq x nil) nil)
 
-    ((eq x (%js-vref "true")) t)
-    ((eq x (%js-vref "false")) nil)
-    ((eq x (%js-vref "null")) nil)
-    ((eq x (%js-vref "undefined")) nil)
+    ((eq x #j:true) t)
+    ((eq x #j:false) nil)
+    ((eq x #j:null) nil)
+    ((eq x #j:undefined) nil)
     (t (error 'type-error :datum x :expected-type 'js-boolean))))
 
 #+jscl
 (defun jsbool (x)
-  (if x (%js-vref "true") (%js-vref "false")))
+  (if x #j:true #j:false))
 
 
 #+jscl

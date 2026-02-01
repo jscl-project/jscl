@@ -24,7 +24,8 @@
 (defun read-sharp-j (stream)
   (cond
     ((char= (%peek-char stream) #\")
-     (let ((string (ls-read stream)))
+     ;; Using read we allow this to be used as a host macro reader too
+     (let ((string (#-jscl read #+jscl ls-read stream)))
        (jsstring string)))
     ((char= (%peek-char stream) #\:)
      (let ((descriptor (subseq (read-until stream #'terminalp) 1))
