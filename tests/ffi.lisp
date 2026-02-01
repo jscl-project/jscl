@@ -152,4 +152,12 @@
 (test (eq (funcall #'clbool +true+) t))
 (test (eq (funcall #'clbool +false+) nil))
 
+
+(test
+ (string= (write-to-string
+	   (let ((arr (vector #j"foo" #j"bar")))
+	     ((oget arr "map") (lambda (x &rest ignored) 1))))
+	"#(1 1)"))
+
+
 ;;; EOF

@@ -228,7 +228,7 @@
           (if (%%nlx-p err)
               (%%throw err)
               (%%error (let ((msg (oget err "message")))
-                        (if msg (clstring msg) err)))))))))
+                        (if (js-undefined-p msg) (clstring err) (clstring msg))))))))))
 
 (defmacro %%handler-case-1 (form &body cases)
   (let ((datum (gensym))

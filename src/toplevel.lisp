@@ -106,9 +106,11 @@ All errors are caught and report to *ERROR-OUTPUT*."
           (terpri))))
     (catch (err)
       (let ((message (let ((msg (oget err "message")))
-                       (if msg (clstring msg) err))))
+                       (if (js-undefined-p msg)
+			   (clstring err)
+			   (clstring msg)))))
         (format *error-output* "ERROR[!]: ~a~%~A~%" message
-                (let ((s (oget err "stack"))) (if s (clstring s) "")))))))
+                (let ((s (oget err "stack"))) (if (js-undefined-p s) "" (clstring s))))))))
 
 (export
  '(&allow-other-keys &aux &body &environment &key &optional &rest &whole
