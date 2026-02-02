@@ -107,8 +107,8 @@ All errors are caught and report to *ERROR-OUTPUT*."
     (catch (err)
       (let ((message (let ((msg (oget err "message")))
                        (if (eq msg #j:undefined)
-			   (clstring err)
-			   (clstring msg)))))
+                           (clstring err)
+                           (clstring msg)))))
         (format *error-output* "ERROR[!]: ~a~%~A~%" message
                 (let ((s (oget err "stack"))) (if (eq s #j:undefined) "" (clstring s))))))))
 
