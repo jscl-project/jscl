@@ -43,24 +43,15 @@
     (test (string= "a" (number-by-radix 10 16)))
     (test (string= "1100100" (number-by-radix 100 2)))))
 
-;;; test what simple-object (Object.create(null)) 
+;;; test what simple-object (Object.create(null))
 (test (string= "#<JS-OBJECT [object Simple-object]>" (write-to-string *package-table*)))
-(test (equal t (js-value-p *package-table*)))
 
-;;; test what new Array isnt js-object
-(let ((obj (new #j:Array)))
-  (setf (oget obj "name") 'one)
-  (test (not (js-value-p obj))))
-
-;;; test what new Date is js-object & have a signature 
-(let ((obj (new #j:Date)))
-  (test (js-value-p obj))
-  (test (js-object-signature obj)))
+;;; test js-object-signature
+(test (js-object-signature (new #j:Date)))
 
 ;;; test in can handle numbers
 
 (let ((obj (new #j:Object)))
-  (test (js-value-p obj))
   (test (oset 456 obj 123))
   (test (equal 456 (oget obj 123))))
 
@@ -192,5 +183,24 @@
 	     ((oget arr "map") (lambda (x &rest ignored) 1))))
 	"#(1 1)"))
 
+;;; eval handles JS value literals (exercises the data-vector path)
+(test (eq (eval #j:true) #j:true))
+(test (eq (eval #j:false) #j:false))
+(test (eq (eval #j:null) #j:null))
+(test (eq (eval #j:undefined) #j:undefined))
+
+;;; compile-toplevel handles JS value literals (exercises the dump path)
+(test (search "true"
+        (jscl::with-compilation-environment
+          (jscl::compile-toplevel #j:true))))
+(test (search "false"
+        (jscl::with-compilation-environment
+          (jscl::compile-toplevel #j:false))))
+(test (search "null"
+        (jscl::with-compilation-environment
+          (jscl::compile-toplevel #j:null))))
+(test (search "undefined"
+        (jscl::with-compilation-environment
+          (jscl::compile-toplevel #j:undefined))))
 
 ;;; EOF

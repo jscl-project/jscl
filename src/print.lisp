@@ -401,8 +401,8 @@
     ;; Packages
     (package
      (simple-format stream "#<PACKAGE ~a>" (package-name form)))
-    ;; Others
-    (js-value
+    ;; JS values and other objects
+    (otherwise
      (cond
        ((eq form #j:true)      (write-string "#j:true" stream))
        ((eq form #j:false)     (write-string "#j:false" stream))
@@ -415,9 +415,7 @@
               (write-string (lisp-escape-string (clstring form)) stream))
             (write-string (clstring form) stream)))
        (t
-        (simple-format stream "#<JS-OBJECT ~a>" (js-object-signature form)))))
-    (otherwise
-     (simple-format stream "#<JS-OBJECT ~a>" (clstring (#j:String form))))))
+        (simple-format stream "#<JS-OBJECT ~a>" (js-object-signature form)))))))
 
 
 #+jscl

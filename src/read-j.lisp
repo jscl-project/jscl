@@ -41,16 +41,16 @@
                    (let ((name (car parts)))
                      (cond
                        ((string= name "true")
-                        #-jscl (%make-js-boolean t)
+                        #-jscl *host-js-true*
                         #+jscl (%js-vref "true"))
                        ((string= name "false")
-                        #-jscl (%make-js-boolean nil)
+                        #-jscl *host-js-false*
                         #+jscl (%js-vref "false"))
                        ((string= name "null")
-                        #-jscl (%make-js-null)
+                        #-jscl *host-js-null*
                         #+jscl (%js-vref "null"))
                        ((string= name "undefined")
-                        #-jscl (%make-js-undefined)
+                        #-jscl *host-js-undefined*
                         #+jscl (%js-vref "undefined"))))
                    `(oget *root* ,@parts))))
          (push (subseq descriptor start end) subdescriptors))))

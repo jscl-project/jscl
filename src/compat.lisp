@@ -56,6 +56,33 @@
 (defstruct (js-undefined (:include js-value)
                          (:constructor %make-js-undefined)))
 
+;;;; Constants for the host.
+;;;; The reader (#j:true, etc.) returns these cached objects so that EQ
+;;;; comparisons work reliably across different read sites.
+(defvar *host-js-true* (%make-js-boolean t))
+(defvar *host-js-false* (%make-js-boolean nil))
+(defvar *host-js-null* (%make-js-null))
+(defvar *host-js-undefined* (%make-js-undefined))
+
+;;;; make-load-form methods so SBCL can serialize these structs into FASLs.
+;;;; When #j:true etc. appear as literal constants in compiled source,
+;;;; SBCL needs to know how to reconstruct them at FASL load time.
+(defmethod make-load-form ((obj js-boolean) &optional env)
+  (declare (ignore env))
+  (if (js-boolean-value obj) '*host-js-true* '*host-js-false*))
+
+(defmethod make-load-form ((obj js-null) &optional env)
+  (declare (ignore env))
+  '*host-js-null*)
+
+(defmethod make-load-form ((obj js-undefined) &optional env)
+  (declare (ignore env))
+  '*host-js-undefined*)
+
+(defmethod make-load-form ((obj js-string) &optional env)
+  (declare (ignore env))
+  `(make-js-string ,(js-string-value obj)))
+
 (defun jsstring (x)
   (make-js-string x))
 

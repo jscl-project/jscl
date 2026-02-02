@@ -26,7 +26,7 @@
         (cons (vector)          '(vector 0))
         (cons "sss"             '(string 3))
         (cons (make-string 2)   '(string 2))
-        (cons (jscl::object)       'jscl::js-value)
+        (cons (jscl::object)       't)
         (cons (find-class 'atomic-test-class) 'standard-class)
         (cons (let nil (lambda nil nil))      'function)))
 
@@ -42,7 +42,7 @@
             NULL           NULL        NULL       BOOLEAN
             package        hash-table  SYMBOL     jscl::atomic-test-struct
             STANDARD-CLASS jscl::ATOMIC-TEST-class  CONS       (VECTOR 1)
-            (VECTOR 0)     (STRING 3)  (STRING 2) JSCL::JS-VALUE
+            (VECTOR 0)     (STRING 3)  (STRING 2) T
             STANDARD-CLASS  FUNCTION)))
     (setq real-type-of (loop for x in +atomic-test-objects+ collect (type-of (car x))))
     (setq diff0

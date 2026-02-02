@@ -26,19 +26,17 @@
 ;;; for example look *package-table* into prelude.js
 ;;; attempt print this, caused error
 (defun js-object-signature (obj)
-  (if (not (js-value-p obj))
-      nil
-      (handler-case
-          (progn
-            ;; legal signature
-            ;;   [object Object]
-            ;;   [object HTMLxxxx]
-            ;;   undefined
-            (clstring (#j:String obj)))
-        (error (msg)
-          ;; js-object created with Object.create(Null) ?
-          ;; legal signature 'simple-object'
-          "[object Simple-object]"))))
+  (handler-case
+      (progn
+        ;; legal signature
+        ;;   [object Object]
+        ;;   [object HTMLxxxx]
+        ;;   undefined
+        (clstring (#j:String obj)))
+    (error (msg)
+      ;; js-object created with Object.create(Null) ?
+      ;; legal signature 'simple-object'
+      "[object Simple-object]")))
 
 ;;; some utils
 
@@ -101,19 +99,6 @@
           (pp/terpri buf)))
     (flush-pp-buffer buf stream))
   (values))
-
-
-;;; js-object
-(defmethod describe ((obj js-value) &optional (stream *standard-output*))
-  (let ((keys (#j:Object:keys obj)))
-    (with-pp-buffer (buf)
-      (pp/presentation obj 'js-value buf)
-      (format buf "Signature: ~a~%" (js-object-signature obj))
-      (if (and keys (> (length keys) 0))
-          (format buf "Keys: ~a~%" (map 'list #'clstring keys)))
-      (flush-pp-buffer buf stream)
-      (values) )))
-
 
 
 ;;; number integer

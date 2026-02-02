@@ -96,10 +96,6 @@
                 :direct-superclasses '()
                 :direct-slots   '())
 
-  (ensure-class 'js-value
-                :direct-superclasses '()
-                :direct-slots   '())
-
   (ensure-class 'function
                 :direct-superclasses '()
                 :direct-slots   '())

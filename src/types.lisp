@@ -75,7 +75,6 @@
     ;;(stream            streamp        t    t )
     (atom              atom           t    t )
     ;;(structure         structure-p    t    t )
-    (js-value          js-value-p     t    t )
     (clos-object       mop-object-p   nil  t)
     (character         characterp     t    t )
     ;; symbol relations
@@ -167,7 +166,6 @@
     (array                        (!find-class 'array))
     ;;(sequence                     (!find-class 'sequence))
     (function                     (!find-class 'function))
-    (js-value                     (!find-class 'js-value))
     ;;; and Root of the Evil
     (t                            (!find-class 't))))
 
@@ -259,9 +257,8 @@
                ((keywordp object) 'keyword)
                (t 'symbol)))
         ((functionp object) 'function)
-        ((js-value-p object) 'js-value)
         ((packagep object) 'package)
-        (t 'unreadable-object)))
+        (t t)))
 
 ;;; numeric [lower-limit [upper-limit]]
 (defun check-numeric-limit (limit his-type)

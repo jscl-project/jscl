@@ -112,17 +112,6 @@
 
 
 #+jscl
-(defun js-value-p (obj)
-  (if (or (sequencep obj)
-          (numberp obj)
-          (symbolp obj)
-          (functionp obj)
-          (characterp obj)
-          (packagep obj))
-      nil
-      t))
-
-#+jscl
 (%js-vset "eval_in_lisp"
           (lambda (form)
             (eval (read-from-string (clstring form)))))
