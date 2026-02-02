@@ -57,7 +57,9 @@ internals.values = function (...args) {
 };
 
 internals.mvcall = function(fn, ...args) {
-  // TODO: comment why this exists
+  // Reset _mv before calling fn so that stale multiple values from
+  // a prior form don't leak through. After the call, _mv will be
+  // set only if fn (or something it calls) invoked values().
   internals._mv = null;
   return fn(...args);
 };
@@ -84,7 +86,8 @@ internals.typeError = function (datum, expectedType) {
 
 // Symbol infrastructure
 
-const UNBOUND = Symbol("UnboundFunction");
+const UNBOUND = Symbol("Unbound");
+internals.UNBOUND = UNBOUND;
 
 internals.makeUnboundFunction = function (symbol) {
   const fn = () => {
@@ -111,7 +114,7 @@ internals.makeUnboundSetFunction = function (symbol) {
 internals.Symbol = function (name, pkg) {
   this.name = name;
   this.package = pkg !== undefined ? pkg : nil;
-  this.value = undefined;
+  this.value = UNBOUND;
   this.fvalue = internals.makeUnboundFunction(this)
   this.setfvalue = internals.makeUnboundSetFunction(this)
   this.stack = [];
@@ -488,7 +491,7 @@ packages.CL.symbols["ERROR"] = errorSym;
 
 internals.symbolValue = function (symbol) {
   var value = symbol.value;
-  if (value === undefined) {
+  if (value === UNBOUND) {
     internals.error(
       internals.intern("UNBOUND-VARIABLE"),
       internals.intern("NAME", "KEYWORD"),

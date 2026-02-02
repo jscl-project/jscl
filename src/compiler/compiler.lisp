@@ -1317,7 +1317,7 @@
   `(= (get ,(convert symbol) "setfvalue") ,(convert value)))
 
 (define-builtin boundp (x)
-  (convert-to-bool `(!== (get ,x "value") undefined)))
+  (convert-to-bool `(!== (get ,x "value") (internal |UNBOUND|))))
 
 (define-builtin %fboundp (x)
   (convert-to-bool `(call-internal |fboundp| ,x)))

@@ -189,6 +189,11 @@
 (test (eq (eval #j:null) #j:null))
 (test (eq (eval #j:undefined) #j:undefined))
 
+;;; A variable bound to #j:undefined should be accessible via symbol-value
+(defvar *test-js-undefined-var* #j:undefined)
+(test (eq (symbol-value '*test-js-undefined-var*) #j:undefined))
+(test (boundp '*test-js-undefined-var*))
+
 ;;; compile-toplevel handles JS value literals (exercises the dump path)
 (test (search "true"
         (jscl::with-compilation-environment
