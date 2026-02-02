@@ -313,7 +313,9 @@ All errors are caught and report to *ERROR-OUTPUT*."
 
 (export '(mop-object mop-object-p
           compile-application
-          oget oset new object)
+          oget oset new object
+          typeof instanceof jsstring clstring clbool jsbool
+          *root*)
         'jscl)
 
 (setq *package* *user-package*)
