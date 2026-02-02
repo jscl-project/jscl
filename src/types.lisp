@@ -74,6 +74,7 @@
     (package           packagep       t    t )
     ;;(stream            streamp        t    t )
     (atom              atom           t    t )
+    (js-null           js-null-p      t    t )
     ;;(structure         structure-p    t    t )
     (clos-object       mop-object-p   nil  t)
     (character         characterp     t    t )
