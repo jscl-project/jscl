@@ -59,7 +59,7 @@
 
 ;; the reader produces a JS string directly, not a form like (jsstring "foo")
 (let ((val (read-from-string "#j\"foo\"")))
-  (test (string= (typeof val) "string"))
+  (test (eq (typeof val) #j"string"))
   (test (string= (clstring val) "foo")))
 
 ;;; jsstring
@@ -103,25 +103,25 @@
 (let ((val (read-from-string "#j:true")))
   (test (not (symbolp val)))
   (test (not (consp val)))
-  (test (string= (typeof val) "boolean"))
+  (test (eq (typeof val) #j"boolean"))
   (test (eq val #j:true)))
 
 (let ((val (read-from-string "#j:false")))
   (test (not (symbolp val)))
   (test (not (consp val)))
-  (test (string= (typeof val) "boolean"))
+  (test (eq (typeof val) #j"boolean"))
   (test (eq val #j:false)))
 
 (let ((val (read-from-string "#j:null")))
   (test (not (symbolp val)))
   (test (not (consp val)))
-  (test (string= (typeof val) "object"))
+  (test (eq (typeof val) #j"object"))
   (test (eq val #j:null)))
 
 (let ((val (read-from-string "#j:undefined")))
   (test (not (symbolp val)))
   (test (not (consp val)))
-  (test (string= (typeof val) "undefined"))
+  (test (eq (typeof val) #j"undefined"))
   (test (eq val #j:undefined)))
 
 ;;; clstring

@@ -408,7 +408,7 @@
        ((eq form #j:false)     (write-string "#j:false" stream))
        ((eq form #j:null)      (write-string "#j:null" stream))
        ((eq form #j:undefined) (write-string "#j:undefined" stream))
-       ((string= (typeof form) "string")
+       ((eq (typeof form) #j"string")
         (if *print-escape*
             (progn
               (write-string "#j" stream)

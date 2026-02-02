@@ -97,7 +97,7 @@
     package))
 
 (defun packagep (x)
-  (and (string= (typeof x) "object")
+  (and (eq (typeof x) #j"object")
        (not (eq x #j:null))
        (in "symbols" x)))
 

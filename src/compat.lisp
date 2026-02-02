@@ -81,10 +81,17 @@
 
 (defmethod make-load-form ((obj js-string) &optional env)
   (declare (ignore env))
-  `(make-js-string ,(js-string-value obj)))
+  `(jsstring ,(js-string-value obj)))
+
+;;;; Interning table for host JS strings.
+;;;; jsstring interns so that EQ comparisons work, matching the
+;;;; target behaviour where JS === compares strings by value.
+(defvar *js-string-intern-table* (make-hash-table :test 'equal))
 
 (defun jsstring (x)
-  (make-js-string x))
+  (or (gethash x *js-string-intern-table*)
+      (setf (gethash x *js-string-intern-table*)
+            (make-js-string x))))
 
 ;;;; Reader utilities needed by read-sharp-j
 ;;;;

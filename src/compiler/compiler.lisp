@@ -626,7 +626,7 @@
     ((eq sexp #j:false) 'false)
     ((eq sexp #j:null) 'null)
     ((eq sexp #j:undefined) 'undefined)
-    ((string= (typeof sexp) "string") (clstring sexp))
+    ((eq (typeof sexp) #j"string") (clstring sexp))
     (t (error "Cannot dump JS value ~S as a literal." sexp))))
 
 ;;; Was the compiler invoked by EVAL for in-process evaluation?
@@ -648,25 +648,28 @@
                ;; them to reconstruction code
                (toplevel-compilation
                 `(var (,jsvar (property |data| ,index))))
-               (let ((dumped (if (or (eq sexp #j:true)
-                                     (eq sexp #j:false)
-                                     (eq sexp #j:null)
-                                     (eq sexp #j:undefined)
-                                     (string= (typeof sexp) "string"))
-                                 (dump-js-value sexp)
-                                 (typecase sexp
-                                   (symbol (dump-symbol sexp))
-                                   (string (dump-string sexp))
-                                   (cons
-                                    ;; BOOTSTRAP MAGIC: See the root file
-                                    ;; jscl.lisp and the function
-                                    ;; `dump-global-environment' for further
-                                    ;; information.
-                                    (if (eq (car sexp) *magic-unquote-marker*)
-                                        (convert (second sexp))
-                                        (dump-cons sexp)))
-                                   (array (dump-array sexp))
-                                   (structure-object (dump-structure sexp))))))
+               (let ((dumped
+                       (cond
+			 ;; Start early with JS objects. Because during bootstrap
+			 ;; we simulate many of those with other Lisp objects like structures.
+                         ((eq sexp #j:true) (dump-js-value sexp))
+                         ((eq sexp #j:false) (dump-js-value sexp))
+                         ((eq sexp #j:null) (dump-js-value sexp))
+                         ((eq sexp #j:undefined) (dump-js-value sexp))
+                         ((eq (typeof sexp) #j"string") (dump-js-value sexp))
+
+                         ((symbolp sexp) (dump-symbol sexp))
+                         ((stringp sexp) (dump-string sexp))
+                         ((consp sexp)
+                          ;; BOOTSTRAP MAGIC: See the root file
+                          ;; jscl.lisp and the function
+                          ;; `dump-global-environment' for further
+                          ;; information.
+                          (if (eq (car sexp) *magic-unquote-marker*)
+                              (convert (second sexp))
+                              (dump-cons sexp)))
+                         ((arrayp sexp) (dump-array sexp))
+                         ((structure-p sexp) (dump-structure sexp)))))
                  (toplevel-compilation `(var (,jsvar ,dumped)))
                  (when (keywordp sexp)
                    (toplevel-compilation `(= (get ,jsvar "value") ,jsvar)))))
@@ -1507,7 +1510,7 @@
   (convert-to-bool `(instanceof ,x ,class)))
 
 (define-builtin typeof (x)
-  `(call-internal |make_lisp_string| (typeof ,x)))
+  `(typeof ,x))
 
 (define-raw-builtin object (&rest plist)
   `(object
@@ -1590,8 +1593,6 @@
             `(%js-vset ,var ,new-value)
             `(%js-vref ,var))))
 
-(define-compilation %js-typeof (x)
-  `(call-internal |make_lisp_string| (typeof ,x)))
 
 ;;; Access a function defined in the internals runtime object.
 (define-compilation %js-internal (name)
@@ -1792,7 +1793,7 @@
         ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp)
              (structure-p sexp)
              (eq sexp #j:true) (eq sexp #j:false) (eq sexp #j:null) (eq sexp #j:undefined)
-             (string= (typeof sexp) "string"))
+	     (eq (typeof sexp) #j"string"))
          (literal sexp))
         ((listp sexp)
          (let* ((name (car sexp))

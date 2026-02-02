@@ -341,15 +341,15 @@ All errors are caught and report to *ERROR-OUTPUT*."
                      month)
                 year))))
 
-(when (and (string/= (%js-typeof |module|) "undefined")
-           (string= (%js-typeof |phantom|) "undefined")
-           (string/= (%js-typeof |process|) "undefined"))
+(when (and (not (eq (typeof (%js-vref "module")) #j"undefined"))
+           (eq (typeof (%js-vref "phantom")) #j"undefined")
+           (not (eq (typeof (%js-vref "process")) #j"undefined")))
   (push :node *features*))
 
-(when (string/= (%js-typeof |Deno|) "undefined")
+(when (not (eq (typeof (%js-vref "Deno")) #j"undefined"))
   (push :deno *features*))
 
-(when (string/= (%js-typeof "WorkerGlobalScope") "undefined")
+(when (not (eq (typeof (%js-vref "WorkerGlobalScope")) #j"undefined"))
   (push :web-worker *features*))
 
 (defun welcome-message (&key (html nil))

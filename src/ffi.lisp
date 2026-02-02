@@ -32,7 +32,7 @@
 ;;;
 ;;; Compiler Primitive Contract
 ;;;
-;;;   typeof      (x)           — JS typeof, returns Lisp string
+;;;   typeof      (x)           — JS typeof, returns JS string
 ;;;   jsstring    (x)           — Lisp string → JS string
 ;;;   clstring%   (x)           — JS string → Lisp string (no type check)
 ;;;   instanceof  (x class)     — JS instanceof operator
@@ -44,11 +44,11 @@
   #+jscl (typeof x)
   #-jscl
   (typecase x
-    (number "number")
-    (js-string "string")
-    (js-boolean "boolean")
-    (js-undefined "undefined")
-    (otherwise "object")))
+    (number #j"number")
+    (js-string #j"string")
+    (js-boolean #j"boolean")
+    (js-undefined #j"undefined")
+    (otherwise #j"object")))
 
 ;;; Host jsstring is defined in compat.lisp.
 ;;; Target jsstring is a self-referencing builtin.
@@ -63,7 +63,7 @@
 (defun clstring (x)
   (cond
     ((stringp x) x)
-    ((string= (typeof x) "string") (clstring% x))
+    ((eq (typeof x) #j"string") (clstring% x))
     (t (error 'type-error :datum x :expected-type 'string))))
 
 ;; TODO: rewrite using DEFUN SETF, once we make OSET proper function,
