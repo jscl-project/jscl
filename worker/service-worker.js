@@ -86,7 +86,7 @@ class Context {
         setTimeout(() => resolve({ timeout: true }), 5000),
       ),
     ]);
-    if (resp.value) this.pendingPromise = undefined;
+    if ("value" in resp) this.pendingPromise = undefined;
     return resp;
   }
 

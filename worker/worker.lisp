@@ -56,20 +56,21 @@
                  (json (#j:JSON:parse text)))
             (if (and (in "timeout" json) (oget json "timeout"))
                 (setq command "wait")
-                (return (clstring (oget json "value")))))
+                (return (oget json "value"))))
           (error "Could not contact with the service worker.")))))
 
 
 (defun sleep (seconds)
   (let ((options (object)))
     (setf (oget options "seconds") seconds)
-    (sw-request-sync "sleep" options)))
+    (sw-request-sync "sleep" options)
+    nil))
 
 
 (defvar *stdin-buffer* "")
 
 (defun read-stdin ()
-  (let ((input (sw-request-sync "readStdin")))
+  (let ((input (clstring (sw-request-sync "readStdin"))))
     (setf *stdin-buffer* (concat *stdin-buffer* input))
     *stdin-buffer*))
 
