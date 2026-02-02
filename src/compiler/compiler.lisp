@@ -637,6 +637,11 @@
     ((integerp sexp) sexp)
     ((floatp sexp) sexp)
     ((characterp sexp) (string sexp))
+    ((eq sexp #j:true) (dump-js-value sexp))
+    ((eq sexp #j:false) (dump-js-value sexp))
+    ((eq sexp #j:null) (dump-js-value sexp))
+    ((eq sexp #j:undefined) (dump-js-value sexp))
+    ((eq (typeof sexp) #j"string") (dump-js-value sexp))
     (t
      (or (cdr (assoc sexp *literal-table* :test #'eql))
          (let ((index *literal-counter*)
@@ -650,14 +655,6 @@
                 `(var (,jsvar (property |data| ,index))))
                (let ((dumped
                        (cond
-			 ;; Start early with JS objects. Because during bootstrap
-			 ;; we simulate many of those with other Lisp objects like structures.
-                         ((eq sexp #j:true) (dump-js-value sexp))
-                         ((eq sexp #j:false) (dump-js-value sexp))
-                         ((eq sexp #j:null) (dump-js-value sexp))
-                         ((eq sexp #j:undefined) (dump-js-value sexp))
-                         ((eq (typeof sexp) #j"string") (dump-js-value sexp))
-
                          ((symbolp sexp) (dump-symbol sexp))
                          ((stringp sexp) (dump-string sexp))
                          ((consp sexp)
