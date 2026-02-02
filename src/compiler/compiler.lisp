@@ -1528,7 +1528,11 @@
 
 (defun convert-xstring (form)
   (multiple-value-bind (value constantp) (constant-value form *environment*)
-    (if constantp value `(call-internal |xstring| ,(convert form)))))
+    (if constantp
+        (if (eq (typeof value) #j"string")
+            (clstring value)
+            value)
+        `(call-internal |xstring| ,(convert form)))))
 
 (define-raw-builtin jsstring (x)
   (convert-xstring x))

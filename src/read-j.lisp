@@ -17,8 +17,8 @@
 
 ;;; The #j: and #j"" reader macros for JavaScript interop.
 ;;;
-;;; #j:foo       => (oget *root* "foo")
-;;; #j:foo:bar   => (oget *root* "foo" "bar")
+;;; #j:foo       => (oget *root* #j"foo")
+;;; #j:foo:bar   => (oget *root* #j"foo" #j"bar")
 ;;; #j"foo"      => a JS string object (read-time evaluation)
 
 (defun read-sharp-j (stream)
@@ -52,7 +52,7 @@
                        ((string= name "undefined")
                         #-jscl *host-js-undefined*
                         #+jscl (%js-vref "undefined"))))
-                   `(oget *root* ,@parts))))
+                   `(oget *root* ,@(mapcar #'jsstring parts)))))
          (push (subseq descriptor start end) subdescriptors))))
     (t
      (simple-reader-error stream "Invalid FFI descriptor. Expected #j: or #j\"."))))
