@@ -41,15 +41,18 @@ global scope), thus no need for the caller to do so."
           (setq expr (ls-read stream nil eof))
           (when (eql expr eof)
             (return))
-          (let ((code (if load
-                          (with-compilation-environment
-                            (compile-toplevel expr t t))
-                          (compile-toplevel expr))))
-            (write-string code out)
-            (when load
-              #+jscl (let ((rc (js-eval code nil)))
-                       (when *compile-print* (format t "=> ~a~%" rc)))
-              #-jscl (error "Can't load on host"))))))))
+          (if load
+              #+jscl
+              (let* ((code (with-compilation-environment
+                             (compile-toplevel expr t t)))
+                     (rc (js-eval code nil)))
+                (write-string "(function(){" out)
+                (write-string code out)
+                (write-string "})();" out)
+                (when *compile-print* (format t "=> ~a~%" rc)))
+              #-jscl (error "Can't load on host")
+              (let ((code (compile-toplevel expr)))
+                (write-string code out))))))))
 
 (defun %write-file-prologue (out place)
   (format out "if (typeof importScripts !== 'undefined') importScripts('~Ajscl.js');
