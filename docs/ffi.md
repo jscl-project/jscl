@@ -72,15 +72,12 @@ Lisp functions are JS functions. No special treatment.
 
 ## Conversions
 
-Therere is still a need for conversions. But those can be explicit:
+There is still a need for conversions. But those can be explicit:
 
-
-- `(jsstring x)` convert to js string
-- `(clstring x)` convert to cl string
-- `(jsbool x)` could convert t/nil to `#j:true` / `#j:false`
-- `(clbool x)` could convert `#j:true` to `t`, `#j:false` (and other falsy values?) to `nil`.
-
-etc.
+- `(jsstring x)` convert a Lisp string to a JS string
+- `(clstring x)` convert a JS string to a Lisp string
+- `(jsbool x)` convert any Lisp value to a JS boolean: non-nil becomes `#j:true`, nil becomes `#j:false`
+- `(clbool x)` convert a JS boolean to a Lisp boolean: `#j:true` becomes `t`; `#j:false`, `#j:null`, and `#j:undefined` become `nil`. Signals a type error for other values.
 
 ## Conditionals
 
