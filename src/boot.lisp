@@ -380,9 +380,7 @@
      (error "Invalid function `~S'." x))))
 
 (defun disassemble (function)
-  (write-line (lambda-code (if (functionp function)
-			       function
-			       (fdefinition function))))
+  (write-line (lambda-code (find-function function)))
   nil)
 
 (defmacro multiple-value-bind (variables value-from &body body)
