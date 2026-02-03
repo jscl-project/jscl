@@ -44,11 +44,11 @@
   #+jscl (typeof x)
   #-jscl
   (typecase x
-    (number #j"number")
-    (js-string #j"string")
-    (js-boolean #j"boolean")
-    (js-undefined #j"undefined")
-    (otherwise #j"object")))
+    (number (jsstring "number"))
+    (js-string (jsstring "string"))
+    (js-boolean (jsstring "boolean"))
+    (js-undefined (jsstring "undefined"))
+    (otherwise (jsstring "object"))))
 
 ;;; Host jsstring is defined in compat.lisp.
 ;;; Target jsstring is a self-referencing builtin.
@@ -63,7 +63,7 @@
 (defun clstring (x)
   (cond
     ((stringp x) x)
-    ((eq (typeof x) #j"string") (clstring% x))
+    ((eq (typeof x) (jsstring "string")) (clstring% x))
     (t (error 'type-error :datum x :expected-type 'string))))
 
 ;; TODO: rewrite using DEFUN SETF, once we make OSET proper function,
@@ -106,7 +106,15 @@
 
 #+jscl
 (defun jsbool (x)
-  (if x #j:true #j:false))
+  (jsbool x))
+
+#+jscl
+(defun jsnull ()
+  (jsnull))
+
+#+jscl
+(defun jsundefined ()
+  (jsundefined))
 
 
 #+jscl

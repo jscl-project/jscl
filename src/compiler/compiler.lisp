@@ -622,11 +622,11 @@
 
 (defun dump-js-value (sexp)
   (cond
-    ((eq sexp #j:true) 'true)
-    ((eq sexp #j:false) 'false)
-    ((eq sexp #j:null) 'null)
-    ((eq sexp #j:undefined) 'undefined)
-    ((eq (typeof sexp) #j"string") (clstring sexp))
+    ((eq sexp (jsbool t)) 'true)
+    ((eq sexp (jsbool nil)) 'false)
+    ((eq sexp (jsnull)) 'null)
+    ((eq sexp (jsundefined)) 'undefined)
+    ((eq (typeof sexp) (jsstring "string")) (clstring sexp))
     (t (error "Cannot dump JS value ~S as a literal." sexp))))
 
 ;;; Was the compiler invoked by EVAL for in-process evaluation?
@@ -637,11 +637,11 @@
     ((integerp sexp) sexp)
     ((floatp sexp) sexp)
     ((characterp sexp) (string sexp))
-    ((eq sexp #j:true) (dump-js-value sexp))
-    ((eq sexp #j:false) (dump-js-value sexp))
-    ((eq sexp #j:null) (dump-js-value sexp))
-    ((eq sexp #j:undefined) (dump-js-value sexp))
-    ((eq (typeof sexp) #j"string") (dump-js-value sexp))
+    ((eq sexp (jsbool t)) (dump-js-value sexp))
+    ((eq sexp (jsbool nil)) (dump-js-value sexp))
+    ((eq sexp (jsnull)) (dump-js-value sexp))
+    ((eq sexp (jsundefined)) (dump-js-value sexp))
+    ((eq (typeof sexp) (jsstring "string")) (dump-js-value sexp))
     (t
      (or (cdr (assoc sexp *literal-table* :test #'eql))
          (let ((index *literal-counter*)
@@ -1530,12 +1530,26 @@
 (define-raw-builtin jsstring (x)
   (convert-xstring x))
 
+(define-raw-builtin jsbool (x)
+  (multiple-value-bind (value constantp) (constant-value x *environment*)
+    (if constantp
+	(if value 'true 'false)
+	`(if (!== ,(convert x) ,(convert nil))
+	     true
+	     false))))
+
+(define-builtin jsnull ()
+  'null)
+
+(define-builtin jsundefined ()
+  'undefined)
+
 (defun convert-property-key (form)
   (multiple-value-bind (value constantp) (constant-value form *environment*)
     (cond
       ((and constantp
 	    (or (stringp value)
-		(eq (typeof value) #j"string")))
+		(eq (typeof value) (jsstring "string"))))
        (clstring value))
       ((and constantp (numberp value)) (princ-to-string value))
       ;; xstring handles strings, numbers, and Lisp strings at runtime
@@ -1803,8 +1817,8 @@
               (convert `(symbol-value ',sexp))))))
         ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp)
              (structure-p sexp)
-             (eq sexp #j:true) (eq sexp #j:false) (eq sexp #j:null) (eq sexp #j:undefined)
-	     (eq (typeof sexp) #j"string"))
+             (eq sexp (jsbool t)) (eq sexp (jsbool nil)) (eq sexp (jsnull)) (eq sexp (jsundefined))
+	     (eq (typeof sexp) (jsstring "string")))
          (literal sexp))
         ((listp sexp)
          (let* ((name (car sexp))

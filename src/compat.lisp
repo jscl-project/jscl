@@ -64,25 +64,6 @@
 (defvar *host-js-null* (%make-js-null))
 (defvar *host-js-undefined* (%make-js-undefined))
 
-;;;; make-load-form methods so SBCL can serialize these structs into FASLs.
-;;;; When #j:true etc. appear as literal constants in compiled source,
-;;;; SBCL needs to know how to reconstruct them at FASL load time.
-(defmethod make-load-form ((obj js-boolean) &optional env)
-  (declare (ignore env))
-  (if (js-boolean-value obj) '*host-js-true* '*host-js-false*))
-
-(defmethod make-load-form ((obj js-null) &optional env)
-  (declare (ignore env))
-  '*host-js-null*)
-
-(defmethod make-load-form ((obj js-undefined) &optional env)
-  (declare (ignore env))
-  '*host-js-undefined*)
-
-(defmethod make-load-form ((obj js-string) &optional env)
-  (declare (ignore env))
-  `(jsstring ,(js-string-value obj)))
-
 ;;;; Interning table for host JS strings.
 ;;;; jsstring interns so that EQ comparisons work, matching the
 ;;;; target behaviour where JS === compares strings by value.
@@ -92,6 +73,15 @@
   (or (gethash x *js-string-intern-table*)
       (setf (gethash x *js-string-intern-table*)
             (make-js-string x))))
+
+(defun jsbool (x)
+  (if x *host-js-true* *host-js-false*))
+
+(defun jsnull ()
+  *host-js-null*)
+
+(defun jsundefined ()
+  *host-js-undefined*)
 
 ;;;; Reader utilities needed by read-sharp-j
 ;;;;
