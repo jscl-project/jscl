@@ -109,8 +109,9 @@ All errors are caught and report to *ERROR-OUTPUT*."
                        (if (eq msg #j:undefined)
                            (clstring err)
                            (clstring msg)))))
-        (format *error-output* "ERROR[!]: ~a~%~A~%" message
-                (let ((s (oget err "stack"))) (if (eq s #j:undefined) "" (clstring s))))))))
+        (format *error-output* "ERROR[!]: ~a~%~A~%"
+		message
+		(clstring (?? (oget err "stack") "")))))))
 
 (export
  '(&allow-other-keys &aux &body &environment &key &optional &rest &whole
@@ -314,7 +315,7 @@ All errors are caught and report to *ERROR-OUTPUT*."
 (export '(mop-object mop-object-p
           compile-application
           oget oset new object
-          typeof instanceof jsstring clstring clbool jsbool
+          typeof instanceof jsstring clstring clbool jsbool ??
           *root*)
         'jscl)
 

@@ -1530,22 +1530,33 @@
 (define-raw-builtin jsstring (x)
   (convert-xstring x))
 
+(defun convert-property-key (form)
+  (multiple-value-bind (value constantp) (constant-value form *environment*)
+    (cond
+      ((and constantp
+	    (or (stringp value)
+		(eq (typeof value) #j"string")))
+       (clstring value))
+      ((and constantp (numberp value)) (princ-to-string value))
+      ;; xstring handles strings, numbers, and Lisp strings at runtime
+      (t `(call-internal |xstring| ,(convert form))))))
+
 (define-raw-builtin oget (object key &rest keys)
   (let ((result (convert object)))
     (dolist (k (cons key keys))
-      (setq result `(property ,result ,(convert-xstring k))))
+      (setq result `(property ,result ,(convert-property-key k))))
     result))
 
 (define-raw-builtin oget? (object key &rest keys)
   (let ((result (convert object)))
     (dolist (k (cons key keys))
-      (setq result `(property? ,result ,(convert-xstring k))))
+      (setq result `(property? ,result ,(convert-property-key k))))
     result))
 
 (define-raw-builtin oset (value object key &rest keys)
   (let ((result (convert object)))
     (dolist (k (cons key keys))
-      (setq result `(property ,result ,(convert-xstring k))))
+      (setq result `(property ,result ,(convert-property-key k))))
     `(= ,result ,(convert value))))
 
 (define-builtin ?? (x y)
@@ -1561,11 +1572,11 @@
 
 
 (define-raw-builtin in (key object)
-  (convert-to-bool `(in ,(convert-xstring key) ,(convert object))))
+  (convert-to-bool `(in ,(convert-property-key key) ,(convert object))))
 
 (define-raw-builtin delete-property (key object)
   `(selfcall
-    (delete (property ,(convert object) ,(convert-xstring key)))))
+    (delete (property ,(convert object) ,(convert-property-key key)))))
 
 (define-builtin map-for-in (function object)
   `(selfcall

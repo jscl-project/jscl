@@ -430,10 +430,7 @@
 
 ;;; tag's utils
 (defun object-type-code (object)
-  (let ((code (oget? object "dt_Name")))
-    (if (eq code #j:undefined)
-	nil
-	code)))
+  (?? (oget? object "dt_Name") nil))
 
 (defun set-object-type-code (object tag)
   (oset tag object "dt_Name"))
