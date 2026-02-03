@@ -96,10 +96,8 @@
 #+jscl
 (defun clbool (x)
   (cond
-    ;; TODO: Should we do this? or just accept js booleans? similar for clstring
     ((eq x t) t)
     ((eq x nil) nil)
-
     ((eq x #j:true) t)
     ((eq x #j:false) nil)
     ((eq x #j:null) nil)
