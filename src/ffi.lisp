@@ -116,6 +116,11 @@
 (defun jsundefined ()
   (jsundefined))
 
+#+jscl
+(defun clone (x)
+  "Create a shallow copy of a JavaScript object."
+  ((oget #j:Object "assign") (object) x))
+
 
 #+jscl
 (%js-vset "eval_in_lisp"

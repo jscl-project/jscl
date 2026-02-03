@@ -1518,9 +1518,6 @@
 (define-raw-builtin new (constructor &rest args)
   `(call-internal |newInstance| ,(convert constructor) ,@(mapcar #'convert args)))
 
-(define-builtin clone (x)
-  `(method-call |Object| "assign" (object) ,x))
-
 (defun convert-xstring (form)
   (multiple-value-bind (value constantp) (constant-value form *environment*)
     (if constantp
