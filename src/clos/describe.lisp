@@ -259,8 +259,8 @@
 
 ;;; function
 (defmethod describe ((obj function) &optional (stream *standard-output*))
-  (let ((name (if (in "fname" obj) (oget obj "fname") nil))
-        (doc (if (in "docstring" obj) (oget obj "docstring") nil)))
+  (let ((name (?? (oget obj "fname") nil))
+        (doc (?? (oget obj "docstring") nil)))
     (with-pp-buffer (buf)
       (pp/presentation obj 'function stream)
       (format buf "Name:~a~%" (if name name "anonimous"))

@@ -1552,6 +1552,9 @@
       (setq result `(property ,result ,(convert-xstring k))))
     `(= ,result ,(convert value))))
 
+(define-builtin ?? (x y)
+  `(?? ,x ,y))
+
 (define-builtin %%nlx-p (x)
   (convert-to-bool `(call-internal |isNLX| ,x)))
 

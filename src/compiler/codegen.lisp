@@ -393,6 +393,7 @@
 
            (binary-op and        "&&"            7    left)
            (binary-op or         "||"            6    left)
+	   (binary-op ??         "??"            6    left)
 
            (when (member op '(? if))
              (when (low-precedence-p 4) (js-format "("))
