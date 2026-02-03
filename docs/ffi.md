@@ -1,5 +1,11 @@
 # JSCL FFI
 
+The `JSCL/FFI` package exports the public API for JavaScript interop.
+
+```lisp
+(use-package :jscl/ffi)
+```
+
 ## Basic values and constants
 
 ```

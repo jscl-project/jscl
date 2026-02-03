@@ -313,11 +313,27 @@ All errors are caught and report to *ERROR-OUTPUT*."
    yes-or-no-p zerop))
 
 (export '(mop-object mop-object-p
-          compile-application
-          oget oset new object
-          typeof instanceof jsstring clstring clbool jsbool ??
-          *root*)
+          compile-application)
         'jscl)
+
+;;; JSCL/FFI package - public API for JavaScript interop
+;;; Only exports symbols documented in docs/ffi.md
+(defpackage "JSCL/FFI"
+  (:use)
+  (:import-from "JSCL"
+   #:object
+   #:oget #:oset #:oget?
+   #:typeof #:instanceof
+   #:new
+   #:jsstring #:clstring
+   #:jsbool #:clbool)
+  (:export
+   #:object
+   #:oget #:oset #:oget?
+   #:typeof #:instanceof
+   #:new
+   #:jsstring #:clstring
+   #:jsbool #:clbool))
 
 (setq *package* *user-package*)
 
