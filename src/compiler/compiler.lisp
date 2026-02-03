@@ -1493,9 +1493,7 @@
 (define-raw-builtin values (&rest args)
   (if *multiple-value-p*
       `(call |values| ,@(mapcar #'convert args))
-      (if args
-          (convert (car args))
-          (convert nil))))
+      (convert (car args))))
 
 ;;; Javascript FFI
 ;;;
