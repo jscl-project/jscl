@@ -276,18 +276,19 @@
          (js-identifier accessor)))
       ;; Function call
       (call
-       (js-expr (car args) 20)
-       (js-format "(")
-       (flet ((output-arg (arg)
-                (if (and (consp arg) (eq (car arg) 'spread))
-                    (progn (js-format "...") (js-expr (cadr arg) no-comma))
-                    (js-expr arg no-comma))))
-         (when (cdr args)
-           (output-arg (cadr args))
-           (dolist (operand (cddr args))
-             (js-format ",")
-             (output-arg operand))))
-       (js-format ")"))
+       (destructuring-bind (fn &rest fnargs) args
+	 (js-expr fn 20)
+	 (js-format "(")
+	 (flet ((output-arg (arg)
+		  (if (and (consp arg) (eq (car arg) 'spread))
+		      (progn (js-format "...") (js-expr (cadr arg) no-comma))
+		      (js-expr arg no-comma))))
+	   (when fnargs
+	     (output-arg (first fnargs))
+	     (dolist (operand (rest fnargs))
+	       (js-format ",")
+	       (output-arg operand))))
+	 (js-format ")")))
       ;; Object syntax
       (object
        (js-object-initializer args))
