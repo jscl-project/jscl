@@ -56,12 +56,17 @@ Access global JS properties.
 (#j:Math:floor 3.7)              ; => 3
 ```
 
-## Type checking: `typeof` / `instanceof`
+## Type checking: `typeof` / `instanceof` / `in`
 
 ```lisp
 (typeof x)                       ; => #j"string", #j"number", etc.
-(instanceof x #j:Date)           ; => #j:true or #j:false
+(instanceof x #j:Date)           ; => T or NIL
+(in #j"foo" obj)				 ; => T or NIL
+(in "foo" obj)					 ; => T or NIL
 ```
+
+Note that, unlike other operators. `instanceof` and `in` return T/NIL
+instead of `#j:true` and `#j:false`.
 
 ## Constructor calls: `new`
 

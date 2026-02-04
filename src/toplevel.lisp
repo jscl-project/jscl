@@ -323,15 +323,15 @@ All errors are caught and report to *ERROR-OUTPUT*."
   (:import-from "JSCL"
    #:object
    #:oget #:oset #:oget?
-   #:typeof #:instanceof
-   #:new
+   #:typeof #:instanceof #:new
    #:jsstring #:clstring
-   #:jsbool #:clbool)
+   #:jsbool #:clbool
+   #:in)
   (:export
    #:object
    #:oget #:oset #:oget?
-   #:typeof #:instanceof
-   #:new
+   #:typeof #:instanceof #:new
+   #:in
    #:jsstring #:clstring
    #:jsbool #:clbool))
 
