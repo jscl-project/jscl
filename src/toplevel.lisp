@@ -105,8 +105,13 @@ All errors are caught and report to *ERROR-OUTPUT*."
           (prin1 result)
           (terpri))))
     (catch (err)
-      (let ((message (or (oget err "message") err)))
-        (format *error-output* "ERROR[!]: ~a~%~A~%" message (oget err "stack"))))))
+      (let ((message (let ((msg (oget err "message")))
+                       (if (eq msg #j:undefined)
+                           (clstring err)
+                           (clstring msg)))))
+        (format *error-output* "ERROR[!]: ~a~%~A~%"
+		message
+		(clstring (?? (oget err "stack") "")))))))
 
 (export
  '(&allow-other-keys &aux &body &environment &key &optional &rest &whole
@@ -308,10 +313,27 @@ All errors are caught and report to *ERROR-OUTPUT*."
    yes-or-no-p zerop))
 
 (export '(mop-object mop-object-p
-          compile-application
-          oget oset new oget! oset! new! make-new
-          lisp-to-js js-to-lisp js-object-p js-null-p js-undefined-p)
+          compile-application)
         'jscl)
+
+;;; JSCL/FFI package - public API for JavaScript interop
+;;; Only exports symbols documented in docs/ffi.md
+(defpackage "JSCL/FFI"
+  (:use)
+  (:import-from "JSCL"
+   #:object
+   #:oget #:oset #:oget?
+   #:typeof #:instanceof #:new
+   #:jsstring #:clstring
+   #:jsbool #:clbool
+   #:in)
+  (:export
+   #:object
+   #:oget #:oset #:oget?
+   #:typeof #:instanceof #:new
+   #:in
+   #:jsstring #:clstring
+   #:jsbool #:clbool))
 
 (setq *package* *user-package*)
 
@@ -338,15 +360,15 @@ All errors are caught and report to *ERROR-OUTPUT*."
                      month)
                 year))))
 
-(when (and (string/= (%js-typeof |module|) "undefined")
-           (string= (%js-typeof |phantom|) "undefined")
-           (string/= (%js-typeof |process|) "undefined"))
+(when (and (not (eq (typeof (%js-vref "module")) #j"undefined"))
+           (eq (typeof (%js-vref "phantom")) #j"undefined")
+           (not (eq (typeof (%js-vref "process")) #j"undefined")))
   (push :node *features*))
 
-(when (string/= (%js-typeof |Deno|) "undefined")
+(when (not (eq (typeof (%js-vref "Deno")) #j"undefined"))
   (push :deno *features*))
 
-(when (string/= (%js-typeof "WorkerGlobalScope") "undefined")
+(when (not (eq (typeof (%js-vref "WorkerGlobalScope")) #j"undefined"))
   (push :web-worker *features*))
 
 (defun welcome-message (&key (html nil))
@@ -406,22 +428,16 @@ All errors are caught and report to *ERROR-OUTPUT*."
 (setq *standard-output*
       (make-line-buffer-stream
        (make-stream
-        :write-fn (lambda (string) (#j:console:log string))
+        :write-fn (lambda (string) (#j:console:log (jsstring string)))
         :kind 'console-output-stream))
       *error-output* *standard-output*
       *trace-output* *standard-output*)
 
-(cond
-  ((find :node *features*)
-   (setq *root* (%js-vref "global"))
-   (setf #j:Fs (funcall (%js-vref "require") "fs")) 
-   (setf #j:FsPath (funcall (%js-vref "require") "path")))
-  ((string/= (%js-typeof |window|) "undefined")
-   (setq *root* (%js-vref "window")))
-  (t
-   (setq *root* (%js-vref "self"))))
+(when (find :node *features*)
+  (setf #j:Fs (funcall (%js-vref "require") #j"fs"))
+  (setf #j:FsPath (funcall (%js-vref "require") #j"path")))
 
 (defun require (name)
   (if (find :node *features*)
-      (funcall (%js-vref "require") name)
+      (funcall (%js-vref "require") (jsstring name))
       (error "require not supported on this platform")))

@@ -22,6 +22,14 @@
 (defun false () nil)
 (defun void () (values))
 
+;;; types predicate's
+(defun mop-object-p (obj)
+  (eql (object-type-code obj) :mop-object))
+
+(defun clos-object-p (object)
+  (eql (object-type-code object) :clos_object))
+
+
 ;;; For to accurately definition  LIST and CONS forms.
 ;;; Now inferno gate is opened. Welcome to DOOM
 ;;;
@@ -66,9 +74,8 @@
     (package           packagep       t    t )
     ;;(stream            streamp        t    t )
     (atom              atom           t    t )
-    ;;(structure         structure-p    t    t )
-    (js-object         js-object-p    t    t )
     (js-null           js-null-p      t    t )
+    ;;(structure         structure-p    t    t )
     (clos-object       mop-object-p   nil  t)
     (character         characterp     t    t )
     ;; symbol relations
@@ -111,6 +118,9 @@
                  :tpl tpl))
       (setf (gethash name *builtin-types*) tip)
       (%deftype name :predicate predicate))))
+
+;; js-null uses an inline eq check instead of a named predicate
+(%deftype 'js-null :predicate (lambda (x) (eq x #j:null)))
 
 (defun builtin-type-p (name &optional (content-p nil))
   (let (type-info)
@@ -157,7 +167,6 @@
     (array                        (!find-class 'array))
     ;;(sequence                     (!find-class 'sequence))
     (function                     (!find-class 'function))
-    (js-object                    (!find-class 'js-object))
     ;;; and Root of the Evil
     (t                            (!find-class 't))))
 
@@ -227,7 +236,7 @@
           (error "Unknown type-specifier ~a."  type-specifier)))))
 
 (defun type-of (object)
-  (cond ((js-null-p object) 'js-null)
+  (cond ((eq object #j:null) 'js-null)
         ((integerp object)
          (case object
            ((0 1) 'bit)
@@ -249,9 +258,8 @@
                ((keywordp object) 'keyword)
                (t 'symbol)))
         ((functionp object) 'function)
-        ((js-object-p object) 'js-object)
         ((packagep object) 'package)
-        (t 'unreadable-object)))
+        (t t)))
 
 ;;; numeric [lower-limit [upper-limit]]
 (defun check-numeric-limit (limit his-type)

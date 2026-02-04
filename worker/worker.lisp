@@ -23,10 +23,10 @@
 
 
 (defun %web-worker-write-string (string &optional (style "jqconsole-output"))
-  (let ((obj (new)))
-    (setf (oget obj "command") "output")
-    (setf (oget obj "stringclass") style)
-    (setf (oget obj "string") string)
+  (let ((obj (object)))
+    (setf (oget obj "command") #j"output")
+    (setf (oget obj "stringclass") (jsstring style))
+    (setf (oget obj "string") (jsstring string))
     (#j:postMessage obj)))
 
 
@@ -38,38 +38,39 @@
       (eval-interactive (read)))))
 
 
-(defun sw-request-sync (command &optional (options (new)))
+(defun sw-request-sync (command &optional (options (object)))
   (while t
-    (let ((xhr (make-new #j:XMLHttpRequest))
-          (payload (new)))
+    (let ((xhr (new #j:XMLHttpRequest))
+          (payload (object)))
 
-      (setf (oget payload "command") command)
+      (setf (oget payload "command") (jsstring command))
       (setf (oget payload "sessionId") *web-worker-session-id*)
       (setf (oget payload "options") options)
 
-      ((oget xhr "open") "POST" "__jscl" nil)
-      ((oget xhr "setRequestHeader") "ContentType" "application/json")
+      ((oget xhr "open") #j"POST" #j"__jscl" #j:false)
+      ((oget xhr "setRequestHeader") #j"ContentType" #j"application/json")
       ((oget xhr "send") (#j:JSON:stringify payload))
 
       (if (eql (oget xhr "status") 200)
           (let* ((text (oget xhr "responseText"))
                  (json (#j:JSON:parse text)))
-            (if (oget json "timeout")
+            (if (and (in "timeout" json) (oget json "timeout"))
                 (setq command "wait")
                 (return (oget json "value"))))
           (error "Could not contact with the service worker.")))))
 
 
 (defun sleep (seconds)
-  (let ((options (new)))
+  (let ((options (object)))
     (setf (oget options "seconds") seconds)
-    (sw-request-sync "sleep" options)))
+    (sw-request-sync "sleep" options)
+    nil))
 
 
 (defvar *stdin-buffer* "")
 
 (defun read-stdin ()
-  (let ((input (sw-request-sync "readStdin")))
+  (let ((input (clstring (sw-request-sync "readStdin"))))
     (setf *stdin-buffer* (concat *stdin-buffer* input))
     *stdin-buffer*))
 
@@ -106,7 +107,7 @@
   (setf #j:onmessage
         (lambda (event)
           (let* ((data (oget event "data"))
-                 (command (oget data "command"))
+                 (command (clstring (oget data "command")))
                  (sessionId (oget data "sessionId")))
             (when (string= command "init")
               (setf *web-worker-session-id* sessionId)

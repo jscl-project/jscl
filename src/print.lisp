@@ -203,7 +203,7 @@
     (setq result
           (cond ((eql print-base 10)(integer-to-string  argument))
                 (t (check-type print-base (integer 2 36))
-                   (funcall ((oget argument "toString" "bind") argument print-base)))))
+                   (clstring ((oget argument "toString") print-base)))))
     (when print-radix
       ;; print base prefix
       (case print-base
@@ -335,7 +335,7 @@
          (write-string form stream)))
     ;; Functions
     (function
-     (let ((name #+jscl (oget form "fname")
+     (let ((name #+jscl (if (in "fname" form) (oget form "fname") nil)
                  #-jscl nil))
        (if name
            (simple-format stream "#<FUNCTION ~a>" name)
@@ -344,7 +344,7 @@
     (mop-object (print-object form stream))
     ;; structure object
     (structure-object
-     (let ((dvec (oget! form "structDescriptors")))
+     (let ((dvec (oget form "structDescriptors")))
        (cond ((symbolp dvec)
               (simple-format stream "#<~a (INTERNAL)>" (string dvec)))
              (t
@@ -365,7 +365,7 @@
                            (write-string " :" stream)
                            (write-string (symbol-name slot) stream)
                            (write-string " " stream)
-                           (write-aux (oget! form prop) stream known-objects object-ids))
+                           (write-aux (oget form prop) stream known-objects object-ids))
                          slot-names property-names)
                    (write-string (if obsolete ">" ")") stream))))))))
     ;; hash-table object
@@ -401,11 +401,21 @@
     ;; Packages
     (package
      (simple-format stream "#<PACKAGE ~a>" (package-name form)))
-    ;; Others
-    (js-object 
-     (simple-format stream "#<JS-OBJECT ~a>" (js-object-signature form)))
+    ;; JS values and other objects
     (otherwise
-     (simple-format stream "#<JS-OBJECT ~a>" (#j:String form)))))
+     (cond
+       ((eq form #j:true)      (write-string "#j:true" stream))
+       ((eq form #j:false)     (write-string "#j:false" stream))
+       ((eq form #j:null)      (write-string "#j:null" stream))
+       ((eq form #j:undefined) (write-string "#j:undefined" stream))
+       ((eq (typeof form) #j"string")
+        (if *print-escape*
+            (progn
+              (write-string "#j" stream)
+              (write-string (lisp-escape-string (clstring form)) stream))
+            (write-string (clstring form) stream)))
+       (t
+        (simple-format stream "#<JS-OBJECT ~a>" (js-object-signature form)))))))
 
 
 #+jscl

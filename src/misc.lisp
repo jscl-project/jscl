@@ -163,17 +163,17 @@ Currently represented as a list of strings. If FROM is provided and
 appears on stack, frames including and above the topmost FROM call is
 omitted. Note the function does NOT truncate the list according to
 *BACKTRACE-LIMIT*."
-  (let ((obj (new)))
-    (cond ((in "stackTraceLimit" (oget! *root* "Error"))
+  (let ((obj (object)))
+    (cond ((in "stackTraceLimit" (oget *root* "Error"))
            (let ((old-limit #j:Error:stackTraceLimit))
-             (setf #j:Error:stackTraceLimit (%js-vref "Infinity"))
-             ((oget! *root* "Error" "captureStackTrace") obj from)
+             (setf #j:Error:stackTraceLimit #j:Infinity)
+             ((oget *root* "Error" "captureStackTrace") obj from)
              (setf #j:Error:stackTraceLimit old-limit)))
-          (t ((oget! *root* "Error" "captureStackTrace") obj from)))
-    (let* ((str (oget! obj "stack"))
-           (list (map 'list #'js-to-lisp
-                      ((oget! str "split")
-                       (#j:RegExp (code-char 10) "g")))))
+          (t ((oget *root* "Error" "captureStackTrace") obj from)))
+    (let* ((str (oget obj "stack"))
+           (list (map 'list #'clstring
+                      ((oget str "split")
+                       (#j:RegExp (code-char 10) #j"g")))))
       ;; Trim useless first line on V8
       (when (equal (car list) "Error")
         (pop list))

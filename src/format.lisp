@@ -1353,8 +1353,8 @@
 #+jscl
 (defun format-fixed-aux (stream number w d k ovf pad atsign)
   (let* ((number (if k (* number (expt 10 k)) number))
-         (str (if d ((oget number "toFixed") d)
-                  ((oget number "toString"))))
+         (str (clstring (if d ((oget number "toFixed") d)
+                            ((oget number "toString")))))
          (l (length str)))
     (when (and w (< l w))
       (write-string (make-string (- w l) :initial-element pad) stream))
@@ -1382,8 +1382,8 @@
 #+jscl
 (defun format-exp-aux (stream number w d k ovf pad marker atsign)
   (let* ((number (if k (* number (expt 10 k)) number))
-         (str (if d ((oget number "toExponential") d)
-                  ((oget number "toExponential"))))
+         (str (clstring (if d ((oget number "toExponential") d)
+                            ((oget number "toExponential")))))
          (l (length str)))
     (when (and w (< l w))
       (write-string (make-string (- w l) :initial-element pad) stream))

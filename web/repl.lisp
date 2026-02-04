@@ -16,33 +16,38 @@
 (/debug "loading repl-web/repl.lisp!")
 
 (defun %write-string (string &optional (escape t) (style "jqconsole-output"))
-    (if #j:jqconsole
-        (if escape
-            (#j:jqconsole:Write string style)
-            (#j:jqconsole:Write string style ""))
-        (#j:console:log string)))
+    (let ((jsstr (jsstring string))
+          (jsstyle (jsstring style)))
+      (if #j:jqconsole
+          (if escape
+              (#j:jqconsole:Write jsstr jsstyle)
+              (#j:jqconsole:Write jsstr jsstyle #j""))
+          (#j:console:log jsstr))))
 
 (defun load-history ()
-  (let ((raw (#j:localStorage:getItem "jqhist")))
-    (unless (js-null-p raw)
+  (let ((raw (#j:localStorage:getItem #j"jqhist")))
+    (unless (eq raw #j:null)
       (#j:jqconsole:SetHistory (#j:JSON:parse raw)))))
 
 (defun save-history ()
-  (#j:localStorage:setItem "jqhist" (#j:JSON:stringify (#j:jqconsole:GetHistory))))
+  (#j:localStorage:setItem #j"jqhist" (#j:JSON:stringify (#j:jqconsole:GetHistory))))
 
 
 (defparameter +err-css+ "jqconsole-error")
 
 (defun toplevel ()
-  (#j:jqconsole:RegisterMatching "(" ")" "parents")
-  (let ((prompt (format nil "~a> " (package-name-for-prompt *package*))))
-    (#j:jqconsole:Write prompt "jqconsole-prompt"))
+  (#j:jqconsole:RegisterMatching #j"(" #j")" #j"parents")
+  (let ((prompt (jsstring (format nil "~a> " (package-name-for-prompt *package*)))))
+    (#j:jqconsole:Write prompt #j"jqconsole-prompt"))
   (flet ((process-input (input)
            (with-toplevel-eval ()
-             (eval-interactive-input input))
+             (eval-interactive-input (clstring input)))
            (save-history)
            (toplevel)))
-    (#j:jqconsole:Prompt t #'process-input #'%sexpr-incomplete)))
+    (#j:jqconsole:Prompt #j:true #'process-input
+     (lambda (input &rest _)
+       (let ((result (%sexpr-incomplete (clstring input))))
+         (if result result #j:false))))))
 
 (defun web-init ()
   (load-history)
@@ -56,7 +61,7 @@
          :kind 'web-repl-error-stream)
         *trace-output* *standard-output*)
   (welcome-message :html t)
-  (#j:window:addEventListener "load" (lambda (&rest args) (toplevel))))
+  (#j:window:addEventListener #j"load" (lambda (&rest args) (toplevel))))
 
 (web-init)
 

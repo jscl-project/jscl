@@ -96,7 +96,8 @@ in which case ARRAY might be partially filled from CONTENTS."
     ;; Record metadata
     (when (or (null dimensions) (cdr dimensions))
       (setf (oget array "dimensions") dimensions))
-    (setf (oget array "fillpointer") fill-pointer)
+    (when fill-pointer
+      (setf (oget array "fillpointer") fill-pointer))
     ;; Initialize array
     (when (and initial-element-p initial-contents-p)
       (error "make-array - INITIAL-ELEMENT and INITIAL-CONTENTS cannot both be provided"))
@@ -204,7 +205,7 @@ in which case ARRAY might be partially filled from CONTENTS."
 
 
 (defun array-has-fill-pointer-p (array)
-  (and (oget array "fillpointer") t))
+  (in "fillpointer" array))
 
 (defun fill-pointer (array)
   (unless (arrayp array)

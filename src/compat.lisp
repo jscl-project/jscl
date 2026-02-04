@@ -34,11 +34,100 @@
   ;; (write-line x)
   )
 
+;;;; Host compatibility types for FFI
+;;;;
+;;;; JS values don't exist in the host. These structs stand in for them
+;;;; so the compiler can recognize and dump FFI literals.
+
+(defstruct js-value)
+
+(defstruct (js-string (:include js-value)
+                      (:constructor make-js-string (value))
+                      (:predicate %host-js-string-p))
+  value)
+
+(defstruct (js-boolean (:include js-value)
+                       (:constructor %make-js-boolean (value)))
+  value)
+
+(defstruct (js-null (:include js-value)
+                    (:constructor %make-js-null)))
+
+(defstruct (js-undefined (:include js-value)
+                         (:constructor %make-js-undefined)))
+
+;;;; Constants for the host.
+;;;; The reader (#j:true, etc.) returns these cached objects so that EQ
+;;;; comparisons work reliably across different read sites.
+(defvar *host-js-true* (%make-js-boolean t))
+(defvar *host-js-false* (%make-js-boolean nil))
+(defvar *host-js-null* (%make-js-null))
+(defvar *host-js-undefined* (%make-js-undefined))
+
+;;;; Interning table for host JS strings.
+;;;; jsstring interns so that EQ comparisons work, matching the
+;;;; target behaviour where JS === compares strings by value.
+(defvar *js-string-intern-table* (make-hash-table :test 'equal))
+
+(defun jsstring (x)
+  (or (gethash x *js-string-intern-table*)
+      (setf (gethash x *js-string-intern-table*)
+            (make-js-string x))))
+
+(defun jsbool (x)
+  (if x *host-js-true* *host-js-false*))
+
+(defun jsnull ()
+  *host-js-null*)
+
+(defun jsundefined ()
+  *host-js-undefined*)
+
+;;;; Reader utilities needed by read-sharp-j
+;;;;
+;;;; These are also defined in read.lisp for the target. The host
+;;;; definitions here make #j: available early in the bootstrap.
+
+(defun %peek-char (stream)
+  (peek-char nil stream nil))
+
+(defun %read-char (stream)
+  (read-char stream nil))
+
+(defun whitespacep (ch)
+  (or (char= ch #\space) (char= ch #\newline) (char= ch #\tab) (char= ch #\page)))
+
+(defun terminating-char-p (ch)
+  (or (char= #\" ch)
+      (char= #\) ch)
+      (char= #\( ch)
+      (char= #\` ch)
+      (char= #\, ch)
+      (char= #\' ch)
+      (char= #\; ch)))
+
+(defun terminalp (ch)
+  (or (null ch) (whitespacep ch) (terminating-char-p ch)))
+
+(defun read-until (stream func)
+  (let ((string "")
+        (ch))
+    (setq ch (%peek-char stream))
+    (while (and ch (not (funcall func ch)))
+      (setq string (concat string (string ch)))
+      (%read-char stream)
+      (setq ch (%peek-char stream)))
+    string))
+
+(defun simple-reader-error (stream format-control &rest format-arguments)
+  (declare (ignore stream))
+  (apply #'error format-control format-arguments))
+
+;;;; #j reader dispatch macro
+
 (defun j-reader (stream subchar arg)
   (declare (ignorable subchar arg))
-  (assert (char= #\: (read-char stream nil :eof)) nil "FFI descriptor must start with a semicolon.")
-  (loop :for ch := (read-char stream nil #\Space)
-        :until (terminalp ch)))
+  (read-sharp-j stream))
 
 (set-dispatch-macro-character #\# #\J #'j-reader)
 

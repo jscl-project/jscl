@@ -10,14 +10,14 @@
   (ecase type
     (function
      (let ((func (find-function x)))
-       (oget func "docstring")))
+       (?? (oget func "docstring") nil)))
     (variable
      (unless (symbolp x)
        (error "The type of documentation `~S' is not a symbol." type))
-     (oget x "vardoc"))
+     (?? (oget x "vardoc") nil))
     (package
      (let ((package (find-package x)))
-       (oget package "docstring")))
+       (?? (oget package "docstring") nil)))
     (structure
      (dsd-docstring (get-structure-dsd x)))))
 
@@ -55,11 +55,11 @@
             (do-all-symbols (symbol) (handle-symbol symbol))))))
 
 (defun apropos/regexp-test (pattern str)
-  ((oget pattern "test")  str))
+  (clbool ((oget pattern "test") (jsstring str))))
 
 (defun apropos-list (string &optional package externals-only)
   (let* ((result '())
-         (pattern (#j:RegExp string))
+         (pattern (#j:RegExp (jsstring string)))
          (comparator (lambda (x)
                        (let ((name (symbol-name x)))
                          (when (apropos/regexp-test pattern name)

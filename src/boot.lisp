@@ -380,7 +380,7 @@
      (error "Invalid function `~S'." x))))
 
 (defun disassemble (function)
-  (write-line (lambda-code (fdefinition function)))
+  (write-line (lambda-code (find-function function)))
   nil)
 
 (defmacro multiple-value-bind (variables value-from &body body)
@@ -427,14 +427,11 @@
 ;;; types family section
 
 ;;; tag's utils
-(defun object-type-code (object) (oget object "dt_Name"))
-(defun set-object-type-code (object tag) (oset tag object "dt_Name"))
+(defun object-type-code (object)
+  (?? (oget? object "dt_Name") nil))
 
-;;; types predicate's
-(defun mop-object-p (obj)
-  (and (objectp obj) (eql (object-type-code obj) :mop-object)))
-
-(defun clos-object-p (object) (eql (object-type-code object) :clos_object))
+(defun set-object-type-code (object tag)
+  (oset tag object "dt_Name"))
 
 ;;; macro's
 
@@ -456,7 +453,7 @@
 
   (defparameter *basic-type-predicates*
     '((hash-table . hash-table-p) (package . packagep) (stream . streamp)
-      (atom . atom) (structure-object . structure-p) (js-object . js-object-p)
+      (atom . atom) (structure-object . structure-p)
       ;; todo: subtypep - remove mop-object from tables
       (clos-object . mop-object-p) (mop-object . mop-object-p) (character . characterp)
       (symbol . symbolp)  (keyword . keywordp)

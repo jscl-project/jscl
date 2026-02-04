@@ -22,17 +22,17 @@
         (linecont-prompt nil))
     (flet ((set-prompt ()
              (let ((name (package-name-for-prompt *package*)))
-               ((oget *rl* "setPrompt") (format nil "~a> " name))
+               ((oget *rl* "setPrompt") (jsstring (format nil "~a> " name)))
                (setq linecont-prompt
                      (concat (make-string (1+ (length name)) :initial-element #\.) " ")))))
       (set-prompt)
       ((oget *rl* "prompt"))
-      ((oget *rl* "on") "line"
+      ((oget *rl* "on") #j"line"
        (lambda (line)
-         (write-line line input-buffer)
+         (write-line (clstring line) input-buffer)
          (let ((input (stream-data input-buffer)))
            (if (%sexpr-incomplete input)
-               ((oget *rl* "setPrompt") linecont-prompt)
+               ((oget *rl* "setPrompt") (jsstring linecont-prompt))
                (progn
                  (with-toplevel-eval ()
                    (eval-interactive-input input))
@@ -46,10 +46,10 @@
   (setq *standard-output*
         (make-stream
          :write-fn (lambda (string)
-                     (#j:process:stdout:write string)))
+                     (#j:process:stdout:write (jsstring string))))
         *error-output* *standard-output*
         *trace-output* *standard-output*)
-  (let ((args (mapcar #'js-to-lisp (vector-to-list (subseq #j:process:argv 2)))))
+  (let ((args (mapcar #'clstring (vector-to-list (subseq #j:process:argv 2)))))
     (cond
       ((null args)
        (start-repl))

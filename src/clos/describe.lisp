@@ -26,19 +26,17 @@
 ;;; for example look *package-table* into prelude.js
 ;;; attempt print this, caused error
 (defun js-object-signature (obj)
-  (if (not (js-object-p obj))
-      nil
-      (handler-case
-          (progn
-            ;; legal signature
-            ;;   [object Object]
-            ;;   [object HTMLxxxx]
-            ;;   undefined
-            (#j:String obj))
-        (error (msg)
-          ;; js-object created with Object.create(Null) ?
-          ;; legal signature 'simple-object'
-          "[object Simple-object]"))))
+  (handler-case
+      (progn
+        ;; legal signature
+        ;;   [object Object]
+        ;;   [object HTMLxxxx]
+        ;;   undefined
+        (clstring (#j:String obj)))
+    (error (msg)
+      ;; js-object created with Object.create(Null) ?
+      ;; legal signature 'simple-object'
+      "[object Simple-object]")))
 
 ;;; some utils
 
@@ -103,19 +101,6 @@
   (values))
 
 
-;;; js-object
-(defmethod describe ((obj js-object) &optional (stream *standard-output*))
-  (let ((keys (#j:Object:keys obj)))
-    (with-pp-buffer (buf)
-      (pp/presentation obj 'js-object buf)
-      (format buf "Signature: ~a~%" (js-object-signature obj))
-      (if (and keys (> (length keys) 0))
-          (format buf "Keys: ~a~%" (map 'list (lambda (obj) (js-to-lisp obj)) keys)))
-      (flush-pp-buffer buf stream)
-      (values) )))
-
-
-
 ;;; number integer
 ;;;
 ;;; Note for "toString" conversion
@@ -129,13 +114,13 @@
     (format buf "Fixnum: ~a~%" obj)
     (labels
         ((make-number (value)
-           (make-new #j:Number value))
+           (new #j:Number value))
          (number-to-fixed (value &optional (digits 0))
-           ((oget  (make-Number value) "toFixed") digits))
+           (clstring ((oget (make-Number value) "toFixed") digits)))
          (number-to-exponent (value)
-           ((oget  (make-Number value) "toExponential")))
+           (clstring ((oget (make-Number value) "toExponential"))))
          (number-by-radix (value &optional (radix 10))
-           ((oget (make-Number value) "toString") radix)))
+           (clstring ((oget (make-Number value) "toString") radix))))
       (format buf "Exponential: ~a~%" (number-to-exponent obj))
       (when (> obj 0)
         ;; not display for negative value
@@ -148,7 +133,7 @@
         ;; char code restrict
         (if (<= obj 2028)
             (format buf "Character: ~a~%" (code-char obj)))
-        (format buf "As time: ~a~%" (string (make-new #j:Date obj)))))
+        (format buf "As time: ~a~%" (string (new #j:Date obj)))))
     (flush-pp-buffer buf stream)
     (values)))
 
@@ -192,9 +177,8 @@
       ;; check bounded
       (when (boundp obj)
         (format buf "~A names a special variable~%" (symbol-name obj))
-        (let ((doc (oget obj "vardoc")))
-          (when doc
-            (format buf "Documentation: ~a~%" doc)))
+        (when (in "vardoc" obj)
+          (format buf "Documentation: ~a~%" (oget obj "vardoc")))
         (format buf "Value: ~a~%" (symbol-value obj))
         (when (not (keywordp obj))
           (describe (symbol-value obj) buf)
@@ -275,8 +259,8 @@
 
 ;;; function
 (defmethod describe ((obj function) &optional (stream *standard-output*))
-  (let ((name (oget obj "fname"))
-        (doc (oget obj "docstring")))
+  (let ((name (?? (oget obj "fname") nil))
+        (doc (?? (oget obj "docstring") nil)))
     (with-pp-buffer (buf)
       (pp/presentation obj 'function stream)
       (format buf "Name:~a~%" (if name name "anonimous"))
@@ -322,7 +306,7 @@
         (when (and keys (> (length keys) 0))
           (with-pp-buffer (buf)
             (format buf "Associative JS array~%Keys: ~a~%"
-                    (map 'list (lambda (obj) (js-to-lisp obj)) keys))
+                    (map 'list #'clstring keys))
             (flush-pp-buffer buf stream)))))
   (values) )
 

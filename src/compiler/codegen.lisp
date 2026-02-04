@@ -205,11 +205,17 @@
   (js-format ")")
   (js-stmt `(group ,@body) t))
 
+(defun valid-lvalue-p (x)
+  (or (symbolp x)
+      (nth-value 1 (valid-js-identifier x))
+      (and (consp x)
+           (member (car x) '(get = property)))
+      ;; JS macro forms that expand to valid lvalues
+      (and (consp x) (assoc (car x) *js-macros*)
+           (valid-lvalue-p (js-macroexpand x)))))
+
 (defun check-lvalue (x)
-  (unless (or (symbolp x)
-              (nth-value 1 (valid-js-identifier x))
-              (and (consp x)
-                   (member (car x) '(get = property))))
+  (unless (valid-lvalue-p x)
     (error "Bad Javascript lvalue ~S" x)))
 
 ;;; Process the Javascript AST to reduce some syntax sugar.
@@ -255,6 +261,11 @@
        (js-format "[")
        (js-expr (cadr args))
        (js-format "]"))
+      (property?
+       (js-expr (car args) 20)
+       (js-format "?.[")
+       (js-expr (cadr args))
+       (js-format "]"))
       (get
        (multiple-value-bind (accessor accessorp)
            (valid-js-identifier (cadr args))
@@ -265,14 +276,19 @@
          (js-identifier accessor)))
       ;; Function call
       (call
-       (js-expr (car args) 20)
-       (js-format "(")
-       (when (cdr args)
-         (js-expr (cadr args) no-comma)
-         (dolist (operand (cddr args))
-           (js-format ",")
-           (js-expr operand no-comma)))
-       (js-format ")"))
+       (destructuring-bind (fn &rest fnargs) args
+	 (js-expr fn 20)
+	 (js-format "(")
+	 (flet ((output-arg (arg)
+		  (if (and (consp arg) (eq (car arg) 'spread))
+		      (progn (js-format "...") (js-expr (cadr arg) no-comma))
+		      (js-expr arg no-comma))))
+	   (when fnargs
+	     (output-arg (first fnargs))
+	     (dolist (operand (rest fnargs))
+	       (js-format ",")
+	       (output-arg operand))))
+	 (js-format ")")))
       ;; Object syntax
       (object
        (js-object-initializer args))
@@ -378,6 +394,7 @@
 
            (binary-op and        "&&"            7    left)
            (binary-op or         "||"            6    left)
+	   (binary-op ??         "??"            6    left)
 
            (when (member op '(? if))
              (when (low-precedence-p 4) (js-format "("))

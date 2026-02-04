@@ -118,11 +118,11 @@
 ;;; load-js - load javascript code from local file system (by FILE:),
 ;;;           or remote resource (by HTTP:) with used html tag 'link/stylesheet'
 (defun load-js (from &optional onload)
-  (let ((link (#j:window:document:createElement "script"))
+  (let ((link (#j:window:document:createElement #j"script"))
         (body #j:window:document:body ))
-    (setf (oget link "charset") "utf-8"
-          (oget link "type") "text/javascript"
-          (oget link "src") from
+    (setf (oget link "charset") #j"utf-8"
+          (oget link "type") #j"text/javascript"
+          (oget link "src") (jsstring from)
           (oget link "onerror") (lambda (ignore)
                                   (format t "~%Error loading ~s file.~%" from)
                                   (funcall ((oget body "removeChild" "bind") body link ))
@@ -142,11 +142,11 @@
 ;;; load-css - load cascade style from local file system (by FILE:),
 ;;;           or remote resource (by HTTP:) with used html tag 'link/stylesheet'
 (defun load-css (from &optional onload)
-  (let ((link (#j:window:document:createElement "link"))
+  (let ((link (#j:window:document:createElement #j"link"))
         (body #j:window:document:body ))
-    (setf (oget link "rel") "stylesheet"
-          (oget link "type") "text/css"
-          (oget link "href") from
+    (setf (oget link "rel") #j"stylesheet"
+          (oget link "type") #j"text/css"
+          (oget link "href") (jsstring from)
           (oget link "onerror") (lambda (ignore)
                                   (format t "~%Error loading ~s file.~%" from)
                                   (funcall ((oget body "removeChild" "bind") body link ))

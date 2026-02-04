@@ -25,7 +25,7 @@
 ;; Counter for identity-based hash codes
 ;; We use a WeakMap to store hash codes without polluting objects
 (defvar *sxhash-counter* 0)
-(defvar *sxhash-table* (make-new (%js-vref "WeakMap" t)))
+(defvar *sxhash-table* (new #j:WeakMap))
 
 (defun sxhash-string (s)
   "Hash a string based on its content using a simple hash algorithm."
@@ -58,22 +58,21 @@
      (sxhash-cons x))
     (t
      ;; For other objects, use identity-based hash via WeakMap
-     (if (eq ((oget! *sxhash-table* "has") x) +true+)
-         ((oget! *sxhash-table* "get") x)
+     (if (eq ((oget *sxhash-table* "has") x) #j:true)
+         ((oget *sxhash-table* "get") x)
          (let ((new-hash (incf *sxhash-counter*)))
-           ((oget! *sxhash-table* "set") x new-hash)
+           ((oget *sxhash-table* "set") x new-hash)
            new-hash)))))
 
-(defconstant EqualMap (oget! (%js-vref "internals" t) "EqualMap"))
+(defconstant EqualMap (%js-internal "EqualMap"))
 
 ;;; Hash table structure:
 ;;; An EqualMap instance (JS object) with additional properties:
 ;;;   $$jscl_test = test function symbol (eq, eql, or equal)
 
 (defun hash-table-p (obj)
-  (and (objectp obj)
-       (or (instanceof obj (%js-vref "Map" t))
-	   (instanceof obj EqualMap))))
+  (or (instanceof obj #j:Map)
+      (instanceof obj EqualMap)))
 
 (defun make-hash-table (&key (test #'eql) size)
   (declare (ignore size))
@@ -90,12 +89,12 @@
          ;; NOTE: We wrap equal to return JS booleans since JS treats
          ;; all objects (including NIL symbol) as truthy.
          (ht (if (eq test-symbol 'equal)
-                 (make-new EqualMap
-                           (fn-to-js #'sxhash)
-                           (fn-to-js (lambda (a b)
-                                       (if (equal a b) +true+ +false+))))
-                 (make-new (%js-vref "Map" t)))))
-    (oset! test-symbol ht "$$jscl_test")
+                 (new EqualMap
+                           #'sxhash
+                           (lambda (a b)
+                             (if (equal a b) #j:true #j:false)))
+                 (new #j:Map))))
+    (oset test-symbol ht "$$jscl_test")
     ht))
 
 (defun check-is-hash-table (x)
@@ -105,27 +104,27 @@
 (defun gethash (key hash-table &optional default)
   (check-is-hash-table hash-table)
   ;; .has() returns a JS boolean, must convert to Lisp boolean
-  (let ((has-key (js-to-lisp ((oget! hash-table "has") key))))
+  (let ((has-key (clbool ((oget hash-table "has") key))))
     (if has-key
-        (values ((oget! hash-table "get") key) t)
+        (values ((oget hash-table "get") key) t)
         (values default nil))))
 
 (defun (setf gethash) (new-value key hash-table &optional defaults)
   (declare (ignore defaults))
   (check-is-hash-table hash-table)
-  ((oget! hash-table "set") key new-value)
+  ((oget hash-table "set") key new-value)
   new-value)
 
 (defun remhash (key hash-table)
   (check-is-hash-table hash-table)
-  ;; Use js-to-lisp to convert JS boolean to Lisp boolean
-  (let ((had-key (js-to-lisp ((oget! hash-table "has") key))))
-    ((oget! hash-table "delete") key)
+  ;; .has() returns a JS boolean, convert to Lisp boolean
+  (let ((had-key (clbool ((oget hash-table "has") key))))
+    ((oget hash-table "delete") key)
     had-key))
 
 (defun clrhash (hash-table)
   (check-is-hash-table hash-table)
-  ((oget! hash-table "clear"))
+  ((oget hash-table "clear"))
   hash-table)
 
 (defun hash-table-count (hash-table)
@@ -134,18 +133,17 @@
 
 (defun maphash (function hash-table)
   (check-is-hash-table hash-table)
-  ((oget! hash-table "forEach")
-   (lisp-to-js (lambda (value key &optional this-map)
-                 (declare (ignore this-map))
-                 (funcall function key value))))
+  ((oget hash-table "forEach")
+   (lambda (value key &optional this-map)
+     (declare (ignore this-map))
+     (funcall function key value)))
   nil)
 
 (defun hash-table-test (hash-table)
   (check-is-hash-table hash-table)
-  (let ((test (oget! hash-table "$$jscl_test")))
-    (if (eq test +undefined+)
-	'eq
-      test)))
+  (if (in "$$jscl_test" hash-table)
+      (oget hash-table "$$jscl_test")
+      'eq))
 
 (defun copy-hash-table (origin)
   (let ((new-ht (make-hash-table :test (hash-table-test origin))))
@@ -174,9 +172,9 @@
   (let ((iterator (gensym "ITERATOR"))
         (ivalue (gensym "IVALUE")))
     `(macrolet ((,name ()
-                  '(let ((,ivalue (oget! ((oget! ,iterator "next")) "value")))
+                  '(let ((,ivalue (oget ((oget ,iterator "next")) "value")))
                     (if (storage-vector-p ,ivalue)
-                        (values t (oget! ,ivalue 0) (oget! ,ivalue 1))
+                        (values t (oget ,ivalue 0) (oget ,ivalue 1))
                         (values nil nil nil)))))
        (let ((,iterator (#j:Iterator:from ,hash-table)))
          ,@body))))
