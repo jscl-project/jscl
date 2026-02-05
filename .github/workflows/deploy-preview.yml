@@ -1,0 +1,49 @@
+name: Deploy Preview
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  deploy-preview:
+    if: >
+      github.event.issue.pull_request &&
+      github.event.comment.body == '/preview' &&
+      github.event.comment.author_association == 'OWNER'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: refs/pull/${{ github.event.issue.number }}/merge
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "22.x"
+
+    - name: Install npm dependencies
+      run: npm ci
+
+    - name: Install SBCL
+      run: sudo apt-get install sbcl
+
+    - name: Build JSCL
+      run: ./make.sh
+
+    - name: Deploy preview to Netlify
+      id: netlify
+      uses: netlify/actions/cli@master
+      with:
+        args: deploy --dir=dist --alias=deploy-preview-${{ github.event.issue.number }}
+      env:
+        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+
+    - name: Comment deploy preview URL on PR
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        number: ${{ github.event.issue.number }}
+        header: netlify-preview
+        message: |
+          **Deploy preview ready!**
+          ${{ steps.netlify.outputs.NETLIFY_URL }}

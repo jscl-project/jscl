@@ -32,19 +32,3 @@ jobs:
     - name: Run tests
       run: ./run-tests.sh
 
-    - name: Deploy preview to Netlify
-      id: netlify
-      uses: netlify/actions/cli@master
-      with:
-        args: deploy --dir=dist --alias=deploy-preview-${{ github.event.number }}
-      env:
-        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-
-    - name: Comment deploy preview URL on PR
-      uses: marocchino/sticky-pull-request-comment@v2
-      with:
-        header: netlify-preview
-        message: |
-          **Deploy preview ready!**
-          ${{ steps.netlify.outputs.NETLIFY_URL }}
