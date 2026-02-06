@@ -97,9 +97,7 @@
     package))
 
 (defun packagep (x)
-  (and (eq (typeof x) #j"object")
-       (not (eq x #j:null))
-       (in "symbols" x)))
+  (not (eq (oget? x "symbols") (jsundefined))))
 
 (defun package-name (package-designator)
   (let ((package (find-package-or-fail package-designator)))

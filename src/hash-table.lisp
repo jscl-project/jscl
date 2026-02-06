@@ -58,7 +58,7 @@
      (sxhash-cons x))
     (t
      ;; For other objects, use identity-based hash via WeakMap
-     (if (eq ((oget *sxhash-table* "has") x) #j:true)
+     (if (eq ((oget *sxhash-table* "has") x) (jsbool t))
          ((oget *sxhash-table* "get") x)
          (let ((new-hash (incf *sxhash-counter*)))
            ((oget *sxhash-table* "set") x new-hash)
@@ -89,10 +89,7 @@
          ;; NOTE: We wrap equal to return JS booleans since JS treats
          ;; all objects (including NIL symbol) as truthy.
          (ht (if (eq test-symbol 'equal)
-                 (new EqualMap
-                           #'sxhash
-                           (lambda (a b)
-                             (if (equal a b) #j:true #j:false)))
+                 (new EqualMap #'sxhash (lambda (a b) (jsbool (equal a b))))
                  (new #j:Map))))
     (oset test-symbol ht "$$jscl_test")
     ht))

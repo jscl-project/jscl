@@ -120,7 +120,7 @@
       (%deftype name :predicate predicate))))
 
 ;; js-null uses an inline eq check instead of a named predicate
-(%deftype 'js-null :predicate (lambda (x) (eq x #j:null)))
+(%deftype 'js-null :predicate (lambda (x) (eq x (jsnull))))
 
 (defun builtin-type-p (name &optional (content-p nil))
   (let (type-info)
@@ -236,7 +236,7 @@
           (error "Unknown type-specifier ~a."  type-specifier)))))
 
 (defun type-of (object)
-  (cond ((eq object #j:null) 'js-null)
+  (cond ((eq object (jsnull)) 'js-null)
         ((integerp object)
          (case object
            ((0 1) 'bit)

@@ -16,8 +16,8 @@
 (defun receive-xhr (method uri sync fn-ok &optional fn-err)
   (let ((req (new #j:XMLHttpRequest)))
     ((oget req "open") (jsstring method) (jsstring uri) (jsbool (not sync)))
-    ((oget req "setRequestHeader") #j"Cache-Control" #j"no-cache")
-    ((oget req "setRequestHeader") #j"Cache-Control" #j"no-store")
+    ((oget req "setRequestHeader") (jsstring "Cache-Control") (jsstring "no-cache"))
+    ((oget req "setRequestHeader") (jsstring "Cache-Control") (jsstring "no-store"))
     ((oget req "send"))
     (flet ((handler ()
              (if (= (oget req "status") 200)
@@ -53,8 +53,8 @@ and asynchronously otherwise."
 
 ;;; replace ctrl-r from input
 (defun ctrl-r-replace (src)
-  (let ((reg (#j:RegExp (code-char 13) #j"g")))
-    (clstring ((oget (jsstring src) "replace") reg #j" "))))
+  (let ((reg (#j:RegExp (code-char 13) (jsstring "g"))))
+    (clstring ((oget (jsstring src) "replace") reg (jsstring " ")))))
 
 (defun call-with-open-file (thunk name &key (direction :input) (if-exists :error) (sync t))
   (ecase direction
@@ -63,7 +63,8 @@ and asynchronously otherwise."
             (unless (clbool (#j:Fs:existsSync (jsstring name)))
               (error "No such file ~s" name))
             (with-input-from-string
-                (s (ctrl-r-replace (clstring (#j:Fs:readFileSync (jsstring name) #j"utf-8"))))
+                (s (ctrl-r-replace (clstring (#j:Fs:readFileSync (jsstring name)
+                                                                 (jsstring "utf-8")))))
               (funcall thunk s)))
            ((and sync (find :web-worker *features*))
             (receive-xhr

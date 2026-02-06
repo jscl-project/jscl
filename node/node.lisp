@@ -30,9 +30,9 @@
                        (eval-interactive-input input))
                      ;; Update prompt
                      ((oget *repl* "setPrompt") (jsstring (get-prompt)))
-                     (funcall cb #j:null))))))
+                     (funcall cb (jsnull)))))))
     (setq *repl* (#j:repl:start (object "input" #j:process:stdin "output" #j:process:stdout
-                                        "eval" #'repl-eval "writer" (lambda (&rest _) #j"")
+                                        "eval" #'repl-eval "writer" (constantly (jsstring ""))
                                         "prompt" (jsstring (get-prompt)))))))
 
 (defun node-init ()

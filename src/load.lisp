@@ -118,10 +118,10 @@
 ;;; load-js - load javascript code from local file system (by FILE:),
 ;;;           or remote resource (by HTTP:) with used html tag 'link/stylesheet'
 (defun load-js (from &optional onload)
-  (let ((link (#j:window:document:createElement #j"script"))
+  (let ((link (#j:window:document:createElement (jsstring "script")))
         (body #j:window:document:body ))
-    (setf (oget link "charset") #j"utf-8"
-          (oget link "type") #j"text/javascript"
+    (setf (oget link "charset") (jsstring "utf-8")
+          (oget link "type") (jsstring "text/javascript")
           (oget link "src") (jsstring from)
           (oget link "onerror") (lambda (ignore)
                                   (format t "~%Error loading ~s file.~%" from)
@@ -142,10 +142,10 @@
 ;;; load-css - load cascade style from local file system (by FILE:),
 ;;;           or remote resource (by HTTP:) with used html tag 'link/stylesheet'
 (defun load-css (from &optional onload)
-  (let ((link (#j:window:document:createElement #j"link"))
+  (let ((link (#j:window:document:createElement (jsstring "link")))
         (body #j:window:document:body ))
-    (setf (oget link "rel") #j"stylesheet"
-          (oget link "type") #j"text/css"
+    (setf (oget link "rel") (jsstring "stylesheet")
+          (oget link "type") (jsstring "text/css")
           (oget link "href") (jsstring from)
           (oget link "onerror") (lambda (ignore)
                                   (format t "~%Error loading ~s file.~%" from)

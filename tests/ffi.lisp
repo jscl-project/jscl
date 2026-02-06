@@ -24,7 +24,7 @@
   (test (equal (jscl::vector-to-list v2) '(left "Mediane" right))))
 
 ;;; String
-(test (string= (clstring ((oget #j"abcdef" "substr") 1 2)) "bc"))
+(test (string= (clstring ((oget (jsstring "abcdef") "substr") 1 2)) "bc"))
 
 ;;; Number's format output
 ;;; for future features
@@ -59,77 +59,50 @@
 
 ;; the reader produces a JS string directly, not a form like (jsstring "foo")
 (let ((val (read-from-string "#j\"foo\"")))
-  (test (eq (typeof val) #j"string"))
+  (test (eq (typeof val) (jsstring "string")))
   (test (string= (clstring val) "foo")))
 
 ;;; jsstring
 
 ;; constant case: the compiler can inline #j"..." to a JS string literal
-(test (eq #j"hello" #j"hello"))
-(test (eq (jsstring "hello") #j"hello"))
-(test (eq #j"" #j""))
+(test (eq (read-from-string "#j\"hello\"") (read-from-string "#j\"hello\"")))
+(test (eq (jsstring "hello") (read-from-string "#j\"hello\"")))
+(test (eq (read-from-string "#j\"\"") (read-from-string "#j\"\"")))
 
 ;; non-constant case: jsstring on a dynamically constructed string
 (let ((s (copy-seq "world")))
   (test (eq (jsstring s) (jsstring s))))
 
 ;; jsstring as a function value
-(test (eq (funcall #'jsstring "abc") #j"abc"))
+(test (eq (funcall #'jsstring "abc") (read-from-string "#j\"abc\"")))
 
 ;; reader macro round-trip through the printer
-(test (string= (write-to-string #j"foo") "#j\"foo\""))
-(test (string= (write-to-string #j"") "#j\"\""))
-(test (string= (write-to-string #j"a\"b") "#j\"a\\\"b\""))
+(test (string= (write-to-string (jsstring "foo")) "#j\"foo\""))
+(test (string= (write-to-string (jsstring "")) "#j\"\""))
+(test (string= (write-to-string (jsstring "a\"b")) "#j\"a\\\"b\""))
 
 ;; princ prints the raw contents without #j or quotes
-(test (string= (princ-to-string #j"bar") "bar"))
+(test (string= (princ-to-string (jsstring "bar")) "bar"))
 
 ;;; FFI constants printing
 
-(test (string= (write-to-string #j:true) "#j:true"))
-(test (string= (write-to-string #j:false) "#j:false"))
-(test (string= (write-to-string #j:null) "#j:null"))
-(test (string= (write-to-string #j:undefined) "#j:undefined"))
+(test (string= (write-to-string (jsbool t)) "#j:true"))
+(test (string= (write-to-string (jsbool nil)) "#j:false"))
+(test (string= (write-to-string (jsnull)) "#j:null"))
+(test (string= (write-to-string (jsundefined)) "#j:undefined"))
 
 ;; princ prints the same (no escaping distinction for constants)
-(test (string= (princ-to-string #j:true) "#j:true"))
-(test (string= (princ-to-string #j:false) "#j:false"))
-(test (string= (princ-to-string #j:null) "#j:null"))
-(test (string= (princ-to-string #j:undefined) "#j:undefined"))
-
-;;; #j:true etc. reader
-
-;; the reader produces JS values directly, not symbols or forms
-(let ((val (read-from-string "#j:true")))
-  (test (not (symbolp val)))
-  (test (not (consp val)))
-  (test (eq (typeof val) #j"boolean"))
-  (test (eq val #j:true)))
-
-(let ((val (read-from-string "#j:false")))
-  (test (not (symbolp val)))
-  (test (not (consp val)))
-  (test (eq (typeof val) #j"boolean"))
-  (test (eq val #j:false)))
-
-(let ((val (read-from-string "#j:null")))
-  (test (not (symbolp val)))
-  (test (not (consp val)))
-  (test (eq (typeof val) #j"object"))
-  (test (eq val #j:null)))
-
-(let ((val (read-from-string "#j:undefined")))
-  (test (not (symbolp val)))
-  (test (not (consp val)))
-  (test (eq (typeof val) #j"undefined"))
-  (test (eq val #j:undefined)))
+(test (string= (princ-to-string (jsbool t)) "#j:true"))
+(test (string= (princ-to-string (jsbool nil)) "#j:false"))
+(test (string= (princ-to-string (jsnull)) "#j:null"))
+(test (string= (princ-to-string (jsundefined)) "#j:undefined"))
 
 ;;; clstring
 
 ;; JS string -> CL string
-(test (stringp (clstring #j"hello")))
-(test (string= (clstring #j"hello") "hello"))
-(test (string= (clstring #j"") ""))
+(test (stringp (clstring (jsstring "hello"))))
+(test (string= (clstring (jsstring "hello")) "hello"))
+(test (string= (clstring (jsstring "")) ""))
 
 ;; CL string passes through
 (test (let ((s "world")) (eq (clstring s) s)))
@@ -138,31 +111,31 @@
 ;; type error for non-strings
 (test (handler-case (progn (clstring 42) nil)
         (type-error () t)))
-(test (handler-case (progn (clstring #j:true) nil)
+(test (handler-case (progn (clstring (jsbool t)) nil)
         (type-error () t)))
 
 ;; clstring as a function value
-(test (string= (funcall #'clstring #j"test") "test"))
+(test (string= (funcall #'clstring (jsstring "test")) "test"))
 
 ;;; jsbool
 
-;; nil -> #j:false, anything else -> #j:true
-(test (eq (jsbool nil) #j:false))
-(test (eq (jsbool t) #j:true))
-(test (eq (jsbool 42) #j:true))
-(test (eq (jsbool "hello") #j:true))
+;; nil -> false, anything else -> true
+(test (eq (jsbool nil) (jsbool nil)))
+(test (eq (jsbool t) (jsbool t)))
+(test (eq (jsbool 42) (jsbool t)))
+(test (eq (jsbool "hello") (jsbool t)))
 
 ;; jsbool as a function value
-(test (eq (funcall #'jsbool nil) #j:false))
-(test (eq (funcall #'jsbool t) #j:true))
+(test (eq (funcall #'jsbool nil) (jsbool nil)))
+(test (eq (funcall #'jsbool t) (jsbool t)))
 
 ;;; clbool
 
-;; #j:true -> t, #j:false/#j:null/#j:undefined -> nil
-(test (eq (clbool #j:true) t))
-(test (eq (clbool #j:false) nil))
-(test (eq (clbool #j:null) nil))
-(test (eq (clbool #j:undefined) nil))
+;; true -> t, false/null/undefined -> nil
+(test (eq (clbool (jsbool t)) t))
+(test (eq (clbool (jsbool nil)) nil))
+(test (eq (clbool (jsnull)) nil))
+(test (eq (clbool (jsundefined)) nil))
 
 ;; CL booleans pass through
 (test (eq (clbool t) t))
@@ -173,39 +146,39 @@
         (type-error () t)))
 
 ;; clbool as a function value
-(test (eq (funcall #'clbool #j:true) t))
-(test (eq (funcall #'clbool #j:false) nil))
+(test (eq (funcall #'clbool (jsbool t)) t))
+(test (eq (funcall #'clbool (jsbool nil)) nil))
 
 
 (test
  (string= (write-to-string
-	   (let ((arr (vector #j"foo" #j"bar")))
+	   (let ((arr (vector (jsstring "foo") (jsstring "bar"))))
 	     ((oget arr "map") (lambda (x &rest ignored) 1))))
 	"#(1 1)"))
 
 ;;; eval handles JS value literals (exercises the data-vector path)
-(test (eq (eval #j:true) #j:true))
-(test (eq (eval #j:false) #j:false))
-(test (eq (eval #j:null) #j:null))
-(test (eq (eval #j:undefined) #j:undefined))
+(test (eq (eval (jsbool t)) (jsbool t)))
+(test (eq (eval (jsbool nil)) (jsbool nil)))
+(test (eq (eval (jsnull)) (jsnull)))
+(test (eq (eval (jsundefined)) (jsundefined)))
 
-;;; A variable bound to #j:undefined should be accessible via symbol-value
-(defvar *test-js-undefined-var* #j:undefined)
-(test (eq (symbol-value '*test-js-undefined-var*) #j:undefined))
+;;; A variable bound to undefined should be accessible via symbol-value
+(defvar *test-js-undefined-var* (jsundefined))
+(test (eq (symbol-value '*test-js-undefined-var*) (jsundefined)))
 (test (boundp '*test-js-undefined-var*))
 
 ;;; compile-toplevel handles JS value literals (exercises the dump path)
 (test (search "true"
         (jscl::with-compilation-environment
-          (jscl::compile-toplevel #j:true))))
+          (jscl::compile-toplevel (jsbool t)))))
 (test (search "false"
         (jscl::with-compilation-environment
-          (jscl::compile-toplevel #j:false))))
+          (jscl::compile-toplevel (jsbool nil)))))
 (test (search "null"
         (jscl::with-compilation-environment
-          (jscl::compile-toplevel #j:null))))
+          (jscl::compile-toplevel (jsnull)))))
 (test (search "undefined"
         (jscl::with-compilation-environment
-          (jscl::compile-toplevel #j:undefined))))
+          (jscl::compile-toplevel (jsundefined)))))
 
 ;;; EOF

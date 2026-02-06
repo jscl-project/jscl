@@ -4,35 +4,13 @@ This document describes how the FFI (Foreign Function Interface) is
 implemented in the compiler and how it bootstraps across the host and
 target environments. For the user-facing API, see `docs/ffi.md`.
 
-## Dual-environment architecture
+## #j string literal in the host
 
-`src/ffi.lisp` and `src/read-j.lisp` are both tagged `:both` in
-`*source*`, so they are loaded into the host CL **and**
-compiled to JavaScript for the target.
-
-However, JavaScript values do not exist in the host (necessarily), yet
-the compiler must be able to manipulate them at compile time (e.g. as
-literals produced by reader macros).
-
-To solve this, there is a set of structs emulating JS values during
-cross-compilation:
-
-```lisp
-;; Only defined in the host (#-jscl)
-(defstruct js-value)
-(defstruct (js-string  (:include js-value)) value)
-(defstruct (js-boolean (:include js-value)) value)
-(defstruct (js-null    (:include js-value)))
-(defstruct (js-undefined (:include js-value)))
-```
-
-When `#j"hello"` is read in the host, it produces a `js-string`
-struct. When `#j:true` is read, it produces a `js-boolean` struct.
-These are ordinary Lisp objects that the compiler can store in its
-literal table and later dump as JavaScript code.
-
-In the target, none of these structs exist. The same reader macros
-produce actual JavaScript primitives instead.
+Some `#j` syntax (currently `#j:true`, `#j:false`, `#j:null`,
+`#j:undefined` and `#j"string"`) expands to literal JS values. These
+aren't represented in the host, so doing so in cross-compiled code
+throws an error. Use `(jsbool t)`, `(jsbool nil)`, `(jsnull)`,
+`(jsundefined)` and `(jsstring "string")` instead.
 
 ## Primitives
 
@@ -51,5 +29,5 @@ Everything else is defined in terms of these primitives, including the
 it does not take `js-value`s as input.
 
 Therefore, `compiler.lisp` is responsible for generating the
-S-expressions necessary to dump a `js-value`. This is done by
-`dump-js-value`.
+S-expressions necessary to dump a `js-value`. This is done by the
+respective branches in `literal`.

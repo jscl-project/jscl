@@ -24,7 +24,7 @@
 
 (defun %web-worker-write-string (string &optional (style "jqconsole-output"))
   (let ((obj (object)))
-    (setf (oget obj "command") #j"output")
+    (setf (oget obj "command") (jsstring "output"))
     (setf (oget obj "stringclass") (jsstring style))
     (setf (oget obj "string") (jsstring string))
     (#j:postMessage obj)))
@@ -47,8 +47,8 @@
       (setf (oget payload "sessionId") *web-worker-session-id*)
       (setf (oget payload "options") options)
 
-      ((oget xhr "open") #j"POST" #j"__jscl" #j:false)
-      ((oget xhr "setRequestHeader") #j"ContentType" #j"application/json")
+      ((oget xhr "open") (jsstring "POST") (jsstring "__jscl") (jsbool nil))
+      ((oget xhr "setRequestHeader") (jsstring "ContentType") (jsstring "application/json"))
       ((oget xhr "send") (#j:JSON:stringify payload))
 
       (if (eql (oget xhr "status") 200)

@@ -404,11 +404,11 @@
     ;; JS values and other objects
     (otherwise
      (cond
-       ((eq form #j:true)      (write-string "#j:true" stream))
-       ((eq form #j:false)     (write-string "#j:false" stream))
-       ((eq form #j:null)      (write-string "#j:null" stream))
-       ((eq form #j:undefined) (write-string "#j:undefined" stream))
-       ((eq (typeof form) #j"string")
+       ((eq form (jsbool t))    (write-string "#j:true" stream))
+       ((eq form (jsbool nil))  (write-string "#j:false" stream))
+       ((eq form (jsnull))      (write-string "#j:null" stream))
+       ((eq form (jsundefined)) (write-string "#j:undefined" stream))
+       ((eq (typeof form) (jsstring "string"))
         (if *print-escape*
             (progn
               (write-string "#j" stream)

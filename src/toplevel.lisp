@@ -106,7 +106,7 @@ All errors are caught and report to *ERROR-OUTPUT*."
           (terpri))))
     (catch (err)
       (let ((message (let ((msg (oget err "message")))
-                       (if (eq msg #j:undefined)
+                       (if (eq msg (jsundefined))
                            (clstring err)
                            (clstring msg)))))
         (format *error-output* "ERROR[!]: ~a~%~A~%"
@@ -326,6 +326,7 @@ All errors are caught and report to *ERROR-OUTPUT*."
    #:typeof #:instanceof #:new
    #:jsstring #:clstring
    #:jsbool #:clbool
+   #:jsnull #:jsundefined
    #:in)
   (:export
    #:object
@@ -333,7 +334,8 @@ All errors are caught and report to *ERROR-OUTPUT*."
    #:typeof #:instanceof #:new
    #:in
    #:jsstring #:clstring
-   #:jsbool #:clbool))
+   #:jsbool #:clbool
+   #:jsnull #:jsundefined))
 
 (setq *package* *user-package*)
 
@@ -360,15 +362,15 @@ All errors are caught and report to *ERROR-OUTPUT*."
                      month)
                 year))))
 
-(when (and (not (eq (typeof (%js-vref "module")) #j"undefined"))
-           (eq (typeof (%js-vref "phantom")) #j"undefined")
-           (not (eq (typeof (%js-vref "process")) #j"undefined")))
+(when (and (not (eq (typeof (%js-vref "module")) (jsstring "undefined")))
+           (eq (typeof (%js-vref "phantom")) (jsstring "undefined"))
+           (not (eq (typeof (%js-vref "process")) (jsstring "undefined"))))
   (push :node *features*))
 
-(when (not (eq (typeof (%js-vref "Deno")) #j"undefined"))
+(when (not (eq (typeof (%js-vref "Deno")) (jsstring "undefined")))
   (push :deno *features*))
 
-(when (not (eq (typeof (%js-vref "WorkerGlobalScope")) #j"undefined"))
+(when (not (eq (typeof (%js-vref "WorkerGlobalScope")) (jsstring "undefined")))
   (push :web-worker *features*))
 
 (defun welcome-message (&key (html nil))
@@ -434,8 +436,8 @@ All errors are caught and report to *ERROR-OUTPUT*."
       *trace-output* *standard-output*)
 
 (when (find :node *features*)
-  (setf #j:Fs (funcall (%js-vref "require") #j"fs"))
-  (setf #j:FsPath (funcall (%js-vref "require") #j"path")))
+  (setf #j:Fs (funcall (%js-vref "require") (jsstring "fs")))
+  (setf #j:FsPath (funcall (%js-vref "require") (jsstring "path"))))
 
 (defun require (name)
   (if (find :node *features*)

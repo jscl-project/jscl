@@ -27,7 +27,7 @@
                      (concat (make-string (1+ (length name)) :initial-element #\.) " ")))))
       (set-prompt)
       ((oget *rl* "prompt"))
-      ((oget *rl* "on") #j"line"
+      ((oget *rl* "on") (jsstring "line")
        (lambda (line)
          (write-line (clstring line) input-buffer)
          (let ((input (stream-data input-buffer)))

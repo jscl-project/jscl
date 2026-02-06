@@ -302,7 +302,36 @@
                       (ls-read stream))
                  (ls-read stream eof-error-p eof-value t)))))
       ((#\J #\j)
-       (read-sharp-j stream))
+       (cond
+         ((char= (%peek-char stream) #\")
+          #+jscl
+          (let ((string (ls-read stream)))
+            (jsstring string))
+          #-jscl
+          (error "#j string not available on host."))
+         ((char= (%peek-char stream) #\:)
+          (let ((descriptor (subseq (read-until stream #'terminalp) 1))
+                (subdescriptors nil))
+            (do* ((start 0 (1+ end))
+                  (end (position #\: descriptor :start start)
+                       (position #\: descriptor :start start)))
+                 ((null end)
+                  (push (subseq descriptor start) subdescriptors)
+                  (let ((parts (reverse subdescriptors)))
+                    (if (and (null (cdr parts))
+                             (member (car parts) '("true" "false" "null" "undefined") :test #'string=))
+                        (let ((name (car parts)))
+                          #-jscl (error "#j:~a not available in host" name)
+                          #+jscl
+                          (cond
+                            ((string= name "true") (jsbool t))
+                            ((string= name "false") (jsbool nil))
+                            ((string= name "null") (jsnull))
+                            ((string= name "undefined") (jsundefined))))
+                        `(oget *root* ,@parts))))
+              (push (subseq descriptor start end) subdescriptors))))
+         (t
+          (simple-reader-error stream "Invalid FFI descriptor. Expected #j: or #j\"."))))
       ;; Sharp radix 
       ((#\B #\b #\O #\o #\X #\x)
        (sharp-radix-reader ch stream))

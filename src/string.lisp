@@ -33,6 +33,7 @@
   (cond ((stringp x) x)
         ((symbolp x) (symbol-name x))
         ((characterp x) (make-string 1 :initial-element x))
+        ((eq (typeof x) (jsstring "string")) (clstring x))
         (t (error 'type-error :datum x
                               :expected-type '(or string symbol character)))))
 

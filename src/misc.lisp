@@ -173,7 +173,7 @@ omitted. Note the function does NOT truncate the list according to
     (let* ((str (oget obj "stack"))
            (list (map 'list #'clstring
                       ((oget str "split")
-                       (#j:RegExp (code-char 10) #j"g")))))
+                       (#j:RegExp (code-char 10) (jsstring "g"))))))
       ;; Trim useless first line on V8
       (when (equal (car list) "Error")
         (pop list))

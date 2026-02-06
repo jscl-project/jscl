@@ -3,7 +3,7 @@
 
 #+node
 (progn
-  (defvar *tmp-dir* (clstring (#j:Fs:mkdtempSync #j".jscl_test/test-")))
+  (defvar *tmp-dir* (clstring (#j:Fs:mkdtempSync (jsstring ".jscl_test/test-"))))
 
   (test
    (progn
