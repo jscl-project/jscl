@@ -303,8 +303,8 @@
   (if (or name docstring)
       `(selfcall
         (var (func ,code))
-        ,(when name `(= (get func "fname") ,name))
-        ,(when docstring `(= (get func "docstring") ,docstring))
+        ,(when name `(= (get func "fname") ,(dump-string name)))
+        ,(when docstring `(= (get func "docstring") ,(dump-string docstring)))
         (return func))
       code))
 

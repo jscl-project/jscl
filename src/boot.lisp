@@ -383,6 +383,12 @@
   (write-line (lambda-code (find-function function)))
   nil)
 
+(defun lambda-name (fn)
+  (?? (oget fn "fname") nil))
+
+(defun lambda-docstring (fn)
+  (?? (oget fn "docstring") nil))
+
 (defmacro multiple-value-bind (variables value-from &body body)
   `(multiple-value-call (lambda (&optional ,@variables &rest ,(gensym))
                           ,@body)

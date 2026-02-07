@@ -93,6 +93,10 @@
   (test (string= "#<structure struct>"  (write-to-string (make-struct))))
   (test (string= "#<structure struct>"  (write-to-string (make-struct :name 'definition :slots #(a b c))))))
 
+;;; Functions
+(test (stringp (write-to-string #'car)))
+(test (stringp (write-to-string #'list)))
+
 ;;; JS values
 (test (string= "#j:true" (write-to-string #j:true)))
 (test (string= "#j:false" (write-to-string #j:false)))

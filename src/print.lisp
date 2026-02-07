@@ -335,7 +335,7 @@
          (write-string form stream)))
     ;; Functions
     (function
-     (let ((name #+jscl (if (in "fname" form) (oget form "fname") nil)
+     (let ((name #+jscl (lambda-name form)
                  #-jscl nil))
        (if name
            (simple-format stream "#<FUNCTION ~a>" name)

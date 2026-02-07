@@ -259,11 +259,11 @@
 
 ;;; function
 (defmethod describe ((obj function) &optional (stream *standard-output*))
-  (let ((name (?? (oget obj "fname") nil))
-        (doc (?? (oget obj "docstring") nil)))
+  (let ((name (lambda-name obj))
+        (doc (lambda-docstring obj)))
     (with-pp-buffer (buf)
       (pp/presentation obj 'function stream)
-      (format buf "Name:~a~%" (if name name "anonimous"))
+      (format buf "Name:~a~%" (if name name "anonymous"))
       (when doc
         (format buf "Documentation: ~a~%" doc))
       (flush-pp-buffer buf stream))
