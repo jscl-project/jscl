@@ -55,8 +55,6 @@
 ;;; function call.
 (defvar *multiple-value-p* nil)
 
-;;; Bound to T if the current form processed is a toplevel
-(defvar *processing-toplevel-p*)
 
 
 ;;; Environment
@@ -744,27 +742,34 @@
 
 
 (define-compilation progn (&rest body)
-  (process-maybe-toplevel-block body nil nil))
+  ;; Note that this is only called for non toplevel forms.
+  (convert-block body nil nil))
 
 (define-compilation locally (&rest body)
+  ;; Note that this is only called for non toplevel forms.
   (handle-locally body
                   (lambda (body)
-                    `(progn ,(process-maybe-toplevel-block body nil t)))))
+                    `(progn ,(convert-block body nil t)))))
 
 (define-compilation macrolet (definitions &rest body)
+  ;; Note that this is only called for non toplevel forms.
   (handle-macrolet definitions body
                    (lambda (body)
-                     `(progn ,(process-maybe-toplevel-block body nil t)))))
+                     `(progn ,(convert-block body nil t)))))
 
 (define-compilation symbol-macrolet (macrobindings &rest body)
+  ;; Note that this is only called for non toplevel forms.
   (handle-symbol-macrolet macrobindings body
                           (lambda (body)
-                            `(progn ,(process-maybe-toplevel-block body nil t)))))
+                            `(progn ,(convert-block body nil t)))))
 
 (define-compilation eval-when (situations &rest body)
-  (handle-eval-when situations body
-                    (lambda (body)
-                      `(progn ,(process-maybe-toplevel-block body nil t)))))
+  ;; Note that this is only called for non toplevel forms.
+  ;; So only :execute matters (CLHS 3.2.3.1)
+  (if (or (find :execute situations)
+          (find 'eval situations))
+      (convert-block body nil t)
+      (convert nil)))
 
 
 
@@ -1800,54 +1805,21 @@
          (error "How should I compile `~S'?" sexp))))))
 
 
-;; Convert a non-toplevel expression to JS
 (defun convert (sexp &optional multiple-value-p)
-  (let ((*processing-toplevel-p* nil))
-    (convert-1 sexp multiple-value-p)))
+  (convert-1 sexp multiple-value-p))
 
 
 (defun convert-block (sexps &optional return-last-p decls-allowed-p)
-  (let ((*processing-toplevel-p* nil))
-    (process-maybe-toplevel-block sexps return-last-p decls-allowed-p)))
-
-
-;; Process a potential toplevel block.
-;; 
-;; If *compiler-process-mode* is 'compile, then this is similar to
-;; convert-block, except that it will consider the sexprs toplevel if
-;; *compile-toplevel* is T.
-;; 
-;; However, if *compile-toplevel* is 'load or 'eval, then each SEXPR
-;; will be evaluated before the next one is compiled.
-;; 
-(defun process-maybe-toplevel-block (sexps &optional return-last-p decls-allowed-p)
   (multiple-value-bind (sexps decls)
       (parse-body sexps :declarations decls-allowed-p)
     (declare (ignore decls))
-    (cond
-      ((and *processing-toplevel-p*
-            (memq *compiler-process-mode* '(load eval)))
-       ;; In load/eval mode, evaluate each toplevel form before
-       ;; compiling the next, per CLHS 3.2.3.1. We eval the butlast
-       ;; forms individually (not wrapped in progn, to avoid infinite
-       ;; recursion in #+jscl where eval re-enters the compiler), then
-       ;; compile the last form to produce JS AST for the caller.
-       (dolist (sexp (butlast sexps))
-         (eval sexp))
-       (let ((last-form (car (last sexps))))
-         (if return-last-p
-             `(return ,(convert-1 last-form *multiple-value-p*))
-             (convert-1 last-form *multiple-value-p*))))
-
-      (t
-       ;; We're in compiler mode, so compile it!
-       (if return-last-p
-           `(progn
-              ,@(mapcar #'convert-1 (butlast sexps))
-              (return ,(convert-1 (car (last sexps)) *multiple-value-p*)))
-           `(progn
-              ,@(append (mapcar #'convert-1 (butlast sexps))
-                        (list (convert-1 (car (last sexps)) *multiple-value-p*)))))))))
+    (if return-last-p
+        `(progn
+           ,@(mapcar #'convert (butlast sexps))
+           (return ,(convert (car (last sexps)) *multiple-value-p*)))
+        `(progn
+           ,@(append (mapcar #'convert (butlast sexps))
+                     (list (convert (car (last sexps)) *multiple-value-p*)))))))
 
 
 (defun handle-locally (args fn)
@@ -1873,11 +1845,10 @@
       (funcall fn body))))
 
 (defun handle-eval-when (situations body fn)
+  "Handle eval-when at toplevel. Called from process-toplevel-form."
   (cond
-    ;;
     ;; Toplevel form compiled by compile-file (cross-compilation).
-    ;;
-    ((and (eq *compiler-process-mode* 'compile) *processing-toplevel-p*)
+    ((eq *compiler-process-mode* 'compile)
      ;; If the situation `compile-toplevel' is given. The form is
      ;; evaluated at compilation-time.
      (when (or (find :compile-toplevel situations)
@@ -1897,28 +1868,65 @@
     (t
      (funcall fn nil))))
 
-#+nil
-(defun process-toplevel-form (sexpr fn)
-  (when (not (listp sexpr))
-    (return-from process-toplevel-form (funcall fn (list sexpr))))
-  (destructuring-bind (operator &rest args)
-      sexpr
-    (case operator
+
+;;; Process a list of toplevel forms. The last form inherits LAST-P;
+;;; all others are processed with LAST-P = NIL.
+(defun process-toplevel-body (forms fn last-p)
+  (when forms
+    (dolist (form (butlast forms))
+      (process-toplevel-form form fn nil))
+    (process-toplevel-form (car (last forms)) fn last-p)))
+
+;;; Recursively process FORM as a toplevel form. Macroexpands FORM,
+;;; then handles the toplevel-preserving special forms (progn, locally,
+;;; macrolet, symbol-macrolet, eval-when) per CLHS 3.2.3.1.
+;;;
+;;; For any leaf (non-toplevel-preserving) form, calls
+;;;   (FUNCALL FN FORM LAST-P)
+;;; where LAST-P indicates whether FORM is in the tail position of
+;;; the outermost toplevel expression.
+;;;
+;;; FN is called for side effects; return value is ignored.
+(defun process-toplevel-form (form fn &optional last-p)
+  (multiple-value-bind (expanded expandedp) (!macroexpand-1 form *environment*)
+    (when expandedp
+      (return-from process-toplevel-form
+        (process-toplevel-form expanded fn last-p))))
+
+  (when (atom form)
+    (return-from process-toplevel-form
+      (funcall fn form last-p)))
+
+  (destructuring-bind (op &rest args) form
+    (case op
+      (progn
+        (process-toplevel-body args fn last-p))
+
       (locally
-          (handle-locally args fn))
+        (handle-locally args
+          (lambda (body)
+            (process-toplevel-body body fn last-p))))
+
       (macrolet
-          (destructuring-bind (definitions &body body) args
-            (handle-macrolet definitions body fn)))
+        (destructuring-bind (defs &body body) args
+          (handle-macrolet defs body
+            (lambda (body)
+              (process-toplevel-body body fn last-p)))))
+
       (symbol-macrolet
-          (destructuring-bind (definitions &body body) args
-            (handle-symbol-macrolet definitions body fn)))
+        (destructuring-bind (bindings &body body) args
+          (handle-symbol-macrolet bindings body
+            (lambda (body)
+              (process-toplevel-body body fn last-p)))))
+
       (eval-when
-          (destructuring-bind (situations &body body) args
-            (handle-eval-when situations body fn)))
+        (destructuring-bind (situations &body body) args
+          (handle-eval-when situations body
+            (lambda (body)
+              (process-toplevel-body body fn last-p)))))
+
       (t
-       (funcall fn sexpr)))))
-
-
+        (funcall fn form last-p)))))
 
 
 #+jscl
@@ -1931,24 +1939,6 @@
                (min width (length string)))))
     (subseq string 0 n)))
 
-;; Convert a toplevel expression to JS
-(defun convert-toplevel (sexp &optional multiple-value-p return-p)
-  ;; Macroexpand sexp as much as possible
-  (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp *environment*)
-    (when expandedp
-      (return-from convert-toplevel
-        (convert-toplevel sexp multiple-value-p return-p))))
-  ;; Process as toplevel
-  (let ((*processing-toplevel-p* t))
-    (when *compile-print*
-      (let ((form-string (prin1-to-string sexp)))
-        (simple-format *standard-output* "Compiling ~a...~%" (truncate-string form-string))))
-    ;; NOTE: Need to call convert-1 instead of convert to preserve the toplevel situation
-    (let ((code (convert-1 sexp multiple-value-p)))
-      (if return-p
-          `(return ,code)
-          code))))
-
 (defmacro with-compilation-environment (&body body)
   `(let ((*literal-table* nil)
          (*variable-counter* 0)
@@ -1956,34 +1946,50 @@
          (*literal-counter* 0))
      ,@body))
 
-(defun compile-toplevel-to-js (sexp &optional multiple-value-p return-p)
-  (with-output-to-string (*js-output*)
-    (let ((ast (let ((*toplevel-compilations* nil))
-                 (let ((code (convert-toplevel sexp multiple-value-p return-p)))
-                   `(progn
-                      ,@(get-toplevel-compilations)
-                      ,code)))))
-      (js ast))))
-
-
 ;;;
-;;; The entrypoint for the compiling from COMPILE-FILE
+;;; The entrypoint for compiling from COMPILE-FILE
 ;;;
 (defun compile-toplevel (sexp &optional multiple-value-p return-p)
   (let ((*compiler-process-mode* 'compile))
-    (compile-toplevel-to-js sexp multiple-value-p return-p)))
+    (with-output-to-string (*js-output*)
+      (process-toplevel-form sexp
+        (lambda (form last-p)
+          (when *compile-print*
+            (let ((form-string (prin1-to-string form)))
+              (simple-format *standard-output* "Compiling ~a...~%" (truncate-string form-string))))
+          (let* ((*toplevel-compilations* nil)
+                 (code (convert form (and last-p multiple-value-p)))
+                 (ast `(progn
+                         ,@(get-toplevel-compilations)
+                         ,(if (and last-p return-p)
+                              `(return ,code)
+                              code))))
+            (js ast)))
+        t))))
 
 ;;;
 ;;; The entrypoint for EVAL and LOAD
 ;;;
-(defun eval-toplevel (sexp mode &optional multiple-value-p return-p)
-  (let ((*compiler-process-mode* mode))
-    (with-compilation-environment
-      (let ((code (compile-toplevel-to-js sexp multiple-value-p return-p)))
-        (values code *literal-table*)))))
+(defun eval-toplevel (sexp mode)
+  (let ((*compiler-process-mode* mode)
+        (result nil))
+    (process-toplevel-form sexp
+      (lambda (form last-p)
+        ;; Compile and execute each form immediately (CLHS 3.2.3.1)
+        (with-compilation-environment
+          (let* ((*toplevel-compilations* nil)
+                 (code (convert form last-p))
+                 (ast `(progn
+                         ,@(get-toplevel-compilations)
+                         (return ,code)))
+                 (jscode (with-output-to-string (*js-output*)
+                           (js ast)))
+                 (literals (list-to-vector (nreverse (mapcar #'car *literal-table*)))))
+            #+jscl (setq result (js-eval jscode literals))
+            #-jscl (error "eval-toplevel: cannot execute in cross-compiler"))))
+      t)
+    result))
 
 #+jscl
 (defun eval (x)
-  (multiple-value-bind (jscode literal-table)
-      (eval-toplevel x 'eval t t)
-    (js-eval jscode (list-to-vector (nreverse (mapcar #'car literal-table))))))
+  (eval-toplevel x 'eval))
