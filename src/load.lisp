@@ -43,7 +43,7 @@
        (let ((*package* *package*))
 
          (when *load-verbose*
-           (format t "Loading ~a" filename))
+           (format t "Loading ~a~%" name))
 
          (with-open-file (stream name :direction :input :sync sync)
            (let ((eof (gensym "LOAD")))
