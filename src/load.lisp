@@ -85,12 +85,20 @@
                (error "Cannot generate output file from load on this platform"))
              (unless hook
                (setq hook (make-array 0))))
-           (let ((stream (if hook
-                             (make-stream
-                              :write-fn (lambda (string) ((oget hook "push") string)))
-                             (make-broadcast-stream))))
-             (!compile-file name stream
-                            :print verbose :verbose t :sync sync :load t))
+           (let ((*package* *package*)
+                 (hook-stream (if hook
+                                  (make-stream
+                                   :write-fn (lambda (string) ((oget hook "push") string)))
+                                  (make-broadcast-stream))))
+             (with-open-file (input name :direction :input :sync sync)
+               (let ((eof (gensym "LOAD")))
+                 (while t
+                   (let ((expr (ls-read input nil eof)))
+                     (when (eql expr eof)
+                       (return))
+                     (let ((jscode (eval-toplevel expr 'load)))
+                       (js-eval jscode nil)
+                       (write-string jscode hook-stream)))))))
            (when output
              (with-open-file (out output :direction :output :if-exists :supersede)
                (%write-file-prologue out place)

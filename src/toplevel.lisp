@@ -37,10 +37,7 @@
 
 (defun eval (x)
   (multiple-value-bind (jscode literal-table)
-      (let ((*compiling-file* nil)
-            (*compiling-in-process* t))
-        (with-compilation-environment
-          (values (compile-toplevel x t t) *literal-table*)))
+      (eval-toplevel x 'eval t t)
     (js-eval jscode (list-to-vector (nreverse (mapcar #'car literal-table))))))
 
 (defun compile (name &optional definition)

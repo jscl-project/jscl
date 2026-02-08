@@ -189,7 +189,8 @@
 
 (defun dump-global-environment (stream)
   (flet ((late-compile (form)
-           (let ((*standard-output* stream))
+           (let ((*standard-output* stream)
+		 (*compiler-process-mode* 'compile))
              (write-string (compile-toplevel form)))))
     ;; We assume that environments have a friendly list representation
     ;; for the compiler and it can be dumped.

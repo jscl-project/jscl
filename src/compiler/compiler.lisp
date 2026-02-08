@@ -278,9 +278,9 @@
 
 (defun ll-keyword-arguments-canonical (ll)
   (flet ((canonicalize (keyarg)
-	   ;; Build a canonical keyword argument descriptor, filling
-	   ;; the optional fields. The result is a list of the form
-	   ;; ((keyword-name var) init-form svar).
+           ;; Build a canonical keyword argument descriptor, filling
+           ;; the optional fields. The result is a list of the form
+           ;; ((keyword-name var) init-form svar).
            (let ((arg (ensure-list keyarg)))
              (cons (if (listp (car arg))
                        (car arg)
@@ -290,7 +290,7 @@
 
 (defun ll-keyword-arguments (ll)
   (mapcar (lambda (keyarg) (second (first keyarg)))
-	  (ll-keyword-arguments-canonical ll)))
+          (ll-keyword-arguments-canonical ll)))
 
 (defun ll-svars (lambda-list)
   (let ((args
@@ -365,11 +365,11 @@
 
 (defun compile-lambda-parse-keywords (ll)
   (let ((n-required-arguments
-	 (length (ll-required-arguments ll)))
-	(n-optional-arguments
-	 (length (ll-optional-arguments ll)))
-	(keyword-arguments
-	 (ll-keyword-arguments-canonical ll))
+         (length (ll-required-arguments ll)))
+        (n-optional-arguments
+         (length (ll-optional-arguments ll)))
+        (keyword-arguments
+         (ll-keyword-arguments-canonical ll))
   (allow-other-keys (ll-allow-other-keys ll)))
     `(progn
        ;; Declare variables
@@ -526,9 +526,9 @@
   (let ((b (lookup-in-lexenv var *environment* 'variable)))
     (cond
       ((and b
-	    (eq (binding-type b) 'variable)
-	    (not (member 'special (binding-declarations b)))
-	    (not (member 'constant (binding-declarations b))))
+            (eq (binding-type b) 'variable)
+            (not (member 'special (binding-declarations b)))
+            (not (member 'constant (binding-declarations b))))
        `(= ,(binding-value b) ,(convert val)))
       ((and b (eq (binding-type b) 'macro))
        (convert `(setf ,var ,val)))
@@ -613,7 +613,7 @@
 
 (defun dump-structure (struct)
   (let* ((name (structure-name struct))
-         (dumper (intern (concat "DUMP-" (symbol-name name)))))
+         (dumper (intern (concat "DUMP-" (symbol-name name)) (symbol-package name))))
     `(object ,@(mapcan (lambda (kv) `(,(car kv) ,(literal (cdr kv))))
                        (funcall dumper struct)))))
 
@@ -629,8 +629,13 @@
     ((eq (typeof sexp) (jsstring "string")) (clstring sexp))
     (t (error "Cannot dump JS value ~S as a literal." sexp))))
 
-;;; Was the compiler invoked by EVAL for in-process evaluation?
-(defvar *compiling-in-process* nil)
+
+;; The mode in which the compiler is processing the code.
+;; Possible values are `EVAL', `LOAD' and `COMPILE'.
+;; Used to evaluate toplevel form after compilation and special
+;; constant handling for EVAL.
+(defvar *compiler-process-mode* nil)
+
 
 (defun literal (sexp)
   (cond
@@ -647,7 +652,7 @@
          (let ((index *literal-counter*)
                (jsvar (genlit)))
            (push (cons sexp jsvar) *literal-table*)
-           (if *compiling-in-process*
+           (if (eq *compiler-process-mode* 'eval)
                ;; If compiling for in-process evaluation, arrange to pass
                ;; literals directly via data vector, instead of dumping
                ;; them to reconstruction code
@@ -697,7 +702,7 @@
      (let ((b (lookup-in-lexenv x *environment* 'function)))
        ;; !PROCLAIM might create FUNCTION binding with NIL value
        (or (and b (binding-value b))
-	   (convert `(symbol-function ',x)))))
+           (convert `(symbol-function ',x)))))
     (t (error "Illegal function ~a" x))))
 
 (defun make-function-binding (fname)
@@ -727,7 +732,7 @@
 
 (define-compilation labels (definitions &rest body)
   (let* ((fnames (mapcar #'car definitions))
-	 (*environment*
+         (*environment*
           (extend-lexenv (mapcar #'make-function-binding fnames)
                          *environment*
                          'function)))
@@ -740,29 +745,29 @@
       ,(convert-block body t t))))
 
 
-;;; Was the compiler invoked from !compile-file?
-(defvar *compiling-file* nil)
-
-;;; NOTE: It is probably wrong in many cases but we will not use this
-;;; heavily. Please, do not rely on wrong cases of this
-;;; implementation.
 (define-compilation eval-when (situations &rest body)
-  ;; TODO: Error checking
   (cond
-    ;; Toplevel form compiled by !compile-file.
-    ((and *compiling-file* (zerop *convert-level*))
+    ;;
+    ;; Toplevel form compiled by compile-file (cross-compilation).
+    ;;
+    ((and (eq *compiler-process-mode* 'compile)
+          (zerop *convert-level*))
      ;; If the situation `compile-toplevel' is given. The form is
      ;; evaluated at compilation-time.
      (when (or (find :compile-toplevel situations)
                (find 'compile situations))
        (eval (cons 'progn body)))
+
      ;; `load-toplevel' is given, then just compile the subforms as usual.
      (when (or (find :load-toplevel situations)
                (find 'load situations))
        (convert-toplevel `(progn ,@body) *multiple-value-p*)))
+
+    ;; LOAD, EVAL or not toplevel forms with :execute
     ((or (find :execute situations)
          (find 'eval situations))
      (convert `(progn ,@body) *multiple-value-p*))
+
     (t
      (convert nil))))
 
@@ -1392,13 +1397,13 @@
       (let ((args (butlast args))
             (last (car (last args))))
         `(selfcall
-	  (var (f ,(convert func)))
-	  (var (args ,(list-to-vector (mapcar #'convert args))))
-	  (var (tail ,(convert last)))
-	  (while (!= tail ,(convert nil))
-	    (method-call args "push" (get tail "$$jscl_car"))
-	    (= tail (get tail "$$jscl_cdr")))
-	  (return ,(let ((resolved '(if (=== (typeof f) "function") f (get f "fvalue"))))
+          (var (f ,(convert func)))
+          (var (args ,(list-to-vector (mapcar #'convert args))))
+          (var (tail ,(convert last)))
+          (while (!= tail ,(convert nil))
+            (method-call args "push" (get tail "$$jscl_car"))
+            (= tail (get tail "$$jscl_cdr")))
+          (return ,(let ((resolved '(if (=== (typeof f) "function") f (get f "fvalue"))))
                      (if *multiple-value-p*
                          `(call-internal |mvcall| ,resolved (spread args))
                          `(method-call ,resolved "apply" this args))))))))
@@ -1530,10 +1535,10 @@
 (define-raw-builtin jsbool (x)
   (multiple-value-bind (value constantp) (constant-value x *environment*)
     (if constantp
-	(if value 'true 'false)
-	`(if (!== ,(convert x) ,(convert nil))
-	     true
-	     false))))
+        (if value 'true 'false)
+        `(if (!== ,(convert x) ,(convert nil))
+             true
+             false))))
 
 (define-builtin jsnull ()
   'null)
@@ -1545,8 +1550,8 @@
   (multiple-value-bind (value constantp) (constant-value form *environment*)
     (cond
       ((and constantp
-	    (or (stringp value)
-		(eq (typeof value) (jsstring "string"))))
+            (or (stringp value)
+                (eq (typeof value) (jsstring "string"))))
        (clstring value))
       ((and constantp (numberp value)) (princ-to-string value))
       ;; xstring handles strings, numbers, and Lisp strings at runtime
@@ -1732,7 +1737,7 @@
     (while continue
       (multiple-value-setq (form continue) (!macroexpand-1 form env))
       (when continue
-	(setq expanded-p t)))
+        (setq expanded-p t)))
     (values form expanded-p)))
 
 #+jscl
@@ -1815,7 +1820,7 @@
         ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp)
              (structure-p sexp)
              (eq sexp (jsbool t)) (eq sexp (jsbool nil)) (eq sexp (jsnull)) (eq sexp (jsundefined))
-	     (eq (typeof sexp) (jsstring "string")))
+             (eq (typeof sexp) (jsstring "string")))
          (literal sexp))
         ((listp sexp)
          (let* ((name (car sexp))
@@ -1873,19 +1878,6 @@
           code))))
 
 
-(defun process-toplevel (sexp &optional multiple-value-p return-p)
-  (let ((*toplevel-compilations* nil))
-    (let ((code (convert-toplevel sexp multiple-value-p return-p)))
-      `(progn
-         ,@(get-toplevel-compilations)
-         ,code))))
-
-
-
-(defun compile-toplevel (sexp &optional multiple-value-p return-p)
-  (with-output-to-string (*js-output*)
-    (js (process-toplevel sexp multiple-value-p return-p))))
-
 
 (defmacro with-compilation-environment (&body body)
   `(let ((*literal-table* nil)
@@ -1893,3 +1885,25 @@
          (*gensym-counter* 0)
          (*literal-counter* 0))
      ,@body))
+
+;;;
+;;; The entrypoint for the compiling from COMPILE-FILE
+;;;
+(defun compile-toplevel (sexp &optional multiple-value-p return-p)
+  (with-output-to-string (*js-output*)
+    (let ((ast (let ((*toplevel-compilations* nil)
+                     (*compiler-process-mode* 'compile))
+                 (let ((code (convert-toplevel sexp multiple-value-p return-p)))
+                   `(progn
+                      ,@(get-toplevel-compilations)
+                      ,code)))))
+      (js ast))))
+
+;;;
+;;; The entrypoint for EVAL and LOAD
+;;;
+(defun eval-toplevel (sexp mode &optional multiple-value-p return-p)
+  (let ((*compiler-process-mode* mode))
+    (with-compilation-environment
+      (let ((code (compile-toplevel sexp multiple-value-p return-p)))
+        (values code *literal-table*)))))
