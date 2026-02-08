@@ -15,8 +15,7 @@
 
 (defun !compile-file (filename out &key print verbose #+jscl (sync t))
   "Compile expressions in FILENAME and write to OUT stream."
-  (let ((*compiling-file* (not load))
-        (*compile-print* print)
+  (let ((*compile-print* print)
         (*compile-verbose* verbose)
         (*package* *package*))
     (with-open-file (stream filename :direction :input #+jscl :sync #+jscl sync)
