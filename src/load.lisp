@@ -26,7 +26,9 @@
 ;;          if value is :maybe, use 'fs' if available, and async XHR otherwise
 ;;;
 
-(defun load (name &key verbose (sync :maybe))
+(defvar *load-verbose* t)
+
+(defun load (name &key (verbose *load-verbose*) (sync :maybe))
   (let ((ext (filename-extension name)))
     ;; Try to guess extension
     (unless ext
@@ -38,12 +40,17 @@
           (return))))
     (cond
       ((member ext '("lisp" "lsp") :test #'string=)
-       (let ((stream (if hook
-                         (make-stream
-                          :write-fn (lambda (string) ((oget hook "push") string)))
-                         (make-broadcast-stream))))
-         (!compile-file name stream
-                        :print verbose :verbose t :sync sync :load t))
+       (let ((*package* *package*))
+
+         (when *load-verbose*
+           (format t "Loading ~a" filename))
+
+         (with-open-file (stream name :direction :input :sync sync)
+           (let ((eof (gensym "LOAD")))
+             (loop
+               (let ((form (read stream nil eof)))
+                 (when (eq form eof) (return))
+                 (eval form))))))
        t)
 
       ((member ext '("js" "cjs" "jso") :test #'string=)
