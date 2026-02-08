@@ -55,10 +55,8 @@
 ;;; function call.
 (defvar *multiple-value-p* nil)
 
-;;; It is bound dynamically to the number of nested calls to
-;;; `convert'. Therefore, a form is being compiled as toplevel if it
-;;; is zero.
-(defvar *convert-level* -1)
+;;; Bound to T if the current form processed is a toplevel
+(defvar *convert-toplevel*)
 
 
 ;;; Environment
@@ -750,8 +748,7 @@
     ;;
     ;; Toplevel form compiled by compile-file (cross-compilation).
     ;;
-    ((and (eq *compiler-process-mode* 'compile)
-          (zerop *convert-level*))
+    ((and (eq *compiler-process-mode* 'compile) *convert-toplevel*)
      ;; If the situation `compile-toplevel' is given. The form is
      ;; evaluated at compilation-time.
      (when (or (find :compile-toplevel situations)
@@ -772,13 +769,11 @@
      (convert nil))))
 
 (define-compilation progn (&rest body)
-  `(progn
-     ,@(append (mapcar #'convert (butlast body))
-               (list (convert (car (last body)) *multiple-value-p*)))))
+  (convert-maybe-toplevel-block body nil nil))
 
 (define-compilation locally (&rest body)
   (let ((*environment* (copy-lexenv *environment*)))
-    `(selfcall ,(convert-block body t t))))
+    `(selfcall ,(convert-maybe-toplevel-block body t t))))
 
 (define-compilation macrolet (definitions &rest body)
   (let ((*environment* (copy-lexenv *environment*)))
@@ -787,7 +782,7 @@
         (let ((binding (make-binding :name name :type 'macro :value
                                      (parse-macro name lambda-list body))))
           (push-to-lexenv binding  *environment* 'function))))
-    `(selfcall ,(convert-block body t t))))
+    `(selfcall ,(convert-maybe-toplevel-block body t t))))
 
 
 (defun special-variable-p (x)
@@ -1671,7 +1666,7 @@
         (let ((b (make-binding :name symbol :type 'macro :value expansion)))
           (push-to-lexenv b new 'variable))))
     (let ((*environment* new))
-      `(selfcall ,(convert-block body t t)))))
+      `(selfcall ,(convert-maybe-toplevel-block body t t)))))
 
 
 #-jscl
@@ -1789,21 +1784,12 @@
       (t
        (error "Bad function descriptor")))))
 
-(defun convert-block (sexps &optional return-last-p decls-allowed-p)
-  (multiple-value-bind (sexps decls)
-      (parse-body sexps :declarations decls-allowed-p)
-    (declare (ignore decls))
-    (if return-last-p
-        `(progn
-           ,@(mapcar #'convert (butlast sexps))
-           (return ,(convert (car (last sexps)) *multiple-value-p*)))
-        `(progn ,@(mapcar #'convert sexps)))))
 
 (defun convert-1 (sexp &optional multiple-value-p)
   (multiple-value-bind (sexp expandedp)
       (!macroexpand-1 (compiler-macroexpand sexp) *environment*)
     (when expandedp
-      (return-from convert-1 (convert sexp multiple-value-p)))
+      (return-from convert-1 (convert-1 sexp multiple-value-p)))
     ;; The expression has been macroexpanded. Now compile it!
     (let ((*multiple-value-p* multiple-value-p))
       (cond
@@ -1824,14 +1810,7 @@
          (literal sexp))
         ((listp sexp)
          (let* ((name (car sexp))
-                (args (cdr sexp))
-                (*convert-level*
-                  (case name
-                    ;; Top-level processing continue into these forms according
-                    ;; to CLHS 3.2.3.1
-                    ((progn macrolet symbol-macrolet locally)
-                     *convert-level*)
-                    (t (1+ *convert-level*)))))
+                (args (cdr sexp)))
            (cond
              ;; Special forms
              ((gethash name *compilations*)
@@ -1847,8 +1826,28 @@
          (error "How should I compile `~S'?" sexp))))))
 
 
+;; Convert a non-toplevel expression to JS
 (defun convert (sexp &optional multiple-value-p)
-  (convert-1 sexp multiple-value-p))
+  (let ((*convert-toplevel* nil))
+    (convert-1 sexp multiple-value-p)))
+
+
+(defun convert-maybe-toplevel-block (sexps &optional return-last-p decls-allowed-p)
+  (multiple-value-bind (sexps decls)
+      (parse-body sexps :declarations decls-allowed-p)
+    (declare (ignore decls))
+    (if return-last-p
+        `(progn
+           ,@(mapcar #'convert-1 (butlast sexps))
+           (return ,(convert-1 (car (last sexps)) *multiple-value-p*)))
+        `(progn
+           ,@(append (mapcar #'convert-1 (butlast sexps))
+                     (list (convert-1 (car (last sexps)) *multiple-value-p*)))))))
+
+(defun convert-block (sexps &optional return-last-p decls-allowed-p)
+  (let ((*convert-toplevel* nil))
+    (convert-maybe-toplevel-block sexps return-last-p decls-allowed-p)))
+
 
 #+jscl
 (defvar *compile-print* nil)
@@ -1860,6 +1859,7 @@
                (min width (length string)))))
     (subseq string 0 n)))
 
+;; Convert a toplevel expression to JS
 (defun convert-toplevel (sexp &optional multiple-value-p return-p)
   ;; Macroexpand sexp as much as possible
   (multiple-value-bind (sexp expandedp) (!macroexpand-1 sexp *environment*)
@@ -1867,16 +1867,15 @@
       (return-from convert-toplevel
         (convert-toplevel sexp multiple-value-p return-p))))
   ;; Process as toplevel
-  (let ((*convert-level* -1))
+  (let ((*convert-toplevel* t))
     (when *compile-print*
       (let ((form-string (prin1-to-string sexp)))
         (simple-format *standard-output* "Compiling ~a...~%" (truncate-string form-string))))
-
-    (let ((code (convert sexp multiple-value-p)))
+    ;; NOTE: Need to call convert-1 instead of convert to preserve the toplevel situation
+    (let ((code (convert-1 sexp multiple-value-p)))
       (if return-p
           `(return ,code)
           code))))
-
 
 (defmacro with-compilation-environment (&body body)
   `(let ((*literal-table* nil)
@@ -1884,7 +1883,6 @@
          (*gensym-counter* 0)
          (*literal-counter* 0))
      ,@body))
-
 
 (defun compile-toplevel-to-js (sexp &optional multiple-value-p return-p)
   (with-output-to-string (*js-output*)
