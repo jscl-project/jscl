@@ -1878,7 +1878,6 @@
           code))))
 
 
-
 (defmacro with-compilation-environment (&body body)
   `(let ((*literal-table* nil)
          (*variable-counter* 0)
@@ -1886,18 +1885,23 @@
          (*literal-counter* 0))
      ,@body))
 
-;;;
-;;; The entrypoint for the compiling from COMPILE-FILE
-;;;
-(defun compile-toplevel (sexp &optional multiple-value-p return-p)
+
+(defun compile-toplevel-to-js (sexp &optional multiple-value-p return-p)
   (with-output-to-string (*js-output*)
-    (let ((ast (let ((*toplevel-compilations* nil)
-                     (*compiler-process-mode* 'compile))
+    (let ((ast (let ((*toplevel-compilations* nil))
                  (let ((code (convert-toplevel sexp multiple-value-p return-p)))
                    `(progn
                       ,@(get-toplevel-compilations)
                       ,code)))))
       (js ast))))
+
+
+;;;
+;;; The entrypoint for the compiling from COMPILE-FILE
+;;;
+(defun compile-toplevel (sexp &optional multiple-value-p return-p)
+  (let ((*compiler-process-mode* 'compile))
+    (compile-toplevel-to-js sexp multiple-value-p return-p)))
 
 ;;;
 ;;; The entrypoint for EVAL and LOAD
@@ -1905,5 +1909,11 @@
 (defun eval-toplevel (sexp mode &optional multiple-value-p return-p)
   (let ((*compiler-process-mode* mode))
     (with-compilation-environment
-      (let ((code (compile-toplevel sexp multiple-value-p return-p)))
+      (let ((code (compile-toplevel-to-js sexp multiple-value-p return-p)))
         (values code *literal-table*)))))
+
+#+jscl
+(defun eval (x)
+  (multiple-value-bind (jscode literal-table)
+      (eval-toplevel x 'eval t t)
+    (js-eval jscode (list-to-vector (nreverse (mapcar #'car literal-table))))))

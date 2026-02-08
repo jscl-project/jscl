@@ -35,11 +35,6 @@
     `(eval-when (:compile-toplevel :load-toplevel :execute)
        (%define-compiler-macro ',name ,expander))))
 
-(defun eval (x)
-  (multiple-value-bind (jscode literal-table)
-      (eval-toplevel x 'eval t t)
-    (js-eval jscode (list-to-vector (nreverse (mapcar #'car literal-table))))))
-
 (defun compile (name &optional definition)
   ;; TODO: collect compiler warning,  when we have them
   (let ((compiled (eval `(function ,definition))))
