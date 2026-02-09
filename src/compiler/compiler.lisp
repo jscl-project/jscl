@@ -626,10 +626,9 @@
     (t (error "Cannot dump JS value ~S as a literal." sexp))))
 
 
-;; The mode in which the compiler is processing the code.
-;; Possible values are `EVAL', `LOAD' and `COMPILE'.
-;; Used to evaluate toplevel form after compilation and special
-;; constant handling for EVAL.
+;; The mode in which the compiler is processing the code.  Possible
+;; values are `EVAL' and `COMPILE'.  Used to evaluate toplevel form
+;; after compilation and special constant handling for EVAL.
 (defvar *compiler-process-mode* nil)
 
 
@@ -1856,7 +1855,7 @@
                (find 'load situations))
        (funcall fn body)))
 
-    ;; LOAD, EVAL or not toplevel forms with :execute
+    ;; EVAL or not toplevel forms only consider :execute
     ((or (find :execute situations)
          (find 'eval situations))
      (funcall fn body))
@@ -1964,10 +1963,10 @@
         t))))
 
 ;;;
-;;; The entrypoint for EVAL and LOAD
+;;; The entrypoint for EVAL
 ;;;
-(defun eval-toplevel (sexp mode)
-  (let ((*compiler-process-mode* mode)
+(defun eval-toplevel (sexp)
+  (let ((*compiler-process-mode* 'eval)
         (result nil))
     (process-toplevel-form sexp
       (lambda (form last-p)
@@ -1986,6 +1985,4 @@
       t)
     result))
 
-#+jscl
-(defun eval (x)
-  (eval-toplevel x 'eval))
+#+jscl (fset 'eval #'eval-toplevel)
