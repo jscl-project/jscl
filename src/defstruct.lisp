@@ -19,7 +19,9 @@
 
 (defun structure-p (obj)
   #+jscl-target (eql (object-type-code obj) :structure)
-  #-jscl-target (typep obj 'structure-object))
+  ;; TODO: unify
+  #+(and (not jscl-target) (not jscl)) (typep obj 'structure-object)
+  #+(and (not jscl-target) jscl) (jscl::structure-p obj))
 
 ;;; Metadata is stored in "structDescriptors" property of instances.
 ;;; For DEF!STRUCT, the name symbol is stored in "structDescriptors",
@@ -30,7 +32,9 @@
            (if (symbolp desc)
                desc
                (dsd-name (storage-vector-ref! desc (1- (length desc))))))
-  #-jscl-target (class-name (class-of obj)))
+  ;; TODO: unify
+  #+(and (not jscl-target) (not jscl)) (class-name (class-of obj))
+  #+(and (not jscl-target) jscl) (jscl::structure-name obj))
 
 (defun def!struct-property-names (slots)
   "Compute the list of JS property names to use for SLOTS.
