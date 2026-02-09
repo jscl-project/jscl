@@ -13,46 +13,24 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-(defun !compile-file (filename out &key print verbose load #+jscl (sync t))
-  "Compile expressions in FILENAME and write to OUT stream.
-
-If LOAD is true, behaves like LOAD instead: all EVAL-WHEN are
-processed under :execute situation, and each expression is evaluated
-immediately after compiled.
-
-If LOAD is false, the caller is responsible for establishing
-WITH-COMPILATION-ENVIRONMENT context, so that dumped literals etc can
-be shared potentially cross-file. If LOAD is true, !COMPILE-FILE wraps
-compilation of every expression inside a different
-WITH-COMPILATION-ENVIRONMENT context (to enable JS evaluation under
-global scope), thus no need for the caller to do so."
-  (let ((*compiling-file* (not load))
-        (*compiling-in-process* nil)
-        (*compile-print* print)
+(defun !compile-file (filename out &key print verbose #+jscl (sync t))
+  "Compile expressions in FILENAME and write to OUT stream."
+  (let ((*compile-print* print)
         (*compile-verbose* verbose)
         (*package* *package*))
     (with-open-file (stream filename :direction :input #+jscl :sync #+jscl sync)
       (when *compile-verbose*
-        (format t "~a ~a...~%" (if load "Loading" "Compiling")
-                #+jscl filename #-jscl (enough-namestring filename)))
+        (format t "Compiling ~a...~%"
+                #+jscl filename
+                #-jscl (enough-namestring filename)))
       (let ((eof (gensym "COMPILE"))
             (expr nil))
         (while t
           (setq expr (ls-read stream nil eof))
           (when (eql expr eof)
             (return))
-          (if load
-              #+jscl
-              (let* ((code (with-compilation-environment
-                             (compile-toplevel expr t t)))
-                     (rc (js-eval code nil)))
-                (write-string "(function(){" out)
-                (write-string code out)
-                (write-string "})();" out)
-                (when *compile-print* (format t "=> ~a~%" rc)))
-              #-jscl (error "Can't load on host")
-              (let ((code (compile-toplevel expr)))
-                (write-string code out))))))))
+          (let ((code (compile-toplevel expr)))
+            (write-string code out)))))))
 
 (defun %write-file-prologue (out place)
   (format out "if (typeof importScripts !== 'undefined') importScripts('~Ajscl.js');
