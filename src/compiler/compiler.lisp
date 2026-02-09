@@ -750,15 +750,15 @@
                   (lambda (body)
                     `(progn ,(convert-block body nil t)))))
 
-(define-compilation macrolet (definitions &rest body)
+(define-compilation macrolet (&rest args)
   ;; Note that this is only called for non toplevel forms.
-  (handle-macrolet definitions body
+  (handle-macrolet args
                    (lambda (body)
                      `(progn ,(convert-block body nil t)))))
 
-(define-compilation symbol-macrolet (macrobindings &rest body)
+(define-compilation symbol-macrolet (&rest args)
   ;; Note that this is only called for non toplevel forms.
-  (handle-symbol-macrolet macrobindings body
+  (handle-symbol-macrolet args
                           (lambda (body)
                             `(progn ,(convert-block body nil t)))))
 
@@ -1821,23 +1821,25 @@
   (let ((*environment* (copy-lexenv *environment*)))
     (funcall fn args)))
 
-(defun handle-macrolet (definitions body fn)
-  (let ((*environment* (copy-lexenv *environment*)))
-    (dolist (def definitions)
-      (destructuring-bind (name lambda-list &body body) def
-        (let ((binding (make-binding :name name :type 'macro :value
-                                     (parse-macro name lambda-list body))))
-          (push-to-lexenv binding  *environment* 'function))))
-    (funcall fn body)))
-
-(defun handle-symbol-macrolet (macrobindings body fn)
-  (let ((new (copy-lexenv *environment*)))
-    (dolist (macrobinding macrobindings)
-      (destructuring-bind (symbol expansion) macrobinding
-        (let ((b (make-binding :name symbol :type 'macro :value expansion)))
-          (push-to-lexenv b new 'variable))))
-    (let ((*environment* new))
+(defun handle-macrolet (args fn)
+  (destructuring-bind (definitions &body body) args
+    (let ((*environment* (copy-lexenv *environment*)))
+      (dolist (def definitions)
+        (destructuring-bind (name lambda-list &body body) def
+          (let ((binding (make-binding :name name :type 'macro :value
+                                       (parse-macro name lambda-list body))))
+            (push-to-lexenv binding  *environment* 'function))))
       (funcall fn body))))
+
+(defun handle-symbol-macrolet (args fn)
+  (destructuring-bind (macrobindings &body body) args
+    (let ((new (copy-lexenv *environment*)))
+      (dolist (macrobinding macrobindings)
+        (destructuring-bind (symbol expansion) macrobinding
+          (let ((b (make-binding :name symbol :type 'macro :value expansion)))
+            (push-to-lexenv b new 'variable))))
+      (let ((*environment* new))
+        (funcall fn body)))))
 
 (defun handle-eval-when (situations body fn)
   "Handle eval-when at toplevel. Called from process-toplevel-form."
@@ -1903,16 +1905,14 @@
             (process-toplevel-body body fn last-p))))
 
       (macrolet
-        (destructuring-bind (defs &body body) args
-          (handle-macrolet defs body
-            (lambda (body)
-              (process-toplevel-body body fn last-p)))))
+        (handle-macrolet args
+          (lambda (body)
+            (process-toplevel-body body fn last-p))))
 
       (symbol-macrolet
-        (destructuring-bind (bindings &body body) args
-          (handle-symbol-macrolet bindings body
-            (lambda (body)
-              (process-toplevel-body body fn last-p)))))
+        (handle-symbol-macrolet args
+          (lambda (body)
+            (process-toplevel-body body fn last-p))))
 
       (eval-when
         (destructuring-bind (situations &body body) args
