@@ -13,6 +13,13 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
+#+jscl-target
+(defmacro with-compilation-unit ((&key override) &body body)
+  (declare (ignore override))
+  `(let ((*fn-info* '()))
+     (multiple-value-prog1 (progn ,@body)
+       (report-undefined-functions))))
+
 (defun !compile-file (filename out &key print verbose #+jscl-target (sync t))
   "Compile expressions in FILENAME and write to OUT stream."
   (let ((*compile-print* print)
