@@ -1684,6 +1684,11 @@
     (!macro-function symbol 'function)))
 
 #+jscl-target
+(defun (setf macro-function) (new-function symbol &optional environment)
+  (declare (ignore environment))
+  (%compile-defmacro symbol new-function))
+
+#+jscl-target
 (defun compiler-macro-function (symbol &optional environment)
   (let ((*environment* (or environment *global-environment*)))
     (!macro-function symbol 'compiler-macro)))
