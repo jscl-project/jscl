@@ -1841,29 +1841,30 @@
       (let ((*environment* new))
         (funcall fn body)))))
 
-(defun handle-eval-when (situations body fn)
+(defun handle-eval-when (args fn)
   "Handle eval-when at toplevel. Called from process-toplevel-form."
-  (cond
-    ;; Toplevel form compiled by compile-file (cross-compilation).
-    ((eq *compiler-process-mode* 'compile)
-     ;; If the situation `compile-toplevel' is given. The form is
-     ;; evaluated at compilation-time.
-     (when (or (find :compile-toplevel situations)
-               (find 'compile situations))
-       (eval (cons 'progn body)))
+  (destructuring-bind (situations &body body) args
+    (cond
+      ;; Toplevel form compiled by compile-file (cross-compilation).
+      ((eq *compiler-process-mode* 'compile)
+       ;; If the situation `compile-toplevel' is given. The form is
+       ;; evaluated at compilation-time.
+       (when (or (find :compile-toplevel situations)
+                 (find 'compile situations))
+         (eval (cons 'progn body)))
 
-     ;; `load-toplevel' is given, then just compile the subforms as usual.
-     (when (or (find :load-toplevel situations)
-               (find 'load situations))
-       (funcall fn body)))
+       ;; `load-toplevel' is given, then just compile the subforms as usual.
+       (when (or (find :load-toplevel situations)
+                 (find 'load situations))
+         (funcall fn body)))
 
-    ;; EVAL or not toplevel forms only consider :execute
-    ((or (find :execute situations)
-         (find 'eval situations))
-     (funcall fn body))
+      ;; EVAL or not toplevel forms only consider :execute
+      ((or (find :execute situations)
+           (find 'eval situations))
+       (funcall fn body))
 
-    (t
-     (funcall fn nil))))
+      (t
+       (funcall fn nil)))))
 
 
 ;;; Process a list of toplevel forms. The last form inherits LAST-P;
@@ -1915,10 +1916,9 @@
             (process-toplevel-body body fn last-p))))
 
       (eval-when
-        (destructuring-bind (situations &body body) args
-          (handle-eval-when situations body
+          (handle-eval-when args
             (lambda (body)
-              (process-toplevel-body body fn last-p)))))
+              (process-toplevel-body body fn last-p))))
 
       (t
         (funcall fn form last-p)))))
