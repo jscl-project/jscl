@@ -177,4 +177,77 @@ The correct value can be used in any expressions, as is, at your discretion
   (funcall fn 1 2))
 ;;; => (170 175)
 
+;;;
+;;; set-dispatch-macro-character / get-dispatch-macro-character
+;;;
+
+;; Basic: register a custom dispatch macro and read with it
+#+jscl
+(test (let* ((rt (copy-readtable))
+             (*readtable* rt))
+        (set-dispatch-macro-character #\# #\!
+          (lambda (stream char arg)
+            (declare (ignore char arg))
+            (let ((obj (read stream t nil t)))
+              (list :bang obj))))
+        (equal (read-from-string "#!foo") '(:BANG FOO))))
+
+;; get-dispatch-macro-character returns the installed function
+#+jscl
+(test (let* ((rt (copy-readtable))
+             (*readtable* rt)
+             (fn (lambda (s c a) (declare (ignore s c a)) nil)))
+        (set-dispatch-macro-character #\# #\! fn rt)
+        (eq (get-dispatch-macro-character #\# #\! rt) fn)))
+
+;; get-dispatch-macro-character returns nil for unregistered sub-char
+#+jscl
+(test (let* ((rt (copy-readtable)))
+        (null (get-dispatch-macro-character #\# #\! rt))))
+
+;; Sub-char is case-insensitive (stored as upcase)
+#+jscl
+(test (let* ((rt (copy-readtable))
+             (*readtable* rt)
+             (fn (lambda (s c a) (declare (ignore s c a)) :ok)))
+        (set-dispatch-macro-character #\# #\z fn rt)
+        (and (eq (get-dispatch-macro-character #\# #\z rt) fn)
+             (eq (get-dispatch-macro-character #\# #\Z rt) fn))))
+
+;; Replacing an existing dispatch function works
+#+jscl
+(test (let* ((rt (copy-readtable))
+             (*readtable* rt))
+        (set-dispatch-macro-character #\# #\!
+          (lambda (stream char arg)
+            (declare (ignore stream char arg))
+            :first))
+        (set-dispatch-macro-character #\# #\!
+          (lambda (stream char arg)
+            (declare (ignore char arg))
+            (read stream t nil t)
+            :second))
+        (eq (read-from-string "#!x") :SECOND)))
+
+;; make-dispatch-macro-character creates a new dispatch character
+#+jscl
+(test (let* ((rt (copy-readtable))
+             (*readtable* rt))
+        (make-dispatch-macro-character #\?)
+        (set-dispatch-macro-character #\? #\!
+          (lambda (stream char arg)
+            (declare (ignore char arg))
+            (let ((obj (read stream t nil t)))
+              (list :question obj))))
+        (equal (read-from-string "?!hello") '(:QUESTION HELLO))))
+
+;; Modifications to a copied readtable don't affect the original
+#+jscl
+(test (let* ((original *readtable*)
+             (rt (copy-readtable))
+             (fn (lambda (s c a) (declare (ignore s c a)) nil)))
+        (set-dispatch-macro-character #\# #\! fn rt)
+        (and (eq (get-dispatch-macro-character #\# #\! rt) fn)
+             (null (get-dispatch-macro-character #\# #\! original)))))
+
 ;;; EOF

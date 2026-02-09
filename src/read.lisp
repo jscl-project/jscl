@@ -32,6 +32,58 @@
 
 #+jscl-target(defvar *read-base* 10)
 
+;;;; Readtable
+
+#+jscl-target
+(def!struct (readtable (:predicate readtablep))
+  (dispatch-table nil)   ; alist: ((disp-char . ((sub-char . function) ...)) ...)
+  (case :upcase))
+
+#+jscl-target
+(defvar *readtable* (make-readtable :dispatch-table (list (cons #\# nil))))
+
+#+jscl-target
+(defun make-dispatch-macro-character (char &optional non-terminating-p (readtable *readtable*))
+  (declare (ignore non-terminating-p))
+  (let ((dt (readtable-dispatch-table readtable)))
+    (unless (assoc char dt)
+      (setf (readtable-dispatch-table readtable)
+            (cons (cons char nil) dt))))
+  t)
+
+#+jscl-target
+(defun set-dispatch-macro-character (disp-char sub-char new-function
+                                     &optional (readtable *readtable*))
+  (let ((entry (assoc disp-char (readtable-dispatch-table readtable))))
+    (unless entry
+      (error "~S is not a dispatch macro character." disp-char))
+    (when (digit-char-p sub-char)
+      (error "SUB-CHAR cannot be a decimal digit: ~S" sub-char))
+    (let* ((uc (char-upcase sub-char))
+           (sub-entry (assoc uc (cdr entry))))
+      (if sub-entry
+          (setf (cdr sub-entry) new-function)
+          (setf (cdr entry) (cons (cons uc new-function) (cdr entry))))))
+  t)
+
+#+jscl-target
+(defun get-dispatch-macro-character (disp-char sub-char &optional (readtable *readtable*))
+  (let ((entry (assoc disp-char (readtable-dispatch-table readtable))))
+    (when entry
+      (cdr (assoc (char-upcase sub-char) (cdr entry))))))
+
+#+jscl-target
+(defun copy-readtable (&optional (from-readtable *readtable*) to-readtable)
+  (let ((new (or to-readtable (make-readtable))))
+    (setf (readtable-dispatch-table new)
+          (mapcar (lambda (entry)
+                    (cons (car entry)
+                          (mapcar (lambda (sub) (cons (car sub) (cdr sub)))
+                                  (cdr entry))))
+                  (readtable-dispatch-table from-readtable)))
+    (setf (readtable-case new) (readtable-case from-readtable))
+    new))
+
 ;;; Reader radix bases
 (defvar *fixed-radix-bases* '((#\B . 2) (#\b . 2) (#\o . 8) (#\O . 8) (#\x . 16) (#\X . 16)))
 
@@ -249,6 +301,20 @@
           (not (eval-feature-expression subexpr))))))))
 
 
+#+jscl-target
+(defun read-sharp-dispatch (stream ch)
+  "Look up CH in *readtable*'s dispatch table for #. If found, call it;
+otherwise signal a reader error."
+  (let* ((dispatch-entry (cdr (assoc #\# (readtable-dispatch-table *readtable*))))
+         (fn (cdr (assoc (char-upcase ch) dispatch-entry))))
+    (if fn
+        (funcall fn stream ch nil)
+        (simple-reader-error stream "Invalid dispatch character ~S after #" ch))))
+
+#-jscl-target
+(defun read-sharp-dispatch (stream ch)
+  (simple-reader-error stream "Invalid dispatch character ~S after #" ch))
+
 (defun read-sharp (stream &optional eof-error-p eof-value)
   (%read-char stream)
   (let ((ch (%read-char stream)))
@@ -356,7 +422,7 @@
                          (cdr cell))
                      (simple-reader-error stream "Invalid labelled object #~S#" id)))))))
          (t
-          (simple-reader-error stream "Invalid dispatch character ~S after #" ch)))))))
+          (read-sharp-dispatch stream ch)))))))
 
 ;;; The #j: and #j"" reader macros for JavaScript interop.
 ;;;
