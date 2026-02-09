@@ -447,14 +447,13 @@ internals.isNLX = function (x) {
 
 var packages = (jscl.packages = Object.create(null));
 
-packages.JSCL = {
-  packageName: "JSCL",
+packages["JSCL-XC"] = {
+  packageName: "JSCL-XC",
   symbols: Object.create(null),
   exports: Object.create(null),
   nicknames: nil,
   shadows: nil,
   use: nil,
-  usedBy: nil,
 };
 
 packages.CL = {
@@ -464,7 +463,6 @@ packages.CL = {
   nicknames: nil,
   shadows: nil,
   use: nil,
-  usedBy: nil,
 };
 
 packages["COMMON-LISP"] = packages.CL;
@@ -476,7 +474,6 @@ packages.KEYWORD = {
   nicknames: nil,
   shadows: nil,
   use: nil,
-  usedBy: nil,
 };
 
 jscl.CL = packages.CL.exports;
@@ -652,7 +649,7 @@ function runCommonLispScripts() {
   progressivelyRunScripts();
 }
 
-// Node/Deno REPL
+// Node/Deno REPL and filesystem access
 if (
   typeof module !== "undefined" &&
   typeof global !== "undefined" &&
@@ -660,4 +657,7 @@ if (
 ) {
   global.readline = require("readline");
   global.repl = require("repl");
+  // Expose fs and path modules for use in eval'd code (e.g., during bootstrap)
+  internals.fs = require("fs");
+  internals.path = require("path");
 }

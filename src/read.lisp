@@ -395,7 +395,7 @@
 
 (defun sharp-radix-reader (ch stream)
   ;; Sharp radix base #\B #\O #\X
-  (let* ((fixed-base (assoc ch jscl::*fixed-radix-bases*))
+  (let* ((fixed-base (assoc ch *fixed-radix-bases*))
 	       (base (cond (fixed-base (cdr fixed-base))
 		                 (t (simple-reader-error stream "No radix base in #~A" ch))))
          (*read-base* base)
@@ -609,7 +609,7 @@
 #+jscl
 (defun parse-integer (string &key (start 0) end (radix 10) junk-allowed)
   (multiple-value-bind (num index)
-      (jscl::!parse-integer string start end radix junk-allowed)
+      (!parse-integer string start end radix junk-allowed)
     (if (or num junk-allowed)
         (values num index)
         (error 'simple-parse-error :format-control "Junk detected."))))

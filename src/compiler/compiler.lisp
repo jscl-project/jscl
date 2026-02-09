@@ -99,6 +99,7 @@
 (defvar *global-environment*)
 (defvar *variable-counter*)
 
+
 (defun gvarname (symbol)
   (declare (ignore symbol))
   (incf *variable-counter*)
@@ -590,17 +591,21 @@
   (incf *literal-counter*)
   (make-symbol (concat "l" (integer-to-string *literal-counter*))))
 
+;;; Bootstrap package name substitution
 (defun dump-symbol (symbol)
   (let ((package (symbol-package symbol)))
     (cond
       ;; Uninterned symbol
       ((null package)
        `(new (call-internal |Symbol| ,(symbol-name symbol))))
-      ;; Interned symbol
+      ;; Interned symbol in CL package
       ((eq package (find-package "COMMON-LISP"))
        `(call-internal |intern| ,(symbol-name symbol)))
       (t
-       `(call-internal |intern| ,(symbol-name symbol) ,(package-name package))))))
+       (let ((pkg-name (package-name package)))
+         (if (string= pkg-name "COMMON-LISP")
+             `(call-internal |intern| ,(symbol-name symbol))
+             `(call-internal |intern| ,(symbol-name symbol) ,pkg-name)))))))
 
 (defun dump-cons (cons)
   (let ((head (butlast cons))
@@ -1644,7 +1649,6 @@
 
 
 
-#-jscl
 (defvar *macroexpander-cache*
   (make-hash-table :test #'eq))
 
@@ -1654,21 +1658,23 @@
   (let ((b (lookup-in-lexenv symbol *environment* namespace)))
     (if (and b (eq (binding-type b) 'macro))
         (let ((expander (binding-value b)))
+          ;; During dump-global-environment, bindings get wrapped with
+          ;; *magic-unquote-marker*. Unwrap it here so we can eval the
+          ;; actual expander form.
+          (when (and (consp expander)
+                     (eq (car expander) *magic-unquote-marker*))
+            (setq expander (second expander)))
           (cond
-            #-jscl
             ((gethash b *macroexpander-cache*)
              (setq expander (gethash b *macroexpander-cache*)))
+	    ;; The list representation is used during bootstrap
+	    ;; because we can dump it. Use a cache to avoid
+	    ;; re-compiling, but preserve the list in the binding
+	    ;; during bootstrap (when :jscl-xc feature is active).  In
+	    ;; JSCL normal operation, replace binding directly.
             ((listp expander)
              (let ((compiled (eval expander)))
-               ;; The list representation are useful while
-               ;; bootstrapping, as we can dump the definition of the
-               ;; macros easily, but they are slow because we have to
-               ;; evaluate them and compile them now and again. So, let
-               ;; us replace the list representation version of the
-               ;; function with the compiled one.
-               ;;
-               #+jscl (setf (binding-value b) compiled)
-               #-jscl (setf (gethash b *macroexpander-cache*) compiled)
+               (setf (gethash b *macroexpander-cache*) compiled)
                (setq expander compiled))))
           expander)
         nil)))

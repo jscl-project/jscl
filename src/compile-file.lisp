@@ -32,29 +32,29 @@
           (let ((code (compile-toplevel expr)))
             (write-string code out)))))))
 
-(defun %write-file-prologue (out place)
-  (format out "if (typeof importScripts !== 'undefined') importScripts('~Ajscl.js');
+(defun %write-file-prologue (out place jscl-name)
+  (format out "if (typeof importScripts !== 'undefined') importScripts('~A~A.js');
 (function(jscl){
 'use strict';
 (function(internals){ var values = internals.values;"
-          place))
+          place jscl-name))
 
-(defun %write-file-epilogue (out place)
+(defun %write-file-epilogue (out place jscl-name)
   (format out "})(jscl.internals);
-})( typeof require !== 'undefined'? require('~Ajscl'):
+})( typeof require !== 'undefined'? require('~A~A'):
 typeof window !== 'undefined'? window.jscl: self.jscl )"
-          place))
+          place jscl-name))
 
-(defun compile-application (files output &key shebang (place "./"))
+(defun compile-application (files output &key shebang (place "./") (jscl-name "jscl"))
   (let ((*features* #+jscl *features* #-jscl (list :jscl :jscl-xc)))
     (with-compilation-environment
       (with-open-file (out output :direction :output :if-exists :supersede)
         (when shebang
           (format out "#!/usr/bin/env node~%"))
-        (%write-file-prologue out place)
+        (%write-file-prologue out place jscl-name)
         (dolist (input files)
           (!compile-file input out :verbose t))
-        (%write-file-epilogue out place)
+        (%write-file-epilogue out place jscl-name)
         output))))
 
 #+jscl
@@ -62,8 +62,8 @@ typeof window !== 'undefined'? window.jscl: self.jscl )"
   (unless output-file
     (setq output-file (concat input-file ".js")))
   (with-open-file (out output-file :direction :output :if-exists :supersede)
-    (%write-file-prologue out place)
+    (%write-file-prologue out place "jscl")
     (with-compilation-environment
       (!compile-file input-file out :verbose verbose :print print))
-    (%write-file-epilogue out place))
+    (%write-file-epilogue out place "jscl"))
   output-file)

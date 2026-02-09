@@ -111,6 +111,33 @@
         (concat result "|"))
       s))
 
+;;; Write a symbol with full package qualification.
+;;; Used for struct printing to ensure readability during bootstrap.
+(defun write-symbol-fully-qualified (symbol stream)
+  "Write SYMBOL to STREAM with full package qualification.
+Always includes package prefix regardless of *package*."
+  (let ((package (symbol-package symbol))
+        (name (symbol-name symbol)))
+    (cond
+      ((null package)
+       ;; Uninterned symbol
+       (write-string "#:" stream)
+       (write-string (escape-token name) stream))
+      ((eq package (find-package "KEYWORD"))
+       ;; Keyword
+       (write-char #\: stream)
+       (write-string (escape-token name) stream))
+      (t
+       ;; Regular symbol - always print package prefix
+       (write-string (escape-token (package-name package)) stream)
+       (multiple-value-bind (sym type)
+           (find-symbol name package)
+         (declare (ignore sym))
+         (if (eq type :internal)
+             (write-string "::" stream)
+             (write-char #\: stream)))
+       (write-string (escape-token name) stream)))))
+
 #+jscl (defvar *print-escape* t)
 #+jscl (defvar *print-circle* nil)
 ;;; @vkm-path-printer 04-09-2022
@@ -359,7 +386,8 @@
                    (funcall print-function form stream 0))
                   (t
                    (write-string (if obsolete "#<" "#S(") stream)
-                   (write-aux (dsd-name dsd) stream known-objects object-ids)
+                   ;; Use fully-qualified name for struct type to ensure readability
+                   (write-symbol-fully-qualified (dsd-name dsd) stream)
                    (when obsolete (write-string " (OBSOLETE)" stream))
                    (mapc (lambda (slot prop)
                            (write-string " :" stream)

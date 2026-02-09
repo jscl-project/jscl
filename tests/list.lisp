@@ -320,14 +320,14 @@
 ;;; SORT
 #+jscl
 (test 
- (equal (apply 'jscl::concat
-               (sort (jscl::vector-to-list "cdbaxaybzcd") #'char-lessp))
+ (equal (apply 'concat
+               (sort (vector-to-list "cdbaxaybzcd") #'char-lessp))
         "aabbccddxyz"))
 
 #+jscl
 (test 
- (let ((sorted (apply 'jscl::concat
-                      (sort (jscl::vector-to-list "cdbaxaybzcd") #'char-lessp))))
+ (let ((sorted (apply 'concat
+                      (sort (vector-to-list "cdbaxaybzcd") #'char-lessp))))
      (equal (remove-duplicates sorted :test #'char-equal :from-end t) "abcdxyz")))
 
 (test 

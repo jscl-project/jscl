@@ -302,17 +302,18 @@ All errors are caught and report to *ERROR-OUTPUT*."
    with-output-to-string with-package-iterator with-simple-restart
    with-slots with-standard-io-syntax write write-byte write-char
    write-line write-sequence write-string write-to-string y-or-n-p
-   yes-or-no-p zerop))
+   yes-or-no-p zerop)
+ "CL")
 
 (export '(mop-object mop-object-p
           compile-application)
-        'jscl)
+        "JSCL-XC")
 
 ;;; JSCL/FFI package - public API for JavaScript interop
 ;;; Only exports symbols documented in docs/ffi.md
-(defpackage "JSCL/FFI"
+(defpackage "JSCL-XC/FFI"
   (:use)
-  (:import-from "JSCL"
+  (:import-from "JSCL-XC"
    #:object
    #:oget #:oset #:oget?
    #:typeof #:instanceof #:new
@@ -328,7 +329,6 @@ All errors are caught and report to *ERROR-OUTPUT*."
    #:jsbool #:clbool))
 
 (setq *package* *user-package*)
-
 
 (defun compilation-notice ()
   #.(let ((build-time
@@ -425,11 +425,10 @@ All errors are caught and report to *ERROR-OUTPUT*."
       *error-output* *standard-output*
       *trace-output* *standard-output*)
 
-(when (find :node *features*)
-  (setf #j:Fs (funcall (%js-vref "require") #j"fs"))
-  (setf #j:FsPath (funcall (%js-vref "require") #j"path")))
-
-(defun require (name)
-  (if (find :node *features*)
-      (funcall (%js-vref "require") (jsstring name))
-      (error "require not supported on this platform")))
+;;; Rename bootstrap packages from JSCL-XC to JSCL.
+;;; During the entire build, packages use the JSCL-XC prefix to avoid
+;;; conflicts with the host CL. Now that all code is loaded, rename
+;;; them to their final JSCL names for user-facing code.
+(rename-package "JSCL-XC/FFI" "JSCL/FFI" '("JSCL-XC/FFI"))
+(rename-package "JSCL-XC/LOOP" "JSCL/LOOP" '("JSCL-XC/LOOP"))
+(rename-package "JSCL-XC" "JSCL" '("JSCL-XC"))

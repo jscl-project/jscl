@@ -168,7 +168,8 @@ accumulated, in the order."
       symbol)))
 
 (defun %defpackage (name nicknames)
-  (let ((package (find-package name))
+  (let ((name (string name))
+        (package (find-package name))
         (nicknames (mapcar #'string nicknames)))
     (if package
         (rename-package package name nicknames)
