@@ -734,4 +734,9 @@
     ;; finds the first defstruct via compile-time registration
     (test (stringp (compile-file src)))))
 
+;;; defstruct should define a type usable with typep
+(defstruct defstruct-type-test a)
+(test (typep (make-defstruct-type-test :a 1) 'defstruct-type-test))
+(test (not (typep 42 'defstruct-type-test)))
+
 ;;; EOF
