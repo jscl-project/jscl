@@ -186,7 +186,7 @@
                          ',imports)
                  package)
          (dolist (symb ',intern)
-           (intern (string symb) package))
+           (intern symb package))
          (export (mapcar (lambda (name) (intern (string name) package)) ',exports)
                  package)
          ,(when doc `(setf (documentation package 'package) ,doc))
