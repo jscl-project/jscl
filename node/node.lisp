@@ -13,6 +13,14 @@
 
 (/debug "loading repl-node/repl.lisp!")
 
+(defun require (name)
+  "Load a Node.js module by NAME."
+  (funcall (%js-vref "require") (jsstring name)))
+
+;; TODO: Remove these global variables. Code should use (require "fs") directly.
+(setf #j:Fs (require "fs"))
+(setf #j:FsPath (require "path"))
+
 (defvar *repl*)
 
 (defun start-repl ()
@@ -49,6 +57,5 @@
       (t
        (dolist (file args)
          (load file))))))
-
 
 (node-init)

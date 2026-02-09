@@ -1,4 +1,4 @@
-;;; ffi.lisp ---
+;;; ffi.lisp --- FFI primitives (target only)
 
 ;; JSCL is free software: you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -28,6 +28,9 @@
 ;;;   jsstring    (x)           — Lisp string → JS string
 ;;;   clstring%   (x)           — JS string → Lisp string (no type check)
 ;;;   instanceof  (x class)     — JS instanceof operator
+
+(defun typeof (x)
+  (typeof x))
 
 (defun jsstring (x)
   (jsstring x))

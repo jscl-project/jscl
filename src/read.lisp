@@ -302,6 +302,13 @@
                       (ls-read stream))
                  (ls-read stream eof-error-p eof-value t)))))
       ((#\J #\j)
+       ;; Check for user-registered dispatch macro before defaulting to #j
+       #+jscl-target
+       (let ((user-fn (get-dispatch-macro-character #\# ch)))
+         (if user-fn
+             (funcall user-fn stream ch nil)
+             (read-sharp-j stream)))
+       #-jscl-target
        (read-sharp-j stream))
       ;; Sharp radix 
       ((#\B #\b #\O #\o #\X #\x)
@@ -395,7 +402,7 @@
 
 (defun sharp-radix-reader (ch stream)
   ;; Sharp radix base #\B #\O #\X
-  (let* ((fixed-base (assoc ch jscl::*fixed-radix-bases*))
+  (let* ((fixed-base (assoc ch *fixed-radix-bases*))
 	       (base (cond (fixed-base (cdr fixed-base))
 		                 (t (simple-reader-error stream "No radix base in #~A" ch))))
          (*read-base* base)
@@ -609,7 +616,7 @@
 #+jscl
 (defun parse-integer (string &key (start 0) end (radix 10) junk-allowed)
   (multiple-value-bind (num index)
-      (jscl::!parse-integer string start end radix junk-allowed)
+      (!parse-integer string start end radix junk-allowed)
     (if (or num junk-allowed)
         (values num index)
         (error 'simple-parse-error :format-control "Junk detected."))))

@@ -41,7 +41,7 @@
    apply-methods
    apply-method
    find-generic-function)
- 'jscl)
+ "JSCL-XC")
 
 
 

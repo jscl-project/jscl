@@ -447,15 +447,16 @@ internals.isNLX = function (x) {
 
 var packages = (jscl.packages = Object.create(null));
 
-packages.JSCL = {
-  packageName: "JSCL",
+const jsclPackage = {
+  packageName: "JSCL-XC",
   symbols: Object.create(null),
   exports: Object.create(null),
   nicknames: nil,
   shadows: nil,
   use: nil,
-  usedBy: nil,
-};
+}
+
+packages["JSCL-XC"] = jsclPackage;
 
 packages.CL = {
   packageName: "COMMON-LISP",
@@ -464,7 +465,6 @@ packages.CL = {
   nicknames: nil,
   shadows: nil,
   use: nil,
-  usedBy: nil,
 };
 
 packages["COMMON-LISP"] = packages.CL;
@@ -476,7 +476,6 @@ packages.KEYWORD = {
   nicknames: nil,
   shadows: nil,
   use: nil,
-  usedBy: nil,
 };
 
 jscl.CL = packages.CL.exports;
@@ -540,8 +539,7 @@ internals.bindSpecialBindings = function (symbols, vals, callback){
 };
 
 internals.intern = function (name, package_name) {
-  package_name = package_name || "COMMON-LISP";
-  var lisp_package = packages[package_name];
+  var lisp_package = package_name ? packages[package_name]: jsclPackage;
   if (!lisp_package) throw "No package " + package_name;
 
   var symbol = lisp_package.symbols[name];
@@ -652,7 +650,7 @@ function runCommonLispScripts() {
   progressivelyRunScripts();
 }
 
-// Node/Deno REPL
+// Node/Deno REPL and filesystem access
 if (
   typeof module !== "undefined" &&
   typeof global !== "undefined" &&
@@ -660,4 +658,7 @@ if (
 ) {
   global.readline = require("readline");
   global.repl = require("repl");
+  // Expose fs and path modules for use in eval'd code (e.g., during bootstrap)
+  internals.fs = require("fs");
+  internals.path = require("path");
 }

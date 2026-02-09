@@ -48,9 +48,7 @@
 ;;;>      United States of America
 ;;;>      +1-617-221-1000
 
-
-(in-package :jscl/loop)
-
+(in-package :jscl-xc/loop)
 
 (defvar *slow-test*
 	nil)
@@ -75,7 +73,7 @@
   (dolist (pair params-and-answers)
     (let ((params (first pair)) (answers (rest pair)) yow)
       ;; fixme: 
-      (jscl::test
+      (jscl-xc::test
           (cond
             ((equal (setq yow (multiple-value-list (apply interpreted params))) answers))
             (t
@@ -92,13 +90,11 @@
 
 #+nil
 (unless (find-package 'extended-loop-test-package)
-  (let ((p (make-package 'extended-loop-test-package :use (list jscl/loop::*loop-lisp-package*))))
+  (let ((p (make-package 'extended-loop-test-package :use (list jscl-xc/loop::*loop-lisp-package*))))
     (shadowing-import 'symbolics-loop:loop p)
     (use-package (find-package 'symbolics-loop) p)
     p))
 
 
-;;; FIXME: *package* should be bound for the file being compiled.
-(in-package :cl)
 
 ;;; EOF

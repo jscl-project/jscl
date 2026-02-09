@@ -10,7 +10,7 @@
 (defun condition-hierarhy-test (condition)
   (handler-case
       (progn
-        (jscl::%%signal condition))
+        (%%signal condition))
     (condition (msg) 
       (typecase msg
         (type-error :type-error)
@@ -21,10 +21,10 @@
 (test
  (mv-eql
   (values
-   (condition-hierarhy-test (jscl::%%make-condition 'warning))
-   (condition-hierarhy-test (jscl::%%make-condition 'error))
-   (condition-hierarhy-test (jscl::%%make-condition 'condition))
-   (condition-hierarhy-test (jscl::%%make-condition 'type-error :datum 'test :expected-type :any)))
+   (condition-hierarhy-test (%%make-condition 'warning))
+   (condition-hierarhy-test (%%make-condition 'error))
+   (condition-hierarhy-test (%%make-condition 'condition))
+   (condition-hierarhy-test (%%make-condition 'type-error :datum 'test :expected-type :any)))
   :WARNING   :ERROR   :CONDITION   :TYPE-ERROR))
 
 
@@ -90,8 +90,8 @@
  
 (test
  (equal '(1 nil 3)
-        (list (trap-errors (jscl::%%signal "Foo.") 1)
-              (trap-errors (jscl::%%error  "Bar.") 2)
+        (list (trap-errors (%%signal "Foo.") 1)
+              (trap-errors (%%error  "Bar.") 2)
               (+ 1 2))))
 
 

@@ -546,7 +546,7 @@
   (let ((value (gensym "ASSERT-VALUE")))
        `(let ((,value ,test))
          (when (not ,value)
-           (jscl::%%assert-error ',test ,datum ,@args)))))
+           (%%assert-error ',test ,datum ,@args)))))
 #+jscl
 (defmacro assert (test &optional ignore datum &rest args)
   `(%%assert ,test ,ignore ,datum ,@args))

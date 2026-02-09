@@ -95,15 +95,15 @@
         (xfv #(#xa001 #xb001 #xc001 #xd001 #xe001 #xf001)))
     (list (equal
            ;; correct b->d conversion
-           (jscl::vector-to-list bfv)
+           (vector-to-list bfv)
            '(1 2 3 4 5 6 7 8 9 10))
           (equal
            ;; correct x->d conversion
-           (jscl::vector-to-list xfv)
+           (vector-to-list xfv)
            '(40961 45057 49153 53249 57345 61441))
           ;; list & sharp tokens -> with sharp reader
           (equal
-           (jscl::vector-to-list bfv1)
+           (vector-to-list bfv1)
            '(1 2 3 (QUOTE SHARP) #\# 4 5 6 7 8 9 10))
           (equal
            (aref bfv1 3)
@@ -121,7 +121,7 @@
       ((s1 (read-from-string "#(#b1 #b10 #b11 #b100 #b101 #b110 #b111 #b1000 #b1001 #b1010)")))
     (list
      (equal
-      (jscl::vector-to-list s1)
+      (vector-to-list s1)
       '(1 2 3 4 5 6 7 8 9 10))))))
 
 ;;; backquote

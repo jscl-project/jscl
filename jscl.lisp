@@ -1,6 +1,6 @@
-;;; jscl.lisp ---
+;;; jscl.lisp --- JSCL Cross-Compiler Bootstrap
 
-;; Copyright (C) 2012, 2013 David Vazquez
+;; Copyright (C) 2012, 2013, 2026 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
 
 ;; JSCL is free software: you can redistribute it and/or
@@ -16,78 +16,119 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-(defpackage :jscl
+;;;; Packages
+;;;;
+;;;; We define JSCL-XC as the cross-compiler package.
+;;;; In SBCL, it uses only :CL.
+;;;; In JSCL (Stage 1), :jscl already exists (it's the running compiler),
+;;;; so JSCL-XC also uses :jscl to inherit its symbols.
+
+(defpackage :jscl-xc
   (:use :cl)
-  (:export #:bootstrap #:build-repls #:build-tests #:build-all
-           #:compile-application #:run-tests-in-host))
+  (:export #:bootstrap
+           #:build-node-repl
+	   #:build-web-repl
+	   #:build-web-worker-repl
+	   #:build-deno-repl
+           #:build-tests))
 
-(in-package :jscl)
+(in-package :jscl-xc)
 
-(require :uiop)
+#-jscl (require :uiop)
+
+;;;; Directory Configuration
+;;;;
+;;;; In SBCL, we compute paths from the load file location.
+;;;; In JSCL, we use the current directory (assumed to be repo root).
 
 (defvar *base-directory*
-  (if #.*load-pathname*
-      (make-pathname :name nil :type nil :defaults #.*load-pathname*)
-      *default-pathname-defaults*))
+  #+jscl ""
+  #-jscl (namestring
+          (if #.*load-pathname*
+              (make-pathname :name nil :type nil :defaults #.*load-pathname*)
+              *default-pathname-defaults*)))
 
 (defvar *dist-directory*
-  (merge-pathnames "dist/" *base-directory*))
+  (concatenate 'string *base-directory* "dist/"))
 
+(defun source-path (filename &key (directory '(:relative "src")) (type nil))
+  "Build a path string relative to *BASE-DIRECTORY* from FILENAME, DIRECTORY, and optional TYPE extension."
+  (let ((dir-str (cond
+                   ((equal directory '(:relative "src")) "src/")
+                   ((equal directory '(:relative)) "")
+                   ((null directory) "")
+                   (t (format nil "~{~a/~}" (cdr directory))))))
+    (if type
+        (concatenate 'string *base-directory* dir-str filename "." type)
+        (concatenate 'string *base-directory* dir-str filename))))
+
+;;;; Version Information
+
+#-jscl
 (defun get-current-git-commit ()
-  (uiop:run-program `("git" "-C" ,(uiop:native-namestring *base-directory*)
-			    "rev-parse"
-			    "HEAD")
-		    :output '(:string :stripped t)))
+  (uiop:run-program `("git" "-C" ,*base-directory*
+                            "rev-parse"
+                            "HEAD")
+                    :output '(:string :stripped t)))
 
+#-jscl
 (defun is-release-build ()
   (uiop:getenvp "JSCL_RELEASE"))
 
+#-jscl
 (defun git-has-uncommited-changes ()
-  (let* ((command `("git" "-C" ,(uiop:native-namestring *base-directory*)
-			  "diff-files"
-			  "--quiet"))
-	 (error-status (nth-value 2 (uiop:run-program command :ignore-error-status t))))
+  (let* ((command `("git" "-C" ,*base-directory*
+                          "diff-files"
+                          "--quiet"))
+         (error-status (nth-value 2 (uiop:run-program command :ignore-error-status t))))
     (= error-status 1)))
 
+#-jscl
 (defvar *version*
-  ;; Read the version from the package.json file. We could have used a
-  ;; json library to parse this, but that would introduce a dependency
-  ;; and we are not using ASDF yet.
-  (with-open-file (in (merge-pathnames "package.json" *base-directory*))
+  ;; Read the version from the package.json file.
+  (with-open-file (in (source-path "package" :directory nil :type "json"))
     (loop
       for line = (read-line in nil)
       while line
       when (search "\"version\":" line)
-	do (let ((colon (position #\: line))
-		 (comma (position #\, line)))
-	     (return (string-trim '(#\newline #\" #\tab #\space)
-				  (subseq line (1+ colon) comma)))))))
+        do (let ((colon (position #\: line))
+                 (comma (position #\, line)))
+             (return (string-trim '(#\newline #\" #\tab #\space)
+                                  (subseq line (1+ colon) comma)))))))
 
 ;; To be inlined into the `lisp-implementation-version' function.
+;; Defined in :jscl-xc package so it's available for #. in misc.lisp
 (defun jscl-implementation-version ()
+  #+jscl
+  ;; In Stage 1, return a placeholder version
+  (format nil "stage1-~a" (get-universal-time))
+  #-jscl
   (if (is-release-build)
       (progn
-	(assert (not (git-has-uncommited-changes)))
-	*version*)
+        (assert (not (git-has-uncommited-changes)))
+        *version*)
       (format nil "dev-~a~a"
-	      (subseq (get-current-git-commit) 0 8)
-	      (if (git-has-uncommited-changes)
-		  "-dirty"
-		  ""))))
+              (subseq (get-current-git-commit) 0 8)
+              (if (git-has-uncommited-changes)
+                  "-dirty"
+                  ""))))
 
-;;; List of all the source files that need to be compiled, and whether they
-;;; are to be compiled just by the host, by the target JSCL, or by both.
-;;; All files have a `.lisp' extension, and
-;;; are relative to src/
-;;; Subdirectories are indicated by the presence of a list rather than a
-;;; keyword in the second element of the list. For example, this list:
-;;;  (("foo"    :target)
-;;;   ("bar"
-;;;     ("baz"  :host)
-;;;     ("quux" :both)))
-;;; Means that src/foo.lisp and src/bar/quux.lisp need to be compiled in the
-;;; target, and that src/bar/baz.lisp and src/bar/quux.lisp need to be
-;;; compiled in the host
+;;;; Source File List
+;;;;
+;;;; List of all the source files that need to be compiled, and whether they
+;;;; are to be compiled just by the host, by the target JSCL, or by both.
+;;;; All files have a `.lisp' extension, and are relative to src/
+;;;;
+;;;; Subdirectories are indicated by the presence of a list rather than a
+;;;; keyword in the second element of the list. For example, this list:
+;;;;  (("foo"    :target)
+;;;;   ("bar"
+;;;;     ("baz"  :host)
+;;;;     ("quux" :both)))
+;;;; Means that src/foo.lisp and src/bar/quux.lisp need to be compiled in the
+;;;; target, and that src/bar/baz.lisp and src/bar/quux.lisp need to be
+;;;; compiled in the host
+
 (defvar *source*
   '(("boot"          :target)
     ("compat"        :host)
@@ -117,7 +158,8 @@
     ("file"          :target)
     ("compiler"
      ("codegen"      :both)
-     ("compiler"     :both))
+     ("compiler"     :both)
+     ("environment"  :both))
     ("clos"
      ("kludges"       :target)
      ("std-object"    :target)
@@ -138,14 +180,6 @@
     ("compile-file"  :both)
     ("load"          :target)))
 
-
-(defun source-pathname (filename &key (directory '(:relative "src")) (type nil) (defaults filename))
-  (merge-pathnames
-   (if type
-       (make-pathname :type type :directory directory :defaults defaults)
-       (make-pathname            :directory directory :defaults defaults))
-   *base-directory*))
-
 (defun get-files (file-list type dir)
   "Traverse FILE-LIST and retrieve a list of the files within which match
    either TYPE or :BOTH, processing subdirectories."
@@ -158,7 +192,7 @@
          (get-files (cdr file)      type (append dir (list (car file))))
          (get-files (cdr file-list) type dir)))
       ((member (cadr file) (list type :both))
-       (cons (source-pathname (car file) :directory dir :type "lisp")
+       (cons (source-path (car file) :directory dir :type "lisp")
              (get-files (cdr file-list) type dir)))
       (t
        (get-files (cdr file-list) type dir)))))
@@ -171,145 +205,146 @@
   `(dolist (,name (get-files *source* ,type '(:relative "src")))
      ,@body))
 
-;;; Compile and load jscl into the host
-(with-compilation-unit ()
-  (do-source input :host
-    (multiple-value-bind (fasl warn fail) (compile-file input)
-      (declare (ignore warn))
-      #-ccl (when fail
-        (error "Compilation of ~A failed." input))
-      (load fasl))))
+;;;; Host Compilation (SBCL only)
+;;;;
+;;;; Compile and load JSCL into the host Lisp for cross-compilation.
+;;;; Host files are loaded in the :jscl-xc package.
+
+(let ((*package* (find-package "JSCL-XC")))
+  (with-compilation-unit ()
+    (do-source input :host
+      (load input))))
+
+
+;;;; Utility Functions
 
 (defun read-whole-file (filename)
-  (with-open-file (in filename)
-    (let* ((seq (make-array (file-length in) :element-type 'character))
-           (char-count (read-sequence seq in)))
-      (subseq seq 0 char-count))))
+  "Read entire contents of FILENAME as a string.
+Works in both SBCL (Stage 0) and JSCL (Stage 1)."
+  (with-open-file (in filename :direction :input)
+    (with-output-to-string (out)
+      (loop for line = (read-line in nil)
+            while line
+            do (write-line line out)))))
 
-(defun dump-global-environment (stream)
-  (flet ((late-compile (form)
-           (let ((*standard-output* stream))
-             (write-string (compile-toplevel form)))))
-    ;; We assume that environments have a friendly list representation
-    ;; for the compiler and it can be dumped.
-    (dolist (b (lexenv-function *environment*))
-      (when (eq (binding-type b) 'macro)
-        (setf (binding-value b) `(,*magic-unquote-marker* ,(binding-value b)))))
-    (late-compile
-     `(progn
-        (setq *environment* ',*environment*)
-        (setq *global-environment* *environment*)))
-    ;; Set some counter variable properly, so user compiled code will
-    ;; not collide with the compiler itself.
-    (late-compile
-     `(progn
-        (setq *variable-counter* ,*variable-counter*)
-        (setq *gensym-counter* ,*gensym-counter*)))
-    (late-compile `(setq *literal-counter* ,*literal-counter*))))
+;;;; Bootstrap Function
+;;;;
+;;;; Compiles JSCL to produce jscl.js. Uses source-tracking for macro
+;;;; definitions so it works in both SBCL and JSCL environments.
 
+(defun bootstrap (output-directory prefix &key verbose)
+  "Compile JSCL to produce PREFIX.js in OUTPUT-DIRECTORY."
+  (let ((jscl-path (concatenate 'string output-directory prefix ".js"))
+        #+jscl (start-time (#j:Date:now))
+        ;; Bind compilation settings - :jscl-xc is active in both stages
+        (*features* (list* :jscl-xc :jscl (remove :jscl *features*)))
+        (*package* (find-package "JSCL-XC")))
 
-(defun bootstrap (&optional verbose)
-  (let ((*features* (list :jscl :jscl-xc))
-        (*package* (find-package "JSCL"))
-        (*default-pathname-defaults* *base-directory*))
-    (setq *environment* (make-lexenv))
-    (setq *global-environment* *environment*)
-    (setq *fn-info* '())
-    (ensure-directories-exist *dist-directory*)
-    (with-compilation-environment
-      (with-open-file (out (merge-pathnames "jscl.js" *dist-directory*)
-                           :direction :output
-                           :if-exists :supersede)
-        (format out "(function(){~%")
-        (format out "'use strict';~%")
-        (write-string (read-whole-file (source-pathname "prelude.js")) out)
+    #+jscl (format t "~%=== JSCL Stage 1 Bootstrap ===~%")
+
+    (ensure-directories-exist output-directory)
+
+    (setq jscl-xc::*environment* (jscl-xc::make-lexenv))
+    (setq jscl-xc::*global-environment* jscl-xc::*environment*)
+
+    ;; Compile jscl.js
+    (jscl-xc::with-compilation-environment
+      (with-open-file (out jscl-path :direction :output :if-exists :supersede)
+        (write-line "(function(){" out)
+        (write-line "'use strict';" out)
+        (write-string (read-whole-file (source-path "prelude.js")) out)
+
         (do-source input :target
-          (!compile-file input out :verbose t :print verbose))
-        (dump-global-environment out)
+          (jscl-xc::!compile-file input out :verbose t :print verbose))
+
+        (jscl-xc::dump-global-environment out)
 
         ;; NOTE: This file must be compiled after dumping the global
         ;; environment. In this file we replace the bootstrap DEFMACRO
-        ;; etc definition with the standard definition, from now on
-        ;; macro definition follow standard semantics but can no
-        ;; longer be handled by dumping magic.
-        (!compile-file "src/toplevel.lisp" out :verbose t :print verbose)
+        ;; etc definition with the standard definition.
+        (jscl-xc::!compile-file (source-path "toplevel" :type "lisp") out
+                             :verbose t :print verbose)
 
-        (format out "})();~%")))
+        (write-line "})();" out)))
 
-    (report-undefined-functions)))
+    (jscl-xc::report-undefined-functions)
 
-(defun copy-asset (src-path &optional dst-path)
-  "Copy static file from SRC-PATH to DST-PATH.
-SRC-PATH is relative to *BASE-DIRECTORY* and DST-PATH is relative to
-*DIST-DIRECTORY*. If DST-PATH is not provided, default to the
-name/type components of SRC-PATH (directory nesting is *removed*). Unix
-namestrings are used for all paths and are parsed with
-UIOP:PARSE-UNIX-NAMESTRING."
-  (let* ((src-path (uiop:parse-unix-namestring src-path))
-         (dst-path (if dst-path
-                       (uiop:parse-unix-namestring dst-path)
-                       (make-pathname :directory '(:relative)
-                                      :defaults src-path))))
-    (uiop:copy-file (merge-pathnames src-path *base-directory*)
-                    (merge-pathnames dst-path *dist-directory*))))
+    #+jscl
+    (format t "~%=== Stage 1 Bootstrap Complete ===~%Time: ~,2f seconds~%"
+            (/ (- (#j:Date:now) start-time) 1000.0))
 
-(defun build-repls ()
-  (let ((*package* (find-package "JSCL"))
-        (*default-pathname-defaults* *base-directory*))
+    jscl-path))
 
-    ;; Web REPL
-    (copy-asset "web/index.html")
-    (copy-asset "web/style.css")
-    (copy-asset "node_modules/jquery/dist/jquery.min.js" "jquery.js")
-    (copy-asset "node_modules/jq-console/lib/jqconsole.js")
-    (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "web")))
-                         (merge-pathnames "jscl-web.js" *dist-directory*))
+;;;; Helper Functions
 
-    ;; Node REPL
-    (compile-application (list (source-pathname "node.lisp" :directory '(:relative "node")))
-                         (merge-pathnames "jscl-node.js" *dist-directory*)
-                         :shebang t)
+(defun copy-asset (src dst-path output-directory)
+  "Copy static file from SRC (relative to base) to DST-PATH in OUTPUT-DIRECTORY."
+  (let ((src-full (source-path src :directory nil))
+        (dst-full (concatenate 'string output-directory dst-path)))
+    #+jscl (#j:Fs:copyFileSync (jscl::jsstring src-full) (jscl::jsstring dst-full))
+    #-jscl (uiop:copy-file src-full dst-full)))
 
-    ;; Web worker REPL
-    (copy-asset "worker/index.html" "worker.html" )
-    (copy-asset "worker/main.js")
-    (copy-asset "worker/service-worker.js")
-    (compile-application (list (source-pathname "worker.lisp" :directory '(:relative "worker")))
-                         (merge-pathnames "jscl-worker.js" *dist-directory*))
+#+jscl
+(defun directory (pattern)
+  "Simple directory listing for JSCL. PATTERN should be like 'tests/*.lisp'."
+  ;; Extract directory and extension from pattern
+  (let* ((slash-pos (position #\/ pattern :from-end t))
+         (dir (if slash-pos (subseq pattern 0 (1+ slash-pos)) ""))
+         (file-pattern (if slash-pos (subseq pattern (1+ slash-pos)) pattern))
+         (ext (let ((dot-pos (position #\. file-pattern)))
+                (if dot-pos (subseq file-pattern dot-pos) nil)))
+         (entries (#j:Fs:readdirSync (jscl::jsstring (if (string= dir "") "." dir))))
+         (result nil))
+    (dotimes (i (jscl::oget entries "length"))
+      (let ((entry (jscl::clstring (aref entries i))))
+        (when (and ext (> (length entry) (length ext))
+                   (string= (subseq entry (- (length entry) (length ext))) ext))
+          (push (concatenate 'string dir entry) result))))
+    (nreverse result)))
 
-    ;; Deno REPL
-    (compile-application (list (source-pathname "repl.lisp" :directory '(:relative "deno")))
-                         (merge-pathnames "jscl-deno.js" *dist-directory*))))
+(defun build-web-repl (output-directory)
+  "Build web REPL into OUTPUT-DIRECTORY."
+  (let ((*package* (find-package "JSCL-XC")))
+    (copy-asset "web/index.html" "index.html" output-directory)
+    (copy-asset "web/style.css" "style.css" output-directory)
+    (copy-asset "node_modules/jquery/dist/jquery.min.js" "jquery.js" output-directory)
+    (copy-asset "node_modules/jq-console/lib/jqconsole.js" "jqconsole.js" output-directory)
+    (jscl-xc::compile-application (list (source-path "repl.lisp" :directory '(:relative "web")))
+                               (concatenate 'string output-directory "jscl-web.js"))))
 
-(defun build-tests ()
-  (let ((*package* (find-package "JSCL"))
-        (*default-pathname-defaults* *base-directory*))
+(defun build-node-repl (output-directory &optional (jscl-name "jscl"))
+  "Build Node.js REPL into OUTPUT-DIRECTORY, depending on JSCL-NAME module."
+  (let ((*package* (find-package "JSCL-XC")))
+    (jscl-xc::compile-application (list (source-path "node.lisp" :directory '(:relative "node")))
+                               (concatenate 'string output-directory jscl-name "-node.js")
+                               :shebang t :place "" :jscl-name (concatenate 'string "./" jscl-name))))
 
-    (copy-asset "tests.html")
-    (compile-application
-     `(,(source-pathname "tests.lisp" :directory nil)
-       ,@(directory (source-pathname "*" :directory '(:relative "tests") :type "lisp"))
-       ;; Loop tests
-       ,(source-pathname "validate.lisp" :directory '(:relative "tests" "loop") :type "lisp")
-       ,(source-pathname "base-tests.lisp" :directory '(:relative "tests" "loop") :type "lisp")
+(defun build-web-worker-repl (output-directory)
+  "Build web worker REPL into OUTPUT-DIRECTORY."
+  (let ((*package* (find-package "JSCL-XC"))
+        #-jscl (*default-pathname-defaults* *base-directory*))
+    (copy-asset "worker/index.html" "worker.html" output-directory)
+    (copy-asset "worker/main.js" "main.js" output-directory)
+    (copy-asset "worker/service-worker.js" "service-worker.js" output-directory)
+    (jscl-xc::compile-application (list (source-path "worker.lisp" :directory '(:relative "worker")))
+                               (concatenate 'string output-directory "jscl-worker.js"))))
 
-       ,(source-pathname "tests-report.lisp" :directory nil))
-     (merge-pathnames "tests.js" *dist-directory*))))
+(defun build-deno-repl (output-directory)
+  "Build Deno REPL into OUTPUT-DIRECTORY."
+  (let ((*package* (find-package "JSCL-XC"))
+        #-jscl (*default-pathname-defaults* *base-directory*))
+    (jscl-xc::compile-application (list (source-path "repl.lisp" :directory '(:relative "deno")))
+                               (concatenate 'string output-directory "jscl-deno.js"))))
 
-(defun build-all (&optional verbose)
-  (bootstrap verbose)
-  (build-repls)
-  (build-tests))
+(defun build-tests (output-directory)
+  "Build test suite into OUTPUT-DIRECTORY."
+  (let ((*package* (find-package "JSCL-XC")))
+    (copy-asset "tests.html" "tests.html" output-directory)
+    ;; Load tests.lisp to get get-test-files function
+    (load (source-path "tests" :directory nil :type "lisp"))
+    (jscl-xc::compile-application
+     (cons "tests.lisp" (funcall (find-symbol "GET-TEST-FILES" "JSCL-XC")))
+     (concatenate 'string output-directory "jscl-tests.js"))))
 
 
-;;; Run the tests in the host Lisp implementation. It is a quick way
-;;; to improve the level of trust of the tests.
-(defun run-tests-in-host ()
-  (let ((*package* (find-package "JSCL"))
-        (*default-pathname-defaults* *base-directory*))
-    (load (source-pathname "tests.lisp" :directory nil))
-    (let ((*use-html-output-p* nil))
-      (declare (special *use-html-output-p*))
-      (dolist (input (directory "tests/*.lisp"))
-        (load input)))
-    (load "tests-report.lisp")))
+;;; EOF

@@ -1,3 +1,8 @@
+;;; tests.lisp --- JSCL Test Framework
+;;;
+;;; This file contains only definitions. Call RUN-TESTS after loading
+;;; to execute the test suite.
+
 (defparameter *total-tests* 0)
 (defparameter *passed-tests* 0)
 (defparameter *failed-tests* 0)
@@ -5,18 +10,20 @@
 (defvar *use-html-output-p* nil)
 (defvar *timestamp* nil)
 
+;; Initialize timestamp at load time (for prebuilt mode where tests
+;; execute immediately during jscl-tests.js loading)
+(setq *timestamp* (get-internal-real-time))
+(terpri)
+
 (defun test-fn (fn form expect-success)
+  "Execute a single test and update counters."
   (let (result success normal-exit)
-    ;; Execute the test and put T/NIL if SUCCESS if the test
-    ;; completed successfully.
     (handler-case
         (catch 'recover
           (unwind-protect
                (progn
                  (setq result (funcall fn))
-                 (if result
-                     (setq success t)
-                     (setq success nil))
+                 (setq success (if result t nil))
                  (setq normal-exit t))
             (unless normal-exit
               (setq success nil)
@@ -28,8 +35,6 @@
 
     (cond
       ((eq success expect-success)
-       ;; the resut is expected
-       ;; do nothing
        (incf *passed-tests*))
       (t
        (incf *failed-tests*)
@@ -45,18 +50,17 @@
 
 
 (defmacro test (condition)
-  `(test-fn (lambda () ,condition)
-            ',condition
-            t))
+  "Execute a test that expects CONDITION to be true."
+  `(test-fn (lambda () ,condition) ',condition t))
 
 (defmacro expected-failure (condition)
-  `(test-fn (lambda () ,condition)
-            ',condition
-            nil))
+  "Execute a test that expects CONDITION to fail."
+  `(test-fn (lambda () ,condition) ',condition nil))
 
 (defmacro test-equal (form value)
   `(test (equal ,form ,value)))
 
+;;; Helper functions used by some tests
 (defun *gensym* ()
   (intern (symbol-name (gensym))))
 
@@ -78,7 +82,67 @@
          (values nil))))
     ',result))
 
+;;;; Test Results
 
-(setq *timestamp* (get-internal-real-time))
+(defun print-test-report ()
+  "Print the test results summary."
+  (format t "~%Finished. The execution took ~a seconds.~%"
+          (/ (- (get-internal-real-time) *timestamp*) internal-time-units-per-second 1.0))
+  (if (= *passed-tests* *total-tests*)
+      (format t "All the tests (~a) passed successfully.~%" *total-tests*)
+      (format t "~a/~a test(s) passed successfully.~%" *passed-tests* *total-tests*))
+  (terpri))
 
-(terpri)
+(defun exit-with-test-status ()
+  "Exit the process with appropriate status code based on test results."
+  #+jscl
+  (progn
+    (when (in "phantom" *root*)
+      (#j:phantom:exit *failed-tests*))
+    (when (in "process" *root*)
+      (#j:process:exit *failed-tests*)))
+  #-jscl
+  (sb-ext:exit :code (if (zerop *failed-tests*) 0 (min *failed-tests* 255))))
+
+;;;; Test File Discovery
+
+(defun get-test-files ()
+  "Get list of test files from tests/ directory."
+  #+jscl
+  (let ((files nil)
+        (fs (require "fs")))
+    (let ((entries (funcall (oget fs "readdirSync") #j"tests")))
+      (dotimes (i (oget entries "length"))
+        (let ((entry (clstring (aref entries i))))
+          (when (and (> (length entry) 5)
+                     (string= (subseq entry (- (length entry) 5)) ".lisp"))
+            (push (concat "tests/" entry) files)))))
+    (push "tests/loop/validate.lisp" files)
+    (push "tests/loop/base-tests.lisp" files)
+    (nreverse files))
+  #-jscl
+  (append (directory (concatenate 'string jscl-xc::*base-directory* "tests/*.lisp"))
+          (list (concatenate 'string jscl-xc::*base-directory* "tests/loop/validate.lisp")
+                (concatenate 'string jscl-xc::*base-directory* "tests/loop/base-tests.lisp"))))
+
+;;;; Test Execution
+
+(defun run-tests ()
+  "Run the test suite.
+For --prebuilt mode, tests have already executed during jscl-tests.js loading.
+For other modes, load and execute test files now."
+  ;; Initialize counters (for non-prebuilt modes, or reset for prebuilt)
+  (when (zerop *total-tests*)
+    (setq *timestamp* (get-internal-real-time))
+    (terpri)
+    ;; Load test files (tests execute immediately via test macro)
+    (let ((*package* (find-package "JSCL")))
+      (dolist (test-file (get-test-files))
+        (format t "Loading ~a...~%" test-file)
+        (handler-case
+            (load test-file)
+          (error (c)
+            (format t "ERROR loading ~a: ~a~%" test-file c))))))
+  ;; Report and exit
+  (print-test-report)
+  (exit-with-test-status))
