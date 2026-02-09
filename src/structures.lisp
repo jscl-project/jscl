@@ -509,7 +509,7 @@
        (list `(setf (dsd-print-function (get-structure-dsd ',(dsd-name dd)))
                     ,print-function)))
      (list
-      (if (and (dsd-type dd) (dsd-named-p dd) (dsd-predicate dd))
+      (if (and (not (dsd-type dd)) (dsd-predicate dd))
           `(deftype ,(dsd-name dd) () '(satisfies ,(dsd-predicate dd)))
           nil)))))
 
