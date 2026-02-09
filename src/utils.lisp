@@ -121,8 +121,8 @@ accumulated, in the order."
 		              digits)))))
 
 (defun float-to-string (x)
-  #+jscl (float-to-string x)
-  #-jscl (format nil "~f" x))
+  #+jscl-target (float-to-string x)
+  #-jscl-target (format nil "~f" x))
 
 (defun make-test-p (&key key (test #'eql) testp (test-not #'eql) test-not-p)
   (when (and testp test-not-p)

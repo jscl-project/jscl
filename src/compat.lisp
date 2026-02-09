@@ -39,8 +39,8 @@
 ;;;; JS values don't exist in the host. These structs stand in for them
 ;;;; so the compiler can recognize and dump FFI literals.
 
-#+jscl
-(use-package :jscl/ffi)
+;;; In JSCL (Stage 1), native FFI is already available. In the host
+;;; (SBCL), we need compatibility types and reader macros.
 #-jscl
 (progn
   (defstruct js-value)
