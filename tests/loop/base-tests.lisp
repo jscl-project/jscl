@@ -48,7 +48,7 @@
 ;;;>      United States of America
 ;;;>      +1-617-221-1000
 
-(in-package :jscl/loop)
+(in-package :jscl-xc/loop)
 
 
 

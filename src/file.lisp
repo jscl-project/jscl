@@ -104,3 +104,12 @@ and asynchronously otherwise."
                       (lambda (body) t)
                       (lambda (uri status) nil)))
         (t (error "PROBE-FILE not supported on this platform"))))
+
+(defun ensure-directories-exist (path)
+  "Create directories for PATH if they don't exist."
+  (when (find :node *features*)
+    (let ((dir (clstring ((oget #j:FsPath "dirname") (jsstring path)))))
+      ;; Only try to create if not current directory
+      (when (and dir (not (string= dir ".")) (not (string= dir "")))
+        (#j:Fs:mkdirSync (jsstring dir) (object "recursive" #j:true)))))
+  (values path nil))

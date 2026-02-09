@@ -11,8 +11,8 @@
   (and (= (length v1) (length v2))
        (every #'identity
               (mapcar (lambda (e1 e2) (equal e1 e2))
-                      (jscl::vector-to-list v1)
-                      (jscl::vector-to-list v2)))))
+                      (vector-to-list v1)
+                      (vector-to-list v2)))))
 
 ;;;
 (defstruct (frob-01-list :named (:type list)

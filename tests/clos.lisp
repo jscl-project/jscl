@@ -138,7 +138,7 @@
     (!rotatef a b c)
     (test (equal '(3 1 2) (list a b c)))
     (!rotatef (aref d 0) (aref d 2))
-    (test (equal '(3 2 1) (jscl::vector-to-list d))))
+    (test (equal '(3 2 1) (vector-to-list d))))
 
 (let* ((a '(1 2))
        (b '(3 4))
@@ -176,15 +176,15 @@
       (sort what predicate)))
 
 (defmethod msort ((what vector) predicate &key key)
-  (let ((lst (jscl::vector-to-list what)))
-    (jscl::list-to-vector
+  (let ((lst (vector-to-list what)))
+    (list-to-vector
      (if key
          (sort lst predicate :key key)
          (sort lst predicate)))))
 
 (defmethod msort ((what string) predicate &key key)
-  (let ((lst (jscl::vector-to-list what)))
-    (apply #'jscl::concat
+  (let ((lst (vector-to-list what)))
+    (apply #'concat
            (if key
                (sort lst predicate :key key)
                (sort lst predicate)))))
@@ -193,7 +193,7 @@
                (msort "cdbaxaybzcd" #'char-lessp)))
 
 (test (equal '(9 8 7 6 5 4 3 2 1)
-             (jscl::vector-to-list (msort #(1 2 3 4 5 6 7 8 9) #'>))))
+             (vector-to-list (msort #(1 2 3 4 5 6 7 8 9) #'>))))
 
 
 ;;; test from original closette-test.lisp

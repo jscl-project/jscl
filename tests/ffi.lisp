@@ -4,24 +4,21 @@
 
 ;;; Tests for Javascript FFI routines.
 
-;;; TODO: Once these are exported under JSCL/FFI, just  :USE that into the testing package. For now,
-;;; using JSCL:: prefix.
-
-(test (= ((jscl::oget (jscl::new #j:Date 0) "getTime")) 0))
+(test (= ((oget (new #j:Date 0) "getTime")) 0))
 (test (stringp (clstring (#j:Date 0))))
 (test (< 32 (length (clstring (#j:Date 0)))))
 
 ;;; Array
 (let ((v1 #(mediane)))
-  ((jscl::oget v1 "push") 'right)
-  ((jscl::oget v1 "unshift") 'left)
-  (test (equal ((jscl::oget v1 "indexOf") 'mediane) 1))
-  (test (equal ((jscl::oget v1 "indexOf") 'left) 0))
-  (test (equal ((jscl::oget v1 "indexOf") 'right) 2))
+  ((oget v1 "push") 'right)
+  ((oget v1 "unshift") 'left)
+  (test (equal ((oget v1 "indexOf") 'mediane) 1))
+  (test (equal ((oget v1 "indexOf") 'left) 0))
+  (test (equal ((oget v1 "indexOf") 'right) 2))
   (test (equal (map 'list #'identity v1) '(left mediane right))))
 
-(let ((v2 (jscl::new #j:Array 'left "Mediane" 'right)))
-  (test (equal (jscl::vector-to-list v2) '(left "Mediane" right))))
+(let ((v2 (new #j:Array 'left "Mediane" 'right)))
+  (test (equal (vector-to-list v2) '(left "Mediane" right))))
 
 ;;; String
 (test (string= (clstring ((oget #j"abcdef" "substr") 1 2)) "bc"))
@@ -31,13 +28,13 @@
 (let ()
   (labels
       ((make-number (value)
-         (jscl::new #j:Number value))
+         (new #j:Number value))
        (float-Exponential (value &optional (fraction 5))
-         (clstring ((jscl::oget (make-Number value) "toExponential") fraction)))
+         (clstring ((oget (make-Number value) "toExponential") fraction)))
        (number-to-fixed (value &optional (digits 0))
-         (clstring ((jscl::oget (make-Number value) "toFixed") digits)))
+         (clstring ((oget (make-Number value) "toFixed") digits)))
        (number-by-radix (value &optional (radix 10))
-         (clstring ((jscl::oget (make-Number value) "toString") radix))))
+         (clstring ((oget (make-Number value) "toString") radix))))
     (test (string= "1.23e+2" (float-exponential 123.1 2)))
     (test (string= "123.01" (number-to-fixed 123.012345 2)))
     (test (string= "a" (number-by-radix 10 16)))
@@ -196,16 +193,16 @@
 
 ;;; compile-toplevel handles JS value literals (exercises the dump path)
 (test (search "true"
-        (jscl::with-compilation-environment
-          (jscl::compile-toplevel #j:true))))
+              (with-compilation-environment
+                (compile-toplevel #j:true))))
 (test (search "false"
-        (jscl::with-compilation-environment
-          (jscl::compile-toplevel #j:false))))
+              (with-compilation-environment
+                (compile-toplevel #j:false))))
 (test (search "null"
-        (jscl::with-compilation-environment
-          (jscl::compile-toplevel #j:null))))
+              (with-compilation-environment
+                (compile-toplevel #j:null))))
 (test (search "undefined"
-        (jscl::with-compilation-environment
-          (jscl::compile-toplevel #j:undefined))))
+              (with-compilation-environment
+                (compile-toplevel #j:undefined))))
 
 ;;; EOF

@@ -62,15 +62,15 @@
          (new-name (string new-name))
          (new-nicknames (mapcar #'string new-nicknames))
          (new-names (cons new-name new-nicknames))
-         (old-names (cons (oget package "packageName")
-                          (oget package "nicknames"))))
+         (old-names (cons (package-name package)
+                          (package-nicknames package))))
     (dolist (n new-names)
       (let ((p (find-package n)))
         (when (and p (not (eq p package)))
           (simple-package-error package "A package named `~a' already exists." n))))
     (dolist (n old-names)
-      (delete-property n *package-table*))
-    (setf (oget package "packageName") new-name
+      (delete-property (jsstring n) *package-table*))
+    (setf (oget package "packageName") (jsstring new-name)
           (oget package "nicknames") new-nicknames)
     (dolist (n new-names)
       (setf (oget *package-table* n) package))
@@ -84,13 +84,12 @@
     (dolist (n names)
       (when (find-package n)
         (simple-package-error name "A package named `~a' already exists." n)))
-    (setf (oget package "packageName") name)
-    (setf (oget package "symbols") (object))
-    (setf (oget package "exports") (object))
+    (setf (oget package "packageName") (jsstring name))
+    (setf (oget package "symbols") (#j:Object:create #j:null))
+    (setf (oget package "exports") (#j:Object:create #j:null))
     (setf (oget package "nicknames") nicknames)
     (setf (oget package "shadows") nil)
     (setf (oget package "use") nil)
-    (setf (oget package "usedBy") nil)
     (use-package use package)
     (dolist (n names)
       (setf (oget *package-table* n) package))
@@ -123,8 +122,11 @@
     (oget package "use")))
 
 (defun package-used-by-list (package-designator)
-  (let ((package (find-package-or-fail package-designator)))
-    (oget package "usedBy")))
+  (let ((package (find-package-or-fail package-designator))
+        (result nil))
+    (dolist (p (list-all-packages) result)
+      (when (member package (package-use-list p))
+        (push p result)))))
 
 (defun %package-external-symbols (package-designator)
   (let ((package (find-package-or-fail package-designator)))
@@ -350,17 +352,14 @@
      package
      (set-difference use-list (package-use-list package)))
     (dolist (use use-list t)
-      (pushnew use (oget package "use"))
-      (pushnew package (oget use "usedBy")))))
+      (pushnew use (oget package "use")))))
 
 (defun unuse-package (unuse-list &optional (package *package*))
   (let ((package (find-package-or-fail package))
         (unuse-list (resolve-package-list (ensure-list unuse-list))))
     (dolist (unuse unuse-list t)
       (setf (oget package "use")
-            (remove unuse (oget package "use")))
-      (setf (oget unuse "usedBy")
-            (remove package (oget unuse "usedBy"))))))
+            (remove unuse (oget package "use"))))))
 
 (defun %map-external-symbols (function package)
   (map-for-in function (%package-external-symbols package)))
@@ -436,11 +435,10 @@
                 *package-table*)
     symbols))
 
-
-;; Make JSCL use CL so that standard symbols like LET, LAMBDA, etc.
-;; resolve correctly when reading code in the JSCL package.
-;; This matches the host environment where JSCL uses CL.
-(use-package "CL" "JSCL")
+;; Make JSCL-XC use CL so that standard symbols like LET, LAMBDA, etc.
+;; resolve correctly when reading code in the JSCL-XC package.
+;; This matches the host environment where JSCL-XC uses CL.
+(use-package "CL" "JSCL-XC")
 
 (defvar *user-package*
   (make-package "COMMON-LISP-USER" :use (list (find-package "CL")) :nicknames '("CL-USER")))
@@ -452,3 +450,13 @@
                 s1 s2))
           (package-nicknames package)
           :initial-value (package-name package)))
+
+(defun freeze-package (package)
+  (let ((package (find-package-or-fail package)))
+    (#j:Object:freeze package)
+    (#j:Object:freeze (oget package "packageName"))
+    (#j:Object:freeze (oget package "symbols"))
+    (#j:Object:freeze (oget package "exports"))
+    (#j:Object:freeze (oget package "nicknames"))
+    (#j:Object:freeze (oget package "shadows"))
+    (#j:Object:freeze (oget package "use"))))

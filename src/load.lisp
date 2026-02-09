@@ -56,7 +56,7 @@
       ((member ext '("js" "cjs" "jso") :test #'string=)
        (let ((*package* *package*))
          (if (find :node *features*)
-             (require (concat "./" name))
+             (require (concat (clstring (#j:process:cwd)) "/" name))
              (load-js name)))
        t)
 
