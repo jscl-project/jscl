@@ -17,18 +17,22 @@
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Duplicate from boot.lisp by now
+#-jscl-target
 (defmacro while (condition &body body)
   `(do ()
        ((not ,condition))
      ,@body))
 
+#-jscl-target
 (defun aset (array idx value)
   (setf (aref array idx) value))
 
+#-jscl-target
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun concat (&rest strs)
     (apply #'concatenate 'string strs)))
 
+#-jscl-target
 (defun /debug (x)
   (declare (ignorable x))
   ;; (write-line x)
@@ -39,9 +43,9 @@
 ;;;; JS values don't exist in the host. These structs stand in for them
 ;;;; so the compiler can recognize and dump FFI literals.
 
-#+jscl
-(use-package :jscl/ffi)
-#-jscl
+;;; In JSCL (Stage 1), native FFI is already available. In the host
+;;; (SBCL), we need compatibility types and reader macros.
+#-jscl-target
 (progn
   (defstruct js-value)
 

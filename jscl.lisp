@@ -16,13 +16,6 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-;;;; Packages
-;;;;
-;;;; We define JSCL-XC as the cross-compiler package.
-;;;; In SBCL, it uses only :CL.
-;;;; In JSCL (Stage 1), :jscl already exists (it's the running compiler),
-;;;; so JSCL-XC also uses :jscl to inherit its symbols.
-
 (defpackage :jscl-xc
   (:use :cl)
   (:export #:bootstrap
@@ -35,11 +28,6 @@
 (in-package :jscl-xc)
 
 #-jscl (require :uiop)
-
-;;;; Directory Configuration
-;;;;
-;;;; In SBCL, we compute paths from the load file location.
-;;;; In JSCL, we use the current directory (assumed to be repo root).
 
 (defvar *base-directory*
   #+jscl ""
@@ -64,26 +52,28 @@
 
 ;;;; Version Information
 
-#-jscl
 (defun get-current-git-commit ()
+  #+jscl ""
+  #-jscl
   (uiop:run-program `("git" "-C" ,*base-directory*
                             "rev-parse"
                             "HEAD")
                     :output '(:string :stripped t)))
 
-#-jscl
 (defun is-release-build ()
+  #+jscl nil
+  #-jscl
   (uiop:getenvp "JSCL_RELEASE"))
 
-#-jscl
 (defun git-has-uncommited-changes ()
+  #+jscl nil
+  #-jscl
   (let* ((command `("git" "-C" ,*base-directory*
                           "diff-files"
                           "--quiet"))
          (error-status (nth-value 2 (uiop:run-program command :ignore-error-status t))))
     (= error-status 1)))
 
-#-jscl
 (defvar *version*
   ;; Read the version from the package.json file.
   (with-open-file (in (source-path "package" :directory nil :type "json"))
@@ -241,7 +231,7 @@ Works in both SBCL (Stage 0) and JSCL (Stage 1)."
   (let ((jscl-path (concatenate 'string output-directory prefix ".js"))
         #+jscl (start-time (#j:Date:now))
         ;; Bind compilation settings - :jscl-xc is active in both stages
-        (*features* (list* :jscl-xc :jscl (remove :jscl *features*)))
+        (*features* (list* :jscl-target *features*))
         (*package* (find-package "JSCL-XC")))
 
     #+jscl (format t "~%=== JSCL Stage 1 Bootstrap ===~%")
@@ -319,8 +309,7 @@ Works in both SBCL (Stage 0) and JSCL (Stage 1)."
 
 (defun build-node-repl (output-directory &optional (jscl-name "jscl"))
   "Build Node.js REPL into OUTPUT-DIRECTORY, depending on JSCL-NAME module."
-  (let ((*features* (list* :jscl-target *features*))
-        (*package* (find-package "JSCL-XC"))
+  (let ((*package* (find-package "JSCL-XC"))
         (*readtable* *jscl-xc-readtable*))
     (jscl-xc::compile-application (list (source-path "node.lisp" :directory '(:relative "node")))
                                (concatenate 'string output-directory jscl-name "-node.js")

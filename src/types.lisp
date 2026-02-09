@@ -475,7 +475,7 @@
 (deftype vector (&optional (type '*) (size '*))
   `(array ,type (,size)))
 
-#+jscl (fset 'typep (fdefinition '!typep))
+#+jscl-target (fset 'typep (fdefinition '!typep))
 
 (push :types *features*)
 

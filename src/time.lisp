@@ -17,7 +17,7 @@
 
 ;;; Time functions needed during bootstrap and at runtime.
 
-#+jscl
+#+jscl-target
 (defun get-universal-time ()
   "Return the current Universal Time."
   ;; JavaScript Date.now() returns milliseconds since Unix epoch (1970-01-01)
@@ -25,7 +25,7 @@
   ;; The difference is 2208988800 seconds
   (+ (floor (#j:Date:now) 1000) 2208988800))
 
-#+jscl
+#+jscl-target
 (defun decode-universal-time (universal-time &optional time-zone)
   "Decode a universal time into its components.
 Returns nine values: second, minute, hour, date, month, year,
@@ -48,7 +48,7 @@ day-of-week, daylight-saving-time-p, and time-zone."
          (dow (if (zerop js-dow) 6 (1- js-dow))))
     (values second minute hour day month year dow nil 0)))
 
-#+jscl
+#+jscl-target
 (defun get-source-data-epoch ()
   "Get SOURCE_DATE_EPOCH from environment, converted to universal time."
   (let ((sde (oget #j:process "env" "SOURCE_DATE_EPOCH")))

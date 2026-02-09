@@ -138,12 +138,12 @@ Always includes package prefix regardless of *package*."
              (write-char #\: stream)))
        (write-string (escape-token name) stream)))))
 
-#+jscl (defvar *print-escape* t)
-#+jscl (defvar *print-circle* nil)
+#+jscl-target (defvar *print-escape* t)
+#+jscl-target (defvar *print-circle* nil)
 ;;; @vkm-path-printer 04-09-2022
 ;;; add variables 
-#+jscl (defvar *print-base* 10)
-#+jscl (defvar *print-radix* nil)
+#+jscl-target (defvar *print-base* 10)
+#+jscl-target (defvar *print-radix* nil)
 
 ;; To support *print-circle* some objects must be tracked for sharing:
 ;; conses, arrays and apparently-uninterned symbols.  These objects
@@ -252,7 +252,7 @@ Always includes package prefix regardless of *package*."
       nil
     (not (eq s (find-symbol (symbol-name s))))))
 
-#+jscl (defvar *print-gensym* t)
+#+jscl-target (defvar *print-gensym* t)
 
 #+nil
 (defun write-symbol (form &optiona (stream *standard-output*))
@@ -362,8 +362,8 @@ Always includes package prefix regardless of *package*."
          (write-string form stream)))
     ;; Functions
     (function
-     (let ((name #+jscl (lambda-name form)
-                 #-jscl nil))
+     (let ((name #+jscl-target (lambda-name form)
+                 #-jscl-target nil))
        (if name
            (simple-format stream "#<FUNCTION ~a>" name)
            (write-string "#<FUNCTION>" stream))))
@@ -446,7 +446,7 @@ Always includes package prefix regardless of *package*."
         (simple-format stream "#<JS-OBJECT ~a>" (js-object-signature form)))))))
 
 
-#+jscl
+#+jscl-target
 (defun output-stream-designator (x)
   (cond ((eq x nil) *standard-output*)
         ((eq x t)   *standard-output*)  
@@ -454,7 +454,7 @@ Always includes package prefix regardless of *package*."
                x
                (error "Form ~s is not output stream type." (write-to-string x))))))
 
-#+jscl
+#+jscl-target
 (defun invoke-object-printer (fn form &optional (stream *standard-output*))
   (let ((stream (output-stream-designator stream)))
     (funcall fn form stream)))
@@ -467,7 +467,7 @@ Always includes package prefix regardless of *package*."
 		 (string-downcase (hash-table-test form))
 		 (hash-table-count form)))
 
-#+jscl
+#+jscl-target
 (defun write (form &key (stream *standard-output*)
                    (escape *print-escape*)
                    (gensym *print-gensym*)
@@ -486,13 +486,13 @@ Always includes package prefix regardless of *package*."
       form)))
 
 
-#+jscl
+#+jscl-target
 (defun write-to-string (form)
   (with-output-to-string (output)
     (write form :stream output)))
 
 ;;; @vkm-path-printer 04-09-2022
-#+jscl
+#+jscl-target
 (defun fresh-line (&optional (stream *standard-output*))
   (let ((s (output-stream-designator stream)))
     (cond ((start-line-p s)
@@ -500,7 +500,7 @@ Always includes package prefix regardless of *package*."
           (t (write-char #\Newline s)
              t))))
 
-#+jscl
+#+jscl-target
 (progn
   (defun prin1 (form &optional stream)
     (write form :stream stream :escape t))

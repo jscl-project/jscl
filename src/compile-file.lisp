@@ -13,12 +13,12 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-(defun !compile-file (filename out &key print verbose #+jscl (sync t))
+(defun !compile-file (filename out &key print verbose #+jscl-target (sync t))
   "Compile expressions in FILENAME and write to OUT stream."
   (let ((*compile-print* print)
         (*compile-verbose* verbose)
         (*package* *package*))
-    (with-open-file (stream filename :direction :input #+jscl :sync #+jscl sync)
+    (with-open-file (stream filename :direction :input #+jscl-target :sync #+jscl-target sync)
       (when *compile-verbose*
         (format t "Compiling ~a...~%"
                 #+jscl filename
@@ -46,18 +46,17 @@ typeof window !== 'undefined'? window.jscl: self.jscl )"
           place jscl-name))
 
 (defun compile-application (files output &key shebang (place "./") (jscl-name "jscl"))
-  (let ((*features* #+jscl *features* #-jscl (list :jscl :jscl-xc)))
-    (with-compilation-environment
-      (with-open-file (out output :direction :output :if-exists :supersede)
-        (when shebang
-          (format out "#!/usr/bin/env node~%"))
-        (%write-file-prologue out place jscl-name)
-        (dolist (input files)
-          (!compile-file input out :verbose t))
-        (%write-file-epilogue out place jscl-name)
-        output))))
+  (with-compilation-environment
+    (with-open-file (out output :direction :output :if-exists :supersede)
+      (when shebang
+	(format out "#!/usr/bin/env node~%"))
+      (%write-file-prologue out place jscl-name)
+      (dolist (input files)
+	(!compile-file input out :verbose t))
+      (%write-file-epilogue out place jscl-name)
+      output)))
 
-#+jscl
+#+jscl-target
 (defun compile-file (input-file &key output-file verbose print (place "./"))
   (unless output-file
     (setq output-file (concat input-file ".js")))

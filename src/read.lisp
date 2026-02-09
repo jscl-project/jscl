@@ -18,7 +18,7 @@
 
 (/debug "loading read.lisp!")
 
-#+jscl (defmacro with-standard-io-syntax (&body body)
+#+jscl-target (defmacro with-standard-io-syntax (&body body)
          `(let ((*package* (find-package-or-fail "CL-USER"))
                 (*print-base* 10)
                 (*print-circle* nil)
@@ -30,7 +30,7 @@
 
 ;;;; Reader
 
-#+jscl(defvar *read-base* 10)
+#+jscl-target(defvar *read-base* 10)
 
 ;;; Reader radix bases
 (defvar *fixed-radix-bases* '((#\B . 2) (#\b . 2) (#\o . 8) (#\O . 8) (#\x . 16) (#\X . 16)))
@@ -368,7 +368,7 @@
   (cond
     ((char= (%peek-char stream) #\")
      ;; Using read we allow this to be used as a host macro reader too
-     (let ((string (#-jscl read #+jscl ls-read stream)))
+     (let ((string (#-jscl-target read #+jscl-target ls-read stream)))
        (jsstring string)))
     ((char= (%peek-char stream) #\:)
      (let ((descriptor (subseq (read-until stream #'terminalp) 1))
@@ -384,17 +384,17 @@
                    (let ((name (car parts)))
                      (cond
                        ((string= name "true")
-                        #-jscl *host-js-true*
-                        #+jscl (%js-vref "true"))
+                        #-jscl-target *host-js-true*
+                        #+jscl-target (%js-vref "true"))
                        ((string= name "false")
-                        #-jscl *host-js-false*
-                        #+jscl (%js-vref "false"))
+                        #-jscl-target *host-js-false*
+                        #+jscl-target (%js-vref "false"))
                        ((string= name "null")
-                        #-jscl *host-js-null*
-                        #+jscl (%js-vref "null"))
+                        #-jscl-target *host-js-null*
+                        #+jscl-target (%js-vref "null"))
                        ((string= name "undefined")
-                        #-jscl *host-js-undefined*
-                        #+jscl (%js-vref "undefined"))))
+                        #-jscl-target *host-js-undefined*
+                        #+jscl-target (%js-vref "undefined"))))
                    `(oget *root* ,@parts))))
          (push (subseq descriptor start end) subdescriptors))))
     (t
@@ -613,7 +613,7 @@
           (values nil index)))))
 
 
-#+jscl
+#+jscl-target
 (defun parse-integer (string &key (start 0) end (radix 10) junk-allowed)
   (multiple-value-bind (num index)
       (!parse-integer string start end radix junk-allowed)
@@ -675,13 +675,13 @@
         (setf *labelled-objects* save-labelled-objects)
         (setf *fixup-locations* save-fixup-locations)))))
 
-#+jscl
+#+jscl-target
 (fset 'read #'ls-read)
 
 (defun ls-read-from-string (string &optional (eof-error-p t) eof-value)
   (ls-read (make-string-input-stream string) eof-error-p eof-value))
 
-#+jscl
+#+jscl-target
 (fset 'read-from-string #'ls-read-from-string)
 
 (defun simple-reader-error (stream format-control &rest format-arguments)

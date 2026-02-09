@@ -442,7 +442,7 @@
 					   ,(dsd-depth dd)))))))))
 
 ;;; COPIER
-#-jscl
+#-jscl-target
 (defun clone (x)
   (error "Clone not implemented in host: ~a" x))
 
@@ -657,7 +657,7 @@
        ,@(das!defstruct-expand name options slots)
        ',name)))
 
-#+jscl
+#+jscl-target
 (defmacro defstruct (name-options &rest slots)
   `(das!struct ,name-options ,@slots))
 
