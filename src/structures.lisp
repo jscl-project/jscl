@@ -438,8 +438,8 @@
                            (eql (nth ,imap obj) ',name))))))
           `(let ((dd (get-structure-dsd ',name)))
              (defun ,it (obj)
-               (eq dd (storage-vector-ref! (oget? obj "structDescriptors")
-					   ,(dsd-depth dd)))))))))
+               (let ((sd (?? (oget? obj "structDescriptors") nil)))
+                 (and sd (eq dd (storage-vector-ref! sd ,(dsd-depth dd)))))))))))
 
 ;;; COPIER
 #-jscl-target
