@@ -739,4 +739,12 @@
 (test (typep (make-defstruct-type-test :a 1) 'defstruct-type-test))
 (test (not (typep 42 'defstruct-type-test)))
 
+;;; CLOS-type struct predicate must not crash on non-struct arguments
+(defstruct predicate-safety-test a)
+(test (predicate-safety-test-p (make-predicate-safety-test)))
+(test (not (predicate-safety-test-p 3)))
+(test (not (predicate-safety-test-p "string")))
+(test (not (predicate-safety-test-p nil)))
+(test (not (predicate-safety-test-p '(1 2 3))))
+
 ;;; EOF
