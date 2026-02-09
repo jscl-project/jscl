@@ -100,13 +100,13 @@
 
 (defun exit-with-test-status ()
   "Exit the process with appropriate status code based on test results."
-  #+jscl
+  #+jscl-target
   (progn
     (when (in "phantom" *root*)
       (#j:phantom:exit *failed-tests*))
     (when (in "process" *root*)
       (#j:process:exit *failed-tests*)))
-  #-jscl
+  #-jscl-target
   (sb-ext:exit :code (if (zerop *failed-tests*) 0 (min *failed-tests* 255))))
 
 ;;;; Test File Discovery

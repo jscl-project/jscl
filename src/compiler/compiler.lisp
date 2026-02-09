@@ -181,7 +181,7 @@
        (let ((b (global-binding name 'variable 'variable)))
          (push 'constant (binding-declarations b)))))))
 
-#+jscl
+#+jscl-target
 (fset 'proclaim #'!proclaim)
 
 (defun %define-symbol-macro (name expansion)
@@ -189,7 +189,7 @@
     (push-to-lexenv b *environment* 'variable)
     name))
 
-#+jscl
+#+jscl-target
 (defmacro define-symbol-macro (name expansion)
   `(%define-symbol-macro ',name ',expansion))
 
@@ -210,7 +210,7 @@
   (if (nth-value 1 (constant-value x environment))
       t nil))
 
-#+jscl
+#+jscl-target
 (fset 'constantp #'!constantp)
 
 
@@ -585,7 +585,7 @@
 ;;; this symbol.
 (defvar *magic-unquote-marker* (gensym "MAGIC-UNQUOTE"))
 
-#-jscl
+#-jscl-target
 (setf (macro-function *magic-unquote-marker*)
       (lambda (form &optional environment)
         (declare (ignore environment))
@@ -856,7 +856,7 @@
 
 
 ;; LET* compilation
-;; 
+;;
 ;; (let* ((*var1* value1))
 ;;        (*var2* value2))
 ;;  ...)
@@ -867,7 +867,7 @@
 ;;       // compute value1
 ;;       // bind to var1
 ;;       // add var1 to sbindings
-;;     
+;;
 ;;       // compute value2
 ;;       // bind to var2
 ;;       // add var2 to sbindings
@@ -879,7 +879,7 @@
 ;;       // restore bindings of sbindings
 ;;       // ...
 ;;     }
-;; 
+;;
 (define-compilation let* (bindings &rest body)
   (let ((bindings (mapcar #'ensure-list bindings))
         (*environment* (copy-lexenv *environment*))
@@ -915,7 +915,7 @@
                       ;; binding.
                       (= (get ,s "value") ,out))
                    prelude-target)))
-          
+
           (t
            (let* ((jsvar (gvarname variable))
                   (binding (make-binding :name variable :type 'variable :value jsvar)))
@@ -936,7 +936,7 @@
            `(progn
               ,@(reverse prelude-target)
               ,(convert-block body t t))))
-      
+
       (if (find-if #'special-variable-p bindings :key #'first)
           `(selfcall
             (var (,sbindings #()))
@@ -1136,7 +1136,7 @@
 
 (defun !special-operator-p (name)
   (nth-value 1 (gethash name *compilations*)))
-#+jscl
+#+jscl-target
 (fset 'special-operator-p #'!special-operator-p)
 
 
@@ -1683,8 +1683,7 @@
 	    ;; The list representation is used during bootstrap
 	    ;; because we can dump it. Use a cache to avoid
 	    ;; re-compiling, but preserve the list in the binding
-	    ;; during bootstrap (when :jscl-xc feature is active).  In
-	    ;; JSCL normal operation, replace binding directly.
+	    ;; during bootstrap (when :jscl-target feature is active).
             ((listp expander)
              (let ((compiled (eval expander)))
                (setf (gethash b *macroexpander-cache*) compiled)
@@ -1692,12 +1691,12 @@
           expander)
         nil)))
 
-#+jscl
+#+jscl-target
 (defun macro-function (symbol &optional environment)
   (let ((*environment* (or environment *global-environment*)))
     (!macro-function symbol 'function)))
 
-#+jscl
+#+jscl-target
 (defun compiler-macro-function (symbol &optional environment)
   (let ((*environment* (or environment *global-environment*)))
     (!macro-function symbol 'compiler-macro)))
@@ -1718,7 +1717,7 @@
       (t
        (values form nil)))))
 
-#+jscl
+#+jscl-target
 (fset 'macroexpand-1 #'!macroexpand-1)
 
 (defun !macroexpand (form &optional env)
@@ -1729,7 +1728,7 @@
         (setq expanded-p t)))
     (values form expanded-p)))
 
-#+jscl
+#+jscl-target
 (fset 'macroexpand #'!macroexpand)
 
 (defun compiler-macroexpand (form)
@@ -1901,9 +1900,9 @@
         (funcall fn form last-p)))))
 
 
-#+jscl
+#+jscl-target
 (defvar *compile-print* nil)
-#+jscl
+#+jscl-target
 (defvar *compile-verbose* nil)
 
 (defun truncate-string (string &optional (width 60))
@@ -1957,10 +1956,10 @@
                  (jscode (with-output-to-string (*js-output*)
                            (js ast)))
                  (literals (list-to-vector (nreverse (mapcar #'car *literal-table*)))))
-            #+jscl (setq result-mv
+            #+jscl-target (setq result-mv
                          (multiple-value-list (js-eval jscode literals)))
-            #-jscl (error "eval-toplevel: cannot execute in cross-compiler"))))
+            #-jscl-target (error "eval-toplevel: cannot execute in cross-compiler"))))
       t)
     (values-list result-mv)))
 
-#+jscl (fset 'eval #'eval-toplevel)
+#+jscl-target (fset 'eval #'eval-toplevel)

@@ -38,11 +38,11 @@
                   ;; macroexpander, because the macroexpander will
                   ;; need to be dumped in the final environment
                   ;; somehow.
-                  (when (find :jscl-xc *features*)
+                  (when (find :jscl-target *features*)
                     (setq expander `(quote ,expander)))
 
                   `(eval-when (:compile-toplevel :execute)
-                     (%compile-defmacro ',name ,expander))
+                     (%compile-defmacro ',name ,expander)) ;
 
                   )))))
     
@@ -108,12 +108,11 @@
 
 (defmacro define-compiler-macro (name args &rest body)
   (let* ((expander `(function ,(parse-macro name args body))))
-
     ;; If we are bootstrapping JSCL, we need to quote the
     ;; macroexpander, because the macroexpander will
     ;; need to be dumped in the final environment
     ;; somehow.
-    (when (find :jscl-xc *features*)
+    (when (find :jscl-target *features*)
       (setq expander `(quote ,expander)))
 
     `(eval-when (:compile-toplevel :execute)
@@ -450,7 +449,7 @@
                                              :place ',place
                                              :description ,string)))))
 
-#+jscl
+#+jscl-target
 (defmacro check-type (place typespec &optional string)
   `(%check-type ,place ,typespec ,string))
 
@@ -537,7 +536,7 @@
        nil)))
 
 
-#+jscl
+#+jscl-target
 (defmacro print-unreadable-object ((object stream &key type identity) &body body) 
     `(!print-unreadable-object (,object ,stream :type ,type :identity ,identity) ,@body))
 
@@ -547,7 +546,7 @@
        `(let ((,value ,test))
          (when (not ,value)
            (%%assert-error ',test ,datum ,@args)))))
-#+jscl
+#+jscl-target
 (defmacro assert (test &optional ignore datum &rest args)
   `(%%assert ,test ,ignore ,datum ,@args))
 

@@ -18,19 +18,19 @@
 (defvar *structures* (make-hash-table))
 
 (defun structure-p (obj)
-  #+jscl (eql (object-type-code obj) :structure)
-  #-jscl (typep obj 'structure-object))
+  #+jscl-target (eql (object-type-code obj) :structure)
+  #-jscl-target (typep obj 'structure-object))
 
 ;;; Metadata is stored in "structDescriptors" property of instances.
 ;;; For DEF!STRUCT, the name symbol is stored in "structDescriptors",
 ;;; but for complete defstruct (see structures.lisp), a vector of DSD
 ;;; is stored in "structDescriptors".
 (defun structure-name (obj)
-  #+jscl (let ((desc (oget obj "structDescriptors")))
+  #+jscl-target (let ((desc (oget obj "structDescriptors")))
            (if (symbolp desc)
                desc
                (dsd-name (storage-vector-ref! desc (1- (length desc))))))
-  #-jscl (class-name (class-of obj)))
+  #-jscl-target (class-name (class-of obj)))
 
 (defun def!struct-property-names (slots)
   "Compute the list of JS property names to use for SLOTS.
@@ -110,7 +110,9 @@ Append numbers to symbol names to make them unique."
          (copier (if (assoc :copier options)
                      (second (assoc :copier options))
                      (intern (concat "COPY-" name-string))))
-         (dumper (intern (concat "DUMP-" name-string)))
+         ;; TODO: this is a hack to find the right package after
+         ;; JSCL-XC is renamed to JSCL. Clean up the package story.
+         (dumper (intern (concat "DUMP-" name-string) (symbol-package 'def!struct)))
 
          (slot-descriptions
            (mapcar (lambda (sd)
@@ -124,10 +126,10 @@ Append numbers to symbol names to make them unique."
                    slots)))
     (declare (ignorable constructor predicate copier dumper))
 
-    #+jscl (def!struct-expand name dumper constructor predicate copier slot-descriptions)
+    #+jscl-target (def!struct-expand name dumper constructor predicate copier slot-descriptions)
 
     ;; Emulation of DEF!STRUCT and DUMP-* in the host, using host DEFSTRUCT
-    #-jscl
+    #-jscl-target
     (let* ((slot-names (mapcar #'car slot-descriptions))
            (property-names (def!struct-property-names slot-names)))
       `(progn
