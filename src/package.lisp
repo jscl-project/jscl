@@ -80,7 +80,7 @@
   (let* ((name (string name))
          (nicknames (mapcar #'string nicknames))
          (names (cons name nicknames))
-         (package (object)))
+         (package (#j:Object:create #j:null)))
     (dolist (n names)
       (when (find-package n)
         (simple-package-error name "A package named `~a' already exists." n)))
@@ -401,7 +401,7 @@
 (defun %check-use-package-name-conflict (package use-list)
   ;; NAME-TABLE maps symbol name to a list of exported symbols from some
   ;; package in USE-LIST
-  (let ((name-table (object)))
+  (let ((name-table (#j:Object:create #j:null)))
     (dolist (use use-list)
       (do-external-symbols (symbol use)
         (let ((name (symbol-name symbol)))
