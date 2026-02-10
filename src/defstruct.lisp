@@ -132,8 +132,23 @@ Append numbers to symbol names to make them unique."
 
     #+jscl-target (def!struct-expand name dumper constructor predicate copier slot-descriptions)
 
-    ;; Emulation of DEF!STRUCT and DUMP-* in the host, using host DEFSTRUCT
-    #-jscl-target
+    ;; TODO: unify JSCL host and SBCL host paths
+    ;; JSCL host: use defstruct (which maps to das!struct) and accessors
+    #+(and jscl (not jscl-target))
+    (let* ((slot-names (mapcar #'car slot-descriptions))
+           (property-names (def!struct-property-names slot-names)))
+      `(progn
+         (defstruct ,name-and-options ,@slots)
+         (defun ,dumper (x)
+           (list (cons "dt_Name" :structure)
+                 (cons "structDescriptors" ',name)
+                 ,@(mapcar (lambda (p n)
+                             (let ((accessor (intern (concat (symbol-name name) "-" (symbol-name n)))))
+                               `(cons ,p (,accessor x))))
+                           property-names slot-names)))))
+
+    ;; SBCL host: use host DEFSTRUCT and slot-value
+    #+(and (not jscl) (not jscl-target))
     (let* ((slot-names (mapcar #'car slot-descriptions))
            (property-names (def!struct-property-names slot-names)))
       `(progn
