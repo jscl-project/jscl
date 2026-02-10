@@ -27,8 +27,9 @@
 ;;;
 
 (defvar *load-verbose* t)
+(defvar *load-print* nil)
 
-(defun load (name &key (verbose *load-verbose*) (sync :maybe))
+(defun load (name &key (verbose *load-verbose*) (print *load-print*) (sync :maybe))
   (let ((ext (filename-extension name)))
     ;; Try to guess extension
     (unless ext
@@ -42,14 +43,16 @@
       ((member ext '("lisp" "lsp") :test #'string=)
        (let ((*package* *package*))
 
-         (when *load-verbose*
-           (format t "Loading ~a~%" name))
+         (when verbose (format t "; Loading ~a~%" name))
 
          (with-open-file (stream name :direction :input :sync sync)
            (let ((eof (gensym "LOAD")))
              (loop
                (let ((form (read stream nil eof)))
                  (when (eq form eof) (return))
+
+                 (when print (format t "; ~S~%" form))
+
                  (eval form))))))
        t)
 
