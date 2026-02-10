@@ -1908,13 +1908,14 @@
 ;;; The entrypoint for compiling from COMPILE-FILE
 ;;;
 (defun compile-toplevel (sexp &optional multiple-value-p return-p)
+  (when *compile-print*
+    (let ((form-string (prin1-to-string sexp)))
+      (simple-format *standard-output* "; processing ~a...~%" (truncate-string form-string))))
+
   (let ((*compiler-process-mode* 'compile))
     (with-output-to-string (*js-output*)
       (process-toplevel-form sexp
         (lambda (form last-p)
-          (when *compile-print*
-            (let ((form-string (prin1-to-string form)))
-              (simple-format *standard-output* "Compiling ~a...~%" (truncate-string form-string))))
           (let* ((*toplevel-compilations* nil)
                  (code (convert form (and last-p multiple-value-p)))
                  (ast `(progn

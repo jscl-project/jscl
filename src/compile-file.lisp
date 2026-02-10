@@ -20,9 +20,7 @@
         (*package* *package*))
     (with-open-file (stream filename :direction :input #+jscl :sync #+jscl sync)
       (when *compile-verbose*
-        (format t "Compiling ~a...~%"
-                #+jscl filename
-                #-jscl (enough-namestring filename)))
+        (format t "; Compiling ~a...~%" filename))
       (let ((eof (gensym "COMPILE"))
             (expr nil))
         (while t
@@ -53,7 +51,7 @@ typeof window !== 'undefined'? window.jscl: self.jscl )"
           (format out "#!/usr/bin/env node~%"))
         (%write-file-prologue out place jscl-name)
         (dolist (input files)
-          (!compile-file input out :verbose t))
+          (!compile-file input out :verbose t :print t))
         (%write-file-epilogue out place jscl-name)
         output))))
 
