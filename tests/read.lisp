@@ -241,6 +241,12 @@ The correct value can be used in any expressions, as is, at your discretion
               (list :question obj))))
         (equal (read-from-string "?!hello") '(:QUESTION HELLO))))
 
+;; Symbols with names matching Object.prototype properties are not
+;; confused with JS functions (prototype pollution regression)
+(test (symbolp (read-from-string "|toString|")))
+(test (symbolp (read-from-string "|hasOwnProperty|")))
+(test (symbolp (read-from-string "|valueOf|")))
+
 ;; Modifications to a copied readtable don't affect the original
 #+jscl
 (test (let* ((original *readtable*)
