@@ -20,9 +20,7 @@
         (*package* *package*))
     (with-open-file (stream filename :direction :input #+jscl-target :sync #+jscl-target sync)
       (when *compile-verbose*
-        (format t "Compiling ~a...~%"
-                #+jscl filename
-                #-jscl (enough-namestring filename)))
+        (format t "; Compiling ~a...~%" filename))
       (let ((eof (gensym "COMPILE"))
             (expr nil))
         (while t
