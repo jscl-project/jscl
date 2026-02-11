@@ -17,16 +17,9 @@
 
 ;;; FFI primitives
 ;;;
-;;; This file is tagged :both in *source*, so it is loaded in the host
-;;; CL (for macro expansion during cross-compilation) AND compiled to
-;;; JavaScript for the target.
-;;;
-;;; Host compatibility types (js-value structs) and the #j: reader
-;;; macro are defined in compat.lisp, which is loaded before this file.
-;;;
-;;; In the target, several functions defined here are "self-referencing
-;;; builtins": ffi.lisp provides the Lisp-level defun, but the
-;;; compiler intercepts calls and replaces them with inline JS (via
+;;; Several functions defined here are "self-referencing builtins":
+;;; ffi.lisp provides the Lisp-level defun, but the compiler
+;;; intercepts calls and replaces them with inline JS (via
 ;;; define-builtin / define-raw-builtin in compiler.lisp).
 ;;;
 ;;; Compiler Primitive Contract
