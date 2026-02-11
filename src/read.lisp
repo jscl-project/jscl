@@ -351,6 +351,48 @@
          (t
           (simple-reader-error stream "Invalid dispatch character ~S after #" ch)))))))
 
+;;; The #j: and #j"" reader macros for JavaScript interop.
+;;;
+;;; #j:foo       => (oget *root* #j"foo")
+;;; #j:foo:bar   => (oget *root* #j"foo" #j"bar")
+;;; #j"foo"      => a JS string object (read-time evaluation)
+
+(defun read-sharp-j (stream)
+  (cond
+    ((char= (%peek-char stream) #\")
+     ;; Using read we allow this to be used as a host macro reader too
+     (let ((string (#-jscl read #+jscl ls-read stream)))
+       (jsstring string)))
+    ((char= (%peek-char stream) #\:)
+     (let ((descriptor (subseq (read-until stream #'terminalp) 1))
+           (subdescriptors nil))
+       (do* ((start 0 (1+ end))
+             (end (position #\: descriptor :start start)
+                  (position #\: descriptor :start start)))
+            ((null end)
+             (push (subseq descriptor start) subdescriptors)
+             (let ((parts (reverse subdescriptors)))
+               (if (and (null (cdr parts))
+                        (member (car parts) '("true" "false" "null" "undefined") :test #'string=))
+                   (let ((name (car parts)))
+                     (cond
+                       ((string= name "true")
+                        #-jscl *host-js-true*
+                        #+jscl (%js-vref "true"))
+                       ((string= name "false")
+                        #-jscl *host-js-false*
+                        #+jscl (%js-vref "false"))
+                       ((string= name "null")
+                        #-jscl *host-js-null*
+                        #+jscl (%js-vref "null"))
+                       ((string= name "undefined")
+                        #-jscl *host-js-undefined*
+                        #+jscl (%js-vref "undefined"))))
+                   `(oget *root* ,@parts))))
+         (push (subseq descriptor start end) subdescriptors))))
+    (t
+     (simple-reader-error stream "Invalid FFI descriptor. Expected #j: or #j\"."))))
+
 (defun sharp-radix-reader (ch stream)
   ;; Sharp radix base #\B #\O #\X
   (let* ((fixed-base (assoc ch jscl::*fixed-radix-bases*))

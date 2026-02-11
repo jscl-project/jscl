@@ -83,45 +83,22 @@
 (defun jsundefined ()
   *host-js-undefined*)
 
-;;;; Reader utilities needed by read-sharp-j
-;;;;
-;;;; These are also defined in read.lisp for the target. The host
-;;;; definitions here make #j: available early in the bootstrap.
+(defun typeof (x)
+  (typecase x
+    (number (jsstring "number"))
+    (js-string (jsstring "string"))
+    (js-boolean (jsstring "boolean"))
+    (js-undefined (jsstring "undefined"))
+    (otherwise (jsstring "object"))))
 
-(defun %peek-char (stream)
-  (peek-char nil stream nil))
+(defun clstring% (x)
+  (js-string-value x))
 
-(defun %read-char (stream)
-  (read-char stream nil))
-
-(defun whitespacep (ch)
-  (or (char= ch #\space) (char= ch #\newline) (char= ch #\tab) (char= ch #\page)))
-
-(defun terminating-char-p (ch)
-  (or (char= #\" ch)
-      (char= #\) ch)
-      (char= #\( ch)
-      (char= #\` ch)
-      (char= #\, ch)
-      (char= #\' ch)
-      (char= #\; ch)))
-
-(defun terminalp (ch)
-  (or (null ch) (whitespacep ch) (terminating-char-p ch)))
-
-(defun read-until (stream func)
-  (let ((string "")
-        (ch))
-    (setq ch (%peek-char stream))
-    (while (and ch (not (funcall func ch)))
-      (setq string (concat string (string ch)))
-      (%read-char stream)
-      (setq ch (%peek-char stream)))
-    string))
-
-(defun simple-reader-error (stream format-control &rest format-arguments)
-  (declare (ignore stream))
-  (apply #'error format-control format-arguments))
+(defun clstring (x)
+  (cond
+    ((stringp x) x)
+    ((%host-js-string-p x) (clstring% x))
+    (t (error 'type-error :datum x :expected-type '(or string js-string)))))
 
 ;;;; #j reader dispatch macro
 
