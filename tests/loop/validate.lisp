@@ -48,11 +48,13 @@
 ;;;>      United States of America
 ;;;>      +1-617-221-1000
 
-(in-package :jscl-xc/loop)
+(defpackage :jscl-tests-loop
+  (:use :cl))
+
+(in-package :jscl-tests-loop)
 
 (defvar *slow-test*
 	nil)
-
 
 ;; (defvar *loop-lisp-package*
 ;; 	(let ((p (car (last (package-use-list (find-package 'jscl/loop))))))
@@ -60,7 +62,6 @@
 ;; 		       if not, you must preset jscl/loop::*loop-lisp-package*.~%"
 ;; 		  p)
 ;; 	  p))
-
 
 (defmacro test (short-desc lambda-list form &body params-and-answers)
   `(test1 ,short-desc ',form ',lambda-list
