@@ -100,13 +100,13 @@
 
 (defun exit-with-test-status ()
   "Exit the process with appropriate status code based on test results."
-  #+jscl-target
+  #+(or jscl jscl-target)
   (progn
     (when (in "phantom" *root*)
       (#j:phantom:exit *failed-tests*))
     (when (in "process" *root*)
       (#j:process:exit *failed-tests*)))
-  #-jscl-target
+  #-(or jscl jscl-target)
   (sb-ext:exit :code (if (zerop *failed-tests*) 0 (min *failed-tests* 255))))
 
 ;;;; Test File Discovery
@@ -121,7 +121,7 @@
         (let ((entry (clstring (aref entries i))))
           (when (and (> (length entry) 5)
                      (string= (subseq entry (- (length entry) 5)) ".lisp"))
-            (push (concat "tests/" entry) files)))))
+            (push (concatenate 'string "tests/" entry) files)))))
     (push "tests/loop/validate.lisp" files)
     (push "tests/loop/base-tests.lisp" files)
     (nreverse files))

@@ -321,6 +321,7 @@ All errors are caught and report to *ERROR-OUTPUT*."
    #:jsbool #:clbool
    #:in)
   (:export
+   #:*root*
    #:object
    #:oget #:oset #:oget?
    #:typeof #:instanceof #:new
