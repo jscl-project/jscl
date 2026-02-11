@@ -481,10 +481,13 @@ jscl.CL = packages.CL.exports;
 // Register nil, t, and error into the CL package
 nil.package = packages.CL;
 packages.CL.symbols["NIL"] = nil;
+packages.CL.exports["NIL"] = nil;
 t.package = packages.CL;
 packages.CL.symbols["T"] = t;
+packages.CL.exports["T"] = t;
 errorSym.package = packages.CL;
 packages.CL.symbols["ERROR"] = errorSym;
+packages.CL.exports["ERROR"] = errorSym;
 
 internals.symbolValue = function (symbol) {
   var value = symbol.value;
