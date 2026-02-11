@@ -48,7 +48,7 @@
 ;;;>      United States of America
 ;;;>      +1-617-221-1000
 
-(in-package :jscl-xc/loop)
+(in-package :jscl-tests-loop)
 
 
 
@@ -655,7 +655,5 @@
            finally (return (= count 100))))
       (() t))
 
-
-(in-package :cl)
 
 ;;; EOF
