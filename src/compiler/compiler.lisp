@@ -114,6 +114,21 @@
       (let ((b (make-binding :name symbol :type 'variable :value (gvarname symbol))))
         (push-to-lexenv b new 'variable)))))
 
+(defun extend-macrolet-env (definitions)
+  (let ((new (copy-lexenv *environment*)))
+    (dolist (def definitions new)
+      (destructuring-bind (name lambda-list &body body) def
+        (let ((binding (make-binding :name name :type 'macro :value
+                                     (parse-macro name lambda-list body))))
+          (push-to-lexenv binding  new 'function))))))
+
+(defun extend-symbol-macrolet-env (macrobindings)
+  (let ((new (copy-lexenv *environment*)))
+    (dolist (macrobinding macrobindings new)
+      (destructuring-bind (symbol expansion) macrobinding
+        (let ((b (make-binding :name symbol :type 'macro :value expansion)))
+          (push-to-lexenv b new 'variable))))))
+
 ;;; Toplevel compilations
 (defvar *toplevel-compilations*)
 
@@ -738,21 +753,18 @@
 
 (define-compilation locally (&rest body)
   ;; Note that this is only called for non toplevel forms.
-  (handle-locally body
-                  (lambda (body)
-                    `(progn ,(convert-block body nil t)))))
+  (let ((*environment* (copy-lexenv *environment*)))
+    (convert-block body nil t)))
 
-(define-compilation macrolet (&rest args)
+(define-compilation macrolet (definitions &rest body)
   ;; Note that this is only called for non toplevel forms.
-  (handle-macrolet args
-                   (lambda (body)
-                     `(progn ,(convert-block body nil t)))))
+  (let ((*environment* (extend-macrolet-env definitions)))
+    (convert-block body nil t)))
 
-(define-compilation symbol-macrolet (&rest args)
+(define-compilation symbol-macrolet (macrobindings &rest body)
   ;; Note that this is only called for non toplevel forms.
-  (handle-symbol-macrolet args
-                          (lambda (body)
-                            `(progn ,(convert-block body nil t)))))
+  (let ((*environment* (extend-symbol-macrolet-env macrobindings)))
+    `(progn ,(convert-block body nil t))))
 
 (define-compilation eval-when (situations &rest body)
   ;; Note that this is only called for non toplevel forms.
@@ -1796,56 +1808,6 @@
                      (list (convert (car (last sexps)) *multiple-value-p*)))))))
 
 
-(defun handle-locally (args fn)
-  (let ((*environment* (copy-lexenv *environment*)))
-    (funcall fn args)))
-
-(defun handle-macrolet (args fn)
-  (destructuring-bind (definitions &body body) args
-    (let ((*environment* (copy-lexenv *environment*)))
-      (dolist (def definitions)
-        (destructuring-bind (name lambda-list &body body) def
-          (let ((binding (make-binding :name name :type 'macro :value
-                                       (parse-macro name lambda-list body))))
-            (push-to-lexenv binding  *environment* 'function))))
-      (funcall fn body))))
-
-(defun handle-symbol-macrolet (args fn)
-  (destructuring-bind (macrobindings &body body) args
-    (let ((new (copy-lexenv *environment*)))
-      (dolist (macrobinding macrobindings)
-        (destructuring-bind (symbol expansion) macrobinding
-          (let ((b (make-binding :name symbol :type 'macro :value expansion)))
-            (push-to-lexenv b new 'variable))))
-      (let ((*environment* new))
-        (funcall fn body)))))
-
-(defun handle-eval-when (args fn)
-  "Handle eval-when at toplevel. Called from process-toplevel-form."
-  (destructuring-bind (situations &body body) args
-    (cond
-      ;; Toplevel form compiled by compile-file (cross-compilation).
-      ((eq *compiler-process-mode* 'compile)
-       ;; If the situation `compile-toplevel' is given. The form is
-       ;; evaluated at compilation-time.
-       (when (or (find :compile-toplevel situations)
-                 (find 'compile situations))
-         (eval (cons 'progn body)))
-
-       ;; `load-toplevel' is given, then just compile the subforms as usual.
-       (when (or (find :load-toplevel situations)
-                 (find 'load situations))
-         (funcall fn body)))
-
-      ;; EVAL or not toplevel forms only consider :execute
-      ((or (find :execute situations)
-           (find 'eval situations))
-       (funcall fn body))
-
-      (t
-       (funcall fn nil)))))
-
-
 ;;; Process a list of toplevel forms. The last form inherits LAST-P;
 ;;; all others are processed with LAST-P = NIL.
 (defun process-toplevel-body (forms fn last-p)
@@ -1880,24 +1842,40 @@
         (process-toplevel-body args fn last-p))
 
       (locally
-        (handle-locally args
-          (lambda (body)
-            (process-toplevel-body body fn last-p))))
+        (let ((*environment* (copy-lexenv *environment*)))
+          (process-toplevel-body args fn last-p)))
 
       (macrolet
-        (handle-macrolet args
-          (lambda (body)
-            (process-toplevel-body body fn last-p))))
+        (let ((*environment* (extend-macrolet-env (car args))))
+          (process-toplevel-body (cdr args) fn last-p)))
 
       (symbol-macrolet
-        (handle-symbol-macrolet args
-          (lambda (body)
-            (process-toplevel-body body fn last-p))))
+        (let ((*environment* (extend-symbol-macrolet-env (car args))))
+          (process-toplevel-body (cdr args) fn last-p)))
 
       (eval-when
-          (handle-eval-when args
-            (lambda (body)
-              (process-toplevel-body body fn last-p))))
+        (destructuring-bind (situations &body body) args
+          (cond
+            ;; Toplevel form compiled by compile-file (cross-compilation).
+            ((eq *compiler-process-mode* 'compile)
+             ;; If the situation `compile-toplevel' is given. The form is
+             ;; evaluated at compilation-time.
+             (when (or (find :compile-toplevel situations)
+                       (find 'compile situations))
+               (eval (cons 'progn body)))
+
+             ;; `load-toplevel' is given, then just compile the subforms as usual.
+             (when (or (find :load-toplevel situations)
+                       (find 'load situations))
+               (process-toplevel-body body fn last-p)))
+
+            ;; EVAL or not toplevel forms only consider :execute
+            ((or (find :execute situations)
+                 (find 'eval situations))
+             (process-toplevel-body body fn last-p))
+
+            (t
+             (process-toplevel-body nil fn last-p)))))
 
       (t
         (funcall fn form last-p)))))
