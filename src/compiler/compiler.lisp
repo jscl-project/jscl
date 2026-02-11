@@ -1519,14 +1519,10 @@
 
 (defun convert-property-key (form)
   (multiple-value-bind (value constantp) (constant-value form *environment*)
-    (cond
-      ((and constantp
-            (or (stringp value)
-                (eq (typeof value) (jsstring "string"))))
-       (clstring value))
-      ((and constantp (numberp value)) (princ-to-string value))
+    (if constantp
+      value
       ;; xstring handles strings, numbers, and Lisp strings at runtime
-      (t `(call-internal |xstring| ,(convert form))))))
+      `(call-internal |xstring| ,(convert form)))))
 
 (define-raw-builtin oget (object key &rest keys)
   (let ((result (convert object)))
