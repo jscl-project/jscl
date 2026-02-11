@@ -10,6 +10,11 @@
 (defvar *use-html-output-p* nil)
 (defvar *timestamp* nil)
 
+#|
+#+(and jscl (not jscl-target))
+(use-package :jscl/ffi)
+|#
+
 ;; Initialize timestamp at load time (for prebuilt mode where tests
 ;; execute immediately during jscl-tests.js loading)
 (setq *timestamp* (get-internal-real-time))

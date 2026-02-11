@@ -76,7 +76,7 @@ internals.error = function (...args) {
 
 internals.typeError = function (datum, expectedType) {
   internals.error(
-    internals.intern("TYPE-ERROR"),
+    internals.intern("TYPE-ERROR", "COMMON-LISP"),
     internals.intern("DATUM", "KEYWORD"),
     datum,
     internals.intern("EXPECTED-TYPE", "KEYWORD"),
@@ -92,7 +92,7 @@ internals.UNBOUND = UNBOUND;
 internals.makeUnboundFunction = function (symbol) {
   const fn = () => {
     internals.error(
-      internals.intern("UNDEFINED-FUNCTION"),
+      internals.intern("UNDEFINED-FUNCTION", "COMMON-LISP"),
       internals.intern("NAME", "KEYWORD"),
       symbol,
     );
@@ -103,9 +103,9 @@ internals.makeUnboundFunction = function (symbol) {
 
 internals.makeUnboundSetFunction = function (symbol) {
   const fn = () => {
-    internals.error(internals.intern("UNDEFINED-FUNCTION"),
+    internals.error(internals.intern("UNDEFINED-FUNCTION", "COMMON-LISP"),
       internals.intern("NAME", "KEYWORD"),
-      internals.QIList(internals.intern("SETF"), symbol, nil));
+      internals.QIList(internals.intern("SETF", "COMMON-LISP"), symbol, nil));
   }
   fn[UNBOUND] = true;
   return fn;
@@ -306,19 +306,19 @@ internals.Cons = function (car, cdr) {
 
 Object.defineProperty(Object.prototype, "$$jscl_car", {
   get: function () {
-    internals.typeError(this, internals.intern("CONS"));
+    internals.typeError(this, internals.intern("CONS", "COMMON-LISP"));
   },
   set: function () {
-    internals.typeError(this, internals.intern("CONS"));
+    internals.typeError(this, internals.intern("CONS", "COMMON-LISP"));
   },
 });
 
 Object.defineProperty(Object.prototype, "$$jscl_cdr", {
   get: function () {
-    internals.typeError(this, internals.intern("CONS"));
+    internals.typeError(this, internals.intern("CONS", "COMMON-LISP"));
   },
   set: function () {
-    internals.typeError(this, internals.intern("CONS"));
+    internals.typeError(this, internals.intern("CONS", "COMMON-LISP"));
   },
 });
 
@@ -347,7 +347,7 @@ internals.QIList = function () {
 internals.handled_division = function (x, y) {
   if (y == 0)
     internals.error(
-      internals.intern("DIVISION-BY-ZERO"),
+      internals.intern("DIVISION-BY-ZERO", "COMMON-LISP"),
       internals.intern("OPERANDS", "KEYWORD"),
       internals.QIList(x, y, nil),
     );
@@ -492,7 +492,7 @@ internals.symbolValue = function (symbol) {
   var value = symbol.value;
   if (value === UNBOUND) {
     internals.error(
-      internals.intern("UNBOUND-VARIABLE"),
+      internals.intern("UNBOUND-VARIABLE", "COMMON-LISP"),
       internals.intern("NAME", "KEYWORD"),
       symbol,
     );
