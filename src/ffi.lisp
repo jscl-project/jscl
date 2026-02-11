@@ -13,7 +13,6 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-#+jscl
 (/debug "loading ffi.lisp!")
 
 ;;; FFI primitives
@@ -37,28 +36,8 @@
 ;;;   clstring%   (x)           — JS string → Lisp string (no type check)
 ;;;   instanceof  (x class)     — JS instanceof operator
 
-
-;;;; Core functions (both environments)
-
-(defun typeof (x)
-  #+jscl (typeof x)
-  #-jscl
-  (typecase x
-    (number (jsstring "number"))
-    (js-string (jsstring "string"))
-    (js-boolean (jsstring "boolean"))
-    (js-undefined (jsstring "undefined"))
-    (otherwise (jsstring "object"))))
-
-;;; Host jsstring is defined in compat.lisp.
-;;; Target jsstring is a self-referencing builtin.
-#+jscl
 (defun jsstring (x)
   (jsstring x))
-
-(defun clstring% (x)
-  #+jscl (clstring% x)
-  #-jscl (js-string-value x))
 
 (defun clstring (x)
   (cond
@@ -82,18 +61,12 @@
             `(oset ,g!value ,g!object ,@g!keys)
             `(oget ,g!object ,@g!keys))))
 
-
-;;;; Target-only runtime
-
-#+jscl
 (defvar *root*
   (%js-vref "globalThis"))
 
-#+jscl
 (defun instanceof (x class)
   (instanceof x class))
 
-#+jscl
 (defun clbool (x)
   (cond
     ((eq x t) t)
@@ -104,25 +77,20 @@
     ((eq x #j:undefined) nil)
     (t (error 'type-error :datum x :expected-type 'js-boolean))))
 
-#+jscl
 (defun jsbool (x)
   (jsbool x))
 
-#+jscl
 (defun jsnull ()
   (jsnull))
 
-#+jscl
 (defun jsundefined ()
   (jsundefined))
 
-#+jscl
 (defun clone (x)
   "Create a shallow copy of a JavaScript object."
   ((oget #j:Object "assign") (object) x))
 
 
-#+jscl
 (%js-vset "eval_in_lisp"
           (lambda (form)
             (eval (read-from-string (clstring form)))))

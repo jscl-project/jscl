@@ -616,15 +616,6 @@
 (defun dump-string (string)
   `(call-internal |make_lisp_string| ,string))
 
-(defun dump-js-value (sexp)
-  (cond
-    ((eq sexp (jsbool t)) 'true)
-    ((eq sexp (jsbool nil)) 'false)
-    ((eq sexp (jsnull)) 'null)
-    ((eq sexp (jsundefined)) 'undefined)
-    ((eq (typeof sexp) (jsstring "string")) (clstring sexp))
-    (t (error "Cannot dump JS value ~S as a literal." sexp))))
-
 
 ;; The mode in which the compiler is processing the code.  Possible
 ;; values are `EVAL' and `COMPILE'.  Used to evaluate toplevel form
@@ -637,11 +628,11 @@
     ((integerp sexp) sexp)
     ((floatp sexp) sexp)
     ((characterp sexp) (string sexp))
-    ((eq sexp (jsbool t)) (dump-js-value sexp))
-    ((eq sexp (jsbool nil)) (dump-js-value sexp))
-    ((eq sexp (jsnull)) (dump-js-value sexp))
-    ((eq sexp (jsundefined)) (dump-js-value sexp))
-    ((eq (typeof sexp) (jsstring "string")) (dump-js-value sexp))
+    ((eq sexp (jsbool t)) 'true)
+    ((eq sexp (jsbool nil)) 'false)
+    ((eq sexp (jsnull)) 'null)
+    ((eq sexp (jsundefined)) 'undefined)
+    ((eq (typeof sexp) (jsstring "string")) (clstring sexp))
     (t
      (or (cdr (assoc sexp *literal-table* :test #'eql))
          (let ((index *literal-counter*)
@@ -666,7 +657,8 @@
                               (convert (second sexp))
                               (dump-cons sexp)))
                          ((arrayp sexp) (dump-array sexp))
-                         ((structure-p sexp) (dump-structure sexp)))))
+                         ((structure-p sexp) (dump-structure sexp))
+                         (t (error "How should I dump `~S'?" sexp)))))
                  (toplevel-compilation `(var (,jsvar ,dumped)))
                  (when (keywordp sexp)
                    (toplevel-compilation `(= (get ,jsvar "value") ,jsvar)))))
@@ -1505,14 +1497,11 @@
 (define-raw-builtin new (constructor &rest args)
   `(call-internal |newInstance| ,(convert constructor) ,@(mapcar #'convert args)))
 
-(defun convert-xstring (form)
-  (multiple-value-bind (value constantp) (constant-value form *environment*)
+(define-raw-builtin jsstring (x)
+  (multiple-value-bind (value constantp) (constant-value x *environment*)
     (if constantp
         (clstring value)
-        `(call-internal |xstring| ,(convert form)))))
-
-(define-raw-builtin jsstring (x)
-  (convert-xstring x))
+        `(call-internal |xstring| ,(convert x)))))
 
 (define-raw-builtin jsbool (x)
   (multiple-value-bind (value constantp) (constant-value x *environment*)
@@ -1756,7 +1745,7 @@
       ((and (consp function) (member (car function) '(oget)))
        `(call ,(reduce (lambda (obj p)
                          `(property ,obj ,p))
-                       (mapcar #'convert-xstring (cddr function))
+                       (mapcar #'convert-property-key (cddr function))
                        :initial-value (convert (cadr function)))
               ,@(mapcar #'convert args)))
       (t
@@ -1781,11 +1770,6 @@
               `(get ,(convert `',sexp) "value"))
              (t
               (convert `(symbol-value ',sexp))))))
-        ((or (integerp sexp) (floatp sexp) (characterp sexp) (stringp sexp) (arrayp sexp)
-             (structure-p sexp)
-             (eq sexp (jsbool t)) (eq sexp (jsbool nil)) (eq sexp (jsnull)) (eq sexp (jsundefined))
-             (eq (typeof sexp) (jsstring "string")))
-         (literal sexp))
         ((listp sexp)
          (let* ((name (car sexp))
                 (args (cdr sexp)))
@@ -1800,8 +1784,7 @@
               (apply (gethash name *builtins*) args))
              (t
               (compile-funcall name args)))))
-        (t
-         (error "How should I compile `~S'?" sexp))))))
+        (t (literal sexp))))))
 
 
 (defun convert-block (sexps &optional return-last-p decls-allowed-p)

@@ -6,12 +6,8 @@ target environments. For the user-facing API, see `docs/ffi.md`.
 
 ## Dual-environment architecture
 
-`src/ffi.lisp` and `src/read-j.lisp` are both tagged `:both` in
-`*source*`, so they are loaded into the host CL **and**
-compiled to JavaScript for the target.
-
-However, JavaScript values do not exist in the host (necessarily), yet
-the compiler must be able to manipulate them at compile time (e.g. as
+JavaScript values do not exist in the host (necessarily), yet the
+compiler must be able to manipulate them at compile time (e.g. as
 literals produced by reader macros).
 
 To solve this, there is a set of structs emulating JS values during
@@ -52,4 +48,4 @@ it does not take `js-value`s as input.
 
 Therefore, `compiler.lisp` is responsible for generating the
 S-expressions necessary to dump a `js-value`. This is done by
-`dump-js-value`.
+respective branches in `literal`.
