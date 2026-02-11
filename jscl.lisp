@@ -205,12 +205,16 @@
   `(dolist (,name (get-files *source* ,type '(:relative "src")))
      ,@body))
 
-;;;; Host Compilation (SBCL only)
+
+(defvar *jscl-xc-readtable* (copy-readtable *readtable*))
+
+;;;; Host Compilation
 ;;;;
 ;;;; Compile and load JSCL into the host Lisp for cross-compilation.
 ;;;; Host files are loaded in the :jscl-xc package.
 
-(let ((*package* (find-package "JSCL-XC")))
+(let ((*package* (find-package "JSCL-XC"))
+      (*readtable* *jscl-xc-readtable*))
   (with-compilation-unit ()
     (do-source input :host
       (load input))))
@@ -254,16 +258,15 @@ Works in both SBCL (Stage 0) and JSCL (Stage 1)."
         (write-line "'use strict';" out)
         (write-string (read-whole-file (source-path "prelude.js")) out)
 
-        (do-source input :target
-          (jscl-xc::!compile-file input out :verbose t :print verbose))
-
-        (jscl-xc::dump-global-environment out)
-
-        ;; NOTE: This file must be compiled after dumping the global
-        ;; environment. In this file we replace the bootstrap DEFMACRO
-        ;; etc definition with the standard definition.
-        (jscl-xc::!compile-file (source-path "toplevel" :type "lisp") out
-                             :verbose t :print verbose)
+        (let ((*readtable* *jscl-xc-readtable*))
+          (do-source input :target
+            (jscl-xc::!compile-file input out :verbose t :print verbose))
+          (jscl-xc::dump-global-environment out)
+          ;; NOTE: This file must be compiled after dumping the global
+          ;; environment. In this file we replace the bootstrap DEFMACRO
+          ;; etc definition with the standard definition.
+          (jscl-xc::!compile-file (source-path "toplevel" :type "lisp") out
+                                  :verbose t :print verbose))
 
         (write-line "})();" out)))
 
@@ -304,7 +307,8 @@ Works in both SBCL (Stage 0) and JSCL (Stage 1)."
 
 (defun build-web-repl (output-directory)
   "Build web REPL into OUTPUT-DIRECTORY."
-  (let ((*package* (find-package "JSCL-XC")))
+  (let ((*package* (find-package "JSCL-XC"))
+        (*readtable* *jscl-xc-readtable*))
     (copy-asset "web/index.html" "index.html" output-directory)
     (copy-asset "web/style.css" "style.css" output-directory)
     (copy-asset "node_modules/jquery/dist/jquery.min.js" "jquery.js" output-directory)
@@ -322,7 +326,7 @@ Works in both SBCL (Stage 0) and JSCL (Stage 1)."
 (defun build-web-worker-repl (output-directory)
   "Build web worker REPL into OUTPUT-DIRECTORY."
   (let ((*package* (find-package "JSCL-XC"))
-        #-jscl (*default-pathname-defaults* *base-directory*))
+        (*readtable* *jscl-xc-readtable*))
     (copy-asset "worker/index.html" "worker.html" output-directory)
     (copy-asset "worker/main.js" "main.js" output-directory)
     (copy-asset "worker/service-worker.js" "service-worker.js" output-directory)
@@ -332,13 +336,14 @@ Works in both SBCL (Stage 0) and JSCL (Stage 1)."
 (defun build-deno-repl (output-directory)
   "Build Deno REPL into OUTPUT-DIRECTORY."
   (let ((*package* (find-package "JSCL-XC"))
-        #-jscl (*default-pathname-defaults* *base-directory*))
+        (*readtable* *jscl-xc-readtable*))
     (jscl-xc::compile-application (list (source-path "repl.lisp" :directory '(:relative "deno")))
                                (concatenate 'string output-directory "jscl-deno.js"))))
 
 (defun build-tests (output-directory)
   "Build test suite into OUTPUT-DIRECTORY."
-  (let ((*package* (find-package "JSCL-XC")))
+  (let ((*package* (find-package "JSCL-XC"))
+        (*readtable* *jscl-xc-readtable*))
     (copy-asset "tests.html" "tests.html" output-directory)
     ;; Load tests.lisp to get get-test-files function
     (load (source-path "tests" :directory nil :type "lisp"))
