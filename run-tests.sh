@@ -32,6 +32,7 @@ while [ $# -gt 0 ]; do
             shift
             ;;
         --jscl=*)
+            MODE=jscl
             JSCL_PATH="${1#--jscl=}"
             shift
             ;;
