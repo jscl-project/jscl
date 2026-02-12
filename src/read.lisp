@@ -313,7 +313,9 @@ otherwise signal a reader error."
 
 #-jscl-target
 (defun read-sharp-dispatch (stream ch)
-  (simple-reader-error stream "Invalid dispatch character ~S after #" ch))
+  (case ch
+    ((#\J #\j) (read-sharp-j stream))
+    (t (simple-reader-error stream "Invalid dispatch character ~S after #" ch))))
 
 (defun read-sharp (stream &optional eof-error-p eof-value)
   (%read-char stream)
@@ -367,16 +369,7 @@ otherwise signal a reader error."
              (prog2 (let ((*read-skip-p* t))
                       (ls-read stream))
                  (ls-read stream eof-error-p eof-value t)))))
-      ((#\J #\j)
-       ;; Check for user-registered dispatch macro before defaulting to #j
-       #+jscl-target
-       (let ((user-fn (get-dispatch-macro-character #\# ch)))
-         (if user-fn
-             (funcall user-fn stream ch nil)
-             (read-sharp-j stream)))
-       #-jscl-target
-       (read-sharp-j stream))
-      ;; Sharp radix 
+      ;; Sharp radix
       ((#\B #\b #\O #\o #\X #\x)
        (sharp-radix-reader ch stream))
       (#\|
@@ -465,6 +458,12 @@ otherwise signal a reader error."
          (push (subseq descriptor start end) subdescriptors))))
     (t
      (simple-reader-error stream "Invalid FFI descriptor. Expected #j: or #j\"."))))
+
+#+jscl-target
+(set-dispatch-macro-character #\# #\J
+  (lambda (stream sub-char arg)
+    (declare (ignore sub-char arg))
+    (read-sharp-j stream)))
 
 (defun sharp-radix-reader (ch stream)
   ;; Sharp radix base #\B #\O #\X
