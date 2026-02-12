@@ -14,7 +14,7 @@ usage() {
     cat <<EOF
 Usage: $0 [OPTIONS]
 
-Build JSCL (jscl.js, node REPL, and test suite).
+Build JSCL (jscl.js, REPLs, and test suite).
 
 Options:
   --sbcl            Use SBCL as host compiler (default)
@@ -67,6 +67,8 @@ case "$HOST" in
              --load jscl.lisp \
              --eval "(jscl-xc:bootstrap \"$OUTPUT_DIR\" \"jscl\" :verbose $VERBOSE)" \
              --eval "(jscl-xc:build-node-repl \"$OUTPUT_DIR\")" \
+             --eval "(jscl-xc:build-web-repl \"$OUTPUT_DIR\")" \
+             --eval "(jscl-xc:build-deno-repl \"$OUTPUT_DIR\")" \
              --eval "(jscl-xc:build-tests \"$OUTPUT_DIR\")"
         ;;
     jscl)
@@ -75,6 +77,8 @@ case "$HOST" in
 (load "jscl.lisp")
 (jscl-xc:bootstrap "$OUTPUT_DIR" "jscl" :verbose $VERBOSE)
 (jscl-xc:build-node-repl "$OUTPUT_DIR")
+(jscl-xc:build-web-repl "$OUTPUT_DIR")
+(jscl-xc:build-deno-repl "$OUTPUT_DIR")
 (jscl-xc:build-tests "$OUTPUT_DIR")
 EOF
         node --stack-size=65536 "$JSCL_PATH" "$tmpfile"
@@ -84,4 +88,6 @@ esac
 
 echo "Built: ${OUTPUT_DIR}jscl.js" >&2
 echo "Built: ${OUTPUT_DIR}jscl-node.js" >&2
+echo "Built: ${OUTPUT_DIR}jscl-web.js" >&2
+echo "Built: ${OUTPUT_DIR}jscl-deno.js" >&2
 echo "Built: ${OUTPUT_DIR}jscl-tests.js" >&2
