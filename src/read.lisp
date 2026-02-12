@@ -1,4 +1,4 @@
-;;; read.lisp --- 
+;;; read.lisp ---
 
 ;; Copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
@@ -18,19 +18,21 @@
 
 (/debug "loading read.lisp!")
 
-#+jscl-target (defmacro with-standard-io-syntax (&body body)
-         `(let ((*package* (find-package-or-fail "CL-USER"))
-                (*print-base* 10)
-                (*print-circle* nil)
-                (*print-escape* t)
-                (*print-gensym* t)
-                (*print-radix* nil)
-                (*read-base* 10))
-            ,@body))
+#+jscl-target
+(defmacro with-standard-io-syntax (&body body)
+  `(let ((*package* (find-package-or-fail "CL-USER"))
+         (*print-base* 10)
+         (*print-circle* nil)
+         (*print-escape* t)
+         (*print-gensym* t)
+         (*print-radix* nil)
+         (*read-base* 10))
+     ,@body))
 
 ;;;; Reader
 
-#+jscl-target(defvar *read-base* 10)
+#+jscl-target
+(defvar *read-base* 10)
 
 ;;;; Readtable
 
@@ -313,7 +315,9 @@ otherwise signal a reader error."
 
 #-jscl-target
 (defun read-sharp-dispatch (stream ch)
-  (simple-reader-error stream "Invalid dispatch character ~S after #" ch))
+  (case ch
+    ((#\J #\j) (read-sharp-j stream))
+    (t (simple-reader-error stream "Invalid dispatch character ~S after #" ch))))
 
 (defun read-sharp (stream &optional eof-error-p eof-value)
   (%read-char stream)
@@ -361,22 +365,13 @@ otherwise signal a reader error."
                 (let ((*package* (find-package :keyword))
                       (*read-skip-p* nil))
                   (ls-read stream eof-error-p eof-value t))))
-         
+
          (if (eql (char= ch #\+) (eval-feature-expression expression))
              (ls-read stream eof-error-p eof-value t)
              (prog2 (let ((*read-skip-p* t))
                       (ls-read stream))
                  (ls-read stream eof-error-p eof-value t)))))
-      ((#\J #\j)
-       ;; Check for user-registered dispatch macro before defaulting to #j
-       #+jscl-target
-       (let ((user-fn (get-dispatch-macro-character #\# ch)))
-         (if user-fn
-             (funcall user-fn stream ch nil)
-             (read-sharp-j stream)))
-       #-jscl-target
-       (read-sharp-j stream))
-      ;; Sharp radix 
+      ;; Sharp radix
       ((#\B #\b #\O #\o #\X #\x)
        (sharp-radix-reader ch stream))
       (#\|
@@ -465,6 +460,12 @@ otherwise signal a reader error."
          (push (subseq descriptor start end) subdescriptors))))
     (t
      (simple-reader-error stream "Invalid FFI descriptor. Expected #j: or #j\"."))))
+
+#+jscl-target
+(set-dispatch-macro-character #\# #\J
+  (lambda (stream sub-char arg)
+    (declare (ignore sub-char arg))
+    (read-sharp-j stream)))
 
 (defun sharp-radix-reader (ch stream)
   ;; Sharp radix base #\B #\O #\X
