@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/multiple-values.lisp!")
 
 ;;; Regression for issue
 ;;;   https://github.com/jscl-project/jscl/issues/341

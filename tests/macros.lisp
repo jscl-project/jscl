@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/macros.lisp!")
 
 (test (eq 'foo (defmacro foo () 1)))
 

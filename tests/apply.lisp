@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/apply.lisp!")
 
 ;;; Tests for funcall/apply
 

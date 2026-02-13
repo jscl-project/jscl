@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/defun.lisp!")
 
 ;;;; Tests for DEFUN
 

@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/variables.lisp!")
 
 (defvar *x*)
 (setq *x* 0)

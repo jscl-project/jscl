@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/hash-tables.lisp!")
 
 (let ((ht (make-hash-table))
       (key "foo"))

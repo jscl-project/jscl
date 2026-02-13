@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "Perform tests/conditions.lisp")
 
 (test (block nil
         (handler-bind

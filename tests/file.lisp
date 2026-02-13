@@ -1,5 +1,4 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
-(/debug "perform test/file.lisp!")
 
 #+node
 (progn

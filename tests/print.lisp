@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/print.lisp!")
 
 #|
 (test (let ((x (read-from-string (prin1-to-string 'foo))))

@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/read.lisp!")
 
 
 ;;; TODO: Uncomment when either read-from-string supports all these parameters

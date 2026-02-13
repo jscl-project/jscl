@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/array.lisp!")
 
 (test (arrayp #(1 2 3 4)))
 (test (vectorp #(1 2 3 4)))

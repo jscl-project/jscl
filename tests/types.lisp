@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/types.lisp!")
 
 (defparameter +atomic-test-objects+
   (list (cons 1     'bit)

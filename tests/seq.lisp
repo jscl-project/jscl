@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/seq.lisp!")
 
 ;;; Functions used as :KEY argument in tests
 (defvar halve  (lambda (x) (/ x 2)))

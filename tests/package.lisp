@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/package.lisp!")
 
 (test (listp (list-all-packages)))
 

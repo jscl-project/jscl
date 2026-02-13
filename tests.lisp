@@ -143,7 +143,6 @@ For other modes, load and execute test files now."
     ;; Load test files (tests execute immediately via test macro)
     (let ((*package* (find-package #+jscl-target "JSCL-XC" #-jscl-target "JSCL")))
       (dolist (test-file (get-test-files))
-        (format t "Loading ~a...~%" test-file)
         (handler-case
             (load test-file)
           (error (c)

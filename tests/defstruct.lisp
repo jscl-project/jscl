@@ -1,5 +1,4 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
-(/debug "perform test/defstruct.lisp!")
 
 (defun sbt-check-fn (sn)
   (handler-case

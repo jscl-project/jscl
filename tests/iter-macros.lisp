@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/iter-macros.lisp!")
 
 ;;; Tests for macros implementing iteration constructs
 
