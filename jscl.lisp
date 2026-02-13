@@ -22,8 +22,7 @@
            #:build-node-repl
 	   #:build-web-repl
 	   #:build-web-worker-repl
-	   #:build-deno-repl
-           #:build-tests))
+	   #:build-deno-repl))
 
 (in-package :jscl-xc)
 
@@ -333,18 +332,5 @@ Works in both SBCL (Stage 0) and JSCL (Stage 1)."
         (*readtable* *jscl-xc-readtable*))
     (jscl-xc::compile-application (list (source-path "repl.lisp" :directory '(:relative "deno")))
                                (concatenate 'string output-directory "jscl-deno.js"))))
-
-(defun build-tests (output-directory)
-  "Build test suite into OUTPUT-DIRECTORY."
-  (let ((*features* (list* :jscl-target *features*))
-        (*package* (find-package "JSCL-XC"))
-        (*readtable* *jscl-xc-readtable*))
-    (copy-asset "tests.html" "tests.html" output-directory)
-    ;; Load tests.lisp to get get-test-files function
-    (load (source-path "tests" :directory nil :type "lisp"))
-    (jscl-xc::compile-application
-     (cons "tests.lisp" (funcall (find-symbol "GET-TEST-FILES" "JSCL-XC")))
-     (concatenate 'string output-directory "jscl-tests.js"))))
-
 
 ;;; EOF

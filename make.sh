@@ -68,8 +68,7 @@ case "$HOST" in
              --eval "(jscl-xc:bootstrap \"$OUTPUT_DIR\" \"jscl\" :verbose $VERBOSE)" \
              --eval "(jscl-xc:build-node-repl \"$OUTPUT_DIR\")" \
              --eval "(jscl-xc:build-web-repl \"$OUTPUT_DIR\")" \
-             --eval "(jscl-xc:build-deno-repl \"$OUTPUT_DIR\")" \
-             --eval "(jscl-xc:build-tests \"$OUTPUT_DIR\")"
+             --eval "(jscl-xc:build-deno-repl \"$OUTPUT_DIR\")"
         ;;
     jscl)
         tmpfile=$(mktemp /tmp/jscl-make.XXXXXX.lisp)
@@ -79,7 +78,6 @@ case "$HOST" in
 (jscl-xc:build-node-repl "$OUTPUT_DIR")
 (jscl-xc:build-web-repl "$OUTPUT_DIR")
 (jscl-xc:build-deno-repl "$OUTPUT_DIR")
-(jscl-xc:build-tests "$OUTPUT_DIR")
 EOF
         node --stack-size=65536 "$JSCL_PATH" "$tmpfile"
         rm -f "$tmpfile"
@@ -90,4 +88,3 @@ echo "Built: ${OUTPUT_DIR}jscl.js" >&2
 echo "Built: ${OUTPUT_DIR}jscl-node.js" >&2
 echo "Built: ${OUTPUT_DIR}jscl-web.js" >&2
 echo "Built: ${OUTPUT_DIR}jscl-deno.js" >&2
-echo "Built: ${OUTPUT_DIR}jscl-tests.js" >&2
