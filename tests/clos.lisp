@@ -132,18 +132,18 @@
       (b 2)
       (c 3)
       (d #(1 2 3)))
-    (!rotatef a b c)
+    (rotatef a b c)
     (test (equal '(2 3 1) (list a b c)))
-    (!rotatef a b c)
+    (rotatef a b c)
     (test (equal '(3 1 2) (list a b c)))
-    (!rotatef (aref d 0) (aref d 2))
-    (test (equal '(3 2 1) (vector-to-list d))))
+    (rotatef (aref d 0) (aref d 2))
+    (test (equal '(3 2 1) (coerce d 'list))))
 
 (let* ((a '(1 2))
        (b '(3 4))
        (c '(a b))
        (d (list a b c)))
-   (!rotatef (nth 0 d) (nth 2 d))
+   (rotatef (nth 0 d) (nth 2 d))
    (test (equal '((a b) (3 4) (1 2)) d)))
 
 (defclass rectangle ()
@@ -175,24 +175,24 @@
       (sort what predicate)))
 
 (defmethod msort ((what vector) predicate &key key)
-  (let ((lst (vector-to-list what)))
-    (list-to-vector
-     (if key
-         (sort lst predicate :key key)
-         (sort lst predicate)))))
+  (let ((lst (coerce what 'list)))
+    (coerce (if key
+                (sort lst predicate :key key)
+                (sort lst predicate))
+            'vector)))
 
 (defmethod msort ((what string) predicate &key key)
-  (let ((lst (vector-to-list what)))
-    (apply #'concat
-           (if key
-               (sort lst predicate :key key)
-               (sort lst predicate)))))
+  (let ((lst (coerce what 'list)))
+    (map 'string 'identity
+         (if key
+             (sort lst predicate :key key)
+             (sort lst predicate)))))
 
 (test (string= "aabbccddxyz"
                (msort "cdbaxaybzcd" #'char-lessp)))
 
 (test (equal '(9 8 7 6 5 4 3 2 1)
-             (vector-to-list (msort #(1 2 3 4 5 6 7 8 9) #'>))))
+             (coerce (msort #(1 2 3 4 5 6 7 8 9) #'>) 'list)))
 
 
 ;;; test from original closette-test.lisp
@@ -259,7 +259,7 @@
 
 
 (defun common-subclasses* (class-1 class-2)
-  (intersection (subclasses* class-1) (subclasses* class-2)))
+  (intersection (jscl::subclasses* class-1) (jscl::subclasses* class-2)))
 
 (defun all-distinct-pairs (set)
   (if (null set)
@@ -274,7 +274,7 @@
   (some #'(lambda (pair)
             (not (null (common-subclasses* (car pair)
                                            (cadr pair)))))
-        (all-distinct-pairs (class-direct-subclasses class))))
+        (all-distinct-pairs (jscl:class-direct-subclasses class))))
 
 (test (equal t (has-diamond-p (find-class 'position))))
 
@@ -302,7 +302,7 @@
   (if (eq class (find-class 'standard-object))
       ()
       (cons class (mapappend #'depth-first-preorder-superclasses*
-                             (class-direct-superclasses class)))))
+                             (jscl:class-direct-superclasses class)))))
 
 
 

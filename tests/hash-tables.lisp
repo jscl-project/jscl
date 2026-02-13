@@ -90,7 +90,7 @@
 
 ;;; test copy-hash
 (test
- (equal 
+ (equal
   (let* ((ht (temp-hash-table :fill t))
          (ht-copy (copy-hash-table ht))
          (map nil))
@@ -300,7 +300,8 @@
 (test (not (hash-table-p #(1 2 3))))
 
 ;; A raw JS Map counts as a hash table with EQ test
-(let ((js-map (new #j:Map)))
+#+jscl
+(let ((js-map (jscl/ffi:new #j:Map)))
   (test (hash-table-p js-map))
   (test (eq (hash-table-test js-map) 'eq)))
 

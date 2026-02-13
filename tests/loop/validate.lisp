@@ -4,7 +4,7 @@
 ;;;>
 ;;;> Portions of LOOP are Copyright (c) 1986 by the Massachusetts Institute of Technology.
 ;;;> All Rights Reserved.
-;;;> 
+;;;>
 ;;;> Permission to use, copy, modify and distribute this software and its
 ;;;> documentation for any purpose and without fee is hereby granted,
 ;;;> provided that the M.I.T. copyright notice appear in all copies and that
@@ -16,7 +16,7 @@
 ;;;> copying distribution is by permission of M.I.T.  M.I.T. makes no
 ;;;> representations about the suitability of this software for any purpose.
 ;;;> It is provided "as is" without express or implied warranty.
-;;;> 
+;;;>
 ;;;>      Massachusetts Institute of Technology
 ;;;>      77 Massachusetts Avenue
 ;;;>      Cambridge, Massachusetts  02139
@@ -25,7 +25,7 @@
 ;;;>
 ;;;> Portions of LOOP are Copyright (c) 1989, 1990, 1991, 1992 by Symbolics, Inc.
 ;;;> All Rights Reserved.
-;;;> 
+;;;>
 ;;;> Permission to use, copy, modify and distribute this software and its
 ;;;> documentation for any purpose and without fee is hereby granted,
 ;;;> provided that the Symbolics copyright notice appear in all copies and
@@ -37,7 +37,7 @@
 ;;;> Symbolics.  Symbolics makes no representations about the suitability of
 ;;;> this software for any purpose.  It is provided "as is" without express
 ;;;> or implied warranty.
-;;;> 
+;;;>
 ;;;> Symbolics, CLOE Runtime, and Minima are trademarks, and CLOE, Genera,
 ;;;> and Zetalisp are registered trademarks of Symbolics, Inc.
 ;;;>
@@ -72,8 +72,7 @@
   (declare (ignore short-desc))
   (dolist (pair params-and-answers)
     (let ((params (first pair)) (answers (rest pair)) yow)
-      ;; fixme: 
-      (jscl-xc::test
+      (jscl-tests::test
           (cond
             ((equal (setq yow (multiple-value-list (apply interpreted params))) answers))
             (t

@@ -3,17 +3,19 @@
 ;;; This file contains only definitions. Call RUN-TESTS after loading
 ;;; to execute the test suite.
 
+
+(defpackage jscl-tests
+  (:use :cl)
+  (:export #:run-tests))
+
+(in-package :jscl-tests)
+
 (defparameter *total-tests* 0)
 (defparameter *passed-tests* 0)
 (defparameter *failed-tests* 0)
 
 (defvar *use-html-output-p* nil)
 (defvar *timestamp* nil)
-
-#|
-#+(and jscl (not jscl-target))
-(use-package :jscl/ffi)
-|#
 
 ;; Initialize timestamp at load time (for prebuilt mode where tests
 ;; execute immediately during jscl-tests.js loading)
@@ -22,32 +24,36 @@
 
 (defun test-fn (fn form expect-success)
   "Execute a single test and update counters."
-  (let (result success normal-exit)
-    (handler-case
-        (catch 'recover
-          (unwind-protect
-               (progn
-                 (setq result (funcall fn))
-                 (setq success (if result t nil))
-                 (setq normal-exit t))
-            (unless normal-exit
-              (setq success nil)
-              (throw 'recover t))))
-      (error ()
-        nil))
+  (let (result success normal-exit raised-condition)
+    (catch 'recover
+      (unwind-protect
+           (handler-case
+               (progn (setq result (funcall fn))
+                      (setq success (if result t nil))
+                      (setq normal-exit t))
+             (error (e)
+               (setq raised-condition e)
+               nil))
+        (unless normal-exit
+          (setq success nil)
+          (throw 'recover t))))
 
     (incf *total-tests*)
 
     (cond
       ((eq success expect-success)
-       (incf *passed-tests*))
+       (incf *passed-tests*)
+       ;(format *error-output* "Test `~S' passed.~%" form)
+       )
       (t
        (incf *failed-tests*)
        (cond
          (expect-success
           (if *use-html-output-p*
-              (format t "<font color='red'>Test `~S' failed.</font>~%" form)
-              (format t "Test `~S' failed.~%" form)))
+              (format *error-output* "<font color='red'>Test `~S' failed.</font>~%" form)
+              (format *error-output* "Test `~S' failed.~%" form))
+          (when raised-condition
+            (format *standard-output* "Error: ~a~%" e)))
          (t
           (if *use-html-output-p*
               (format t "<font color='orange'>Test `~S' was expected to fail.</font>~%" form)
@@ -80,7 +86,7 @@
          (progn
            ,form)
        (error (msg)
-         (format t " ERROR: ~a"
+         (format *error-output* " ERROR: ~a"
                  (format nil
                          (simple-condition-format-control msg)
                          (simple-condition-format-arguments msg)))
@@ -100,13 +106,13 @@
 
 (defun exit-with-test-status ()
   "Exit the process with appropriate status code based on test results."
-  #+(or jscl jscl-target)
+  #+jscl
   (progn
-    (when (in "phantom" *root*)
-      (#j:phantom:exit *failed-tests*))
-    (when (in "process" *root*)
-      (#j:process:exit *failed-tests*)))
-  #-(or jscl jscl-target)
+    (unless (eq (jscl/ffi:typeof #j:process) #j"undefined")
+      (#j:process:exit *failed-tests*))
+    (unless (eq (jscl/ffi:typeof #j:phantom) #j"undefined")
+      (#j:phantom:exit *failed-tests*)))
+  #+sbcl
   (sb-ext:exit :code (if (zerop *failed-tests*) 0 (min *failed-tests* 255))))
 
 ;;;; Test File Discovery
@@ -116,9 +122,9 @@
   #+jscl
   (let ((files nil)
         (fs (require "fs")))
-    (let ((entries (funcall (oget fs "readdirSync") #j"tests")))
-      (dotimes (i (oget entries "length"))
-        (let ((entry (clstring (aref entries i))))
+    (let ((entries (funcall (jscl/ffi:oget fs "readdirSync") #j"tests")))
+      (dotimes (i (jscl/ffi:oget entries "length"))
+        (let ((entry (jscl/ffi:clstring (aref entries i))))
           (when (and (> (length entry) 5)
                      (string= (subseq entry (- (length entry) 5)) ".lisp"))
             (push (concatenate 'string "tests/" entry) files)))))
@@ -126,9 +132,9 @@
     (push "tests/loop/base-tests.lisp" files)
     (nreverse files))
   #-jscl
-  (append (directory (concatenate 'string jscl-xc::*base-directory* "tests/*.lisp"))
-          (list (concatenate 'string jscl-xc::*base-directory* "tests/loop/validate.lisp")
-                (concatenate 'string jscl-xc::*base-directory* "tests/loop/base-tests.lisp"))))
+  (append (directory (make-pathname :directory `(:relative "tests") :name :wild :type "lisp" :defaults *load-pathname*))
+          (list (make-pathname :directory `(:relative "tests" "loop") :name "validate" :type "lisp" :defaults *load-pathname*)
+                (make-pathname :directory `(:relative "tests" "loop") :name "base-tests" :type "lisp" :defaults *load-pathname*))))
 
 ;;;; Test Execution
 
@@ -141,12 +147,12 @@ For other modes, load and execute test files now."
     (setq *timestamp* (get-internal-real-time))
     (terpri)
     ;; Load test files (tests execute immediately via test macro)
-    (let ((*package* (find-package #+jscl-target "JSCL-XC" #-jscl-target "JSCL")))
+    (let ((*package* (find-package "JSCL-TESTS")))
       (dolist (test-file (get-test-files))
         (handler-case
             (load test-file)
           (error (c)
-            (format t "ERROR loading ~a: ~a~%" test-file c))))))
+            nil)))))
   ;; Report and exit
   (print-test-report)
   (exit-with-test-status))

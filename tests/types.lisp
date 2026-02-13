@@ -25,7 +25,8 @@
         (cons (vector)          '(vector 0))
         (cons "sss"             '(string 3))
         (cons (make-string 2)   '(string 2))
-        (cons (object)       't)
+        #+jscl
+        (cons (jscl/ffi:object)       't)
         (cons (find-class 'atomic-test-class) 'standard-class)
         (cons (let nil (lambda nil nil))      'function)))
 
@@ -56,7 +57,7 @@
                 collect (unless (equal x y) (list idx x y)) ))
     (setq idx 0
           diff2
-          (loop for x in +atomic-test-objects+ 
+          (loop for x in +atomic-test-objects+
                 do (incf idx)
                 collect (unless (typep (car x) 'atom) (list idx (cdr x)))))
 
@@ -83,7 +84,7 @@
                      integer integer integer integer
                      bignum fixnum fixnum bignum)))
 
-    (values 
+    (values
      (every #'identity (loop for x in universum collect (typep x 'atom)))
      (loop for x in universum collect (type-of x))
      (loop for x in universum
@@ -142,7 +143,7 @@
                             (and (or array vector (string 9))
                              (or (array character 1) (vector character 2) string)))))
 
-    (values 
+    (values
      (every #'identity (loop for x in universum collect (typep x 'atom)))
      (list 'type-of (loop for x in universum collect (type-of x)))
      (list 'type-spec (loop for x in universum
@@ -377,7 +378,7 @@
    (typep (make-struct-bus :type 'alarm :signal 'trap) '(bus-alarm))
    (typep (make-struct-bus :type 'alarm :signal 'trap-21) 'bus-alarm)
    (typecase (make-struct-bus :type 'alarm :signal 12) (bus-alarm :good) (t :bad))
-   (typecase (make-struct-bus :type 'alarm :signal 32) ((bus-alarm) :good) (t :bad)))  
+   (typecase (make-struct-bus :type 'alarm :signal 32) ((bus-alarm) :good) (t :bad)))
   t t nil :good :bad))
 
 ;;; array
@@ -440,7 +441,7 @@
          (mapcar (lambda (x y) (equal x y))
                  '(BIT SYMBOL FLOAT (VECTOR 0) (ARRAY (1 1)) (STRING 6) NULL CONS BOOLEAN NULL)
                  (loop for i in universum collect (type-of i))))))
-  
+
 (test
  (mv-eql
   (let* ((sym (*gensym*))
@@ -451,7 +452,7 @@
      (typep (make-instance sym) sym)
      (typep class standard-class)))
   t t t))
-      
+
 ;;; typecase test cases
 (test (eql 'a (typecase 1 (integer 'a) (t 'b))))
 (test  (not (typecase 1 (symbol 'a))))
@@ -547,18 +548,18 @@
 
 #+nil
 (test
- (let ((cells (list 1 2021 3.33  t #\c "abc" #(1)))) 
-   (typep cells '(cons (eql 1) 
-                       (cons (integer 2019 2022) 
-                            (cons (float -1.00000000001 3.4) 
-                                   (cons (member t nil) *))))))) 
+ (let ((cells (list 1 2021 3.33  t #\c "abc" #(1))))
+   (typep cells '(cons (eql 1)
+                       (cons (integer 2019 2022)
+                            (cons (float -1.00000000001 3.4)
+                                   (cons (member t nil) *)))))))
 
 #+nil
 (test
- (let ((cells (list 1 2021 3.33  t #\c "abc" #(1)))) 
-   (typep cells '(cons (eql 1) 
-                       (cons (integer 2019 2022) 
-                            (cons (float -1.00000000001 3.4) 
+ (let ((cells (list 1 2021 3.33  t #\c "abc" #(1))))
+   (typep cells '(cons (eql 1)
+                       (cons (integer 2019 2022)
+                            (cons (float -1.00000000001 3.4)
                                    (cons (member t nil)
                                          (cons character
                                                (cons array (cons vector))

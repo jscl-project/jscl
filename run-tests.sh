@@ -54,12 +54,12 @@ case "$MODE" in
         sbcl --noinform --non-interactive \
              --load jscl.lisp \
              --load tests.lisp \
-             --eval '(jscl::run-tests)'
+             --eval '(jscl-tests:run-tests)'
         ;;
     jscl)
         echo "Running tests in JSCL ($JSCL_PATH)..."
         tmpfile=$(mktemp /tmp/jscl-tests.XXXXXX.lisp)
-        echo '(in-package :jscl) (load "tests.lisp") (run-tests)' > "$tmpfile"
+        echo '(load "tests.lisp") (jscl-tests:run-tests)' > "$tmpfile"
         $RUNJS "$JSCL_PATH" "$tmpfile"
         status=$?
         rm -f "$tmpfile"

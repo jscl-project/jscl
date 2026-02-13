@@ -141,9 +141,9 @@
 (test (do-external-symbols (var 'cl)
         (when (eq var t) (return t))))
 
-;;; This test is failing. I have disabled temporarily.
-;;; note: Fixed ? @vkm
 (test (eq (eval '(in-package #:cl-user)) (find-package '#:cl-user)))
+
+(in-package :jscl-tests)
 
 ;;; Keywords are self-evaluating
 (test (eq (symbol-value :obscure-kw-12345) :obscure-kw-12345))
