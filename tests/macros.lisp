@@ -12,7 +12,7 @@
                       (bar))))))
 
 (test (eq 2 (eval '(macrolet ((foo () 2))
-                    (macrolet ((bar () (macroexpand-1 '(foo) *environment*)))
+                    (macrolet ((bar () (macroexpand-1 '(foo) jscl::*environment*)))
                       (bar))))))
 
 (test (eq 2 (eval '(macrolet ((foo () 2))

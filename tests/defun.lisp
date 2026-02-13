@@ -11,7 +11,7 @@
 
 (let ((actual
        (multiple-value-list
-        (parse-body '((declare (integerp x)) "foo" 3)
+        (jscl::parse-body '((declare (integerp x)) "foo" 3)
                     :declarations t
                     :docstring t))))
 
@@ -19,7 +19,7 @@
 
 (let ((actual
        (multiple-value-list
-        (parse-body '((declare (integerp x)) "foo")
+        (jscl::parse-body '((declare (integerp x)) "foo")
                     :declarations t
                     :docstring t))))
 
@@ -28,7 +28,7 @@
 
 (let ((actual
        (multiple-value-list
-        (parse-body '("foo" 3)
+        (jscl::parse-body '("foo" 3)
                     :declarations t
                     :docstring t))))
 
@@ -83,7 +83,7 @@
     (dotimes (i 10)
       (incf (getr r 0)))
     (equal '(11 (3 2 1 :tail) nil) 
-           (vector-to-list r))))
+           (coerce r 'list))))
 
 ;;; &allow-other-keys test
 (defun fff (&key a b &allow-other-keys)

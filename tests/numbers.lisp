@@ -328,7 +328,7 @@
                   (1073741824 (1 . 31)))))
    (equal pattern
           (dolist (it nums (return (reverse r)))
-            (push (list it (cons (clz32 it) (integer-length it))) r)))))
+            (push (list it (cons (jscl::clz32 it) (integer-length it))) r)))))
 
     
 ;;; LOGCOUNT
@@ -347,9 +347,9 @@
 (test
  (equal '(t)
         (remove-duplicates
-         (with-collect
+         (jscl::with-collect
            (dotimes (i 100)
-             (collect (identity-logcount (random 100))))))))
+             (jscl::collect (identity-logcount (random 100))))))))
 
 ;;; BYTE
 (test

@@ -3,74 +3,74 @@
 
 ;;; Tests for Javascript FFI routines.
 
-(test (= ((oget (new #j:Date 0) "getTime")) 0))
-(test (stringp (clstring (#j:Date 0))))
-(test (< 32 (length (clstring (#j:Date 0)))))
+(test (= ((jscl/ffi:oget (jscl/ffi:new #j:Date 0) "getTime")) 0))
+(test (stringp (jscl/ffi:clstring (#j:Date 0))))
+(test (< 32 (length (jscl/ffi:clstring (#j:Date 0)))))
 
 ;;; Array
 (let ((v1 #(mediane)))
-  ((oget v1 "push") 'right)
-  ((oget v1 "unshift") 'left)
-  (test (equal ((oget v1 "indexOf") 'mediane) 1))
-  (test (equal ((oget v1 "indexOf") 'left) 0))
-  (test (equal ((oget v1 "indexOf") 'right) 2))
+  ((jscl/ffi:oget v1 "push") 'right)
+  ((jscl/ffi:oget v1 "unshift") 'left)
+  (test (equal ((jscl/ffi:oget v1 "indexOf") 'mediane) 1))
+  (test (equal ((jscl/ffi:oget v1 "indexOf") 'left) 0))
+  (test (equal ((jscl/ffi:oget v1 "indexOf") 'right) 2))
   (test (equal (map 'list #'identity v1) '(left mediane right))))
 
-(let ((v2 (new #j:Array 'left "Mediane" 'right)))
-  (test (equal (vector-to-list v2) '(left "Mediane" right))))
+(let ((v2 (jscl/ffi:new #j:Array 'left "Mediane" 'right)))
+  (test (equal (coerce v2 'list) '(left "Mediane" right))))
 
 ;;; String
-(test (string= (clstring ((oget #j"abcdef" "substr") 1 2)) "bc"))
+(test (string= (jscl/ffi:clstring ((jscl/ffi:oget #j"abcdef" "substr") 1 2)) "bc"))
 
 ;;; Number's format output
 ;;; for future features
 (let ()
   (labels
       ((make-number (value)
-         (new #j:Number value))
+         (jscl/ffi:new #j:Number value))
        (float-Exponential (value &optional (fraction 5))
-         (clstring ((oget (make-Number value) "toExponential") fraction)))
+         (jscl/ffi:clstring ((jscl/ffi:oget (make-Number value) "toExponential") fraction)))
        (number-to-fixed (value &optional (digits 0))
-         (clstring ((oget (make-Number value) "toFixed") digits)))
+         (jscl/ffi:clstring ((jscl/ffi:oget (make-Number value) "toFixed") digits)))
        (number-by-radix (value &optional (radix 10))
-         (clstring ((oget (make-Number value) "toString") radix))))
+         (jscl/ffi:clstring ((jscl/ffi:oget (make-Number value) "toString") radix))))
     (test (string= "1.23e+2" (float-exponential 123.1 2)))
     (test (string= "123.01" (number-to-fixed 123.012345 2)))
     (test (string= "a" (number-by-radix 10 16)))
     (test (string= "1100100" (number-by-radix 100 2)))))
 
 ;;; test what simple-object (Object.create(null))
-(test (string= "#<JS-OBJECT [object Simple-object]>" (write-to-string *package-table*)))
+(test (string= "#<JS-OBJECT [object Simple-object]>" (write-to-string jscl::*package-table*)))
 
 ;;; test js-object-signature
-(test (js-object-signature (new #j:Date)))
+(test (jscl::js-object-signature (jscl/ffi:new #j:Date)))
 
 ;;; test in can handle numbers
 
-(let ((obj (new #j:Object)))
-  (test (oset 456 obj 123))
-  (test (equal 456 (oget obj 123))))
+(let ((obj (jscl/ffi:new #j:Object)))
+  (test (jscl/ffi:oset 456 obj 123))
+  (test (equal 456 (jscl/ffi:oget obj 123))))
 
 ;;; #j"..." reader
 
 ;; the reader produces a JS string directly, not a form like (jsstring "foo")
 (let ((val (read-from-string "#j\"foo\"")))
-  (test (eq (typeof val) #j"string"))
-  (test (string= (clstring val) "foo")))
+  (test (eq (jscl/ffi:typeof val) #j"string"))
+  (test (string= (jscl/ffi:clstring val) "foo")))
 
 ;;; jsstring
 
 ;; constant case: the compiler can inline #j"..." to a JS string literal
 (test (eq #j"hello" #j"hello"))
-(test (eq (jsstring "hello") #j"hello"))
+(test (eq (jscl/ffi:jsstring "hello") #j"hello"))
 (test (eq #j"" #j""))
 
 ;; non-constant case: jsstring on a dynamically constructed string
 (let ((s (copy-seq "world")))
-  (test (eq (jsstring s) (jsstring s))))
+  (test (eq (jscl/ffi:jsstring s) (jscl/ffi:jsstring s))))
 
 ;; jsstring as a function value
-(test (eq (funcall #'jsstring "abc") #j"abc"))
+(test (eq (funcall #'jscl/ffi:jsstring "abc") #j"abc"))
 
 ;; reader macro round-trip through the printer
 (test (string= (write-to-string #j"foo") "#j\"foo\""))
@@ -99,84 +99,84 @@
 (let ((val (read-from-string "#j:true")))
   (test (not (symbolp val)))
   (test (not (consp val)))
-  (test (eq (typeof val) #j"boolean"))
+  (test (eq (jscl/ffi:typeof val) #j"boolean"))
   (test (eq val #j:true)))
 
 (let ((val (read-from-string "#j:false")))
   (test (not (symbolp val)))
   (test (not (consp val)))
-  (test (eq (typeof val) #j"boolean"))
+  (test (eq (jscl/ffi:typeof val) #j"boolean"))
   (test (eq val #j:false)))
 
 (let ((val (read-from-string "#j:null")))
   (test (not (symbolp val)))
   (test (not (consp val)))
-  (test (eq (typeof val) #j"object"))
+  (test (eq (jscl/ffi:typeof val) #j"object"))
   (test (eq val #j:null)))
 
 (let ((val (read-from-string "#j:undefined")))
   (test (not (symbolp val)))
   (test (not (consp val)))
-  (test (eq (typeof val) #j"undefined"))
+  (test (eq (jscl/ffi:typeof val) #j"undefined"))
   (test (eq val #j:undefined)))
 
 ;;; clstring
 
 ;; JS string -> CL string
-(test (stringp (clstring #j"hello")))
-(test (string= (clstring #j"hello") "hello"))
-(test (string= (clstring #j"") ""))
+(test (stringp (jscl/ffi:clstring #j"hello")))
+(test (string= (jscl/ffi:clstring #j"hello") "hello"))
+(test (string= (jscl/ffi:clstring #j"") ""))
 
 ;; CL string passes through
-(test (let ((s "world")) (eq (clstring s) s)))
-(test (string= (clstring "abc") "abc"))
+(test (let ((s "world")) (eq (jscl/ffi:clstring s) s)))
+(test (string= (jscl/ffi:clstring "abc") "abc"))
 
 ;; type error for non-strings
-(test (handler-case (progn (clstring 42) nil)
+(test (handler-case (progn (jscl/ffi:clstring 42) nil)
         (type-error () t)))
-(test (handler-case (progn (clstring #j:true) nil)
+(test (handler-case (progn (jscl/ffi:clstring #j:true) nil)
         (type-error () t)))
 
 ;; clstring as a function value
-(test (string= (funcall #'clstring #j"test") "test"))
+(test (string= (funcall #'jscl/ffi:clstring #j"test") "test"))
 
 ;;; jsbool
 
 ;; nil -> #j:false, anything else -> #j:true
-(test (eq (jsbool nil) #j:false))
-(test (eq (jsbool t) #j:true))
-(test (eq (jsbool 42) #j:true))
-(test (eq (jsbool "hello") #j:true))
+(test (eq (jscl/ffi:jsbool nil) #j:false))
+(test (eq (jscl/ffi:jsbool t) #j:true))
+(test (eq (jscl/ffi:jsbool 42) #j:true))
+(test (eq (jscl/ffi:jsbool "hello") #j:true))
 
 ;; jsbool as a function value
-(test (eq (funcall #'jsbool nil) #j:false))
-(test (eq (funcall #'jsbool t) #j:true))
+(test (eq (funcall #'jscl/ffi:jsbool nil) #j:false))
+(test (eq (funcall #'jscl/ffi:jsbool t) #j:true))
 
 ;;; clbool
 
 ;; #j:true -> t, #j:false/#j:null/#j:undefined -> nil
-(test (eq (clbool #j:true) t))
-(test (eq (clbool #j:false) nil))
-(test (eq (clbool #j:null) nil))
-(test (eq (clbool #j:undefined) nil))
+(test (eq (jscl/ffi:clbool #j:true) t))
+(test (eq (jscl/ffi:clbool #j:false) nil))
+(test (eq (jscl/ffi:clbool #j:null) nil))
+(test (eq (jscl/ffi:clbool #j:undefined) nil))
 
 ;; CL booleans pass through
-(test (eq (clbool t) t))
-(test (eq (clbool nil) nil))
+(test (eq (jscl/ffi:clbool t) t))
+(test (eq (jscl/ffi:clbool nil) nil))
 
 ;; type error for non-booleans
-(test (handler-case (progn (clbool 42) nil)
+(test (handler-case (progn (jscl/ffi:clbool 42) nil)
         (type-error () t)))
 
 ;; clbool as a function value
-(test (eq (funcall #'clbool #j:true) t))
-(test (eq (funcall #'clbool #j:false) nil))
+(test (eq (funcall #'jscl/ffi:clbool #j:true) t))
+(test (eq (funcall #'jscl/ffi:clbool #j:false) nil))
 
 
 (test
  (string= (write-to-string
 	   (let ((arr (vector #j"foo" #j"bar")))
-	     ((oget arr "map") (lambda (x &rest ignored) 1))))
+	     ((jscl/ffi:oget arr "map") (lambda (x &rest ignored) 1))))
 	"#(1 1)"))
 
 ;;; eval handles JS value literals (exercises the data-vector path)
@@ -192,16 +192,16 @@
 
 ;;; compile-toplevel handles JS value literals (exercises the dump path)
 (test (search "true"
-              (with-compilation-environment
-                (compile-toplevel #j:true))))
+              (jscl::with-compilation-environment
+                (jscl::compile-toplevel #j:true))))
 (test (search "false"
-              (with-compilation-environment
-                (compile-toplevel #j:false))))
+              (jscl::with-compilation-environment
+                (jscl::compile-toplevel #j:false))))
 (test (search "null"
-              (with-compilation-environment
-                (compile-toplevel #j:null))))
+              (jscl::with-compilation-environment
+                (jscl::compile-toplevel #j:null))))
 (test (search "undefined"
-              (with-compilation-environment
-                (compile-toplevel #j:undefined))))
+              (jscl::with-compilation-environment
+                (jscl::compile-toplevel #j:undefined))))
 
 ;;; EOF

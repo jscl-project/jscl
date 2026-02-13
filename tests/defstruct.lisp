@@ -10,8 +10,8 @@
   (and (= (length v1) (length v2))
        (every #'identity
               (mapcar (lambda (e1 e2) (equal e1 e2))
-                      (vector-to-list v1)
-                      (vector-to-list v2)))))
+                      (coerce v1 'list)
+                      (coerce v2 'list)))))
 
 ;;;
 (defstruct (frob-01-list :named (:type list)
@@ -594,12 +594,12 @@
   ;; struct printing with only numbers
   (string-equal
     (format nil "~S" (make-print-struct-test :a 1 :b 2 :c 3))
-    "#S(JSCL::PRINT-STRUCT-TEST :A 1 :B 2 :C 3)"))
+    "#S(JSCL-TESTS::PRINT-STRUCT-TEST :A 1 :B 2 :C 3)"))
 (test
   ;; struct printing with some strings in it
   (string-equal
     (format nil "~S" (make-print-struct-test :a "hello" :b "world" :c 3))
-    "#S(JSCL::PRINT-STRUCT-TEST :A \"hello\" :B \"world\" :C 3)"))
+    "#S(JSCL-TESTS::PRINT-STRUCT-TEST :A \"hello\" :B \"world\" :C 3)"))
 
 ;;;
 (defstruct (print-function-struct-test
@@ -646,10 +646,10 @@
 (defparameter *redef-struct-p-2* #'redef-struct-test-p)
 (test (string-equal
        (format nil "~S" *redef-struct-2*)
-       "#S(JSCL::REDEF-STRUCT-TEST :B 1 :C 2)"))
+       "#S(JSCL-TESTS::REDEF-STRUCT-TEST :B 1 :C 2)"))
 (test (string-equal
        (format nil "~S" *redef-struct-1*)
-       "#<JSCL::REDEF-STRUCT-TEST (OBSOLETE) :A 1 :B 2 :C 3>"))
+       "#<JSCL-TESTS::REDEF-STRUCT-TEST (OBSOLETE) :A 1 :B 2 :C 3>"))
 
 ;;; New predicate is generated after redefinition
 (test (not (redef-struct-test-p *redef-struct-1*)))
@@ -662,7 +662,7 @@
         (not warning-issued)))
 (test (string-equal
        (format nil "~S" (make-redef-struct-test :c 3))
-       "#S(JSCL::REDEF-STRUCT-TEST :B 3 :C 3)"))
+       "#S(JSCL-TESTS::REDEF-STRUCT-TEST :B 3 :C 3)"))
 
 ;;; Redefinition does not change layout, predicate remain valid
 (test (not (redef-struct-test-p *redef-struct-1*)))
@@ -685,8 +685,8 @@
 ;;; Test via load (progn).
 
 #+node
-(let* ((tmpdir (clstring (funcall (oget (require "os") "tmpdir"))))
-       (file (concat (clstring (#j:Fs:mkdtempSync (jsstring (concat tmpdir "/jscl-test-"))))
+(let* ((tmpdir (jscl/ffi:clstring (funcall (jscl/ffi:oget (require "os") "tmpdir"))))
+       (file (concatenate 'string (jscl/ffi:clstring (#j:Fs:mkdtempSync (jscl/ffi:jsstring (concatenate 'string tmpdir "/jscl-test-"))))
                      "/issue-593.lisp")))
   (with-open-file (s file :direction :output :if-exists :supersede)
                   (write-string "(progn
@@ -701,8 +701,8 @@
 ;;; Each form is compiled and executed individually, so the first
 ;;; defstruct's runtime registration makes it visible to the second.
 #+node
-(let* ((tmpdir (clstring (funcall (oget (require "os") "tmpdir"))))
-       (file (concat (clstring (#j:Fs:mkdtempSync (jsstring (concat tmpdir "/jscl-test-"))))
+(let* ((tmpdir (jscl/ffi:clstring (funcall (jscl/ffi:oget (require "os") "tmpdir"))))
+       (file (concatenate 'string (jscl/ffi:clstring (#j:Fs:mkdtempSync (jscl/ffi:jsstring (concatenate 'string tmpdir "/jscl-test-"))))
                      "/issue-593-sep.lisp")))
   (with-open-file (s file :direction :output :if-exists :supersede)
                   (write-string "(defstruct issue-593-load-sep-foo)" s)
@@ -717,10 +717,10 @@
 ;;; information at compile time (:compile-toplevel) so that a
 ;;; subsequent defstruct in the same file can use :include.
 #+node
-(let* ((tmpdir (clstring (funcall (oget (require "os") "tmpdir"))))
-       (dir (clstring (#j:Fs:mkdtempSync (jsstring (concat tmpdir "/jscl-compile-")))))
-       (src (concat dir "/issue-593-ct.lisp"))
-       (js  (concat src ".js")))
+(let* ((tmpdir (jscl/ffi:clstring (funcall (jscl/ffi:oget (require "os") "tmpdir"))))
+       (dir (jscl/ffi:clstring (#j:Fs:mkdtempSync (jscl/ffi:jsstring (concatenate 'string tmpdir "/jscl-compile-")))))
+       (src (concatenate 'string dir "/issue-593-ct.lisp"))
+       (js  (concatenate 'string src ".js")))
   (with-open-file (s src :direction :output :if-exists :supersede)
                   (write-string "(defstruct issue-593-ct-foo)" s)
                   (terpri s)

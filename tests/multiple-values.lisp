@@ -410,7 +410,7 @@
   (test (= 5 (funcall jsfn 5))))
 
 ;;; oget retrieves property correctly
-(test (= 0 ((oget (new #j:Date 0) "getTime"))))
+(test (= 0 ((jscl/ffi:oget (jscl/ffi:new #j:Date 0) "getTime"))))
 
 
 ;;;; =============================================

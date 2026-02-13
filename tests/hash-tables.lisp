@@ -92,7 +92,7 @@
 (test
  (equal
   (let* ((ht (temp-hash-table :fill t))
-         (ht-copy (copy-hash-table ht))
+         (ht-copy (jscl::copy-hash-table ht))
          (map nil))
     (maphash
      (lambda (k1 v1)
@@ -111,7 +111,7 @@
                                           (symbol-name key)
                                           key)))
          '(one-key two-key set-difference multiple-value-bind :test "small string"))
-    (setq ht-copy (copy-hash-table ht))
+    (setq ht-copy (jscl::copy-hash-table ht))
     (maphash
      (lambda (k1 v1)
        (let ((v2 (gethash k1 ht-copy)))
@@ -145,7 +145,7 @@
   (test (equal 'bar (setf (gethash "123" ht) 'bar)))
   (test (equal 'foo (gethash 123 ht)))
   (test (equal 'bar (gethash "123" ht)))
-  (test (eq 2 (length (hash-table-keys ht)))))
+  (test (eq 2 (length (jscl::hash-table-keys ht)))))
 
 ;;; SXHASH
 

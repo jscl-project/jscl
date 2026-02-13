@@ -284,14 +284,14 @@
 (defclass loops-class (standard-class) ())
 (defclass flavors-class (standard-class) ())
 
-(defmethod compute-class-precedence-list ((class loops-class))
+(defmethod jscl:compute-class-precedence-list ((class loops-class))
   (append (remove-duplicates
            (depth-first-preorder-superclasses* class)
            :from-end nil)
           (list (find-class 'standard-object)
                 (find-class 't))))
 
-(defmethod compute-class-precedence-list ((class flavors-class))
+(defmethod jscl:compute-class-precedence-list ((class flavors-class))
   (append (remove-duplicates
            (depth-first-preorder-superclasses* class)
            :from-end t)
@@ -301,8 +301,8 @@
 (defun depth-first-preorder-superclasses* (class)
   (if (eq class (find-class 'standard-object))
       ()
-      (cons class (mapappend #'depth-first-preorder-superclasses*
-                             (jscl:class-direct-superclasses class)))))
+      (cons class (mapcan #'depth-first-preorder-superclasses*
+                          (jscl:class-direct-superclasses class)))))
 
 
 
@@ -318,13 +318,13 @@
 
 (test (equal '(q-flavors s a b r c standard-object t)
              (mapcar (lambda (x) (class-name x))
-                     (class-precedence-list (find-class 'q-flavors)))))
+                     (jscl:class-precedence-list (find-class 'q-flavors)))))
 
 (test (equal '(q-loops s b r a c standard-object t)
-             (mapcar (lambda (x) (class-name x)) (class-precedence-list (find-class 'q-loops)))))
+             (mapcar (lambda (x) (class-name x)) (jscl:class-precedence-list (find-class 'q-loops)))))
 
 (test (equal '(q-clos s r a c b standard-object t)
-             (mapcar (lambda (x) (class-name x)) (class-precedence-list (find-class 'q-clos)))))
+             (mapcar (lambda (x) (class-name x)) (jscl:class-precedence-list (find-class 'q-clos)))))
 
 
 

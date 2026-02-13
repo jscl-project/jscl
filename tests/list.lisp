@@ -317,17 +317,13 @@
 
 
 ;;; SORT
-#+jscl
-(test 
- (equal (apply 'concat
-               (sort (vector-to-list "cdbaxaybzcd") #'char-lessp))
-        "aabbccddxyz"))
+(test
+ (string= (sort (copy-seq "cdbaxaybzcd") #'char-lessp)
+          "aabbccddxyz"))
 
-#+jscl
-(test 
- (let ((sorted (apply 'concat
-                      (sort (vector-to-list "cdbaxaybzcd") #'char-lessp))))
-     (equal (remove-duplicates sorted :test #'char-equal :from-end t) "abcdxyz")))
+(test
+ (let ((sorted (sort (copy-seq "cdbaxaybzcd") #'char-lessp)))
+     (string= (remove-duplicates sorted :test #'char-equal :from-end t) "abcdxyz")))
 
 (test 
  (equal (sort '((1 2 3) (4 5 6) (7 8 9))  #'> :key #'car)
