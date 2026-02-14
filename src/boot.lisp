@@ -512,7 +512,7 @@
     ((eq type1 type2)
      (values t t))
     ((eq type2 'number)
-     (values (and (member type1 '(fixnum integer)) t)
+     (values (and (member type1 '(fixnum integer float real rational)) t)
              t))
     (t
      (values nil nil))))
@@ -608,6 +608,9 @@
            (if (and (listp object) (eq (car object) 'lambda))
                (compile nil object)
                (fdefinition object)))
+          ((and (numberp object)
+                (member result-type '(float single-float double-float short-float long-float)))
+           object)
           (t (fail)))))
 
 ;;; EOF
