@@ -19,10 +19,7 @@
 (defpackage :jscl-xc
   (:use :cl)
   (:export #:bootstrap
-           #:build-node-repl
-	   #:build-web-repl
-	   #:build-web-worker-repl
-	   #:build-deno-repl))
+           #:build-node-repl))
 
 (in-package :jscl-xc)
 
@@ -287,43 +284,13 @@ Works in both SBCL (Stage 0) and JSCL (Stage 1)."
           (push (concatenate 'string dir entry) result))))
     (nreverse result)))
 
-(defun build-web-repl (output-directory)
-  "Build web REPL into OUTPUT-DIRECTORY."
-  (let ((*features* (list* :jscl-target *features*))
-        (*package* (find-package "JSCL-XC"))
-        (*readtable* *jscl-xc-readtable*))
-    (copy-asset "web/index.html" "index.html" output-directory)
-    (copy-asset "web/style.css" "style.css" output-directory)
-    (copy-asset "node_modules/jquery/dist/jquery.min.js" "jquery.js" output-directory)
-    (copy-asset "node_modules/jq-console/lib/jqconsole.js" "jqconsole.js" output-directory)
-    (jscl-xc::compile-application (list (source-path "repl.lisp" :directory '(:relative "web")))
-                               (concatenate 'string output-directory "jscl-web.js"))))
-
 (defun build-node-repl (output-directory &optional (jscl-name "jscl"))
   "Build Node.js REPL into OUTPUT-DIRECTORY, depending on JSCL-NAME module."
-  (let ((*package* (find-package "JSCL-XC"))
+  (let ((*features* (list* :jscl-target *features*))
+        (*package* (find-package "JSCL-XC"))
         (*readtable* *jscl-xc-readtable*))
     (jscl-xc::compile-application (list (source-path "node.lisp" :directory '(:relative "node")))
                                (concatenate 'string output-directory jscl-name "-node.js")
                                :shebang t :place "" :jscl-name (concatenate 'string "./" jscl-name))))
-
-(defun build-web-worker-repl (output-directory)
-  "Build web worker REPL into OUTPUT-DIRECTORY."
-  (let ((*features* (list* :jscl-target *features*))
-        (*package* (find-package "JSCL-XC"))
-        (*readtable* *jscl-xc-readtable*))
-    (copy-asset "worker/index.html" "worker.html" output-directory)
-    (copy-asset "worker/main.js" "main.js" output-directory)
-    (copy-asset "worker/service-worker.js" "service-worker.js" output-directory)
-    (jscl-xc::compile-application (list (source-path "worker.lisp" :directory '(:relative "worker")))
-                               (concatenate 'string output-directory "jscl-worker.js"))))
-
-(defun build-deno-repl (output-directory)
-  "Build Deno REPL into OUTPUT-DIRECTORY."
-  (let ((*features* (list* :jscl-target *features*))
-        (*package* (find-package "JSCL-XC"))
-        (*readtable* *jscl-xc-readtable*))
-    (jscl-xc::compile-application (list (source-path "repl.lisp" :directory '(:relative "deno")))
-                               (concatenate 'string output-directory "jscl-deno.js"))))
 
 ;;; EOF

@@ -364,17 +364,43 @@ All errors are caught and report to *ERROR-OUTPUT*."
 (when (not (eq (typeof (%js-vref "WorkerGlobalScope")) #j"undefined"))
   (push :web-worker *features*))
 
-(defun welcome-message (&key (html nil))
-  (format t "Welcome to ~a (version ~a ~a)~%~%"
-          (lisp-implementation-type)
-          (lisp-implementation-version)
-          (compilation-notice))
-  (format t "JSCL is a Common Lisp implementation on Javascript.~%")
-  (if html
-      (%write-string
-       (format nil "For more information, visit the project page at <a href=\"https://github.com/jscl-project/jscl\">GitHub</a>.~%~%")
-       nil)
-      (format t "For more information, visit the project page at https://github.com/jscl-project/jscl.~%~%")))
+(defun welcome-message-items ()
+  "Return the welcome message as a list of markup items.
+Each item is one of:
+  (:str STRING)      - plain text
+  (:bold STRING)     - emphasized text
+  (:link TEXT URL)   - hyperlink
+  (:newline)         - line break"
+  `((:bold ,(format nil "Welcome to ~a" (lisp-implementation-type)))
+    (:str ,(format nil " (version ~a ~a)"
+                   (lisp-implementation-version)
+                   (compilation-notice)))
+    (:newline) (:newline)
+    (:str "JSCL is a Common Lisp implementation on Javascript.")
+    (:newline)
+    (:str "For more information, visit the project page at ")
+    (:link "https://github.com/jscl-project/jscl"
+           "https://github.com/jscl-project/jscl")
+    (:str ".")
+    (:newline) (:newline)))
+
+(defun welcome-message ()
+  "Print the welcome message as plain text to *standard-output*."
+  (dolist (item (welcome-message-items))
+    (ecase (first item)
+      (:str      (write-string (second item)))
+      (:bold     (write-string (second item)))
+      (:link     (write-string (second item)))
+      (:newline  (terpri)))))
+
+(defun get-repl-prompt ()
+  "Return a prompt string for the REPL based on *package*."
+  (let ((name (reduce (lambda (s1 s2)
+                        (if (< (string-length s1) (string-length s2))
+                            s1 s2))
+                      (package-nicknames *package*)
+                      :initial-value (package-name *package*))))
+    (concatenate 'string name "> ")))
 
 ;;; Decides whether the input the user has entered is completed or we
 ;;; should accept one more line.

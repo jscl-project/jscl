@@ -443,13 +443,6 @@
 (defvar *user-package*
   (make-package "COMMON-LISP-USER" :use (list (find-package "CL")) :nicknames '("CL-USER")))
 
-(defun package-name-for-prompt (package)
-  "Return the shortest name or nickname of PACKAGE."
-  (reduce (lambda (s1 s2)
-            (if (< (string-length s1) (string-length s2))
-                s1 s2))
-          (package-nicknames package)
-          :initial-value (package-name package)))
 
 (defun freeze-package (package)
   (let ((package (find-package-or-fail package)))

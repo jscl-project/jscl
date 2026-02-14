@@ -66,9 +66,7 @@ case "$HOST" in
         sbcl --non-interactive \
              --load jscl.lisp \
              --eval "(jscl-xc:bootstrap \"$OUTPUT_DIR\" \"jscl\" :verbose $VERBOSE)" \
-             --eval "(jscl-xc:build-node-repl \"$OUTPUT_DIR\")" \
-             --eval "(jscl-xc:build-web-repl \"$OUTPUT_DIR\")" \
-             --eval "(jscl-xc:build-deno-repl \"$OUTPUT_DIR\")"
+             --eval "(jscl-xc:build-node-repl \"$OUTPUT_DIR\")"
         ;;
     jscl)
         tmpfile=$(mktemp /tmp/jscl-make.XXXXXX.lisp)
@@ -76,15 +74,27 @@ case "$HOST" in
 (load "jscl.lisp")
 (jscl-xc:bootstrap "$OUTPUT_DIR" "jscl" :verbose $VERBOSE)
 (jscl-xc:build-node-repl "$OUTPUT_DIR")
-(jscl-xc:build-web-repl "$OUTPUT_DIR")
-(jscl-xc:build-deno-repl "$OUTPUT_DIR")
 EOF
         node --stack-size=65536 "$JSCL_PATH" "$tmpfile"
         rm -f "$tmpfile"
         ;;
 esac
 
+# Build web and deno REPLs using the bootstrapped JSCL
+tmpfile=$(mktemp /tmp/jscl-repl-build.XXXXXX.lisp)
+cat > "$tmpfile" << EOF
+(load "web/build.lisp")
+(build-web-repl "$OUTPUT_DIR")
+(load "deno/build.lisp")
+(build-deno-repl "$OUTPUT_DIR")
+(load "worker/build.lisp")
+(build-worker-repl "$OUTPUT_DIR")
+EOF
+node --stack-size=65536 "${OUTPUT_DIR}jscl-node.js" "$tmpfile"
+rm -f "$tmpfile"
+
 echo "Built: ${OUTPUT_DIR}jscl.js" >&2
 echo "Built: ${OUTPUT_DIR}jscl-node.js" >&2
 echo "Built: ${OUTPUT_DIR}jscl-web.js" >&2
 echo "Built: ${OUTPUT_DIR}jscl-deno.js" >&2
+echo "Built: ${OUTPUT_DIR}jscl-worker.js" >&2
