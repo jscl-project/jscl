@@ -456,6 +456,17 @@
 (test (equal '(3)
              (multiple-value-list (+ 1 (nth-value 0 (values 2 99))))))
 
+;;; A function that calls something returning multiple values but
+;;; itself returns a single value should not leak the inner multiple
+;;; values through multiple-value-bind.
+(defun mv-leak-test-fn ()
+  (funcall 'values 1 2)
+  3)
+
+(test (equal '(3 nil)
+             (multiple-value-bind (a b) (mv-leak-test-fn)
+               (list a b))))
+
 ;;; The stale _mv bug caused defstruct to fail because the setf of
 ;;; dsd-constructors received MAKE-ES (from intern inside %symbolize)
 ;;; instead of the actual list of constructor descriptors.

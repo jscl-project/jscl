@@ -55,6 +55,13 @@
 ;;; function call.
 (defvar *multiple-value-p* nil)
 
+;;; When in multiple-value position, wrap JSEXPR in a values1() call
+;;; to clear _mv signaling a single return value.  In non-MV position,
+;;; return JSEXPR unchanged.
+(defun value1 (jsexpr)
+  (if *multiple-value-p*
+      `(call-internal |values1| ,jsexpr)
+      jsexpr))
 
 
 ;;; Environment
@@ -681,7 +688,7 @@
 
 
 (define-compilation quote (sexp)
-  (literal sexp))
+  (value1 (literal sexp)))
 
 (define-compilation %while (pred &rest body)
   `(selfcall
@@ -1772,10 +1779,10 @@
          (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
            (cond
              ((and b (not (member 'special (binding-declarations b))))
-              (binding-value b))
+              (value1 (binding-value b)))
              ((or (keywordp sexp)
                   (and b (member 'constant (binding-declarations b))))
-              `(get ,(convert `',sexp) "value"))
+              (value1 `(get ,(convert `',sexp) "value")))
              (t
               (convert `(symbol-value ',sexp))))))
         ((listp sexp)
@@ -1792,7 +1799,8 @@
               (apply (gethash name *builtins*) args))
              (t
               (compile-funcall name args)))))
-        (t (literal sexp))))))
+        (t
+         (value1 (literal sexp)))))))
 
 
 (defun convert-block (sexps &optional return-last-p decls-allowed-p)
@@ -1924,7 +1932,7 @@
 ;;;
 (defun eval-toplevel (sexp)
   (let ((*compiler-process-mode* 'eval)
-        (result nil))
+        (result-mv nil))
     (process-toplevel-form sexp
       (lambda (form last-p)
         ;; Compile and execute each form immediately (CLHS 3.2.3.1)
@@ -1937,9 +1945,10 @@
                  (jscode (with-output-to-string (*js-output*)
                            (js ast)))
                  (literals (list-to-vector (nreverse (mapcar #'car *literal-table*)))))
-            #+jscl (setq result (js-eval jscode literals))
+            #+jscl (setq result-mv
+                         (multiple-value-list (js-eval jscode literals)))
             #-jscl (error "eval-toplevel: cannot execute in cross-compiler"))))
       t)
-    result))
+    (values-list result-mv)))
 
 #+jscl (fset 'eval #'eval-toplevel)

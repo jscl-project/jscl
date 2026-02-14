@@ -56,6 +56,13 @@ internals.values = function (...args) {
   return args.length > 0 ? args[0] : nil;
 };
 
+// Optimized version for returning a single value. Resets _mv to
+// indicate that no multiple values were produced.
+internals.values1 = function (x) {
+  internals._mv = null;
+  return x;
+};
+
 internals.mvcall = function(fn, ...args) {
   // Reset _mv before calling fn so that stale multiple values from
   // a prior form don't leak through. After the call, _mv will be
