@@ -215,7 +215,7 @@
   (test (equal (assoc  3 alist :test-not #'=) '(1 . 2)))
   (test (equal (rassoc 4 alist :test-not #'=) '(1 . 2)))
   (test (equal (assoc  1 alist :key (lambda (x) (/ x 3))) '(3 . 4)))
-  (test (equal (rassoc 2 alist :key (lambda (x) (/ x 2))) '(3 . 4)))) 
+  (test (equal (rassoc 2 alist :key (lambda (x) (/ x 2))) '(3 . 4))))
 
 ;;; MEMBER
 (test (equal (member 2 '(1 2 3)) '(2 3)))
@@ -308,24 +308,25 @@
 ;;; set-difference test
 (let ((lst1 (list "A" "b" "C" "d"))
       (lst2 (list "a" "B" "C" "d")))
-    (test (equal 
+    (test (equal
            (list
             (equal (set-difference lst1 lst2) (list "d" "C" "b" "A"))
             (equal (set-difference lst1 lst2 :test 'equal) (list "b" "A"))
             (equal (set-difference lst1 lst2 :test #'string=)  (list "b" "A")))
-           (list t t t)))) 
+           (list t t t))))
 
 
 ;;; SORT
 (test
- (string= (sort (copy-seq "cdbaxaybzcd") #'char-lessp)
+ (string= (map 'string 'identity (sort (coerce (copy-seq "cdbaxaybzcd") 'list) #'char-lessp))
           "aabbccddxyz"))
 
 (test
- (let ((sorted (sort (copy-seq "cdbaxaybzcd") #'char-lessp)))
-     (string= (remove-duplicates sorted :test #'char-equal :from-end t) "abcdxyz")))
+ (let ((sorted (sort (coerce (copy-seq "cdbaxaybzcd") 'list) #'char-lessp)))
+   (string= (map 'string 'identity (remove-duplicates sorted :test #'char-equal :from-end t))
+            "abcdxyz")))
 
-(test 
+(test
  (equal (sort '((1 2 3) (4 5 6) (7 8 9))  #'> :key #'car)
         '((7 8 9) (4 5 6) (1 2 3))))
 
@@ -339,9 +340,9 @@
  (equal (nunion (list 'a 'b 'c) (list 'f 'a 'd))
         '(C B F A D)))
 
-(test 
+(test
  (equal (union '((x 5) (y 6)) '((z 2) (x 4))
-               :key #'car 
+               :key #'car
                :test #'equal)
         '((Y 6) (Z 2) (X 4))))
 (test
