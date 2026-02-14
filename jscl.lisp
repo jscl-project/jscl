@@ -228,12 +228,9 @@ Works in both SBCL (Stage 0) and JSCL (Stage 1)."
 (defun bootstrap (output-directory prefix &key verbose)
   "Compile JSCL to produce PREFIX.js in OUTPUT-DIRECTORY."
   (let ((jscl-path (concatenate 'string output-directory prefix ".js"))
-        #+jscl (start-time (#j:Date:now))
         ;; Bind compilation settings - :jscl-xc is active in both stages
         (*features* (list* :jscl-target *features*))
         (*package* (find-package "JSCL-XC")))
-
-    #+jscl (format t "~%=== JSCL Stage 1 Bootstrap ===~%")
 
     (ensure-directories-exist output-directory)
 
@@ -260,10 +257,6 @@ Works in both SBCL (Stage 0) and JSCL (Stage 1)."
         (write-line "})();" out)))
 
     (jscl-xc::report-undefined-functions)
-
-    #+jscl
-    (format t "~%=== Stage 1 Bootstrap Complete ===~%Time: ~,2f seconds~%"
-            (/ (- (#j:Date:now) start-time) 1000.0))
 
     jscl-path))
 
