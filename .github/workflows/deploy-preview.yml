@@ -27,7 +27,10 @@ jobs:
     - name: Install SBCL
       run: sudo apt-get install sbcl
 
-    - name: Build JSCL
+    # We publish the SBCL-built version until the bootstrap pipeline
+    # is more mature. Once bootstrap is stable, we can switch to
+    # ./bootstrap.sh to publish the self-hosted build.
+    - name: Build JSCL with SBCL
       run: ./make.sh
 
     - name: Deploy preview to Netlify

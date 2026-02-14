@@ -19,7 +19,6 @@
     "test": "tests"
   },
   "scripts": {
-    "build": "./make.sh",
     "test": "./run-tests.sh",
     "serve": "serve dist",
     "prettier": "prettier --write .",
