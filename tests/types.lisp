@@ -73,6 +73,8 @@
   NIL
   ((19 CONS))))
 
+;;; JSCL-specific: type-of returns different results for floats/bignums
+#+jscl
 (test
  (mv-eql
   (let ((universum (list 0 1  1.1  1. 0.0  1.
@@ -94,6 +96,8 @@
   (T T T T T T T T T T T NIL T T NIL) ))
 
 
+;;; JSCL-specific: type-of for strings returns (STRING n) not (SIMPLE-BASE-STRING n)
+#+jscl
 (test
  (mv-eql
   (let ((universum (list "string"
@@ -414,6 +418,8 @@
      (typep (list 1 2 3) `(,sym))))
   t t t nil))
 
+;;; JSCL-specific: redefine standard-char (not allowed on SBCL due to package lock)
+#+jscl
 (deftype standard-char ()
   '(member
     #\Space #\Newline
