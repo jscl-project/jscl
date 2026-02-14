@@ -109,6 +109,8 @@
                     (:constructor sbt-02-con (&key ((:foo a) 32))))
   a)
 
+;; Use EVERY to normalize the result to T (SBCL's FBOUNDP returns the
+;; function object, not T).
 (test
  (mv-eql
   (values

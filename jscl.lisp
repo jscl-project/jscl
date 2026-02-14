@@ -231,6 +231,7 @@ Works in both SBCL (Stage 0) and JSCL (Stage 1)."
 
     (ensure-directories-exist output-directory)
 
+    ;; Reset the environment so bootstrap can be called multiple times.
     (setq jscl-xc::*environment* (jscl-xc::make-lexenv))
     (setq jscl-xc::*global-environment* jscl-xc::*environment*)
 

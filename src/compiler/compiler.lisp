@@ -588,13 +588,6 @@
 ;;; this symbol.
 (defvar *magic-unquote-marker* (gensym "MAGIC-UNQUOTE"))
 
-;; TODO: I don't think this is needed? the magic unquote is only added during the dump-global-environment
-;; #-jscl-target
-;; (setf (macro-function *magic-unquote-marker*)
-;;       (lambda (form &optional environment)
-;;         (declare (ignore environment))
-;;         (second form)))
-
 (defvar *literal-table*)
 (defvar *literal-counter*)
 

@@ -6,7 +6,6 @@
 *.lib
 \#*
 jscl.js
-jscl-tests.js
 .tmp/
 
 /repl-node.js

@@ -44,7 +44,7 @@
 ;;;; so the compiler can recognize and dump FFI literals.
 
 ;;; In JSCL (Stage 1), native FFI is already available. In the host
-;;; (SBCL), we need compatibility types and reader macros.
+;;; Lisp, we need compatibility types and reader macros.
 #-jscl-target
 (progn
   (defstruct js-value)

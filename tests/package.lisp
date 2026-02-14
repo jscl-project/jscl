@@ -143,6 +143,7 @@
 
 (test (eq (eval '(in-package #:cl-user)) (find-package '#:cl-user)))
 
+;; The test above changed *package* to CL-USER; switch back.
 (in-package :jscl-tests)
 
 ;;; Keywords are self-evaluating

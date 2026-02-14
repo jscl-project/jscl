@@ -42,7 +42,7 @@
                     (setq expander `(quote ,expander)))
 
                   `(eval-when (:compile-toplevel :execute)
-                     (%compile-defmacro ',name ,expander)) ;
+                     (%compile-defmacro ',name ,expander))
 
                   )))))
     
