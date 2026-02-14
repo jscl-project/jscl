@@ -228,17 +228,17 @@ The correct value can be used in any expressions, as is, at your discretion
             :second))
         (eq (read-from-string "#!x") :SECOND)))
 
-;; make-dispatch-macro-character creates a new dispatch character
+;; make-dispatch-macro-character is idempotent on existing dispatch chars
 #+jscl
 (test (let* ((rt (copy-readtable))
              (*readtable* rt))
-        (make-dispatch-macro-character #\?)
-        (set-dispatch-macro-character #\? #\!
+        (make-dispatch-macro-character #\#)
+        (set-dispatch-macro-character #\# #\!
           (lambda (stream char arg)
             (declare (ignore char arg))
             (let ((obj (read stream t nil t)))
               (list :question obj))))
-        (equal (read-from-string "?!hello") '(:QUESTION HELLO))))
+        (equal (read-from-string "#!hello") '(:QUESTION HELLO))))
 
 ;; Symbols with names matching Object.prototype properties are not
 ;; confused with JS functions (prototype pollution regression)

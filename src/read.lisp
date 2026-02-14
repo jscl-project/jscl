@@ -47,6 +47,8 @@
 #+jscl-target
 (defun make-dispatch-macro-character (char &optional non-terminating-p (readtable *readtable*))
   (declare (ignore non-terminating-p))
+  (unless (char= char #\#)
+    (error "JSCL only supports #\\# as a dispatch macro character, not ~S" char))
   (let ((dt (readtable-dispatch-table readtable)))
     (unless (assoc char dt)
       (setf (readtable-dispatch-table readtable)
