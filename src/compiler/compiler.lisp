@@ -442,11 +442,14 @@
                        (throw (+ "Unknown keyword argument " (property (arg i) "name"))))))))))))
 
 (defun parse-lambda-list (ll)
-  (values (ll-required-arguments ll)
-          (ll-optional-arguments ll)
-          (ll-keyword-arguments  ll)
-          (ll-rest-argument      ll)
-          (ll-allow-other-keys   ll)))
+  (let ((required (ll-required-arguments ll))
+        (optional (ll-optional-arguments ll))
+        (keyword  (ll-keyword-arguments  ll))
+        (rest     (ll-rest-argument      ll)))
+    (dolist (arg (append required optional keyword (when rest (list rest))))
+      (unless (symbolp arg)
+        (error "~S is not a valid parameter name." arg)))
+    (values required optional keyword rest (ll-allow-other-keys ll))))
 
 ;;; Process BODY for declarations and/or docstrings. Return as
 ;;; multiple values the BODY without docstrings or declarations, the

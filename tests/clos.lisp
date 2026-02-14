@@ -1,8 +1,8 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
 
-(test (string= "#<STANDARD-CLASS T>"  (write-to-string (find-class 't))))
-(test (string= "#<STANDARD-CLASS NULL>"  (write-to-string (find-class 'null))))
+#+jscl (test (string= "#<STANDARD-CLASS T>"  (write-to-string (find-class 't))))
+#+jscl (test (string= "#<STANDARD-CLASS NULL>"  (write-to-string (find-class 'null))))
 
 (defclass obj1 ()
   ((val :initform nil :initarg :value :reader obj-val :writer set-obj-val)))
@@ -72,6 +72,9 @@
                  (setf a 22)
                  (setf b 33)
                  (list (eq a 22) (eq b 33) (eq (screw-ccc ip) 1998.11)))))
+  ;; This test relies on assignment to free variables, which generates
+  ;; full WARNINGs on SBCL.
+  #+jscl
   (test (equal '(1234 abcd t)
                (let ((other (with-slots (aaa bbb) ip
                               (let ((a aaa) (b bbb))
@@ -100,7 +103,8 @@
 
 (defclass mixt (original mixin-1 mixin-2) ())
 
-(defmethod initialize-instance :after ((class mixt))
+(defmethod initialize-instance :after ((class mixt) &rest args)
+  (declare (ignore args))
   (with-slots (thing prop1 prop2) class
     (setf thing 1)
     (setf prop1 2)
@@ -119,7 +123,8 @@
 (defmethod bot-inspect ((item integer)) (list 'built-in-class-integer))
 (defmethod bot-inspect ((item hash-table)) (list 'hash-table-object))
 
-(test (equal '(standard-class) (bot-inspect (find-class 't))))
+;;; In JSCL all classes are standard-class; in SBCL, built-in classes differ
+#+jscl (test (equal '(standard-class) (bot-inspect (find-class 't))))
 (test (equal '(hash-table-object) (bot-inspect (make-hash-table))))
 (test (equal '(built-in-class-integer) (bot-inspect 123)))
 

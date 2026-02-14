@@ -116,6 +116,7 @@
         (undefined-function (c)
           (eq (cell-error-name c) 'test-undefined-function))))
 
+#+jscl
 (test (handler-case
           (progn test-unbound-variable nil)
         (unbound-variable (c)

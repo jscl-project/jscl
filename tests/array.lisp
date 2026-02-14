@@ -16,7 +16,7 @@
 
 (test
  (mv-eql
-  (let ((vector (make-array 10 :fill-pointer 1))
+  (let ((vector (make-array 10 :fill-pointer 1 :initial-element nil))
         (new-idx))
     (values
      (dotimes (i 10 new-idx)

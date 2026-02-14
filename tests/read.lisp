@@ -116,7 +116,7 @@
 (test
  (equal
   '(t)
-  (let* 
+  (let*
       ((s1 (read-from-string "#(#b1 #b10 #b11 #b100 #b101 #b110 #b111 #b1000 #b1001 #b1010)")))
     (list
      (equal
@@ -155,26 +155,9 @@
          (multiple-value-bind (num pos) (parse-integer "no-integer" :junk-allowed t)
            (equal (list num pos) '(nil 0))))))
 
-;;;
-;;; other fun glitch's
-;;;
-
-#|
-If you remove comments from the following expression there will be a compilation error.
-actually any errors in the types are caught at the compilation stage.
-The correct value can be used in any expressions, as is, at your discretion
-|#
-
-#|
-(let ((fn 
-        (lambda (#xag #xaf) (list #xaa #xaf))))
-  (funcall fn 1 2))
-|#
-
-;;; the correct value can be used in any expressions, as is, at your discretion
-(let ((fn (lambda (#xaa #xaf) (list #xaa #xaf))))
-  (funcall fn 1 2))
-;;; => (170 175)
+;;; #xaa = 170, #xaf = 175 - numbers are not valid lambda parameters
+(test (= #xaa 170))
+(test (= #xaf 175))
 
 ;;;
 ;;; set-dispatch-macro-character / get-dispatch-macro-character

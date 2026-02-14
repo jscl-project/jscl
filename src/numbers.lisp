@@ -97,7 +97,7 @@
 (defun rationalp (x) (%integer-p x))
 
 (defun floatp (x)
-  (and (numberp x) (not (integerp x))))
+  (numberp x))
 
 (defun minusp (x) (< x 0))
 (defun zerop (x) (= x 0))

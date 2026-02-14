@@ -140,8 +140,6 @@
 
 
 ;;; number float
-;;; wtf: (floatp 0.0) => nil ???
-;;; its bug or feature ???
 (defmethod describe ((obj float) &optional (stream *standard-output*))
   (with-pp-buffer (buf)
     (pp/builtin-baner 'float stream)

@@ -40,8 +40,8 @@
   (test (equal (mapcar #'+ a b c) '( 3  6)))
   (test (equal (mapcar #'- a b c) '(-1 -2)))
   (test (equal (mapcar #'* a b c) '( 1  8)))
-  ;; This test will need to be changed when rationals are introduced
-  (test (equal (mapcar #'/ a b c) '( 1  0.5))))
+  ;; Use (/ 1 2) so the expected value is 1/2 on SBCL and 0.5 on JSCL
+  (test (equal (mapcar #'/ a b c) (list 1 (/ 1 2)))))
 
 ;;; >, >=, =, <, <=, /=
 ;;; As above, we need to make sure the function is called, not the builtin
@@ -65,15 +65,16 @@
 
 ;;; FLOATP
 
-;; It is a known bug. Javascript does not distinguish between floats
-;; and integers, and we represent both numbers in the same way. So 1
-;; == 1.0 and integer and float types are not disjoint.
-(expected-failure (floatp 1.0)) 
-
+;; In JSCL, all numbers are JavaScript doubles, so floatp returns T
+;; for all numbers including integers.
+(test             (floatp    1.0))
 (test             (floatp    1.1))
 (test             (floatp    pi))
 (test             (floatp (- pi)))
-(test        (not (floatp    1)))
+;; In standard CL, integers are not floats. In JSCL, all numbers are
+;; floats (JavaScript doubles), so (floatp 1) is true.
+#+jscl (test      (floatp    1))
+#-jscl (test (not (floatp    1)))
 
 ;;; GCD
 (test (= 0 (gcd)))

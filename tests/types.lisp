@@ -400,12 +400,13 @@
    (typep #(1 2 3) '(array t (3))))
   t t t))
 
-;;; list-length
+;;; *list-length (JSCL-specific type specifier)
+#+jscl
 (test
  (mv-eql
   (let* ((sym (*gensym*))
 	       (form `(deftype ,sym ()
-                  `(or (list-length 0) (list-length 1)))))
+                  `(or (jscl::*list-length 0) (jscl::*list-length 1)))))
     (values
      (eqlt (eval form) sym)
      (typep (list) `(,sym))
@@ -565,10 +566,12 @@
                                                (cons array (cons vector))
                                          ))))))) )
 
+;;; *list-length is a JSCL-specific type specifier
+#+jscl
 (test
  (typep (cons 1 (list 1))
         '(cons (or (eql 1) (eql 2))
-               (or (list-length 0) (list-length 1)))))
+               (or (jscl::*list-length 0) (jscl::*list-length 1)))))
 
 (test (typep "abc" '(array *)))
 
