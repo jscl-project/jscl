@@ -172,7 +172,8 @@
                                (incf index)))
              :peek-char-fn (lambda (eof-error-p)
                              (peek eof-error-p))
-             :kind 'string-input-stream)))))
+             :kind 'string-input-stream
+             :data (lambda () index))))))
 
 ;;; Output streams
 
