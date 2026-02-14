@@ -26,9 +26,12 @@ jobs:
     - name: Install SBCL
       run: sudo apt-get install sbcl
 
-    - name: Build JSCL
-      run: ./make.sh
+    - name: Bootstrap JSCL
+      run: ./bootstrap.sh
 
-    - name: Run tests
-      run: ./run-tests.sh
+    - name: Run tests (Stage 0)
+      run: ./run-tests.sh --jscl=out/jscl-node.js
+
+    - name: Run tests (Stage 1)
+      run: ./run-tests.sh --jscl=dist/jscl-node.js
 
