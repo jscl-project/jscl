@@ -192,17 +192,18 @@
  (equal t
         (numberp (parse-integer (format nil "~d" (expt 10 65))))))
 
-;;; test ASH 
-;;; important note:
-;;; at clhs example (ash  -100000000000000000000000000000000 -100) => -79
-;;; but js op: -100000000000000000000000000000000 >> -100 => 0
-;;;
+;;; test ASH
 (test
- (let ((pattern '(32 16 8 0))
+ (let ((pattern '(32 16 8))
        (result  (mapcar (lambda (x y) (ash x y))
-                        '(16 16 16 -100000000000000000000000000000000)
-                        '(1 0 -1 -100))))
+                        '(16 16 16)
+                        '(1 0 -1))))
    (equal pattern result)))
+
+;;; JSCL-specific: JS bitwise shift gives 0 for this bignum case
+;;; CLHS says (ash -100000000000000000000000000000000 -100) => -79
+#+jscl
+(test (= 0 (ash -100000000000000000000000000000000 -100)))
 
 ;;;(equal '(32 16 8 0)
 ;;;        (mapcar (lambda (x y) (ash x y))
@@ -215,12 +216,9 @@
            (ash #xFFFF 2))))
 
 ;;; test LOG
-(test
- (equal 0 (log 1)))
-(test
- (equal 2 (log 100 10)))
-(test
- (equal 3 (log 8.0 2)))
+(test (zerop (log 1)))
+(test (< (abs (- 2 (log 100 10))) 1e-10))
+(test (< (abs (- 3 (log 8.0 2))) 1e-10))
 
 ;;; test LOGNOT
 (test

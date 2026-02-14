@@ -30,10 +30,13 @@
         (cons (find-class 'atomic-test-class) 'standard-class)
         (cons (let nil (lambda nil nil))      'function)))
 
+;;; JSCL-specific: tests JSCL's type-of results for +atomic-test-objects+
+#+jscl
 (test
  (mv-eql
   (let ((real-type-of)
         (idx 0)
+        (diff0)
         (diff1)
         (diff2)
         (expected-type-of
@@ -441,7 +444,8 @@
    (typep #\space 'standard-char))
   t t t))
 
-;;; type-of
+;;; type-of (JSCL-specific expected values)
+#+jscl
 (test
  (let* ((universum (list 1 'symbol 1.2 #() (make-array '(1 1)) "string" (list) (list 0) t nil)))
   (every #'identity
