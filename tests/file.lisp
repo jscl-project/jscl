@@ -2,16 +2,7 @@
 
 #+node
 (progn
-  ;; Require the fs module for file system operations
-  ;;
-  ;; TODO: should require() be available here? now it's only defined
-  ;; for node repl, but tests are not built with node support because
-  ;; they also run in the browser.
-  ;;
-  (unless (jscl/ffi:in "Fs" jscl/ffi:*root*)
-    (setf #j:Fs (funcall (jscl::%js-vref "require") #j"fs")))
-
-  (defvar *tmp-dir* (jscl/ffi:clstring (#j:Fs:mkdtempSync #j".jscl_test/test-")))
+  (defvar *tmp-dir* (jscl/ffi:clstring ((jscl/ffi:oget (require "fs") "mkdtempSync") #j".jscl_test/test-")))
 
   (test
    (progn

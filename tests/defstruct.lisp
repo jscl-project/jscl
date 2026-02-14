@@ -679,50 +679,49 @@
 ;;; Test via load (progn).
 
 #+node
-(let* ((tmpdir (jscl/ffi:clstring (funcall (jscl/ffi:oget (require "os") "tmpdir"))))
-       (file (concatenate 'string (jscl/ffi:clstring (#j:Fs:mkdtempSync (jscl/ffi:jsstring (concatenate 'string tmpdir "/jscl-test-"))))
-                     "/issue-593.lisp")))
-  (with-open-file (s file :direction :output :if-exists :supersede)
-                  (write-string "(progn
+(progn
+  (let* ((tmpdir (jscl/ffi:clstring (funcall (jscl/ffi:oget (require "os") "tmpdir"))))
+         (file (concatenate 'string (jscl/ffi:clstring ((jscl/ffi:oget (require "fs") "mkdtempSync") (jscl/ffi:jsstring (concatenate 'string tmpdir "/jscl-test-"))))
+                            "/issue-593.lisp")))
+    (with-open-file (s file :direction :output :if-exists :supersede)
+      (write-string "(progn
                        (defstruct issue-593-load-foo)
                        (defstruct (issue-593-load-bar (:include issue-593-load-foo))
                          value))" s))
-  (load file)
-  (test (eval (read-from-string
-               "(issue-593-load-bar-p (make-issue-593-load-bar :value 42))"))))
+    (load file)
+    (test (eval (read-from-string
+                 "(issue-593-load-bar-p (make-issue-593-load-bar :value 42))"))))
 
-;;; Test via load with separate toplevel forms (not in a progn).
-;;; Each form is compiled and executed individually, so the first
-;;; defstruct's runtime registration makes it visible to the second.
-#+node
-(let* ((tmpdir (jscl/ffi:clstring (funcall (jscl/ffi:oget (require "os") "tmpdir"))))
-       (file (concatenate 'string (jscl/ffi:clstring (#j:Fs:mkdtempSync (jscl/ffi:jsstring (concatenate 'string tmpdir "/jscl-test-"))))
-                     "/issue-593-sep.lisp")))
-  (with-open-file (s file :direction :output :if-exists :supersede)
-                  (write-string "(defstruct issue-593-load-sep-foo)" s)
-                  (terpri s)
-                  (write-string "(defstruct (issue-593-load-sep-bar (:include issue-593-load-sep-foo))
+  ;; Test via load with separate toplevel forms (not in a progn).
+  ;; Each form is compiled and executed individually, so the first
+  ;; defstruct's runtime registration makes it visible to the second.
+  (let* ((tmpdir (jscl/ffi:clstring (funcall (jscl/ffi:oget (require "os") "tmpdir"))))
+         (file (concatenate 'string (jscl/ffi:clstring ((jscl/ffi:oget (require "fs") "mkdtempSync") (jscl/ffi:jsstring (concatenate 'string tmpdir "/jscl-test-"))))
+                            "/issue-593-sep.lisp")))
+    (with-open-file (s file :direction :output :if-exists :supersede)
+      (write-string "(defstruct issue-593-load-sep-foo)" s)
+      (terpri s)
+      (write-string "(defstruct (issue-593-load-sep-bar (:include issue-593-load-sep-foo))
                        value)" s))
-  (load file)
-  (test (eval (read-from-string
-               "(issue-593-load-sep-bar-p (make-issue-593-load-sep-bar :value 42))"))))
+    (load file)
+    (test (eval (read-from-string
+                 "(issue-593-load-sep-bar-p (make-issue-593-load-sep-bar :value 42))"))))
 
-;;; Test via compile-file: CLHS requires defstruct to register enough
-;;; information at compile time (:compile-toplevel) so that a
-;;; subsequent defstruct in the same file can use :include.
-#+node
-(let* ((tmpdir (jscl/ffi:clstring (funcall (jscl/ffi:oget (require "os") "tmpdir"))))
-       (dir (jscl/ffi:clstring (#j:Fs:mkdtempSync (jscl/ffi:jsstring (concatenate 'string tmpdir "/jscl-compile-")))))
-       (src (concatenate 'string dir "/issue-593-ct.lisp"))
-       (js  (concatenate 'string src ".js")))
-  (with-open-file (s src :direction :output :if-exists :supersede)
-                  (write-string "(defstruct issue-593-ct-foo)" s)
-                  (terpri s)
-                  (write-string "(defstruct (issue-593-ct-bar (:include issue-593-ct-foo))
+  ;; Test via compile-file: CLHS requires defstruct to register enough
+  ;; information at compile time (:compile-toplevel) so that a
+  ;; subsequent defstruct in the same file can use :include.
+  (let* ((tmpdir (jscl/ffi:clstring (funcall (jscl/ffi:oget (require "os") "tmpdir"))))
+         (dir (jscl/ffi:clstring ((jscl/ffi:oget (require "fs") "mkdtempSync") (jscl/ffi:jsstring (concatenate 'string tmpdir "/jscl-compile-")))))
+         (src (concatenate 'string dir "/issue-593-ct.lisp"))
+         (js  (concatenate 'string src ".js")))
+    (with-open-file (s src :direction :output :if-exists :supersede)
+      (write-string "(defstruct issue-593-ct-foo)" s)
+      (terpri s)
+      (write-string "(defstruct (issue-593-ct-bar (:include issue-593-ct-foo))
                        value)" s))
-  ;; compile-file must not error: the second defstruct's :include
-  ;; finds the first defstruct via compile-time registration
-  (test (stringp (compile-file src))))
+    ;; compile-file must not error: the second defstruct's :include
+    ;; finds the first defstruct via compile-time registration
+    (test (stringp (compile-file src)))))
 
 ;;; defstruct should define a type usable with typep
 (defstruct defstruct-type-test a)

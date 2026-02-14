@@ -263,7 +263,7 @@ Works in both SBCL (Stage 0) and JSCL (Stage 1)."
   "Copy static file from SRC (relative to base) to DST-PATH in OUTPUT-DIRECTORY."
   (let ((src-full (source-path src :directory nil))
         (dst-full (concatenate 'string output-directory dst-path)))
-    #+jscl (#j:Fs:copyFileSync (jscl::jsstring src-full) (jscl::jsstring dst-full))
+    #+jscl ((jscl::oget (require "fs") "copyFileSync") (jscl::jsstring src-full) (jscl::jsstring dst-full))
     #-jscl (uiop:copy-file src-full dst-full)))
 
 #+jscl
@@ -275,7 +275,7 @@ Works in both SBCL (Stage 0) and JSCL (Stage 1)."
          (file-pattern (if slash-pos (subseq pattern (1+ slash-pos)) pattern))
          (ext (let ((dot-pos (position #\. file-pattern)))
                 (if dot-pos (subseq file-pattern dot-pos) nil)))
-         (entries (#j:Fs:readdirSync (jscl::jsstring (if (string= dir "") "." dir))))
+         (entries ((jscl::oget (require "fs") "readdirSync") (jscl::jsstring (if (string= dir "") "." dir))))
          (result nil))
     (dotimes (i (jscl::oget entries "length"))
       (let ((entry (jscl::clstring (aref entries i))))

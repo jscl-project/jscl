@@ -665,7 +665,4 @@ if (
 ) {
   global.readline = require("readline");
   global.repl = require("repl");
-  // Expose fs and path modules for use in eval'd code (e.g., during bootstrap)
-  internals.fs = require("fs");
-  internals.path = require("path");
 }

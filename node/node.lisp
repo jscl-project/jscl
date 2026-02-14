@@ -18,10 +18,6 @@
   "Load a Node.js module by NAME."
   (funcall (jscl-xc::%js-vref "require") (jscl-xc::jsstring name)))
 
-;; TODO: Remove these global variables. Code should use (require "fs") directly.
-(setf #j:Fs (require "fs"))
-(setf #j:FsPath (require "path"))
-
 (defvar *repl*)
 
 (defun start-repl ()
