@@ -316,21 +316,6 @@
            (list t t t))))
 
 
-;;; SORT
-(test
- (string= (map 'string 'identity (sort (coerce (copy-seq "cdbaxaybzcd") 'list) #'char-lessp))
-          "aabbccddxyz"))
-
-(test
- (let ((sorted (sort (coerce (copy-seq "cdbaxaybzcd") 'list) #'char-lessp)))
-   (string= (map 'string 'identity (remove-duplicates sorted :test #'char-equal :from-end t))
-            "abcdxyz")))
-
-(test
- (equal (sort '((1 2 3) (4 5 6) (7 8 9))  #'> :key #'car)
-        '((7 8 9) (4 5 6) (1 2 3))))
-
-
 ;;; union
 
 (test

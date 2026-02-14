@@ -732,4 +732,44 @@ The return value will share structure with SEQ if possible."
     (assert region-nondecreasing-order-seq-2))
   (%replace-seq sequence-1 sequence-2 start1 end1 start2 end2))
 
+;;; Selection sort algorithm for lists.
+;;; See https://en.wikipedia.org/wiki/Selection_sort
+;;;
+;;; The selection criteria is very simple: a) do not use additional
+;;; memory b) without recursion c) simple pseudocode and fast
+;;; implementation.
+;;;
+;;; Vectors delegate to JavaScript's native Array.prototype.sort.
+;;;
+(defun sort (sequence predicate &key (key #'identity))
+  (etypecase sequence
+    (list
+     ;; Selection sort for lists
+     (if (endp sequence)
+         '()
+         (let* ((j sequence)
+                (imin j))
+           (while t
+             (when (null j)
+               (return sequence))
+             (tagbody
+                (let ((i (cdr j)))
+                  (while t
+                    (if (null i) (return nil))
+                    (if (funcall predicate
+                                 (funcall key (car i))
+                                 (funcall key (car imin)))
+                        (setq imin i))
+                    (setq i (cdr i))))
+                (when (not (eq imin j))
+                  (let ((swap-j (car j))
+                        (swap-imin (car imin)))
+                    (setf (car j) swap-imin (car imin) swap-j))))
+             (setq j (cdr j) imin j)))))
+    (vector
+     ((oget sequence "sort")
+      (lambda (a b)
+        (if (funcall predicate (funcall key a) (funcall key b)) -1 1)))
+     sequence)))
+
 ;;; EOF
