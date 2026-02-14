@@ -115,7 +115,9 @@
      :name name :boa from-boa-list
      :assigns (append (lambda-list-reqvars ll)
                       (mapcar #'optvar-variable (lambda-list-optvars ll))
+                      (remove nil (mapcar #'optvar-supplied-p-parameter (lambda-list-optvars ll)))
                       (mapcar #'keyvar-variable (lambda-list-keyvars ll))
+                      (remove nil (mapcar #'keyvar-supplied-p-parameter (lambda-list-keyvars ll)))
                       (mapcar #'auxvar-variable (lambda-list-auxvars ll))))))
 
 (def!struct dsd

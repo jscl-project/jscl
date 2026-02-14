@@ -483,18 +483,12 @@
  (mv-eql
   (let ((b1 (make-boa-supplied-p.1))
         (b2 (make-boa-supplied-p.1 t)))
-    #+nil
-    (format t "BOA SUPPLIED ~a" (list
-                                 (eq t (boa-supplied-p.1-bar b1))
-                                 (eq t (boa-supplied-p.1-bar b2))
-                                 (eq nil (boa-supplied-p.1-barp b1))
-                                 (eq t (boa-supplied-p.1-barp b2))))
     (values
      (eq t (boa-supplied-p.1-bar b1))
      (eq t (boa-supplied-p.1-bar b2))
      (eq nil (boa-supplied-p.1-barp b1))
      (eq t (boa-supplied-p.1-barp b2))))
-  t t t NIL))
+  t t t t))
 
 
 ;;;
@@ -502,23 +496,17 @@
                                             (&key (bar t barp))))
              bar
              barp)
+
 (test
  (mv-eql
   (let ((b1 (make-boa-supplied-p.2))
         (b2 (make-boa-supplied-p.2 :bar t)))
-    #+nil
-    (format t "BOA SUPPLIED-2 ~a" (list
-                                   (eq t (boa-supplied-p.2-bar b1))
-                                   (eq t (boa-supplied-p.2-bar b2))
-                                   (eq nil (boa-supplied-p.2-barp b1))
-                                   (eq t (boa-supplied-p.2-barp b2))))
     (values
      (eq t (boa-supplied-p.2-bar b1))
      (eq t (boa-supplied-p.2-bar b2))
      (eq nil (boa-supplied-p.2-barp b1))
-     ;; must be t. nil its bug:
      (eq t (boa-supplied-p.2-barp b2))))
-  t t t NIL))
+  t t t t))
 
 ;;;
 (defstruct (list-struct (:type list) :named) a-slot)
