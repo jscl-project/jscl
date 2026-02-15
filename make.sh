@@ -61,24 +61,22 @@ export SOURCE_DATE_EPOCH=$(git show -s --format=%ct HEAD)
 
 mkdir -p "$OUTPUT_DIR"
 
-case "$HOST" in
-    sbcl)
-        sbcl --non-interactive \
-             --load jscl.lisp \
-             --eval "(jscl-xc:bootstrap \"$OUTPUT_DIR\" \"jscl\" :verbose $VERBOSE)" \
-             --eval "(jscl-xc:build-node-repl \"$OUTPUT_DIR\")"
-        ;;
-    jscl)
-        tmpfile=$(mktemp /tmp/jscl-make.XXXXXX.lisp)
-        cat > "$tmpfile" << EOF
+tmpfile=$(mktemp /tmp/jscl-make.XXXXXX.lisp)
+cat > "$tmpfile" << EOF
 (load "jscl.lisp")
 (jscl-xc:bootstrap "$OUTPUT_DIR" "jscl" :verbose $VERBOSE)
 (jscl-xc:build-node-repl "$OUTPUT_DIR")
 EOF
+
+case "$HOST" in
+    sbcl)
+        sbcl --non-interactive --load "$tmpfile"
+        ;;
+    jscl)
         node --stack-size=65536 "$JSCL_PATH" "$tmpfile"
-        rm -f "$tmpfile"
         ;;
 esac
+rm -f "$tmpfile"
 
 # Build web and deno REPLs using the bootstrapped JSCL
 tmpfile=$(mktemp /tmp/jscl-repl-build.XXXXXX.lisp)
