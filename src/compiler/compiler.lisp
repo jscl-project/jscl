@@ -216,7 +216,8 @@
 
 ;;; Report functions which are called but not defined
 
-(defvar *fn-info* '())
+(defvar *fn-info*)
+
 
 (def!struct fn-info
   symbol
@@ -241,10 +242,25 @@
   (dolist (info *fn-info*)
     (let ((symbol (fn-info-symbol info)))
       (when (and (fn-info-called info)
-                 (not (fn-info-defined info)))
+                 (not (fn-info-defined info))
+                 (not (fboundp symbol)))
         (warn "The function `~a' is undefined.~%" symbol))))
   (setq *fn-info* nil))
 
+(defmacro %with-compilation-unit ((&key override) &body body)
+  (declare (ignore override))
+  `(flet ((run () ,@body))
+     (if (boundp '*fn-info*)
+         ;; If there is already a bound *fn-info*, just run the body
+         (run)
+         ;; Othewise, stup the *fn-info* and reporting of undefined
+         ;; functions by the end of the block.
+         (let ((*fn-info* '()))
+           (multiple-value-prog1 (run)
+             (report-undefined-functions))))))
+#+jscl-target
+(defmacro with-compilation-unit ((&key override) &body body)
+  `(%with-compilation-unit (:override ,override) ,@body))
 
 
 ;;; Special forms
@@ -1926,20 +1942,20 @@
   (when *compile-print*
     (let ((form-string (prin1-to-string sexp)))
       (simple-format *standard-output* "; processing ~a...~%" (truncate-string form-string))))
-
-  (let ((*compiler-process-mode* 'compile))
-    (with-output-to-string (*js-output*)
-      (process-toplevel-form sexp
-        (lambda (form last-p)
-          (let* ((*toplevel-compilations* nil)
-                 (code (convert form (and last-p multiple-value-p)))
-                 (ast `(progn
-                         ,@(get-toplevel-compilations)
-                         ,(if (and last-p return-p)
-                              `(return ,code)
-                              code))))
-            (js ast)))
-        t))))
+  (%with-compilation-unit ()
+    (let ((*compiler-process-mode* 'compile))
+     (with-output-to-string (*js-output*)
+       (process-toplevel-form sexp
+                              (lambda (form last-p)
+                                (let* ((*toplevel-compilations* nil)
+                                       (code (convert form (and last-p multiple-value-p)))
+                                       (ast `(progn
+                                               ,@(get-toplevel-compilations)
+                                               ,(if (and last-p return-p)
+                                                    `(return ,code)
+                                                    code))))
+                                  (js ast)))
+                              t)))))
 
 (defun dump-global-environment (stream)
   "Dump the global environment to STREAM.
@@ -1977,11 +1993,12 @@ compiler.lisp for details."
 (defun eval-toplevel (sexp)
   (let ((*compiler-process-mode* 'eval)
         (result-mv nil))
+    ;; Compile and execute each form immediately (CLHS 3.2.3.1)
     (process-toplevel-form sexp
       (lambda (form last-p)
-        ;; Compile and execute each form immediately (CLHS 3.2.3.1)
         (with-compilation-environment
-          (let* ((*toplevel-compilations* nil)
+          (%with-compilation-unit ()
+            (let* ((*toplevel-compilations* nil)
                  (code (convert form last-p))
                  (ast `(progn
                          ,@(get-toplevel-compilations)
@@ -1990,8 +2007,8 @@ compiler.lisp for details."
                            (js ast)))
                  (literals (list-to-vector (nreverse (mapcar #'car *literal-table*)))))
             #+jscl-target (setq result-mv
-                         (multiple-value-list (js-eval jscode literals)))
-            #-jscl-target (error "eval-toplevel: cannot execute in cross-compiler"))))
+                                (multiple-value-list (js-eval jscode literals)))
+            #-jscl-target (error "eval-toplevel: cannot execute in cross-compiler")))))
       t)
     (values-list result-mv)))
 

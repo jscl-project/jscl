@@ -365,7 +365,7 @@
     ((symbolp x)
      (%fboundp x))
     ((and (consp x) (eq (car x) 'setf))
-     (%setfboundp x))
+     (%setfboundp (cadr x)))
     (t
      (error "Invalid function `~S'." x))))
 

@@ -236,24 +236,23 @@ Works in both SBCL (Stage 0) and JSCL (Stage 1)."
 
     ;; Compile jscl.js
     (jscl-xc::with-compilation-environment
-      (with-open-file (out jscl-path :direction :output :if-exists :supersede)
-        (write-line "(function(){" out)
-        (write-line "'use strict';" out)
-        (write-string (read-whole-file (source-path "prelude.js")) out)
+      (jscl-xc::%with-compilation-unit ()
+        (with-open-file (out jscl-path :direction :output :if-exists :supersede)
+          (write-line "(function(){" out)
+          (write-line "'use strict';" out)
+          (write-string (read-whole-file (source-path "prelude.js")) out)
 
-        (let ((*readtable* *jscl-xc-readtable*))
-          (do-source input :target
-            (jscl-xc::!compile-file input out :verbose t :print verbose))
-          (jscl-xc::dump-global-environment out)
-          ;; NOTE: This file must be compiled after dumping the global
-          ;; environment. In this file we replace the bootstrap DEFMACRO
-          ;; etc definition with the standard definition.
-          (jscl-xc::!compile-file (source-path "toplevel" :type "lisp") out
-                                  :verbose t :print verbose))
+          (let ((*readtable* *jscl-xc-readtable*))
+            (do-source input :target
+              (jscl-xc::!compile-file input out :verbose t :print verbose))
+            (jscl-xc::dump-global-environment out)
+            ;; NOTE: This file must be compiled after dumping the global
+            ;; environment. In this file we replace the bootstrap DEFMACRO
+            ;; etc definition with the standard definition.
+            (jscl-xc::!compile-file (source-path "toplevel" :type "lisp") out
+                                    :verbose t :print verbose))
 
-        (write-line "})();" out)))
-
-    (jscl-xc::report-undefined-functions)
+          (write-line "})();" out))))
 
     jscl-path))
 

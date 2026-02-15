@@ -42,17 +42,13 @@
     (cond
       ((member ext '("lisp" "lsp") :test #'string=)
        (let ((*package* *package*))
-
          (when verbose (format t "; Loading ~a~%" name))
-
          (with-open-file (stream name :direction :input :sync sync)
            (let ((eof (gensym "LOAD")))
              (loop
                (let ((form (read stream nil eof)))
                  (when (eq form eof) (return))
-
                  (when print (format t "; ~S~%" form))
-
                  (eval form))))))
        t)
 
