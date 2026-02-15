@@ -65,5 +65,6 @@ typeof window !== 'undefined'? window.jscl: self.jscl )"
 (function(internals){ var values = internals.values;" out)
     (with-compilation-environment
       (!compile-file input-file out :verbose verbose :print print))
-    (write-string "})(jscl.internals);};" out))
+    (write-string "})(jscl.internals);};" out)
+    (format out "module.exports.jsclVersion = ~S;" *git-commit-hash*))
   output-file)

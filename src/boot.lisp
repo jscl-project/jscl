@@ -45,7 +45,7 @@
                      (%compile-defmacro ',name ,expander))
 
                   )))))
-    
+
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
 (defmacro backquote (form)
@@ -462,7 +462,7 @@
       ;; todo: subtypep - remove mop-object from tables
       (clos-object . mop-object-p) (mop-object . mop-object-p) (character . characterp)
       (symbol . symbolp)  (keyword . keywordp)
-      (function . functionp) 
+      (function . functionp)
       (number . numberp) (real . realp) (rational . rationalp) (float . floatp)
       (integer . integerp)
       (sequence .  sequencep) (list . listp) (cons . consp) (array . arrayp)
@@ -537,7 +537,7 @@
 
 
 #+jscl-target
-(defmacro print-unreadable-object ((object stream &key type identity) &body body) 
+(defmacro print-unreadable-object ((object stream &key type identity) &body body)
     `(!print-unreadable-object (,object ,stream :type ,type :identity ,identity) ,@body))
 
 
@@ -612,5 +612,7 @@
                 (member result-type '(float single-float double-float short-float long-float)))
            object)
           (t (fail)))))
+
+(defvar *git-commit-hash* #.(get-current-git-commit))
 
 ;;; EOF

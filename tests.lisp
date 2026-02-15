@@ -130,13 +130,15 @@
         (let ((entry (jscl/ffi:clstring (aref entries i))))
           (when (and (> (length entry) 5)
                      (string= (subseq entry (- (length entry) 5)) ".lisp")
-                     (not (search ".fixtures." entry)))
+                     (not (search ".fixtures." entry))
+                     (not (string= entry "helpers.lisp")))
             (push (concatenate 'string "tests/" entry) files)))))
     (push "tests/loop/validate.lisp" files)
     (push "tests/loop/base-tests.lisp" files)
     (nreverse files))
   #-jscl
-  (append (remove-if (lambda (p) (search ".fixtures." (namestring p)))
+  (append (remove-if (lambda (p) (or (search ".fixtures." (namestring p))
+                                     (search "helpers.lisp" (namestring p))))
                      (directory (make-pathname :directory `(:relative "tests") :name :wild :type "lisp" :defaults *load-pathname*)))
           (list (make-pathname :directory `(:relative "tests" "loop") :name "validate" :type "lisp" :defaults *load-pathname*)
                 (make-pathname :directory `(:relative "tests" "loop") :name "base-tests" :type "lisp" :defaults *load-pathname*))))
@@ -163,6 +165,9 @@ In SBCL, test files are loaded directly."
       ;; Start timing after compilation
       (setq *timestamp* (get-internal-real-time))
       (terpri)
+      ;; Load shared test helpers
+      (load #+jscl "tests/helpers.lisp"
+            #-jscl (make-pathname :directory '(:relative "tests") :name "helpers" :type "lisp" :defaults *load-pathname*))
       ;; Load test files (tests execute immediately via test macro)
       (dolist (file files-to-load)
         (handler-case

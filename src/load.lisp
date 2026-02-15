@@ -56,6 +56,13 @@
        (let ((*package* *package*))
          (if (find :node *features*)
              (let ((init (require (concat (clstring (#j:process:cwd)) "/" name))))
+               (let ((file-version (oget init "jsclVersion")))
+                 (when (or (eq (typeof file-version) #j"undefined")
+                           (not (string= (clstring file-version) *git-commit-hash*)))
+                   (error "Cannot load ~a: compiled with JSCL ~a but current is ~a"
+                          name
+                          (if (eq (typeof file-version) #j"undefined") "unknown" (clstring file-version))
+                          *git-commit-hash*)))
                (funcall init (%js-vref "jscl")))
              (load-js name)))
        t)
