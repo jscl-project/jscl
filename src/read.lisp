@@ -750,7 +750,7 @@ otherwise signal a reader error."
 (defun ls-read-from-string (string &optional (eof-error-p t) eof-value)
   (let ((stream (make-string-input-stream string)))
     (values (ls-read stream eof-error-p eof-value)
-            (funcall (stream-data stream)))))
+            (stream-index stream))))
 
 #+jscl-target
 (fset 'read-from-string #'ls-read-from-string)

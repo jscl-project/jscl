@@ -33,6 +33,7 @@
   (finish-output-fn (lambda ()))
   kind
   data
+  index
   at-line-start)
 
 (defun start-line-p (&optional (stream *standard-output*))
@@ -154,12 +155,11 @@
 ;;; Input streams
 
 (defun make-string-input-stream (string)
-  (let ((index 0)
-        (stream nil))
+  (let ((stream nil))
     (flet ((peek (eof-error-p)
              (cond
-               ((< index (length string))
-                (char string index))
+               ((< (stream-index stream) (length string))
+                (char string (stream-index stream)))
                (eof-error-p
                 (error 'end-of-file :stream stream))
                (t
@@ -169,11 +169,11 @@
             (make-stream
              :read-char-fn (lambda (eof-error-p)
                              (prog1 (peek eof-error-p)
-                               (incf index)))
+                               (incf (stream-index stream))))
              :peek-char-fn (lambda (eof-error-p)
                              (peek eof-error-p))
              :kind 'string-input-stream
-             :data (lambda () index))))))
+             :index 0)))))
 
 ;;; Output streams
 
