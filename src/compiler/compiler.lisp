@@ -106,6 +106,7 @@
 (defvar *global-environment*)
 (defvar *variable-counter*)
 
+
 (defun gvarname (symbol)
   (declare (ignore symbol))
   (incf *variable-counter*)
@@ -180,7 +181,7 @@
        (let ((b (global-binding name 'variable 'variable)))
          (push 'constant (binding-declarations b)))))))
 
-#+jscl
+#+jscl-target
 (fset 'proclaim #'!proclaim)
 
 (defun %define-symbol-macro (name expansion)
@@ -188,7 +189,7 @@
     (push-to-lexenv b *environment* 'variable)
     name))
 
-#+jscl
+#+jscl-target
 (defmacro define-symbol-macro (name expansion)
   `(%define-symbol-macro ',name ',expansion))
 
@@ -209,13 +210,14 @@
   (if (nth-value 1 (constant-value x environment))
       t nil))
 
-#+jscl
+#+jscl-target
 (fset 'constantp #'!constantp)
 
 
 ;;; Report functions which are called but not defined
 
-(defvar *fn-info* '())
+(defvar *fn-info*)
+
 
 (def!struct fn-info
   symbol
@@ -240,10 +242,25 @@
   (dolist (info *fn-info*)
     (let ((symbol (fn-info-symbol info)))
       (when (and (fn-info-called info)
-                 (not (fn-info-defined info)))
+                 (not (fn-info-defined info))
+                 (not (fboundp symbol)))
         (warn "The function `~a' is undefined.~%" symbol))))
   (setq *fn-info* nil))
 
+(defmacro %with-compilation-unit ((&key override) &body body)
+  (declare (ignore override))
+  `(flet ((run () ,@body))
+     (if (boundp '*fn-info*)
+         ;; If there is already a bound *fn-info*, just run the body
+         (run)
+         ;; Othewise, stup the *fn-info* and reporting of undefined
+         ;; functions by the end of the block.
+         (let ((*fn-info* '()))
+           (multiple-value-prog1 (run)
+             (report-undefined-functions))))))
+#+jscl-target
+(defmacro with-compilation-unit ((&key override) &body body)
+  `(%with-compilation-unit (:override ,override) ,@body))
 
 
 ;;; Special forms
@@ -441,11 +458,14 @@
                        (throw (+ "Unknown keyword argument " (property (arg i) "name"))))))))))))
 
 (defun parse-lambda-list (ll)
-  (values (ll-required-arguments ll)
-          (ll-optional-arguments ll)
-          (ll-keyword-arguments  ll)
-          (ll-rest-argument      ll)
-          (ll-allow-other-keys   ll)))
+  (let ((required (ll-required-arguments ll))
+        (optional (ll-optional-arguments ll))
+        (keyword  (ll-keyword-arguments  ll))
+        (rest     (ll-rest-argument      ll)))
+    (dolist (arg (append required optional keyword (ll-svars ll) (ensure-list rest)))
+      (unless (symbolp arg)
+        (error "~S is not a valid parameter name." arg)))
+    (values required optional keyword rest (ll-allow-other-keys ll))))
 
 ;;; Process BODY for declarations and/or docstrings. Return as
 ;;; multiple values the BODY without docstrings or declarations, the
@@ -584,12 +604,6 @@
 ;;; this symbol.
 (defvar *magic-unquote-marker* (gensym "MAGIC-UNQUOTE"))
 
-#-jscl
-(setf (macro-function *magic-unquote-marker*)
-      (lambda (form &optional environment)
-        (declare (ignore environment))
-        (second form)))
-
 (defvar *literal-table*)
 (defvar *literal-counter*)
 
@@ -597,17 +611,27 @@
   (incf *literal-counter*)
   (make-symbol (concat "l" (integer-to-string *literal-counter*))))
 
+;;; Bootstrap package name substitution
 (defun dump-symbol (symbol)
   (let ((package (symbol-package symbol)))
     (cond
       ;; Uninterned symbol
       ((null package)
        `(new (call-internal |Symbol| ,(symbol-name symbol))))
-      ;; Interned symbol
+      ;; Interned symbol in CL package
       ((eq package (find-package "COMMON-LISP"))
-       `(call-internal |intern| ,(symbol-name symbol)))
+       `(call-internal |intern| ,(symbol-name symbol) "COMMON-LISP"))
       (t
-       `(call-internal |intern| ,(symbol-name symbol) ,(package-name package))))))
+       (let ((pkg-name (package-name package)))
+         ;; KLUDGE: All symbols in the JSCL-XC/JSCL package are dumped
+         ;; without an explicit package name. As we rename the package
+         ;; later, it makes the intern() calls in JS more meaningful
+         ;; this way.  The default intern is the JSCL/JSCL-XC package,
+         ;; regardless of the name.
+         (if (or (string= pkg-name "JSCL")
+                 (string= pkg-name "JSCL-XC"))
+             `(call-internal |intern| ,(symbol-name symbol))
+             `(call-internal |intern| ,(symbol-name symbol) ,pkg-name)))))))
 
 (defun dump-cons (cons)
   (let ((head (butlast cons))
@@ -845,7 +869,7 @@
 
 
 ;; LET* compilation
-;; 
+;;
 ;; (let* ((*var1* value1))
 ;;        (*var2* value2))
 ;;  ...)
@@ -856,7 +880,7 @@
 ;;       // compute value1
 ;;       // bind to var1
 ;;       // add var1 to sbindings
-;;     
+;;
 ;;       // compute value2
 ;;       // bind to var2
 ;;       // add var2 to sbindings
@@ -868,7 +892,7 @@
 ;;       // restore bindings of sbindings
 ;;       // ...
 ;;     }
-;; 
+;;
 (define-compilation let* (bindings &rest body)
   (let ((bindings (mapcar #'ensure-list bindings))
         (*environment* (copy-lexenv *environment*))
@@ -904,7 +928,7 @@
                       ;; binding.
                       (= (get ,s "value") ,out))
                    prelude-target)))
-          
+
           (t
            (let* ((jsvar (gvarname variable))
                   (binding (make-binding :name variable :type 'variable :value jsvar)))
@@ -925,7 +949,7 @@
            `(progn
               ,@(reverse prelude-target)
               ,(convert-block body t t))))
-      
+
       (if (find-if #'special-variable-p bindings :key #'first)
           `(selfcall
             (var (,sbindings #()))
@@ -1125,7 +1149,7 @@
 
 (defun !special-operator-p (name)
   (nth-value 1 (gethash name *compilations*)))
-#+jscl
+#+jscl-target
 (fset 'special-operator-p #'!special-operator-p)
 
 
@@ -1651,7 +1675,6 @@
 
 
 
-#-jscl
 (defvar *macroexpander-cache*
   (make-hash-table :test #'eq))
 
@@ -1661,31 +1684,37 @@
   (let ((b (lookup-in-lexenv symbol *environment* namespace)))
     (if (and b (eq (binding-type b) 'macro))
         (let ((expander (binding-value b)))
+          ;; During dump-global-environment, bindings get wrapped with
+          ;; *magic-unquote-marker*. Unwrap it here so we can eval the
+          ;; actual expander form.
+          (when (and (consp expander)
+                     (eq (car expander) *magic-unquote-marker*))
+            (setq expander (second expander)))
           (cond
-            #-jscl
             ((gethash b *macroexpander-cache*)
              (setq expander (gethash b *macroexpander-cache*)))
+	    ;; The list representation is used during bootstrap
+	    ;; because we can dump it. Use a cache to avoid
+	    ;; re-compiling, but preserve the list in the binding
+	    ;; during bootstrap (when :jscl-target feature is active).
             ((listp expander)
              (let ((compiled (eval expander)))
-               ;; The list representation are useful while
-               ;; bootstrapping, as we can dump the definition of the
-               ;; macros easily, but they are slow because we have to
-               ;; evaluate them and compile them now and again. So, let
-               ;; us replace the list representation version of the
-               ;; function with the compiled one.
-               ;;
-               #+jscl (setf (binding-value b) compiled)
-               #-jscl (setf (gethash b *macroexpander-cache*) compiled)
+               (setf (gethash b *macroexpander-cache*) compiled)
                (setq expander compiled))))
           expander)
         nil)))
 
-#+jscl
+#+jscl-target
 (defun macro-function (symbol &optional environment)
   (let ((*environment* (or environment *global-environment*)))
     (!macro-function symbol 'function)))
 
-#+jscl
+#+jscl-target
+(defun (setf macro-function) (new-function symbol &optional environment)
+  (declare (ignore environment))
+  (%compile-defmacro symbol new-function))
+
+#+jscl-target
 (defun compiler-macro-function (symbol &optional environment)
   (let ((*environment* (or environment *global-environment*)))
     (!macro-function symbol 'compiler-macro)))
@@ -1706,7 +1735,7 @@
       (t
        (values form nil)))))
 
-#+jscl
+#+jscl-target
 (fset 'macroexpand-1 #'!macroexpand-1)
 
 (defun !macroexpand (form &optional env)
@@ -1717,7 +1746,7 @@
         (setq expanded-p t)))
     (values form expanded-p)))
 
-#+jscl
+#+jscl-target
 (fset 'macroexpand #'!macroexpand)
 
 (defun compiler-macroexpand (form)
@@ -1889,9 +1918,9 @@
         (funcall fn form last-p)))))
 
 
-#+jscl
+#+jscl-target
 (defvar *compile-print* nil)
-#+jscl
+#+jscl-target
 (defvar *compile-verbose* nil)
 
 (defun truncate-string (string &optional (width 60))
@@ -1910,22 +1939,53 @@
 ;;; The entrypoint for compiling from COMPILE-FILE
 ;;;
 (defun compile-toplevel (sexp &optional multiple-value-p return-p)
-  (let ((*compiler-process-mode* 'compile))
-    (with-output-to-string (*js-output*)
-      (process-toplevel-form sexp
-        (lambda (form last-p)
-          (when *compile-print*
-            (let ((form-string (prin1-to-string form)))
-              (simple-format *standard-output* "Compiling ~a...~%" (truncate-string form-string))))
-          (let* ((*toplevel-compilations* nil)
-                 (code (convert form (and last-p multiple-value-p)))
-                 (ast `(progn
-                         ,@(get-toplevel-compilations)
-                         ,(if (and last-p return-p)
-                              `(return ,code)
-                              code))))
-            (js ast)))
-        t))))
+  (when *compile-print*
+    (let ((form-string (prin1-to-string sexp)))
+      (simple-format *standard-output* "; processing ~a...~%" (truncate-string form-string))))
+  (%with-compilation-unit ()
+    (let ((*compiler-process-mode* 'compile))
+     (with-output-to-string (*js-output*)
+       (process-toplevel-form sexp
+                              (lambda (form last-p)
+                                (let* ((*toplevel-compilations* nil)
+                                       (code (convert form (and last-p multiple-value-p)))
+                                       (ast `(progn
+                                               ,@(get-toplevel-compilations)
+                                               ,(if (and last-p return-p)
+                                                    `(return ,code)
+                                                    code))))
+                                  (js ast)))
+                              t)))))
+
+(defun dump-global-environment (stream)
+  "Dump the global environment to STREAM.
+
+Macro bindings are wrapped with *magic-unquote-marker* so the compiler
+will compile them instead of quoting them. See the literal function in
+compiler.lisp for details."
+  (flet ((emit (form)
+           (write-string (compile-toplevel form) stream))
+         (wrap-macros (bindings)
+           ;; Wrap macro binding values with the magic marker
+           (dolist (b bindings)
+             (when (eq (binding-type b) 'macro)
+               (setf (binding-value b) `(,*magic-unquote-marker* ,(binding-value b)))))))
+    ;; We assume that environments have a friendly list representation
+    ;; for the compiler and it can be dumped.
+    ;; Wrap both regular macros and compiler-macros
+    (wrap-macros (lexenv-function *environment*))
+    (wrap-macros (lexenv-compiler-macro *environment*))
+    (emit
+     `(progn
+        (setq *environment* ',*environment*)
+        (setq *global-environment* *environment*)))
+    ;; Set some counter variable properly, so user compiled code will
+    ;; not collide with the compiler itself.
+    (emit
+     `(progn
+        (setq *variable-counter* ,*variable-counter*)
+        (setq *gensym-counter* ,*gensym-counter*)))
+    (emit `(setq *literal-counter* ,*literal-counter*))))
 
 ;;;
 ;;; The entrypoint for EVAL
@@ -1933,11 +1993,12 @@
 (defun eval-toplevel (sexp)
   (let ((*compiler-process-mode* 'eval)
         (result-mv nil))
+    ;; Compile and execute each form immediately (CLHS 3.2.3.1)
     (process-toplevel-form sexp
       (lambda (form last-p)
-        ;; Compile and execute each form immediately (CLHS 3.2.3.1)
         (with-compilation-environment
-          (let* ((*toplevel-compilations* nil)
+          (%with-compilation-unit ()
+            (let* ((*toplevel-compilations* nil)
                  (code (convert form last-p))
                  (ast `(progn
                          ,@(get-toplevel-compilations)
@@ -1945,10 +2006,10 @@
                  (jscode (with-output-to-string (*js-output*)
                            (js ast)))
                  (literals (list-to-vector (nreverse (mapcar #'car *literal-table*)))))
-            #+jscl (setq result-mv
-                         (multiple-value-list (js-eval jscode literals)))
-            #-jscl (error "eval-toplevel: cannot execute in cross-compiler"))))
+            #+jscl-target (setq result-mv
+                                (multiple-value-list (js-eval jscode literals)))
+            #-jscl-target (error "eval-toplevel: cannot execute in cross-compiler")))))
       t)
     (values-list result-mv)))
 
-#+jscl (fset 'eval #'eval-toplevel)
+#+jscl-target (fset 'eval #'eval-toplevel)

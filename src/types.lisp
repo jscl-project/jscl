@@ -355,10 +355,12 @@
              (or (eql t2 't)
                  (!typep (cdr object) t2))))))
 
-;;; (list-length *) | (list-length 0) | (list-length n)
-;;;      (typep (list) '(list-length 0))
-;;;      (typesace x ((list-length 1) :ok) ((list-length 0) :bad))
-(deftype-compound  list-length (object type)
+;;; (*list-length *) | (*list-length 0) | (*list-length n)
+;;;      (typep (list) '(*list-length 0))
+;;;      (typecase x ((*list-length 1) :ok) ((*list-length 0) :bad))
+;;; Named *list-length (not list-length) to avoid shadowing the
+;;; standard CL function LIST-LENGTH.
+(deftype-compound  *list-length (object type)
   (when (listp object)
     (if (not (true-cons-p object))
         (destructuring-bind (&optional (size '*))
@@ -421,6 +423,8 @@
   (unless (and (integerp n) (plusp n)) (error "Type (mod ~a)." n))
   `(integer 0 (,n)))
 
+(deftype boolean () `(member t nil))
+
 ;;; (typep 1|0 '(bit)) -> t
 (deftype bit () `(integer 0 1))
 
@@ -475,7 +479,7 @@
 (deftype vector (&optional (type '*) (size '*))
   `(array ,type (,size)))
 
-#+jscl (fset 'typep (fdefinition '!typep))
+#+jscl-target (fset 'typep (fdefinition '!typep))
 
 (push :types *features*)
 

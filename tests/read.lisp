@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/read.lisp!")
 
 
 ;;; TODO: Uncomment when either read-from-string supports all these parameters
@@ -8,7 +7,7 @@
 ;;; or when test macro supports error handling, whichever comes first
 ;;; (test (equal (read-from-string " 1 3 5" t nil :start 2) (values 3 5)))
 
-(expected-failure
+(test
  (equal (multiple-value-list (read-from-string "(a b c)"))
         '((A B C) 7)))
 
@@ -95,15 +94,15 @@
         (xfv #(#xa001 #xb001 #xc001 #xd001 #xe001 #xf001)))
     (list (equal
            ;; correct b->d conversion
-           (jscl::vector-to-list bfv)
+           (coerce bfv 'list)
            '(1 2 3 4 5 6 7 8 9 10))
           (equal
            ;; correct x->d conversion
-           (jscl::vector-to-list xfv)
+           (coerce xfv 'list)
            '(40961 45057 49153 53249 57345 61441))
           ;; list & sharp tokens -> with sharp reader
           (equal
-           (jscl::vector-to-list bfv1)
+           (coerce bfv1 'list)
            '(1 2 3 (QUOTE SHARP) #\# 4 5 6 7 8 9 10))
           (equal
            (aref bfv1 3)
@@ -117,11 +116,11 @@
 (test
  (equal
   '(t)
-  (let* 
+  (let*
       ((s1 (read-from-string "#(#b1 #b10 #b11 #b100 #b101 #b110 #b111 #b1000 #b1001 #b1010)")))
     (list
      (equal
-      (jscl::vector-to-list s1)
+      (coerce s1 'list)
       '(1 2 3 4 5 6 7 8 9 10))))))
 
 ;;; backquote
@@ -156,25 +155,87 @@
          (multiple-value-bind (num pos) (parse-integer "no-integer" :junk-allowed t)
            (equal (list num pos) '(nil 0))))))
 
+;;; #xaa = 170, #xaf = 175 - numbers are not valid lambda parameters
+(test (= #xaa 170))
+(test (= #xaf 175))
+
 ;;;
-;;; other fun glitch's
+;;; set-dispatch-macro-character / get-dispatch-macro-character
 ;;;
 
-#|
-If you remove comments from the following expression there will be a compilation error.
-actually any errors in the types are caught at the compilation stage.
-The correct value can be used in any expressions, as is, at your discretion
-|#
+;; Basic: register a custom dispatch macro and read with it
+#+jscl
+(test (let* ((rt (copy-readtable))
+             (*readtable* rt))
+        (set-dispatch-macro-character #\# #\!
+          (lambda (stream char arg)
+            (declare (ignore char arg))
+            (let ((obj (read stream t nil t)))
+              (list :bang obj))))
+        (equal (read-from-string "#!foo") '(:BANG FOO))))
 
-#|
-(let ((fn 
-        (lambda (#xag #xaf) (list #xaa #xaf))))
-  (funcall fn 1 2))
-|#
+;; get-dispatch-macro-character returns the installed function
+#+jscl
+(test (let* ((rt (copy-readtable))
+             (*readtable* rt)
+             (fn (lambda (s c a) (declare (ignore s c a)) nil)))
+        (set-dispatch-macro-character #\# #\! fn rt)
+        (eq (get-dispatch-macro-character #\# #\! rt) fn)))
 
-;;; the correct value can be used in any expressions, as is, at your discretion
-(let ((fn (lambda (#xaa #xaf) (list #xaa #xaf))))
-  (funcall fn 1 2))
-;;; => (170 175)
+;; get-dispatch-macro-character returns nil for unregistered sub-char
+#+jscl
+(test (let* ((rt (copy-readtable)))
+        (null (get-dispatch-macro-character #\# #\! rt))))
+
+;; Sub-char is case-insensitive (stored as upcase)
+#+jscl
+(test (let* ((rt (copy-readtable))
+             (*readtable* rt)
+             (fn (lambda (s c a) (declare (ignore s c a)) :ok)))
+        (set-dispatch-macro-character #\# #\z fn rt)
+        (and (eq (get-dispatch-macro-character #\# #\z rt) fn)
+             (eq (get-dispatch-macro-character #\# #\Z rt) fn))))
+
+;; Replacing an existing dispatch function works
+#+jscl
+(test (let* ((rt (copy-readtable))
+             (*readtable* rt))
+        (set-dispatch-macro-character #\# #\!
+          (lambda (stream char arg)
+            (declare (ignore stream char arg))
+            :first))
+        (set-dispatch-macro-character #\# #\!
+          (lambda (stream char arg)
+            (declare (ignore char arg))
+            (read stream t nil t)
+            :second))
+        (eq (read-from-string "#!x") :SECOND)))
+
+;; make-dispatch-macro-character is idempotent on existing dispatch chars
+#+jscl
+(test (let* ((rt (copy-readtable))
+             (*readtable* rt))
+        (make-dispatch-macro-character #\#)
+        (set-dispatch-macro-character #\# #\!
+          (lambda (stream char arg)
+            (declare (ignore char arg))
+            (let ((obj (read stream t nil t)))
+              (list :question obj))))
+        (equal (read-from-string "#!hello") '(:QUESTION HELLO))))
+
+;; Symbols with names matching Object.prototype properties are not
+;; confused with JS functions (prototype pollution regression)
+(test (symbolp (read-from-string "|toString|")))
+(test (symbolp (read-from-string "|hasOwnProperty|")))
+(test (symbolp (read-from-string "|valueOf|")))
+
+;; Modifications to a copied readtable don't affect the original
+#+jscl
+(test (let* ((original *readtable*)
+             (rt (copy-readtable))
+             (fn (lambda (s c a) (declare (ignore s c a)) nil)))
+        (set-dispatch-macro-character #\# #\! fn rt)
+        (and (eq (get-dispatch-macro-character #\# #\! rt) fn)
+             (null (get-dispatch-macro-character #\# #\! original)))))
 
 ;;; EOF

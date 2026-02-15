@@ -15,31 +15,32 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-(in-package :jscl)
-
-(/debug "loading worker.lisp!")
+(defpackage :jscl/worker-repl (:use :cl :jscl/ffi))
+(in-package :jscl/worker-repl)
 
 (defvar *web-worker-session-id*)
 
 
-(defun %web-worker-write-string (string &optional (style "jqconsole-output"))
+(defun %web-worker-write-string (string &optional (style "jqconsole-output") html)
   (let ((obj (object)))
     (setf (oget obj "command") #j"output")
     (setf (oget obj "stringclass") (jsstring style))
     (setf (oget obj "string") (jsstring string))
+    (when html
+      (setf (oget obj "html") #j:true))
     (#j:postMessage obj)))
 
 
 (defun web-worker-repl ()
   (loop
-    (%web-worker-write-string (concat (package-name-for-prompt *package*) "> ")
+    (%web-worker-write-string (jscl::get-repl-prompt)
                               "jqconsole-prompt")
-    (with-toplevel-eval ()
-      (eval-interactive (read)))))
+    (jscl::with-toplevel-eval ()
+      (jscl::eval-interactive (read)))))
 
 
 (defun sw-request-sync (command &optional (options (object)))
-  (while t
+  (loop
     (let ((xhr (new #j:XMLHttpRequest))
           (payload (object)))
 
@@ -71,7 +72,7 @@
 
 (defun read-stdin ()
   (let ((input (clstring (sw-request-sync "readStdin"))))
-    (setf *stdin-buffer* (concat *stdin-buffer* input))
+    (setf *stdin-buffer* (concatenate 'string *stdin-buffer* input))
     *stdin-buffer*))
 
 (defun clear-buffer ()
@@ -88,21 +89,37 @@
   (prog1 (apply #'%peek-char-stdin args)
     (setf *stdin-buffer* (subseq *stdin-buffer* 1))))
 
+(defun write-welcome-message ()
+  "Render the welcome message as HTML via the web worker output."
+  (dolist (item (jscl::welcome-message-items))
+    (ecase (first item)
+      (:str     (%web-worker-write-string (second item)))
+      (:bold    (%web-worker-write-string
+                 (format nil "<strong>~a</strong>" (second item))
+                 "jqconsole-output" t))
+      (:link    (%web-worker-write-string
+                 (format nil "<a href=\"~a\" target=\"_blank\">~a</a>"
+                         (third item) (second item))
+                 "jqconsole-output" t))
+      (:newline (%web-worker-write-string (string #\newline))))))
+
 (defun initialize-web-worker ()
   (setq *standard-output*
-        (make-stream :write-fn #'%web-worker-write-string)
+        (jscl::make-stream :write-fn #'%web-worker-write-string)
         *error-output*
-        (make-stream
+        (jscl::make-stream
          :write-fn (lambda (string)
                      (%web-worker-write-string string "jqconsole-error")))
         *trace-output* *standard-output*)
 
   (setq *standard-input*
-        (make-stream
+        (jscl::make-stream
          :read-char-fn #'%read-char-stdin
          :peek-char-fn #'%peek-char-stdin))
 
-  (welcome-message)
+  (setq *package* (find-package "CL-USER"))
+
+  (write-welcome-message)
 
   (setf #j:onmessage
         (lambda (event)

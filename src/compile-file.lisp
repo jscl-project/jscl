@@ -13,57 +13,58 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-(defun !compile-file (filename out &key print verbose #+jscl (sync t))
+(defun !compile-file (filename out &key print verbose #+jscl-target (sync t))
   "Compile expressions in FILENAME and write to OUT stream."
   (let ((*compile-print* print)
         (*compile-verbose* verbose)
         (*package* *package*))
-    (with-open-file (stream filename :direction :input #+jscl :sync #+jscl sync)
-      (when *compile-verbose*
-        (format t "Compiling ~a...~%"
-                #+jscl filename
-                #-jscl (enough-namestring filename)))
-      (let ((eof (gensym "COMPILE"))
-            (expr nil))
-        (while t
-          (setq expr (ls-read stream nil eof))
-          (when (eql expr eof)
-            (return))
-          (let ((code (compile-toplevel expr)))
-            (write-string code out)))))))
+    (%with-compilation-unit ()
+      (with-open-file (stream filename :direction :input #+jscl-target :sync #+jscl-target sync)
+        (when *compile-verbose*
+          (format t "; Compiling ~a...~%" filename))
+        (let ((eof (gensym "COMPILE"))
+              (expr nil))
+          (while t
+                 (setq expr (ls-read stream nil eof))
+                 (when (eql expr eof)
+                   (return))
+                 (let ((code (compile-toplevel expr)))
+                   (write-string code out))))))))
 
-(defun %write-file-prologue (out place)
-  (format out "if (typeof importScripts !== 'undefined') importScripts('~Ajscl.js');
+(defun %write-file-prologue (out place jscl-name)
+  (format out "if (typeof importScripts !== 'undefined') importScripts('~A~A.js');
 (function(jscl){
 'use strict';
 (function(internals){ var values = internals.values;"
-          place))
+          place jscl-name))
 
-(defun %write-file-epilogue (out place)
+(defun %write-file-epilogue (out place jscl-name)
   (format out "})(jscl.internals);
-})( typeof require !== 'undefined'? require('~Ajscl'):
+})( typeof require !== 'undefined'? require('~A~A'):
 typeof window !== 'undefined'? window.jscl: self.jscl )"
-          place))
+          place jscl-name))
 
-(defun compile-application (files output &key shebang (place "./"))
-  (let ((*features* #+jscl *features* #-jscl (list :jscl :jscl-xc)))
-    (with-compilation-environment
+(defun compile-application (files output &key shebang (place "./") (jscl-name "jscl"))
+  (with-compilation-environment
+    (%with-compilation-unit ()
       (with-open-file (out output :direction :output :if-exists :supersede)
         (when shebang
           (format out "#!/usr/bin/env node~%"))
-        (%write-file-prologue out place)
+        (%write-file-prologue out place jscl-name)
         (dolist (input files)
           (!compile-file input out :verbose t))
-        (%write-file-epilogue out place)
+        (%write-file-epilogue out place jscl-name)
         output))))
 
-#+jscl
-(defun compile-file (input-file &key output-file verbose print (place "./"))
+#+jscl-target
+(defun compile-file (input-file &key output-file (verbose *compile-verbose*) (print *compile-print*))
   (unless output-file
     (setq output-file (concat input-file ".js")))
   (with-open-file (out output-file :direction :output :if-exists :supersede)
-    (%write-file-prologue out place)
+    (write-string "module.exports = function(jscl){'use strict';
+(function(internals){ var values = internals.values;" out)
     (with-compilation-environment
       (!compile-file input-file out :verbose verbose :print print))
-    (%write-file-epilogue out place))
+    (write-string "})(jscl.internals);};" out)
+    (format out "module.exports.jsclVersion = ~S;" *git-commit-hash*))
   output-file)

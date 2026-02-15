@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/strings.lisp!")
 
 (defvar *str* "hello world")
 (defvar *str2* "h")

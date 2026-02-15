@@ -27,8 +27,9 @@
 ;;;
 
 (defvar *load-verbose* t)
+(defvar *load-print* nil)
 
-(defun load (name &key (verbose *load-verbose*) (sync :maybe))
+(defun load (name &key (verbose *load-verbose*) (print *load-print*) (sync :maybe))
   (let ((ext (filename-extension name)))
     ;; Try to guess extension
     (unless ext
@@ -41,22 +42,28 @@
     (cond
       ((member ext '("lisp" "lsp") :test #'string=)
        (let ((*package* *package*))
-
-         (when *load-verbose*
-           (format t "Loading ~a~%" name))
-
+         (when verbose (format t "; Loading ~a~%" name))
          (with-open-file (stream name :direction :input :sync sync)
            (let ((eof (gensym "LOAD")))
              (loop
                (let ((form (read stream nil eof)))
                  (when (eq form eof) (return))
+                 (when print (format t "; ~S~%" form))
                  (eval form))))))
        t)
 
       ((member ext '("js" "cjs" "jso") :test #'string=)
        (let ((*package* *package*))
          (if (find :node *features*)
-             (require (concat "./" name))
+             (let ((init (require (concat (clstring (#j:process:cwd)) "/" name))))
+               (let ((file-version (oget init "jsclVersion")))
+                 (when (or (eq (typeof file-version) #j"undefined")
+                           (not (string= (clstring file-version) *git-commit-hash*)))
+                   (error "Cannot load ~a: compiled with JSCL ~a but current is ~a"
+                          name
+                          (if (eq (typeof file-version) #j"undefined") "unknown" (clstring file-version))
+                          *git-commit-hash*)))
+               (funcall init (%js-vref "jscl")))
              (load-js name)))
        t)
 

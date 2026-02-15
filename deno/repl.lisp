@@ -11,32 +11,33 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-(/debug "loading deno/repl.lisp!")
+(defpackage :jscl/deno-repl (:use :cl :jscl/ffi))
+(in-package :jscl/deno-repl)
 
 (defvar *rl*)
 
 (defun start-repl ()
-  (welcome-message)
+  (jscl::welcome-message)
   (setq *rl* (#j:readline:createInterface #j:process:stdin #j:process:stdout))
   (let ((input-buffer (make-string-output-stream))
         (linecont-prompt nil))
     (flet ((set-prompt ()
-             (let ((name (package-name-for-prompt *package*)))
-               ((oget *rl* "setPrompt") (jsstring (format nil "~a> " name)))
+             (let ((prompt (jscl::get-repl-prompt)))
+               ((oget *rl* "setPrompt") (jsstring prompt))
                (setq linecont-prompt
-                     (concat (make-string (1+ (length name)) :initial-element #\.) " ")))))
+                     (concatenate 'string (make-string (1- (length prompt)) :initial-element #\.) " ")))))
       (set-prompt)
       ((oget *rl* "prompt"))
       ((oget *rl* "on") #j"line"
        (lambda (line)
          (write-line (clstring line) input-buffer)
-         (let ((input (stream-data input-buffer)))
-           (if (%sexpr-incomplete input)
+         (let ((input (jscl::stream-data input-buffer)))
+           (if (jscl::%sexpr-incomplete input)
                ((oget *rl* "setPrompt") (jsstring linecont-prompt))
                (progn
-                 (with-toplevel-eval ()
-                   (eval-interactive-input input))
-                 (setf (fill-pointer (stream-data input-buffer)) 0)
+                 (jscl::with-toplevel-eval ()
+                   (jscl::eval-interactive-input input))
+                 (setf (fill-pointer (jscl::stream-data input-buffer)) 0)
                  ;; Update prompt
                  (set-prompt))))
          ;; Continue
@@ -44,12 +45,13 @@
 
 (defun deno-init ()
   (setq *standard-output*
-        (make-stream
+        (jscl::make-stream
          :write-fn (lambda (string)
                      (#j:process:stdout:write (jsstring string))))
         *error-output* *standard-output*
-        *trace-output* *standard-output*)
-  (let ((args (mapcar #'clstring (vector-to-list (subseq #j:process:argv 2)))))
+        *trace-output* *standard-output*
+        *package* (find-package "CL-USER"))
+  (let ((args (mapcar #'clstring (jscl::vector-to-list (subseq #j:process:argv 2)))))
     (cond
       ((null args)
        (start-repl))

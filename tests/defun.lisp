@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/defun.lisp!")
 
 ;;;; Tests for DEFUN
 
@@ -10,26 +9,28 @@
 
 ;;; Body, declarations and docstrings
 
+#+jscl
 (let ((actual
        (multiple-value-list
-        (parse-body '((declare (integerp x)) "foo" 3)
+        (jscl::parse-body '((declare (integerp x)) "foo" 3)
                     :declarations t
                     :docstring t))))
 
   (test (equal actual '((3) ((DECLARE (INTEGERP X))) "foo"))))
 
+#+jscl
 (let ((actual
        (multiple-value-list
-        (parse-body '((declare (integerp x)) "foo")
+        (jscl::parse-body '((declare (integerp x)) "foo")
                     :declarations t
                     :docstring t))))
 
   (test (equal actual '(("foo") ((DECLARE (INTEGERP X))) nil))))
 
-
+#+jscl
 (let ((actual
        (multiple-value-list
-        (parse-body '("foo" 3)
+        (jscl::parse-body '("foo" 3)
                     :declarations t
                     :docstring t))))
 
@@ -55,7 +56,7 @@
   (test (equal '(1 2 3) (setf (fn1 2 3) 1)))
   (test (equal '(4 1 2 3) (setf (fn2 1) 4)))
   (test (equal '(4 5 6 7) (setf (fn2 5 6 7) 4)))
-  (let ((qq '(1 2 3)))
+  (let ((qq (list 1 2 3)))
     (test (equal '(99 3) (setf (%cadr% qq) 99)))
     (test (equal '(1 99 3) qq)))
 
@@ -84,7 +85,7 @@
     (dotimes (i 10)
       (incf (getr r 0)))
     (equal '(11 (3 2 1 :tail) nil) 
-           (vector-to-list r))))
+           (coerce r 'list))))
 
 ;;; &allow-other-keys test
 (defun fff (&key a b &allow-other-keys)

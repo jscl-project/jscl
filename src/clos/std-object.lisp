@@ -43,14 +43,14 @@
 ;;; @vlad-km
 ;;; version for JSCL
 (defun std-allocate-instance (class)
-  #-jscl
+  #-jscl-target
   (allocate-std-instance
    :class class
    :slots (allocate-slot-storage (count-if #'instance-slot-p (class-slots class))
                                  *secret-unbound-value*)
    :hash nil
    :cn nil)
-  #+jscl
+  #+jscl-target
   (let ((instance
           (allocate-std-instance
            :class class
@@ -93,7 +93,7 @@
 
 
 ;;; @vlad-km
-#+jscl
+#+jscl-target
 (mapcar (lambda (x) (setf (gethash (car x) *position-slots-of-standard-class*) (cadr x)))
         '((NAME 0)
           (DIRECT-SUPERCLASSES 1)

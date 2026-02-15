@@ -1,5 +1,4 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
-(/debug "perform test/defstruct.lisp!")
 
 (defun sbt-check-fn (sn)
   (handler-case
@@ -11,8 +10,8 @@
   (and (= (length v1) (length v2))
        (every #'identity
               (mapcar (lambda (e1 e2) (equal e1 e2))
-                      (jscl::vector-to-list v1)
-                      (jscl::vector-to-list v2)))))
+                      (coerce v1 'list)
+                      (coerce v2 'list)))))
 
 ;;;
 (defstruct (frob-01-list :named (:type list)
@@ -79,7 +78,7 @@
          (ip (make-frob-01-clos :a 1 :b 2))
          (ip2 (copy-frob-01-clos ip))
          (ip3 (copy-frob-01-clos ip2)))
-  
+
     (values
      (every #'identity (mapcar 'the-frob-01-clos (list ip ip2 ip3)))
      (every #'identity (mapcar 'sbt-check-fn fnames))
@@ -110,15 +109,17 @@
                     (:constructor sbt-02-con (&key ((:foo a) 32))))
   a)
 
+;; Use EVERY to normalize the result to T (SBCL's FBOUNDP returns the
+;; function object, not T).
 (test
  (mv-eql
   (values
-   (mapcar 'fboundp (list 'sbt-02-a 'sbt-02-p 'copy-sbt-02))
+   (every #'fboundp (list 'sbt-02-a 'sbt-02-p 'copy-sbt-02))
    (sbt-02-con)
    (sbt-02-con :foo 99)
    (sbt-02-a (sbt-02-con :foo 1234)))
 
-  (t t t)
+  t
   (SBT-02 32)
   (SBT-02 99)
   1234))
@@ -374,7 +375,8 @@
   t ))
 
 
-;;;
+;;; JSCL-specific: tests JSCL's defstruct error checking during macroexpand
+#+jscl
 (test
  (= 6 (let ((e 0))
         (dolist (form
@@ -483,18 +485,12 @@
  (mv-eql
   (let ((b1 (make-boa-supplied-p.1))
         (b2 (make-boa-supplied-p.1 t)))
-    #+nil
-    (format t "BOA SUPPLIED ~a" (list
-                                 (eq t (boa-supplied-p.1-bar b1))
-                                 (eq t (boa-supplied-p.1-bar b2))
-                                 (eq nil (boa-supplied-p.1-barp b1))
-                                 (eq t (boa-supplied-p.1-barp b2))))
     (values
      (eq t (boa-supplied-p.1-bar b1))
      (eq t (boa-supplied-p.1-bar b2))
      (eq nil (boa-supplied-p.1-barp b1))
      (eq t (boa-supplied-p.1-barp b2))))
-  t t t NIL))
+  t t t t))
 
 
 ;;;
@@ -502,23 +498,17 @@
                                             (&key (bar t barp))))
              bar
              barp)
+
 (test
  (mv-eql
   (let ((b1 (make-boa-supplied-p.2))
         (b2 (make-boa-supplied-p.2 :bar t)))
-    #+nil
-    (format t "BOA SUPPLIED-2 ~a" (list
-                                   (eq t (boa-supplied-p.2-bar b1))
-                                   (eq t (boa-supplied-p.2-bar b2))
-                                   (eq nil (boa-supplied-p.2-barp b1))
-                                   (eq t (boa-supplied-p.2-barp b2))))
     (values
      (eq t (boa-supplied-p.2-bar b1))
      (eq t (boa-supplied-p.2-bar b2))
      (eq nil (boa-supplied-p.2-barp b1))
-     ;; must be t. nil its bug:
      (eq t (boa-supplied-p.2-barp b2))))
-  t t t NIL))
+  t t t t))
 
 ;;;
 (defstruct (list-struct (:type list) :named) a-slot)
@@ -537,7 +527,7 @@
 (test (not (offset-list-struct-p '(offset-list-struct . 3))))
 
 (defstruct (vector-struct (:type vector) :named) a-slot)
-(test 
+(test
  (let* ((v (make-vector-struct))
         (r (vector-struct-p v)))
    #+nil(format t "VECTOR-STRUCT ~a ~a" v r)
@@ -591,16 +581,19 @@
       (error (c) nil)))))
 
 (defstruct print-struct-test a b c)
+;;; JSCL-specific: struct printing format includes package qualifier
+#+jscl
 (test
   ;; struct printing with only numbers
   (string-equal
     (format nil "~S" (make-print-struct-test :a 1 :b 2 :c 3))
-    "#S(JSCL::PRINT-STRUCT-TEST :A 1 :B 2 :C 3)"))
+    "#S(JSCL-TESTS::PRINT-STRUCT-TEST :A 1 :B 2 :C 3)"))
+#+jscl
 (test
   ;; struct printing with some strings in it
   (string-equal
     (format nil "~S" (make-print-struct-test :a "hello" :b "world" :c 3))
-    "#S(JSCL::PRINT-STRUCT-TEST :A \"hello\" :B \"world\" :C 3)"))
+    "#S(JSCL-TESTS::PRINT-STRUCT-TEST :A \"hello\" :B \"world\" :C 3)"))
 
 ;;;
 (defstruct (print-function-struct-test
@@ -634,45 +627,12 @@
            (eql 1 (ow1-foo-x (make-ow1-bar)))
            (eql nil (ow1-foo-x (make-ow1-baz)))))
 
-;;; Redefinition
-(defstruct redef-struct-test a b c)
-(defparameter *redef-struct-1* (make-redef-struct-test :a 1 :b 2 :c 3))
-(defparameter *redef-struct-p-1* #'redef-struct-test-p)
-
-(test (let ((warning-issued))
-        (handler-bind ((warning (lambda (c) (setq warning-issued c))))
-          (defstruct redef-struct-test b c))
-        warning-issued))
-(defparameter *redef-struct-2* (make-redef-struct-test :b 1 :c 2))
-(defparameter *redef-struct-p-2* #'redef-struct-test-p)
-(test (string-equal
-       (format nil "~S" *redef-struct-2*)
-       "#S(JSCL::REDEF-STRUCT-TEST :B 1 :C 2)"))
-(test (string-equal
-       (format nil "~S" *redef-struct-1*)
-       "#<JSCL::REDEF-STRUCT-TEST (OBSOLETE) :A 1 :B 2 :C 3>"))
-
-;;; New predicate is generated after redefinition
-(test (not (redef-struct-test-p *redef-struct-1*)))
-(test (funcall *redef-struct-p-1* *redef-struct-1*))
-(test (not (funcall *redef-struct-p-1* (make-redef-struct-test))))
-
-(test (let ((warning-issued))
-        (handler-bind ((warning (lambda (c) (setq warning-issued c))))
-          (defstruct redef-struct-test (b 3) c))
-        (not warning-issued)))
-(test (string-equal
-       (format nil "~S" (make-redef-struct-test :c 3))
-       "#S(JSCL::REDEF-STRUCT-TEST :B 3 :C 3)"))
-
-;;; Redefinition does not change layout, predicate remain valid
-(test (not (redef-struct-test-p *redef-struct-1*)))
-(test (funcall *redef-struct-p-2* (make-redef-struct-test)))
-(test (redef-struct-test-p *redef-struct-2*))
-
-;;; included in another struct, redefinition no longer possible
-(defstruct (redef-struct-test-child (:include redef-struct-test)))
-(test (not (ignore-errors (defstruct redef-struct-test a b c) t)))
+;;; Redefinition (JSCL-specific behavior)
+;;; Loaded from a fixture file so that defstruct forms are only eval'd
+;;; at runtime, not at compile time (which would pollute the runtime
+;;; state when this test file is processed via compile-file).
+#+jscl
+(load "tests/defstruct.fixtures.lisp")
 
 ;;; Issue #593: defstruct definitions should be visible inside a progn
 ;;; Test via eval (the REPL path): the second defstruct with :include
@@ -684,14 +644,12 @@
                            value))"))))
 
 ;;; Test via load (progn).
-;;; Note: we use (when (find :node *features*) ...) instead of #+node
-;;; because #+node is evaluated at read time during cross-compilation,
-;;; where *features* is (:jscl :jscl-xc) and :node is absent.
-;;; The runtime check ensures the test actually runs in Node.js.
-(when (find :node *features*)
-  (let* ((tmpdir (clstring (funcall (oget (require "os") "tmpdir"))))
-         (file (concat (clstring (#j:Fs:mkdtempSync (jsstring (concat tmpdir "/jscl-test-"))))
-                       "/issue-593.lisp")))
+
+#+node
+(progn
+  (let* ((tmpdir (jscl/ffi:clstring (funcall (jscl/ffi:oget (require "os") "tmpdir"))))
+         (file (concatenate 'string (jscl/ffi:clstring ((jscl/ffi:oget (require "fs") "mkdtempSync") (jscl/ffi:jsstring (concatenate 'string tmpdir "/jscl-test-"))))
+                            "/issue-593.lisp")))
     (with-open-file (s file :direction :output :if-exists :supersede)
       (write-string "(progn
                        (defstruct issue-593-load-foo)
@@ -699,15 +657,14 @@
                          value))" s))
     (load file)
     (test (eval (read-from-string
-                  "(issue-593-load-bar-p (make-issue-593-load-bar :value 42))")))))
+                 "(issue-593-load-bar-p (make-issue-593-load-bar :value 42))"))))
 
-;;; Test via load with separate toplevel forms (not in a progn).
-;;; Each form is compiled and executed individually, so the first
-;;; defstruct's runtime registration makes it visible to the second.
-(when (find :node *features*)
-  (let* ((tmpdir (clstring (funcall (oget (require "os") "tmpdir"))))
-         (file (concat (clstring (#j:Fs:mkdtempSync (jsstring (concat tmpdir "/jscl-test-"))))
-                       "/issue-593-sep.lisp")))
+  ;; Test via load with separate toplevel forms (not in a progn).
+  ;; Each form is compiled and executed individually, so the first
+  ;; defstruct's runtime registration makes it visible to the second.
+  (let* ((tmpdir (jscl/ffi:clstring (funcall (jscl/ffi:oget (require "os") "tmpdir"))))
+         (file (concatenate 'string (jscl/ffi:clstring ((jscl/ffi:oget (require "fs") "mkdtempSync") (jscl/ffi:jsstring (concatenate 'string tmpdir "/jscl-test-"))))
+                            "/issue-593-sep.lisp")))
     (with-open-file (s file :direction :output :if-exists :supersede)
       (write-string "(defstruct issue-593-load-sep-foo)" s)
       (terpri s)
@@ -715,16 +672,15 @@
                        value)" s))
     (load file)
     (test (eval (read-from-string
-                  "(issue-593-load-sep-bar-p (make-issue-593-load-sep-bar :value 42))")))))
+                 "(issue-593-load-sep-bar-p (make-issue-593-load-sep-bar :value 42))"))))
 
-;;; Test via compile-file: CLHS requires defstruct to register enough
-;;; information at compile time (:compile-toplevel) so that a
-;;; subsequent defstruct in the same file can use :include.
-(when (find :node *features*)
-  (let* ((tmpdir (clstring (funcall (oget (require "os") "tmpdir"))))
-         (dir (clstring (#j:Fs:mkdtempSync (jsstring (concat tmpdir "/jscl-compile-")))))
-         (src (concat dir "/issue-593-ct.lisp"))
-         (js  (concat src ".js")))
+  ;; Test via compile-file: CLHS requires defstruct to register enough
+  ;; information at compile time (:compile-toplevel) so that a
+  ;; subsequent defstruct in the same file can use :include.
+  (let* ((tmpdir (jscl/ffi:clstring (funcall (jscl/ffi:oget (require "os") "tmpdir"))))
+         (dir (jscl/ffi:clstring ((jscl/ffi:oget (require "fs") "mkdtempSync") (jscl/ffi:jsstring (concatenate 'string tmpdir "/jscl-compile-")))))
+         (src (concatenate 'string dir "/issue-593-ct.lisp"))
+         (js  (concatenate 'string src ".js")))
     (with-open-file (s src :direction :output :if-exists :supersede)
       (write-string "(defstruct issue-593-ct-foo)" s)
       (terpri s)
@@ -733,5 +689,18 @@
     ;; compile-file must not error: the second defstruct's :include
     ;; finds the first defstruct via compile-time registration
     (test (stringp (compile-file src)))))
+
+;;; defstruct should define a type usable with typep
+(defstruct defstruct-type-test a)
+(test (typep (make-defstruct-type-test :a 1) 'defstruct-type-test))
+(test (not (typep 42 'defstruct-type-test)))
+
+;;; CLOS-type struct predicate must not crash on non-struct arguments
+(defstruct predicate-safety-test a)
+(test (predicate-safety-test-p (make-predicate-safety-test)))
+(test (not (predicate-safety-test-p 3)))
+(test (not (predicate-safety-test-p "string")))
+(test (not (predicate-safety-test-p nil)))
+(test (not (predicate-safety-test-p '(1 2 3))))
 
 ;;; EOF

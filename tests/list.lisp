@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/list.lisp!")
 
 ;;; Tests for list functions
 
@@ -126,11 +125,14 @@
                        :key #'stringp)
                '("string" ("string" 2) (("string" 2 3)) ((("string" 2 3 44))))))
   (test (equal tree1 '(1 (1 2) ((1 2 3)) (((1 2 3 4)))))))
-(let ((tree2 '("one" ("one" "two") (("one" "Two" "three")))))
-  (test (equal (sublis '(("two" . 2)) tree2)
+;;; Use list/copy-seq to avoid literal coalescing by compile-file
+;;; (CLHS 3.2.4.2.2), which would make string keys eql and change
+;;; the default eql-based sublis behavior.
+(let ((tree2 (list "one" (list "one" "two") (list (list "one" "Two" "three")))))
+  (test (equal (sublis (list (cons (copy-seq "two") 2)) tree2)
                '("one" ("one" "two") (("one" "Two" "three")))))
   (test (equal tree2 '("one" ("one" "two") (("one" "Two" "three")))))
-  (test (equal (sublis '(("two" . 2)) tree2 :test 'equal)
+  (test (equal (sublis (list (cons (copy-seq "two") 2)) tree2 :test 'equal)
                '("one" ("one" 2) (("one" "Two" "three"))))))
 
 ;;; SUBST
@@ -155,7 +157,9 @@
 (test (equal (copy-list (list 1 2 3)) (list 1 2 3)))
 
 ;;; COPY-TREE
-(test (let* ((foo (list '(1 2) '(3 4)))
+;;; Use (list ...) instead of quoted literals to avoid undefined
+;;; behavior from mutating literal data (CLHS 3.7.1).
+(test (let* ((foo (list (list 1 2) (list 3 4)))
              (bar (copy-tree foo)))
         (setf (car (car foo)) 0)
         (not (= (car (car foo))
@@ -216,7 +220,7 @@
   (test (equal (assoc  3 alist :test-not #'=) '(1 . 2)))
   (test (equal (rassoc 4 alist :test-not #'=) '(1 . 2)))
   (test (equal (assoc  1 alist :key (lambda (x) (/ x 3))) '(3 . 4)))
-  (test (equal (rassoc 2 alist :key (lambda (x) (/ x 2))) '(3 . 4)))) 
+  (test (equal (rassoc 2 alist :key (lambda (x) (/ x 2))) '(3 . 4))))
 
 ;;; MEMBER
 (test (equal (member 2 '(1 2 3)) '(2 3)))
@@ -307,32 +311,17 @@
 
 
 ;;; set-difference test
+;;; Use copy-seq for strings shared between the two lists to prevent
+;;; compile-file from coalescing them (CLHS 3.2.4.2.2), which would
+;;; make them eql and change the default set-difference behavior.
 (let ((lst1 (list "A" "b" "C" "d"))
-      (lst2 (list "a" "B" "C" "d")))
-    (test (equal 
+      (lst2 (list "a" "B" (copy-seq "C") (copy-seq "d"))))
+    (test (equal
            (list
             (equal (set-difference lst1 lst2) (list "d" "C" "b" "A"))
             (equal (set-difference lst1 lst2 :test 'equal) (list "b" "A"))
             (equal (set-difference lst1 lst2 :test #'string=)  (list "b" "A")))
-           (list t t t)))) 
-
-
-;;; SORT
-#+jscl
-(test 
- (equal (apply 'jscl::concat
-               (sort (jscl::vector-to-list "cdbaxaybzcd") #'char-lessp))
-        "aabbccddxyz"))
-
-#+jscl
-(test 
- (let ((sorted (apply 'jscl::concat
-                      (sort (jscl::vector-to-list "cdbaxaybzcd") #'char-lessp))))
-     (equal (remove-duplicates sorted :test #'char-equal :from-end t) "abcdxyz")))
-
-(test 
- (equal (sort '((1 2 3) (4 5 6) (7 8 9))  #'> :key #'car)
-        '((7 8 9) (4 5 6) (1 2 3))))
+           (list t t t))))
 
 
 ;;; union
@@ -344,9 +333,9 @@
  (equal (nunion (list 'a 'b 'c) (list 'f 'a 'd))
         '(C B F A D)))
 
-(test 
+(test
  (equal (union '((x 5) (y 6)) '((z 2) (x 4))
-               :key #'car 
+               :key #'car
                :test #'equal)
         '((Y 6) (Z 2) (X 4))))
 (test

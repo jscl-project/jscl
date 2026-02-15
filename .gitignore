@@ -6,7 +6,6 @@
 *.lib
 \#*
 jscl.js
-tests.js
 .tmp/
 
 /repl-node.js
@@ -15,3 +14,6 @@ tests.js
 /node_modules/
 /.jscl_test/
 /dist/
+/out/
+
+tests/**/*.lisp.js

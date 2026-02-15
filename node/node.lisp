@@ -11,44 +11,47 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-(/debug "loading repl-node/repl.lisp!")
+(defpackage :jscl/node-repl (:use :cl))
+(in-package :jscl/node-repl)
+
+(defun require (name)
+  "Load a Node.js module by NAME."
+  (funcall (jscl-xc::%js-vref "require") (jscl-xc::jsstring name)))
 
 (defvar *repl*)
 
 (defun start-repl ()
-  (welcome-message)
-  (labels ((get-prompt ()
-             (concat (package-name-for-prompt *package*) "> "))
-           (repl-eval (input context resource-name cb)
+  (jscl-xc::welcome-message)
+  (labels ((repl-eval (input context resource-name cb)
              ;; Replace #\return with #\newline
-             (let ((input (clstring input)))
+             (let ((input (jscl-xc::clstring input)))
                (setq input (nsubstitute (code-char 10) (code-char 13) input))
-               (if (%sexpr-incomplete input)
-                   (funcall cb (new #j:repl:Recoverable))
+               (if (jscl-xc::%sexpr-incomplete input)
+                   (funcall cb (jscl-xc::new #j:repl:Recoverable))
                    (progn
-                     (with-toplevel-eval ()
-                       (eval-interactive-input input))
+                     (jscl-xc::with-toplevel-eval ()
+                       (jscl-xc::eval-interactive-input input))
                      ;; Update prompt
-                     ((oget *repl* "setPrompt") (jsstring (get-prompt)))
+                     ((jscl-xc::oget *repl* "setPrompt") (jscl-xc::jsstring (jscl-xc::get-repl-prompt)))
                      (funcall cb #j:null))))))
-    (setq *repl* (#j:repl:start (object "input" #j:process:stdin "output" #j:process:stdout
+    (setq *repl* (#j:repl:start (jscl-xc::object "input" #j:process:stdin "output" #j:process:stdout
                                         "eval" #'repl-eval "writer" (lambda (&rest _) #j"")
-                                        "prompt" (jsstring (get-prompt)))))))
+                                        "prompt" (jscl-xc::jsstring (jscl-xc::get-repl-prompt)))))))
 
 (defun node-init ()
   (setq *standard-output*
-        (make-stream
+        (jscl-xc::make-stream
          :write-fn (lambda (string)
-                     (#j:process:stdout:write (jsstring string))))
+                     (#j:process:stdout:write (jscl-xc::jsstring string))))
         *error-output* *standard-output*
-        *trace-output* *standard-output*)
-  (let ((args (mapcar #'clstring (vector-to-list (subseq #j:process:argv 2)))))
+        *trace-output* *standard-output*
+        *package* (find-package "CL-USER"))
+  (let ((args (mapcar #'jscl-xc::clstring (jscl-xc::vector-to-list (subseq #j:process:argv 2)))))
     (cond
       ((null args)
        (start-repl))
       (t
        (dolist (file args)
          (load file))))))
-
 
 (node-init)

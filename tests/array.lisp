@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/array.lisp!")
 
 (test (arrayp #(1 2 3 4)))
 (test (vectorp #(1 2 3 4)))
@@ -17,12 +16,12 @@
 
 (test
  (mv-eql
-  (let ((vector (make-array 10 :fill-pointer 1))
+  (let ((vector (make-array 10 :fill-pointer 1 :initial-element nil))
         (new-idx))
     (values
      (dotimes (i 10 new-idx)
        (push (vector-push i vector) new-idx))
-     (vector-to-list vector)))
+     (coerce vector 'list)))
   (NIL 9 8 7 6 5 4 3 2 1)
   (NIL 0 1 2 3 4 5 6 7 8)))
 
@@ -32,7 +31,7 @@
   (let (fable fa)
     (values
      (vector-push (setq fable (list 'fable))
-                  (setq fa (make-array 8 
+                  (setq fa (make-array 8
                                        :fill-pointer 2
                                        :initial-element 'first-one)))
      (fill-pointer fa)

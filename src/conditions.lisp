@@ -292,7 +292,7 @@
 
 ;;; @vlad-km macro %%assert moved to boot.lisp
 
-#+jscl
+#+jscl-target
 (progn
   (defmacro define-condition (name (&rest parents) (&rest slot-spec) &rest options)
     `(%define-condition ,name (,@parents)

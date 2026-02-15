@@ -29,16 +29,15 @@ If you want to hack JSCL, you will have to download the repository
 
     git clone https://github.com/jscl-project/jscl.git
 
-Run `npm install` under the `jscl` directory. Then *load* `jscl.lisp`
-in your Lisp, and call the build-all function to compile the
-implementation itself:
+Run `npm install` under the `jscl` directory, then run the build
+script:
 
-    (jscl:build-all)
+    ./make.sh
 
-It will generate a `jscl.js` file in the `jscl/dist` directory. Now
-you can open `dist/index.html` in your browser and use it. To use in Node,
-`node dist/jscl-node.js`; to use in Deno,
-`deno --allow-env --allow-read dist/jscl-deno.js`.
+It will generate `jscl.js` and the rest of the distribution files in
+the `jscl/dist` directory. Now you can open `dist/index.html` in your
+browser and use it. To use in Node, `node dist/jscl-node.js`; to use
+in Deno, `deno --allow-env --allow-read dist/jscl-deno.js`.
 
 
 ## Status

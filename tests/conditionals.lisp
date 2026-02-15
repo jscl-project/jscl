@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/conditionals.lisp!")
 
 ;;;; Tests for conditional forms
 ; Boolean operators

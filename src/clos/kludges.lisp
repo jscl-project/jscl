@@ -68,18 +68,20 @@
          (setf ,(car pairs) ,g!val)
          nil))))
 
+;; %rotatef-args-parser must be available at macro-expansion time
 (eval-always
- (defun %rotatef-args-parser (args)
-   (let ((res))
-     (when args
-       (dolist (it args)
-         (push it res)
-         (push it res))
-       (push (car args) res)
-       (setq res (reverse res))
-       (setf (car res) '!psetf))
-     res ))
- (defmacro !rotatef (&rest assigments)
-   `(progn
-      ,(%rotatef-args-parser `,assigments) nil)))
+  (defun %rotatef-args-parser (args)
+    (let ((res))
+      (when args
+        (dolist (it args)
+          (push it res)
+          (push it res))
+        (push (car args) res)
+        (setq res (reverse res))
+        (setf (car res) '!psetf))
+      res)))
+
+(defmacro !rotatef (&rest assigments)
+  `(progn
+     ,(%rotatef-args-parser `,assigments) nil))
 ;;; EOF

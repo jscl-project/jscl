@@ -111,12 +111,39 @@
         (concat result "|"))
       s))
 
-#+jscl (defvar *print-escape* t)
-#+jscl (defvar *print-circle* nil)
+;;; Write a symbol with full package qualification.
+;;; Used for struct printing to ensure readability during bootstrap.
+(defun write-symbol-fully-qualified (symbol stream)
+  "Write SYMBOL to STREAM with full package qualification.
+Always includes package prefix regardless of *package*."
+  (let ((package (symbol-package symbol))
+        (name (symbol-name symbol)))
+    (cond
+      ((null package)
+       ;; Uninterned symbol
+       (write-string "#:" stream)
+       (write-string (escape-token name) stream))
+      ((eq package (find-package "KEYWORD"))
+       ;; Keyword
+       (write-char #\: stream)
+       (write-string (escape-token name) stream))
+      (t
+       ;; Regular symbol - always print package prefix
+       (write-string (escape-token (package-name package)) stream)
+       (multiple-value-bind (sym type)
+           (find-symbol name package)
+         (declare (ignore sym))
+         (if (eq type :internal)
+             (write-string "::" stream)
+             (write-char #\: stream)))
+       (write-string (escape-token name) stream)))))
+
+#+jscl-target (defvar *print-escape* t)
+#+jscl-target (defvar *print-circle* nil)
 ;;; @vkm-path-printer 04-09-2022
 ;;; add variables 
-#+jscl (defvar *print-base* 10)
-#+jscl (defvar *print-radix* nil)
+#+jscl-target (defvar *print-base* 10)
+#+jscl-target (defvar *print-radix* nil)
 
 ;; To support *print-circle* some objects must be tracked for sharing:
 ;; conses, arrays and apparently-uninterned symbols.  These objects
@@ -225,7 +252,7 @@
       nil
     (not (eq s (find-symbol (symbol-name s))))))
 
-#+jscl (defvar *print-gensym* t)
+#+jscl-target (defvar *print-gensym* t)
 
 #+nil
 (defun write-symbol (form &optiona (stream *standard-output*))
@@ -335,8 +362,8 @@
          (write-string form stream)))
     ;; Functions
     (function
-     (let ((name #+jscl (lambda-name form)
-                 #-jscl nil))
+     (let ((name #+jscl-target (lambda-name form)
+                 #-jscl-target nil))
        (if name
            (simple-format stream "#<FUNCTION ~a>" name)
            (write-string "#<FUNCTION>" stream))))
@@ -359,7 +386,8 @@
                    (funcall print-function form stream 0))
                   (t
                    (write-string (if obsolete "#<" "#S(") stream)
-                   (write-aux (dsd-name dsd) stream known-objects object-ids)
+                   ;; Use fully-qualified name for struct type to ensure readability
+                   (write-symbol-fully-qualified (dsd-name dsd) stream)
                    (when obsolete (write-string " (OBSOLETE)" stream))
                    (mapc (lambda (slot prop)
                            (write-string " :" stream)
@@ -418,7 +446,7 @@
         (simple-format stream "#<JS-OBJECT ~a>" (js-object-signature form)))))))
 
 
-#+jscl
+#+jscl-target
 (defun output-stream-designator (x)
   (cond ((eq x nil) *standard-output*)
         ((eq x t)   *standard-output*)  
@@ -426,7 +454,7 @@
                x
                (error "Form ~s is not output stream type." (write-to-string x))))))
 
-#+jscl
+#+jscl-target
 (defun invoke-object-printer (fn form &optional (stream *standard-output*))
   (let ((stream (output-stream-designator stream)))
     (funcall fn form stream)))
@@ -439,7 +467,7 @@
 		 (string-downcase (hash-table-test form))
 		 (hash-table-count form)))
 
-#+jscl
+#+jscl-target
 (defun write (form &key (stream *standard-output*)
                    (escape *print-escape*)
                    (gensym *print-gensym*)
@@ -458,13 +486,13 @@
       form)))
 
 
-#+jscl
+#+jscl-target
 (defun write-to-string (form)
   (with-output-to-string (output)
     (write form :stream output)))
 
 ;;; @vkm-path-printer 04-09-2022
-#+jscl
+#+jscl-target
 (defun fresh-line (&optional (stream *standard-output*))
   (let ((s (output-stream-designator stream)))
     (cond ((start-line-p s)
@@ -472,7 +500,7 @@
           (t (write-char #\Newline s)
              t))))
 
-#+jscl
+#+jscl-target
 (progn
   (defun prin1 (form &optional stream)
     (write form :stream stream :escape t))

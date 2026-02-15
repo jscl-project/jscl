@@ -75,8 +75,12 @@ async function initialize() {
 function loadJSCLWorker(sessionId) {
   const jsclWorker = new Worker("jscl-worker.js");
   jsclWorker.onmessage = (event) => {
-    const { string, stringclass } = event.data;
-    jqconsole.Write(string, stringclass);
+    const { string, stringclass, html } = event.data;
+    if (html) {
+      jqconsole.Write(string, stringclass, "");
+    } else {
+      jqconsole.Write(string, stringclass);
+    }
   };
   jsclWorker.postMessage({
     command: "init",

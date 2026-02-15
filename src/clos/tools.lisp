@@ -29,7 +29,7 @@
 
 ;;; display defclass
 
-(export '(display-defclass) 'jscl)
+(export '(display-defclass) "JSCL-XC")
 
 (defun display-defclass (class-name)
     (printer-defclass (generate-defclass (find-class class-name)))
@@ -86,7 +86,7 @@
     `(defgeneric ,(generic-function-name gf)
          ,(generic-function-lambda-list gf)))
 
-(export '(display-defgeneric) 'jscl)
+(export '(display-defgeneric) "JSCL-XC")
 (defun display-defgeneric (arg)
     (let ((gf (if (symbolp arg) (find-generic-function arg) arg)))
         (print (generate-defgeneric gf))
@@ -124,7 +124,7 @@
                         specializers)
                 (subseq lambda-list number-required))))
 
-(export '(display-generic-function) 'jscl)
+(export '(display-generic-function) "JSCL-XC")
 (defun display-generic-function (gf-name &key show-body)
     (display-defgeneric gf-name)
     (dolist (method (generic-function-methods (find-generic-function gf-name)))

@@ -271,7 +271,7 @@
                        (LIST G!NEWVALUE)
                        (LIST* G!SETTER G!NEWVALUE ARGUMENTS)
                        (CONS G!GETTER ARGUMENTS))))))
-          JSCL::*SETF-EXPANDERS*) ))
+          *SETF-EXPANDERS*) ))
 
 ;;; @vlad-km
 (defun finalize-generic-function (gf)
