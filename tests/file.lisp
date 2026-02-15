@@ -2,7 +2,9 @@
 
 #+node
 (progn
-  (defvar *tmp-dir* (jscl/ffi:clstring ((jscl/ffi:oget (require "fs") "mkdtempSync") #j".jscl_test/test-")))
+  (let ((fs (require "fs")))
+    ((jscl/ffi:oget fs "mkdirSync") #j".jscl_test" (jscl/ffi:object "recursive" #j:true))
+    (defvar *tmp-dir* (jscl/ffi:clstring ((jscl/ffi:oget fs "mkdtempSync") #j".jscl_test/test-"))))
 
   (test
    (progn
