@@ -13,7 +13,8 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
-(/debug "loading repl-web/repl.lisp!")
+(defpackage :jscl/web-repl (:use :cl :jscl/ffi))
+(in-package :jscl/web-repl)
 
 (defun %write-string (string &optional (escape t) (style "jqconsole-output"))
     (let ((jsstr (jsstring string))
@@ -37,30 +38,42 @@
 
 (defun toplevel ()
   (#j:jqconsole:RegisterMatching #j"(" #j")" #j"parents")
-  (let ((prompt (jsstring (format nil "~a> " (package-name-for-prompt *package*)))))
+  (let ((prompt (jsstring (jscl::get-repl-prompt))))
     (#j:jqconsole:Write prompt #j"jqconsole-prompt"))
   (flet ((process-input (input)
-           (with-toplevel-eval ()
-             (eval-interactive-input (clstring input)))
+           (jscl::with-toplevel-eval ()
+             (jscl::eval-interactive-input (clstring input)))
            (save-history)
            (toplevel)))
     (#j:jqconsole:Prompt #j:true #'process-input
      (lambda (input &rest _)
-       (let ((result (%sexpr-incomplete (clstring input))))
+       (let ((result (jscl::%sexpr-incomplete (clstring input))))
          (if result result #j:false))))))
+
+(defun write-welcome-message ()
+  "Render the welcome message as HTML via jqconsole."
+  (dolist (item (jscl::welcome-message-items))
+    (ecase (first item)
+      (:str     (%write-string (second item)))
+      (:bold    (%write-string (format nil "<strong>~a</strong>" (second item)) nil))
+      (:link    (%write-string (format nil "<a href=\"~a\" target=\"_blank\">~a</a>"
+                                       (third item) (second item))
+                               nil))
+      (:newline (%write-string (string #\newline))))))
 
 (defun web-init ()
   (load-history)
   (setq *standard-output*
-        (make-stream
+        (jscl::make-stream
          :write-fn (lambda (string) (%write-string string))
          :kind 'web-repl-output-stream)
         *error-output*
-        (make-stream
+        (jscl::make-stream
          :write-fn (lambda (string) (%write-string string t +err-css+))
          :kind 'web-repl-error-stream)
-        *trace-output* *standard-output*)
-  (welcome-message :html t)
+        *trace-output* *standard-output*
+        *package* (find-package "CL-USER"))
+  (write-welcome-message)
   (#j:window:addEventListener #j"load" (lambda (&rest args) (toplevel))))
 
 (web-init)

@@ -17,18 +17,22 @@
 ;; along with JSCL.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Duplicate from boot.lisp by now
+#-jscl-target
 (defmacro while (condition &body body)
   `(do ()
        ((not ,condition))
      ,@body))
 
+#-jscl-target
 (defun aset (array idx value)
   (setf (aref array idx) value))
 
+#-jscl-target
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun concat (&rest strs)
     (apply #'concatenate 'string strs)))
 
+#-jscl-target
 (defun /debug (x)
   (declare (ignorable x))
   ;; (write-line x)
@@ -39,49 +43,53 @@
 ;;;; JS values don't exist in the host. These structs stand in for them
 ;;;; so the compiler can recognize and dump FFI literals.
 
-(defstruct js-value)
+;;; In JSCL (Stage 1), native FFI is already available. In the host
+;;; Lisp, we need compatibility types and reader macros.
+#-jscl-target
+(progn
+  (defstruct js-value)
 
-(defstruct (js-string (:include js-value)
-                      (:constructor make-js-string (value))
-                      (:predicate %host-js-string-p))
-  value)
+  (defstruct (js-string (:include js-value)
+			(:constructor make-js-string (value))
+			(:predicate %host-js-string-p))
+    value)
 
-(defstruct (js-boolean (:include js-value)
-                       (:constructor %make-js-boolean (value)))
-  value)
+  (defstruct (js-boolean (:include js-value)
+			 (:constructor %make-js-boolean (value)))
+    value)
 
-(defstruct (js-null (:include js-value)
-                    (:constructor %make-js-null)))
+  (defstruct (js-null (:include js-value)
+		      (:constructor %make-js-null)))
 
-(defstruct (js-undefined (:include js-value)
-                         (:constructor %make-js-undefined)))
+  (defstruct (js-undefined (:include js-value)
+			   (:constructor %make-js-undefined)))
 
-;;;; Constants for the host.
-;;;; The reader (#j:true, etc.) returns these cached objects so that EQ
-;;;; comparisons work reliably across different read sites.
-(defvar *host-js-true* (%make-js-boolean t))
-(defvar *host-js-false* (%make-js-boolean nil))
-(defvar *host-js-null* (%make-js-null))
-(defvar *host-js-undefined* (%make-js-undefined))
+  ;; Constants for the host.
+  ;; The reader (#j:true, etc.) returns these cached objects so that EQ
+  ;; comparisons work reliably across different read sites.
+  (defvar *host-js-true* (%make-js-boolean t))
+  (defvar *host-js-false* (%make-js-boolean nil))
+  (defvar *host-js-null* (%make-js-null))
+  (defvar *host-js-undefined* (%make-js-undefined))
 
-;;;; Interning table for host JS strings.
-;;;; jsstring interns so that EQ comparisons work, matching the
-;;;; target behaviour where JS === compares strings by value.
-(defvar *js-string-intern-table* (make-hash-table :test 'equal))
+  ;; Interning table for host JS strings.
+  ;; jsstring interns so that EQ comparisons work, matching the
+  ;; target behaviour where JS === compares strings by value.
+  (defvar *js-string-intern-table* (make-hash-table :test 'equal))
 
-(defun jsstring (x)
-  (or (gethash x *js-string-intern-table*)
-      (setf (gethash x *js-string-intern-table*)
-            (make-js-string x))))
+  (defun jsstring (x)
+    (or (gethash x *js-string-intern-table*)
+	(setf (gethash x *js-string-intern-table*)
+	      (make-js-string x))))
 
-(defun jsbool (x)
-  (if x *host-js-true* *host-js-false*))
+  (defun jsbool (x)
+    (if x *host-js-true* *host-js-false*))
 
-(defun jsnull ()
-  *host-js-null*)
+  (defun jsnull ()
+    *host-js-null*)
 
-(defun jsundefined ()
-  *host-js-undefined*)
+  (defun jsundefined ()
+    *host-js-undefined*)
 
 (defun typeof (x)
   (typecase x
@@ -102,11 +110,13 @@
 
 ;;;; #j reader dispatch macro
 
-(defun j-reader (stream subchar arg)
-  (declare (ignorable subchar arg))
-  (read-sharp-j stream))
+  (defun j-reader (stream subchar arg)
+    (declare (ignorable subchar arg))
+    (read-sharp-j stream))
 
-(set-dispatch-macro-character #\# #\J #'j-reader)
+  (set-dispatch-macro-character #\# #\J #'j-reader))
+
+
 
 #+sbcl
 (eval-when (:compile-toplevel :load-toplevel :execute)

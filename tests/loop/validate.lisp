@@ -1,11 +1,10 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/loop/validate-tests.lisp!")
 
 ;;;>
 ;;;> Portions of LOOP are Copyright (c) 1986 by the Massachusetts Institute of Technology.
 ;;;> All Rights Reserved.
-;;;> 
+;;;>
 ;;;> Permission to use, copy, modify and distribute this software and its
 ;;;> documentation for any purpose and without fee is hereby granted,
 ;;;> provided that the M.I.T. copyright notice appear in all copies and that
@@ -17,7 +16,7 @@
 ;;;> copying distribution is by permission of M.I.T.  M.I.T. makes no
 ;;;> representations about the suitability of this software for any purpose.
 ;;;> It is provided "as is" without express or implied warranty.
-;;;> 
+;;;>
 ;;;>      Massachusetts Institute of Technology
 ;;;>      77 Massachusetts Avenue
 ;;;>      Cambridge, Massachusetts  02139
@@ -26,7 +25,7 @@
 ;;;>
 ;;;> Portions of LOOP are Copyright (c) 1989, 1990, 1991, 1992 by Symbolics, Inc.
 ;;;> All Rights Reserved.
-;;;> 
+;;;>
 ;;;> Permission to use, copy, modify and distribute this software and its
 ;;;> documentation for any purpose and without fee is hereby granted,
 ;;;> provided that the Symbolics copyright notice appear in all copies and
@@ -38,7 +37,7 @@
 ;;;> Symbolics.  Symbolics makes no representations about the suitability of
 ;;;> this software for any purpose.  It is provided "as is" without express
 ;;;> or implied warranty.
-;;;> 
+;;;>
 ;;;> Symbolics, CLOE Runtime, and Minima are trademarks, and CLOE, Genera,
 ;;;> and Zetalisp are registered trademarks of Symbolics, Inc.
 ;;;>
@@ -48,13 +47,13 @@
 ;;;>      United States of America
 ;;;>      +1-617-221-1000
 
+(defpackage :jscl-tests-loop
+  (:use :cl))
 
-(in-package :jscl/loop)
-
+(in-package :jscl-tests-loop)
 
 (defvar *slow-test*
 	nil)
-
 
 ;; (defvar *loop-lisp-package*
 ;; 	(let ((p (car (last (package-use-list (find-package 'jscl/loop))))))
@@ -62,7 +61,6 @@
 ;; 		       if not, you must preset jscl/loop::*loop-lisp-package*.~%"
 ;; 		  p)
 ;; 	  p))
-
 
 (defmacro test (short-desc lambda-list form &body params-and-answers)
   `(test1 ,short-desc ',form ',lambda-list
@@ -74,8 +72,7 @@
   (declare (ignore short-desc))
   (dolist (pair params-and-answers)
     (let ((params (first pair)) (answers (rest pair)) yow)
-      ;; fixme: 
-      (jscl::test
+      (jscl-tests::test
           (cond
             ((equal (setq yow (multiple-value-list (apply interpreted params))) answers))
             (t
@@ -92,13 +89,11 @@
 
 #+nil
 (unless (find-package 'extended-loop-test-package)
-  (let ((p (make-package 'extended-loop-test-package :use (list jscl/loop::*loop-lisp-package*))))
+  (let ((p (make-package 'extended-loop-test-package :use (list jscl-xc/loop::*loop-lisp-package*))))
     (shadowing-import 'symbolics-loop:loop p)
     (use-package (find-package 'symbolics-loop) p)
     p))
 
 
-;;; FIXME: *package* should be bound for the file being compiled.
-(in-package :cl)
 
 ;;; EOF

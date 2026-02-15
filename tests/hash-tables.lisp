@@ -1,11 +1,13 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/hash-tables.lisp!")
 
+;;; Use copy-seq to ensure distinct string objects.  compile-file may
+;;; coalesce equal string literals into the same object (CLHS 3.2.4.2.2),
+;;; which would make them eql and break this eql hash-table test.
 (let ((ht (make-hash-table))
-      (key "foo"))
+      (key (copy-seq "foo")))
   (setf (gethash key ht) 10)
-  (test (null (gethash "foo" ht)))
+  (test (null (gethash (copy-seq "foo") ht)))
   (test (equal (gethash key ht) 10))
   (setf (gethash 'foo ht) "lisp")
   (test (string= (gethash 'foo ht) "lisp")))
@@ -90,8 +92,9 @@
   0))
 
 ;;; test copy-hash
+#+jscl
 (test
- (equal 
+ (equal
   (let* ((ht (temp-hash-table :fill t))
          (ht-copy (jscl::copy-hash-table ht))
          (map nil))
@@ -102,6 +105,7 @@
     (remove-duplicates map))
   '(t)))
 
+#+jscl
 (test
  (equal
   (let* ((ht (temp-hash-table :test #'equal :fill t))
@@ -120,19 +124,21 @@
     (remove-duplicates map))
   '(t)))
 
-;;; test hash-table-printer
-(test (string= "#<HASH-TABLE :TEST eq :COUNT 0>"
-               (write-to-string (temp-hash-table :test #'eq))))
-(test (string= "#<HASH-TABLE :TEST eql :COUNT 0>"
-               (write-to-string (temp-hash-table))))
-(test (string= "#<HASH-TABLE :TEST equal :COUNT 0>"
-               (write-to-string (temp-hash-table :test #'equal))))
-(test (string= "#<HASH-TABLE :TEST eql :COUNT 6>"  (write-to-string (temp-hash-table :fill t))))
-(test (string= "#<HASH-TABLE :TEST eql :COUNT 5>"
-               (write-to-string
-                (let ((h (temp-hash-table :fill t)))
-                  (remhash 'one h)
-                  h))))
+;;; test hash-table-printer (JSCL-specific print format)
+#+jscl
+(progn
+  (test (string= "#<HASH-TABLE :TEST eq :COUNT 0>"
+                 (write-to-string (temp-hash-table :test #'eq))))
+  (test (string= "#<HASH-TABLE :TEST eql :COUNT 0>"
+                 (write-to-string (temp-hash-table))))
+  (test (string= "#<HASH-TABLE :TEST equal :COUNT 0>"
+                 (write-to-string (temp-hash-table :test #'equal))))
+  (test (string= "#<HASH-TABLE :TEST eql :COUNT 6>"  (write-to-string (temp-hash-table :fill t))))
+  (test (string= "#<HASH-TABLE :TEST eql :COUNT 5>"
+                 (write-to-string
+                  (let ((h (temp-hash-table :fill t)))
+                    (remhash 'one h)
+                    h)))))
 
 ;;; Test numbers as keys
 (let ((ht (make-hash-table)))
@@ -146,7 +152,7 @@
   (test (equal 'bar (setf (gethash "123" ht) 'bar)))
   (test (equal 'foo (gethash 123 ht)))
   (test (equal 'bar (gethash "123" ht)))
-  (test (eq 2 (length (hash-table-keys ht)))))
+  #+jscl (test (eq 2 (length (jscl::hash-table-keys ht)))))
 
 ;;; SXHASH
 
@@ -173,12 +179,12 @@
 (test (integerp (sxhash nil)))
 (test (= (sxhash nil) (sxhash nil)))
 
-;; characters hash to their char-code
-(test (= (sxhash #\A) (char-code #\A)))
+;; characters hash to their char-code (JSCL-specific implementation detail)
+#+jscl (test (= (sxhash #\A) (char-code #\A)))
 
-;; numbers hash based on value
-(test (= (sxhash 0) 0))
-(test (= (sxhash 42) 42))
+;; numbers hash based on value (JSCL-specific implementation detail)
+#+jscl (test (= (sxhash 0) 0))
+#+jscl (test (= (sxhash 42) 42))
 
 ;; symbols get consistent hash codes
 (let ((sym 'test-symbol))
@@ -275,7 +281,7 @@
 ;;   sxhash((3 0)) = 3*31 + (0*31 + 0) = 93
 ;; This test catches the bug where Lisp NIL was truthy in JS, causing
 ;; all keys in the same hash bucket to appear equal.
-(test (= (sxhash '(1 2)) (sxhash '(3 0))))  ; verify collision
+#+jscl (test (= (sxhash '(1 2)) (sxhash '(3 0))))  ; verify collision (JSCL-specific)
 (test (not (equal '(1 2) '(3 0))))          ; verify not equal
 (let ((ht (make-hash-table :test #'equal)))
   (setf (gethash '(1 2) ht) 'value-a)
@@ -301,7 +307,8 @@
 (test (not (hash-table-p #(1 2 3))))
 
 ;; A raw JS Map counts as a hash table with EQ test
-(let ((js-map (new #j:Map)))
+#+jscl
+(let ((js-map (jscl/ffi:new #j:Map)))
   (test (hash-table-p js-map))
   (test (eq (hash-table-test js-map) 'eq)))
 
@@ -328,21 +335,33 @@
 ;;; WITH-HASH-TABLE-ITERATOR
 
 (test
- (let ((h (make-hash-table)))
+ (let ((h (make-hash-table))
+       (entries nil))
    (setf (gethash 'foo h) 1)
    (setf (gethash 2 h) 'bar)
    (with-hash-table-iterator (i h)
-     (and (mv-eql (i) t foo 1)
-          (mv-eql (i) t 2 bar)
-          (mv-eql (i) nil nil nil)))))
+     (loop
+       (multiple-value-bind (more key value) (i)
+         (unless more (return))
+         (push (list key value) entries))))
+   (and (= (length entries) 2)
+        (member '(foo 1) entries :test #'equal)
+        (member '(2 bar) entries :test #'equal)
+        t)))
 
 (test
- (let ((h (make-hash-table :test 'equal)))
+ (let ((h (make-hash-table :test 'equal))
+       (entries nil))
    (setf (gethash "foo" h) "test")
    (setf (gethash "bar" h) 2)
    (with-hash-table-iterator (i h)
-     (and (mv-eql (i) t "foo" "test")
-          (mv-eql (i) t "bar" 2)
-          (mv-eql (i) nil nil nil)))))
+     (loop
+       (multiple-value-bind (more key value) (i)
+         (unless more (return))
+         (push (list key value) entries))))
+   (and (= (length entries) 2)
+        (member '("foo" "test") entries :test #'equal)
+        (member '("bar" 2) entries :test #'equal)
+        t)))
 
 ;;; EOF

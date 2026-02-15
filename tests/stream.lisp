@@ -1,11 +1,12 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/stream.lisp!")
 
-(with-input-from-string (in "jscl::foo jscl::bar jscl::baz")
-  (test (eq (read in) 'jscl::foo))
-  (test (eq (read in) 'jscl::bar))
-  (test (eq (read in) 'jscl::baz)))
+(defpackage :jscl-test-stream)
+
+(with-input-from-string (in "jscl-test-stream::foo jscl-test-stream::bar jscl-test-stream::baz")
+  (test (eq (read in) 'jscl-test-stream::foo))
+  (test (eq (read in) 'jscl-test-stream::bar))
+  (test (eq (read in) 'jscl-test-stream::baz)))
 
 (test (let ((stream (make-string-output-stream)))
         (and (write-line "123" stream)

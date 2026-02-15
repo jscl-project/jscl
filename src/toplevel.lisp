@@ -302,17 +302,18 @@ All errors are caught and report to *ERROR-OUTPUT*."
    with-output-to-string with-package-iterator with-simple-restart
    with-slots with-standard-io-syntax write write-byte write-char
    write-line write-sequence write-string write-to-string y-or-n-p
-   yes-or-no-p zerop))
+   yes-or-no-p zerop)
+ "CL")
 
 (export '(mop-object mop-object-p
           compile-application)
-        'jscl)
+        "JSCL-XC")
 
 ;;; JSCL/FFI package - public API for JavaScript interop
 ;;; Only exports symbols documented in docs/ffi.md
-(defpackage "JSCL/FFI"
+(defpackage "JSCL-XC/FFI"
   (:use)
-  (:import-from "JSCL"
+  (:import-from "JSCL-XC"
    #:object
    #:oget #:oset #:oget?
    #:typeof #:instanceof #:new
@@ -320,6 +321,7 @@ All errors are caught and report to *ERROR-OUTPUT*."
    #:jsbool #:clbool
    #:in)
   (:export
+   #:*root*
    #:object
    #:oget #:oset #:oget?
    #:typeof #:instanceof #:new
@@ -328,7 +330,6 @@ All errors are caught and report to *ERROR-OUTPUT*."
    #:jsbool #:clbool))
 
 (setq *package* *user-package*)
-
 
 (defun compilation-notice ()
   #.(let ((build-time
@@ -363,17 +364,43 @@ All errors are caught and report to *ERROR-OUTPUT*."
 (when (not (eq (typeof (%js-vref "WorkerGlobalScope")) #j"undefined"))
   (push :web-worker *features*))
 
-(defun welcome-message (&key (html nil))
-  (format t "Welcome to ~a (version ~a ~a)~%~%"
-          (lisp-implementation-type)
-          (lisp-implementation-version)
-          (compilation-notice))
-  (format t "JSCL is a Common Lisp implementation on Javascript.~%")
-  (if html
-      (%write-string
-       (format nil "For more information, visit the project page at <a href=\"https://github.com/jscl-project/jscl\">GitHub</a>.~%~%")
-       nil)
-      (format t "For more information, visit the project page at https://github.com/jscl-project/jscl.~%~%")))
+(defun welcome-message-items ()
+  "Return the welcome message as a list of markup items.
+Each item is one of:
+  (:str STRING)      - plain text
+  (:bold STRING)     - emphasized text
+  (:link TEXT URL)   - hyperlink
+  (:newline)         - line break"
+  `((:bold ,(format nil "Welcome to ~a" (lisp-implementation-type)))
+    (:str ,(format nil " (version ~a ~a)"
+                   (lisp-implementation-version)
+                   (compilation-notice)))
+    (:newline) (:newline)
+    (:str "JSCL is a Common Lisp implementation on Javascript.")
+    (:newline)
+    (:str "For more information, visit the project page at ")
+    (:link "https://github.com/jscl-project/jscl"
+           "https://github.com/jscl-project/jscl")
+    (:str ".")
+    (:newline) (:newline)))
+
+(defun welcome-message ()
+  "Print the welcome message as plain text to *standard-output*."
+  (dolist (item (welcome-message-items))
+    (ecase (first item)
+      (:str      (write-string (second item)))
+      (:bold     (write-string (second item)))
+      (:link     (write-string (second item)))
+      (:newline  (terpri)))))
+
+(defun get-repl-prompt ()
+  "Return a prompt string for the REPL based on *package*."
+  (let ((name (reduce (lambda (s1 s2)
+                        (if (< (string-length s1) (string-length s2))
+                            s1 s2))
+                      (package-nicknames *package*)
+                      :initial-value (package-name *package*))))
+    (concatenate 'string name "> ")))
 
 ;;; Decides whether the input the user has entered is completed or we
 ;;; should accept one more line.
@@ -425,11 +452,10 @@ All errors are caught and report to *ERROR-OUTPUT*."
       *error-output* *standard-output*
       *trace-output* *standard-output*)
 
-(when (find :node *features*)
-  (setf #j:Fs (funcall (%js-vref "require") #j"fs"))
-  (setf #j:FsPath (funcall (%js-vref "require") #j"path")))
-
-(defun require (name)
-  (if (find :node *features*)
-      (funcall (%js-vref "require") (jsstring name))
-      (error "require not supported on this platform")))
+;;; Rename bootstrap packages from JSCL-XC to JSCL.
+;;; During the entire build, packages use the JSCL-XC prefix to avoid
+;;; conflicts with the host CL. Now that all code is loaded, rename
+;;; them to their final JSCL names for user-facing code.
+(rename-package "JSCL-XC/FFI" "JSCL/FFI")
+(rename-package "JSCL-XC/LOOP" "JSCL/LOOP")
+(rename-package "JSCL-XC" "JSCL")

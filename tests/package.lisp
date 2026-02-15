@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/package.lisp!")
 
 (test (listp (list-all-packages)))
 
@@ -142,9 +141,10 @@
 (test (do-external-symbols (var 'cl)
         (when (eq var t) (return t))))
 
-;;; This test is failing. I have disabled temporarily.
-;;; note: Fixed ? @vkm
 (test (eq (eval '(in-package #:cl-user)) (find-package '#:cl-user)))
+
+;; The test above changed *package* to CL-USER; switch back.
+(in-package :jscl-tests)
 
 ;;; Keywords are self-evaluating
 (test (eq (symbol-value :obscure-kw-12345) :obscure-kw-12345))

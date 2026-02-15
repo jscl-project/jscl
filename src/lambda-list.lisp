@@ -21,7 +21,7 @@
 (defvar !lambda-list-keywords
   '(&optional &rest &key &aux &allow-other-keys &body &optional &environment))
 
-#+jscl
+#+jscl-target
 (defconstant lambda-list-keywords !lambda-list-keywords)
 
 ;;;; Lambda list parsing
@@ -392,7 +392,7 @@
                `(cdr ,whole)
                body)))))))
 
-#+jscl
+#+jscl-target
 (defmacro destructuring-bind (lambda-list expression &body body)
   (!expand-destructuring-bind
    (parse-destructuring-lambda-list lambda-list)

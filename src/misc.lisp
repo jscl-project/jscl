@@ -82,7 +82,7 @@
 (defun %prevent-infinite-trace (name)
   (typecase name
     (symbol
-     (if (jscl::memq name *prevent-trace-stop-list*)
+     (if (memq name *prevent-trace-stop-list*)
          (error "Trace - `~S` this function is not traceable." name)))
     (otherwise
      (error 'simple-type-error

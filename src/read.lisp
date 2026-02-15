@@ -1,4 +1,4 @@
-;;; read.lisp --- 
+;;; read.lisp ---
 
 ;; Copyright (C) 2012, 2013 David Vazquez
 ;; Copyright (C) 2012 Raimon Grau
@@ -18,19 +18,75 @@
 
 (/debug "loading read.lisp!")
 
-#+jscl (defmacro with-standard-io-syntax (&body body)
-         `(let ((*package* (find-package-or-fail "CL-USER"))
-                (*print-base* 10)
-                (*print-circle* nil)
-                (*print-escape* t)
-                (*print-gensym* t)
-                (*print-radix* nil)
-                (*read-base* 10))
-            ,@body))
+#+jscl-target
+(defmacro with-standard-io-syntax (&body body)
+  `(let ((*package* (find-package-or-fail "CL-USER"))
+         (*print-base* 10)
+         (*print-circle* nil)
+         (*print-escape* t)
+         (*print-gensym* t)
+         (*print-radix* nil)
+         (*read-base* 10))
+     ,@body))
 
 ;;;; Reader
 
-#+jscl(defvar *read-base* 10)
+#+jscl-target
+(defvar *read-base* 10)
+
+;;;; Readtable
+
+#+jscl-target
+(def!struct (readtable (:predicate readtablep))
+  (dispatch-table nil)   ; alist: ((disp-char . ((sub-char . function) ...)) ...)
+  (case :upcase))
+
+#+jscl-target
+(defvar *readtable* (make-readtable :dispatch-table (list (cons #\# nil))))
+
+#+jscl-target
+(defun make-dispatch-macro-character (char &optional non-terminating-p (readtable *readtable*))
+  (declare (ignore non-terminating-p))
+  (unless (char= char #\#)
+    (error "JSCL only supports #\\# as a dispatch macro character, not ~S" char))
+  (let ((dt (readtable-dispatch-table readtable)))
+    (unless (assoc char dt)
+      (setf (readtable-dispatch-table readtable)
+            (cons (cons char nil) dt))))
+  t)
+
+#+jscl-target
+(defun set-dispatch-macro-character (disp-char sub-char new-function
+                                     &optional (readtable *readtable*))
+  (let ((entry (assoc disp-char (readtable-dispatch-table readtable))))
+    (unless entry
+      (error "~S is not a dispatch macro character." disp-char))
+    (when (digit-char-p sub-char)
+      (error "SUB-CHAR cannot be a decimal digit: ~S" sub-char))
+    (let* ((uc (char-upcase sub-char))
+           (sub-entry (assoc uc (cdr entry))))
+      (if sub-entry
+          (setf (cdr sub-entry) new-function)
+          (setf (cdr entry) (cons (cons uc new-function) (cdr entry))))))
+  t)
+
+#+jscl-target
+(defun get-dispatch-macro-character (disp-char sub-char &optional (readtable *readtable*))
+  (let ((entry (assoc disp-char (readtable-dispatch-table readtable))))
+    (when entry
+      (cdr (assoc (char-upcase sub-char) (cdr entry))))))
+
+#+jscl-target
+(defun copy-readtable (&optional (from-readtable *readtable*) to-readtable)
+  (let ((new (or to-readtable (make-readtable))))
+    (setf (readtable-dispatch-table new)
+          (mapcar (lambda (entry)
+                    (cons (car entry)
+                          (mapcar (lambda (sub) (cons (car sub) (cdr sub)))
+                                  (cdr entry))))
+                  (readtable-dispatch-table from-readtable)))
+    (setf (readtable-case new) (readtable-case from-readtable))
+    new))
 
 ;;; Reader radix bases
 (defvar *fixed-radix-bases* '((#\B . 2) (#\b . 2) (#\o . 8) (#\O . 8) (#\x . 16) (#\X . 16)))
@@ -249,6 +305,22 @@
           (not (eval-feature-expression subexpr))))))))
 
 
+#+jscl-target
+(defun read-sharp-dispatch (stream ch)
+  "Look up CH in *readtable*'s dispatch table for #. If found, call it;
+otherwise signal a reader error."
+  (let* ((dispatch-entry (cdr (assoc #\# (readtable-dispatch-table *readtable*))))
+         (fn (cdr (assoc (char-upcase ch) dispatch-entry))))
+    (if fn
+        (funcall fn stream ch nil)
+        (simple-reader-error stream "Invalid dispatch character ~S after #" ch))))
+
+#-jscl-target
+(defun read-sharp-dispatch (stream ch)
+  (case ch
+    ((#\J #\j) (read-sharp-j stream))
+    (t (simple-reader-error stream "Invalid dispatch character ~S after #" ch))))
+
 (defun read-sharp (stream &optional eof-error-p eof-value)
   (%read-char stream)
   (let ((ch (%read-char stream)))
@@ -295,15 +367,13 @@
                 (let ((*package* (find-package :keyword))
                       (*read-skip-p* nil))
                   (ls-read stream eof-error-p eof-value t))))
-         
+
          (if (eql (char= ch #\+) (eval-feature-expression expression))
              (ls-read stream eof-error-p eof-value t)
              (prog2 (let ((*read-skip-p* t))
                       (ls-read stream))
                  (ls-read stream eof-error-p eof-value t)))))
-      ((#\J #\j)
-       (read-sharp-j stream))
-      ;; Sharp radix 
+      ;; Sharp radix
       ((#\B #\b #\O #\o #\X #\x)
        (sharp-radix-reader ch stream))
       (#\|
@@ -349,7 +419,7 @@
                          (cdr cell))
                      (simple-reader-error stream "Invalid labelled object #~S#" id)))))))
          (t
-          (simple-reader-error stream "Invalid dispatch character ~S after #" ch)))))))
+          (read-sharp-dispatch stream ch)))))))
 
 ;;; The #j: and #j"" reader macros for JavaScript interop.
 ;;;
@@ -361,7 +431,7 @@
   (cond
     ((char= (%peek-char stream) #\")
      ;; Using read we allow this to be used as a host macro reader too
-     (let ((string (#-jscl read #+jscl ls-read stream)))
+     (let ((string (#-jscl-target read #+jscl-target ls-read stream)))
        (jsstring string)))
     ((char= (%peek-char stream) #\:)
      (let ((descriptor (subseq (read-until stream #'terminalp) 1))
@@ -377,25 +447,31 @@
                    (let ((name (car parts)))
                      (cond
                        ((string= name "true")
-                        #-jscl *host-js-true*
-                        #+jscl (%js-vref "true"))
+                        #-jscl-target *host-js-true*
+                        #+jscl-target (%js-vref "true"))
                        ((string= name "false")
-                        #-jscl *host-js-false*
-                        #+jscl (%js-vref "false"))
+                        #-jscl-target *host-js-false*
+                        #+jscl-target (%js-vref "false"))
                        ((string= name "null")
-                        #-jscl *host-js-null*
-                        #+jscl (%js-vref "null"))
+                        #-jscl-target *host-js-null*
+                        #+jscl-target (%js-vref "null"))
                        ((string= name "undefined")
-                        #-jscl *host-js-undefined*
-                        #+jscl (%js-vref "undefined"))))
+                        #-jscl-target *host-js-undefined*
+                        #+jscl-target (%js-vref "undefined"))))
                    `(oget *root* ,@parts))))
          (push (subseq descriptor start end) subdescriptors))))
     (t
      (simple-reader-error stream "Invalid FFI descriptor. Expected #j: or #j\"."))))
 
+#+jscl-target
+(set-dispatch-macro-character #\# #\J
+  (lambda (stream sub-char arg)
+    (declare (ignore sub-char arg))
+    (read-sharp-j stream)))
+
 (defun sharp-radix-reader (ch stream)
   ;; Sharp radix base #\B #\O #\X
-  (let* ((fixed-base (assoc ch jscl::*fixed-radix-bases*))
+  (let* ((fixed-base (assoc ch *fixed-radix-bases*))
 	       (base (cond (fixed-base (cdr fixed-base))
 		                 (t (simple-reader-error stream "No radix base in #~A" ch))))
          (*read-base* base)
@@ -606,10 +682,10 @@
           (values nil index)))))
 
 
-#+jscl
+#+jscl-target
 (defun parse-integer (string &key (start 0) end (radix 10) junk-allowed)
   (multiple-value-bind (num index)
-      (jscl::!parse-integer string start end radix junk-allowed)
+      (!parse-integer string start end radix junk-allowed)
     (if (or num junk-allowed)
         (values num index)
         (error 'simple-parse-error :format-control "Junk detected."))))
@@ -668,14 +744,14 @@
         (setf *labelled-objects* save-labelled-objects)
         (setf *fixup-locations* save-fixup-locations)))))
 
-#+jscl
+#+jscl-target
 (fset 'read #'ls-read)
 
-(defun ls-read-from-string (string &optional (eof-error-p t) eof-value)
-  (ls-read (make-string-input-stream string) eof-error-p eof-value))
-
-#+jscl
-(fset 'read-from-string #'ls-read-from-string)
+#+jscl-target
+(defun read-from-string (string &optional (eof-error-p t) eof-value)
+  (let ((stream (make-string-input-stream string)))
+    (values (ls-read stream eof-error-p eof-value)
+            (stream-index stream))))
 
 (defun simple-reader-error (stream format-control &rest format-arguments)
   (error 'simple-reader-error

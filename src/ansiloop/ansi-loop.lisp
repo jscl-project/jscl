@@ -49,14 +49,14 @@
 
 ;;;; LOOP Iteration Macro
 
-#-jscl
-(defpackage :jscl/loop
+#-jscl-target
+(defpackage :jscl-xc/loop
   (:use :common-lisp))
-#+jscl
+#+jscl-target
 (eval-when (:load-toplevel :execute)
-  (make-package "JSCL/LOOP" :use (list(find-package "CL"))))
+  (make-package "JSCL-XC/LOOP" :use (list (find-package "CL"))))
 
-(in-package :jscl/loop)
+(in-package :jscl-xc/loop)
 
 
 ;;; Technology.
@@ -223,7 +223,7 @@
   (declare
    #+LISPM (ignore head-var user-head-var) ;use locatives, unconditionally update through the tail.
    )
-  (setq form (jscl::!macroexpand form env))
+  (setq form (jscl-xc::!macroexpand form env))
   (flet ((cdr-wrap (form n)
            #+nil (declare (fixnum n))
            (do () ((<= n 4) (setq form `(,(case n
@@ -294,7 +294,7 @@ a wrapper and internal macros to do the coding when the loop has been
 constructed.
 |#
 
-(jscl::def!struct (loop-minimax
+(jscl-xc::def!struct (loop-minimax
 	     (:constructor make-loop-minimax-internal)
 	     (:copier nil)
 	     (:predicate nil))
@@ -422,7 +422,7 @@ code to be loaded.
   `(setf (gethash (symbol-name ,symbol) ,table) ,datum))
 
 
-(jscl::def!struct (loop-universe
+(jscl-xc::def!struct (loop-universe
               ;; FIXME: Implement me in JSCL!
               ;; (:print-function print-loop-universe)
               (:copier nil)
@@ -536,7 +536,7 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
                                   (and (consp x)
                                        (or (not (eq (car x) 'car))
                                            (not (symbolp (cadr x)))
-                                           (not (symbolp (setq x (jscl::!macroexpand x env)))))
+                                           (not (symbolp (setq x (jscl-xc::!macroexpand x env)))))
                                        (cons x nil)))
                               (cdr val))
                       `(,val))))
@@ -872,7 +872,7 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
 	     (dolist (x l n) (incf n (estimate-code-size-1 x env))))))
     ;;@@@@ ???? (declare (function list-size (list) fixnum))
     (cond ((constantp x #+Genera env) 1)
-	  ((symbolp x) (multiple-value-bind (new-form expanded-p) (jscl::!macroexpand-1 x env)
+	  ((symbolp x) (multiple-value-bind (new-form expanded-p) (jscl-xc::!macroexpand-1 x env)
 			 (if expanded-p (estimate-code-size-1 new-form env) 1)))
 	  ((atom x) 1)				;??? self-evaluating???
 	  ((symbolp (car x))
@@ -909,7 +909,7 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
 		     ((eq fn 'return-from) (1+ (estimate-code-size-1 (third x) env)))
 		     ((or (special-operator-p fn) (member fn *estimate-code-size-punt*))
 		      (throw 'estimate-code-size nil))
-		     (t (multiple-value-bind (new-form expanded-p) (jscl::!macroexpand-1 x env)
+		     (t (multiple-value-bind (new-form expanded-p) (jscl-xc::!macroexpand-1 x env)
 			  (if expanded-p
 			      (estimate-code-size-1 new-form env)
 			      (f 3))))))))
@@ -1299,7 +1299,7 @@ collected result will be returned as the value of the LOOP."
 ;;;; Value Accumulation: List
 
 
-(jscl::def!struct (loop-collector
+(jscl-xc::def!struct (loop-collector
 	     (:copier nil)
 	     (:predicate nil))
   name
@@ -1684,7 +1684,7 @@ collected result will be returned as the value of the LOOP."
 ;;;; Iteration Paths
 
 
-(jscl::def!struct (loop-path
+(jscl-xc::def!struct (loop-path
 	     (:copier nil)
 	     (:predicate nil))
   names
@@ -2130,7 +2130,7 @@ collected result will be returned as the value of the LOOP."
 		    (zwei:indentation . zwei:indent-loop))
   (loop-standard-expansion keywords-and-forms env *loop-ansi-universe*))
 
-#+jscl
+#+jscl-target
 (defmacro loop (&rest keywords-and-forms)
   `(!loop ,@keywords-and-forms))
 
@@ -2141,10 +2141,10 @@ collected result will be returned as the value of the LOOP."
 
 ;;; FIXME: Somehow the package is not being bound properly in
 ;;; !compile-file.
-#+jscl
+#+jscl-target
 (progn
   (in-package :cl)
   (defmacro loop (&rest keywords-and-forms)
-    `(jscl/loop::!loop ,@keywords-and-forms))
+    `(jscl-xc/loop::!loop ,@keywords-and-forms))
   (defmacro loop-finish ()
-    `(jscl/loop::!loop-finish)))
+    `(jscl-xc/loop::!loop-finish)))

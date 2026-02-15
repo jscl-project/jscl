@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/setf.lisp!")
 
 (test (= 2
          (let ((x 0))

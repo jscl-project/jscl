@@ -121,8 +121,8 @@ accumulated, in the order."
 		              digits)))))
 
 (defun float-to-string (x)
-  #+jscl (float-to-string x)
-  #-jscl (format nil "~f" x))
+  #+jscl-target (float-to-string x)
+  #-jscl-target (format nil "~f" x))
 
 (defun make-test-p (&key key (test #'eql) testp (test-not #'eql) test-not-p)
   (when (and testp test-not-p)
@@ -168,7 +168,8 @@ accumulated, in the order."
       symbol)))
 
 (defun %defpackage (name nicknames)
-  (let ((package (find-package name))
+  (let ((name (string name))
+        (package (find-package name))
         (nicknames (mapcar #'string nicknames)))
     (if package
         (rename-package package name nicknames)

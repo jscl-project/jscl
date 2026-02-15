@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/types.lisp!")
 
 (defparameter +atomic-test-objects+
   (list (cons 1     'bit)
@@ -18,30 +17,34 @@
         (cons (make-package 'fake-pack)            'package)
         (cons (make-hash-table)                    'hash-table)
         (cons (defstruct atomic-test-struct)       'symbol)
-        (cons (make-atomic-test-struct)            'jscl::atomic-test-struct)
+        (cons (make-atomic-test-struct)            ':atomic-test-struct)
         (cons (defclass atomic-test-class nil nil) 'standard-class)
-        (cons (make-instance 'atomic-test-class)   'jscl::atomic-test-class)
+        (cons (make-instance 'atomic-test-class)   'atomic-test-class)
         (cons (make-list 1)     'cons)
         (cons (make-array '(1)) '(vector 1))
         (cons (vector)          '(vector 0))
         (cons "sss"             '(string 3))
         (cons (make-string 2)   '(string 2))
-        (cons (jscl::object)       't)
+        #+jscl
+        (cons (jscl/ffi:object)       't)
         (cons (find-class 'atomic-test-class) 'standard-class)
         (cons (let nil (lambda nil nil))      'function)))
 
+;;; JSCL-specific: tests JSCL's type-of results for +atomic-test-objects+
+#+jscl
 (test
  (mv-eql
   (let ((real-type-of)
         (idx 0)
+        (diff0)
         (diff1)
         (diff2)
         (expected-type-of
           '(BIT            FLOAT       SYMBOL     CHARACTER
             KEYWORD        SYMBOL      SYMBOL     FUNCTION
             NULL           NULL        NULL       BOOLEAN
-            package        hash-table  SYMBOL     jscl::atomic-test-struct
-            STANDARD-CLASS jscl::ATOMIC-TEST-class  CONS       (VECTOR 1)
+            package        hash-table  SYMBOL     atomic-test-struct
+            STANDARD-CLASS ATOMIC-TEST-class  CONS       (VECTOR 1)
             (VECTOR 0)     (STRING 3)  (STRING 2) T
             STANDARD-CLASS  FUNCTION)))
     (setq real-type-of (loop for x in +atomic-test-objects+ collect (type-of (car x))))
@@ -57,7 +60,7 @@
                 collect (unless (equal x y) (list idx x y)) ))
     (setq idx 0
           diff2
-          (loop for x in +atomic-test-objects+ 
+          (loop for x in +atomic-test-objects+
                 do (incf idx)
                 collect (unless (typep (car x) 'atom) (list idx (cdr x)))))
 
@@ -73,6 +76,8 @@
   NIL
   ((19 CONS))))
 
+;;; JSCL-specific: type-of returns different results for floats/bignums
+#+jscl
 (test
  (mv-eql
   (let ((universum (list 0 1  1.1  1. 0.0  1.
@@ -84,7 +89,7 @@
                      integer integer integer integer
                      bignum fixnum fixnum bignum)))
 
-    (values 
+    (values
      (every #'identity (loop for x in universum collect (typep x 'atom)))
      (loop for x in universum collect (type-of x))
      (loop for x in universum
@@ -94,10 +99,12 @@
   (T T T T T T T T T T T NIL T T NIL) ))
 
 
+;;; JSCL-specific: type-of for strings returns (STRING n) not (SIMPLE-BASE-STRING n)
+#+jscl
 (test
  (mv-eql
   (let ((universum (list "string"
-                         (make-string 10) (concat (make-string 10) "aaaa" 1 "")
+                         (make-string 10) (concatenate 'string (make-string 10) "aaaa" (write-to-string 1) "")
                          (string #\1) (string 'symbol)
                          (symbol-name 'jjjj)))
         (type-spec '(string
@@ -143,7 +150,7 @@
                             (and (or array vector (string 9))
                              (or (array character 1) (vector character 2) string)))))
 
-    (values 
+    (values
      (every #'identity (loop for x in universum collect (typep x 'atom)))
      (list 'type-of (loop for x in universum collect (type-of x)))
      (list 'type-spec (loop for x in universum
@@ -378,7 +385,7 @@
    (typep (make-struct-bus :type 'alarm :signal 'trap) '(bus-alarm))
    (typep (make-struct-bus :type 'alarm :signal 'trap-21) 'bus-alarm)
    (typecase (make-struct-bus :type 'alarm :signal 12) (bus-alarm :good) (t :bad))
-   (typecase (make-struct-bus :type 'alarm :signal 32) ((bus-alarm) :good) (t :bad)))  
+   (typecase (make-struct-bus :type 'alarm :signal 32) ((bus-alarm) :good) (t :bad)))
   t t nil :good :bad))
 
 ;;; array
@@ -400,12 +407,13 @@
    (typep #(1 2 3) '(array t (3))))
   t t t))
 
-;;; list-length
+;;; *list-length (JSCL-specific type specifier)
+#+jscl
 (test
  (mv-eql
   (let* ((sym (*gensym*))
 	       (form `(deftype ,sym ()
-                  `(or (list-length 0) (list-length 1)))))
+                  `(or (jscl::*list-length 0) (jscl::*list-length 1)))))
     (values
      (eqlt (eval form) sym)
      (typep (list) `(,sym))
@@ -413,6 +421,8 @@
      (typep (list 1 2 3) `(,sym))))
   t t t nil))
 
+;;; JSCL-specific: redefine standard-char (not allowed on SBCL due to package lock)
+#+jscl
 (deftype standard-char ()
   '(member
     #\Space #\Newline
@@ -434,14 +444,15 @@
    (typep #\space 'standard-char))
   t t t))
 
-;;; type-of
+;;; type-of (JSCL-specific expected values)
+#+jscl
 (test
  (let* ((universum (list 1 'symbol 1.2 #() (make-array '(1 1)) "string" (list) (list 0) t nil)))
   (every #'identity
          (mapcar (lambda (x y) (equal x y))
                  '(BIT SYMBOL FLOAT (VECTOR 0) (ARRAY (1 1)) (STRING 6) NULL CONS BOOLEAN NULL)
                  (loop for i in universum collect (type-of i))))))
-  
+
 (test
  (mv-eql
   (let* ((sym (*gensym*))
@@ -452,7 +463,7 @@
      (typep (make-instance sym) sym)
      (typep class standard-class)))
   t t t))
-      
+
 ;;; typecase test cases
 (test (eql 'a (typecase 1 (integer 'a) (t 'b))))
 (test  (not (typecase 1 (symbol 'a))))
@@ -462,7 +473,6 @@
 ;;; predefined type bit
 (test (eql 'a (typecase 1 (bit 'a) (integer 'b))))
 ;;; test (boolean)
-(deftype boolean () `(member t nil))
 (test
  (mv-eql
   (values
@@ -548,27 +558,29 @@
 
 #+nil
 (test
- (let ((cells (list 1 2021 3.33  t #\c "abc" #(1)))) 
-   (typep cells '(cons (eql 1) 
-                       (cons (integer 2019 2022) 
-                            (cons (float -1.00000000001 3.4) 
-                                   (cons (member t nil) *))))))) 
+ (let ((cells (list 1 2021 3.33  t #\c "abc" #(1))))
+   (typep cells '(cons (eql 1)
+                       (cons (integer 2019 2022)
+                            (cons (float -1.00000000001 3.4)
+                                   (cons (member t nil) *)))))))
 
 #+nil
 (test
- (let ((cells (list 1 2021 3.33  t #\c "abc" #(1)))) 
-   (typep cells '(cons (eql 1) 
-                       (cons (integer 2019 2022) 
-                            (cons (float -1.00000000001 3.4) 
+ (let ((cells (list 1 2021 3.33  t #\c "abc" #(1))))
+   (typep cells '(cons (eql 1)
+                       (cons (integer 2019 2022)
+                            (cons (float -1.00000000001 3.4)
                                    (cons (member t nil)
                                          (cons character
                                                (cons array (cons vector))
                                          ))))))) )
 
+;;; *list-length is a JSCL-specific type specifier
+#+jscl
 (test
  (typep (cons 1 (list 1))
         '(cons (or (eql 1) (eql 2))
-               (or (list-length 0) (list-length 1)))))
+               (or (jscl::*list-length 0) (jscl::*list-length 1)))))
 
 (test (typep "abc" '(array *)))
 

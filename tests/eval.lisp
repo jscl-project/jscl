@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/eval.lisp!")
 
 
 (test (= (eval '(+ 1 2)) 3))

@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/loop/base-tests.lisp!")
 
 ;;;>
 ;;;> Portions of LOOP are Copyright (c) 1986 by the Massachusetts Institute of Technology.
@@ -48,7 +47,7 @@
 ;;;>      United States of America
 ;;;>      +1-617-221-1000
 
-(in-package :jscl/loop)
+(in-package :jscl-tests-loop)
 
 
 
@@ -655,7 +654,5 @@
            finally (return (= count 100))))
       (() t))
 
-
-(in-package :cl)
 
 ;;; EOF

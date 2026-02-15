@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/characters.lisp!")
 
 
 ;; CHAR=, CHAR/=, etc.

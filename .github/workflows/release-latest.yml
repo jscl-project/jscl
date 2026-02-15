@@ -20,13 +20,16 @@ jobs:
       - name: Install SBCL
         run: sudo apt-get install sbcl
 
-      - name: Build
-        run: npm run build
+      # We publish the SBCL-built version until the bootstrap pipeline
+      # is more mature. Once bootstrap is stable, we can switch to
+      # ./bootstrap.sh to publish the self-hosted build.
+      - name: Build JSCL with SBCL
+        run: ./make.sh
         env:
           JSCL_RELEASE: true
 
       - name: Run tests
-        run: npm test
+        run: ./run-tests.sh
 
       - name: Deploy latest version
         uses: JamesIves/github-pages-deploy-action@v4

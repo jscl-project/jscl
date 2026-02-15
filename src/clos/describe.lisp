@@ -140,8 +140,6 @@
 
 
 ;;; number float
-;;; wtf: (floatp 0.0) => nil ???
-;;; its bug or feature ???
 (defmethod describe ((obj float) &optional (stream *standard-output*))
   (with-pp-buffer (buf)
     (pp/builtin-baner 'float stream)
@@ -211,8 +209,8 @@
     (format buf "Size: ~a~%Hash fn: ~a~%"
             (hash-table-count obj)
             (let ((test (cadr obj)))
-              (cond ((eq test #'jscl::eq-hash) 'eq)
-                    ((eq test #'jscl::eql-hash) 'eql)
+              (cond ((eq test #'eq-hash) 'eq)
+                    ((eq test #'eql-hash) 'eql)
                     (t 'equal))))
     (flush-pp-buffer buf stream))
   (values))

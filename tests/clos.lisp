@@ -1,9 +1,8 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/clos.lisp!")
 
-(test (string= "#<STANDARD-CLASS T>"  (write-to-string (find-class 't))))
-(test (string= "#<STANDARD-CLASS NULL>"  (write-to-string (find-class 'null))))
+#+jscl (test (string= "#<STANDARD-CLASS T>"  (write-to-string (find-class 't))))
+#+jscl (test (string= "#<STANDARD-CLASS NULL>"  (write-to-string (find-class 'null))))
 
 (defclass obj1 ()
   ((val :initform nil :initarg :value :reader obj-val :writer set-obj-val)))
@@ -73,6 +72,9 @@
                  (setf a 22)
                  (setf b 33)
                  (list (eq a 22) (eq b 33) (eq (screw-ccc ip) 1998.11)))))
+  ;; This test relies on assignment to free variables, which generates
+  ;; full WARNINGs on SBCL.
+  #+jscl
   (test (equal '(1234 abcd t)
                (let ((other (with-slots (aaa bbb) ip
                               (let ((a aaa) (b bbb))
@@ -101,7 +103,9 @@
 
 (defclass mixt (original mixin-1 mixin-2) ())
 
-(defmethod initialize-instance :after ((class mixt))
+(defmethod initialize-instance :after ((class mixt) &rest args)
+  ;; JSCL cnanot handle method declarations right now
+  #-jscl (declare (ignore args))
   (with-slots (thing prop1 prop2) class
     (setf thing 1)
     (setf prop1 2)
@@ -120,7 +124,8 @@
 (defmethod bot-inspect ((item integer)) (list 'built-in-class-integer))
 (defmethod bot-inspect ((item hash-table)) (list 'hash-table-object))
 
-(test (equal '(standard-class) (bot-inspect (find-class 't))))
+;;; In JSCL all classes are standard-class; in SBCL, built-in classes differ
+#+jscl (test (equal '(standard-class) (bot-inspect (find-class 't))))
 (test (equal '(hash-table-object) (bot-inspect (make-hash-table))))
 (test (equal '(built-in-class-integer) (bot-inspect 123)))
 
@@ -133,18 +138,18 @@
       (b 2)
       (c 3)
       (d #(1 2 3)))
-    (!rotatef a b c)
+    (rotatef a b c)
     (test (equal '(2 3 1) (list a b c)))
-    (!rotatef a b c)
+    (rotatef a b c)
     (test (equal '(3 1 2) (list a b c)))
-    (!rotatef (aref d 0) (aref d 2))
-    (test (equal '(3 2 1) (jscl::vector-to-list d))))
+    (rotatef (aref d 0) (aref d 2))
+    (test (equal '(3 2 1) (coerce d 'list))))
 
 (let* ((a '(1 2))
        (b '(3 4))
        (c '(a b))
        (d (list a b c)))
-   (!rotatef (nth 0 d) (nth 2 d))
+   (rotatef (nth 0 d) (nth 2 d))
    (test (equal '((a b) (3 4) (1 2)) d)))
 
 (defclass rectangle ()
@@ -176,31 +181,31 @@
       (sort what predicate)))
 
 (defmethod msort ((what vector) predicate &key key)
-  (let ((lst (jscl::vector-to-list what)))
-    (jscl::list-to-vector
-     (if key
-         (sort lst predicate :key key)
-         (sort lst predicate)))))
+  (let ((lst (coerce what 'list)))
+    (coerce (if key
+                (sort lst predicate :key key)
+                (sort lst predicate))
+            'vector)))
 
 (defmethod msort ((what string) predicate &key key)
-  (let ((lst (jscl::vector-to-list what)))
-    (apply #'jscl::concat
-           (if key
-               (sort lst predicate :key key)
-               (sort lst predicate)))))
+  (let ((lst (coerce what 'list)))
+    (map 'string 'identity
+         (if key
+             (sort lst predicate :key key)
+             (sort lst predicate)))))
 
 (test (string= "aabbccddxyz"
                (msort "cdbaxaybzcd" #'char-lessp)))
 
 (test (equal '(9 8 7 6 5 4 3 2 1)
-             (jscl::vector-to-list (msort #(1 2 3 4 5 6 7 8 9) #'>))))
+             (coerce (msort #(1 2 3 4 5 6 7 8 9) #'>) 'list)))
 
 
 ;;; test from original closette-test.lisp
 ;;; method combination
-(defclass log () ((buf :initform nil)))
+(defclass mctest-log () ((buf :initform nil)))
 
-(defvar ip (make-instance 'log))
+(defvar ip (make-instance 'mctest-log))
 
 (defgeneric mctest (x))
 
@@ -253,6 +258,10 @@
                (reverse buf))))
 
 ;;; test's from original closette-test.lisp
+;;; Uses JSCL-specific CLOS internals and class names that conflict with CL symbols
+#+jscl
+(progn
+
 (defclass position () (x y))
 (defclass cad-element (position) ())
 (defclass display-element (position) ())
@@ -260,7 +269,7 @@
 
 
 (defun common-subclasses* (class-1 class-2)
-  (intersection (subclasses* class-1) (subclasses* class-2)))
+  (intersection (jscl::subclasses* class-1) (jscl::subclasses* class-2)))
 
 (defun all-distinct-pairs (set)
   (if (null set)
@@ -275,7 +284,7 @@
   (some #'(lambda (pair)
             (not (null (common-subclasses* (car pair)
                                            (cadr pair)))))
-        (all-distinct-pairs (class-direct-subclasses class))))
+        (all-distinct-pairs (jscl:class-direct-subclasses class))))
 
 (test (equal t (has-diamond-p (find-class 'position))))
 
@@ -285,14 +294,14 @@
 (defclass loops-class (standard-class) ())
 (defclass flavors-class (standard-class) ())
 
-(defmethod compute-class-precedence-list ((class loops-class))
+(defmethod jscl:compute-class-precedence-list ((class loops-class))
   (append (remove-duplicates
            (depth-first-preorder-superclasses* class)
            :from-end nil)
           (list (find-class 'standard-object)
                 (find-class 't))))
 
-(defmethod compute-class-precedence-list ((class flavors-class))
+(defmethod jscl:compute-class-precedence-list ((class flavors-class))
   (append (remove-duplicates
            (depth-first-preorder-superclasses* class)
            :from-end t)
@@ -302,8 +311,8 @@
 (defun depth-first-preorder-superclasses* (class)
   (if (eq class (find-class 'standard-object))
       ()
-      (cons class (mapappend #'depth-first-preorder-superclasses*
-                             (class-direct-superclasses class)))))
+      (cons class (mapcan #'depth-first-preorder-superclasses*
+                          (jscl:class-direct-superclasses class)))))
 
 
 
@@ -319,13 +328,15 @@
 
 (test (equal '(q-flavors s a b r c standard-object t)
              (mapcar (lambda (x) (class-name x))
-                     (class-precedence-list (find-class 'q-flavors)))))
+                     (jscl:class-precedence-list (find-class 'q-flavors)))))
 
 (test (equal '(q-loops s b r a c standard-object t)
-             (mapcar (lambda (x) (class-name x)) (class-precedence-list (find-class 'q-loops)))))
+             (mapcar (lambda (x) (class-name x)) (jscl:class-precedence-list (find-class 'q-loops)))))
 
 (test (equal '(q-clos s r a c b standard-object t)
-             (mapcar (lambda (x) (class-name x)) (class-precedence-list (find-class 'q-clos)))))
+             (mapcar (lambda (x) (class-name x)) (jscl:class-precedence-list (find-class 'q-clos)))))
+
+) ;; end #+jscl progn
 
 
 

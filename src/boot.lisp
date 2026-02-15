@@ -38,14 +38,14 @@
                   ;; macroexpander, because the macroexpander will
                   ;; need to be dumped in the final environment
                   ;; somehow.
-                  (when (find :jscl-xc *features*)
+                  (when (find :jscl-target *features*)
                     (setq expander `(quote ,expander)))
 
                   `(eval-when (:compile-toplevel :execute)
                      (%compile-defmacro ',name ,expander))
 
                   )))))
-    
+
     (%compile-defmacro 'defmacro defmacro-macroexpander)))
 
 (defmacro backquote (form)
@@ -108,12 +108,11 @@
 
 (defmacro define-compiler-macro (name args &rest body)
   (let* ((expander `(function ,(parse-macro name args body))))
-
     ;; If we are bootstrapping JSCL, we need to quote the
     ;; macroexpander, because the macroexpander will
     ;; need to be dumped in the final environment
     ;; somehow.
-    (when (find :jscl-xc *features*)
+    (when (find :jscl-target *features*)
       (setq expander `(quote ,expander)))
 
     `(eval-when (:compile-toplevel :execute)
@@ -366,7 +365,7 @@
     ((symbolp x)
      (%fboundp x))
     ((and (consp x) (eq (car x) 'setf))
-     (%setfboundp x))
+     (%setfboundp (cadr x)))
     (t
      (error "Invalid function `~S'." x))))
 
@@ -450,7 +449,7 @@
                                              :place ',place
                                              :description ,string)))))
 
-#+jscl
+#+jscl-target
 (defmacro check-type (place typespec &optional string)
   `(%check-type ,place ,typespec ,string))
 
@@ -463,7 +462,7 @@
       ;; todo: subtypep - remove mop-object from tables
       (clos-object . mop-object-p) (mop-object . mop-object-p) (character . characterp)
       (symbol . symbolp)  (keyword . keywordp)
-      (function . functionp) 
+      (function . functionp)
       (number . numberp) (real . realp) (rational . rationalp) (float . floatp)
       (integer . integerp)
       (sequence .  sequencep) (list . listp) (cons . consp) (array . arrayp)
@@ -513,7 +512,7 @@
     ((eq type1 type2)
      (values t t))
     ((eq type2 'number)
-     (values (and (member type1 '(fixnum integer)) t)
+     (values (and (member type1 '(fixnum integer float real rational)) t)
              t))
     (t
      (values nil nil))))
@@ -537,8 +536,8 @@
        nil)))
 
 
-#+jscl
-(defmacro print-unreadable-object ((object stream &key type identity) &body body) 
+#+jscl-target
+(defmacro print-unreadable-object ((object stream &key type identity) &body body)
     `(!print-unreadable-object (,object ,stream :type ,type :identity ,identity) ,@body))
 
 
@@ -546,8 +545,8 @@
   (let ((value (gensym "ASSERT-VALUE")))
        `(let ((,value ,test))
          (when (not ,value)
-           (jscl::%%assert-error ',test ,datum ,@args)))))
-#+jscl
+           (%%assert-error ',test ,datum ,@args)))))
+#+jscl-target
 (defmacro assert (test &optional ignore datum &rest args)
   `(%%assert ,test ,ignore ,datum ,@args))
 
@@ -609,6 +608,11 @@
            (if (and (listp object) (eq (car object) 'lambda))
                (compile nil object)
                (fdefinition object)))
+          ((and (numberp object)
+                (member result-type '(float single-float double-float short-float long-float)))
+           object)
           (t (fail)))))
+
+(defvar *git-commit-hash* #.(get-current-git-commit))
 
 ;;; EOF

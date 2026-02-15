@@ -307,9 +307,9 @@
      (apply formatter destination args)
      nil)))
 
-#+jscl (fset 'format #'%format)
+#+jscl-target (fset 'format #'%format)
 
-#+jscl
+#+jscl-target
 (define-compiler-macro format (&whole form dest control-string &rest args)
   (if (stringp control-string)
       `(call-formatter ,dest ,(%formatter control-string) ,@args)
@@ -318,7 +318,7 @@
 
 ;;;; FORMATTER
 
-#+jscl (defmacro formatter (control-string)
+#+jscl-target (defmacro formatter (control-string)
          `#',(%formatter control-string))
 
 (defun %formatter (control-string)
@@ -1342,7 +1342,7 @@
   (expand-bind-defaults ((w nil) (d nil) (k nil) (ovf nil) (pad #\space)) params
     `(format-fixed stream ,(expand-next-arg) ,w ,d ,k ,ovf ,pad ,atsignp)))
 
-#+jscl
+#+jscl-target
 (defun format-fixed (stream number w d k ovf pad atsign)
   (if (numberp number)
       ;; TODO: Once we have proper numeric tower, we need to consider
@@ -1350,7 +1350,7 @@
       (format-fixed-aux stream number w d k ovf pad atsign)
       (format-princ stream number nil nil w 1 0 pad)))
 
-#+jscl
+#+jscl-target
 (defun format-fixed-aux (stream number w d k ovf pad atsign)
   (let* ((number (if k (* number (expt 10 k)) number))
          (str (clstring (if d ((oget number "toFixed") d)
@@ -1373,13 +1373,13 @@
     `(format-exponential stream ,(expand-next-arg) ,w ,d ,e ,k ,ovf ,pad ,mark
 			 ,atsignp)))
 
-#+jscl
+#+jscl-target
 (defun format-exponential (stream number w d e k ovf pad marker atsign)
   (if (numberp number)
       (format-exp-aux stream number w d e k ovf pad marker atsign)
       (format-princ stream number nil nil w 1 0 pad)))
 
-#+jscl
+#+jscl-target
 (defun format-exp-aux (stream number w d k ovf pad marker atsign)
   (let* ((number (if k (* number (expt 10 k)) number))
          (str (clstring (if d ((oget number "toExponential") d)
@@ -1401,7 +1401,7 @@
       params
     `(format-general stream ,(expand-next-arg) ,w ,d ,e ,k ,ovf ,pad ,mark ,atsignp)))
 
-#+jscl
+#+jscl-target
 (defun format-general (stream number w d e k ovf pad marker atsign)
   (if (numberp number)
       ;; TODO: proper general format
@@ -1413,7 +1413,7 @@
     `(format-dollars stream ,(expand-next-arg) ,d ,n ,w ,pad ,colonp
 		     ,atsignp)))
 
-#+jscl
+#+jscl-target
 (defun format-dollars (stream number d n w pad colon atsign)
   (if (numberp number)
       ;; TODO: Once we have proper numeric tower, we need to consider

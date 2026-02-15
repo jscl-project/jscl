@@ -1,6 +1,5 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
-(/debug "perform test/control.lisp!")
 
 ;;; Returning from a "dynamically" nested non local exists
 

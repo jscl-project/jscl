@@ -115,7 +115,9 @@
      :name name :boa from-boa-list
      :assigns (append (lambda-list-reqvars ll)
                       (mapcar #'optvar-variable (lambda-list-optvars ll))
+                      (remove nil (mapcar #'optvar-supplied-p-parameter (lambda-list-optvars ll)))
                       (mapcar #'keyvar-variable (lambda-list-keyvars ll))
+                      (remove nil (mapcar #'keyvar-supplied-p-parameter (lambda-list-keyvars ll)))
                       (mapcar #'auxvar-variable (lambda-list-auxvars ll))))))
 
 (def!struct dsd
@@ -438,11 +440,11 @@
                            (eql (nth ,imap obj) ',name))))))
           `(let ((dd (get-structure-dsd ',name)))
              (defun ,it (obj)
-               (eq dd (storage-vector-ref! (oget? obj "structDescriptors")
-					   ,(dsd-depth dd)))))))))
+               (let ((sd (?? (oget? obj "structDescriptors") nil)))
+                 (and sd (eq dd (storage-vector-ref! sd ,(dsd-depth dd)))))))))))
 
 ;;; COPIER
-#-jscl
+#-jscl-target
 (defun clone (x)
   (error "Clone not implemented in host: ~a" x))
 
@@ -509,7 +511,7 @@
        (list `(setf (dsd-print-function (get-structure-dsd ',(dsd-name dd)))
                     ,print-function)))
      (list
-      (if (and (dsd-type dd) (dsd-named-p dd) (dsd-predicate dd))
+      (if (and (not (dsd-type dd)) (dsd-predicate dd))
           `(deftype ,(dsd-name dd) () '(satisfies ,(dsd-predicate dd)))
           nil)))))
 
@@ -657,7 +659,7 @@
        ,@(das!defstruct-expand name options slots)
        ',name)))
 
-#+jscl
+#+jscl-target
 (defmacro defstruct (name-options &rest slots)
   `(das!struct ,name-options ,@slots))
 
