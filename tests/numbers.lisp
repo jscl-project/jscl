@@ -261,7 +261,9 @@
    (equal '(3 5 1 4 2 -4 -6 0 -7 7 -2 -8 -3 -5 -1 6)
           (reverse result))))
 
-(defconstant boole-n-vector
+;;; defvar instead of defconstant: vectors are not eql across
+;;; compile-file loads, which violates defconstant's contract.
+(defvar boole-n-vector
   (vector boole-clr   boole-and  boole-andc1 boole-2
           boole-andc2 boole-1    boole-xor   boole-ior
           boole-nor   boole-eqv  boole-c1    boole-orc1

@@ -57,12 +57,13 @@ typeof window !== 'undefined'? window.jscl: self.jscl )"
         output))))
 
 #+jscl-target
-(defun compile-file (input-file &key output-file verbose print (place "./"))
+(defun compile-file (input-file &key output-file (verbose *compile-verbose*) (print *compile-print*))
   (unless output-file
     (setq output-file (concat input-file ".js")))
   (with-open-file (out output-file :direction :output :if-exists :supersede)
-    (%write-file-prologue out place "jscl")
+    (write-string "module.exports = function(jscl){'use strict';
+(function(internals){ var values = internals.values;" out)
     (with-compilation-environment
       (!compile-file input-file out :verbose verbose :print print))
-    (%write-file-epilogue out place "jscl"))
+    (write-string "})(jscl.internals);};" out))
   output-file)

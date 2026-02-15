@@ -55,7 +55,8 @@
       ((member ext '("js" "cjs" "jso") :test #'string=)
        (let ((*package* *package*))
          (if (find :node *features*)
-             (require (concat (clstring (#j:process:cwd)) "/" name))
+             (let ((init (require (concat (clstring (#j:process:cwd)) "/" name))))
+               (funcall init (%js-vref "jscl")))
              (load-js name)))
        t)
 

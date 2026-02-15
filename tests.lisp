@@ -16,6 +16,7 @@
 
 (defvar *use-html-output-p* nil)
 (defvar *timestamp* nil)
+(defvar *compile-time* nil)
 
 ;; Initialize timestamp at load time (for prebuilt mode where tests
 ;; execute immediately during jscl-tests.js loading)
@@ -53,7 +54,7 @@
               (format *error-output* "<font color='red'>Test `~S' failed.</font>~%" form)
               (format *error-output* "Test `~S' failed.~%" form))
           (when raised-condition
-            (format *standard-output* "Error: ~a~%" e)))
+            (format *standard-output* "Error: ~a~%" raised-condition)))
          (t
           (if *use-html-output-p*
               (format t "<font color='orange'>Test `~S' was expected to fail.</font>~%" form)
@@ -97,6 +98,8 @@
 
 (defun print-test-report ()
   "Print the test results summary."
+  (when *compile-time*
+    (format t "~%Compilation took ~a seconds.~%" *compile-time*))
   (format t "~%Finished. The execution took ~a seconds.~%"
           (/ (- (get-internal-real-time) *timestamp*) internal-time-units-per-second 1.0))
   (if (= *passed-tests* *total-tests*)
@@ -126,13 +129,15 @@
       (dotimes (i (jscl/ffi:oget entries "length"))
         (let ((entry (jscl/ffi:clstring (aref entries i))))
           (when (and (> (length entry) 5)
-                     (string= (subseq entry (- (length entry) 5)) ".lisp"))
+                     (string= (subseq entry (- (length entry) 5)) ".lisp")
+                     (not (search ".fixtures." entry)))
             (push (concatenate 'string "tests/" entry) files)))))
     (push "tests/loop/validate.lisp" files)
     (push "tests/loop/base-tests.lisp" files)
     (nreverse files))
   #-jscl
-  (append (directory (make-pathname :directory `(:relative "tests") :name :wild :type "lisp" :defaults *load-pathname*))
+  (append (remove-if (lambda (p) (search ".fixtures." (namestring p)))
+                     (directory (make-pathname :directory `(:relative "tests") :name :wild :type "lisp" :defaults *load-pathname*)))
           (list (make-pathname :directory `(:relative "tests" "loop") :name "validate" :type "lisp" :defaults *load-pathname*)
                 (make-pathname :directory `(:relative "tests" "loop") :name "base-tests" :type "lisp" :defaults *load-pathname*))))
 
@@ -141,20 +146,30 @@
 (defun run-tests ()
   "Run the test suite.
 For --prebuilt mode, tests have already executed during jscl-tests.js loading.
-For other modes, load and execute test files now."
-  ;; Initialize counters (for non-prebuilt modes, or reset for prebuilt)
+For other modes, compile and load test files now.
+In JSCL, test files are compiled first to exercise the compiler, then loaded.
+In SBCL, test files are loaded directly."
   (when (zerop *total-tests*)
-    (setq *timestamp* (get-internal-real-time))
-    (terpri)
-    ;; Load test files (tests execute immediately via test macro)
-    (let ((*package* (find-package "JSCL-TESTS")))
-      (dolist (test-file (get-test-files))
+    (let* ((*package* (find-package "JSCL-TESTS"))
+           (test-files (get-test-files))
+           (*compile-verbose* t)
+           (compile-start (get-internal-real-time))
+           (files-to-load (mapcar #'compile-file test-files))
+           (compile-time (/ (- (get-internal-real-time) compile-start)
+                            internal-time-units-per-second 1.0)))
+
+      (setq *compile-time* compile-time)
+
+      ;; Start timing after compilation
+      (setq *timestamp* (get-internal-real-time))
+      (terpri)
+      ;; Load test files (tests execute immediately via test macro)
+      (dolist (file files-to-load)
         (handler-case
-            ;; Hide sbcl warnings temporairly to see errors better
             (handler-bind (#+sbcl (warning #'muffle-warning))
-              (load test-file))
+              (load file))
           (error (c)
-            (format *error-output* "Failed to load test file ~a: ~a~%" test-file c)
+            (format *error-output* "Failed to load test file ~a: ~a~%" file c)
             (incf *total-tests*)
             (incf *failed-tests*))))))
   ;; Report and exit

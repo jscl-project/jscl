@@ -15,3 +15,5 @@ jscl.js
 /.jscl_test/
 /dist/
 /out/
+
+tests/**/*.lisp.js

@@ -1,10 +1,13 @@
 ;;; -*- mode:lisp; coding:utf-8 -*-
 
 
+;;; Use copy-seq to ensure distinct string objects.  compile-file may
+;;; coalesce equal string literals into the same object (CLHS 3.2.4.2.2),
+;;; which would make them eql and break this eql hash-table test.
 (let ((ht (make-hash-table))
-      (key "foo"))
+      (key (copy-seq "foo")))
   (setf (gethash key ht) 10)
-  (test (null (gethash "foo" ht)))
+  (test (null (gethash (copy-seq "foo") ht)))
   (test (equal (gethash key ht) 10))
   (setf (gethash 'foo ht) "lisp")
   (test (string= (gethash 'foo ht) "lisp")))

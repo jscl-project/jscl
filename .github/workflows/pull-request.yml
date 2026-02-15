@@ -29,9 +29,11 @@ jobs:
     - name: Bootstrap JSCL
       run: ./bootstrap.sh
 
+    - name: Run tests (SBCL)
+      run: ./run-tests.sh --sbcl
+
     - name: Run tests (Stage 0)
       run: ./run-tests.sh --jscl=out/jscl-node.js
 
     - name: Run tests (Stage 1)
       run: ./run-tests.sh --jscl=dist/jscl-node.js
-

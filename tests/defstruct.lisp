@@ -628,46 +628,11 @@
            (eql nil (ow1-foo-x (make-ow1-baz)))))
 
 ;;; Redefinition (JSCL-specific behavior)
+;;; Loaded from a fixture file so that defstruct forms are only eval'd
+;;; at runtime, not at compile time (which would pollute the runtime
+;;; state when this test file is processed via compile-file).
 #+jscl
-(progn
-  (defstruct redef-struct-test a b c)
-  (defparameter *redef-struct-1* (make-redef-struct-test :a 1 :b 2 :c 3))
-  (defparameter *redef-struct-p-1* #'redef-struct-test-p)
-
-  (test (let ((warning-issued))
-          (handler-bind ((warning (lambda (c) (setq warning-issued c))))
-            (defstruct redef-struct-test b c))
-          warning-issued))
-  (defparameter *redef-struct-2* (make-redef-struct-test :b 1 :c 2))
-  (defparameter *redef-struct-p-2* #'redef-struct-test-p)
-  (test (string-equal
-         (format nil "~S" *redef-struct-2*)
-         "#S(JSCL-TESTS::REDEF-STRUCT-TEST :B 1 :C 2)"))
-  (test (string-equal
-         (format nil "~S" *redef-struct-1*)
-         "#<JSCL-TESTS::REDEF-STRUCT-TEST (OBSOLETE) :A 1 :B 2 :C 3>"))
-
-  ;;; New predicate is generated after redefinition
-  (test (not (redef-struct-test-p *redef-struct-1*)))
-  (test (funcall *redef-struct-p-1* *redef-struct-1*))
-  (test (not (funcall *redef-struct-p-1* (make-redef-struct-test))))
-
-  (test (let ((warning-issued))
-          (handler-bind ((warning (lambda (c) (setq warning-issued c))))
-            (defstruct redef-struct-test (b 3) c))
-          (not warning-issued)))
-  (test (string-equal
-         (format nil "~S" (make-redef-struct-test :c 3))
-         "#S(JSCL-TESTS::REDEF-STRUCT-TEST :B 3 :C 3)"))
-
-  ;;; Redefinition does not change layout, predicate remain valid
-  (test (not (redef-struct-test-p *redef-struct-1*)))
-  (test (funcall *redef-struct-p-2* (make-redef-struct-test)))
-  (test (redef-struct-test-p *redef-struct-2*))
-
-  ;;; included in another struct, redefinition no longer possible
-  (defstruct (redef-struct-test-child (:include redef-struct-test)))
-  (test (not (ignore-errors (defstruct redef-struct-test a b c) t))))
+(load "tests/defstruct.fixtures.lisp")
 
 ;;; Issue #593: defstruct definitions should be visible inside a progn
 ;;; Test via eval (the REPL path): the second defstruct with :include
