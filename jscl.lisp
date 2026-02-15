@@ -144,8 +144,7 @@
     ("file"          :target)
     ("compiler"
      ("codegen"      :both)
-     ("compiler"     :both)
-     ("environment"  :both))
+     ("compiler"     :both))
     ("clos"
      ("kludges"       :target)
      ("std-object"    :target)

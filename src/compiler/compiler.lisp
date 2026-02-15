@@ -1941,6 +1941,36 @@
             (js ast)))
         t))))
 
+(defun dump-global-environment (stream)
+  "Dump the global environment to STREAM.
+
+Macro bindings are wrapped with *magic-unquote-marker* so the compiler
+will compile them instead of quoting them. See the literal function in
+compiler.lisp for details."
+  (flet ((emit (form)
+           (write-string (compile-toplevel form) stream))
+         (wrap-macros (bindings)
+           ;; Wrap macro binding values with the magic marker
+           (dolist (b bindings)
+             (when (eq (binding-type b) 'macro)
+               (setf (binding-value b) `(,*magic-unquote-marker* ,(binding-value b)))))))
+    ;; We assume that environments have a friendly list representation
+    ;; for the compiler and it can be dumped.
+    ;; Wrap both regular macros and compiler-macros
+    (wrap-macros (lexenv-function *environment*))
+    (wrap-macros (lexenv-compiler-macro *environment*))
+    (emit
+     `(progn
+        (setq *environment* ',*environment*)
+        (setq *global-environment* *environment*)))
+    ;; Set some counter variable properly, so user compiled code will
+    ;; not collide with the compiler itself.
+    (emit
+     `(progn
+        (setq *variable-counter* ,*variable-counter*)
+        (setq *gensym-counter* ,*gensym-counter*)))
+    (emit `(setq *literal-counter* ,*literal-counter*))))
+
 ;;;
 ;;; The entrypoint for EVAL
 ;;;
