@@ -156,7 +156,8 @@ In SBCL, test files are loaded directly."
            (test-files (get-test-files))
            (*compile-verbose* t)
            (compile-start (get-internal-real-time))
-           (files-to-load (mapcar #'compile-file test-files))
+           (files-to-load #+jscl (mapcar #'compile-file test-files)
+                          #-jscl test-files)
            (compile-time (/ (- (get-internal-real-time) compile-start)
                             internal-time-units-per-second 1.0)))
 
