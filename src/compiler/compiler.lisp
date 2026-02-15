@@ -446,7 +446,7 @@
         (optional (ll-optional-arguments ll))
         (keyword  (ll-keyword-arguments  ll))
         (rest     (ll-rest-argument      ll)))
-    (dolist (arg (append required optional keyword (when rest (list rest))))
+    (dolist (arg (append required optional keyword (ll-svars ll) (ensure-list rest)))
       (unless (symbolp arg)
         (error "~S is not a valid parameter name." arg)))
     (values required optional keyword rest (ll-allow-other-keys ll))))
