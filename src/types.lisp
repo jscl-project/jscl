@@ -423,6 +423,8 @@
   (unless (and (integerp n) (plusp n)) (error "Type (mod ~a)." n))
   `(integer 0 (,n)))
 
+(deftype boolean () `(member t nil))
+
 ;;; (typep 1|0 '(bit)) -> t
 (deftype bit () `(integer 0 1))
 

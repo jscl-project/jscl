@@ -11,6 +11,7 @@
                     (macrolet ((bar () (macroexpand-1 '(foo))))
                       (bar))))))
 
+#+jscl
 (test (eq 2 (eval '(macrolet ((foo () 2))
                     (macrolet ((bar () (macroexpand-1 '(foo) jscl::*environment*)))
                       (bar))))))

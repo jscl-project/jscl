@@ -2,6 +2,10 @@
 
 
 ;;; Tests for Javascript FFI routines.
+;;; All tests in this file are JSCL-specific (require #j: reader and jscl/ffi package).
+
+#+jscl
+(progn
 
 (test (= ((jscl/ffi:oget (jscl/ffi:new #j:Date 0) "getTime")) 0))
 (test (stringp (jscl/ffi:clstring (#j:Date 0))))
@@ -203,5 +207,7 @@
 (test (search "undefined"
               (jscl::with-compilation-environment
                 (jscl::compile-toplevel #j:undefined))))
+
+) ;; end #+jscl progn
 
 ;;; EOF

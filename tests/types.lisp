@@ -473,7 +473,6 @@
 ;;; predefined type bit
 (test (eql 'a (typecase 1 (bit 'a) (integer 'b))))
 ;;; test (boolean)
-(deftype boolean () `(member t nil))
 (test
  (mv-eql
   (values

@@ -9,6 +9,7 @@
 
 ;;; Body, declarations and docstrings
 
+#+jscl
 (let ((actual
        (multiple-value-list
         (jscl::parse-body '((declare (integerp x)) "foo" 3)
@@ -17,6 +18,7 @@
 
   (test (equal actual '((3) ((DECLARE (INTEGERP X))) "foo"))))
 
+#+jscl
 (let ((actual
        (multiple-value-list
         (jscl::parse-body '((declare (integerp x)) "foo")
@@ -25,7 +27,7 @@
 
   (test (equal actual '(("foo") ((DECLARE (INTEGERP X))) nil))))
 
-
+#+jscl
 (let ((actual
        (multiple-value-list
         (jscl::parse-body '("foo" 3)
@@ -54,7 +56,7 @@
   (test (equal '(1 2 3) (setf (fn1 2 3) 1)))
   (test (equal '(4 1 2 3) (setf (fn2 1) 4)))
   (test (equal '(4 5 6 7) (setf (fn2 5 6 7) 4)))
-  (let ((qq '(1 2 3)))
+  (let ((qq (list 1 2 3)))
     (test (equal '(99 3) (setf (%cadr% qq) 99)))
     (test (equal '(1 99 3) qq)))
 

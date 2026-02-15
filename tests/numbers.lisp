@@ -318,6 +318,7 @@
      (equal pattern r))))
 
 ;;; CLZ32
+#+jscl
 (test
  (let ((nums (list 0 1 10 100 200 (expt 2 10) (expt 2 20) (expt 2 30)))
        (r (list))
@@ -343,6 +344,7 @@
     (eql (eql r (logcount (- (+ x 1))))
          (eql r (logcount (lognot x))))))
 
+#+jscl
 (test
  (equal '(t)
         (remove-duplicates

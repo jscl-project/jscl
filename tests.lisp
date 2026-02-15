@@ -150,9 +150,13 @@ For other modes, load and execute test files now."
     (let ((*package* (find-package "JSCL-TESTS")))
       (dolist (test-file (get-test-files))
         (handler-case
-            (load test-file)
+            ;; Hide sbcl warnings temporairly to see errors better
+            (handler-bind (#+sbcl (warning #'muffle-warning))
+              (load test-file))
           (error (c)
-            nil)))))
+            (format *error-output* "Failed to load test file ~a: ~a~%" test-file c)
+            (incf *total-tests*)
+            (incf *failed-tests*))))))
   ;; Report and exit
   (print-test-report)
   (exit-with-test-status))

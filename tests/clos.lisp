@@ -104,7 +104,8 @@
 (defclass mixt (original mixin-1 mixin-2) ())
 
 (defmethod initialize-instance :after ((class mixt) &rest args)
-  (declare (ignore args))
+  ;; JSCL cnanot handle method declarations right now
+  #-jscl (declare (ignore args))
   (with-slots (thing prop1 prop2) class
     (setf thing 1)
     (setf prop1 2)
@@ -202,9 +203,9 @@
 
 ;;; test from original closette-test.lisp
 ;;; method combination
-(defclass log () ((buf :initform nil)))
+(defclass mctest-log () ((buf :initform nil)))
 
-(defvar ip (make-instance 'log))
+(defvar ip (make-instance 'mctest-log))
 
 (defgeneric mctest (x))
 
@@ -257,6 +258,10 @@
                (reverse buf))))
 
 ;;; test's from original closette-test.lisp
+;;; Uses JSCL-specific CLOS internals and class names that conflict with CL symbols
+#+jscl
+(progn
+
 (defclass position () (x y))
 (defclass cad-element (position) ())
 (defclass display-element (position) ())
@@ -330,6 +335,8 @@
 
 (test (equal '(q-clos s r a c b standard-object t)
              (mapcar (lambda (x) (class-name x)) (jscl:class-precedence-list (find-class 'q-clos)))))
+
+) ;; end #+jscl progn
 
 
 

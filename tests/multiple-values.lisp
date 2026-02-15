@@ -410,6 +410,7 @@
   (test (= 5 (funcall jsfn 5))))
 
 ;;; oget retrieves property correctly
+#+jscl
 (test (= 0 ((jscl/ffi:oget (jscl/ffi:new #j:Date 0) "getTime"))))
 
 
@@ -418,17 +419,20 @@
 ;;;; =============================================
 
 ;;; handler-case propagates multiple values from successful macroexpand
-(test (equal '((if t (progn 42) nil) t)
-             (multiple-value-list
-              (handler-case
-                  (progn (macroexpand '(when t 42)))
-                (error (e) :error)))))
+;;; (JSCL-specific: expansion form and error behavior differ across implementations)
+#+jscl
+(progn
+  (test (equal '((if t (progn 42) nil) t)
+               (multiple-value-list
+                (handler-case
+                    (progn (macroexpand '(when t 42)))
+                  (error (e) :error)))))
 
-;;; handler-case catches error from failed macroexpansion
-(test (typep (handler-case
-                 (progn (macroexpand '(when)))
-               (error (e) e))
-             'error))
+  ;;; handler-case catches error from failed macroexpansion
+  (test (typep (handler-case
+                   (progn (macroexpand '(when)))
+                 (error (e) e))
+               'error)))
 
 
 ;;;; =============================================
