@@ -64,8 +64,9 @@ mkdir -p "$OUTPUT_DIR"
 tmpfile=$(mktemp /tmp/jscl-make.XXXXXX.lisp)
 cat > "$tmpfile" << EOF
 (load "jscl.lisp")
-(jscl-xc:bootstrap "$OUTPUT_DIR" "jscl" :verbose $VERBOSE)
-(jscl-xc:build-node-repl "$OUTPUT_DIR")
+(jscl-xc::%with-compilation-unit ()
+  (jscl-xc:bootstrap "$OUTPUT_DIR" "jscl" :verbose $VERBOSE)
+  (jscl-xc:build-node-repl "$OUTPUT_DIR"))
 EOF
 
 case "$HOST" in

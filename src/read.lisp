@@ -747,13 +747,11 @@ otherwise signal a reader error."
 #+jscl-target
 (fset 'read #'ls-read)
 
-(defun ls-read-from-string (string &optional (eof-error-p t) eof-value)
+#+jscl-target
+(defun -read-from-string (string &optional (eof-error-p t) eof-value)
   (let ((stream (make-string-input-stream string)))
     (values (ls-read stream eof-error-p eof-value)
             (stream-index stream))))
-
-#+jscl-target
-(fset 'read-from-string #'ls-read-from-string)
 
 (defun simple-reader-error (stream format-control &rest format-arguments)
   (error 'simple-reader-error
