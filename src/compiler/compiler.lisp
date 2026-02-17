@@ -680,35 +680,37 @@
     ((eq sexp (jsundefined)) 'undefined)
     ((eq (typeof sexp) (jsstring "string")) (clstring sexp))
     (t
-     (or (cdr (assoc sexp *literal-table* :test #'eql))
-         (let ((index *literal-counter*)
-               (jsvar (genlit)))
-           (push (cons sexp jsvar) *literal-table*)
-           (if (eq *compiler-process-mode* 'eval)
-               ;; If compiling for in-process evaluation, arrange to pass
-               ;; literals directly via data vector, instead of dumping
-               ;; them to reconstruction code
-               (toplevel-compilation
-                `(var (,jsvar (property |data| ,index))))
-               (let ((dumped
-                       (cond
-                         ((symbolp sexp) (dump-symbol sexp))
-                         ((stringp sexp) (dump-string sexp))
-                         ((consp sexp)
-                          ;; BOOTSTRAP MAGIC: See the root file
-                          ;; jscl.lisp and the function
-                          ;; `dump-global-environment' for further
-                          ;; information.
-                          (if (eq (car sexp) *magic-unquote-marker*)
-                              (convert (second sexp))
-                              (dump-cons sexp)))
-                         ((arrayp sexp) (dump-array sexp))
-                         ((structure-p sexp) (dump-structure sexp))
-                         (t (error "How should I dump `~S'?" sexp)))))
-                 (toplevel-compilation `(var (,jsvar ,dumped)))
-                 (when (keywordp sexp)
-                   (toplevel-compilation `(= (get ,jsvar "value") ,jsvar)))))
-           jsvar)))))
+     (let ((entry (gethash sexp *literal-table*)))
+       (if entry
+           (cdr entry)
+           (let ((index *literal-counter*)
+                 (jsvar (genlit)))
+             (setf (gethash sexp *literal-table*) (cons index jsvar))
+             (if (eq *compiler-process-mode* 'eval)
+                 ;; If compiling for in-process evaluation, arrange to pass
+                 ;; literals directly via data vector, instead of dumping
+                 ;; them to reconstruction code
+                 (toplevel-compilation
+                  `(var (,jsvar (property |data| ,index))))
+                 (let ((dumped
+                         (cond
+                           ((symbolp sexp) (dump-symbol sexp))
+                           ((stringp sexp) (dump-string sexp))
+                           ((consp sexp)
+                            ;; BOOTSTRAP MAGIC: See the root file
+                            ;; jscl.lisp and the function
+                            ;; `dump-global-environment' for further
+                            ;; information.
+                            (if (eq (car sexp) *magic-unquote-marker*)
+                                (convert (second sexp))
+                                (dump-cons sexp)))
+                           ((arrayp sexp) (dump-array sexp))
+                           ((structure-p sexp) (dump-structure sexp))
+                           (t (error "How should I dump `~S'?" sexp)))))
+                   (toplevel-compilation `(var (,jsvar ,dumped)))
+                   (when (keywordp sexp)
+                     (toplevel-compilation `(= (get ,jsvar "value") ,jsvar)))))
+             jsvar))))))
 
 
 (define-compilation quote (sexp)
@@ -1929,7 +1931,7 @@
     (subseq string 0 n)))
 
 (defmacro with-compilation-environment (&body body)
-  `(let ((*literal-table* nil)
+  `(let ((*literal-table* (make-hash-table :test #'eql))
          (*variable-counter* 0)
          (*gensym-counter* 0)
          (*literal-counter* 0))
@@ -2005,7 +2007,11 @@ compiler.lisp for details."
                          (return ,code)))
                  (jscode (with-output-to-string (*js-output*)
                            (js ast)))
-                 (literals (list-to-vector (nreverse (mapcar #'car *literal-table*)))))
+                 (literals (let ((vec (make-array *literal-counter*)))
+                            (maphash (lambda (sexp entry)
+                                       (setf (aref vec (car entry)) sexp))
+                                     *literal-table*)
+                            vec)))
             #+jscl-target (setq result-mv
                                 (multiple-value-list (js-eval jscode literals)))
             #-jscl-target (error "eval-toplevel: cannot execute in cross-compiler")))))
