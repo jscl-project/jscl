@@ -110,3 +110,51 @@ state so the caller can inspect or save it.
 
 This is used when the compiler needs to **observe** the secondary
 values rather than just propagate them.
+
+## Targets
+
+`*target*` tells a compilation handler how the result should be
+delivered.  Handlers see three targets:
+
+- `:return` — emit a return statement
+- `(:assign v)` — assign to the JS variable `v`
+- `:discard` — execute for side effects only
+
+Callers of `convert` may also request `:expression` (the default),
+but `convert` translates this to `(:assign tmp)` before calling
+`convert-1`, so handlers never see it directly.
+
+### The `convert` functions
+
+- **`(convert sexp &key multiple-value-p target)`** — compile a
+  subform whose value is needed in the given target.
+- **`(convert-tail sexp &key target)`** — compile a subform in tail
+  position, preserving the current `*multiple-value-p*`.
+- **`(convert-for-value sexp &optional multiple-value-p)`** — compile
+  a subform and return `(values preceding-stmts js-expression)`,
+  introducing a temporary variable if needed.
+
+### Writing compilation handlers
+
+Handlers fall into two categories:
+
+**Leaf compilations** Some compilation are very simple, like symbol
+variables, constants, etc. They do not have subforms, or they will
+most likely be constants.  For these, it makes sense to return
+expression:
+
+```lisp
+(define-builtin car (x)
+  `(get ,x "$$jscl_car"))
+```
+
+**Propagator compilations** have a subforms that are likely to compile
+to statements. In this case, it is better to compose them and continue
+returning statements.
+
+For example, `if`,
+
+```lisp
+(define-compilation if (condition true &optional false)
+  ...)
+```
