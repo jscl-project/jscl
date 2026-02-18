@@ -44,7 +44,7 @@
 
 
 (defun convert-to-bool (expr)
-  `(if ,expr ,(convert t) ,(convert nil)))
+  `(? ,expr ,(convert t) ,(convert nil)))
 
 
 ;;; A Form can return a multiple values object calling VALUES, like
@@ -54,6 +54,30 @@
 ;;; value will be used, so we can optimize to avoid the VALUES
 ;;; function call.
 (defvar *multiple-value-p* nil)
+
+;;; The target specifies how the compiled form's result should be
+;;; delivered.  It is set by `convert' and `convert-1' so that
+;;; compilation handlers can read it.  Handlers only see:
+;;;
+;;;   :return      -- emit a return statement
+;;;   :discard     -- the value is unused (side effects only)
+;;;   (:assign V)  -- emit an assignment to the JS variable V
+;;;
+;;; The :expression target is never passed to handlers; `convert'
+;;; translates it to (:assign tmp) before calling `convert-1'.
+;;;
+;;; Legacy handlers ignore *target* and always produce a JS expression.
+;;; `convert' adapts it to the target automatically.  Migrated
+;;; handlers read *target* and produce a JS statement (detected by
+;;; `js-expression-p' in codegen).
+(defvar *target* :expression)
+
+;;; Deliver a JS expression via the current *target*.
+(defun emit-for-target (expr)
+  (ecase (if (consp *target*) :assign *target*)
+    (:return  `(return ,expr))
+    (:assign  `(= ,(cadr *target*) ,expr))
+    (:discard expr)))
 
 ;;; When in multiple-value position, wrap JSEXPR in a values1() call
 ;;; to clear _mv signaling a single return value.  In non-MV position,
@@ -278,10 +302,10 @@
 (define-compilation if (condition true &optional false)
   (multiple-value-bind (value constantp) (constant-value condition *environment*)
     (if constantp
-        (convert (if value true false) *multiple-value-p*)
+        (convert-tail (if value true false))
         `(if (!== ,(convert condition) ,(convert nil))
-             ,(convert true *multiple-value-p*)
-             ,(convert false *multiple-value-p*)))))
+             ,(convert-tail true)
+             ,(convert-tail false)))))
 
 (defvar *ll-keywords* '(&optional &rest &key &allow-other-keys))
 
@@ -554,8 +578,8 @@
                           ,(bind-this)
                           ,(let ((*multiple-value-p* t))
                              (if block
-                                 (convert-block `((block ,block ,@body)) t)
-                                 (convert-block body t)))))))))
+                                 (convert-block `((block ,block ,@body)) :return)
+                                 (convert-block body :return)))))))))
 
 
 (defun setq-pair (var val)
@@ -762,7 +786,7 @@
                          *environment*
                          'function)))
     `(call (function ,(mapcar #'translate-function fnames)
-                ,(convert-block body t t))
+                ,(convert-block body :return t))
            ,@cfuncs)))
 
 (define-compilation labels (definitions &rest body)
@@ -777,34 +801,34 @@
                           ,(compile-lambda (cadr func)
                                            `((block ,(car func) ,@(cddr func)))))))
                 definitions)
-      ,(convert-block body t t))))
+      ,(convert-block body :return t))))
 
 
 (define-compilation progn (&rest body)
   ;; Note that this is only called for non toplevel forms.
-  (convert-block body nil nil))
+  (convert-block body))
 
 (define-compilation locally (&rest body)
   ;; Note that this is only called for non toplevel forms.
   (let ((*environment* (copy-lexenv *environment*)))
-    (convert-block body nil t)))
+    (convert-block body :expression t)))
 
 (define-compilation macrolet (definitions &rest body)
   ;; Note that this is only called for non toplevel forms.
   (let ((*environment* (extend-macrolet-env definitions)))
-    (convert-block body nil t)))
+    (convert-block body :expression t)))
 
 (define-compilation symbol-macrolet (macrobindings &rest body)
   ;; Note that this is only called for non toplevel forms.
   (let ((*environment* (extend-symbol-macrolet-env macrobindings)))
-    `(progn ,(convert-block body nil t))))
+    (convert-block body :expression t)))
 
 (define-compilation eval-when (situations &rest body)
   ;; Note that this is only called for non toplevel forms.
   ;; So only :execute matters (CLHS 3.2.3.1)
   (if (or (find :execute situations)
           (find 'eval situations))
-      (convert-block body nil t)
+      (convert-block body :expression t)
       (convert nil)))
 
 
@@ -850,14 +874,14 @@
 ;;; the old value.
 (defun let-bind-dynamic-vars (special-bindings body)
   (if (null special-bindings)
-      (convert-block body t t)
+      (convert-block body :return t)
       (let ((special-variables (mapcar #'car special-bindings))
             (lexical-variables (mapcar #'cdr special-bindings)))
         `(return (call-internal
                   |bindSpecialBindings|
                   ,(list-to-vector (mapcar #'literal special-variables))
                   ,(list-to-vector (mapcar #'translate-variable lexical-variables))
-                  (function () ,(convert-block body t t)))))))
+                  (function () ,(convert-block body :return t)))))))
 
 
 (define-compilation let (bindings &rest body)
@@ -950,7 +974,7 @@
     (let ((body
            `(progn
               ,@(reverse prelude-target)
-              ,(convert-block body t t))))
+              ,(convert-block body :return t))))
 
       (if (find-if #'special-variable-p bindings :key #'first)
           `(selfcall
@@ -973,7 +997,7 @@
     (when *multiple-value-p*
       (push 'multiple-value (binding-declarations b)))
     (let* ((*environment* (extend-lexenv (list b) *environment* 'block))
-           (cbody (convert-block body t)))
+           (cbody (convert-block body :return)))
       (if (member 'used (binding-declarations b))
           `(selfcall
             (try
@@ -1001,7 +1025,7 @@
     ;; capture it in a closure.
     (if multiple-value-p
         `(selfcall
-          (var (_r (call-internal |withMV| (function () (return ,(convert value t))))))
+          (var (_r (call-internal |withMV| (function () (return ,(convert value :multiple-value-p t))))))
           (throw (new (call-internal |BlockNLX|
                                      ,(binding-value b)
                                      (get _r "result")
@@ -1018,7 +1042,7 @@
   `(selfcall
     (var (id ,(convert id)))
     (try
-     ,(convert-block body t))
+     ,(convert-block body :return))
     (catch (cf)
       (if (and (instanceof cf (internal |CatchNLX|)) (== (get cf "id") id))
           ,(if *multiple-value-p*
@@ -1030,7 +1054,7 @@
 
 (define-compilation throw (id value)
   `(selfcall
-    (var (_r (call-internal |withMV| (function () (return ,(convert value t))))))
+    (var (_r (call-internal |withMV| (function () (return ,(convert value :multiple-value-p t))))))
     (throw (new (call-internal |CatchNLX|
                                ,(convert id)
                                (get _r "result")
@@ -1102,7 +1126,7 @@
       `(selfcall
         (var _r)
         (try
-         (= _r (call-internal |withMV| (function () (return ,(convert form t))))))
+         (= _r (call-internal |withMV| (function () (return ,(convert form :multiple-value-p t))))))
         (finally
          ,(convert-block clean-up))
         (= (internal |_mv|) (get _r "mv"))
@@ -1123,7 +1147,7 @@
     (progn
       ,@(with-collect
          (dolist (form forms)
-           (collect `(= _r (call-internal |withMV| (function () (return ,(convert form t))))))
+           (collect `(= _r (call-internal |withMV| (function () (return ,(convert form :multiple-value-p t))))))
            (collect `(if (!== (get _r "mv") null)
                          (= args (method-call args "concat" (get _r "mv")))
                          (method-call args "push" (get _r "result")))))))
@@ -1132,7 +1156,7 @@
 (define-compilation multiple-value-prog1 (first-form &rest forms)
   (if *multiple-value-p*
       `(selfcall
-        (var (_r (call-internal |withMV| (function () (return ,(convert first-form t))))))
+        (var (_r (call-internal |withMV| (function () (return ,(convert first-form :multiple-value-p t))))))
         (progn ,@(mapcar #'convert forms))
         (= (internal |_mv|) (get _r "mv"))
         (return (get _r "result")))
@@ -1142,7 +1166,7 @@
         (return result))))
 
 (define-compilation the (value-type form)
-  (convert form *multiple-value-p*))
+  (convert-tail form))
 
 ;;; Primitives
 
@@ -1552,9 +1576,9 @@
   (multiple-value-bind (value constantp) (constant-value x *environment*)
     (if constantp
         (if value 'true 'false)
-        `(if (!== ,(convert x) ,(convert nil))
-             true
-             false))))
+        `(? (!== ,(convert x) ,(convert nil))
+            true
+            false))))
 
 (define-builtin jsnull ()
   'null)
@@ -1660,7 +1684,7 @@
                 (let* ((*environment* (extend-local-env (list var)))
                        (tvar (translate-variable var)))
                   `(catch (,tvar)
-                     ,(convert-block body t))))))
+                     ,(convert-block body :return))))))
 
         (finally-compilation
          (and finally-form
@@ -1798,13 +1822,14 @@
        (error "Bad function descriptor")))))
 
 
-(defun convert (sexp &optional multiple-value-p)
+(defun convert-1 (sexp &optional multiple-value-p (target :expression))
   (multiple-value-bind (sexp expandedp)
       (!macroexpand-1 (compiler-macroexpand sexp) *environment*)
     (when expandedp
-      (return-from convert (convert sexp multiple-value-p)))
+      (return-from convert-1 (convert-1 sexp multiple-value-p target)))
     ;; The expression has been macroexpanded. Now compile it!
-    (let ((*multiple-value-p* multiple-value-p))
+    (let ((*multiple-value-p* multiple-value-p)
+          (*target* target))
       (cond
         ((symbolp sexp)
          (let ((b (lookup-in-lexenv sexp *environment* 'variable)))
@@ -1822,8 +1847,7 @@
            (cond
              ;; Special forms
              ((gethash name *compilations*)
-              (let ((comp (gethash name *compilations*)))
-                (apply comp args)))
+              (apply (gethash name *compilations*) args))
              ;; Built-in functions
              ((and (gethash name *builtins*)
                    (not (claimp name 'function 'notinline)))
@@ -1833,18 +1857,86 @@
         (t
          (value1 (literal sexp)))))))
 
+;;; Compile SEXP to JavaScript AST.
+;;;
+;;; MULTIPLE-VALUE-P controls whether the compiled code must preserve
+;;; multiple values (see *multiple-value-p*).  Defaults to NIL, meaning
+;;; only the primary value matters.
+;;;
+;;; TARGET controls how the result is delivered (see *target*).
+;;; Possible values:
+;;;
+;;;   :expression  -- return a JS expression (the default).  Handlers
+;;;                   never see this target; `convert' translates it
+;;;                   to (:assign tmp) before calling `convert-1'.
+;;;   :return      -- emit a return statement
+;;;   :discard     -- the value is unused (side effects only)
+;;;   (:assign V)  -- emit an assignment to the JS variable V
+;;;
+;;; Most internal call sites use plain (convert subform) for subforms
+;;; whose value is consumed as an expression.  Use `convert-tail' for
+;;; subforms in tail position.
+(defun convert (sexp &key multiple-value-p (target :expression))
+  (if (eq target :expression)
+      ;; Expression target: we call convert-1 with (:assign tmp) so
+      ;; that handlers never see :expression as the target.
+      ;;
+      ;; We use convert-1 (not convert) deliberately: convert would
+      ;; always produce an assignment statement, forcing every
+      ;; expression into a selfcall IIFE — even simple ones like
+      ;; variable references or (car x).  By calling convert-1, we
+      ;; let js-expression-p inspect the result: legacy handlers
+      ;; ignore the target and return a JS expression, which we use
+      ;; directly without an IIFE.  Migrated handlers honor the
+      ;; (:assign tmp) target and return a JS statement, which we
+      ;; wrap in a selfcall.
+      (let ((tmp (gvarname 'tmp)))
+        (let ((ast (convert-1 sexp multiple-value-p `(:assign ,tmp))))
+          (cond
+            ;; Handler produced (= tmp expr) — the target propagated
+            ;; through a simple delegation (e.g. convert-tail) and the
+            ;; sub-form was a plain expression.  Extract the value.
+            ;; Unwrap multiple layers for cascaded delegation (e.g.
+            ;; nested constant-folded IF).
+            ((and (consp ast) (eq (car ast) '=) (eq (cadr ast) tmp))
+             (do ((expr (caddr ast) (caddr expr)))
+                 ((not (and (consp expr) (eq (car expr) '=) (eq (cadr expr) tmp)))
+                  expr)))
+            ;; Legacy handler ignored the target — plain expression.
+            ((js-expression-p ast) ast)
+            ;; Migrated handler honored the target — wrap in selfcall.
+            (t `(selfcall (let ,tmp) ,ast (return ,tmp))))))
+      ;; Statement targets: pass through directly.
+      (let ((ast (convert-1 sexp multiple-value-p target)))
+        (if (js-expression-p ast)
+            ;; Legacy handler ignored the target — adapt the expression.
+            (ecase (if (consp target) :assign target)
+              (:return   `(return ,ast))
+              (:assign   `(= ,(cadr target) ,ast))
+              (:discard  ast))
+            ;; Migrated handler honored the target — use as-is.
+            ast))))
 
-(defun convert-block (sexps &optional return-last-p decls-allowed-p)
+;;; Like `convert', but preserves the current `*multiple-value-p*'
+;;; and defaults to the current `*target*'.  Use this when compiling
+;;; a subform in tail position (e.g. branches of IF, last form of
+;;; PROGN).
+(defun convert-tail (sexp &key (target *target*))
+  (convert sexp :multiple-value-p *multiple-value-p* :target target))
+
+
+(defun convert-block (sexps &optional (target :expression) decls-allowed-p)
   (multiple-value-bind (sexps decls)
       (parse-body sexps :declarations decls-allowed-p)
     (declare (ignore decls))
-    (if return-last-p
+    (if (eq target :expression)
         `(progn
            ,@(mapcar #'convert (butlast sexps))
-           (return ,(convert (car (last sexps)) *multiple-value-p*)))
-        `(progn
-           ,@(append (mapcar #'convert (butlast sexps))
-                     (list (convert (car (last sexps)) *multiple-value-p*)))))))
+           ,@(list (convert-tail (car (last sexps)) :target :expression)))
+        `(group
+           ,@(mapcar (lambda (form) (convert form :target :discard))
+                     (butlast sexps))
+           ,(convert-tail (car (last sexps)) :target target)))))
 
 
 ;;; Process a list of toplevel forms. The last form inherits LAST-P;
@@ -1950,12 +2042,14 @@
        (process-toplevel-form sexp
                               (lambda (form last-p)
                                 (let* ((*toplevel-compilations* nil)
-                                       (code (convert form (and last-p multiple-value-p)))
+                                       (code (if (and last-p return-p)
+                                                 (convert form :target :return
+                                                               :multiple-value-p (and last-p multiple-value-p))
+                                                 (convert form :multiple-value-p
+                                                               (and last-p multiple-value-p))))
                                        (ast `(progn
                                                ,@(get-toplevel-compilations)
-                                               ,(if (and last-p return-p)
-                                                    `(return ,code)
-                                                    code))))
+                                               ,code)))
                                   (js ast)))
                               t)))))
 
@@ -2001,20 +2095,21 @@ compiler.lisp for details."
         (with-compilation-environment
           (%with-compilation-unit ()
             (let* ((*toplevel-compilations* nil)
-                 (code (convert form last-p))
-                 (ast `(progn
-                         ,@(get-toplevel-compilations)
-                         (return ,code)))
-                 (jscode (with-output-to-string (*js-output*)
-                           (js ast)))
-                 (literals (let ((vec (make-array *literal-counter*)))
-                            (maphash (lambda (sexp entry)
-                                       (setf (aref vec (car entry)) sexp))
-                                     *literal-table*)
-                            vec)))
-            #+jscl-target (setq result-mv
-                                (multiple-value-list (js-eval jscode literals)))
-            #-jscl-target (error "eval-toplevel: cannot execute in cross-compiler")))))
+                   (code (convert form :target :return
+                                      :multiple-value-p last-p))
+                   (ast `(progn
+                           ,@(get-toplevel-compilations)
+                           ,code))
+                   (jscode (with-output-to-string (*js-output*)
+                             (js ast)))
+                   (literals (let ((vec (make-array *literal-counter*)))
+                              (maphash (lambda (sexp entry)
+                                         (setf (aref vec (car entry)) sexp))
+                                       *literal-table*)
+                              vec)))
+              #+jscl-target (setq result-mv
+                                  (multiple-value-list (js-eval jscode literals)))
+              #-jscl-target (error "eval-toplevel: cannot execute in cross-compiler")))))
       t)
     (values-list result-mv)))
 
