@@ -1875,8 +1875,7 @@
 ;;;
 ;;; Most internal call sites use plain (convert subform) for subforms
 ;;; whose value is consumed as an expression.  Use `convert-tail' for
-;;; subforms in tail position, and `convert-for-value' when you need
-;;; to separate preceding statements from a value expression.
+;;; subforms in tail position.
 (defun convert (sexp &key multiple-value-p (target :expression))
   (if (eq target :expression)
       ;; Expression target: we call convert-1 with (:assign tmp) so
@@ -1925,30 +1924,19 @@
 (defun convert-tail (sexp &key (target *target*))
   (convert sexp :multiple-value-p *multiple-value-p* :target target))
 
-;;; Compile SEXP and return (values preceding-stmts js-expression).
-;;; If the handler produces an expression, preceding-stmts is NIL.
-;;; If it produces a statement block, a temporary variable is
-;;; introduced and the block assigns to it.
-(defun convert-for-value (sexp &optional multiple-value-p)
-  (let ((tmp (gvarname 'tmp)))
-    (let ((ast (convert-1 sexp multiple-value-p `(:assign ,tmp))))
-      (if (js-expression-p ast)
-          (values nil ast)
-          (values `(group (let ,tmp) ,ast) tmp)))))
 
-
-(defun convert-block (sexps &optional (last-target :expression) decls-allowed-p)
+(defun convert-block (sexps &optional (target :expression) decls-allowed-p)
   (multiple-value-bind (sexps decls)
       (parse-body sexps :declarations decls-allowed-p)
     (declare (ignore decls))
-    (if (eq last-target :expression)
+    (if (eq target :expression)
         `(progn
            ,@(mapcar #'convert (butlast sexps))
            ,@(list (convert-tail (car (last sexps)) :target :expression)))
         `(group
            ,@(mapcar (lambda (form) (convert form :target :discard))
                      (butlast sexps))
-           ,(convert-tail (car (last sexps)) :target last-target)))))
+           ,(convert-tail (car (last sexps)) :target target)))))
 
 
 ;;; Process a list of toplevel forms. The last form inherits LAST-P;
