@@ -129,32 +129,49 @@ but `convert` translates this to `(:assign tmp)` before calling
 - **`(convert sexp &key multiple-value-p target)`** — compile a
   subform whose value is needed in the given target.
 - **`(convert-tail sexp &key target)`** — compile a subform in tail
-  position, preserving the current `*multiple-value-p*`.
+  position, preserving the current `*multiple-value-p*` and
+  defaulting to the current `*target*`.
 - **`(convert-for-value sexp &optional multiple-value-p)`** — compile
   a subform and return `(values preceding-stmts js-expression)`,
   introducing a temporary variable if needed.
+
+### Expression vs statement detection
+
+`convert` determines whether a handler's result is a JS expression or
+a JS statement by calling `js-expression-p` (in codegen.lisp) on the
+returned AST.  Statement-only operators (`return`, `var`, `group`,
+`if`, `while`, `try`, `throw`, etc.) are classified as statements;
+everything else is an expression.
+
+To keep this unambiguous:
+- Use `?` for ternary expressions, `if` for if-statements.
+- Use `progn` for expression sequences (comma operator), `group` for
+  statement blocks.
 
 ### Writing compilation handlers
 
 Handlers fall into two categories:
 
-**Leaf compilations** Some compilation are very simple, like symbol
-variables, constants, etc. They do not have subforms, or they will
-most likely be constants.  For these, it makes sense to return
-expression:
+**Leaf handlers** compute their result directly.  Sub-forms (if any)
+are compiled via `convert` or `convert-for-value`.  The handler
+returns a JS expression AST and `convert` adapts it to the target
+automatically.
 
 ```lisp
 (define-builtin car (x)
   `(get ,x "$$jscl_car"))
 ```
 
-**Propagator compilations** have a subforms that are likely to compile
-to statements. In this case, it is better to compose them and continue
-returning statements.
+**Propagator handlers** delegate to a sub-form in result (tail)
+position by passing `*target*` through via `convert-tail`.  They
+produce JS statements and `convert` uses them as-is.
 
-For example, `if`,
+For example, `if` propagates the target to both branches via
+`convert-tail` (which defaults to `*target*`):
 
 ```lisp
 (define-compilation if (condition true &optional false)
-  ...)
+  `(if (!== ,(convert condition) ,(convert nil))
+       ,(convert-tail true)
+       ,(convert-tail false)))
 ```
