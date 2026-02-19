@@ -1223,10 +1223,49 @@
   `(variable-arity-call ,args (lambda (,args) `(return  ,,@body))))
 
 (define-raw-builtin + (&rest numbers)
-  (if (null numbers)
-      0
-      (variable-arity numbers
-        `(+ ,@numbers))))
+  (cond
+    ;; Zero args: constant 0.
+    ((null numbers)
+     (convert-tail 0))
+    ;; One arg: identity (with type check if non-constant).
+    ((null (cdr numbers))
+     (let ((x (car numbers)))
+       (if (numberp x)
+           (convert-tail x)
+           (let ((v (make-symbol "x")))
+             `(group
+                (var (,v ,(convert x)))
+                (if (!= (typeof ,v) "number")
+                    (call-internal "typeError" ,v ,(literal 'number)))
+                ,(ecase (if (consp *target*) :assign *target*)
+                   (:return  `(return ,v))
+                   (:assign  `(= ,(cadr *target*) ,v))
+                   (:discard ,v)))))))
+    ;; Multiple args.
+    (t
+     (let ((counter 0))
+       (with-collector (fargs)
+         (with-collector (prelude)
+           (dolist (x numbers)
+             (if (numberp x)
+                 (collect-fargs x)
+                 (let ((v (make-symbol (concat "x" (integer-to-string (incf counter))))))
+                   (collect-fargs v)
+                   (collect-prelude `(var (,v ,(convert x))))
+                   (collect-prelude `(if (!= (typeof ,v) "number")
+                                        (call-internal "typeError" ,v ,(literal 'number)))))))
+           (let ((expr `(+ ,@fargs)))
+             (if (null prelude)
+                 ;; All constants — pure expression, let convert adapt to target.
+                 expr
+                 ;; Has type-check statements — emit directly, respecting target.
+                 `(group
+                    ,@prelude
+                    ,(ecase (if (consp *target*) :assign *target*)
+                       (:return  `(return ,expr))
+                       (:assign  `(= ,(cadr *target*) ,expr))
+                       (:discard expr)))))))))))
+
 
 (define-raw-builtin - (x &rest others)
   (let ((args (cons x others)))
