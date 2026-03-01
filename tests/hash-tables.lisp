@@ -376,14 +376,25 @@
 ;;; The same code works inside a LET because LET is not a macro, so
 ;;; PROCESS-TOPLEVEL-FORM passes it directly to the callback where
 ;;; *FN-INFO* is already bound.
+;;;
+;;; Inside the test suite, *FN-INFO* is always bound by an outer
+;;; %WITH-COMPILATION-UNIT context, masking the bug.  To reproduce
+;;; the REPL scenario we temporarily set the symbol's JS .value
+;;; property to the UNBOUND marker (obtained from a fresh gensym).
 
 #+jscl
 (defvar *issue-610-ht* (make-hash-table))
 
 #+jscl
 (expected-failure
- (progn
-   (eval '(setf (gethash :x *issue-610-ht*) 10))
-   (equal (gethash :x *issue-610-ht*) 10)))
+ (let ((fn-info-sym 'jscl::*fn-info*)
+       (unbound-marker (jscl/ffi:oget (gensym) "value"))
+       (saved-value (jscl/ffi:oget 'jscl::*fn-info* "value")))
+   (jscl/ffi:oset unbound-marker fn-info-sym "value")
+   (unwind-protect
+       (progn
+         (eval '(setf (gethash :x *issue-610-ht*) 10))
+         (equal (gethash :x *issue-610-ht*) 10))
+     (jscl/ffi:oset saved-value fn-info-sym "value"))))
 
 ;;; EOF
