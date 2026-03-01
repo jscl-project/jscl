@@ -364,4 +364,26 @@
         (member '("bar" 2) entries :test #'equal)
         t)))
 
+;;; Issue #610: (setf (gethash ...)) at top level via EVAL
+;;;
+;;; When (setf (gethash :x ht) 10) is evaluated at the REPL (i.e. via
+;;; EVAL rather than COMPILE-FILE), the SETF macro expansion calls
+;;; FN-INFO to record that (SETF GETHASH) was called.  However,
+;;; PROCESS-TOPLEVEL-FORM macro-expands the form *before* the callback
+;;; that establishes %WITH-COMPILATION-UNIT (which binds *FN-INFO*).
+;;; This causes an UNBOUND-VARIABLE error for JSCL::*FN-INFO*.
+;;;
+;;; The same code works inside a LET because LET is not a macro, so
+;;; PROCESS-TOPLEVEL-FORM passes it directly to the callback where
+;;; *FN-INFO* is already bound.
+
+#+jscl
+(defvar *issue-610-ht* (make-hash-table))
+
+#+jscl
+(expected-failure
+ (progn
+   (eval '(setf (gethash :x *issue-610-ht*) 10))
+   (equal (gethash :x *issue-610-ht*) 10)))
+
 ;;; EOF
