@@ -1995,27 +1995,31 @@ compiler.lisp for details."
 (defun eval-toplevel (sexp)
   (let ((*compiler-process-mode* 'eval)
         (result-mv nil))
-    ;; Compile and execute each form immediately (CLHS 3.2.3.1)
-    (process-toplevel-form sexp
-      (lambda (form last-p)
-        (with-compilation-environment
-          (%with-compilation-unit ()
+    ;; Bind *fn-info* before process-toplevel-form so that macro
+    ;; expansions (e.g. SETF -> !GET-SETF-EXPANSION -> FN-INFO) can
+    ;; record function usage.  This matches compile-toplevel's structure.
+    ;; See issue #610.
+    (%with-compilation-unit ()
+      ;; Compile and execute each form immediately (CLHS 3.2.3.1)
+      (process-toplevel-form sexp
+        (lambda (form last-p)
+          (with-compilation-environment
             (let* ((*toplevel-compilations* nil)
-                 (code (convert form last-p))
-                 (ast `(progn
-                         ,@(get-toplevel-compilations)
-                         (return ,code)))
-                 (jscode (with-output-to-string (*js-output*)
-                           (js ast)))
-                 (literals (let ((vec (make-array *literal-counter*)))
-                            (maphash (lambda (sexp entry)
-                                       (setf (aref vec (car entry)) sexp))
-                                     *literal-table*)
-                            vec)))
-            #+jscl-target (setq result-mv
-                                (multiple-value-list (js-eval jscode literals)))
-            #-jscl-target (error "eval-toplevel: cannot execute in cross-compiler")))))
-      t)
+                   (code (convert form last-p))
+                   (ast `(progn
+                           ,@(get-toplevel-compilations)
+                           (return ,code)))
+                   (jscode (with-output-to-string (*js-output*)
+                             (js ast)))
+                   (literals (let ((vec (make-array *literal-counter*)))
+                               (maphash (lambda (sexp entry)
+                                          (setf (aref vec (car entry)) sexp))
+                                        *literal-table*)
+                               vec)))
+              #+jscl-target (setq result-mv
+                                  (multiple-value-list (js-eval jscode literals)))
+              #-jscl-target (error "eval-toplevel: cannot execute in cross-compiler"))))
+        t))
     (values-list result-mv)))
 
 #+jscl-target (fset 'eval #'eval-toplevel)

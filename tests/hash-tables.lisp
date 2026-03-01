@@ -366,35 +366,16 @@
 
 ;;; Issue #610: (setf (gethash ...)) at top level via EVAL
 ;;;
-;;; When (setf (gethash :x ht) 10) is evaluated at the REPL (i.e. via
-;;; EVAL rather than COMPILE-FILE), the SETF macro expansion calls
-;;; FN-INFO to record that (SETF GETHASH) was called.  However,
-;;; PROCESS-TOPLEVEL-FORM macro-expands the form *before* the callback
-;;; that establishes %WITH-COMPILATION-UNIT (which binds *FN-INFO*).
-;;; This causes an UNBOUND-VARIABLE error for JSCL::*FN-INFO*.
-;;;
-;;; The same code works inside a LET because LET is not a macro, so
-;;; PROCESS-TOPLEVEL-FORM passes it directly to the callback where
-;;; *FN-INFO* is already bound.
-;;;
-;;; Inside the test suite, *FN-INFO* is always bound by an outer
-;;; %WITH-COMPILATION-UNIT context, masking the bug.  To reproduce
-;;; the REPL scenario we temporarily set the symbol's JS .value
-;;; property to the UNBOUND marker (obtained from a fresh gensym).
+;;; Fixed by moving %WITH-COMPILATION-UNIT to wrap PROCESS-TOPLEVEL-FORM
+;;; in EVAL-TOPLEVEL, matching COMPILE-TOPLEVEL's structure.  This
+;;; ensures *FN-INFO* is bound before macro expansion occurs.
 
 #+jscl
 (defvar *issue-610-ht* (make-hash-table))
 
 #+jscl
-(expected-failure
- (let ((fn-info-sym 'jscl::*fn-info*)
-       (unbound-marker (jscl/ffi:oget (gensym) "value"))
-       (saved-value (jscl/ffi:oget 'jscl::*fn-info* "value")))
-   (jscl/ffi:oset unbound-marker fn-info-sym "value")
-   (unwind-protect
-       (progn
-         (eval '(setf (gethash :x *issue-610-ht*) 10))
-         (equal (gethash :x *issue-610-ht*) 10))
-     (jscl/ffi:oset saved-value fn-info-sym "value"))))
+(test (progn
+        (eval '(setf (gethash :x *issue-610-ht*) 10))
+        (equal (gethash :x *issue-610-ht*) 10)))
 
 ;;; EOF
