@@ -232,11 +232,19 @@
     entry))
 
 (defun fn-info (symbol &key defined called)
-  (let ((info (find-fn-info symbol)))
-    (when defined
-      (setf (fn-info-defined info) defined))
-    (when called
-      (setf (fn-info-called info) called))))
+  ;; *FN-INFO* is only bound inside a compilation unit. The
+  ;; macroexpansion of a toplevel form happens in PROCESS-TOPLEVEL-FORM,
+  ;; which during EVAL/LOAD runs *before* the per-form compilation unit
+  ;; is established. A macroexpander that records call info (e.g.
+  ;; GET-SETF-EXPANSION recording a (SETF fn) as called for a place with
+  ;; no setf-expander) would then crash on an unbound *FN-INFO*. When
+  ;; there is no surrounding unit, simply skip tracking.
+  (when (boundp '*fn-info*)
+    (let ((info (find-fn-info symbol)))
+      (when defined
+        (setf (fn-info-defined info) defined))
+      (when called
+        (setf (fn-info-called info) called)))))
 
 (defun report-undefined-functions ()
   (dolist (info *fn-info*)
