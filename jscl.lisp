@@ -163,7 +163,8 @@
      ("exports"       :target)
      ("describe"      :target))
     ("compile-file"  :both)
-    ("load"          :target)))
+    ("load"          :target)
+    ("time"          :both)))
 
 (defun get-files (file-list type dir)
   "Traverse FILE-LIST and retrieve a list of the files within which match
