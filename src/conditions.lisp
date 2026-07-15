@@ -207,7 +207,11 @@
     nil))
 
 ;;; handlers
-(defvar *handler-bindings* nil)
+(defvar *handler-bindings* 
+        (list (cons 'serious-condition 
+                    (lambda (c) 
+                      (format-backtrace *trace-output* :from #'signal)
+                      (%%throw (jsstring (format nil "Unhandled serious condition ~A: ~A~%" (class-name (class-of c)) c)))))))
 
 (defmacro %%handler-bind (bindings &body body)
   (let ((install-handlers nil))
