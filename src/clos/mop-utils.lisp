@@ -31,7 +31,7 @@
              (push "#(..) " result))
             ((or (numberp place)
                  (symbolp place))
-             (push (format nil "~A " place) result)
+             (push (format nil "~A " place) result))
             ((stringp place)
              (push (concat place " ") result))
             (t (push "@ " result))))
