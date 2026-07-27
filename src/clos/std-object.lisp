@@ -244,7 +244,8 @@
 
 ;;; subclassp and sub-specializer-p
 (defun subclassp (c1 c2)
-  (not (null (find c2 (class-precedence-list c1)))))
+  (or (equal c1 c2)
+      (not (null (find c2 (class-precedence-list c1))))))
 
 (defun sub-specializer-p (c1 c2 c-arg)
   (let ((cpl (class-precedence-list c-arg)))
