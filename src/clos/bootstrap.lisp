@@ -40,7 +40,7 @@
         (setf-class-direct-superclasses class ())
         (setf-class-direct-methods class ())
         (setf-class-direct-slots class ())
-        (setf-class-precedence-list class ())
+        (setf-class-precedence-list class (list class))
         (setf-class-slots class ())
         (hash-class-slots-names class)
         class))
