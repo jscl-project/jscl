@@ -360,4 +360,13 @@
         b)
     (rplacd x (progn (setq b 0) 'c)))
   '(a . c )))
+
+;; See https://github.com/jscl-project/jscl/issues/620
+(test
+ (eq
+  (let ((result (list 1 2)))
+    (setf (cdr (cdr result)) result)
+    (list-length result))
+  nil))
+
 ;;; EOF
