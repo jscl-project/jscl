@@ -81,11 +81,30 @@
                ((null (cddr x)) (rplacd x (cadr x))))
            (cons arg others))))
 
+(defun circular-list-p (list)
+  (let ((fast list)
+        (slow list))
+    (tagbody
+       loop-start
+       (cond
+         ((null fast)
+          (return-from circular-list-p nil))
+         ((null (cdr fast))
+          (return-from circular-list-p nil))
+         (t
+          (setq slow (cdr slow)
+                fast (cddr fast))
+          (if (eq fast slow)
+              (return-from circular-list-p t)
+              (go loop-start)))))))
+
 (defun list-length (list)
   (let ((l 0))
-    (while (not (null list))
-      (incf l)
-      (setq list (cdr list)))
+    (if (circular-list-p list)
+        (setq l nil)
+        (while (not (null list))
+               (incf l)
+               (setq list (cdr list))))
     l))
 
 (defun nthcdr (n list)
