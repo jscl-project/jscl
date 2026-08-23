@@ -313,7 +313,7 @@ Always includes package prefix regardless of *package*."
       (cond
         ((and id (> id 0))
          (simple-format stream "#~d=" id)
-         (setf (aref object-ids id) (- id)))
+         (setf (aref object-ids ix) (- id)))
         ((and id (< id 0))
          (simple-format stream "#~d#" (- id))
          (return-from write-aux)))))
