@@ -240,11 +240,11 @@
       (error 'type-error :datum number :expected-type 'number)))
 
 ;; atan
-(defun atan (number1 &optional number2)
+(defun atan (number1 &optional (number2 nil number2-p))
   (unless (numberp number1)
     (error 'type-error :datum number1 :expected-type 'number))
 
-  (when (and number2 (not (numberp number2)))
+  (when (and number2-p (not (numberp number2)))
     (error 'type-error :datum number2 :expected-type 'number))
   
   (if (null number2)
