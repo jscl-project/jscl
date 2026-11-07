@@ -209,6 +209,48 @@
         (%ash-right x y)
         (%ash-left x  y))))
 
+;; sin
+(defun sin (radians)
+  (if (numberp radians)
+      (#j:Math:sin radians)
+      (error 'type-error :datum radians :expected-type 'number)))
+
+;; cos
+(defun cos (radians)
+  (if (numberp radians)
+      (#j:Math:cos radians)
+      (error 'type-error :datum radians :expected-type 'number)))
+
+;; tan
+(defun tan (radians)
+  (if (numberp radians)
+      (#j:Math:tan radians)
+      (error 'type-error :datum radians :expected-type 'number)))
+
+;; asin
+(defun asin (number)
+  (if (numberp number)
+      (#j:Math:asin number)
+      (error 'type-error :datum number :expected-type 'number)))
+
+;; acos
+(defun acos (number)
+  (if (numberp number)
+      (#j:Math:acos number)
+      (error 'type-error :datum number :expected-type 'number)))
+
+;; atan
+(defun atan (number1 &optional number2)
+  (unless (numberp number1)
+    (error 'type-error :datum number1 :expected-type 'number))
+
+  (when (and number2 (not (numberp number2)))
+    (error 'type-error :datum number2 :expected-type 'number))
+  
+  (if (null number2)
+      (#j:Math:atan number1)
+      (#j:Math:atan number1 number2)))
+
 ;;; log
 (defun log (number &optional (base nil base-p))
   "Return the logarithm of NUMBER in the base BASE, which defaults to e."

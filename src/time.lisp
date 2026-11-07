@@ -49,6 +49,10 @@ day-of-week, daylight-saving-time-p, and time-zone."
     (values second minute hour day month year dow nil 0)))
 
 #+jscl-target
+(defun get-decoded-time ()
+  (decode-universal-time (get-universal-time)))
+
+#+jscl-target
 (defun get-source-data-epoch ()
   "Get SOURCE_DATE_EPOCH from environment, converted to universal time."
   (let ((sde (oget #j:process "env" "SOURCE_DATE_EPOCH")))
