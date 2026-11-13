@@ -583,10 +583,9 @@ if (typeof window !== "undefined" && window && window.addEventListener) {
 function runCommonLispScripts() {
   var documentScripts = document.getElementsByTagName("script");
   var scripts = [];
-  var script;
 
   var progressivelyRunScripts = function () {
-    var script, i;
+    let script, i;
 
     for (i = 0; i < scripts.length; i++) {
       script = scripts[i];
@@ -624,7 +623,7 @@ function runCommonLispScripts() {
     }
 
     if ("src" in documentScripts[i] && documentScripts[i].src.length != 0) {
-      script = {
+      let script = {
         executed: false,
         error: false,
         text: null,
