@@ -437,6 +437,19 @@
 
 
 
+;;; Returns T if FORM is a JS expression AST node, NIL if it is a
+;;; statement.  `if' is always a statement (use `?' for ternary).
+;;; `progn' is always an expression (comma operator); use `group' for
+;;; statement sequences.
+(defun js-expression-p (form)
+  (cond
+    ((atom form) t)
+    ((vectorp form) t)
+    (t (not (member (car form)
+                    '(return var let group if while switch for for-in
+                      try catch finally throw label break))))))
+
+
 ;;; Statements generators
 ;;;
 ;;; `js-stmt' generates code for Javascript statements. A form is
@@ -494,7 +507,7 @@
                (js-format "return ")
                (js-expr value)
                (js-end-stmt)))
-           (var
+           ((var let)
             (flet ((js-var (spec)
                      (destructuring-bind (variable &optional initial)
                          (ensure-list spec)
@@ -503,7 +516,7 @@
                          (js-format "=")
                          (js-expr initial no-comma)))))
               (destructuring-bind (var &rest vars) (cdr form)
-                (js-format "var ")
+                (js-format (if (eq (car form) 'let) "let " "var "))
                 (js-var var)
                 (dolist (var vars)
                   (js-format ",")
